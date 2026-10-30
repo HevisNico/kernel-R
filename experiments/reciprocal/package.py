@@ -1,5 +1,6 @@
 """Create the user's compact, titled English prototype bundle."""
 from pathlib import Path
+import argparse
 import shutil,json,hashlib,zipfile
 ROOT=Path(__file__).resolve().parents[2]
 SOURCE=Path(__file__).resolve().parent
@@ -8,7 +9,7 @@ STAGE=WORKSPACE/'R_Reciprocal_Prototype'
 RESULTS=ROOT/'audit_runs'/'reciprocal'
 
 
-def package():
+def package(adaptive_results=None):
     WORKSPACE.mkdir(parents=True,exist_ok=True)
     if STAGE.exists():shutil.rmtree(STAGE)
     folders=['01_Guide','02_R_Simulation','03_Visualization','04_Results','05_Verification']
@@ -62,23 +63,38 @@ def package():
             shutil.copyfile(pedagogy_results/name,target/name)
         with (STAGE/'START_HERE.txt').open('a') as guide:
             guide.write('\nLATEST: LEARNED CURRICULUM SELECTION\nOpen 07_Learned_Pedagogy/RESULTS.html\nFull protocol, added architecture and limits: 07_Learned_Pedagogy/README.md\n')
-    adaptive_results=ROOT/'audit_runs'/'adaptive'
+    adaptive_results=Path(adaptive_results) if adaptive_results is not None else ROOT/'audit_runs'/'adaptive'
     if (adaptive_results/'live_validation.json').exists():
         adaptive_source=SOURCE/'adaptive'
+        plan=json.loads((adaptive_results/'plan.json').read_text())
+        required={'model.py','run.py','provenance.py','../engine.py','../simulate.py'}
+        if plan.get('source_manifest_version')!=2 or set(plan.get('source_sha256',{}))!=required:
+            raise RuntimeError('adaptive packaging requires complete source provenance')
+        for name,want in plan['source_sha256'].items():
+            if hashlib.sha256((adaptive_source/name).read_bytes()).hexdigest()!=want:
+                raise RuntimeError('adaptive source identity mismatch: '+name)
+        # Packaging copies recorded results; it does not replay their numerical
+        # runtime. The two experiment validators require the exact versions.
+        runtime=plan.get('runtime_versions',{})
+        if set(runtime)!={'python','numpy','scipy'} or not all(isinstance(v,str) and v for v in runtime.values()):
+            raise RuntimeError('adaptive runtime provenance is missing')
+        validation=json.loads((adaptive_results/'validation.json').read_text())
+        live=json.loads((adaptive_results/'live_validation.json').read_text())
+        if validation['passed']!=validation['checks'] or not live['passed']:
+            raise RuntimeError('adaptive results must pass both validators before packaging')
         source_dir=STAGE/'02_R_Simulation'/'adaptive'
         source_dir.mkdir(parents=True,exist_ok=True)
-        for name in ['model.py','run.py','validate.py','live_validate.py','analyze.py','report.py']:
+        for name in ['model.py','run.py','provenance.py','validate.py','live_validate.py','analyze.py','report.py']:
             shutil.copyfile(adaptive_source/name,source_dir/name)
         target=STAGE/'08_Adaptive_Lessons'
         target.mkdir(parents=True,exist_ok=True)
         for name in ['README.md','INVENTION_PROTOCOL.md']:
             shutil.copyfile(adaptive_source/name,target/name)
         for name in ['plan.json','training.json','policies.json','evaluation.json','summary.json','validation.json',
-                     'online_validation.json','live_validation.json','POSTHOC_ANALYSIS.json',
-                     'development_prefixes.json','development_blocks.json','development_preferences.json',
-                     'development_training_abort_plan.json','RESULTS.html']:
+                     'online_validation.json','live_validation.json','POSTHOC_ANALYSIS.json','RESULTS.html']:
             shutil.copyfile(adaptive_results/name,target/name)
-        shutil.copyfile(ROOT/'audit_runs'/'adaptive.log',target/'development_training_abort.log')
+        if (adaptive_results/'REPRODUCTION.json').exists():
+            shutil.copyfile(adaptive_results/'REPRODUCTION.json',target/'REPRODUCTION.json')
         with (STAGE/'START_HERE.txt').open('a') as guide:
             guide.write('\nLATEST: LEARNED ADAPTATION DURING A LESSON\nOpen 08_Adaptive_Lessons/RESULTS.html\nFull method and boundaries: 08_Adaptive_Lessons/README.md\nProposed next invention test: 08_Adaptive_Lessons/INVENTION_PROTOCOL.md\n')
     certified=ROOT/'results'/'reciprocal_learning'
@@ -167,4 +183,6 @@ def package():
         for name,want in manifest.items():assert hashlib.sha256(z.read(str(Path(STAGE.name)/name))).hexdigest()==want
     print(json.dumps(dict(file=str(dest),bytes=dest.stat().st_size,files=len(files)+1,limit_bytes=30_000_000,sha256=hashlib.sha256(dest.read_bytes()).hexdigest()),indent=2))
     return dest
-if __name__=='__main__':package()
+if __name__=='__main__':
+    parser=argparse.ArgumentParser();parser.add_argument('--adaptive-results',type=Path)
+    package(parser.parse_args().adaptive_results)

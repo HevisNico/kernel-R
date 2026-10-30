@@ -75,6 +75,10 @@ are not claimed to work unchanged at arbitrary depth.
 Python 3.12 and its standard library suffice; no numerical packages or network
 access are required.
 
+Dependency replay runs only authenticated source snapshots in a temporary
+directory, with isolated Python startup. Unlisted modules, packages and caches
+in a supplied dependency directory cannot join that snapshot.
+
 ```sh
 python -B -m unittest discover -s tests
 python -B certify/reciprocal_learning/tests.py
@@ -115,6 +119,19 @@ python -u -B experiments/reciprocal/validate.py --out audit_runs/new_reciprocal
 
 NumPy 2.3.5 and SciPy 1.17.0 are pinned. Use a new output directory for each run.
 The individual experiment guides provide further teaching and adaptation commands.
+New adaptive plans lock both simulation engines and the numerical runtime;
+legacy two-file plans are rejected by the updated validators. See the
+[adaptive reproduction notes](experiments/reciprocal/adaptive/README.md#reproduce).
+The bundled adaptive records have been recomputed on the original seeds with
+that complete manifest. All 127 experiment checks and continuous teacher replay
+pass; legacy adaptive development and aborted-run records have been removed.
+
+After installing the numerical requirements, run the terminal-event and
+provenance regressions with:
+
+```sh
+python -B -m unittest discover -s experiments/reciprocal/tests -v
+```
 
 ## Rebuild the ZIP
 

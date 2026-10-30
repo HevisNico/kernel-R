@@ -6,7 +6,7 @@ Input hashes are for provenance; they are not a substitute for that soundness pr
 """
 from pathlib import Path
 from fractions import Fraction
-import json,hashlib,re,argparse,sys,tempfile
+import json,hashlib,re,argparse,sys,tempfile,posixpath
 from cadence_evidence import generate_cadence
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -76,7 +76,24 @@ def certificates():
 
 def adaptive():
     member='08_Adaptive_Lessons/evaluation.json'
-    raw=verify_bundle()[member]
+    bundle=verify_bundle()
+    plan_member='08_Adaptive_Lessons/plan.json'
+    plan=json.loads(bundle[plan_member])
+    sources={'model.py','run.py','provenance.py','../engine.py','../simulate.py'}
+    if plan.get('source_manifest_version')!=2 or set(plan.get('source_sha256',{}))!=sources:
+        raise ValueError('adaptive evidence requires the complete source manifest')
+    for name,want in plan['source_sha256'].items():
+        path=posixpath.normpath('02_R_Simulation/adaptive/'+name)
+        if hashlib.sha256(bundle[path]).hexdigest()!=want:
+            raise ValueError('adaptive source identity mismatch: '+name)
+    runtime=plan.get('runtime_versions',{})
+    if set(runtime)!={'python','numpy','scipy'} or not all(isinstance(v,str) and v for v in runtime.values()):
+        raise ValueError('adaptive numerical runtime identity is missing')
+    policies=json.loads(bundle['08_Adaptive_Lessons/policies.json'])
+    primary=[p for p in policies if p['arm']=='actual_credit']
+    if len(primary)!=plan['replicates'] or any(p['choices']!=[0,0,1] for p in primary):
+        raise ValueError('the recorded learned policy differs from the formalized stopping rule')
+    raw=bundle[member]
     lots=json.loads(raw)
     lines=['import KernelR.Adaptive','','/-! Exact replay of recorded finite outcomes, not a proof of their ODE origin. -/',
       'namespace KernelR.Recorded','open Adaptive','set_option maxRecDepth 100000',
@@ -119,7 +136,10 @@ def adaptive():
       '#print axioms KernelR.Recorded.test_successes',
       '#print axioms KernelR.Recorded.confirmation_successes',''])
     write('KernelR/Recorded.lean','\n'.join(lines))
-    return {'downloads/R_Reciprocal_Prototype.zip!/'+member:{'sha256':hashlib.sha256(raw).hexdigest(),'counts':counts}}
+    return {'downloads/R_Reciprocal_Prototype.zip!/'+member:{'sha256':hashlib.sha256(raw).hexdigest(),'counts':counts,
+      'plan_sha256':hashlib.sha256(bundle[plan_member]).hexdigest(),
+      'policies_sha256':hashlib.sha256(bundle['08_Adaptive_Lessons/policies.json']).hexdigest(),
+      'source_manifest_version':plan['source_manifest_version'],'runtime_versions':runtime}}
 
 def generate():
     info=certificates();info.update(adaptive())

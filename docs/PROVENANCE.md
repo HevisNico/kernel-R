@@ -34,10 +34,31 @@ work. This avoids duplicating the same evidence across many source-tree files.
 Historical source hashes describe the source at each run, not an assertion that
 every old pilot can be rerun with a later version of a script.
 
-Pinned certificate programs and their dependencies remain byte-identical.
+The interval arithmetic cores and mathematical certificate data remain unchanged.
+The entry, cadence and N-cell composition dependency launchers now execute temporary snapshots of
+only the authenticated source bytes, with isolated Python startup. Their source
+identities, entry anchors, dependent certificates and replay reports have been
+regenerated together; bounds, obligations, pulse traces and conclusions were
+compared to the preceding commit and are identical. These certificate revalidations do not alter the mathematical claims.
+
 Portability edits concern packaging and optional viewer QA: the source recording
 fragment is included, outputs go into `dist/`, and QA uses repository-relative
 paths. The local SOURCE_MANIFEST files still match their retained reference files.
+
+The numerical cell simulator now consumes terminal physical events before
+returning the final state and checkpoints. New adaptive runs lock both engines
+and Python/NumPy/SciPy versions in addition to their controller sources. The
+adaptive experiment was then rerun from scratch with this complete manifest,
+using the original three training replicates and two 160-pupil lots. All 127
+checks and the continuous native-teacher verification pass. The reproduced
+scores are 140/160 and 147/160, with 882 and 873 student pulses. This is a
+computational reproduction on the original seeds, not new independent evidence.
+
+The current bundle replaces the old adaptive records and excludes legacy
+adaptive development sweeps and aborted-run files. They remain in earlier Git
+revisions. Other experiments and certificate data retain their separate
+provenance. The new adaptive `REPRODUCTION.json` records the execution and
+artifact identities; incomplete legacy plans remain refused.
 
 The original full A22 campaign was not freshly rerun to completion during this
 session. The new proofs are computer-assisted written arguments with independent
@@ -55,4 +76,6 @@ The Lean cadence extension consumes both `results/reciprocal_cadence/`
 certificates directly, including their 95-case pulse traces. The new combined
 MARK/ERROR case is modeled separately from the earlier three-case abstraction.
 The updated bundled archive remains checked by `tools/prepare_recordings.py`;
-the adaptive evaluation member has the same SHA-256 identity as before.
+the adaptive evaluation identity now refers to the new execution. The Lean
+recorded-outcome propositions are regenerated from those records; their
+finite counts do not prove the underlying continuous trajectories.

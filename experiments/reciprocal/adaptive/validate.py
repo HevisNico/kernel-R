@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse,json,hashlib,math
 import numpy as np
 import model as m
+import provenance
 from ode_reference import simulate_ode
 
 
@@ -19,12 +20,16 @@ def online_episode(initial,choices):
 
 
 def validate(out):
-    plan=json.loads((out/'plan.json').read_text());training=json.loads((out/'training.json').read_text())
+    plan=json.loads((out/'plan.json').read_text())
+    # Refuse incomplete or mismatched provenance before replaying any dynamics.
+    provenance.verify(plan)
+    training=json.loads((out/'training.json').read_text())
     policies=json.loads((out/'policies.json').read_text());evaluations=json.loads((out/'evaluation.json').read_text());summary=json.loads((out/'summary.json').read_text())
     checks=[];online_records=[]
     def check(name,passed,**details):
         row=dict(test=name,passed=bool(passed),**details);checks.append(row);print(json.dumps(row),flush=True)
-    check('locked source hashes match',all(hashlib.sha256((m.HERE/name).read_bytes()).hexdigest()==h for name,h in plan['source_sha256'].items()))
+    check('locked source hashes and numerical runtime match',True,
+          source_manifest_version=plan['source_manifest_version'],runtime_versions=plan['runtime_versions'])
     check('feedback follows the full counterfactual pupil episode',m.FEEDBACK_OFFSET>m.MAX_BLOCKS*m.BLOCK_TIME+80. and m.TRAIN_SLOT>m.FEEDBACK_OFFSET+24.)
     check('each observation precedes its next action',30.+20.+2*20.==m.BLOCK_TIME)
     check('complete teacher factorial',len(policies)==4*plan['replicates'] and len({(p['replicate'],p['arm']) for p in policies})==len(policies))

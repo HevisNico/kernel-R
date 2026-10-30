@@ -6,7 +6,11 @@ concept of adaptive stopping. Pulse shape, teaching blocks, observation categori
 and preference training are supplied. Inventing a new lesson rhythm or content
 has not been demonstrated.
 
-## Locked fresh-learner results
+## Reproduced held-out learner results
+
+The published records were recomputed from scratch with the corrected terminal-event
+scheduler and a complete source/runtime manifest. This reproduction uses the original
+seeds and protocol; it is not a new independent sample.
 
 Three independently trained R memory banks learn the same choices. Each bank is
 evaluated on the same pupils; this does not create additional independent samples.
@@ -189,17 +193,25 @@ E'=10(100-E)-W and initial E=100, this gives E>=77.495, so the positive-reserve
 plasticity gate remains open under these assumptions. Teacher reserve is directly
 integrated. This argument is not a machine-checked interval certificate.
 
-Development pulse-prefix and block sweeps, and an abandoned one-step preference
-exploration, are preserved. Development found fixed counts 3 and 4 tied for best;
-3 was selected for fewer pulses. The final block adds the explicit 40-unit readout
-allowance to the prototype's quiet period. An initial 32-pupil training attempt
-aborted because one set lacked eight naturally occurring late-context comparisons.
-Training was increased to 64 before either test lot was evaluated; its aborted
-plan and log are retained. The task and decision rule were not retuned on either
-fresh test lot. A validation-only equality check was changed to a 1e-12 tolerance
-for a measured 1.78e-15 exp/log round-trip difference; dynamics were unchanged.
+The task, fixed three-block baseline, 64-pupil training size and seeds were
+selected in the earlier development process. This reproduction does not rerun
+or establish that process and is not a preregistered experiment. The legacy
+adaptive development sweeps, aborted-run plan/log and old evaluation records
+have been removed from the current bundle; previous Git revisions retain them.
+`REPRODUCTION.json` records this execution, artifact identities and validation.
 
 ## Reproduce
+
+New runs write a version-2 provenance manifest before training. It locks
+`model.py`, `run.py`, `provenance.py`, both numerical engines (`engine.py` and
+`simulate.py`), and the actual Python, NumPy and SciPy versions. Both validators
+refuse incomplete manifests, changed engines or different runtime versions
+before replaying dynamics.
+
+The bundled results now come from a complete new execution, followed by both
+validators, the descriptive analysis and report generation. The reproduced
+scores match the earlier scores; they are supported by the new records and
+manifest. Legacy two-file plans remain intentionally refused.
 
 From the extracted ZIP's main directory:
 
@@ -212,6 +224,8 @@ python -u -B 02_R_Simulation/adaptive/analyze.py --out 08_New_Adaptive
 python -u -B 02_R_Simulation/adaptive/report.py --out 08_New_Adaptive
 ```
 
-Optional development records are copied only when available in the original
-checkout. The supplied recordings remain in `08_Adaptive_Lessons`; no network
-access is needed for the calculations.
+Historical development records are never imported into a new execution. The
+reproduced recordings are in `08_Adaptive_Lessons`; no network access is needed
+for the calculations. To rerun from the repository, use the same commands with
+`experiments/reciprocal/adaptive/` as the script directory and a new output
+directory, then package it with `package.py --adaptive-results PATH`.

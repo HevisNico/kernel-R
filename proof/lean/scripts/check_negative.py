@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reject corrupted endpoint obligations and cadence trace counters."""
+"""Reject corrupted endpoint obligations, cadence counters and adaptive scores."""
 from pathlib import Path
 import re
 import subprocess
@@ -39,6 +39,15 @@ example : checkSteps 3 0 {steps} = true := by decide
     cases.append(('cadence counters', trace.format(steps='bFast'),
                   trace.format(steps='(bFast.map fun row => { row with gainDoses := 0 })'),
                   'false'))
+    recorded=(ROOT/'KernelR/Recorded.lean').read_text()
+    score=int(re.search(r'theorem test_successes : successes test = (\d+)',recorded).group(1))
+    replay='''import KernelR.Recorded
+open KernelR.Recorded
+set_option maxRecDepth 100000
+set_option maxHeartbeats 0
+example : successes test = {score} := by decide
+'''
+    cases.append(('adaptive score',replay.format(score=score),replay.format(score=score+1),'false'))
     with tempfile.TemporaryDirectory(prefix='lean-negative-', dir=ROOT) as tmp:
         path = Path(tmp) / 'Check.lean'
         for name, good, bad, diagnostic in cases:

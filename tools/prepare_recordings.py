@@ -4,7 +4,7 @@ import argparse,hashlib,json,stat,zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 BUNDLE=ROOT/'downloads'/'R_Reciprocal_Prototype.zip'
-BUNDLE_SHA256='918f0680dbe37d293c3b052a4a0c51cf8ed11d041bbd4a17ce338edb25797dce'
+BUNDLE_SHA256='34d49bab7ad29d357cbae8ac24fd278623c707fe2f442cc07d0b2166a351b03e'
 PREFIX='R_Reciprocal_Prototype/'
 
 
@@ -52,10 +52,6 @@ def restoration_plan(data):
                 destinations.append('audit_runs/pedagogy_pilot/'+filename.removeprefix('pilot_'))
         elif folder=='08_Adaptive_Lessons' and path.suffix in ['.json','.jsonl','.html','.md']:
             destinations.append('audit_runs/adaptive/'+filename)
-            if filename in ['development_prefixes.json','development_blocks.json','development_preferences.json']:
-                destinations.append('audit_runs/adaptive_development/'+filename.removeprefix('development_'))
-        elif name=='08_Adaptive_Lessons/development_training_abort.log':
-            destinations.append('audit_runs/adaptive.log')
         elif name.startswith('02_R_Simulation/pedagogy/development/') and path.suffix=='.py':
             destinations.append('audit_runs/pedagogy_development/'+filename)
         for destination in destinations:
