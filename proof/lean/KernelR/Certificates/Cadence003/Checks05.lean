@@ -1,0 +1,654 @@
+import KernelR.Certificates.Cadence003.Bounds12
+import KernelR.Certificates.Cadence003.Bounds13
+import KernelR.Certificates.Cadence003.Bounds14
+
+/-! Generated exact evidence checks, not hybrid-flow soundness. -/
+namespace KernelR.Certificates.Cadence003
+set_option maxRecDepth 20000
+set_option maxHeartbeats 4000000
+
+theorem A_fast_18_aux_separation_verified : RationalBox.StrictBefore A_fast_18_aux_separation_left A_fast_18_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_aux_separation_left, A_fast_18_aux_separation_right]
+
+theorem A_fast_18_gain_below_cap_verified : RationalBox.StrictBefore A_fast_18_gain_below_cap_left A_fast_18_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_gain_below_cap_left, A_fast_18_gain_below_cap_right]
+
+theorem A_fast_18_ready_at_input_verified : RationalBox.StrictBefore A_fast_18_ready_at_input_left A_fast_18_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_ready_at_input_left, A_fast_18_ready_at_input_right]
+
+theorem A_fast_18_positive_derivative_coefficient_verified : RationalBox.StrictBefore A_fast_18_positive_derivative_coefficient_left A_fast_18_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_positive_derivative_coefficient_left, A_fast_18_positive_derivative_coefficient_right]
+
+theorem A_fast_18_fixed_flow_increases_verified : RationalBox.StrictBefore A_fast_18_fixed_flow_increases_left A_fast_18_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_fixed_flow_increases_left, A_fast_18_fixed_flow_increases_right]
+
+theorem A_fast_18_strong_crosses_by_one_verified : RationalBox.StrictBefore A_fast_18_strong_crosses_by_one_left A_fast_18_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_strong_crosses_by_one_left, A_fast_18_strong_crosses_by_one_right]
+
+theorem A_fast_18_root_lower_verified : RationalBox.StrictBefore A_fast_18_root_lower_left A_fast_18_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_root_lower_left, A_fast_18_root_lower_right]
+
+theorem A_fast_18_root_upper_verified : RationalBox.StrictBefore A_fast_18_root_upper_left A_fast_18_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_root_upper_left, A_fast_18_root_upper_right]
+
+theorem A_fast_18_MARK_before_fire_verified : RationalBox.StrictBefore A_fast_18_MARK_before_fire_left A_fast_18_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_MARK_before_fire_left, A_fast_18_MARK_before_fire_right]
+
+theorem A_fast_18_fire_before_ERROR_verified : RationalBox.StrictBefore A_fast_18_fire_before_ERROR_left A_fast_18_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_fire_before_ERROR_left, A_fast_18_fire_before_ERROR_right]
+
+theorem A_fast_18_ERROR_protected_verified : RationalBox.StrictBefore A_fast_18_ERROR_protected_left A_fast_18_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_18_ERROR_protected_left, A_fast_18_ERROR_protected_right]
+
+theorem C_fast_19_aux_separation_verified : RationalBox.StrictBefore C_fast_19_aux_separation_left C_fast_19_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_aux_separation_left, C_fast_19_aux_separation_right]
+
+theorem C_fast_19_gain_below_cap_verified : RationalBox.StrictBefore C_fast_19_gain_below_cap_left C_fast_19_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_gain_below_cap_left, C_fast_19_gain_below_cap_right]
+
+theorem C_fast_19_ready_at_input_verified : RationalBox.StrictBefore C_fast_19_ready_at_input_left C_fast_19_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_ready_at_input_left, C_fast_19_ready_at_input_right]
+
+theorem C_fast_19_positive_derivative_coefficient_verified : RationalBox.StrictBefore C_fast_19_positive_derivative_coefficient_left C_fast_19_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_positive_derivative_coefficient_left, C_fast_19_positive_derivative_coefficient_right]
+
+theorem C_fast_19_fixed_flow_increases_verified : RationalBox.StrictBefore C_fast_19_fixed_flow_increases_left C_fast_19_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_fixed_flow_increases_left, C_fast_19_fixed_flow_increases_right]
+
+theorem C_fast_19_strong_crosses_by_one_verified : RationalBox.StrictBefore C_fast_19_strong_crosses_by_one_left C_fast_19_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_strong_crosses_by_one_left, C_fast_19_strong_crosses_by_one_right]
+
+theorem C_fast_19_root_lower_verified : RationalBox.StrictBefore C_fast_19_root_lower_left C_fast_19_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_root_lower_left, C_fast_19_root_lower_right]
+
+theorem C_fast_19_root_upper_verified : RationalBox.StrictBefore C_fast_19_root_upper_left C_fast_19_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_root_upper_left, C_fast_19_root_upper_right]
+
+theorem C_fast_19_MARK_before_fire_verified : RationalBox.StrictBefore C_fast_19_MARK_before_fire_left C_fast_19_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_MARK_before_fire_left, C_fast_19_MARK_before_fire_right]
+
+theorem C_fast_19_fire_before_ERROR_verified : RationalBox.StrictBefore C_fast_19_fire_before_ERROR_left C_fast_19_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_fire_before_ERROR_left, C_fast_19_fire_before_ERROR_right]
+
+theorem C_fast_19_ERROR_protected_verified : RationalBox.StrictBefore C_fast_19_ERROR_protected_left C_fast_19_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_19_ERROR_protected_left, C_fast_19_ERROR_protected_right]
+
+theorem B_fast_19_aux_separation_verified : RationalBox.StrictBefore B_fast_19_aux_separation_left B_fast_19_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_aux_separation_left, B_fast_19_aux_separation_right]
+
+theorem B_fast_19_gain_below_cap_verified : RationalBox.StrictBefore B_fast_19_gain_below_cap_left B_fast_19_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_gain_below_cap_left, B_fast_19_gain_below_cap_right]
+
+theorem B_fast_19_ready_at_input_verified : RationalBox.StrictBefore B_fast_19_ready_at_input_left B_fast_19_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_ready_at_input_left, B_fast_19_ready_at_input_right]
+
+theorem B_fast_19_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_fast_19_positive_derivative_coefficient_left B_fast_19_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_positive_derivative_coefficient_left, B_fast_19_positive_derivative_coefficient_right]
+
+theorem B_fast_19_fixed_flow_increases_verified : RationalBox.StrictBefore B_fast_19_fixed_flow_increases_left B_fast_19_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_fixed_flow_increases_left, B_fast_19_fixed_flow_increases_right]
+
+theorem B_fast_19_strong_crosses_by_one_verified : RationalBox.StrictBefore B_fast_19_strong_crosses_by_one_left B_fast_19_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_strong_crosses_by_one_left, B_fast_19_strong_crosses_by_one_right]
+
+theorem B_fast_19_root_lower_verified : RationalBox.StrictBefore B_fast_19_root_lower_left B_fast_19_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_root_lower_left, B_fast_19_root_lower_right]
+
+theorem B_fast_19_root_upper_verified : RationalBox.StrictBefore B_fast_19_root_upper_left B_fast_19_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_root_upper_left, B_fast_19_root_upper_right]
+
+theorem B_fast_19_MARK_before_fire_verified : RationalBox.StrictBefore B_fast_19_MARK_before_fire_left B_fast_19_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_MARK_before_fire_left, B_fast_19_MARK_before_fire_right]
+
+theorem B_fast_19_fire_before_ERROR_verified : RationalBox.StrictBefore B_fast_19_fire_before_ERROR_left B_fast_19_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_fire_before_ERROR_left, B_fast_19_fire_before_ERROR_right]
+
+theorem B_fast_19_ERROR_protected_verified : RationalBox.StrictBefore B_fast_19_ERROR_protected_left B_fast_19_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_19_ERROR_protected_left, B_fast_19_ERROR_protected_right]
+
+theorem A_fast_19_aux_separation_verified : RationalBox.StrictBefore A_fast_19_aux_separation_left A_fast_19_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_aux_separation_left, A_fast_19_aux_separation_right]
+
+theorem A_fast_19_gain_below_cap_verified : RationalBox.StrictBefore A_fast_19_gain_below_cap_left A_fast_19_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_gain_below_cap_left, A_fast_19_gain_below_cap_right]
+
+theorem A_fast_19_ready_at_input_verified : RationalBox.StrictBefore A_fast_19_ready_at_input_left A_fast_19_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_ready_at_input_left, A_fast_19_ready_at_input_right]
+
+theorem A_fast_19_positive_derivative_coefficient_verified : RationalBox.StrictBefore A_fast_19_positive_derivative_coefficient_left A_fast_19_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_positive_derivative_coefficient_left, A_fast_19_positive_derivative_coefficient_right]
+
+theorem A_fast_19_fixed_flow_increases_verified : RationalBox.StrictBefore A_fast_19_fixed_flow_increases_left A_fast_19_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_fixed_flow_increases_left, A_fast_19_fixed_flow_increases_right]
+
+theorem A_fast_19_strong_crosses_by_one_verified : RationalBox.StrictBefore A_fast_19_strong_crosses_by_one_left A_fast_19_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_strong_crosses_by_one_left, A_fast_19_strong_crosses_by_one_right]
+
+theorem A_fast_19_root_lower_verified : RationalBox.StrictBefore A_fast_19_root_lower_left A_fast_19_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_root_lower_left, A_fast_19_root_lower_right]
+
+theorem A_fast_19_root_upper_verified : RationalBox.StrictBefore A_fast_19_root_upper_left A_fast_19_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_root_upper_left, A_fast_19_root_upper_right]
+
+theorem A_fast_19_MARK_before_fire_verified : RationalBox.StrictBefore A_fast_19_MARK_before_fire_left A_fast_19_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_MARK_before_fire_left, A_fast_19_MARK_before_fire_right]
+
+theorem A_fast_19_fire_before_ERROR_verified : RationalBox.StrictBefore A_fast_19_fire_before_ERROR_left A_fast_19_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_fire_before_ERROR_left, A_fast_19_fire_before_ERROR_right]
+
+theorem A_fast_19_ERROR_protected_verified : RationalBox.StrictBefore A_fast_19_ERROR_protected_left A_fast_19_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_19_ERROR_protected_left, A_fast_19_ERROR_protected_right]
+
+theorem C_fast_20_aux_separation_verified : RationalBox.StrictBefore C_fast_20_aux_separation_left C_fast_20_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_aux_separation_left, C_fast_20_aux_separation_right]
+
+theorem C_fast_20_gain_below_cap_verified : RationalBox.StrictBefore C_fast_20_gain_below_cap_left C_fast_20_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_gain_below_cap_left, C_fast_20_gain_below_cap_right]
+
+theorem C_fast_20_ready_at_input_verified : RationalBox.StrictBefore C_fast_20_ready_at_input_left C_fast_20_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_ready_at_input_left, C_fast_20_ready_at_input_right]
+
+theorem C_fast_20_positive_derivative_coefficient_verified : RationalBox.StrictBefore C_fast_20_positive_derivative_coefficient_left C_fast_20_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_positive_derivative_coefficient_left, C_fast_20_positive_derivative_coefficient_right]
+
+theorem C_fast_20_fixed_flow_increases_verified : RationalBox.StrictBefore C_fast_20_fixed_flow_increases_left C_fast_20_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_fixed_flow_increases_left, C_fast_20_fixed_flow_increases_right]
+
+theorem C_fast_20_strong_crosses_by_one_verified : RationalBox.StrictBefore C_fast_20_strong_crosses_by_one_left C_fast_20_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_strong_crosses_by_one_left, C_fast_20_strong_crosses_by_one_right]
+
+theorem C_fast_20_root_lower_verified : RationalBox.StrictBefore C_fast_20_root_lower_left C_fast_20_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_root_lower_left, C_fast_20_root_lower_right]
+
+theorem C_fast_20_root_upper_verified : RationalBox.StrictBefore C_fast_20_root_upper_left C_fast_20_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_root_upper_left, C_fast_20_root_upper_right]
+
+theorem C_fast_20_MARK_before_fire_verified : RationalBox.StrictBefore C_fast_20_MARK_before_fire_left C_fast_20_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_MARK_before_fire_left, C_fast_20_MARK_before_fire_right]
+
+theorem C_fast_20_fire_before_ERROR_verified : RationalBox.StrictBefore C_fast_20_fire_before_ERROR_left C_fast_20_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_fire_before_ERROR_left, C_fast_20_fire_before_ERROR_right]
+
+theorem C_fast_20_ERROR_protected_verified : RationalBox.StrictBefore C_fast_20_ERROR_protected_left C_fast_20_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_20_ERROR_protected_left, C_fast_20_ERROR_protected_right]
+
+theorem B_fast_20_aux_separation_verified : RationalBox.StrictBefore B_fast_20_aux_separation_left B_fast_20_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_aux_separation_left, B_fast_20_aux_separation_right]
+
+theorem B_fast_20_gain_below_cap_verified : RationalBox.StrictBefore B_fast_20_gain_below_cap_left B_fast_20_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_gain_below_cap_left, B_fast_20_gain_below_cap_right]
+
+theorem B_fast_20_ready_at_input_verified : RationalBox.StrictBefore B_fast_20_ready_at_input_left B_fast_20_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_ready_at_input_left, B_fast_20_ready_at_input_right]
+
+theorem B_fast_20_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_fast_20_positive_derivative_coefficient_left B_fast_20_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_positive_derivative_coefficient_left, B_fast_20_positive_derivative_coefficient_right]
+
+theorem B_fast_20_fixed_flow_increases_verified : RationalBox.StrictBefore B_fast_20_fixed_flow_increases_left B_fast_20_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_fixed_flow_increases_left, B_fast_20_fixed_flow_increases_right]
+
+theorem B_fast_20_strong_crosses_by_one_verified : RationalBox.StrictBefore B_fast_20_strong_crosses_by_one_left B_fast_20_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_strong_crosses_by_one_left, B_fast_20_strong_crosses_by_one_right]
+
+theorem B_fast_20_root_lower_verified : RationalBox.StrictBefore B_fast_20_root_lower_left B_fast_20_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_root_lower_left, B_fast_20_root_lower_right]
+
+theorem B_fast_20_root_upper_verified : RationalBox.StrictBefore B_fast_20_root_upper_left B_fast_20_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_root_upper_left, B_fast_20_root_upper_right]
+
+theorem B_fast_20_MARK_before_fire_verified : RationalBox.StrictBefore B_fast_20_MARK_before_fire_left B_fast_20_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_MARK_before_fire_left, B_fast_20_MARK_before_fire_right]
+
+theorem B_fast_20_fire_before_ERROR_verified : RationalBox.StrictBefore B_fast_20_fire_before_ERROR_left B_fast_20_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_fire_before_ERROR_left, B_fast_20_fire_before_ERROR_right]
+
+theorem B_fast_20_ERROR_protected_verified : RationalBox.StrictBefore B_fast_20_ERROR_protected_left B_fast_20_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_20_ERROR_protected_left, B_fast_20_ERROR_protected_right]
+
+theorem A_fast_20_aux_separation_verified : RationalBox.StrictBefore A_fast_20_aux_separation_left A_fast_20_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_aux_separation_left, A_fast_20_aux_separation_right]
+
+theorem A_fast_20_gain_below_cap_verified : RationalBox.StrictBefore A_fast_20_gain_below_cap_left A_fast_20_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_gain_below_cap_left, A_fast_20_gain_below_cap_right]
+
+theorem A_fast_20_ready_at_input_verified : RationalBox.StrictBefore A_fast_20_ready_at_input_left A_fast_20_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_ready_at_input_left, A_fast_20_ready_at_input_right]
+
+theorem A_fast_20_positive_derivative_coefficient_verified : RationalBox.StrictBefore A_fast_20_positive_derivative_coefficient_left A_fast_20_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_positive_derivative_coefficient_left, A_fast_20_positive_derivative_coefficient_right]
+
+theorem A_fast_20_fixed_flow_increases_verified : RationalBox.StrictBefore A_fast_20_fixed_flow_increases_left A_fast_20_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_fixed_flow_increases_left, A_fast_20_fixed_flow_increases_right]
+
+theorem A_fast_20_strong_crosses_by_one_verified : RationalBox.StrictBefore A_fast_20_strong_crosses_by_one_left A_fast_20_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_strong_crosses_by_one_left, A_fast_20_strong_crosses_by_one_right]
+
+theorem A_fast_20_root_lower_verified : RationalBox.StrictBefore A_fast_20_root_lower_left A_fast_20_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_root_lower_left, A_fast_20_root_lower_right]
+
+theorem A_fast_20_root_upper_verified : RationalBox.StrictBefore A_fast_20_root_upper_left A_fast_20_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_root_upper_left, A_fast_20_root_upper_right]
+
+theorem A_fast_20_MARK_before_fire_verified : RationalBox.StrictBefore A_fast_20_MARK_before_fire_left A_fast_20_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_MARK_before_fire_left, A_fast_20_MARK_before_fire_right]
+
+theorem A_fast_20_fire_before_ERROR_verified : RationalBox.StrictBefore A_fast_20_fire_before_ERROR_left A_fast_20_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_fire_before_ERROR_left, A_fast_20_fire_before_ERROR_right]
+
+theorem A_fast_20_ERROR_protected_verified : RationalBox.StrictBefore A_fast_20_ERROR_protected_left A_fast_20_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_20_ERROR_protected_left, A_fast_20_ERROR_protected_right]
+
+theorem C_fast_21_aux_separation_verified : RationalBox.StrictBefore C_fast_21_aux_separation_left C_fast_21_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_aux_separation_left, C_fast_21_aux_separation_right]
+
+theorem C_fast_21_gain_below_cap_verified : RationalBox.StrictBefore C_fast_21_gain_below_cap_left C_fast_21_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_gain_below_cap_left, C_fast_21_gain_below_cap_right]
+
+theorem C_fast_21_ready_at_input_verified : RationalBox.StrictBefore C_fast_21_ready_at_input_left C_fast_21_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_ready_at_input_left, C_fast_21_ready_at_input_right]
+
+theorem C_fast_21_positive_derivative_coefficient_verified : RationalBox.StrictBefore C_fast_21_positive_derivative_coefficient_left C_fast_21_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_positive_derivative_coefficient_left, C_fast_21_positive_derivative_coefficient_right]
+
+theorem C_fast_21_fixed_flow_increases_verified : RationalBox.StrictBefore C_fast_21_fixed_flow_increases_left C_fast_21_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_fixed_flow_increases_left, C_fast_21_fixed_flow_increases_right]
+
+theorem C_fast_21_strong_crosses_by_one_verified : RationalBox.StrictBefore C_fast_21_strong_crosses_by_one_left C_fast_21_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_strong_crosses_by_one_left, C_fast_21_strong_crosses_by_one_right]
+
+theorem C_fast_21_root_lower_verified : RationalBox.StrictBefore C_fast_21_root_lower_left C_fast_21_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_root_lower_left, C_fast_21_root_lower_right]
+
+theorem C_fast_21_root_upper_verified : RationalBox.StrictBefore C_fast_21_root_upper_left C_fast_21_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_root_upper_left, C_fast_21_root_upper_right]
+
+theorem C_fast_21_MARK_before_fire_verified : RationalBox.StrictBefore C_fast_21_MARK_before_fire_left C_fast_21_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_MARK_before_fire_left, C_fast_21_MARK_before_fire_right]
+
+theorem C_fast_21_fire_before_ERROR_verified : RationalBox.StrictBefore C_fast_21_fire_before_ERROR_left C_fast_21_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_fire_before_ERROR_left, C_fast_21_fire_before_ERROR_right]
+
+theorem C_fast_21_ERROR_protected_verified : RationalBox.StrictBefore C_fast_21_ERROR_protected_left C_fast_21_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_21_ERROR_protected_left, C_fast_21_ERROR_protected_right]
+
+theorem B_fast_21_aux_separation_verified : RationalBox.StrictBefore B_fast_21_aux_separation_left B_fast_21_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_aux_separation_left, B_fast_21_aux_separation_right]
+
+theorem B_fast_21_gain_below_cap_verified : RationalBox.StrictBefore B_fast_21_gain_below_cap_left B_fast_21_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_gain_below_cap_left, B_fast_21_gain_below_cap_right]
+
+theorem B_fast_21_ready_at_input_verified : RationalBox.StrictBefore B_fast_21_ready_at_input_left B_fast_21_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_ready_at_input_left, B_fast_21_ready_at_input_right]
+
+theorem B_fast_21_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_fast_21_positive_derivative_coefficient_left B_fast_21_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_positive_derivative_coefficient_left, B_fast_21_positive_derivative_coefficient_right]
+
+theorem B_fast_21_fixed_flow_increases_verified : RationalBox.StrictBefore B_fast_21_fixed_flow_increases_left B_fast_21_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_fixed_flow_increases_left, B_fast_21_fixed_flow_increases_right]
+
+theorem B_fast_21_strong_crosses_by_one_verified : RationalBox.StrictBefore B_fast_21_strong_crosses_by_one_left B_fast_21_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_strong_crosses_by_one_left, B_fast_21_strong_crosses_by_one_right]
+
+theorem B_fast_21_root_lower_verified : RationalBox.StrictBefore B_fast_21_root_lower_left B_fast_21_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_root_lower_left, B_fast_21_root_lower_right]
+
+theorem B_fast_21_root_upper_verified : RationalBox.StrictBefore B_fast_21_root_upper_left B_fast_21_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_root_upper_left, B_fast_21_root_upper_right]
+
+theorem B_fast_21_MARK_before_fire_verified : RationalBox.StrictBefore B_fast_21_MARK_before_fire_left B_fast_21_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_MARK_before_fire_left, B_fast_21_MARK_before_fire_right]
+
+theorem B_fast_21_fire_before_ERROR_verified : RationalBox.StrictBefore B_fast_21_fire_before_ERROR_left B_fast_21_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_fire_before_ERROR_left, B_fast_21_fire_before_ERROR_right]
+
+theorem B_fast_21_ERROR_protected_verified : RationalBox.StrictBefore B_fast_21_ERROR_protected_left B_fast_21_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_21_ERROR_protected_left, B_fast_21_ERROR_protected_right]
+
+theorem A_fast_21_aux_separation_verified : RationalBox.StrictBefore A_fast_21_aux_separation_left A_fast_21_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_aux_separation_left, A_fast_21_aux_separation_right]
+
+theorem A_fast_21_gain_below_cap_verified : RationalBox.StrictBefore A_fast_21_gain_below_cap_left A_fast_21_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_gain_below_cap_left, A_fast_21_gain_below_cap_right]
+
+theorem A_fast_21_ready_at_input_verified : RationalBox.StrictBefore A_fast_21_ready_at_input_left A_fast_21_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_ready_at_input_left, A_fast_21_ready_at_input_right]
+
+theorem A_fast_21_positive_derivative_coefficient_verified : RationalBox.StrictBefore A_fast_21_positive_derivative_coefficient_left A_fast_21_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_positive_derivative_coefficient_left, A_fast_21_positive_derivative_coefficient_right]
+
+theorem A_fast_21_fixed_flow_increases_verified : RationalBox.StrictBefore A_fast_21_fixed_flow_increases_left A_fast_21_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_fixed_flow_increases_left, A_fast_21_fixed_flow_increases_right]
+
+theorem A_fast_21_strong_crosses_by_one_verified : RationalBox.StrictBefore A_fast_21_strong_crosses_by_one_left A_fast_21_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_strong_crosses_by_one_left, A_fast_21_strong_crosses_by_one_right]
+
+theorem A_fast_21_root_lower_verified : RationalBox.StrictBefore A_fast_21_root_lower_left A_fast_21_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_root_lower_left, A_fast_21_root_lower_right]
+
+theorem A_fast_21_root_upper_verified : RationalBox.StrictBefore A_fast_21_root_upper_left A_fast_21_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_root_upper_left, A_fast_21_root_upper_right]
+
+theorem A_fast_21_MARK_before_fire_verified : RationalBox.StrictBefore A_fast_21_MARK_before_fire_left A_fast_21_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_MARK_before_fire_left, A_fast_21_MARK_before_fire_right]
+
+theorem A_fast_21_fire_before_ERROR_verified : RationalBox.StrictBefore A_fast_21_fire_before_ERROR_left A_fast_21_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_fire_before_ERROR_left, A_fast_21_fire_before_ERROR_right]
+
+theorem A_fast_21_ERROR_protected_verified : RationalBox.StrictBefore A_fast_21_ERROR_protected_left A_fast_21_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_21_ERROR_protected_left, A_fast_21_ERROR_protected_right]
+
+theorem C_fast_22_aux_separation_verified : RationalBox.StrictBefore C_fast_22_aux_separation_left C_fast_22_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_aux_separation_left, C_fast_22_aux_separation_right]
+
+theorem C_fast_22_gain_below_cap_verified : RationalBox.StrictBefore C_fast_22_gain_below_cap_left C_fast_22_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_gain_below_cap_left, C_fast_22_gain_below_cap_right]
+
+theorem C_fast_22_ready_at_input_verified : RationalBox.StrictBefore C_fast_22_ready_at_input_left C_fast_22_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_ready_at_input_left, C_fast_22_ready_at_input_right]
+
+theorem C_fast_22_positive_derivative_coefficient_verified : RationalBox.StrictBefore C_fast_22_positive_derivative_coefficient_left C_fast_22_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_positive_derivative_coefficient_left, C_fast_22_positive_derivative_coefficient_right]
+
+theorem C_fast_22_fixed_flow_increases_verified : RationalBox.StrictBefore C_fast_22_fixed_flow_increases_left C_fast_22_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_fixed_flow_increases_left, C_fast_22_fixed_flow_increases_right]
+
+theorem C_fast_22_strong_crosses_by_one_verified : RationalBox.StrictBefore C_fast_22_strong_crosses_by_one_left C_fast_22_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_strong_crosses_by_one_left, C_fast_22_strong_crosses_by_one_right]
+
+theorem C_fast_22_root_lower_verified : RationalBox.StrictBefore C_fast_22_root_lower_left C_fast_22_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_root_lower_left, C_fast_22_root_lower_right]
+
+theorem C_fast_22_root_upper_verified : RationalBox.StrictBefore C_fast_22_root_upper_left C_fast_22_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_root_upper_left, C_fast_22_root_upper_right]
+
+theorem C_fast_22_MARK_before_fire_verified : RationalBox.StrictBefore C_fast_22_MARK_before_fire_left C_fast_22_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_MARK_before_fire_left, C_fast_22_MARK_before_fire_right]
+
+theorem C_fast_22_fire_before_ERROR_verified : RationalBox.StrictBefore C_fast_22_fire_before_ERROR_left C_fast_22_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_fire_before_ERROR_left, C_fast_22_fire_before_ERROR_right]
+
+theorem C_fast_22_ERROR_protected_verified : RationalBox.StrictBefore C_fast_22_ERROR_protected_left C_fast_22_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_22_ERROR_protected_left, C_fast_22_ERROR_protected_right]
+
+theorem B_fast_22_aux_separation_verified : RationalBox.StrictBefore B_fast_22_aux_separation_left B_fast_22_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_aux_separation_left, B_fast_22_aux_separation_right]
+
+theorem B_fast_22_gain_below_cap_verified : RationalBox.StrictBefore B_fast_22_gain_below_cap_left B_fast_22_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_gain_below_cap_left, B_fast_22_gain_below_cap_right]
+
+theorem B_fast_22_ready_at_input_verified : RationalBox.StrictBefore B_fast_22_ready_at_input_left B_fast_22_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_ready_at_input_left, B_fast_22_ready_at_input_right]
+
+theorem B_fast_22_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_fast_22_positive_derivative_coefficient_left B_fast_22_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_positive_derivative_coefficient_left, B_fast_22_positive_derivative_coefficient_right]
+
+theorem B_fast_22_fixed_flow_increases_verified : RationalBox.StrictBefore B_fast_22_fixed_flow_increases_left B_fast_22_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_fixed_flow_increases_left, B_fast_22_fixed_flow_increases_right]
+
+theorem B_fast_22_strong_crosses_by_one_verified : RationalBox.StrictBefore B_fast_22_strong_crosses_by_one_left B_fast_22_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_strong_crosses_by_one_left, B_fast_22_strong_crosses_by_one_right]
+
+theorem B_fast_22_root_lower_verified : RationalBox.StrictBefore B_fast_22_root_lower_left B_fast_22_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_root_lower_left, B_fast_22_root_lower_right]
+
+theorem B_fast_22_root_upper_verified : RationalBox.StrictBefore B_fast_22_root_upper_left B_fast_22_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_root_upper_left, B_fast_22_root_upper_right]
+
+theorem B_fast_22_MARK_before_fire_verified : RationalBox.StrictBefore B_fast_22_MARK_before_fire_left B_fast_22_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_MARK_before_fire_left, B_fast_22_MARK_before_fire_right]
+
+theorem B_fast_22_fire_before_ERROR_verified : RationalBox.StrictBefore B_fast_22_fire_before_ERROR_left B_fast_22_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_fire_before_ERROR_left, B_fast_22_fire_before_ERROR_right]
+
+theorem B_fast_22_ERROR_protected_verified : RationalBox.StrictBefore B_fast_22_ERROR_protected_left B_fast_22_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_22_ERROR_protected_left, B_fast_22_ERROR_protected_right]
+
+theorem A_fast_22_aux_separation_verified : RationalBox.StrictBefore A_fast_22_aux_separation_left A_fast_22_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_aux_separation_left, A_fast_22_aux_separation_right]
+
+theorem A_fast_22_gain_below_cap_verified : RationalBox.StrictBefore A_fast_22_gain_below_cap_left A_fast_22_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_gain_below_cap_left, A_fast_22_gain_below_cap_right]
+
+theorem A_fast_22_ready_at_input_verified : RationalBox.StrictBefore A_fast_22_ready_at_input_left A_fast_22_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_ready_at_input_left, A_fast_22_ready_at_input_right]
+
+theorem A_fast_22_positive_derivative_coefficient_verified : RationalBox.StrictBefore A_fast_22_positive_derivative_coefficient_left A_fast_22_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_positive_derivative_coefficient_left, A_fast_22_positive_derivative_coefficient_right]
+
+theorem A_fast_22_fixed_flow_increases_verified : RationalBox.StrictBefore A_fast_22_fixed_flow_increases_left A_fast_22_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_fixed_flow_increases_left, A_fast_22_fixed_flow_increases_right]
+
+theorem A_fast_22_strong_crosses_by_one_verified : RationalBox.StrictBefore A_fast_22_strong_crosses_by_one_left A_fast_22_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_strong_crosses_by_one_left, A_fast_22_strong_crosses_by_one_right]
+
+theorem A_fast_22_root_lower_verified : RationalBox.StrictBefore A_fast_22_root_lower_left A_fast_22_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_root_lower_left, A_fast_22_root_lower_right]
+
+theorem A_fast_22_root_upper_verified : RationalBox.StrictBefore A_fast_22_root_upper_left A_fast_22_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_root_upper_left, A_fast_22_root_upper_right]
+
+theorem A_fast_22_MARK_before_fire_verified : RationalBox.StrictBefore A_fast_22_MARK_before_fire_left A_fast_22_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_MARK_before_fire_left, A_fast_22_MARK_before_fire_right]
+
+theorem A_fast_22_fire_before_ERROR_verified : RationalBox.StrictBefore A_fast_22_fire_before_ERROR_left A_fast_22_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_fire_before_ERROR_left, A_fast_22_fire_before_ERROR_right]
+
+theorem A_fast_22_ERROR_protected_verified : RationalBox.StrictBefore A_fast_22_ERROR_protected_left A_fast_22_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, A_fast_22_ERROR_protected_left, A_fast_22_ERROR_protected_right]
+
+theorem C_fast_23_aux_separation_verified : RationalBox.StrictBefore C_fast_23_aux_separation_left C_fast_23_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_aux_separation_left, C_fast_23_aux_separation_right]
+
+theorem C_fast_23_gain_below_cap_verified : RationalBox.StrictBefore C_fast_23_gain_below_cap_left C_fast_23_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_gain_below_cap_left, C_fast_23_gain_below_cap_right]
+
+theorem C_fast_23_ready_at_input_verified : RationalBox.StrictBefore C_fast_23_ready_at_input_left C_fast_23_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_ready_at_input_left, C_fast_23_ready_at_input_right]
+
+theorem C_fast_23_positive_derivative_coefficient_verified : RationalBox.StrictBefore C_fast_23_positive_derivative_coefficient_left C_fast_23_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_positive_derivative_coefficient_left, C_fast_23_positive_derivative_coefficient_right]
+
+theorem C_fast_23_fixed_flow_increases_verified : RationalBox.StrictBefore C_fast_23_fixed_flow_increases_left C_fast_23_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_fixed_flow_increases_left, C_fast_23_fixed_flow_increases_right]
+
+theorem C_fast_23_strong_crosses_by_one_verified : RationalBox.StrictBefore C_fast_23_strong_crosses_by_one_left C_fast_23_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_strong_crosses_by_one_left, C_fast_23_strong_crosses_by_one_right]
+
+theorem C_fast_23_root_lower_verified : RationalBox.StrictBefore C_fast_23_root_lower_left C_fast_23_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_root_lower_left, C_fast_23_root_lower_right]
+
+theorem C_fast_23_root_upper_verified : RationalBox.StrictBefore C_fast_23_root_upper_left C_fast_23_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_root_upper_left, C_fast_23_root_upper_right]
+
+theorem C_fast_23_MARK_before_fire_verified : RationalBox.StrictBefore C_fast_23_MARK_before_fire_left C_fast_23_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_MARK_before_fire_left, C_fast_23_MARK_before_fire_right]
+
+theorem C_fast_23_fire_before_ERROR_verified : RationalBox.StrictBefore C_fast_23_fire_before_ERROR_left C_fast_23_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_fire_before_ERROR_left, C_fast_23_fire_before_ERROR_right]
+
+theorem C_fast_23_ERROR_protected_verified : RationalBox.StrictBefore C_fast_23_ERROR_protected_left C_fast_23_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, C_fast_23_ERROR_protected_left, C_fast_23_ERROR_protected_right]
+
+theorem B_fast_23_aux_separation_verified : RationalBox.StrictBefore B_fast_23_aux_separation_left B_fast_23_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_23_aux_separation_left, B_fast_23_aux_separation_right]
+
+theorem B_fast_23_gain_below_cap_verified : RationalBox.StrictBefore B_fast_23_gain_below_cap_left B_fast_23_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_23_gain_below_cap_left, B_fast_23_gain_below_cap_right]
+
+theorem B_fast_23_ready_at_input_verified : RationalBox.StrictBefore B_fast_23_ready_at_input_left B_fast_23_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_23_ready_at_input_left, B_fast_23_ready_at_input_right]
+
+theorem B_fast_23_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_fast_23_positive_derivative_coefficient_left B_fast_23_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_23_positive_derivative_coefficient_left, B_fast_23_positive_derivative_coefficient_right]
+
+theorem B_fast_23_fixed_flow_increases_verified : RationalBox.StrictBefore B_fast_23_fixed_flow_increases_left B_fast_23_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_23_fixed_flow_increases_left, B_fast_23_fixed_flow_increases_right]
+
+theorem B_fast_23_strong_crosses_by_one_verified : RationalBox.StrictBefore B_fast_23_strong_crosses_by_one_left B_fast_23_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_fast_23_strong_crosses_by_one_left, B_fast_23_strong_crosses_by_one_right]
+
+def Checks05Valid : Prop :=
+  RationalBox.StrictBefore A_fast_18_aux_separation_left A_fast_18_aux_separation_right ∧
+  RationalBox.StrictBefore A_fast_18_gain_below_cap_left A_fast_18_gain_below_cap_right ∧
+  RationalBox.StrictBefore A_fast_18_ready_at_input_left A_fast_18_ready_at_input_right ∧
+  RationalBox.StrictBefore A_fast_18_positive_derivative_coefficient_left A_fast_18_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore A_fast_18_fixed_flow_increases_left A_fast_18_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore A_fast_18_strong_crosses_by_one_left A_fast_18_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore A_fast_18_root_lower_left A_fast_18_root_lower_right ∧
+  RationalBox.StrictBefore A_fast_18_root_upper_left A_fast_18_root_upper_right ∧
+  RationalBox.StrictBefore A_fast_18_MARK_before_fire_left A_fast_18_MARK_before_fire_right ∧
+  RationalBox.StrictBefore A_fast_18_fire_before_ERROR_left A_fast_18_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore A_fast_18_ERROR_protected_left A_fast_18_ERROR_protected_right ∧
+  RationalBox.StrictBefore C_fast_19_aux_separation_left C_fast_19_aux_separation_right ∧
+  RationalBox.StrictBefore C_fast_19_gain_below_cap_left C_fast_19_gain_below_cap_right ∧
+  RationalBox.StrictBefore C_fast_19_ready_at_input_left C_fast_19_ready_at_input_right ∧
+  RationalBox.StrictBefore C_fast_19_positive_derivative_coefficient_left C_fast_19_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore C_fast_19_fixed_flow_increases_left C_fast_19_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore C_fast_19_strong_crosses_by_one_left C_fast_19_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore C_fast_19_root_lower_left C_fast_19_root_lower_right ∧
+  RationalBox.StrictBefore C_fast_19_root_upper_left C_fast_19_root_upper_right ∧
+  RationalBox.StrictBefore C_fast_19_MARK_before_fire_left C_fast_19_MARK_before_fire_right ∧
+  RationalBox.StrictBefore C_fast_19_fire_before_ERROR_left C_fast_19_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore C_fast_19_ERROR_protected_left C_fast_19_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_fast_19_aux_separation_left B_fast_19_aux_separation_right ∧
+  RationalBox.StrictBefore B_fast_19_gain_below_cap_left B_fast_19_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_fast_19_ready_at_input_left B_fast_19_ready_at_input_right ∧
+  RationalBox.StrictBefore B_fast_19_positive_derivative_coefficient_left B_fast_19_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_fast_19_fixed_flow_increases_left B_fast_19_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_fast_19_strong_crosses_by_one_left B_fast_19_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_fast_19_root_lower_left B_fast_19_root_lower_right ∧
+  RationalBox.StrictBefore B_fast_19_root_upper_left B_fast_19_root_upper_right ∧
+  RationalBox.StrictBefore B_fast_19_MARK_before_fire_left B_fast_19_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_fast_19_fire_before_ERROR_left B_fast_19_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_fast_19_ERROR_protected_left B_fast_19_ERROR_protected_right ∧
+  RationalBox.StrictBefore A_fast_19_aux_separation_left A_fast_19_aux_separation_right ∧
+  RationalBox.StrictBefore A_fast_19_gain_below_cap_left A_fast_19_gain_below_cap_right ∧
+  RationalBox.StrictBefore A_fast_19_ready_at_input_left A_fast_19_ready_at_input_right ∧
+  RationalBox.StrictBefore A_fast_19_positive_derivative_coefficient_left A_fast_19_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore A_fast_19_fixed_flow_increases_left A_fast_19_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore A_fast_19_strong_crosses_by_one_left A_fast_19_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore A_fast_19_root_lower_left A_fast_19_root_lower_right ∧
+  RationalBox.StrictBefore A_fast_19_root_upper_left A_fast_19_root_upper_right ∧
+  RationalBox.StrictBefore A_fast_19_MARK_before_fire_left A_fast_19_MARK_before_fire_right ∧
+  RationalBox.StrictBefore A_fast_19_fire_before_ERROR_left A_fast_19_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore A_fast_19_ERROR_protected_left A_fast_19_ERROR_protected_right ∧
+  RationalBox.StrictBefore C_fast_20_aux_separation_left C_fast_20_aux_separation_right ∧
+  RationalBox.StrictBefore C_fast_20_gain_below_cap_left C_fast_20_gain_below_cap_right ∧
+  RationalBox.StrictBefore C_fast_20_ready_at_input_left C_fast_20_ready_at_input_right ∧
+  RationalBox.StrictBefore C_fast_20_positive_derivative_coefficient_left C_fast_20_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore C_fast_20_fixed_flow_increases_left C_fast_20_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore C_fast_20_strong_crosses_by_one_left C_fast_20_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore C_fast_20_root_lower_left C_fast_20_root_lower_right ∧
+  RationalBox.StrictBefore C_fast_20_root_upper_left C_fast_20_root_upper_right ∧
+  RationalBox.StrictBefore C_fast_20_MARK_before_fire_left C_fast_20_MARK_before_fire_right ∧
+  RationalBox.StrictBefore C_fast_20_fire_before_ERROR_left C_fast_20_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore C_fast_20_ERROR_protected_left C_fast_20_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_fast_20_aux_separation_left B_fast_20_aux_separation_right ∧
+  RationalBox.StrictBefore B_fast_20_gain_below_cap_left B_fast_20_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_fast_20_ready_at_input_left B_fast_20_ready_at_input_right ∧
+  RationalBox.StrictBefore B_fast_20_positive_derivative_coefficient_left B_fast_20_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_fast_20_fixed_flow_increases_left B_fast_20_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_fast_20_strong_crosses_by_one_left B_fast_20_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_fast_20_root_lower_left B_fast_20_root_lower_right ∧
+  RationalBox.StrictBefore B_fast_20_root_upper_left B_fast_20_root_upper_right ∧
+  RationalBox.StrictBefore B_fast_20_MARK_before_fire_left B_fast_20_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_fast_20_fire_before_ERROR_left B_fast_20_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_fast_20_ERROR_protected_left B_fast_20_ERROR_protected_right ∧
+  RationalBox.StrictBefore A_fast_20_aux_separation_left A_fast_20_aux_separation_right ∧
+  RationalBox.StrictBefore A_fast_20_gain_below_cap_left A_fast_20_gain_below_cap_right ∧
+  RationalBox.StrictBefore A_fast_20_ready_at_input_left A_fast_20_ready_at_input_right ∧
+  RationalBox.StrictBefore A_fast_20_positive_derivative_coefficient_left A_fast_20_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore A_fast_20_fixed_flow_increases_left A_fast_20_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore A_fast_20_strong_crosses_by_one_left A_fast_20_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore A_fast_20_root_lower_left A_fast_20_root_lower_right ∧
+  RationalBox.StrictBefore A_fast_20_root_upper_left A_fast_20_root_upper_right ∧
+  RationalBox.StrictBefore A_fast_20_MARK_before_fire_left A_fast_20_MARK_before_fire_right ∧
+  RationalBox.StrictBefore A_fast_20_fire_before_ERROR_left A_fast_20_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore A_fast_20_ERROR_protected_left A_fast_20_ERROR_protected_right ∧
+  RationalBox.StrictBefore C_fast_21_aux_separation_left C_fast_21_aux_separation_right ∧
+  RationalBox.StrictBefore C_fast_21_gain_below_cap_left C_fast_21_gain_below_cap_right ∧
+  RationalBox.StrictBefore C_fast_21_ready_at_input_left C_fast_21_ready_at_input_right ∧
+  RationalBox.StrictBefore C_fast_21_positive_derivative_coefficient_left C_fast_21_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore C_fast_21_fixed_flow_increases_left C_fast_21_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore C_fast_21_strong_crosses_by_one_left C_fast_21_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore C_fast_21_root_lower_left C_fast_21_root_lower_right ∧
+  RationalBox.StrictBefore C_fast_21_root_upper_left C_fast_21_root_upper_right ∧
+  RationalBox.StrictBefore C_fast_21_MARK_before_fire_left C_fast_21_MARK_before_fire_right ∧
+  RationalBox.StrictBefore C_fast_21_fire_before_ERROR_left C_fast_21_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore C_fast_21_ERROR_protected_left C_fast_21_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_fast_21_aux_separation_left B_fast_21_aux_separation_right ∧
+  RationalBox.StrictBefore B_fast_21_gain_below_cap_left B_fast_21_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_fast_21_ready_at_input_left B_fast_21_ready_at_input_right ∧
+  RationalBox.StrictBefore B_fast_21_positive_derivative_coefficient_left B_fast_21_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_fast_21_fixed_flow_increases_left B_fast_21_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_fast_21_strong_crosses_by_one_left B_fast_21_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_fast_21_root_lower_left B_fast_21_root_lower_right ∧
+  RationalBox.StrictBefore B_fast_21_root_upper_left B_fast_21_root_upper_right ∧
+  RationalBox.StrictBefore B_fast_21_MARK_before_fire_left B_fast_21_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_fast_21_fire_before_ERROR_left B_fast_21_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_fast_21_ERROR_protected_left B_fast_21_ERROR_protected_right ∧
+  RationalBox.StrictBefore A_fast_21_aux_separation_left A_fast_21_aux_separation_right ∧
+  RationalBox.StrictBefore A_fast_21_gain_below_cap_left A_fast_21_gain_below_cap_right ∧
+  RationalBox.StrictBefore A_fast_21_ready_at_input_left A_fast_21_ready_at_input_right ∧
+  RationalBox.StrictBefore A_fast_21_positive_derivative_coefficient_left A_fast_21_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore A_fast_21_fixed_flow_increases_left A_fast_21_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore A_fast_21_strong_crosses_by_one_left A_fast_21_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore A_fast_21_root_lower_left A_fast_21_root_lower_right ∧
+  RationalBox.StrictBefore A_fast_21_root_upper_left A_fast_21_root_upper_right ∧
+  RationalBox.StrictBefore A_fast_21_MARK_before_fire_left A_fast_21_MARK_before_fire_right ∧
+  RationalBox.StrictBefore A_fast_21_fire_before_ERROR_left A_fast_21_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore A_fast_21_ERROR_protected_left A_fast_21_ERROR_protected_right ∧
+  RationalBox.StrictBefore C_fast_22_aux_separation_left C_fast_22_aux_separation_right ∧
+  RationalBox.StrictBefore C_fast_22_gain_below_cap_left C_fast_22_gain_below_cap_right ∧
+  RationalBox.StrictBefore C_fast_22_ready_at_input_left C_fast_22_ready_at_input_right ∧
+  RationalBox.StrictBefore C_fast_22_positive_derivative_coefficient_left C_fast_22_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore C_fast_22_fixed_flow_increases_left C_fast_22_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore C_fast_22_strong_crosses_by_one_left C_fast_22_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore C_fast_22_root_lower_left C_fast_22_root_lower_right ∧
+  RationalBox.StrictBefore C_fast_22_root_upper_left C_fast_22_root_upper_right ∧
+  RationalBox.StrictBefore C_fast_22_MARK_before_fire_left C_fast_22_MARK_before_fire_right ∧
+  RationalBox.StrictBefore C_fast_22_fire_before_ERROR_left C_fast_22_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore C_fast_22_ERROR_protected_left C_fast_22_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_fast_22_aux_separation_left B_fast_22_aux_separation_right ∧
+  RationalBox.StrictBefore B_fast_22_gain_below_cap_left B_fast_22_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_fast_22_ready_at_input_left B_fast_22_ready_at_input_right ∧
+  RationalBox.StrictBefore B_fast_22_positive_derivative_coefficient_left B_fast_22_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_fast_22_fixed_flow_increases_left B_fast_22_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_fast_22_strong_crosses_by_one_left B_fast_22_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_fast_22_root_lower_left B_fast_22_root_lower_right ∧
+  RationalBox.StrictBefore B_fast_22_root_upper_left B_fast_22_root_upper_right ∧
+  RationalBox.StrictBefore B_fast_22_MARK_before_fire_left B_fast_22_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_fast_22_fire_before_ERROR_left B_fast_22_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_fast_22_ERROR_protected_left B_fast_22_ERROR_protected_right ∧
+  RationalBox.StrictBefore A_fast_22_aux_separation_left A_fast_22_aux_separation_right ∧
+  RationalBox.StrictBefore A_fast_22_gain_below_cap_left A_fast_22_gain_below_cap_right ∧
+  RationalBox.StrictBefore A_fast_22_ready_at_input_left A_fast_22_ready_at_input_right ∧
+  RationalBox.StrictBefore A_fast_22_positive_derivative_coefficient_left A_fast_22_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore A_fast_22_fixed_flow_increases_left A_fast_22_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore A_fast_22_strong_crosses_by_one_left A_fast_22_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore A_fast_22_root_lower_left A_fast_22_root_lower_right ∧
+  RationalBox.StrictBefore A_fast_22_root_upper_left A_fast_22_root_upper_right ∧
+  RationalBox.StrictBefore A_fast_22_MARK_before_fire_left A_fast_22_MARK_before_fire_right ∧
+  RationalBox.StrictBefore A_fast_22_fire_before_ERROR_left A_fast_22_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore A_fast_22_ERROR_protected_left A_fast_22_ERROR_protected_right ∧
+  RationalBox.StrictBefore C_fast_23_aux_separation_left C_fast_23_aux_separation_right ∧
+  RationalBox.StrictBefore C_fast_23_gain_below_cap_left C_fast_23_gain_below_cap_right ∧
+  RationalBox.StrictBefore C_fast_23_ready_at_input_left C_fast_23_ready_at_input_right ∧
+  RationalBox.StrictBefore C_fast_23_positive_derivative_coefficient_left C_fast_23_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore C_fast_23_fixed_flow_increases_left C_fast_23_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore C_fast_23_strong_crosses_by_one_left C_fast_23_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore C_fast_23_root_lower_left C_fast_23_root_lower_right ∧
+  RationalBox.StrictBefore C_fast_23_root_upper_left C_fast_23_root_upper_right ∧
+  RationalBox.StrictBefore C_fast_23_MARK_before_fire_left C_fast_23_MARK_before_fire_right ∧
+  RationalBox.StrictBefore C_fast_23_fire_before_ERROR_left C_fast_23_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore C_fast_23_ERROR_protected_left C_fast_23_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_fast_23_aux_separation_left B_fast_23_aux_separation_right ∧
+  RationalBox.StrictBefore B_fast_23_gain_below_cap_left B_fast_23_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_fast_23_ready_at_input_left B_fast_23_ready_at_input_right ∧
+  RationalBox.StrictBefore B_fast_23_positive_derivative_coefficient_left B_fast_23_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_fast_23_fixed_flow_increases_left B_fast_23_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_fast_23_strong_crosses_by_one_left B_fast_23_strong_crosses_by_one_right
+theorem Checks05Valid_verified : Checks05Valid := by
+  exact ⟨A_fast_18_aux_separation_verified, A_fast_18_gain_below_cap_verified, A_fast_18_ready_at_input_verified, A_fast_18_positive_derivative_coefficient_verified, A_fast_18_fixed_flow_increases_verified, A_fast_18_strong_crosses_by_one_verified, A_fast_18_root_lower_verified, A_fast_18_root_upper_verified, A_fast_18_MARK_before_fire_verified, A_fast_18_fire_before_ERROR_verified, A_fast_18_ERROR_protected_verified, C_fast_19_aux_separation_verified, C_fast_19_gain_below_cap_verified, C_fast_19_ready_at_input_verified, C_fast_19_positive_derivative_coefficient_verified, C_fast_19_fixed_flow_increases_verified, C_fast_19_strong_crosses_by_one_verified, C_fast_19_root_lower_verified, C_fast_19_root_upper_verified, C_fast_19_MARK_before_fire_verified, C_fast_19_fire_before_ERROR_verified, C_fast_19_ERROR_protected_verified, B_fast_19_aux_separation_verified, B_fast_19_gain_below_cap_verified, B_fast_19_ready_at_input_verified, B_fast_19_positive_derivative_coefficient_verified, B_fast_19_fixed_flow_increases_verified, B_fast_19_strong_crosses_by_one_verified, B_fast_19_root_lower_verified, B_fast_19_root_upper_verified, B_fast_19_MARK_before_fire_verified, B_fast_19_fire_before_ERROR_verified, B_fast_19_ERROR_protected_verified, A_fast_19_aux_separation_verified, A_fast_19_gain_below_cap_verified, A_fast_19_ready_at_input_verified, A_fast_19_positive_derivative_coefficient_verified, A_fast_19_fixed_flow_increases_verified, A_fast_19_strong_crosses_by_one_verified, A_fast_19_root_lower_verified, A_fast_19_root_upper_verified, A_fast_19_MARK_before_fire_verified, A_fast_19_fire_before_ERROR_verified, A_fast_19_ERROR_protected_verified, C_fast_20_aux_separation_verified, C_fast_20_gain_below_cap_verified, C_fast_20_ready_at_input_verified, C_fast_20_positive_derivative_coefficient_verified, C_fast_20_fixed_flow_increases_verified, C_fast_20_strong_crosses_by_one_verified, C_fast_20_root_lower_verified, C_fast_20_root_upper_verified, C_fast_20_MARK_before_fire_verified, C_fast_20_fire_before_ERROR_verified, C_fast_20_ERROR_protected_verified, B_fast_20_aux_separation_verified, B_fast_20_gain_below_cap_verified, B_fast_20_ready_at_input_verified, B_fast_20_positive_derivative_coefficient_verified, B_fast_20_fixed_flow_increases_verified, B_fast_20_strong_crosses_by_one_verified, B_fast_20_root_lower_verified, B_fast_20_root_upper_verified, B_fast_20_MARK_before_fire_verified, B_fast_20_fire_before_ERROR_verified, B_fast_20_ERROR_protected_verified, A_fast_20_aux_separation_verified, A_fast_20_gain_below_cap_verified, A_fast_20_ready_at_input_verified, A_fast_20_positive_derivative_coefficient_verified, A_fast_20_fixed_flow_increases_verified, A_fast_20_strong_crosses_by_one_verified, A_fast_20_root_lower_verified, A_fast_20_root_upper_verified, A_fast_20_MARK_before_fire_verified, A_fast_20_fire_before_ERROR_verified, A_fast_20_ERROR_protected_verified, C_fast_21_aux_separation_verified, C_fast_21_gain_below_cap_verified, C_fast_21_ready_at_input_verified, C_fast_21_positive_derivative_coefficient_verified, C_fast_21_fixed_flow_increases_verified, C_fast_21_strong_crosses_by_one_verified, C_fast_21_root_lower_verified, C_fast_21_root_upper_verified, C_fast_21_MARK_before_fire_verified, C_fast_21_fire_before_ERROR_verified, C_fast_21_ERROR_protected_verified, B_fast_21_aux_separation_verified, B_fast_21_gain_below_cap_verified, B_fast_21_ready_at_input_verified, B_fast_21_positive_derivative_coefficient_verified, B_fast_21_fixed_flow_increases_verified, B_fast_21_strong_crosses_by_one_verified, B_fast_21_root_lower_verified, B_fast_21_root_upper_verified, B_fast_21_MARK_before_fire_verified, B_fast_21_fire_before_ERROR_verified, B_fast_21_ERROR_protected_verified, A_fast_21_aux_separation_verified, A_fast_21_gain_below_cap_verified, A_fast_21_ready_at_input_verified, A_fast_21_positive_derivative_coefficient_verified, A_fast_21_fixed_flow_increases_verified, A_fast_21_strong_crosses_by_one_verified, A_fast_21_root_lower_verified, A_fast_21_root_upper_verified, A_fast_21_MARK_before_fire_verified, A_fast_21_fire_before_ERROR_verified, A_fast_21_ERROR_protected_verified, C_fast_22_aux_separation_verified, C_fast_22_gain_below_cap_verified, C_fast_22_ready_at_input_verified, C_fast_22_positive_derivative_coefficient_verified, C_fast_22_fixed_flow_increases_verified, C_fast_22_strong_crosses_by_one_verified, C_fast_22_root_lower_verified, C_fast_22_root_upper_verified, C_fast_22_MARK_before_fire_verified, C_fast_22_fire_before_ERROR_verified, C_fast_22_ERROR_protected_verified, B_fast_22_aux_separation_verified, B_fast_22_gain_below_cap_verified, B_fast_22_ready_at_input_verified, B_fast_22_positive_derivative_coefficient_verified, B_fast_22_fixed_flow_increases_verified, B_fast_22_strong_crosses_by_one_verified, B_fast_22_root_lower_verified, B_fast_22_root_upper_verified, B_fast_22_MARK_before_fire_verified, B_fast_22_fire_before_ERROR_verified, B_fast_22_ERROR_protected_verified, A_fast_22_aux_separation_verified, A_fast_22_gain_below_cap_verified, A_fast_22_ready_at_input_verified, A_fast_22_positive_derivative_coefficient_verified, A_fast_22_fixed_flow_increases_verified, A_fast_22_strong_crosses_by_one_verified, A_fast_22_root_lower_verified, A_fast_22_root_upper_verified, A_fast_22_MARK_before_fire_verified, A_fast_22_fire_before_ERROR_verified, A_fast_22_ERROR_protected_verified, C_fast_23_aux_separation_verified, C_fast_23_gain_below_cap_verified, C_fast_23_ready_at_input_verified, C_fast_23_positive_derivative_coefficient_verified, C_fast_23_fixed_flow_increases_verified, C_fast_23_strong_crosses_by_one_verified, C_fast_23_root_lower_verified, C_fast_23_root_upper_verified, C_fast_23_MARK_before_fire_verified, C_fast_23_fire_before_ERROR_verified, C_fast_23_ERROR_protected_verified, B_fast_23_aux_separation_verified, B_fast_23_gain_below_cap_verified, B_fast_23_ready_at_input_verified, B_fast_23_positive_derivative_coefficient_verified, B_fast_23_fixed_flow_increases_verified, B_fast_23_strong_crosses_by_one_verified⟩
+
+end KernelR.Certificates.Cadence003

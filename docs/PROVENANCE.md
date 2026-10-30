@@ -4,8 +4,11 @@ The physical R definition and the unchanged Decimal interval core originate from
 [HevisNico/a22-going-further](https://github.com/HevisNico/a22-going-further), base
 commit `269483eb2c6227b369cffb2c46f86eaae5272bb8`. Author and license notices are retained.
 
-Only the original kernel/model definition snapshots and exact dependencies of
-the new certificates are kept here. The complete A22 engines, inherited network
+The original kernel/model definition snapshots and exact dependencies of
+the new certificates are kept here. Five reusable upstream Lean lemma modules
+are also vendored, unchanged, under `proof/lean/`; their original paths and Git
+blob identities are recorded in `proof/lean/evidence/UPSTREAM.json` and checked
+by `proof/lean/scripts/check_sources.py`. The complete A22 engines, inherited network
 proof archive and old global campaign records remain upstream. In particular,
 historical executable locations in `kernel/README.md` and the entries of
 `kernel/KERNEL_SHA256SUMS` identify that upstream reference; they do not imply
@@ -36,3 +39,16 @@ The original full A22 campaign was not freshly rerun to completion during this
 session. The new proofs are computer-assisted written arguments with independent
 arithmetic replay, not full Lean formalizations or independently peer-reviewed
 mathematics. The proposed invention protocol is not a completed experiment.
+
+The [partial Lean formalization](../proof/lean/README.md) adds checked lemmas and
+exact endpoint comparisons while retaining those boundaries. Generated Lean
+evidence comes directly from the committed certificates and the verified ZIP;
+`proof/lean/evidence/GENERATED_FROM.json` records the input SHA-256 identities.
+Neither exact endpoint checks nor replay of recorded Boolean outcomes proves
+the missing correspondence with complete hybrid trajectories.
+
+The Lean cadence extension consumes both `results/reciprocal_cadence/`
+certificates directly, including their 95-case pulse traces. The new combined
+MARK/ERROR case is modeled separately from the earlier three-case abstraction.
+The updated bundled archive remains checked by `tools/prepare_recordings.py`;
+the adaptive evaluation member has the same SHA-256 identity as before.
