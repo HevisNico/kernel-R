@@ -12,6 +12,23 @@ This is an extension of the repository's partial formalization, using Lean
 | `Robust.Induction` | Induction for every finite N over actual finite streams; exact counts; total traffic; zero-noise constant period; 32-cell period-8 arithmetic | Each cell satisfies `CellLaw` from a prepared section; wires realize the specified delays/errors |
 | `Robust.Evidence`, `Robust.Certified` | 438 strict endpoint comparisons and 1,386 interval-validity proofs from 16 certificates; explicit margin transfer and the 0.00748 radius budget | Real exp/log/model quantities belong to the published rational intervals |
 
+## What `CellLaw` carries
+
+`Robust.Induction` proves the chain conclusion from one local hypothesis per cell,
+`CellLaw incoming outgoing δ`. Its witness, `CellWitness`, contains **timing and counts
+only**: a reference latency, the per-output latencies with the first-shot bound and the
+regular radius δ, the exact count `outgoing.count = incoming.count - 3`, and the date of
+every output. The Lean chain theorem therefore concludes about emission counts, dates and
+phase budgets.
+
+The learning conclusions of the written theorems (three full ERROR doses per cell,
+unchanged b after preparation, frozen probes 0/8 then 8/8, reserve in [50,100]) are not
+fields of `CellWitness` and are not concluded by the Lean induction. They are proved by the
+written local arguments and their certificates. A later version can add them to the
+witness, so that the induction carries them unchanged, once `CellLaw` itself is derived
+from the hybrid execution. [CELLLAW_PLAN.md](CELLLAW_PLAN.md) proposes how to split that
+derivation.
+
 The sufficient period is `T ≥ 7.5 + 2 Σ (δᵢ + σᵢ)` over the first N−1
 cells/links. The final cell's latency affects output jitter but no downstream
 input. A cell removes three silent inputs. For K ≥ 3N+1, root traffic is K−3N;

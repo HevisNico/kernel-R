@@ -29,5 +29,9 @@ jobs:
           python -B periodic/tests.py
           python -B birth/tests.py
           python -B latency/tests.py
+      - name: Range certificates (every nu and alpha in the certified ranges)
+        run: |
+          python -B ranges/tests.py
+          for c in ranges/certificates/*.json; do python -B ranges/verify.py "$c"; done
       - name: Replay all robust birth and latency certificates
         run: python -B ../../proof/lean/scripts/robust_evidence.py --check

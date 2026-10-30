@@ -1,0 +1,1089 @@
+{
+ "schema_version": 1,
+ "status": "CERTIFIED_ROBUST_BIRTH_AND_LATENCY_OVER_PARAMETER_RANGES",
+ "meaning": "every obligation of the pinned birth-entry, local-continuation and latency-radius derivations holds for every noise bound nu and every amplitude deviation alpha in the stated closed ranges, at the stated exact epsilon, with one common radius delta",
+ "method": "closed pieces covering the ranges, each evaluated with nu and alpha as intervals in the unchanged pinned formulas; ranges/load.py lists the only textual changes",
+ "chain": "T >= 7.5 + 2*sum_{i=0}^{N-2}(sigma_i+delta_i), with delta the published radius",
+ "trust": "authentic sources; integer interval replay; written hybrid proofs, not full Lean semantics",
+ "parameters": {
+  "epsilon": "0.003",
+  "nu": "0:0.0015",
+  "alpha": "0:0.05",
+  "split": "1",
+  "delta": "0.11023"
+ },
+ "pinned_sources": {
+  "birth/local_bounds.py": "91a0bad9a1b0e3f40c80f998f22892a4c8201d69d57972b9b463e64e676d1858",
+  "birth/obligations.py": "f84e430bb6acda3a00a9908dda60e006788270e1e69084962a04a78c706ec934",
+  "latency/obligations.py": "bffcd9e32a982d342454084393fe6d8a8c4f10b353e117e9ab29c454e58aeff3"
+ },
+ "source_sha256": {
+  "load.py": "ab86f96b682bb8dcf8693b71cbb70780bb4f3e8a9c76e5ceb02ef4b4d3fbd7e6",
+  "schema.py": "4ca6975387a018c6fa9b03ac8c0ac75c25d9eeb06ba1fd37b2dd7994dfee18d3",
+  "certify.py": "8b7b3183f0e04b5b6583b65c4876fb9fcc80c6cc1d3bbf4a583ef1a0bdc9faa7",
+  "verify.py": "f6b423bf7ba8fa4bed755499acf2c5bf9b123b2dff3427dde7c3e1d87fb50360",
+  "README.md": "8f32b0873685456a7395d02756c3fec941e46acaf6118680c9ecb4c5813d4b2c"
+ },
+ "pieces": [
+  {
+   "nu": [
+    "0",
+    "0.0015"
+   ],
+   "alpha": [
+    "0",
+    "0.05"
+   ],
+   "reference_lo": "0.644663",
+   "reference_hi": "0.661968",
+   "bounds": {
+    "birth.local.epsilon": [
+     "0.0030000000000000000000000000000000000000",
+     "0.0030000000000000000000000000000000000000"
+    ],
+    "birth.local.nu": [
+     "0E-40",
+     "0.0015000000000000000000000000000000000000"
+    ],
+    "birth.local.alpha": [
+     "0E-40",
+     "0.0500000000000000000000000000000000000000"
+    ],
+    "birth.local.section_excess": [
+     "0.0300000000000000000000000000000000000000",
+     "0.0300000000000000000000000000000000000000"
+    ],
+    "birth.local.a": [
+     "1.3862943611198906188344642429163531361510",
+     "1.3862943611198906188344642429163531361511"
+    ],
+    "birth.local.kappa": [
+     "0.5000000000000000000000000000000000000000",
+     "0.5000000000000000000000000000000000000000"
+    ],
+    "birth.local.cap": [
+     "3.9880000000000000000000000000000000000000",
+     "4.0120000000000000000000000000000000000000"
+    ],
+    "birth.local.Lm": [
+     "11.1237060330133563249498102519452499932238",
+     "11.1906490984076192516796987790382003442363"
+    ],
+    "birth.local.Ls": [
+     "1.9558520915611286985537181842277416180319",
+     "1.9676225153819579585249542013845785786219"
+    ],
+    "birth.local.Le": [
+     "9.2142365202435396465197390012506938449503",
+     "9.2696882946883352712731175709673479703964"
+    ],
+    "birth.local.M": [
+     "35.7273420760588861992766890170194236673938",
+     "35.9423511557543258353806610672722988349008"
+    ],
+    "birth.local.b": [
+     "0.1799749434987905345742650731451278297884",
+     "0.1800250565012094654257349268548721702116"
+    ],
+    "birth.local.h_increases_through_raw_window.left": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.h_increases_through_raw_window.right": [
+     "1.1506125789288178013078098393876846217522",
+     "1.1506125789288178013078098393876846217523"
+    ],
+    "birth.local.aux_rest_deviation": [
+     "0.0000100000000000000000000000000000000000",
+     "0.0030100000000000000000000000000000000000"
+    ],
+    "birth.local.aux_rest_below_threshold.left": [
+     "0.0250100000000000000000000000000000000000",
+     "0.0280100000000000000000000000000000000000"
+    ],
+    "birth.local.aux_rest_below_threshold.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.aux_below_threshold_until_0.015.left": [
+     "0.7987617454964961657947604383968658600924",
+     "0.8017842454964961657947604383968658600925"
+    ],
+    "birth.local.aux_below_threshold_until_0.015.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.aux_above_threshold_by_0.03.left": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.aux_above_threshold_by_0.03.right": [
+     "1.3941712071412640220531758438860943494512",
+     "1.3972162071412640220531758438860943494513"
+    ],
+    "birth.local.decay_1_0.8_dominates_noise.left": [
+     "0.0001348471449666364028152371288288382808",
+     "0.0001348471449666364028152371288288382809"
+    ],
+    "birth.local.decay_1_0.8_dominates_noise.right": [
+     "0.8000000000000000000000000000000000000000",
+     "0.8000000000000000000000000000000000000000"
+    ],
+    "birth.local.decay_0.8_0.1_dominates_noise.left": [
+     "0.0007669291591485963950860181353370138744",
+     "0.0007669291591485963950860181353370138745"
+    ],
+    "birth.local.decay_0.8_0.1_dominates_noise.right": [
+     "0.1000000000000000000000000000000000000000",
+     "0.1000000000000000000000000000000000000000"
+    ],
+    "birth.local.decay_0.1_0.025_dominates_noise.left": [
+     "0.0001627915668004096121644849815573850205",
+     "0.0001627915668004096121644849815573850206"
+    ],
+    "birth.local.decay_0.1_0.025_dominates_noise.right": [
+     "0.0250000000000000000000000000000000000000",
+     "0.0250000000000000000000000000000000000000"
+    ],
+    "birth.local.mark_duration": [
+     "0.0199252083400922600386910346408920285855",
+     "0.0200753349459539009799024731628936154495"
+    ],
+    "birth.local.silent_duration": [
+     "1.0529697761540784256168085310397468856767",
+     "1.0671258846862014862620374775351935498319"
+    ],
+    "birth.local.error_duration": [
+     "0.1488553299448912560810329837114002108192",
+     "0.1511603608279854641039355666052506870860"
+    ],
+    "birth.local.mark_end": [
+     "0.0349252083400922600386910346408920285855",
+     "0.0500753349459539009799024731628936154495"
+    ],
+    "birth.local.error_start": [
+     "1.0878949844941706856554995656806389142622",
+     "1.1172012196321553872419399506980871652813"
+    ],
+    "birth.local.aux_finish": [
+     "1.2367503144390619417365325493920391250815",
+     "1.2683615804601408513458755173033378523673"
+    ],
+    "birth.local.gain_log_dose": [
+     "0.5981860756700641744307527732007369917549",
+     "0.6018139243299358255692472267992630082451"
+    ],
+    "birth.local.initial_gain": [
+     "0.2999970000149999500001249997500004166660",
+     "0.3000030000150000500001250002500004166673"
+    ],
+    "birth.local.learned_gain": [
+     "1.8050267699719500699758446519816665792959",
+     "1.8248156507851708199568898773608659034272"
+    ],
+    "birth.local.decay_1_0.25_dominates_noise.left": [
+     "0.0010820212806667225555199435107514191030",
+     "0.0010820212806667225555199435107514191031"
+    ],
+    "birth.local.decay_1_0.25_dominates_noise.right": [
+     "0.2500000000000000000000000000000000000000",
+     "0.2500000000000000000000000000000000000000"
+    ],
+    "birth.local.decay_0.25_0.1_dominates_noise.left": [
+     "0.0083344935180384167296659233120661430788",
+     "0.0083344935180384167296659233120661430789"
+    ],
+    "birth.local.decay_0.25_0.1_dominates_noise.right": [
+     "0.1000000000000000000000000000000000000000",
+     "0.1000000000000000000000000000000000000000"
+    ],
+    "birth.local.min_input_gap": [
+     "7.5000000000000000000000000000000000000000",
+     "7.5000000000000000000000000000000000000000"
+    ],
+    "birth.local.fast_duration": [
+     "0.9968846833537087981797962235962543328275",
+     "1.0031288292860353544977547656828687098227"
+    ],
+    "birth.local.slow_duration": [
+     "4.6452352074026501062856890366479981925362",
+     "5.5747469397652086123193604279693217104965"
+    ],
+    "birth.local.main_reopen_bound": [
+     "7.4778757690512439668171151936521904203190",
+     "7.4778757690512439668171151936521904203191"
+    ],
+    "birth.local.aux_cycle_ends_after_raw_pulse.left": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.aux_cycle_ends_after_raw_pulse.right": [
+     "1.2367503144390619417365325493920391250815",
+     "1.2367503144390619417365325493920391250816"
+    ],
+    "birth.local.aux_cycle_ends_before_next_input.left": [
+     "1.2683615804601408513458755173033378523672",
+     "1.2683615804601408513458755173033378523673"
+    ],
+    "birth.local.aux_cycle_ends_before_next_input.right": [
+     "7.5000000000000000000000000000000000000000",
+     "7.5000000000000000000000000000000000000000"
+    ],
+    "birth.local.learned_gain_below_all_caps.left": [
+     "1.8050267699719500699758446519816665792959",
+     "1.8248156507851708199568898773608659034272"
+    ],
+    "birth.local.learned_gain_below_all_caps.right": [
+     "3.9880000000000000000000000000000000000000",
+     "3.9880000000000000000000000000000000000000"
+    ],
+    "birth.local.mark_finishes_before_any_main_firing.left": [
+     "0.0500753349459539009799024731628936154494",
+     "0.0500753349459539009799024731628936154495"
+    ],
+    "birth.local.mark_finishes_before_any_main_firing.right": [
+     "0.5000000000000000000000000000000000000000",
+     "0.5000000000000000000000000000000000000000"
+    ],
+    "birth.local.main_fires_before_error_begins.left": [
+     "0.9000000000000000000000000000000000000000",
+     "0.9000000000000000000000000000000000000000"
+    ],
+    "birth.local.main_fires_before_error_begins.right": [
+     "1.0878949844941706856554995656806389142622",
+     "1.0878949844941706856554995656806389142623"
+    ],
+    "birth.local.error_finishes_during_main_fast.left": [
+     "1.2683615804601408513458755173033378523672",
+     "1.2683615804601408513458755173033378523673"
+    ],
+    "birth.local.error_finishes_during_main_fast.right": [
+     "1.4968846833537087981797962235962543328275",
+     "1.4968846833537087981797962235962543328276"
+    ],
+    "birth.local.main_reopens_after_raw_pulse.left": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.main_reopens_after_raw_pulse.right": [
+     "6.1421198907563589044654852602442525253638",
+     "6.1421198907563589044654852602442525253639"
+    ],
+    "birth.local.main_reopens_before_next_input.left": [
+     "7.4778757690512439668171151936521904203190",
+     "7.4778757690512439668171151936521904203191"
+    ],
+    "birth.local.main_reopens_before_next_input.right": [
+     "7.5000000000000000000000000000000000000000",
+     "7.5000000000000000000000000000000000000000"
+    ],
+    "birth.local.arbitrary_initial_silence_inside_section.left": [
+     "0.0000100000000000000000000000000000000000",
+     "0.0030100000000000000000000000000000000000"
+    ],
+    "birth.local.arbitrary_initial_silence_inside_section.right": [
+     "0.0300000000000000000000000000000000000000",
+     "0.0300000000000000000000000000000000000000"
+    ],
+    "birth.local.rest_noise_inside_section.left": [
+     "0E-40",
+     "0.0030000000000000000000000000000000000000"
+    ],
+    "birth.local.rest_noise_inside_section.right": [
+     "0.0300000000000000000000000000000000000000",
+     "0.0300000000000000000000000000000000000000"
+    ],
+    "birth.local.gain_before_0": [
+     "0.2999970000149999500001249997500004166660",
+     "0.3000030000150000500001250002500004166673"
+    ],
+    "birth.local.peak_bound_0": [
+     "0.3056666219827193383274134334287322912463",
+     "0.3071666219827193383274134334287322912464"
+    ],
+    "birth.local.carry_bound_0": [
+     "0.0079745603448061662493267467556901350871",
+     "0.0110327216565537492641570965085915293021"
+    ],
+    "birth.local.silent_0_no_first_crossing.left": [
+     "0.3056666219827193383274134334287322912463",
+     "0.3071666219827193383274134334287322912464"
+    ],
+    "birth.local.silent_0_no_first_crossing.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.silent_0_stays_below_threshold_after_raw_end.left": [
+     "0.1000000000000000000000000000000000000000",
+     "0.1030000000000000000000000000000000000000"
+    ],
+    "birth.local.silent_0_stays_below_threshold_after_raw_end.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.silent_0_excess_returns_inside_section.left": [
+     "0.0079745603448061662493267467556901350871",
+     "0.0110327216565537492641570965085915293021"
+    ],
+    "birth.local.silent_0_excess_returns_inside_section.right": [
+     "0.0300000000000000000000000000000000000000",
+     "0.0300000000000000000000000000000000000000"
+    ],
+    "birth.local.gain_before_1": [
+     "0.5456395267673675020629345300531911670942",
+     "0.5476335719602048549116003085335406752493"
+    ],
+    "birth.local.peak_bound_1": [
+     "0.4506665922199765332215251278178753198572",
+     "0.4521665922199765332215251278178753198573"
+    ],
+    "birth.local.carry_bound_1": [
+     "0.0135968193263790825156625871793203759712",
+     "0.0166549806381266655304929369322217701862"
+    ],
+    "birth.local.silent_1_no_first_crossing.left": [
+     "0.4506665922199765332215251278178753198572",
+     "0.4521665922199765332215251278178753198573"
+    ],
+    "birth.local.silent_1_no_first_crossing.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.silent_1_stays_below_threshold_after_raw_end.left": [
+     "0.1000000000000000000000000000000000000000",
+     "0.1030000000000000000000000000000000000000"
+    ],
+    "birth.local.silent_1_stays_below_threshold_after_raw_end.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.silent_1_excess_returns_inside_section.left": [
+     "0.0135968193263790825156625871793203759712",
+     "0.0166549806381266655304929369322217701862"
+    ],
+    "birth.local.silent_1_excess_returns_inside_section.right": [
+     "0.0300000000000000000000000000000000000000",
+     "0.0300000000000000000000000000000000000000"
+    ],
+    "birth.local.gain_before_2": [
+     "0.9924182347024488007411776537662326888572",
+     "0.9996651004253218888004009559373952742017"
+    ],
+    "birth.local.peak_bound_2": [
+     "0.7153534507886649601914251658112028508617",
+     "0.7168534507886649601914251658112028508618"
+    ],
+    "birth.local.carry_bound_2": [
+     "0.0238598425908470173008970082583038489768",
+     "0.0269180039025946003157273580112052431918"
+    ],
+    "birth.local.silent_2_no_first_crossing.left": [
+     "0.7153534507886649601914251658112028508617",
+     "0.7168534507886649601914251658112028508618"
+    ],
+    "birth.local.silent_2_no_first_crossing.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.silent_2_stays_below_threshold_after_raw_end.left": [
+     "0.1000000000000000000000000000000000000000",
+     "0.1030000000000000000000000000000000000000"
+    ],
+    "birth.local.silent_2_stays_below_threshold_after_raw_end.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.silent_2_excess_returns_inside_section.left": [
+     "0.0238598425908470173008970082583038489768",
+     "0.0269180039025946003157273580112052431918"
+    ],
+    "birth.local.silent_2_excess_returns_inside_section.right": [
+     "0.0300000000000000000000000000000000000000",
+     "0.0300000000000000000000000000000000000000"
+    ],
+    "birth.local.learned_start_excess": [
+     "0.0238598425908470173008970082583038489768",
+     "0.0269180039025946003157273580112052431918"
+    ],
+    "birth.local.learned_upper_at_0_5": [
+     "0.9594239111101532581785158124699926742816",
+     "0.9632320724219008411933461622228940684966"
+    ],
+    "birth.local.learned_lower_at_0_9": [
+     "1.0356126181972292106291344317908303844434",
+     "1.0399626181972292106291344317908303844435"
+    ],
+    "birth.local.learned_below_threshold_until_0.5.left": [
+     "0.9594239111101532581785158124699926742816",
+     "0.9632320724219008411933461622228940684966"
+    ],
+    "birth.local.learned_below_threshold_until_0.5.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.learned_above_threshold_by_0.9.left": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.learned_above_threshold_by_0.9.right": [
+     "1.0356126181972292106291344317908303844434",
+     "1.0399626181972292106291344317908303844435"
+    ],
+    "birth.local.probe_gap_exceeds_cycle.left": [
+     "7.4778757690512439668171151936521904203190",
+     "7.4778757690512439668171151936521904203191"
+    ],
+    "birth.local.probe_gap_exceeds_cycle.right": [
+     "20.0000000000000000000000000000000000000000",
+     "20.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.probe_aux_cycle_ends.left": [
+     "1.2683615804601408513458755173033378523672",
+     "1.2683615804601408513458755173033378523673"
+    ],
+    "birth.local.probe_aux_cycle_ends.right": [
+     "20.0000000000000000000000000000000000000000",
+     "20.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.work_bound": [
+     "249.6345308139547268836240769902730598561352",
+     "249.6345308139547268836240769902730598561353"
+    ],
+    "birth.local.reserve_gate_stays_open.left": [
+     "249.6345308139547268836240769902730598561352",
+     "249.6345308139547268836240769902730598561353"
+    ],
+    "birth.local.reserve_gate_stays_open.right": [
+     "500.0000000000000000000000000000000000000000",
+     "500.0000000000000000000000000000000000000000"
+    ],
+    "birth.local.A_gain_complete_by": [
+     "42.5683615804601408513458755173033378523672",
+     "42.5683615804601408513458755173033378523673"
+    ],
+    "birth.local.A_first_emission": [
+     "49.3000000000000000000000000000000000000000",
+     "50.2000000000000000000000000000000000000000"
+    ],
+    "birth.local.A_last_return_by": [
+     "128.7778757690512439668171151936521904203190",
+     "128.7778757690512439668171151936521904203191"
+    ],
+    "birth.local.B_last_return_by": [
+     "127.4778757690512439668171151936521904203190",
+     "127.4778757690512439668171151936521904203191"
+    ],
+    "birth.local.A_learning_complete_before_first_response.left": [
+     "42.5683615804601408513458755173033378523672",
+     "42.5683615804601408513458755173033378523673"
+    ],
+    "birth.local.A_learning_complete_before_first_response.right": [
+     "49.3000000000000000000000000000000000000000",
+     "49.3000000000000000000000000000000000000000"
+    ],
+    "birth.local.A_quiescent_before_measurement.left": [
+     "128.7778757690512439668171151936521904203190",
+     "128.7778757690512439668171151936521904203191"
+    ],
+    "birth.local.A_quiescent_before_measurement.right": [
+     "139.9000000000000000000000000000000000000000",
+     "139.9000000000000000000000000000000000000000"
+    ],
+    "birth.local.B_quiescent_before_measurement.left": [
+     "127.4778757690512439668171151936521904203190",
+     "127.4778757690512439668171151936521904203191"
+    ],
+    "birth.local.B_quiescent_before_measurement.right": [
+     "139.9000000000000000000000000000000000000000",
+     "139.9000000000000000000000000000000000000000"
+    ],
+    "birth.birth_slow_decay_dominates_noise.left": [
+     "0E-40",
+     "0.0187523440430053756719589948743592949119"
+    ],
+    "birth.birth_slow_decay_dominates_noise.right": [
+     "0.1000000000000000000000000000000000000000",
+     "0.1000000000000000000000000000000000000000"
+    ],
+    "birth.protected_arrival_after_FAST.left": [
+     "1.9031288292860353544977547656828687098226",
+     "1.9031288292860353544977547656828687098227"
+    ],
+    "birth.protected_arrival_after_FAST.right": [
+     "8.0000000000000000000000000000000000000000",
+     "8.0000000000000000000000000000000000000000"
+    ],
+    "birth.entire_protected_MARK_and_ERROR_before_reopen.left": [
+     "0.1000000000000000000000000000000000000000",
+     "0.1000000000000000000000000000000000000000"
+    ],
+    "birth.entire_protected_MARK_and_ERROR_before_reopen.right": [
+     "0.1104973568207115693315482893189950987255",
+     "0.1182510369173970501132030920621170593966"
+    ],
+    "birth.protected_input_reopens_by_deadline.left": [
+     "0.0821762778850960894769838405512142077558",
+     "0.0899459632898517566403668124501420370779"
+    ],
+    "birth.protected_input_reopens_by_deadline.right": [
+     "0.1000000000000000000000000000000000000000",
+     "0.1000000000000000000000000000000000000000"
+    ],
+    "birth.protected_aux_cycle_before_deadline.left": [
+     "1.2683615804601408513458755173033378523672",
+     "1.2683615804601408513458755173033378523673"
+    ],
+    "birth.protected_aux_cycle_before_deadline.right": [
+     "3.5000000000000000000000000000000000000000",
+     "3.5000000000000000000000000000000000000000"
+    ],
+    "birth.protected_return_before_next_input.left": [
+     "3.5000000000000000000000000000000000000000",
+     "3.5000000000000000000000000000000000000000"
+    ],
+    "birth.protected_return_before_next_input.right": [
+     "8.0000000000000000000000000000000000000000",
+     "8.0000000000000000000000000000000000000000"
+    ],
+    "birth.recovery_cap_not_reached.left": [
+     "0.1799749434987905345742650731451278297884",
+     "0.1800250565012094654257349268548721702116"
+    ],
+    "birth.recovery_cap_not_reached.right": [
+     "1.1000000000000000000000000000000000000000",
+     "1.1000000000000000000000000000000000000000"
+    ],
+    "birth.unused_port1_birth_gain_below_caps.left": [
+     "1.1999880000599998000004999990000016666642",
+     "1.2000120000600002000005000010000016666691"
+    ],
+    "birth.unused_port1_birth_gain_below_caps.right": [
+     "3.9880000000000000000000000000000000000000",
+     "3.9880000000000000000000000000000000000000"
+    ],
+    "birth.warmup_returns_before_entry_cut.left": [
+     "127.4778757690512439668171151936521904203190",
+     "127.4778757690512439668171151936521904203191"
+    ],
+    "birth.warmup_returns_before_entry_cut.right": [
+     "159.9000000000000000000000000000000000000000",
+     "159.9000000000000000000000000000000000000000"
+    ],
+    "birth.entry_charge_radius_inside_local_section.left": [
+     "0.0000100000000000000000000000000000000000",
+     "0.0030100000000000000000000000000000000000"
+    ],
+    "birth.entry_charge_radius_inside_local_section.right": [
+     "0.0300000000000000000000000000000000000000",
+     "0.0300000000000000000000000000000000000000"
+    ],
+    "birth.entry_aux_band_below_threshold.left": [
+     "0.0250100000000000000000000000000000000000",
+     "0.0280100000000000000000000000000000000000"
+    ],
+    "birth.entry_aux_band_below_threshold.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "birth.birth_recovery": [
+     "0.0799900000000000000000000000000000000000",
+     "0.0800100000000000000000000000000000000000"
+    ],
+    "birth.protected_MARK_dose": [
+     "0.0999849434987905345742650731451278297884",
+     "0.1000150565012094654257349268548721702116"
+    ],
+    "birth.entry_recovery": [
+     "0.1799749434987905345742650731451278297884",
+     "0.1800250565012094654257349268548721702116"
+    ],
+    "birth.entry_charge_radius": [
+     "0.0000100000000000000000000000000000000000",
+     "0.0030100000000000000000000000000000000000"
+    ],
+    "birth.entry_q": [
+     "0.0969900000000000000000000000000000000000",
+     "0.1030100000000000000000000000000000000000"
+    ],
+    "birth.entry_m": [
+     "0.0219900000000000000000000000000000000000",
+     "0.0280100000000000000000000000000000000000"
+    ],
+    "birth.q_lower_at_protected_arrival": [
+     "0.1409781447339674078461307921123981340980",
+     "0.1485834363465263609088353060913030427763"
+    ],
+    "birth.q_lower_through_protected_cycle": [
+     "0.1104973568207115693315482893189950987255",
+     "0.1182510369173970501132030920621170593966"
+    ],
+    "birth.q_upper_at_reopen_deadline": [
+     "0.0821762778850960894769838405512142077558",
+     "0.0899459632898517566403668124501420370779"
+    ],
+    "birth.protected_reopen_deadline": [
+     "3.5000000000000000000000000000000000000000",
+     "3.5000000000000000000000000000000000000000"
+    ],
+    "birth.last_warmup_return": [
+     "127.4778757690512439668171151936521904203190",
+     "127.4778757690512439668171151936521904203191"
+    ],
+    "birth.no_noise_positive_residual.left": [
+     "0.0000100000000000000000000000000000000000",
+     "0.0000100000000000000000000000000000000000"
+    ],
+    "birth.no_noise_positive_residual.right": [
+     "0.1672981987480121658249516336462404357628",
+     "0.1672981987480121658249516336462404357629"
+    ],
+    "latency.nu": [
+     "0E-40",
+     "0.0015000000000000000000000000000000000000"
+    ],
+    "latency.alpha": [
+     "0E-40",
+     "0.0500000000000000000000000000000000000000"
+    ],
+    "latency.latency_radius": [
+     "0.1102300000000000000000000000000000000000",
+     "0.1102300000000000000000000000000000000000"
+    ],
+    "latency.reference_lower": [
+     "0.6446630000000000000000000000000000000000",
+     "0.6446630000000000000000000000000000000000"
+    ],
+    "latency.reference_upper": [
+     "0.6619680000000000000000000000000000000000",
+     "0.6619680000000000000000000000000000000000"
+    ],
+    "latency.learned_gain": [
+     "1.8050267699719500699758446519816665792959",
+     "1.8248156507851708199568898773608659034272"
+    ],
+    "latency.reference_before_all_roots.left": [
+     "0.9999995444704735005368245311125114762243",
+     "0.9999995444704735005368245311125114762244"
+    ],
+    "latency.reference_before_all_roots.right": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "latency.reference_after_all_roots.left": [
+     "1.0000000000000000000000000000000000000000",
+     "1.0000000000000000000000000000000000000000"
+    ],
+    "latency.reference_after_all_roots.right": [
+     "1.0000002369814482554204869520318893936712",
+     "1.0000002369814482554204869520318893936713"
+    ],
+    "latency.response_strictly_concave_through_raw_window.left": [
+     "2.4261226388505336944151981399647218137676",
+     "2.4261226388505336944151981399647218137677"
+    ],
+    "latency.response_strictly_concave_through_raw_window.right": [
+     "7.6872482226912227946736404212266395476888",
+     "7.6872482226912227946736404212266395476889"
+    ],
+    "latency.positive_early_time.left": [
+     "0.1102300000000000000000000000000000000000",
+     "0.1102300000000000000000000000000000000000"
+    ],
+    "latency.positive_early_time.right": [
+     "0.6446630000000000000000000000000000000000",
+     "0.6446630000000000000000000000000000000000"
+    ],
+    "latency.late_time_before_local_ERROR_gate.left": [
+     "0.7721980000000000000000000000000000000000",
+     "0.7721980000000000000000000000000000000000"
+    ],
+    "latency.late_time_before_local_ERROR_gate.right": [
+     "0.9000000000000000000000000000000000000000",
+     "0.9000000000000000000000000000000000000000"
+    ],
+    "latency.positive_minimum_slope.left": [
+     "0E-40",
+     "0E-40"
+    ],
+    "latency.positive_minimum_slope.right": [
+     "0.3823474224404866023679601664372782050878",
+     "0.3823474224404866023679601664372782050879"
+    ],
+    "latency.late_reference_separation_dominates_perturbation.left": [
+     "0E-40",
+     "0.0510752009456653246602944868331798234432"
+    ],
+    "latency.late_reference_separation_dominates_perturbation.right": [
+     "0.0510769268007542769141335332735026144578",
+     "0.0510769268007542769141335332735026144579"
+    ],
+    "latency.early_reference_separation_dominates_perturbation.left": [
+     "0E-40",
+     "0.0448891900924414709862738012747082760281"
+    ],
+    "latency.early_reference_separation_dominates_perturbation.right": [
+     "0.0713016289136454320738712420414279683139",
+     "0.0713016289136454320738712420414279683140"
+    ],
+    "latency.minimum_slope": [
+     "0.3823474224404866023679601664372782050878",
+     "0.3823474224404866023679601664372782050879"
+    ],
+    "latency.late_separation": [
+     "0.0510769268007542769141335332735026144578",
+     "0.0510769268007542769141335332735026144579"
+    ],
+    "latency.early_separation": [
+     "0.0713016289136454320738712420414279683139",
+     "0.0713016289136454320738712420414279683140"
+    ],
+    "latency.late_perturbation": [
+     "0E-40",
+     "0.0510752009456653246602944868331798234432"
+    ],
+    "latency.early_perturbation": [
+     "0E-40",
+     "0.0448891900924414709862738012747082760281"
+    ]
+   },
+   "obligations": [
+    {
+     "name": "birth.local.h_increases_through_raw_window",
+     "relation": "strict_lt",
+     "left": "birth.local.h_increases_through_raw_window.left",
+     "right": "birth.local.h_increases_through_raw_window.right"
+    },
+    {
+     "name": "birth.local.aux_rest_below_threshold",
+     "relation": "strict_lt",
+     "left": "birth.local.aux_rest_below_threshold.left",
+     "right": "birth.local.aux_rest_below_threshold.right"
+    },
+    {
+     "name": "birth.local.aux_below_threshold_until_0.015",
+     "relation": "strict_lt",
+     "left": "birth.local.aux_below_threshold_until_0.015.left",
+     "right": "birth.local.aux_below_threshold_until_0.015.right"
+    },
+    {
+     "name": "birth.local.aux_above_threshold_by_0.03",
+     "relation": "strict_lt",
+     "left": "birth.local.aux_above_threshold_by_0.03.left",
+     "right": "birth.local.aux_above_threshold_by_0.03.right"
+    },
+    {
+     "name": "birth.local.decay_1_0.8_dominates_noise",
+     "relation": "strict_lt",
+     "left": "birth.local.decay_1_0.8_dominates_noise.left",
+     "right": "birth.local.decay_1_0.8_dominates_noise.right"
+    },
+    {
+     "name": "birth.local.decay_0.8_0.1_dominates_noise",
+     "relation": "strict_lt",
+     "left": "birth.local.decay_0.8_0.1_dominates_noise.left",
+     "right": "birth.local.decay_0.8_0.1_dominates_noise.right"
+    },
+    {
+     "name": "birth.local.decay_0.1_0.025_dominates_noise",
+     "relation": "strict_lt",
+     "left": "birth.local.decay_0.1_0.025_dominates_noise.left",
+     "right": "birth.local.decay_0.1_0.025_dominates_noise.right"
+    },
+    {
+     "name": "birth.local.decay_1_0.25_dominates_noise",
+     "relation": "strict_lt",
+     "left": "birth.local.decay_1_0.25_dominates_noise.left",
+     "right": "birth.local.decay_1_0.25_dominates_noise.right"
+    },
+    {
+     "name": "birth.local.decay_0.25_0.1_dominates_noise",
+     "relation": "strict_lt",
+     "left": "birth.local.decay_0.25_0.1_dominates_noise.left",
+     "right": "birth.local.decay_0.25_0.1_dominates_noise.right"
+    },
+    {
+     "name": "birth.local.aux_cycle_ends_after_raw_pulse",
+     "relation": "strict_lt",
+     "left": "birth.local.aux_cycle_ends_after_raw_pulse.left",
+     "right": "birth.local.aux_cycle_ends_after_raw_pulse.right"
+    },
+    {
+     "name": "birth.local.aux_cycle_ends_before_next_input",
+     "relation": "strict_lt",
+     "left": "birth.local.aux_cycle_ends_before_next_input.left",
+     "right": "birth.local.aux_cycle_ends_before_next_input.right"
+    },
+    {
+     "name": "birth.local.learned_gain_below_all_caps",
+     "relation": "strict_lt",
+     "left": "birth.local.learned_gain_below_all_caps.left",
+     "right": "birth.local.learned_gain_below_all_caps.right"
+    },
+    {
+     "name": "birth.local.mark_finishes_before_any_main_firing",
+     "relation": "strict_lt",
+     "left": "birth.local.mark_finishes_before_any_main_firing.left",
+     "right": "birth.local.mark_finishes_before_any_main_firing.right"
+    },
+    {
+     "name": "birth.local.main_fires_before_error_begins",
+     "relation": "strict_lt",
+     "left": "birth.local.main_fires_before_error_begins.left",
+     "right": "birth.local.main_fires_before_error_begins.right"
+    },
+    {
+     "name": "birth.local.error_finishes_during_main_fast",
+     "relation": "strict_lt",
+     "left": "birth.local.error_finishes_during_main_fast.left",
+     "right": "birth.local.error_finishes_during_main_fast.right"
+    },
+    {
+     "name": "birth.local.main_reopens_after_raw_pulse",
+     "relation": "strict_lt",
+     "left": "birth.local.main_reopens_after_raw_pulse.left",
+     "right": "birth.local.main_reopens_after_raw_pulse.right"
+    },
+    {
+     "name": "birth.local.main_reopens_before_next_input",
+     "relation": "strict_lt",
+     "left": "birth.local.main_reopens_before_next_input.left",
+     "right": "birth.local.main_reopens_before_next_input.right"
+    },
+    {
+     "name": "birth.local.arbitrary_initial_silence_inside_section",
+     "relation": "strict_lt",
+     "left": "birth.local.arbitrary_initial_silence_inside_section.left",
+     "right": "birth.local.arbitrary_initial_silence_inside_section.right"
+    },
+    {
+     "name": "birth.local.rest_noise_inside_section",
+     "relation": "strict_lt",
+     "left": "birth.local.rest_noise_inside_section.left",
+     "right": "birth.local.rest_noise_inside_section.right"
+    },
+    {
+     "name": "birth.local.silent_0_no_first_crossing",
+     "relation": "strict_lt",
+     "left": "birth.local.silent_0_no_first_crossing.left",
+     "right": "birth.local.silent_0_no_first_crossing.right"
+    },
+    {
+     "name": "birth.local.silent_0_stays_below_threshold_after_raw_end",
+     "relation": "strict_lt",
+     "left": "birth.local.silent_0_stays_below_threshold_after_raw_end.left",
+     "right": "birth.local.silent_0_stays_below_threshold_after_raw_end.right"
+    },
+    {
+     "name": "birth.local.silent_0_excess_returns_inside_section",
+     "relation": "strict_lt",
+     "left": "birth.local.silent_0_excess_returns_inside_section.left",
+     "right": "birth.local.silent_0_excess_returns_inside_section.right"
+    },
+    {
+     "name": "birth.local.silent_1_no_first_crossing",
+     "relation": "strict_lt",
+     "left": "birth.local.silent_1_no_first_crossing.left",
+     "right": "birth.local.silent_1_no_first_crossing.right"
+    },
+    {
+     "name": "birth.local.silent_1_stays_below_threshold_after_raw_end",
+     "relation": "strict_lt",
+     "left": "birth.local.silent_1_stays_below_threshold_after_raw_end.left",
+     "right": "birth.local.silent_1_stays_below_threshold_after_raw_end.right"
+    },
+    {
+     "name": "birth.local.silent_1_excess_returns_inside_section",
+     "relation": "strict_lt",
+     "left": "birth.local.silent_1_excess_returns_inside_section.left",
+     "right": "birth.local.silent_1_excess_returns_inside_section.right"
+    },
+    {
+     "name": "birth.local.silent_2_no_first_crossing",
+     "relation": "strict_lt",
+     "left": "birth.local.silent_2_no_first_crossing.left",
+     "right": "birth.local.silent_2_no_first_crossing.right"
+    },
+    {
+     "name": "birth.local.silent_2_stays_below_threshold_after_raw_end",
+     "relation": "strict_lt",
+     "left": "birth.local.silent_2_stays_below_threshold_after_raw_end.left",
+     "right": "birth.local.silent_2_stays_below_threshold_after_raw_end.right"
+    },
+    {
+     "name": "birth.local.silent_2_excess_returns_inside_section",
+     "relation": "strict_lt",
+     "left": "birth.local.silent_2_excess_returns_inside_section.left",
+     "right": "birth.local.silent_2_excess_returns_inside_section.right"
+    },
+    {
+     "name": "birth.local.learned_below_threshold_until_0.5",
+     "relation": "strict_lt",
+     "left": "birth.local.learned_below_threshold_until_0.5.left",
+     "right": "birth.local.learned_below_threshold_until_0.5.right"
+    },
+    {
+     "name": "birth.local.learned_above_threshold_by_0.9",
+     "relation": "strict_lt",
+     "left": "birth.local.learned_above_threshold_by_0.9.left",
+     "right": "birth.local.learned_above_threshold_by_0.9.right"
+    },
+    {
+     "name": "birth.local.probe_gap_exceeds_cycle",
+     "relation": "strict_lt",
+     "left": "birth.local.probe_gap_exceeds_cycle.left",
+     "right": "birth.local.probe_gap_exceeds_cycle.right"
+    },
+    {
+     "name": "birth.local.probe_aux_cycle_ends",
+     "relation": "strict_lt",
+     "left": "birth.local.probe_aux_cycle_ends.left",
+     "right": "birth.local.probe_aux_cycle_ends.right"
+    },
+    {
+     "name": "birth.local.reserve_gate_stays_open",
+     "relation": "strict_lt",
+     "left": "birth.local.reserve_gate_stays_open.left",
+     "right": "birth.local.reserve_gate_stays_open.right"
+    },
+    {
+     "name": "birth.local.A_learning_complete_before_first_response",
+     "relation": "strict_lt",
+     "left": "birth.local.A_learning_complete_before_first_response.left",
+     "right": "birth.local.A_learning_complete_before_first_response.right"
+    },
+    {
+     "name": "birth.local.A_quiescent_before_measurement",
+     "relation": "strict_lt",
+     "left": "birth.local.A_quiescent_before_measurement.left",
+     "right": "birth.local.A_quiescent_before_measurement.right"
+    },
+    {
+     "name": "birth.local.B_quiescent_before_measurement",
+     "relation": "strict_lt",
+     "left": "birth.local.B_quiescent_before_measurement.left",
+     "right": "birth.local.B_quiescent_before_measurement.right"
+    },
+    {
+     "name": "birth.birth_slow_decay_dominates_noise",
+     "relation": "strict_lt",
+     "left": "birth.birth_slow_decay_dominates_noise.left",
+     "right": "birth.birth_slow_decay_dominates_noise.right"
+    },
+    {
+     "name": "birth.protected_arrival_after_FAST",
+     "relation": "strict_lt",
+     "left": "birth.protected_arrival_after_FAST.left",
+     "right": "birth.protected_arrival_after_FAST.right"
+    },
+    {
+     "name": "birth.entire_protected_MARK_and_ERROR_before_reopen",
+     "relation": "strict_lt",
+     "left": "birth.entire_protected_MARK_and_ERROR_before_reopen.left",
+     "right": "birth.entire_protected_MARK_and_ERROR_before_reopen.right"
+    },
+    {
+     "name": "birth.protected_input_reopens_by_deadline",
+     "relation": "strict_lt",
+     "left": "birth.protected_input_reopens_by_deadline.left",
+     "right": "birth.protected_input_reopens_by_deadline.right"
+    },
+    {
+     "name": "birth.protected_aux_cycle_before_deadline",
+     "relation": "strict_lt",
+     "left": "birth.protected_aux_cycle_before_deadline.left",
+     "right": "birth.protected_aux_cycle_before_deadline.right"
+    },
+    {
+     "name": "birth.protected_return_before_next_input",
+     "relation": "strict_lt",
+     "left": "birth.protected_return_before_next_input.left",
+     "right": "birth.protected_return_before_next_input.right"
+    },
+    {
+     "name": "birth.recovery_cap_not_reached",
+     "relation": "strict_lt",
+     "left": "birth.recovery_cap_not_reached.left",
+     "right": "birth.recovery_cap_not_reached.right"
+    },
+    {
+     "name": "birth.unused_port1_birth_gain_below_caps",
+     "relation": "strict_lt",
+     "left": "birth.unused_port1_birth_gain_below_caps.left",
+     "right": "birth.unused_port1_birth_gain_below_caps.right"
+    },
+    {
+     "name": "birth.warmup_returns_before_entry_cut",
+     "relation": "strict_lt",
+     "left": "birth.warmup_returns_before_entry_cut.left",
+     "right": "birth.warmup_returns_before_entry_cut.right"
+    },
+    {
+     "name": "birth.entry_charge_radius_inside_local_section",
+     "relation": "strict_lt",
+     "left": "birth.entry_charge_radius_inside_local_section.left",
+     "right": "birth.entry_charge_radius_inside_local_section.right"
+    },
+    {
+     "name": "birth.entry_aux_band_below_threshold",
+     "relation": "strict_lt",
+     "left": "birth.entry_aux_band_below_threshold.left",
+     "right": "birth.entry_aux_band_below_threshold.right"
+    },
+    {
+     "name": "birth.no_noise_positive_residual",
+     "relation": "strict_lt",
+     "left": "birth.no_noise_positive_residual.left",
+     "right": "birth.no_noise_positive_residual.right"
+    },
+    {
+     "name": "latency.reference_before_all_roots",
+     "relation": "strict_lt",
+     "left": "latency.reference_before_all_roots.left",
+     "right": "latency.reference_before_all_roots.right"
+    },
+    {
+     "name": "latency.reference_after_all_roots",
+     "relation": "strict_lt",
+     "left": "latency.reference_after_all_roots.left",
+     "right": "latency.reference_after_all_roots.right"
+    },
+    {
+     "name": "latency.response_strictly_concave_through_raw_window",
+     "relation": "strict_lt",
+     "left": "latency.response_strictly_concave_through_raw_window.left",
+     "right": "latency.response_strictly_concave_through_raw_window.right"
+    },
+    {
+     "name": "latency.positive_early_time",
+     "relation": "strict_lt",
+     "left": "latency.positive_early_time.left",
+     "right": "latency.positive_early_time.right"
+    },
+    {
+     "name": "latency.late_time_before_local_ERROR_gate",
+     "relation": "strict_lt",
+     "left": "latency.late_time_before_local_ERROR_gate.left",
+     "right": "latency.late_time_before_local_ERROR_gate.right"
+    },
+    {
+     "name": "latency.positive_minimum_slope",
+     "relation": "strict_lt",
+     "left": "latency.positive_minimum_slope.left",
+     "right": "latency.positive_minimum_slope.right"
+    },
+    {
+     "name": "latency.late_reference_separation_dominates_perturbation",
+     "relation": "strict_lt",
+     "left": "latency.late_reference_separation_dominates_perturbation.left",
+     "right": "latency.late_reference_separation_dominates_perturbation.right"
+    },
+    {
+     "name": "latency.early_reference_separation_dominates_perturbation",
+     "relation": "strict_lt",
+     "left": "latency.early_reference_separation_dominates_perturbation.left",
+     "right": "latency.early_reference_separation_dominates_perturbation.right"
+    }
+   ]
+  }
+ ]
+}
