@@ -14,7 +14,10 @@ those entire engines are present in this focused checkout.
 This repository adds the reciprocal prototype, teaching-choice and stopping
 experiments, their written arguments and local interval certificates. The
 READY birth-family/pulses-only entry proof covers the prefix through time 459.9.
-It does not certify settings-copy ordering, the later open reciprocal phase,
+The subsequent C->B->A cadence proof composes that authenticated result with C's
+birth and the later pulse blocks through 789.9, on 45-parameter physical boxes.
+It includes a retained period-4 probe and a written route-cut argument.
+These results do not certify settings-copy ordering, the open reciprocal phase,
 adaptive pedagogy, silicon behavior or the full original A22 network at ±10%.
 
 Recorded numerical data are supplied in the pinned English prototype ZIP.
