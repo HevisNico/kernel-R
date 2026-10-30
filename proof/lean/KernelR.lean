@@ -22,3 +22,7 @@ import KernelR.Certificates.Cadence003
 import KernelR.Certificates.Cadence010
 import KernelR.CadenceRecorded.Cadence003
 import KernelR.CadenceRecorded.Cadence010
+import KernelR.Chain.Packets
+import KernelR.Chain.Induction
+import KernelR.Chain.Consequences
+import KernelR.Chain.Algebra
