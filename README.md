@@ -12,6 +12,7 @@ A22 network engines and historical proof archive stay in the
 - [R kernel definition](kernel/README.md) and [original model](model/full_model_reference.md).
 - [Birth-to-feedback proof](proof/reciprocal_entry/THEOREM.md): pulses-only initialization through time 459.9.
 - [Prepared-section theorem](proof/reciprocal_learning/THEOREM.md): the local A-learns-from-B effect.
+- [Lean proof project](proof/lean/README.md): checked mathematical lemmas, exact certificate endpoint obligations and finite adaptive-policy replay, with explicit coverage limits.
 - [Reciprocal prototype](experiments/reciprocal/README.md): cells remain alive and learn back from their students.
 - [Learned teaching choice](experiments/reciprocal/pedagogy/README.md) and [within-lesson adaptation](experiments/reciprocal/adaptive/README.md).
 - [Complete English prototype ZIP](downloads/R_Reciprocal_Prototype.zip): runnable code, recordings, reports and proofs in titled folders.
@@ -41,6 +42,13 @@ This ±10% prefix result does not certify the older entire A22 network at ±10%,
 the settings-copy variant, later open recurrence or adaptive pedagogy. The new
 theorems combine written hybrid-flow arguments with checked interval obligations;
 they are not complete Lean formalizations or independently peer-reviewed mathematics.
+
+The [Lean project](proof/lean/README.md) now formalizes selected parts: charge
+balance and dose identities, mode-local decay and recovery, calendar arithmetic,
+abstract cycle counts, copying and stopping-policy properties. It also checks
+180 exact rational endpoint obligations from the published certificates and
+replays the recorded adaptive scores. Proving that the complete hybrid execution
+satisfies those abstractions and enclosures remains separate work.
 
 ## Verify the proofs
 

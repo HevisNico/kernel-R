@@ -1,0 +1,40 @@
+name: Kernel R Lean proofs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      LEAN_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Source identities and generated evidence
+        working-directory: proof/lean
+        run: |
+          python scripts/check_sources.py
+          python scripts/generate_evidence.py --check
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: proof/lean
+          build: 'true'
+          test: 'false'
+          lint: 'false'
+          use-mathlib-cache: 'true'
+      - name: Audit every KernelR and A22 theorem
+        working-directory: proof/lean
+        run: lake env lean Audit.lean
+      - name: Reject a corrupted endpoint obligation
+        working-directory: proof/lean
+        run: python scripts/check_negative.py
