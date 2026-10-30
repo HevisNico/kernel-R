@@ -1,113 +1,116 @@
-# Physical execution semantics and exact ledgers
+# Physical execution semantics and analytic refinement
 
-The execution-to-abstraction theorem remains open. This change reconstructs the
-missing drafts as a checked foundation; it does not claim the learning, cadence,
-or arbitrary-chain results are now complete Lean theorems of the physical model.
+The complete protocol-to-abstraction theorem remains open. The modules below
+prove physical flow and invariant results needed for that theorem. They do not
+yet derive the four pulse cases or the training calendars from complete executions.
 
-## Definitions
+## Physical definitions
 
-`KernelR/Hybrid.lean` defines a pulses-only finite network. Its state contains
-all q/m/z/b/E coordinates, the main and three auxiliary modes, raw-current
-origins and pending delivery tokens. Physical parameters are independent inputs
-per cell and port. `PhysicalBox` states the independent ±0.3% or ±10%
-fabrication family; `BirthState` states the common time-zero physical birth
-family, with an explicit separate obligation to fix the pending source queue.
-`field` implements the original equations, including the
-complete work expression, energy gates and gain/recovery cap gates. Cap gates
-are represented by the discontinuous integral ODE, not by a rounded dose.
+`KernelR/Hybrid.lean` defines a pulses-only finite network with all q/m/z/b/E
+coordinates, main and three auxiliary modes, raw-current origins and pending
+delivery tokens. Parameters are independent per cell and port. `PhysicalBox`
+states the ±0.3% or ±10% fabrication family. `BirthState` states the common
+zero-time birth family, including allowed residual ERROR phases. Its pending
+queue must separately be fixed to the supplied source protocol.
 
-A positive-duration `Flow` supplies a continuous path satisfying integral ODEs
-on every prefix. Its discrete state is fixed. Strict pre-guard inequalities
-prevent advancing past a main or auxiliary section; delivery urgency and raw
-support prevent advancing beyond a queued arrival or raw-current end.
+`field` contains the actual equations, complete work expression, energy gates,
+and gain/recovery cap gates. A positive-duration `Flow` supplies continuous
+coordinates satisfying integral ODEs on every prefix, with fixed discrete state.
+Strict pre-guard conditions prevent advancing through a mode's first section.
+Raw support and pending-delivery urgency prevent passing current ends or arrivals.
 
 `Jump` permits only guarded section changes, delivery of an actual queued token,
-or the end of an active raw current. All continuous coordinates and time are
-preserved. A firing appends the supplied router's deliveries. An arrival removes
-one specified occurrence from the pending list and requires a free receiving
-port. The canonical current has half-open support, independently of main mode.
-Consequently reopening admission retains any remaining input tail.
+or the end of an active raw current. Jumps preserve physical coordinates and time.
+A fire appends routed tokens. An arrival removes one actual occurrence and requires
+a free port. Canonical currents have half-open support, independently of main mode;
+reopening admission retains any unfinished raw tail.
 
-External source pulses must be present in the initial pending queue. There is
-no external token-insertion event. Delayed routing is supplied by `Router`;
-`CausalRouter` expresses causality but is not required by generic algebraic
-ledger theorems. A protocol theorem must require it and prove the routing and
-port-separation obligations. The current semantics has no staged-birth or
-settings-copy operation.
+Sources must be in the initial pending queue. `CausalRouter` states causality of
+the supplied wiring; generic ledger identities do not require that extra premise.
+There is no staged-birth or settings-copy operation. Those protocols need a
+separate semantic extension or a proved reduction.
 
-An `Execution` is a finite sequence of flows and zero-time jumps. There is no
-total event priority. The checked `simultaneous_fire_mark_orders` theorem
-constructs both legal orders for simultaneous main-fire and auxiliary-MARK
-guards. This example is not a proof of global confluence or of coverage of all
-simultaneous events in the simulator or interval checker.
+`Execution` retains arbitrary legal zero-time interleavings without a total event
+priority. `simultaneous_fire_mark_orders` constructs both compatible orders for
+simultaneous main-fire and auxiliary-MARK guards. It does not establish global
+confluence or simulator coverage of all simultaneous events.
 
-`CompleteThrough` requires reaching the horizon and discharging all enabled
-jumps and due deliveries, including those exactly at the horizon. This is a
-definition, not a general progress theorem. A complete, positive-duration silent
-execution is constructed for any finite collection of resting cells. This
-nonempty example does not establish existence for the training protocols.
+`CompleteThrough` requires reaching the horizon and discharging enabled jumps
+and due deliveries, including events exactly at the horizon. `Flow.prefix`
+constructs a valid shorter prefix of an existing flow; it does not construct a
+future continuation. A complete positive-duration silent execution is exhibited,
+but existence for the training protocols remains unproved.
 
-## Established implications
+## Checked implications
 
-`KernelR/Refinement.lean` derives from actual flow equations and jump rules:
+| Module | Consequence proved from the operational equations | Boundary |
+|---|---|---|
+| `Refinement` | Exact per-port ERROR and MARK integrals; telescoped gain/recovery balances; recovery equals the sum of all MARK contributions; queue conservation; actual emissions | Quantifies over finite admissible executions |
+| `HybridFlow` | Scalar ODE uniqueness derived from integral equations; FAST and protected-auxiliary exponential solutions; SLOW uses the integral of actual varying recovery | Observed mode spans must still be selected from the execution |
+| `HybridFlow` | Exponential solutions compose across legal zero-time interleavings; observed jumps supply phase endpoints; FAST duration is 1; MARK/SILENT/ERROR durations use actual rates; SLOW returns at accumulated recovery log(5/2) | Does not establish the supplied protocol's ordering of these phases |
+| `HybridFlow` | A FAST flow cannot pass its first physical exit section; zero-input READY relaxation and gate-implied constant gains/recovery | No general extension/progress theorem |
+| `HybridReady` | Main and auxiliary READY responses to one active canonical input, including residual charge and attenuation from the real pulse origin; first threshold contacts agree with the analytic response | Main input gain is frozen by local absence of ERROR; variable-gain overlap and multi-input cases remain separate |
+| `HybridInvariants` | Integral cap barriers; gains and recovery cannot overshoot their caps, and are nondecreasing in the fabrication family; birth-state memory bounds | Strict cap inactivity during a required complete dose is not automatic |
+| `HybridBounds` | Coarse bounds on actual real log/exp expressions and independent fabrication parameters | Does not certify every stored certificate enclosure |
+| `HybridRegion` | Main charge upper bound and mode-dependent auxiliary upper bounds, including m<=0.1 in ERROR, preserved from birth across flows and jumps | Port-separation/protocol-calendar results are not asserted |
+| `HybridWork` | Actual work is nonnegative and <=500, derived before assuming positive reserve; reserve stays in [50,100] for every finite admissible execution from the declared family, and throughout each reachable flow | Does not supply existence of those protocol executions |
+| `HybridWork` | Energy exposure in ERROR/MARK lemmas follows from reachability and the reserve invariant | Required main/auxiliary chronology and strict cap inactivity remain premises |
 
-- Final log-gain equals initial log-gain plus the integral of actual ERROR
-  actuation, telescoped over every finite execution.
-- Final recovery equals initial recovery plus the integral of the sum of all
-  ports' actual MARK actuations, also telescoped over executions.
-- Final queue length plus deliveries equals initial queue length plus issued
-  tokens. Each arrival rule additionally consumes an actual list occurrence.
-- Time is nondecreasing; jumps preserve every continuous coordinate and add no
-  actuation. Emission records are produced only by actual fire jumps.
-- Gain-cap, recovery-cap and energy gate closure gives zero corresponding
-  instantaneous actuation.
-- On an explicitly open ERROR span, the integrated dose is exactly
-  `8 * (m_start - m_end)`, including across legal jump interleavings. Full
-  endpoints imply `3/5`; partial endpoints remain real-valued.
-- On an explicitly open MARK span, including legal jump interleavings, each port's dose is
-  `(m_start - m_end)/2`; full endpoints imply `1/10`. Equating that port's dose
-  with total recovery requires absence of other-port contributions. The full
-  execution ledger retains every port's MARK integral, and total recovery is
-  proved equal to their sum.
-- A canonical input remains positive until its actual raw end; SLOW reopening
-  does not erase it.
+The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
+Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
+exponential inequalities. These are proofs about the actual real expressions;
+no stored rational endpoints or Python arithmetic implementation are assumed.
+They suffice for the work invariant but do not close the other certificate bounds.
 
-`ErrorOpen`, `MarkOpen`, exposure on a span and the full phase endpoints are
-explicit premises of the dose consequences. They have **not** been derived
-from the certified input calendars. The example `0.36` is an exact partial-dose
-calculation, not a constructed reachable training trajectory.
+The reserve proof uses an integral barrier rather than differentiability at all
+cap contacts. A density that points inward on the wrong side of a boundary cannot
+move a continuous integral solution outside that boundary. This covers the work
+discontinuities caused by actuator clipping and energy gates.
+
+## Doses and clipping
+
+Actual actuation is always integrated without rounding. For an openly exposed
+ERROR span, the dose is `8*(m_start-m_end)`; for MARK it is
+`(m_start-m_end)/2` per port. Actual legal entry/exit jumps yield the endpoints
+for full doses of 3/5 and 1/10. Other-port contributions remain in recovery.
+A partial dose such as `8*(0.07-0.025)=0.36` stays partial.
+
+The global cap theorem permits clipping. A complete ERROR phase at an already
+closed gain cap does not receive a full dose. `ErrorOpen`, `MarkOpen` and the
+span exposure predicates still require the relevant mode chronology and strict
+cap inactivity. For a flow reached from the declared birth family, the energy
+part is now derived by `reachable_power_gate_open`, rather than postulated.
+
+Neither full-dose lemmas nor mode-span predicates derive the four pulse cases of
+the certified protocol. That remaining distinction is explicit in signatures.
 
 ## Connection to finite-chain composition
 
-The emission ledger is now exposed as `Execution.signal`, a `Chain.Signal`
-constructed from actual fire jumps. Its count is the exact length of that
-cell's filtered emission list. `hasPacket_of_emission_witness` connects this
-signal to the interface introduced by PR #6, retaining both exact-count and
-all-date obligations. It does not supply the missing leaf or relay witness.
-The base includes PR #6's packet induction and both N-cell endpoint certificates.
+`Execution.signal` extracts a `Chain.Signal` from actual fire jumps, retaining
+the exact number of emissions. `hasPacket_of_emission_witness` exposes both
+outstanding packet obligations: exact event count and every actual emission date.
+It connects to PR #6's interface but does not supply its leaf or `RelayLaw` witness.
 
-## Obligations still required for the requested theorem
+## Remaining obligations for the complete theorem
 
-1. Review and instantiate this semantics with the physical parameter and birth
-   families and the actual supplied protocols, including staged births where
-   relevant. Relate FAST dynamics and routing to the same canonical output.
-2. Derive mode-local solutions and uniqueness from the integral equations, then
-   prove first-crossing and phase-endpoint properties.
-3. Prove energy and cap invariance, auxiliary separation, port non-collision,
-   and all required gate chronologies for those executions.
-4. Establish sound enclosure membership for real exp/log expressions and actual
-   trajectories. Exact rational endpoint comparisons alone are insufficient.
-5. Derive the four physical pulse cases, including combined MARK/ERROR, partial
-   and clipped doses, raw tails and absence of extra firings.
-6. Prove protocol execution existence, extension/progress, finite-event or
-   non-Zeno bounds and horizon saturation for all compatible simultaneous orders.
-7. Lift the resulting physical theorem through preparation, the cadence cascade
-   and the packet induction for every finite chain.
+1. Instantiate and review the semantics with the supplied protocols, including
+   staged births where relevant, and prove routing adequacy and port separation.
+2. Prove strict cap inactivity and the main/auxiliary chronology in each actual
+   pulse case, including combined MARK/ERROR, variable-gain raw-tail overlap and
+   absence of extra firings. Select the mode spans from executions rather than
+   assuming the desired case word.
+3. Establish sound real enclosure membership for the remaining root, calendar,
+   recovery and residual-tail expressions in the certificates. Exact comparisons
+   of stored endpoints alone remain insufficient.
+4. Prove protocol-specific execution existence, extension/progress, finite-event
+   or non-Zeno bounds and terminal saturation for all compatible event orders.
+5. Lift the resulting physical case theorem through preparation, the cadence
+   cascade, retained probes and the packet induction for every finite chain.
 
-No theorem in this change assumes a recorded pulse-case word or dose counter.
-There is also no theorem asserting the complete physical-to-abstract result.
-The existing certificates, manifests, recorded evidence and prototype ZIP are
-unchanged, and retain their previous scope and provenance.
+Certificates, manifests, recordings and the pinned prototype ZIP retain their
+existing identities and scope. No theorem asserts the complete physical result,
+assumes a recorded pulse-case word, or treats finite counter replay as a trajectory
+proof. The partial-dose calculation is not a reachable training counterexample.
 
 ## Validation
 
@@ -120,10 +123,11 @@ python scripts/check_sources.py
 python scripts/generate_evidence.py --check
 python scripts/check_negative.py
 python scripts/check_hybrid_negative.py
+python scripts/check_hybrid_analytic_negative.py
 ```
 
-The new negative checks first compile physical positive controls, then require
-Lean to reject firing below threshold, a nonconsuming arrival, a positive ERROR
-actuation at a closed cap or energy gate, rounding a partial dose to a full dose,
-and deleting an unfinished raw tail. Build errors cannot count as successful
-negative checks unless the corresponding positive control compiles.
+Every negative check first compiles its positive control. Existing physical
+checks reject under-threshold firing, nonconsuming delivery, closed-gate positive
+actuation, a rounded partial dose and an omitted raw current. Analytic controls
+reject altered FAST/MARK durations, an invalid reserve floor and removal of the
+attenuation of a raw tail. The axiom audit imports all new modules through KernelR.

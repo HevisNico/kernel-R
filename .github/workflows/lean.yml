@@ -41,3 +41,6 @@ jobs:
       - name: Reject invalid physical transitions and doses
         working-directory: proof/lean
         run: python scripts/check_hybrid_negative.py
+      - name: Reject altered physical durations, reserve bounds and raw tails
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_analytic_negative.py

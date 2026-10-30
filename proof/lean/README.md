@@ -8,9 +8,11 @@ execution nor the Python interval implementations have been verified in Lean.
 
 The [hybrid execution notes](HYBRID_EXECUTION.md) describe the operational
 semantics and exact ledger balances in `Hybrid` and `Refinement`. These modules
-now derive memory and queue balances from physical flows and guarded jumps.
-Protocol-specific gate exposure, real enclosure soundness, progress and the
-complete execution-to-abstraction theorem remain open.
+derive memory/queue balances, mode-local ODE solutions and observed guard
+endpoints from physical flows and jumps. Their extensions prove birth-family
+cap, charge and reserve invariants, including work <=500 and positive energy
+throughout reachable flows. Protocol-specific chronology, the remaining real
+enclosures, progress and the complete execution-to-abstraction theorem remain open.
 
 ## Reproduce
 
@@ -24,6 +26,7 @@ python3 scripts/generate_evidence.py --check
 python3 scripts/check_sources.py
 python3 scripts/check_negative.py
 python3 scripts/check_hybrid_negative.py
+python3 scripts/check_hybrid_analytic_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -128,12 +131,13 @@ local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Define the hybrid state, continuous flows, guards, resets and delayed events
-   in Lean, including simultaneous-event conventions.
+1. Instantiate and extend the hybrid semantics for the supplied protocols,
+   including staged births, routing, simultaneous events and execution progress.
 2. Prove soundness of the interval arithmetic and the exp/log enclosures used by
    the certificate checker, or derive the necessary enclosures directly in Lean.
-3. Connect the flow semantics and bounds to the declared cycle words, cap
-   inactivity, energy invariant and birth-to-section transition.
+3. Derive the actual pulse cases, strict cap inactivity and birth-to-section
+   transition. The common birth-family energy/cap invariants are now proved,
+   but do not establish the protocol chronology.
 4. Instantiate the composition rule to obtain the complete reciprocal theorem.
 5. For pedagogy, separately formalize the observation/readout/training interface
    and connect numerical records to that semantics.
