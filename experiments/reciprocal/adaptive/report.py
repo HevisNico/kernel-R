@@ -31,7 +31,12 @@ def report(out):
 <p><strong>Within-lesson adaptation is supported in this supplied R-based architecture.</strong>
 The same learned policy uses each pupil's intermediate responses to choose its
 stopping time. Pulse shapes and teaching blocks remain predefined.</p>
-<h2>Two fresh, independent learner lots</h2>
+<h2>Reproduction on two held-out learner lots</h2>
+<p>This execution uses the corrected terminal-event scheduler and a complete
+source/runtime manifest. Training and evaluation were recomputed from scratch
+on the original seeds. This is a computational reproduction, not an additional
+independent confirmation sample. Legacy development and aborted-run records
+are excluded from this release. See <a href="plan.json">the locked plan</a>.</p>
 <div class="scroll"><table><thead><tr><th>Method</th><th>Test</th><th>Confirmation</th></tr></thead><tbody>__ROWS__</tbody></table></div>
 <p class="note">Three independently trained banks obtain these same counts on the
 same two lots; teacher repetitions do not multiply the independent learner count.

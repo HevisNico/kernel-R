@@ -122,6 +122,9 @@ The individual experiment guides provide further teaching and adaptation command
 New adaptive plans lock both simulation engines and the numerical runtime;
 legacy two-file plans are rejected by the updated validators. See the
 [adaptive reproduction notes](experiments/reciprocal/adaptive/README.md#reproduce).
+The bundled adaptive records have been recomputed on the original seeds with
+that complete manifest. All 127 experiment checks and continuous teacher replay
+pass; legacy adaptive development and aborted-run records have been removed.
 
 After installing the numerical requirements, run the terminal-event and
 provenance regressions with:

@@ -63,6 +63,11 @@ a wrong inequality cannot acquire a valid proof through code generation. The
 correspondence between the emitted proposition and the intended model still
 needs review; hashes and regeneration checks establish provenance, not semantics.
 
+The adaptive records have been recomputed with the complete source/runtime
+manifest on the original seeds. The emitter checks the bundled source hashes,
+runtime metadata and actual learned policy before extracting outcomes. The
+plan and policy hashes are recorded alongside the evaluation hash.
+
 The adaptive replay uses the explicit stop rule equivalent to the reported
 learned policy on these records. Python also checks the retained success flags
 against the saved eight probe windows. That extraction check uses the original

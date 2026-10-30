@@ -1,5 +1,6 @@
 """Locked evaluation of a learned within-lesson stopping policy."""
 from pathlib import Path
+from datetime import datetime, timezone
 import argparse,json,hashlib,time,itertools
 import numpy as np
 import model as m
@@ -50,14 +51,10 @@ def run(out,replicates=3,training_students=64,comparisons_per_context=8,test_stu
        'initial observation only','time-aligned other-learner observations','wrong action credit with exact pulse timing/count match',
        'frozen teacher plasticity','uninformative outcomes','frozen learner plasticity',
        'fresh bank inheriting learned settings'],
-      design_provenance='Stopping-only task, block protocol and rollout preference were designed on separate development trajectories. Training and two fresh test seeds are locked before this run. No claim of preregistration of the preceding development search.',
+      design_provenance='The supplied stopping task, block protocol and rollout preference were designed previously. This is a computational reproduction using the original training/test seeds, not a new independent confirmation sample or a preregistered experiment. Historical development recordings are not imported.',
+      execution_started_utc=datetime.now(timezone.utc).isoformat(),
       **provenance.capture())
     write(out,'plan.json',plan)
-    development=ROOT/'audit_runs'/'adaptive_development'
-    for name in ['prefixes.json','blocks.json','preferences.json']:
-        if (development/name).exists():(out/('development_'+name)).write_bytes((development/name).read_bytes())
-    aborted=ROOT/'audit_runs'/'adaptive_training_abort'/'plan.json'
-    if aborted.exists():(out/'development_training_abort_plan.json').write_bytes(aborted.read_bytes())
     training=[];policies=[]
     for rep in range(replicates):
         trajectories=[];pool=[]

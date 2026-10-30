@@ -26,8 +26,10 @@ class ProjectLayout(unittest.TestCase):
         files=module.restoration_plan(module.verify_bundle())
         for name in ['audit_runs/reciprocal/impulsions.json','audit_runs/teaching/summary.json',
           'audit_runs/pedagogy/evaluation.json','audit_runs/adaptive/live_validation.json',
-          'audit_runs/pedagogy_development/explore.py','audit_runs/adaptive.log']:
+          'audit_runs/pedagogy_development/explore.py','audit_runs/adaptive/REPRODUCTION.json']:
             self.assertIn(name,files)
+        self.assertFalse(any(name.startswith('audit_runs/adaptive/development_') for name in files))
+        self.assertNotIn('audit_runs/adaptive.log',files)
         self.assertLess(module.BUNDLE.stat().st_size,30_000_000)
 
 if __name__=='__main__':unittest.main()
