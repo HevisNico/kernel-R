@@ -113,6 +113,25 @@ def package():
             shutil.copyfile(ROOT/'certify'/'reciprocal_entry'/name,target/'code'/name)
         with (STAGE/'START_HERE.txt').open('a') as guide:
             guide.write('\nLATEST: BIRTH-TO-SECTION ENTRY AND COMPOSED FEEDBACK LEARNING\nOpen 10_Certified_Section_Entry/RESULTS.html\nComplete proof: 10_Certified_Section_Entry/THEOREM.md\nScope: pulses-only READY birth family through 459.9; settings copies and later phases remain separate.\n')
+    cadence=ROOT/'results'/'reciprocal_cadence'
+    if (cadence/'eps1e-1'/'independent_check.json').exists():
+        target=STAGE/'11_Certified_Cadence_Cascade'
+        target.mkdir(parents=True,exist_ok=True)
+        for name in ['README.md','RESULTS.html','tests.json','SOURCE_MANIFEST.json']:
+            shutil.copyfile(cadence/name,target/name)
+        for name in ['README.md','RESULTS.html']:
+            page=target/name
+            page.write_text(page.read_text().replace('../../proof/reciprocal_cadence/THEOREM.md','THEOREM.md'))
+        shutil.copyfile(ROOT/'proof'/'reciprocal_cadence'/'THEOREM.md',target/'THEOREM.md')
+        for box in ['eps3e-3','eps1e-1']:
+            (target/box).mkdir(parents=True,exist_ok=True)
+            for name in ['certificate.json','independent_check.json']:
+                shutil.copyfile(cadence/box/name,target/box/name)
+        (target/'code').mkdir(parents=True,exist_ok=True)
+        for name in ['certify.py','verify.py','tests.py','dependency.py','decimal_intervals.py','integer_intervals.py']:
+            shutil.copyfile(ROOT/'certify'/'reciprocal_cadence'/name,target/'code'/name)
+        with (STAGE/'START_HERE.txt').open('a') as guide:
+            guide.write('\nLATEST: CERTIFIED C-TO-B-TO-A CADENCE CASCADE\nOpen 11_Certified_Cadence_Cascade/RESULTS.html\nComplete proof: 11_Certified_Cadence_Cascade/THEOREM.md\nRun: python -B 11_Certified_Cadence_Cascade/code/tests.py\nScope: pulses-only birth family through 789.9; 45 physical parameters, no settings copies or open recurrence.\n')
     files=[p for p in STAGE.rglob('*') if p.is_file() and p.name!='SHA256SUMS.json']
     manifest={str(p.relative_to(STAGE)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
     (STAGE/'05_Verification'/'SHA256SUMS.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')

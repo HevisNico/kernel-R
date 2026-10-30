@@ -27,3 +27,15 @@ jobs:
         run: |
           python -B certify/reciprocal_entry/verify.py results/reciprocal_entry/eps3e-3/certificate.json --link-certificate results/reciprocal_learning/eps3e-3/certificate.json --link-code certify/reciprocal_learning
           python -B certify/reciprocal_entry/verify.py results/reciprocal_entry/eps1e-1/certificate.json --link-certificate results/reciprocal_learning/eps1e-1/certificate.json --link-code certify/reciprocal_learning
+      - name: Cadence cascade induction and refusal cases
+        run: python -B certify/reciprocal_cadence/tests.py
+      - name: Replay both published C-to-B-to-A certificates
+        run: |
+          for box in eps3e-3 eps1e-1; do
+            python -B certify/reciprocal_cadence/verify.py \
+              results/reciprocal_cadence/$box/certificate.json \
+              --entry-certificate results/reciprocal_entry/$box/certificate.json \
+              --entry-code certify/reciprocal_entry \
+              --local-certificate results/reciprocal_learning/$box/certificate.json \
+              --local-code certify/reciprocal_learning
+          done

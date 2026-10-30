@@ -7,6 +7,7 @@ Input hashes are for provenance; they are not a substitute for that soundness pr
 from pathlib import Path
 from fractions import Fraction
 import json,hashlib,re,argparse,sys,tempfile
+from cadence_evidence import generate_cadence
 
 ROOT=Path(__file__).resolve().parents[1]
 REPO=ROOT.parents[1]
@@ -122,6 +123,7 @@ def adaptive():
 
 def generate():
     info=certificates();info.update(adaptive())
+    info.update(generate_cadence(REPO,write,rational,ident))
     write('evidence/GENERATED_FROM.json',json.dumps(info,indent=2)+'\n')
     return info
 

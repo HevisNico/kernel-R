@@ -17,3 +17,8 @@ import KernelR.Certificates.Local010
 import KernelR.Certificates.Entry003
 import KernelR.Certificates.Entry010
 import KernelR.Recorded
+import KernelR.Cadence
+import KernelR.Certificates.Cadence003
+import KernelR.Certificates.Cadence010
+import KernelR.CadenceRecorded.Cadence003
+import KernelR.CadenceRecorded.Cadence010

@@ -1,0 +1,654 @@
+import KernelR.Certificates.Cadence003.Bounds02
+import KernelR.Certificates.Cadence003.Bounds03
+import KernelR.Certificates.Cadence003.Bounds04
+
+/-! Generated exact evidence checks, not hybrid-flow soundness. -/
+namespace KernelR.Certificates.Cadence003
+set_option maxRecDepth 20000
+set_option maxHeartbeats 4000000
+
+theorem Cteach_teach_7_aux_separation_verified : RationalBox.StrictBefore Cteach_teach_7_aux_separation_left Cteach_teach_7_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_aux_separation_left, Cteach_teach_7_aux_separation_right]
+
+theorem Cteach_teach_7_gain_below_cap_verified : RationalBox.StrictBefore Cteach_teach_7_gain_below_cap_left Cteach_teach_7_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_gain_below_cap_left, Cteach_teach_7_gain_below_cap_right]
+
+theorem Cteach_teach_7_ready_at_input_verified : RationalBox.StrictBefore Cteach_teach_7_ready_at_input_left Cteach_teach_7_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_ready_at_input_left, Cteach_teach_7_ready_at_input_right]
+
+theorem Cteach_teach_7_positive_derivative_coefficient_verified : RationalBox.StrictBefore Cteach_teach_7_positive_derivative_coefficient_left Cteach_teach_7_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_positive_derivative_coefficient_left, Cteach_teach_7_positive_derivative_coefficient_right]
+
+theorem Cteach_teach_7_fixed_flow_increases_verified : RationalBox.StrictBefore Cteach_teach_7_fixed_flow_increases_left Cteach_teach_7_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_fixed_flow_increases_left, Cteach_teach_7_fixed_flow_increases_right]
+
+theorem Cteach_teach_7_strong_crosses_by_one_verified : RationalBox.StrictBefore Cteach_teach_7_strong_crosses_by_one_left Cteach_teach_7_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_strong_crosses_by_one_left, Cteach_teach_7_strong_crosses_by_one_right]
+
+theorem Cteach_teach_7_root_lower_verified : RationalBox.StrictBefore Cteach_teach_7_root_lower_left Cteach_teach_7_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_root_lower_left, Cteach_teach_7_root_lower_right]
+
+theorem Cteach_teach_7_root_upper_verified : RationalBox.StrictBefore Cteach_teach_7_root_upper_left Cteach_teach_7_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_root_upper_left, Cteach_teach_7_root_upper_right]
+
+theorem Cteach_teach_7_MARK_before_fire_verified : RationalBox.StrictBefore Cteach_teach_7_MARK_before_fire_left Cteach_teach_7_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_MARK_before_fire_left, Cteach_teach_7_MARK_before_fire_right]
+
+theorem Cteach_teach_7_fire_before_ERROR_verified : RationalBox.StrictBefore Cteach_teach_7_fire_before_ERROR_left Cteach_teach_7_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_fire_before_ERROR_left, Cteach_teach_7_fire_before_ERROR_right]
+
+theorem Cteach_teach_7_ERROR_protected_verified : RationalBox.StrictBefore Cteach_teach_7_ERROR_protected_left Cteach_teach_7_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_7_ERROR_protected_left, Cteach_teach_7_ERROR_protected_right]
+
+theorem B_teach_8_aux_separation_verified : RationalBox.StrictBefore B_teach_8_aux_separation_left B_teach_8_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_aux_separation_left, B_teach_8_aux_separation_right]
+
+theorem B_teach_8_gain_below_cap_verified : RationalBox.StrictBefore B_teach_8_gain_below_cap_left B_teach_8_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_gain_below_cap_left, B_teach_8_gain_below_cap_right]
+
+theorem B_teach_8_ready_at_input_verified : RationalBox.StrictBefore B_teach_8_ready_at_input_left B_teach_8_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_ready_at_input_left, B_teach_8_ready_at_input_right]
+
+theorem B_teach_8_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_teach_8_positive_derivative_coefficient_left B_teach_8_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_positive_derivative_coefficient_left, B_teach_8_positive_derivative_coefficient_right]
+
+theorem B_teach_8_fixed_flow_increases_verified : RationalBox.StrictBefore B_teach_8_fixed_flow_increases_left B_teach_8_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_fixed_flow_increases_left, B_teach_8_fixed_flow_increases_right]
+
+theorem B_teach_8_strong_crosses_by_one_verified : RationalBox.StrictBefore B_teach_8_strong_crosses_by_one_left B_teach_8_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_strong_crosses_by_one_left, B_teach_8_strong_crosses_by_one_right]
+
+theorem B_teach_8_root_lower_verified : RationalBox.StrictBefore B_teach_8_root_lower_left B_teach_8_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_root_lower_left, B_teach_8_root_lower_right]
+
+theorem B_teach_8_root_upper_verified : RationalBox.StrictBefore B_teach_8_root_upper_left B_teach_8_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_root_upper_left, B_teach_8_root_upper_right]
+
+theorem B_teach_8_MARK_before_fire_verified : RationalBox.StrictBefore B_teach_8_MARK_before_fire_left B_teach_8_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_MARK_before_fire_left, B_teach_8_MARK_before_fire_right]
+
+theorem B_teach_8_fire_before_ERROR_verified : RationalBox.StrictBefore B_teach_8_fire_before_ERROR_left B_teach_8_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_fire_before_ERROR_left, B_teach_8_fire_before_ERROR_right]
+
+theorem B_teach_8_ERROR_protected_verified : RationalBox.StrictBefore B_teach_8_ERROR_protected_left B_teach_8_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_8_ERROR_protected_left, B_teach_8_ERROR_protected_right]
+
+theorem Cteach_teach_8_aux_separation_verified : RationalBox.StrictBefore Cteach_teach_8_aux_separation_left Cteach_teach_8_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_aux_separation_left, Cteach_teach_8_aux_separation_right]
+
+theorem Cteach_teach_8_gain_below_cap_verified : RationalBox.StrictBefore Cteach_teach_8_gain_below_cap_left Cteach_teach_8_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_gain_below_cap_left, Cteach_teach_8_gain_below_cap_right]
+
+theorem Cteach_teach_8_ready_at_input_verified : RationalBox.StrictBefore Cteach_teach_8_ready_at_input_left Cteach_teach_8_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_ready_at_input_left, Cteach_teach_8_ready_at_input_right]
+
+theorem Cteach_teach_8_positive_derivative_coefficient_verified : RationalBox.StrictBefore Cteach_teach_8_positive_derivative_coefficient_left Cteach_teach_8_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_positive_derivative_coefficient_left, Cteach_teach_8_positive_derivative_coefficient_right]
+
+theorem Cteach_teach_8_fixed_flow_increases_verified : RationalBox.StrictBefore Cteach_teach_8_fixed_flow_increases_left Cteach_teach_8_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_fixed_flow_increases_left, Cteach_teach_8_fixed_flow_increases_right]
+
+theorem Cteach_teach_8_strong_crosses_by_one_verified : RationalBox.StrictBefore Cteach_teach_8_strong_crosses_by_one_left Cteach_teach_8_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_strong_crosses_by_one_left, Cteach_teach_8_strong_crosses_by_one_right]
+
+theorem Cteach_teach_8_root_lower_verified : RationalBox.StrictBefore Cteach_teach_8_root_lower_left Cteach_teach_8_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_root_lower_left, Cteach_teach_8_root_lower_right]
+
+theorem Cteach_teach_8_root_upper_verified : RationalBox.StrictBefore Cteach_teach_8_root_upper_left Cteach_teach_8_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_root_upper_left, Cteach_teach_8_root_upper_right]
+
+theorem Cteach_teach_8_MARK_before_fire_verified : RationalBox.StrictBefore Cteach_teach_8_MARK_before_fire_left Cteach_teach_8_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_MARK_before_fire_left, Cteach_teach_8_MARK_before_fire_right]
+
+theorem Cteach_teach_8_fire_before_ERROR_verified : RationalBox.StrictBefore Cteach_teach_8_fire_before_ERROR_left Cteach_teach_8_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_fire_before_ERROR_left, Cteach_teach_8_fire_before_ERROR_right]
+
+theorem Cteach_teach_8_ERROR_protected_verified : RationalBox.StrictBefore Cteach_teach_8_ERROR_protected_left Cteach_teach_8_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_8_ERROR_protected_left, Cteach_teach_8_ERROR_protected_right]
+
+theorem B_teach_9_aux_separation_verified : RationalBox.StrictBefore B_teach_9_aux_separation_left B_teach_9_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_aux_separation_left, B_teach_9_aux_separation_right]
+
+theorem B_teach_9_gain_below_cap_verified : RationalBox.StrictBefore B_teach_9_gain_below_cap_left B_teach_9_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_gain_below_cap_left, B_teach_9_gain_below_cap_right]
+
+theorem B_teach_9_ready_at_input_verified : RationalBox.StrictBefore B_teach_9_ready_at_input_left B_teach_9_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_ready_at_input_left, B_teach_9_ready_at_input_right]
+
+theorem B_teach_9_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_teach_9_positive_derivative_coefficient_left B_teach_9_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_positive_derivative_coefficient_left, B_teach_9_positive_derivative_coefficient_right]
+
+theorem B_teach_9_fixed_flow_increases_verified : RationalBox.StrictBefore B_teach_9_fixed_flow_increases_left B_teach_9_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_fixed_flow_increases_left, B_teach_9_fixed_flow_increases_right]
+
+theorem B_teach_9_strong_crosses_by_one_verified : RationalBox.StrictBefore B_teach_9_strong_crosses_by_one_left B_teach_9_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_strong_crosses_by_one_left, B_teach_9_strong_crosses_by_one_right]
+
+theorem B_teach_9_root_lower_verified : RationalBox.StrictBefore B_teach_9_root_lower_left B_teach_9_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_root_lower_left, B_teach_9_root_lower_right]
+
+theorem B_teach_9_root_upper_verified : RationalBox.StrictBefore B_teach_9_root_upper_left B_teach_9_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_root_upper_left, B_teach_9_root_upper_right]
+
+theorem B_teach_9_MARK_before_fire_verified : RationalBox.StrictBefore B_teach_9_MARK_before_fire_left B_teach_9_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_MARK_before_fire_left, B_teach_9_MARK_before_fire_right]
+
+theorem B_teach_9_fire_before_ERROR_verified : RationalBox.StrictBefore B_teach_9_fire_before_ERROR_left B_teach_9_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_fire_before_ERROR_left, B_teach_9_fire_before_ERROR_right]
+
+theorem B_teach_9_ERROR_protected_verified : RationalBox.StrictBefore B_teach_9_ERROR_protected_left B_teach_9_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_9_ERROR_protected_left, B_teach_9_ERROR_protected_right]
+
+theorem Cteach_teach_9_aux_separation_verified : RationalBox.StrictBefore Cteach_teach_9_aux_separation_left Cteach_teach_9_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_aux_separation_left, Cteach_teach_9_aux_separation_right]
+
+theorem Cteach_teach_9_gain_below_cap_verified : RationalBox.StrictBefore Cteach_teach_9_gain_below_cap_left Cteach_teach_9_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_gain_below_cap_left, Cteach_teach_9_gain_below_cap_right]
+
+theorem Cteach_teach_9_ready_at_input_verified : RationalBox.StrictBefore Cteach_teach_9_ready_at_input_left Cteach_teach_9_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_ready_at_input_left, Cteach_teach_9_ready_at_input_right]
+
+theorem Cteach_teach_9_positive_derivative_coefficient_verified : RationalBox.StrictBefore Cteach_teach_9_positive_derivative_coefficient_left Cteach_teach_9_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_positive_derivative_coefficient_left, Cteach_teach_9_positive_derivative_coefficient_right]
+
+theorem Cteach_teach_9_fixed_flow_increases_verified : RationalBox.StrictBefore Cteach_teach_9_fixed_flow_increases_left Cteach_teach_9_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_fixed_flow_increases_left, Cteach_teach_9_fixed_flow_increases_right]
+
+theorem Cteach_teach_9_strong_crosses_by_one_verified : RationalBox.StrictBefore Cteach_teach_9_strong_crosses_by_one_left Cteach_teach_9_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_strong_crosses_by_one_left, Cteach_teach_9_strong_crosses_by_one_right]
+
+theorem Cteach_teach_9_root_lower_verified : RationalBox.StrictBefore Cteach_teach_9_root_lower_left Cteach_teach_9_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_root_lower_left, Cteach_teach_9_root_lower_right]
+
+theorem Cteach_teach_9_root_upper_verified : RationalBox.StrictBefore Cteach_teach_9_root_upper_left Cteach_teach_9_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_root_upper_left, Cteach_teach_9_root_upper_right]
+
+theorem Cteach_teach_9_MARK_before_fire_verified : RationalBox.StrictBefore Cteach_teach_9_MARK_before_fire_left Cteach_teach_9_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_MARK_before_fire_left, Cteach_teach_9_MARK_before_fire_right]
+
+theorem Cteach_teach_9_fire_before_ERROR_verified : RationalBox.StrictBefore Cteach_teach_9_fire_before_ERROR_left Cteach_teach_9_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_fire_before_ERROR_left, Cteach_teach_9_fire_before_ERROR_right]
+
+theorem Cteach_teach_9_ERROR_protected_verified : RationalBox.StrictBefore Cteach_teach_9_ERROR_protected_left Cteach_teach_9_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_9_ERROR_protected_left, Cteach_teach_9_ERROR_protected_right]
+
+theorem B_teach_10_aux_separation_verified : RationalBox.StrictBefore B_teach_10_aux_separation_left B_teach_10_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_aux_separation_left, B_teach_10_aux_separation_right]
+
+theorem B_teach_10_gain_below_cap_verified : RationalBox.StrictBefore B_teach_10_gain_below_cap_left B_teach_10_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_gain_below_cap_left, B_teach_10_gain_below_cap_right]
+
+theorem B_teach_10_ready_at_input_verified : RationalBox.StrictBefore B_teach_10_ready_at_input_left B_teach_10_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_ready_at_input_left, B_teach_10_ready_at_input_right]
+
+theorem B_teach_10_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_teach_10_positive_derivative_coefficient_left B_teach_10_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_positive_derivative_coefficient_left, B_teach_10_positive_derivative_coefficient_right]
+
+theorem B_teach_10_fixed_flow_increases_verified : RationalBox.StrictBefore B_teach_10_fixed_flow_increases_left B_teach_10_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_fixed_flow_increases_left, B_teach_10_fixed_flow_increases_right]
+
+theorem B_teach_10_strong_crosses_by_one_verified : RationalBox.StrictBefore B_teach_10_strong_crosses_by_one_left B_teach_10_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_strong_crosses_by_one_left, B_teach_10_strong_crosses_by_one_right]
+
+theorem B_teach_10_root_lower_verified : RationalBox.StrictBefore B_teach_10_root_lower_left B_teach_10_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_root_lower_left, B_teach_10_root_lower_right]
+
+theorem B_teach_10_root_upper_verified : RationalBox.StrictBefore B_teach_10_root_upper_left B_teach_10_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_root_upper_left, B_teach_10_root_upper_right]
+
+theorem B_teach_10_MARK_before_fire_verified : RationalBox.StrictBefore B_teach_10_MARK_before_fire_left B_teach_10_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_MARK_before_fire_left, B_teach_10_MARK_before_fire_right]
+
+theorem B_teach_10_fire_before_ERROR_verified : RationalBox.StrictBefore B_teach_10_fire_before_ERROR_left B_teach_10_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_fire_before_ERROR_left, B_teach_10_fire_before_ERROR_right]
+
+theorem B_teach_10_ERROR_protected_verified : RationalBox.StrictBefore B_teach_10_ERROR_protected_left B_teach_10_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_10_ERROR_protected_left, B_teach_10_ERROR_protected_right]
+
+theorem Cteach_teach_10_aux_separation_verified : RationalBox.StrictBefore Cteach_teach_10_aux_separation_left Cteach_teach_10_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_aux_separation_left, Cteach_teach_10_aux_separation_right]
+
+theorem Cteach_teach_10_gain_below_cap_verified : RationalBox.StrictBefore Cteach_teach_10_gain_below_cap_left Cteach_teach_10_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_gain_below_cap_left, Cteach_teach_10_gain_below_cap_right]
+
+theorem Cteach_teach_10_ready_at_input_verified : RationalBox.StrictBefore Cteach_teach_10_ready_at_input_left Cteach_teach_10_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_ready_at_input_left, Cteach_teach_10_ready_at_input_right]
+
+theorem Cteach_teach_10_positive_derivative_coefficient_verified : RationalBox.StrictBefore Cteach_teach_10_positive_derivative_coefficient_left Cteach_teach_10_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_positive_derivative_coefficient_left, Cteach_teach_10_positive_derivative_coefficient_right]
+
+theorem Cteach_teach_10_fixed_flow_increases_verified : RationalBox.StrictBefore Cteach_teach_10_fixed_flow_increases_left Cteach_teach_10_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_fixed_flow_increases_left, Cteach_teach_10_fixed_flow_increases_right]
+
+theorem Cteach_teach_10_strong_crosses_by_one_verified : RationalBox.StrictBefore Cteach_teach_10_strong_crosses_by_one_left Cteach_teach_10_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_strong_crosses_by_one_left, Cteach_teach_10_strong_crosses_by_one_right]
+
+theorem Cteach_teach_10_root_lower_verified : RationalBox.StrictBefore Cteach_teach_10_root_lower_left Cteach_teach_10_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_root_lower_left, Cteach_teach_10_root_lower_right]
+
+theorem Cteach_teach_10_root_upper_verified : RationalBox.StrictBefore Cteach_teach_10_root_upper_left Cteach_teach_10_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_root_upper_left, Cteach_teach_10_root_upper_right]
+
+theorem Cteach_teach_10_MARK_before_fire_verified : RationalBox.StrictBefore Cteach_teach_10_MARK_before_fire_left Cteach_teach_10_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_MARK_before_fire_left, Cteach_teach_10_MARK_before_fire_right]
+
+theorem Cteach_teach_10_fire_before_ERROR_verified : RationalBox.StrictBefore Cteach_teach_10_fire_before_ERROR_left Cteach_teach_10_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_fire_before_ERROR_left, Cteach_teach_10_fire_before_ERROR_right]
+
+theorem Cteach_teach_10_ERROR_protected_verified : RationalBox.StrictBefore Cteach_teach_10_ERROR_protected_left Cteach_teach_10_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_10_ERROR_protected_left, Cteach_teach_10_ERROR_protected_right]
+
+theorem B_teach_11_aux_separation_verified : RationalBox.StrictBefore B_teach_11_aux_separation_left B_teach_11_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_aux_separation_left, B_teach_11_aux_separation_right]
+
+theorem B_teach_11_gain_below_cap_verified : RationalBox.StrictBefore B_teach_11_gain_below_cap_left B_teach_11_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_gain_below_cap_left, B_teach_11_gain_below_cap_right]
+
+theorem B_teach_11_ready_at_input_verified : RationalBox.StrictBefore B_teach_11_ready_at_input_left B_teach_11_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_ready_at_input_left, B_teach_11_ready_at_input_right]
+
+theorem B_teach_11_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_teach_11_positive_derivative_coefficient_left B_teach_11_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_positive_derivative_coefficient_left, B_teach_11_positive_derivative_coefficient_right]
+
+theorem B_teach_11_fixed_flow_increases_verified : RationalBox.StrictBefore B_teach_11_fixed_flow_increases_left B_teach_11_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_fixed_flow_increases_left, B_teach_11_fixed_flow_increases_right]
+
+theorem B_teach_11_strong_crosses_by_one_verified : RationalBox.StrictBefore B_teach_11_strong_crosses_by_one_left B_teach_11_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_strong_crosses_by_one_left, B_teach_11_strong_crosses_by_one_right]
+
+theorem B_teach_11_root_lower_verified : RationalBox.StrictBefore B_teach_11_root_lower_left B_teach_11_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_root_lower_left, B_teach_11_root_lower_right]
+
+theorem B_teach_11_root_upper_verified : RationalBox.StrictBefore B_teach_11_root_upper_left B_teach_11_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_root_upper_left, B_teach_11_root_upper_right]
+
+theorem B_teach_11_MARK_before_fire_verified : RationalBox.StrictBefore B_teach_11_MARK_before_fire_left B_teach_11_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_MARK_before_fire_left, B_teach_11_MARK_before_fire_right]
+
+theorem B_teach_11_fire_before_ERROR_verified : RationalBox.StrictBefore B_teach_11_fire_before_ERROR_left B_teach_11_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_fire_before_ERROR_left, B_teach_11_fire_before_ERROR_right]
+
+theorem B_teach_11_ERROR_protected_verified : RationalBox.StrictBefore B_teach_11_ERROR_protected_left B_teach_11_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_11_ERROR_protected_left, B_teach_11_ERROR_protected_right]
+
+theorem Cteach_teach_11_aux_separation_verified : RationalBox.StrictBefore Cteach_teach_11_aux_separation_left Cteach_teach_11_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_aux_separation_left, Cteach_teach_11_aux_separation_right]
+
+theorem Cteach_teach_11_gain_below_cap_verified : RationalBox.StrictBefore Cteach_teach_11_gain_below_cap_left Cteach_teach_11_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_gain_below_cap_left, Cteach_teach_11_gain_below_cap_right]
+
+theorem Cteach_teach_11_ready_at_input_verified : RationalBox.StrictBefore Cteach_teach_11_ready_at_input_left Cteach_teach_11_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_ready_at_input_left, Cteach_teach_11_ready_at_input_right]
+
+theorem Cteach_teach_11_positive_derivative_coefficient_verified : RationalBox.StrictBefore Cteach_teach_11_positive_derivative_coefficient_left Cteach_teach_11_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_positive_derivative_coefficient_left, Cteach_teach_11_positive_derivative_coefficient_right]
+
+theorem Cteach_teach_11_fixed_flow_increases_verified : RationalBox.StrictBefore Cteach_teach_11_fixed_flow_increases_left Cteach_teach_11_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_fixed_flow_increases_left, Cteach_teach_11_fixed_flow_increases_right]
+
+theorem Cteach_teach_11_strong_crosses_by_one_verified : RationalBox.StrictBefore Cteach_teach_11_strong_crosses_by_one_left Cteach_teach_11_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_strong_crosses_by_one_left, Cteach_teach_11_strong_crosses_by_one_right]
+
+theorem Cteach_teach_11_root_lower_verified : RationalBox.StrictBefore Cteach_teach_11_root_lower_left Cteach_teach_11_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_root_lower_left, Cteach_teach_11_root_lower_right]
+
+theorem Cteach_teach_11_root_upper_verified : RationalBox.StrictBefore Cteach_teach_11_root_upper_left Cteach_teach_11_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_root_upper_left, Cteach_teach_11_root_upper_right]
+
+theorem Cteach_teach_11_MARK_before_fire_verified : RationalBox.StrictBefore Cteach_teach_11_MARK_before_fire_left Cteach_teach_11_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_MARK_before_fire_left, Cteach_teach_11_MARK_before_fire_right]
+
+theorem Cteach_teach_11_fire_before_ERROR_verified : RationalBox.StrictBefore Cteach_teach_11_fire_before_ERROR_left Cteach_teach_11_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_fire_before_ERROR_left, Cteach_teach_11_fire_before_ERROR_right]
+
+theorem Cteach_teach_11_ERROR_protected_verified : RationalBox.StrictBefore Cteach_teach_11_ERROR_protected_left Cteach_teach_11_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_11_ERROR_protected_left, Cteach_teach_11_ERROR_protected_right]
+
+theorem B_teach_12_aux_separation_verified : RationalBox.StrictBefore B_teach_12_aux_separation_left B_teach_12_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_aux_separation_left, B_teach_12_aux_separation_right]
+
+theorem B_teach_12_gain_below_cap_verified : RationalBox.StrictBefore B_teach_12_gain_below_cap_left B_teach_12_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_gain_below_cap_left, B_teach_12_gain_below_cap_right]
+
+theorem B_teach_12_ready_at_input_verified : RationalBox.StrictBefore B_teach_12_ready_at_input_left B_teach_12_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_ready_at_input_left, B_teach_12_ready_at_input_right]
+
+theorem B_teach_12_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_teach_12_positive_derivative_coefficient_left B_teach_12_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_positive_derivative_coefficient_left, B_teach_12_positive_derivative_coefficient_right]
+
+theorem B_teach_12_fixed_flow_increases_verified : RationalBox.StrictBefore B_teach_12_fixed_flow_increases_left B_teach_12_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_fixed_flow_increases_left, B_teach_12_fixed_flow_increases_right]
+
+theorem B_teach_12_strong_crosses_by_one_verified : RationalBox.StrictBefore B_teach_12_strong_crosses_by_one_left B_teach_12_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_strong_crosses_by_one_left, B_teach_12_strong_crosses_by_one_right]
+
+theorem B_teach_12_root_lower_verified : RationalBox.StrictBefore B_teach_12_root_lower_left B_teach_12_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_root_lower_left, B_teach_12_root_lower_right]
+
+theorem B_teach_12_root_upper_verified : RationalBox.StrictBefore B_teach_12_root_upper_left B_teach_12_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_root_upper_left, B_teach_12_root_upper_right]
+
+theorem B_teach_12_MARK_before_fire_verified : RationalBox.StrictBefore B_teach_12_MARK_before_fire_left B_teach_12_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_MARK_before_fire_left, B_teach_12_MARK_before_fire_right]
+
+theorem B_teach_12_fire_before_ERROR_verified : RationalBox.StrictBefore B_teach_12_fire_before_ERROR_left B_teach_12_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_fire_before_ERROR_left, B_teach_12_fire_before_ERROR_right]
+
+theorem B_teach_12_ERROR_protected_verified : RationalBox.StrictBefore B_teach_12_ERROR_protected_left B_teach_12_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_12_ERROR_protected_left, B_teach_12_ERROR_protected_right]
+
+theorem Cteach_teach_12_aux_separation_verified : RationalBox.StrictBefore Cteach_teach_12_aux_separation_left Cteach_teach_12_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_aux_separation_left, Cteach_teach_12_aux_separation_right]
+
+theorem Cteach_teach_12_gain_below_cap_verified : RationalBox.StrictBefore Cteach_teach_12_gain_below_cap_left Cteach_teach_12_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_gain_below_cap_left, Cteach_teach_12_gain_below_cap_right]
+
+theorem Cteach_teach_12_ready_at_input_verified : RationalBox.StrictBefore Cteach_teach_12_ready_at_input_left Cteach_teach_12_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_ready_at_input_left, Cteach_teach_12_ready_at_input_right]
+
+theorem Cteach_teach_12_positive_derivative_coefficient_verified : RationalBox.StrictBefore Cteach_teach_12_positive_derivative_coefficient_left Cteach_teach_12_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_positive_derivative_coefficient_left, Cteach_teach_12_positive_derivative_coefficient_right]
+
+theorem Cteach_teach_12_fixed_flow_increases_verified : RationalBox.StrictBefore Cteach_teach_12_fixed_flow_increases_left Cteach_teach_12_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_fixed_flow_increases_left, Cteach_teach_12_fixed_flow_increases_right]
+
+theorem Cteach_teach_12_strong_crosses_by_one_verified : RationalBox.StrictBefore Cteach_teach_12_strong_crosses_by_one_left Cteach_teach_12_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_strong_crosses_by_one_left, Cteach_teach_12_strong_crosses_by_one_right]
+
+theorem Cteach_teach_12_root_lower_verified : RationalBox.StrictBefore Cteach_teach_12_root_lower_left Cteach_teach_12_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_root_lower_left, Cteach_teach_12_root_lower_right]
+
+theorem Cteach_teach_12_root_upper_verified : RationalBox.StrictBefore Cteach_teach_12_root_upper_left Cteach_teach_12_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_root_upper_left, Cteach_teach_12_root_upper_right]
+
+theorem Cteach_teach_12_MARK_before_fire_verified : RationalBox.StrictBefore Cteach_teach_12_MARK_before_fire_left Cteach_teach_12_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_MARK_before_fire_left, Cteach_teach_12_MARK_before_fire_right]
+
+theorem Cteach_teach_12_fire_before_ERROR_verified : RationalBox.StrictBefore Cteach_teach_12_fire_before_ERROR_left Cteach_teach_12_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_fire_before_ERROR_left, Cteach_teach_12_fire_before_ERROR_right]
+
+theorem Cteach_teach_12_ERROR_protected_verified : RationalBox.StrictBefore Cteach_teach_12_ERROR_protected_left Cteach_teach_12_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_12_ERROR_protected_left, Cteach_teach_12_ERROR_protected_right]
+
+theorem B_teach_13_aux_separation_verified : RationalBox.StrictBefore B_teach_13_aux_separation_left B_teach_13_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_aux_separation_left, B_teach_13_aux_separation_right]
+
+theorem B_teach_13_gain_below_cap_verified : RationalBox.StrictBefore B_teach_13_gain_below_cap_left B_teach_13_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_gain_below_cap_left, B_teach_13_gain_below_cap_right]
+
+theorem B_teach_13_ready_at_input_verified : RationalBox.StrictBefore B_teach_13_ready_at_input_left B_teach_13_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_ready_at_input_left, B_teach_13_ready_at_input_right]
+
+theorem B_teach_13_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_teach_13_positive_derivative_coefficient_left B_teach_13_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_positive_derivative_coefficient_left, B_teach_13_positive_derivative_coefficient_right]
+
+theorem B_teach_13_fixed_flow_increases_verified : RationalBox.StrictBefore B_teach_13_fixed_flow_increases_left B_teach_13_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_fixed_flow_increases_left, B_teach_13_fixed_flow_increases_right]
+
+theorem B_teach_13_strong_crosses_by_one_verified : RationalBox.StrictBefore B_teach_13_strong_crosses_by_one_left B_teach_13_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_strong_crosses_by_one_left, B_teach_13_strong_crosses_by_one_right]
+
+theorem B_teach_13_root_lower_verified : RationalBox.StrictBefore B_teach_13_root_lower_left B_teach_13_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_root_lower_left, B_teach_13_root_lower_right]
+
+theorem B_teach_13_root_upper_verified : RationalBox.StrictBefore B_teach_13_root_upper_left B_teach_13_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_root_upper_left, B_teach_13_root_upper_right]
+
+theorem B_teach_13_MARK_before_fire_verified : RationalBox.StrictBefore B_teach_13_MARK_before_fire_left B_teach_13_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_MARK_before_fire_left, B_teach_13_MARK_before_fire_right]
+
+theorem B_teach_13_fire_before_ERROR_verified : RationalBox.StrictBefore B_teach_13_fire_before_ERROR_left B_teach_13_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_fire_before_ERROR_left, B_teach_13_fire_before_ERROR_right]
+
+theorem B_teach_13_ERROR_protected_verified : RationalBox.StrictBefore B_teach_13_ERROR_protected_left B_teach_13_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_13_ERROR_protected_left, B_teach_13_ERROR_protected_right]
+
+theorem Cteach_teach_13_aux_separation_verified : RationalBox.StrictBefore Cteach_teach_13_aux_separation_left Cteach_teach_13_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_aux_separation_left, Cteach_teach_13_aux_separation_right]
+
+theorem Cteach_teach_13_gain_below_cap_verified : RationalBox.StrictBefore Cteach_teach_13_gain_below_cap_left Cteach_teach_13_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_gain_below_cap_left, Cteach_teach_13_gain_below_cap_right]
+
+theorem Cteach_teach_13_ready_at_input_verified : RationalBox.StrictBefore Cteach_teach_13_ready_at_input_left Cteach_teach_13_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_ready_at_input_left, Cteach_teach_13_ready_at_input_right]
+
+theorem Cteach_teach_13_positive_derivative_coefficient_verified : RationalBox.StrictBefore Cteach_teach_13_positive_derivative_coefficient_left Cteach_teach_13_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_positive_derivative_coefficient_left, Cteach_teach_13_positive_derivative_coefficient_right]
+
+theorem Cteach_teach_13_fixed_flow_increases_verified : RationalBox.StrictBefore Cteach_teach_13_fixed_flow_increases_left Cteach_teach_13_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_fixed_flow_increases_left, Cteach_teach_13_fixed_flow_increases_right]
+
+theorem Cteach_teach_13_strong_crosses_by_one_verified : RationalBox.StrictBefore Cteach_teach_13_strong_crosses_by_one_left Cteach_teach_13_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_strong_crosses_by_one_left, Cteach_teach_13_strong_crosses_by_one_right]
+
+theorem Cteach_teach_13_root_lower_verified : RationalBox.StrictBefore Cteach_teach_13_root_lower_left Cteach_teach_13_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_root_lower_left, Cteach_teach_13_root_lower_right]
+
+theorem Cteach_teach_13_root_upper_verified : RationalBox.StrictBefore Cteach_teach_13_root_upper_left Cteach_teach_13_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_root_upper_left, Cteach_teach_13_root_upper_right]
+
+theorem Cteach_teach_13_MARK_before_fire_verified : RationalBox.StrictBefore Cteach_teach_13_MARK_before_fire_left Cteach_teach_13_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_MARK_before_fire_left, Cteach_teach_13_MARK_before_fire_right]
+
+theorem Cteach_teach_13_fire_before_ERROR_verified : RationalBox.StrictBefore Cteach_teach_13_fire_before_ERROR_left Cteach_teach_13_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_fire_before_ERROR_left, Cteach_teach_13_fire_before_ERROR_right]
+
+theorem Cteach_teach_13_ERROR_protected_verified : RationalBox.StrictBefore Cteach_teach_13_ERROR_protected_left Cteach_teach_13_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_13_ERROR_protected_left, Cteach_teach_13_ERROR_protected_right]
+
+theorem B_teach_14_aux_separation_verified : RationalBox.StrictBefore B_teach_14_aux_separation_left B_teach_14_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_aux_separation_left, B_teach_14_aux_separation_right]
+
+theorem B_teach_14_gain_below_cap_verified : RationalBox.StrictBefore B_teach_14_gain_below_cap_left B_teach_14_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_gain_below_cap_left, B_teach_14_gain_below_cap_right]
+
+theorem B_teach_14_ready_at_input_verified : RationalBox.StrictBefore B_teach_14_ready_at_input_left B_teach_14_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_ready_at_input_left, B_teach_14_ready_at_input_right]
+
+theorem B_teach_14_positive_derivative_coefficient_verified : RationalBox.StrictBefore B_teach_14_positive_derivative_coefficient_left B_teach_14_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_positive_derivative_coefficient_left, B_teach_14_positive_derivative_coefficient_right]
+
+theorem B_teach_14_fixed_flow_increases_verified : RationalBox.StrictBefore B_teach_14_fixed_flow_increases_left B_teach_14_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_fixed_flow_increases_left, B_teach_14_fixed_flow_increases_right]
+
+theorem B_teach_14_strong_crosses_by_one_verified : RationalBox.StrictBefore B_teach_14_strong_crosses_by_one_left B_teach_14_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_strong_crosses_by_one_left, B_teach_14_strong_crosses_by_one_right]
+
+theorem B_teach_14_root_lower_verified : RationalBox.StrictBefore B_teach_14_root_lower_left B_teach_14_root_lower_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_root_lower_left, B_teach_14_root_lower_right]
+
+theorem B_teach_14_root_upper_verified : RationalBox.StrictBefore B_teach_14_root_upper_left B_teach_14_root_upper_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_root_upper_left, B_teach_14_root_upper_right]
+
+theorem B_teach_14_MARK_before_fire_verified : RationalBox.StrictBefore B_teach_14_MARK_before_fire_left B_teach_14_MARK_before_fire_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_MARK_before_fire_left, B_teach_14_MARK_before_fire_right]
+
+theorem B_teach_14_fire_before_ERROR_verified : RationalBox.StrictBefore B_teach_14_fire_before_ERROR_left B_teach_14_fire_before_ERROR_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_fire_before_ERROR_left, B_teach_14_fire_before_ERROR_right]
+
+theorem B_teach_14_ERROR_protected_verified : RationalBox.StrictBefore B_teach_14_ERROR_protected_left B_teach_14_ERROR_protected_right := by
+  norm_num [RationalBox.StrictBefore, B_teach_14_ERROR_protected_left, B_teach_14_ERROR_protected_right]
+
+theorem Cteach_teach_14_aux_separation_verified : RationalBox.StrictBefore Cteach_teach_14_aux_separation_left Cteach_teach_14_aux_separation_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_14_aux_separation_left, Cteach_teach_14_aux_separation_right]
+
+theorem Cteach_teach_14_gain_below_cap_verified : RationalBox.StrictBefore Cteach_teach_14_gain_below_cap_left Cteach_teach_14_gain_below_cap_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_14_gain_below_cap_left, Cteach_teach_14_gain_below_cap_right]
+
+theorem Cteach_teach_14_ready_at_input_verified : RationalBox.StrictBefore Cteach_teach_14_ready_at_input_left Cteach_teach_14_ready_at_input_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_14_ready_at_input_left, Cteach_teach_14_ready_at_input_right]
+
+theorem Cteach_teach_14_positive_derivative_coefficient_verified : RationalBox.StrictBefore Cteach_teach_14_positive_derivative_coefficient_left Cteach_teach_14_positive_derivative_coefficient_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_14_positive_derivative_coefficient_left, Cteach_teach_14_positive_derivative_coefficient_right]
+
+theorem Cteach_teach_14_fixed_flow_increases_verified : RationalBox.StrictBefore Cteach_teach_14_fixed_flow_increases_left Cteach_teach_14_fixed_flow_increases_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_14_fixed_flow_increases_left, Cteach_teach_14_fixed_flow_increases_right]
+
+theorem Cteach_teach_14_strong_crosses_by_one_verified : RationalBox.StrictBefore Cteach_teach_14_strong_crosses_by_one_left Cteach_teach_14_strong_crosses_by_one_right := by
+  norm_num [RationalBox.StrictBefore, Cteach_teach_14_strong_crosses_by_one_left, Cteach_teach_14_strong_crosses_by_one_right]
+
+def Checks01Valid : Prop :=
+  RationalBox.StrictBefore Cteach_teach_7_aux_separation_left Cteach_teach_7_aux_separation_right ∧
+  RationalBox.StrictBefore Cteach_teach_7_gain_below_cap_left Cteach_teach_7_gain_below_cap_right ∧
+  RationalBox.StrictBefore Cteach_teach_7_ready_at_input_left Cteach_teach_7_ready_at_input_right ∧
+  RationalBox.StrictBefore Cteach_teach_7_positive_derivative_coefficient_left Cteach_teach_7_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore Cteach_teach_7_fixed_flow_increases_left Cteach_teach_7_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore Cteach_teach_7_strong_crosses_by_one_left Cteach_teach_7_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore Cteach_teach_7_root_lower_left Cteach_teach_7_root_lower_right ∧
+  RationalBox.StrictBefore Cteach_teach_7_root_upper_left Cteach_teach_7_root_upper_right ∧
+  RationalBox.StrictBefore Cteach_teach_7_MARK_before_fire_left Cteach_teach_7_MARK_before_fire_right ∧
+  RationalBox.StrictBefore Cteach_teach_7_fire_before_ERROR_left Cteach_teach_7_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore Cteach_teach_7_ERROR_protected_left Cteach_teach_7_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_teach_8_aux_separation_left B_teach_8_aux_separation_right ∧
+  RationalBox.StrictBefore B_teach_8_gain_below_cap_left B_teach_8_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_teach_8_ready_at_input_left B_teach_8_ready_at_input_right ∧
+  RationalBox.StrictBefore B_teach_8_positive_derivative_coefficient_left B_teach_8_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_teach_8_fixed_flow_increases_left B_teach_8_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_teach_8_strong_crosses_by_one_left B_teach_8_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_teach_8_root_lower_left B_teach_8_root_lower_right ∧
+  RationalBox.StrictBefore B_teach_8_root_upper_left B_teach_8_root_upper_right ∧
+  RationalBox.StrictBefore B_teach_8_MARK_before_fire_left B_teach_8_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_teach_8_fire_before_ERROR_left B_teach_8_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_teach_8_ERROR_protected_left B_teach_8_ERROR_protected_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_aux_separation_left Cteach_teach_8_aux_separation_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_gain_below_cap_left Cteach_teach_8_gain_below_cap_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_ready_at_input_left Cteach_teach_8_ready_at_input_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_positive_derivative_coefficient_left Cteach_teach_8_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_fixed_flow_increases_left Cteach_teach_8_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_strong_crosses_by_one_left Cteach_teach_8_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_root_lower_left Cteach_teach_8_root_lower_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_root_upper_left Cteach_teach_8_root_upper_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_MARK_before_fire_left Cteach_teach_8_MARK_before_fire_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_fire_before_ERROR_left Cteach_teach_8_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore Cteach_teach_8_ERROR_protected_left Cteach_teach_8_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_teach_9_aux_separation_left B_teach_9_aux_separation_right ∧
+  RationalBox.StrictBefore B_teach_9_gain_below_cap_left B_teach_9_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_teach_9_ready_at_input_left B_teach_9_ready_at_input_right ∧
+  RationalBox.StrictBefore B_teach_9_positive_derivative_coefficient_left B_teach_9_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_teach_9_fixed_flow_increases_left B_teach_9_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_teach_9_strong_crosses_by_one_left B_teach_9_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_teach_9_root_lower_left B_teach_9_root_lower_right ∧
+  RationalBox.StrictBefore B_teach_9_root_upper_left B_teach_9_root_upper_right ∧
+  RationalBox.StrictBefore B_teach_9_MARK_before_fire_left B_teach_9_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_teach_9_fire_before_ERROR_left B_teach_9_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_teach_9_ERROR_protected_left B_teach_9_ERROR_protected_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_aux_separation_left Cteach_teach_9_aux_separation_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_gain_below_cap_left Cteach_teach_9_gain_below_cap_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_ready_at_input_left Cteach_teach_9_ready_at_input_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_positive_derivative_coefficient_left Cteach_teach_9_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_fixed_flow_increases_left Cteach_teach_9_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_strong_crosses_by_one_left Cteach_teach_9_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_root_lower_left Cteach_teach_9_root_lower_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_root_upper_left Cteach_teach_9_root_upper_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_MARK_before_fire_left Cteach_teach_9_MARK_before_fire_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_fire_before_ERROR_left Cteach_teach_9_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore Cteach_teach_9_ERROR_protected_left Cteach_teach_9_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_teach_10_aux_separation_left B_teach_10_aux_separation_right ∧
+  RationalBox.StrictBefore B_teach_10_gain_below_cap_left B_teach_10_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_teach_10_ready_at_input_left B_teach_10_ready_at_input_right ∧
+  RationalBox.StrictBefore B_teach_10_positive_derivative_coefficient_left B_teach_10_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_teach_10_fixed_flow_increases_left B_teach_10_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_teach_10_strong_crosses_by_one_left B_teach_10_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_teach_10_root_lower_left B_teach_10_root_lower_right ∧
+  RationalBox.StrictBefore B_teach_10_root_upper_left B_teach_10_root_upper_right ∧
+  RationalBox.StrictBefore B_teach_10_MARK_before_fire_left B_teach_10_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_teach_10_fire_before_ERROR_left B_teach_10_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_teach_10_ERROR_protected_left B_teach_10_ERROR_protected_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_aux_separation_left Cteach_teach_10_aux_separation_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_gain_below_cap_left Cteach_teach_10_gain_below_cap_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_ready_at_input_left Cteach_teach_10_ready_at_input_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_positive_derivative_coefficient_left Cteach_teach_10_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_fixed_flow_increases_left Cteach_teach_10_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_strong_crosses_by_one_left Cteach_teach_10_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_root_lower_left Cteach_teach_10_root_lower_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_root_upper_left Cteach_teach_10_root_upper_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_MARK_before_fire_left Cteach_teach_10_MARK_before_fire_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_fire_before_ERROR_left Cteach_teach_10_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore Cteach_teach_10_ERROR_protected_left Cteach_teach_10_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_teach_11_aux_separation_left B_teach_11_aux_separation_right ∧
+  RationalBox.StrictBefore B_teach_11_gain_below_cap_left B_teach_11_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_teach_11_ready_at_input_left B_teach_11_ready_at_input_right ∧
+  RationalBox.StrictBefore B_teach_11_positive_derivative_coefficient_left B_teach_11_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_teach_11_fixed_flow_increases_left B_teach_11_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_teach_11_strong_crosses_by_one_left B_teach_11_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_teach_11_root_lower_left B_teach_11_root_lower_right ∧
+  RationalBox.StrictBefore B_teach_11_root_upper_left B_teach_11_root_upper_right ∧
+  RationalBox.StrictBefore B_teach_11_MARK_before_fire_left B_teach_11_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_teach_11_fire_before_ERROR_left B_teach_11_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_teach_11_ERROR_protected_left B_teach_11_ERROR_protected_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_aux_separation_left Cteach_teach_11_aux_separation_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_gain_below_cap_left Cteach_teach_11_gain_below_cap_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_ready_at_input_left Cteach_teach_11_ready_at_input_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_positive_derivative_coefficient_left Cteach_teach_11_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_fixed_flow_increases_left Cteach_teach_11_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_strong_crosses_by_one_left Cteach_teach_11_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_root_lower_left Cteach_teach_11_root_lower_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_root_upper_left Cteach_teach_11_root_upper_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_MARK_before_fire_left Cteach_teach_11_MARK_before_fire_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_fire_before_ERROR_left Cteach_teach_11_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore Cteach_teach_11_ERROR_protected_left Cteach_teach_11_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_teach_12_aux_separation_left B_teach_12_aux_separation_right ∧
+  RationalBox.StrictBefore B_teach_12_gain_below_cap_left B_teach_12_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_teach_12_ready_at_input_left B_teach_12_ready_at_input_right ∧
+  RationalBox.StrictBefore B_teach_12_positive_derivative_coefficient_left B_teach_12_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_teach_12_fixed_flow_increases_left B_teach_12_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_teach_12_strong_crosses_by_one_left B_teach_12_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_teach_12_root_lower_left B_teach_12_root_lower_right ∧
+  RationalBox.StrictBefore B_teach_12_root_upper_left B_teach_12_root_upper_right ∧
+  RationalBox.StrictBefore B_teach_12_MARK_before_fire_left B_teach_12_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_teach_12_fire_before_ERROR_left B_teach_12_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_teach_12_ERROR_protected_left B_teach_12_ERROR_protected_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_aux_separation_left Cteach_teach_12_aux_separation_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_gain_below_cap_left Cteach_teach_12_gain_below_cap_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_ready_at_input_left Cteach_teach_12_ready_at_input_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_positive_derivative_coefficient_left Cteach_teach_12_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_fixed_flow_increases_left Cteach_teach_12_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_strong_crosses_by_one_left Cteach_teach_12_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_root_lower_left Cteach_teach_12_root_lower_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_root_upper_left Cteach_teach_12_root_upper_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_MARK_before_fire_left Cteach_teach_12_MARK_before_fire_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_fire_before_ERROR_left Cteach_teach_12_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore Cteach_teach_12_ERROR_protected_left Cteach_teach_12_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_teach_13_aux_separation_left B_teach_13_aux_separation_right ∧
+  RationalBox.StrictBefore B_teach_13_gain_below_cap_left B_teach_13_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_teach_13_ready_at_input_left B_teach_13_ready_at_input_right ∧
+  RationalBox.StrictBefore B_teach_13_positive_derivative_coefficient_left B_teach_13_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_teach_13_fixed_flow_increases_left B_teach_13_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_teach_13_strong_crosses_by_one_left B_teach_13_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_teach_13_root_lower_left B_teach_13_root_lower_right ∧
+  RationalBox.StrictBefore B_teach_13_root_upper_left B_teach_13_root_upper_right ∧
+  RationalBox.StrictBefore B_teach_13_MARK_before_fire_left B_teach_13_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_teach_13_fire_before_ERROR_left B_teach_13_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_teach_13_ERROR_protected_left B_teach_13_ERROR_protected_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_aux_separation_left Cteach_teach_13_aux_separation_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_gain_below_cap_left Cteach_teach_13_gain_below_cap_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_ready_at_input_left Cteach_teach_13_ready_at_input_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_positive_derivative_coefficient_left Cteach_teach_13_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_fixed_flow_increases_left Cteach_teach_13_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_strong_crosses_by_one_left Cteach_teach_13_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_root_lower_left Cteach_teach_13_root_lower_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_root_upper_left Cteach_teach_13_root_upper_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_MARK_before_fire_left Cteach_teach_13_MARK_before_fire_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_fire_before_ERROR_left Cteach_teach_13_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore Cteach_teach_13_ERROR_protected_left Cteach_teach_13_ERROR_protected_right ∧
+  RationalBox.StrictBefore B_teach_14_aux_separation_left B_teach_14_aux_separation_right ∧
+  RationalBox.StrictBefore B_teach_14_gain_below_cap_left B_teach_14_gain_below_cap_right ∧
+  RationalBox.StrictBefore B_teach_14_ready_at_input_left B_teach_14_ready_at_input_right ∧
+  RationalBox.StrictBefore B_teach_14_positive_derivative_coefficient_left B_teach_14_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore B_teach_14_fixed_flow_increases_left B_teach_14_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore B_teach_14_strong_crosses_by_one_left B_teach_14_strong_crosses_by_one_right ∧
+  RationalBox.StrictBefore B_teach_14_root_lower_left B_teach_14_root_lower_right ∧
+  RationalBox.StrictBefore B_teach_14_root_upper_left B_teach_14_root_upper_right ∧
+  RationalBox.StrictBefore B_teach_14_MARK_before_fire_left B_teach_14_MARK_before_fire_right ∧
+  RationalBox.StrictBefore B_teach_14_fire_before_ERROR_left B_teach_14_fire_before_ERROR_right ∧
+  RationalBox.StrictBefore B_teach_14_ERROR_protected_left B_teach_14_ERROR_protected_right ∧
+  RationalBox.StrictBefore Cteach_teach_14_aux_separation_left Cteach_teach_14_aux_separation_right ∧
+  RationalBox.StrictBefore Cteach_teach_14_gain_below_cap_left Cteach_teach_14_gain_below_cap_right ∧
+  RationalBox.StrictBefore Cteach_teach_14_ready_at_input_left Cteach_teach_14_ready_at_input_right ∧
+  RationalBox.StrictBefore Cteach_teach_14_positive_derivative_coefficient_left Cteach_teach_14_positive_derivative_coefficient_right ∧
+  RationalBox.StrictBefore Cteach_teach_14_fixed_flow_increases_left Cteach_teach_14_fixed_flow_increases_right ∧
+  RationalBox.StrictBefore Cteach_teach_14_strong_crosses_by_one_left Cteach_teach_14_strong_crosses_by_one_right
+theorem Checks01Valid_verified : Checks01Valid := by
+  exact ⟨Cteach_teach_7_aux_separation_verified, Cteach_teach_7_gain_below_cap_verified, Cteach_teach_7_ready_at_input_verified, Cteach_teach_7_positive_derivative_coefficient_verified, Cteach_teach_7_fixed_flow_increases_verified, Cteach_teach_7_strong_crosses_by_one_verified, Cteach_teach_7_root_lower_verified, Cteach_teach_7_root_upper_verified, Cteach_teach_7_MARK_before_fire_verified, Cteach_teach_7_fire_before_ERROR_verified, Cteach_teach_7_ERROR_protected_verified, B_teach_8_aux_separation_verified, B_teach_8_gain_below_cap_verified, B_teach_8_ready_at_input_verified, B_teach_8_positive_derivative_coefficient_verified, B_teach_8_fixed_flow_increases_verified, B_teach_8_strong_crosses_by_one_verified, B_teach_8_root_lower_verified, B_teach_8_root_upper_verified, B_teach_8_MARK_before_fire_verified, B_teach_8_fire_before_ERROR_verified, B_teach_8_ERROR_protected_verified, Cteach_teach_8_aux_separation_verified, Cteach_teach_8_gain_below_cap_verified, Cteach_teach_8_ready_at_input_verified, Cteach_teach_8_positive_derivative_coefficient_verified, Cteach_teach_8_fixed_flow_increases_verified, Cteach_teach_8_strong_crosses_by_one_verified, Cteach_teach_8_root_lower_verified, Cteach_teach_8_root_upper_verified, Cteach_teach_8_MARK_before_fire_verified, Cteach_teach_8_fire_before_ERROR_verified, Cteach_teach_8_ERROR_protected_verified, B_teach_9_aux_separation_verified, B_teach_9_gain_below_cap_verified, B_teach_9_ready_at_input_verified, B_teach_9_positive_derivative_coefficient_verified, B_teach_9_fixed_flow_increases_verified, B_teach_9_strong_crosses_by_one_verified, B_teach_9_root_lower_verified, B_teach_9_root_upper_verified, B_teach_9_MARK_before_fire_verified, B_teach_9_fire_before_ERROR_verified, B_teach_9_ERROR_protected_verified, Cteach_teach_9_aux_separation_verified, Cteach_teach_9_gain_below_cap_verified, Cteach_teach_9_ready_at_input_verified, Cteach_teach_9_positive_derivative_coefficient_verified, Cteach_teach_9_fixed_flow_increases_verified, Cteach_teach_9_strong_crosses_by_one_verified, Cteach_teach_9_root_lower_verified, Cteach_teach_9_root_upper_verified, Cteach_teach_9_MARK_before_fire_verified, Cteach_teach_9_fire_before_ERROR_verified, Cteach_teach_9_ERROR_protected_verified, B_teach_10_aux_separation_verified, B_teach_10_gain_below_cap_verified, B_teach_10_ready_at_input_verified, B_teach_10_positive_derivative_coefficient_verified, B_teach_10_fixed_flow_increases_verified, B_teach_10_strong_crosses_by_one_verified, B_teach_10_root_lower_verified, B_teach_10_root_upper_verified, B_teach_10_MARK_before_fire_verified, B_teach_10_fire_before_ERROR_verified, B_teach_10_ERROR_protected_verified, Cteach_teach_10_aux_separation_verified, Cteach_teach_10_gain_below_cap_verified, Cteach_teach_10_ready_at_input_verified, Cteach_teach_10_positive_derivative_coefficient_verified, Cteach_teach_10_fixed_flow_increases_verified, Cteach_teach_10_strong_crosses_by_one_verified, Cteach_teach_10_root_lower_verified, Cteach_teach_10_root_upper_verified, Cteach_teach_10_MARK_before_fire_verified, Cteach_teach_10_fire_before_ERROR_verified, Cteach_teach_10_ERROR_protected_verified, B_teach_11_aux_separation_verified, B_teach_11_gain_below_cap_verified, B_teach_11_ready_at_input_verified, B_teach_11_positive_derivative_coefficient_verified, B_teach_11_fixed_flow_increases_verified, B_teach_11_strong_crosses_by_one_verified, B_teach_11_root_lower_verified, B_teach_11_root_upper_verified, B_teach_11_MARK_before_fire_verified, B_teach_11_fire_before_ERROR_verified, B_teach_11_ERROR_protected_verified, Cteach_teach_11_aux_separation_verified, Cteach_teach_11_gain_below_cap_verified, Cteach_teach_11_ready_at_input_verified, Cteach_teach_11_positive_derivative_coefficient_verified, Cteach_teach_11_fixed_flow_increases_verified, Cteach_teach_11_strong_crosses_by_one_verified, Cteach_teach_11_root_lower_verified, Cteach_teach_11_root_upper_verified, Cteach_teach_11_MARK_before_fire_verified, Cteach_teach_11_fire_before_ERROR_verified, Cteach_teach_11_ERROR_protected_verified, B_teach_12_aux_separation_verified, B_teach_12_gain_below_cap_verified, B_teach_12_ready_at_input_verified, B_teach_12_positive_derivative_coefficient_verified, B_teach_12_fixed_flow_increases_verified, B_teach_12_strong_crosses_by_one_verified, B_teach_12_root_lower_verified, B_teach_12_root_upper_verified, B_teach_12_MARK_before_fire_verified, B_teach_12_fire_before_ERROR_verified, B_teach_12_ERROR_protected_verified, Cteach_teach_12_aux_separation_verified, Cteach_teach_12_gain_below_cap_verified, Cteach_teach_12_ready_at_input_verified, Cteach_teach_12_positive_derivative_coefficient_verified, Cteach_teach_12_fixed_flow_increases_verified, Cteach_teach_12_strong_crosses_by_one_verified, Cteach_teach_12_root_lower_verified, Cteach_teach_12_root_upper_verified, Cteach_teach_12_MARK_before_fire_verified, Cteach_teach_12_fire_before_ERROR_verified, Cteach_teach_12_ERROR_protected_verified, B_teach_13_aux_separation_verified, B_teach_13_gain_below_cap_verified, B_teach_13_ready_at_input_verified, B_teach_13_positive_derivative_coefficient_verified, B_teach_13_fixed_flow_increases_verified, B_teach_13_strong_crosses_by_one_verified, B_teach_13_root_lower_verified, B_teach_13_root_upper_verified, B_teach_13_MARK_before_fire_verified, B_teach_13_fire_before_ERROR_verified, B_teach_13_ERROR_protected_verified, Cteach_teach_13_aux_separation_verified, Cteach_teach_13_gain_below_cap_verified, Cteach_teach_13_ready_at_input_verified, Cteach_teach_13_positive_derivative_coefficient_verified, Cteach_teach_13_fixed_flow_increases_verified, Cteach_teach_13_strong_crosses_by_one_verified, Cteach_teach_13_root_lower_verified, Cteach_teach_13_root_upper_verified, Cteach_teach_13_MARK_before_fire_verified, Cteach_teach_13_fire_before_ERROR_verified, Cteach_teach_13_ERROR_protected_verified, B_teach_14_aux_separation_verified, B_teach_14_gain_below_cap_verified, B_teach_14_ready_at_input_verified, B_teach_14_positive_derivative_coefficient_verified, B_teach_14_fixed_flow_increases_verified, B_teach_14_strong_crosses_by_one_verified, B_teach_14_root_lower_verified, B_teach_14_root_upper_verified, B_teach_14_MARK_before_fire_verified, B_teach_14_fire_before_ERROR_verified, B_teach_14_ERROR_protected_verified, Cteach_teach_14_aux_separation_verified, Cteach_teach_14_gain_below_cap_verified, Cteach_teach_14_ready_at_input_verified, Cteach_teach_14_positive_derivative_coefficient_verified, Cteach_teach_14_fixed_flow_increases_verified, Cteach_teach_14_strong_crosses_by_one_verified⟩
+
+end KernelR.Certificates.Cadence003

@@ -1,7 +1,7 @@
 import KernelR
 import Lean.Util.CollectAxioms
 
-set_option maxHeartbeats 2000000
+set_option maxHeartbeats 8000000
 
 /-! Fail if any project theorem depends on an axiom outside Lean's standard
 logical foundations. This includes admitted proofs and native evaluation axioms. -/

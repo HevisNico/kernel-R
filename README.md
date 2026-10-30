@@ -10,6 +10,7 @@ A22 network engines and historical proof archive stay in the
 ## Start here
 
 - [R kernel definition](kernel/README.md) and [original model](model/full_model_reference.md).
+- [Cadence cascade proof](proof/reciprocal_cadence/THEOREM.md): C's faster cadence reaches A through B, from birth through time 789.9.
 - [Birth-to-feedback proof](proof/reciprocal_entry/THEOREM.md): pulses-only initialization through time 459.9.
 - [Prepared-section theorem](proof/reciprocal_learning/THEOREM.md): the local A-learns-from-B effect.
 - [Lean proof project](proof/lean/README.md): checked mathematical lemmas, exact certificate endpoint obligations and finite adaptive-policy replay, with explicit coverage limits.
@@ -17,7 +18,7 @@ A22 network engines and historical proof archive stay in the
 - [Learned teaching choice](experiments/reciprocal/pedagogy/README.md) and [within-lesson adaptation](experiments/reciprocal/adaptive/README.md).
 - [Complete English prototype ZIP](downloads/R_Reciprocal_Prototype.zip): runnable code, recordings, reports and proofs in titled folders.
 
-Extract the ZIP and open `10_Certified_Section_Entry/RESULTS.html` for the latest
+Extract the ZIP and open `11_Certified_Cadence_Cascade/RESULTS.html` for the latest
 proof, or `03_Visualization/OPEN_IN_BROWSER.html` for the recorded three-cell
 network. The viewer replays simulations rather than solving the equations.
 
@@ -31,6 +32,7 @@ network. The viewer replays simulations rather than solving the equations.
 | Within-lesson adaptation | A learned stopping policy improves on fixed durations; a programmed equivalent rule matches it. |
 | Local feedback theorem | ±0.3% and ±10% physical boxes, from a prepared section. |
 | Entry and composed theorem | The declared READY birth family reaches that section; pulses-only protocol through time 459.9. |
+| Cadence cascade theorem | From birth through 789.9, on 45-parameter boxes: C->B->A; b gains 0.2 in each cell's fast stage; A's frozen period-4 probe improves 4/8 to 8/8. |
 
 The composed proof starts with b near 0.08, establishes one protected full MARK
 in each cell, and reaches b near 0.18 at time 319.9. It then proves
@@ -38,16 +40,24 @@ in each cell, and reaches b near 0.18 at time 319.9. It then proves
 probe changing from 0/8 to 8/8. The box contains all 30 original per-port physical
 parameters of A and B independently.
 
-This ±10% prefix result does not certify the older entire A22 network at ±10%,
-the settings-copy variant, later open recurrence or adaptive pedagogy. The new
+The cadence extension reaches 789.9, including C's introduction, 20/18/16 fast
+emissions in C/B/A and two full recovery MARK doses in each. It covers all 45
+per-port physical parameters independently, with per-pulse wire jitter in [0.3,0.4].
+The [cadence results](results/reciprocal_cadence/README.md) include retained probes
+and causal cuts: without either reverse link, A remains at 4/8.
+
+These ±10% prefix results do not certify the older entire A22 network at ±10%,
+the settings-copy variant, open recurrence after 800 or adaptive pedagogy. The new
 theorems combine written hybrid-flow arguments with checked interval obligations;
 they are not complete Lean formalizations or independently peer-reviewed mathematics.
 
 The [Lean project](proof/lean/README.md) now formalizes selected parts: charge
 balance and dose identities, mode-local decay and recovery, calendar arithmetic,
-abstract cycle counts, copying and stopping-policy properties. It also checks
-180 exact rational endpoint obligations from the published certificates and
-replays the recorded adaptive scores. Proving that the complete hybrid execution
+abstract cycle counts, copying and stopping-policy properties. The C→B→A
+extension adds the combined MARK/ERROR case, the integrated MARK recovery formula,
+per-input dose-counter replay and explicit treatment of wire jitter. Lean checks
+2,240 exact rational endpoint obligations from all six published certificates,
+the two 95-case cadence traces and the recorded adaptive scores. Proving that the complete hybrid execution
 satisfies those abstractions and enclosures remains separate work.
 
 ## Verify the proofs
@@ -60,9 +70,13 @@ python -B -m unittest discover -s tests
 python -B certify/reciprocal_learning/tests.py
 python -B certify/reciprocal_entry/tests.py --link-code certify/reciprocal_learning --link-003 results/reciprocal_learning/eps3e-3/certificate.json --link-01 results/reciprocal_learning/eps1e-1/certificate.json
 python -B certify/reciprocal_entry/verify.py results/reciprocal_entry/eps1e-1/certificate.json --link-certificate results/reciprocal_learning/eps1e-1/certificate.json --link-code certify/reciprocal_learning
+python -B certify/reciprocal_cadence/tests.py
 ```
 
-There are 14 local-theorem and 16 entry/composition tests. The new entry checker
+There are 14 local-theorem, 16 entry/composition and 18 cadence tests. The cadence
+checker replays 95 actual input cases, 1,030 strict obligations and 2,533 enclosures
+for each physical box, and rechecks the authenticated earlier theorems.
+The entry checker
 verifies 59 obligations and 170 enclosures, then rechecks the pinned local theorem's
 31 obligations and 103 enclosures. The two arithmetic implementations are outward
 Decimal intervals and integer fixed point with explicit exp/ln series tails.

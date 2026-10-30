@@ -33,10 +33,12 @@ proofs, project axioms or native-evaluation proofs.
 | `Calendar` | Routed latency hulls, gaps in [7.5,8.5], disjoint pulses, causal delay, quiescence and preservation of intervals under fixed latency | The latency and duration enclosures |
 | `Energy` | Integrating-factor barrier; reserve stays in [50,100] on a smooth interval with work in [0,500]; explicit constant-work comparison bounds | The derivative and work bounds must hold; composition across hybrid event boundaries is not proved |
 | `Protocol` | Cycle counts 13/10 for local feedback and 38/27 for the composed words, dose updates and logical composition | The words are supplied abstractions; producing those words from the hybrid equations is not proved |
+| `Cadence` | Four pulse cases, including MARK followed by full ERROR; integral of the exponential MARK profile; post-MARK return equation and monotonicity; two extra MARK doses and four total ERROR doses; retained wire jitter after shared-latency cancellation | Physical guards, clipping inactivity, the validity of the phase decomposition and the interval enclosures remain separate obligations |
+| `CadenceRecorded/*` | Per-input cumulative dose counters for both 95-case traces, teaching counts 16/14, fast counts 20/18/16, route input/output counts and totals A=54/B=61/C=34 composed with the earlier cycle words | Case labels and recorded counters are inputs; the hybrid equations are not proved to produce these traces |
 | `Inheritance` | Bounded monotone copying, idempotence, deterministic readout under exact copying, impossibility of erasing acquired increases with monotone memory | A supplied mathematical copying operation; no claim of physical realization or invented pedagogy |
 | `Adaptive` | Stop at the first `notLate` observation, budget bounds, independence from future observations after stopping and from final grades | Categories and decoder are supplied; learning them is not formalized |
 | `Intervals` | Exact rational interval algebra and transfer of endpoint order to enclosed real values | Membership of the real quantities in the boxes is an explicit hypothesis |
-| `Certificates/*` | 180 endpoint-order obligations and validity of 546 intervals, across the two local and two entry certificates | These are exact rational checks of the published endpoints, **not** proofs that exp/log evaluations or model trajectories lie in the intervals |
+| `Certificates/*` | 2,240 endpoint-order obligations and validity of 5,612 intervals, across the two local, two entry and two cadence certificates | These are exact rational checks of the published endpoints, **not** proofs that exp/log evaluations or model trajectories lie in the intervals |
 | `Recorded` | Exact finite replay: 140/160 and 147/160 successes; 882 and 873 student pulses; four fixed-duration scores per lot | Recorded observations and grade flags are inputs, not formally derived from differential equations; this is no statistical or generalization theorem |
 
 The five upstream modules `StrictRoot`, `PeakBounds`, `CommutationE`,
@@ -47,7 +49,7 @@ perturbation range to ±10%. See [upstream provenance](evidence/UPSTREAM.json).
 
 ## How the evidence is connected
 
-`scripts/generate_evidence.py` reads the four certificates already in
+`scripts/generate_evidence.py` reads the six certificates already in
 [results](../../results) and the adaptive evaluation inside the repository's
 [pinned prototype ZIP](../../downloads/R_Reciprocal_Prototype.zip). It validates
 the ZIP and its manifest using the existing repository verifier. It does not
@@ -67,6 +69,35 @@ against the saved eight probe windows. That extraction check uses the original
 numeric recordings; Lean proves only the resulting finite Boolean/list claims.
 Teacher-query pulses remain separate from the reported student pulse totals.
 
+## C → B → A extension
+
+The cadence theorem requires more than reusing the earlier three-case cycle
+model. `Cadence.PulseCase.markThenError` gives one MARK dose and one ERROR dose
+without an emission. `CadenceRecorded` checks the accumulated counters after
+**every** input, including those combined cases. The old `Protocol` abstraction
+retains its original, narrower scope.
+
+The new analytic lemma integrates the exponential MARK profile to obtain
+`(b + 0.1) * u - J`, with
+`J = 0.1 * tau + (0.1 - 0.4 * log(5/4)) / Lm`. The return identity uses that
+deficit; it does not approximate MARK as an instantaneous jump in recovery.
+The required physical phase ordering remains a guard obligation.
+
+Shared firing latencies can cancel between dates, but fresh per-pulse wire
+delays cannot. The new calendar lemma retains `d₂ - d₁` and proves the
+[3.9,4.1] gap bound for a period-4 source and one wire with delays in [0.3,0.4],
+or [3.8,4.2] for the two-wire C→B→A path with shared latencies.
+A checked counterexample prevents an exact period-preservation claim under
+independent jitter. This bound applies to the stated common-latency case;
+skipped emissions and changed gains need their own calendar hypotheses.
+
+The two cadence certificates add 2,060 strict comparisons and 5,066 interval
+validity checks. Their generated files are split into chunks of at most 160
+checks, with aggregate theorems importing every chunk. This limits individual
+compilation size while preserving the exact published inputs. Neither the
+retained 4/8→8/8 probes nor the causal cuts are upgraded to complete Lean
+theorems of the hybrid system by this arithmetic/trace replay.
+
 ## What remains to close the complete proof
 
 1. Define the hybrid state, continuous flows, guards, resets and delayed events
@@ -79,8 +110,9 @@ Teacher-query pulses remain separate from the reported student pulse totals.
 5. For pedagogy, separately formalize the observation/readout/training interface
    and connect numerical records to that semantics.
 
-The existing [local theorem](../reciprocal_learning/THEOREM.md) and
-[entry theorem](../reciprocal_entry/THEOREM.md) therefore remain computer-assisted
+The existing [local theorem](../reciprocal_learning/THEOREM.md),
+[entry theorem](../reciprocal_entry/THEOREM.md) and
+[cadence theorem](../reciprocal_cadence/THEOREM.md) therefore remain computer-assisted
 written arguments with independent arithmetic replay. This project strengthens
 selected parts without upgrading their overall status to fully formalized.
 
