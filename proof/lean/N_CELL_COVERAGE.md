@@ -22,7 +22,7 @@ The distinction is explicit in theorem signatures, not hidden in project axioms.
 | Same-gain root ordering | `same_gain_ready_comparison`, `first_crossing_no_later` | Residual charge cannot delay the first crossing when comparing the same realized gain |
 | Local certificate endpoints | `Certificates.Composition003`, `Composition010` | All 162 strict comparisons and validity of all 352 rational enclosures in the two committed certificates |
 
-The packet representation includes bounded padding phases beyond the finite packet.
+The finite signal interface records an exact event count, so its refinement\ncontract excludes both missing and additional emissions. The packet representation\nincludes bounded padding phases beyond the finite packet.
 Only indices below m+L represent actual events. This lets retained phase errors be
 selected without adding a physical independence or retiming assumption.
 

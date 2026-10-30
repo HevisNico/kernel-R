@@ -16,6 +16,7 @@ def main():
     cadence = next(path for path in sorted((ROOT / 'KernelR/Certificates/Cadence010').glob('Checks*.lean'))
                    if 'return_before_ERROR_verified' in path.read_text())
     files.append(cadence)
+    files.append(ROOT / 'KernelR/Certificates/Composition010.lean')
     for path in files:
         source = path.read_text()
         pattern = (r'theorem \w*return_before_ERROR_verified : RationalBox.StrictBefore (\w+) (\w+) :='
