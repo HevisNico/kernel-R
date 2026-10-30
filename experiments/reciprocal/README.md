@@ -182,3 +182,12 @@ whole reciprocal or adaptive prototype.
 `10_Certified_Section_Entry` discharges that entry condition for the pulses-only
 READY birth family and composes the local theorem from initialization through
 459.9. The result does not include settings copies or later open recurrence.
+
+`11_Certified_Cadence_Cascade` extends the pulses-only birth-family proof through
+789.9. It covers C's introduction and the C->B->A fast feedback chain over all
+45 per-port physical parameters at ±0.3% and ±10%, with independent wire jitter.
+Each cell gains exactly 0.2 in b during the fast block. A's isolated frozen
+period-4 probe improves from 4/8 to 8/8; cutting either reverse link leaves A
+at 4/8. C's pulses-only baseline is 0/8 on its unused port 0, unlike the full
+settings-copy baseline above. Settings copies and the open phase after 800
+remain outside these new proofs.

@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 
 class ProjectLayout(unittest.TestCase):
     def test_proof_source_manifests_match(self):
-        for result in ['reciprocal_learning','reciprocal_entry']:
+        for result in ['reciprocal_learning','reciprocal_entry','reciprocal_cadence']:
             manifest=json.loads((ROOT/'results'/result/'SOURCE_MANIFEST.json').read_text())
             for name,want in manifest['files'].items():
                 with self.subTest(path=name):self.assertEqual(hashlib.sha256((ROOT/name).read_bytes()).hexdigest(),want)

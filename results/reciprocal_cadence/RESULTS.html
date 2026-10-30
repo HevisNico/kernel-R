@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R kernel — certified cadence cascade</title>
+<style>
+  :root{color-scheme:light;font:17px/1.6 system-ui,sans-serif;color:#172b38;background:#f4f7f8}
+  body{max-width:900px;margin:0 auto;padding:36px 20px 64px}
+  h1{font-size:clamp(2rem,6vw,3.4rem);line-height:1.12;letter-spacing:-.04em;max-width:760px}
+  h2{margin-top:2.2em;font-size:1.35rem}p{max-width:75ch}a{color:#075f70}
+  .label{font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#426b74}
+  .card{padding:24px;background:white;border:1px solid #d9e3e6;border-radius:12px;margin:24px 0}
+  .lead{font-size:1.18rem}table{border-collapse:collapse;width:100%;font-size:.94rem}
+  th,td{padding:12px 10px;text-align:left;border-bottom:1px solid #d9e3e6}th{color:#42616c}
+  .scroll{overflow-x:auto}.pass{font-weight:750;color:#11674e}code{font-size:.88em;background:#e9f0f2;padding:2px 5px}
+  @media(max-width:500px){body{padding:22px 14px 40px}.card{padding:16px}th,td{padding:10px 7px}}
+</style>
+<main>
+<p class="label">Kernel-R / Proof 11 / Pulses only</p>
+<h1>C's faster cadence reaches A through B.</h1>
+<p class="lead">A retains a period-4 response it did not have before: <strong>4/8 → 8/8</strong>,
+after learning from B's responses to C. The parents remain alive; no settings are copied.</p>
+<div class="card">
+  <p class="label">Uniform parameter guarantee</p>
+  <p><strong>45 independently varying physical parameters.</strong> Both ±0.3% and ±10% boxes,
+  independent per-pulse delays in [0.3,0.4], and the declared READY birth family.
+  The composed argument reaches time <strong>789.9</strong>.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Fast-block result</th><th>C</th><th>B</th><th>A</th></tr></thead>
+    <tbody>
+      <tr><td>Emissions</td><td>20</td><td>18</td><td>16</td></tr>
+      <tr><td>Full recovery MARK doses</td><td>2</td><td>2</td><td>2</td></tr>
+      <tr><td>Recovery change</td><td>+0.2</td><td>+0.2</td><td>+0.2</td></tr>
+      <tr><td>Frozen period-4 probe before</td><td>0/8</td><td>4/8</td><td>4/8</td></tr>
+      <tr><td>Frozen period-4 probe after</td><td class="pass">8/8</td><td class="pass">8/8</td><td class="pass">8/8</td></tr>
+    </tbody>
+  </table></div>
+  <p>C's active port is 0; B and A use port 2. C's 0/8 baseline is specific to the pulses-only variant.</p>
+</div>
+<h2>Transmission leaves a measurable change.</h2>
+<p>The fast world input reaches C alone. C's emissions drive B, whose emissions drive A.
+Each cell acquires two complete recovery doses: <code>b_after = b_before + 0.2</code>.
+Final b lies in [0.37999,0.38001]; the nominal value is 0.38. The active gain in each cell
+is its own birth gain multiplied by exp(2.4).</p>
+<p>The probes use independent copies at standard rest, with learning disabled and peers disconnected.
+They do not reset the live network. Cutting C→B leaves both parents unchanged;
+cutting B→A leaves A unchanged. A retains its 4/8 probe in either intervention.</p>
+<h2>What the checker verifies</h2>
+<p>For each box: <strong>95 input cases, 1,030 strict inequalities and 2,533 interval enclosures</strong>.
+The checker authenticates and replays both preceding certificates. Its integer arithmetic verifies
+root endpoint signs and the full pulse induction without importing the Decimal producer.</p>
+<p>The 18 tests include conformance with the nominal recording, corrupted roots and return times,
+missing MARK obligations, changed protocols, wrong dependencies and altered source identities.</p>
+<p><a href="eps3e-3/certificate.json">±0.3% certificate</a> ·
+<a href="eps3e-3/independent_check.json">integer replay</a><br>
+<a href="eps1e-1/certificate.json">±10% certificate</a> ·
+<a href="eps1e-1/independent_check.json">integer replay</a></p>
+<h2>Scope of the result</h2>
+<p>This is a computer-assisted written hybrid-flow proof with arithmetic replay. It is not a full
+Lean formalization or independent mathematical peer review. It stops before the settings copies and
+open reciprocal exchanges at 800. General learned pedagogy and silicon benefits remain separate questions.</p>
+<p><a href="../../proof/reciprocal_cadence/THEOREM.md">Read the complete theorem</a> ·
+<a href="README.md">Reproduce the checks</a> · <a href="SOURCE_MANIFEST.json">Source identities</a></p>
+</main>
+</html>
