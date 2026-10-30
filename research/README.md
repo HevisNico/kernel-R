@@ -10,3 +10,7 @@ requires those corresponding traces and the recorded numerical runtime.
 The historical notes describe the package before its integration into GitHub.
 For the new Lean proofs and their exact scope, see
 [robust coverage](../proof/lean/ROBUST_COVERAGE.md).
+
+[`robust/ranges/`](robust/ranges/README.md) extends the eight point certificates to closed
+ranges of the noise bound and the amplitude deviation (for example every ν in [0, 0.002]),
+without modifying the pinned sources.

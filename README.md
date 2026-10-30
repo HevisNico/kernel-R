@@ -10,6 +10,7 @@ A22 network engines and historical proof archive stay in the
 ## Start here
 
 - [N-cell composition theorem](proof/reciprocal_composition/THEOREM.md): every finite chain, with source-length and path-jitter budgets.
+- [Robust slow chains](research/robust/README.md): drift, bounded charge noise and pulse-amplitude variation, from birth; Lean scope in [robust coverage](proof/lean/ROBUST_COVERAGE.md).
 - [R kernel definition](kernel/README.md) and [original model](model/full_model_reference.md).
 - [Cadence cascade proof](proof/reciprocal_cadence/THEOREM.md): C's faster cadence reaches A through B, from birth through time 789.9.
 - [Birth-to-feedback proof](proof/reciprocal_entry/THEOREM.md): pulses-only initialization through time 459.9.
@@ -35,6 +36,7 @@ network. The viewer replays simulations rather than solving the equations.
 | Entry and composed theorem | The declared READY birth family reaches that section; pulses-only protocol through time 459.9. |
 | Cadence cascade theorem | From birth through 789.9, on 45-parameter boxes: C->B->A; b gains 0.2 in each cell's fast stage; A's frozen period-4 probe improves 4/8 to 8/8. |
 | N-cell composition theorem | Every finite directed chain, 15*N independent physical parameters: K>=4*N+12 and summed link-jitter budgets <=0.15. Fixed link delays allow arbitrary depth. |
+| Robust slow chains (research) | Prepared or birth-entered slow chains under measurable drift inside ±0.3% or ±10%, charge noise |w|<=nu and received-amplitude factor in [1-alpha,1+alpha]: K>=3*N+1, T>=7.5+2*sum(delta_i+sigma_i). Eight certified (epsilon,nu,alpha) points, and closed ranges such as every nu in [0,0.002] ([ranges](research/robust/ranges/README.md)); delta=0 without noise or amplitude variation. Written proofs and integer-replayed certificates; the Lean chain induction is conditional on each cell's `CellLaw` and covers timing and counts only. |
 
 The composed proof starts with b near 0.08, establishes one protected full MARK
 in each cell, and reaches b near 0.18 at time 319.9. It then proves
@@ -147,6 +149,17 @@ not preserve ZIP timestamps, while its source/data manifest remains verifiable.
 Optional viewer QA uses Node.js: `npm install`, then `npm run check:viewer`.
 `npm run check:browser` additionally needs an installed Playwright Chromium binary.
 The original reports distinguish DOM/SVG checks from unavailable full-browser tests.
+
+## Where the robust results live
+
+The robust results are in `research/robust/`, not in `certify/`, `proof/` and `results/`.
+They are a tested snapshot of an offline package, preserved byte for byte with its source
+manifests. Their protocol is a different, slow-input chain: it is not the fast period-4
+packet protocol of the N-cell composition theorem. Their status is that of the other
+written theorems: hybrid arguments written by hand, finite inequalities replayed in
+independent integer arithmetic, and, in Lean, the chain induction and the certificate
+endpoints. Proving each cell's `CellLaw` from the hybrid execution is the open step
+([plan](proof/lean/CELLLAW_PLAN.md)).
 
 ## Reference boundary and limitations
 
