@@ -13,6 +13,7 @@ lake exe cache get
 lake build
 lake env lean Audit.lean
 python3 scripts/generate_evidence.py --check
+python3 scripts/robust_evidence.py --check
 python3 scripts/check_sources.py
 python3 scripts/check_negative.py
 ```
@@ -24,6 +25,9 @@ other than `propext`, `Classical.choice` and `Quot.sound`. There are no admitted
 proofs, project axioms or native-evaluation proofs.
 
 ## Coverage and hypotheses
+
+The [robust coverage guide](ROBUST_COVERAGE.md) covers the additional birth,
+noise-dependent latency and arbitrary-depth slow-chain formalization.
 
 | Module | What Lean establishes | Remaining premise or boundary |
 |---|---|---|

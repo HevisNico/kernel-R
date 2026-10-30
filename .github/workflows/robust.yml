@@ -1,0 +1,33 @@
+name: Robust birth and latency evidence
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  robust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: research/robust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Regression tests
+        run: |
+          python -B tests.py
+          python -B test_regressions.py
+          python -B periodic/tests.py
+          python -B birth/tests.py
+          python -B latency/tests.py
+      - name: Replay all robust birth and latency certificates
+        run: python -B ../../proof/lean/scripts/robust_evidence.py --check

@@ -60,6 +60,36 @@ example : pathJitter (fun _ => (1 / 20 : ℝ)) {links} ≤ 3 / 20 := by
   norm_num [pathJitter]
 '''
     cases.append(('N-cell jitter', jitter.format(links=3), jitter.format(links=4), 'unsolved goals'))
+    robust = '''import KernelR.Robust.Induction
+open KernelR.Robust KernelR.Chain
+example : 15/2 + 2 * pathJitter (fun _ => (187/25000 : ℝ)) {links} ≤ 8 := by
+  rw [constant_jitter]
+  norm_num
+'''
+    cases.append(('robust latency budget', robust.format(links=31),
+                  robust.format(links=34), 'unsolved goals'))
+    counts = '''import KernelR.Robust.Induction
+open KernelR.Robust
+example : traffic 104 32 = {count} := by decide
+'''
+    cases.append(('robust exact traffic', counts.format(count=1744),
+                  counts.format(count=1745), 'false'))
+    decomposition = '''import KernelR.Robust.Packets
+open KernelR.Robust
+example : (4/5 : ℝ) = 3/5 - max (3/5-4/5) 0 + {late} := by norm_num
+'''
+    cases.append(('first firing delay is retained', decomposition.format(late='1/5'),
+                  decomposition.format(late='0'), 'unsolved goals'))
+    entry = '''import KernelR.Robust.Evidence.Birth0
+open KernelR KernelR.Robust.Evidence.Birth0
+example : RationalBox.StrictBefore
+    entry_charge_radius_inside_local_section_left {right} := by
+  norm_num [RationalBox.StrictBefore, entry_charge_radius_inside_local_section_left,
+    entry_charge_radius_inside_local_section_right]
+'''
+    cases.append(('robust entry boundary',
+                  entry.format(right='entry_charge_radius_inside_local_section_right'),
+                  entry.format(right='entry_charge_radius_inside_local_section_left'), 'unsolved goals'))
     with tempfile.TemporaryDirectory(prefix='lean-negative-', dir=ROOT) as tmp:
         path = Path(tmp) / 'Check.lean'
         for name, good, bad, diagnostic in cases:

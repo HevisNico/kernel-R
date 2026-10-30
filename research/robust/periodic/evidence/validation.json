@@ -1,0 +1,4952 @@
+{
+  "status": "PASS_NUMERICAL_PERIODIC_PACKET_VALIDATION",
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0"
+  },
+  "source_sha256": {
+    "../README.md": "9ebcda45fea6586d0ffd865286ac3eff96e534056b4bad774e961f1b70260844",
+    "../THEOREM_N.md": "c538c633b159edc8e0fb00c5d08ea1a1707c41de7bdb2d0038e740ea3725dbdf",
+    "../THEOREM_ROBUST.md": "7432c8a5a056b122967c7c32143517b2e88d892379c20514c41fe950573c56ca",
+    "../bounds.py": "fc57e085e180e59e8b4b919173534478793121eb66c7da3e7df1e9f2c2ba40aa",
+    "../budgets.py": "78f5db8338b3e581a15e83196a011abf1e4ca03ee9ddf705463f0ad01a5dc52a",
+    "../certify.py": "01c77fa785bbdc2eb142a63e9e16d7df6b9e9b62d69945b9636665bacd3afce3",
+    "../chain.py": "b5ab30791fd2d5563a7ede570c47df17eef00ee1c3b46e4b98c6854c24cb6b46",
+    "../contract.py": "9f40233deef9dc6e56be9e8a65d9a8fcbf1fc00714fd097e7d298bba9327bb08",
+    "../decimal_intervals.py": "b7797c2be191b6baff61fd4d1e3087999aca097bf871c3452d801be7741ec444",
+    "../integer_intervals.py": "24732cfecccf069a3e3d21e97b6088f811adae4ad1d499ece266f21695f1c68d",
+    "../requirements.txt": "1668a3152e33680d94637b13421c15e68bd97cd8701f7f555c691f5bc5c0b9f3",
+    "../results/eps0.003/nu0.0015_alpha0.05.json": "eebded851f7e2cae4b5dbd02c49d998fe1a5325e7b3db1a90e317f0fe07f4732",
+    "../results/eps0.003/nu0.002_alpha0.json": "7c9c56e78f76a68ba3bb23c342cf61f1750e088eb84bf189aa383a0952a42ac9",
+    "../results/eps0.003/nu0_alpha0.09.json": "d1bcac5b41b90c5af62cccad0c563da7859a7e659152191aaa395c9b12bdb689",
+    "../results/eps0.003/nu0_alpha0.json": "e5b6378a4ebdd80251e1d6e108284e0b0f96c4b7e69a43c2c66179c5359b8b79",
+    "../results/eps0.1/nu0.0015_alpha0.05.json": "c86554a9b418abc2251b71ef61e7f5c6b8fa69e2342233e4e3e071e0ee0cb4ae",
+    "../results/eps0.1/nu0.002_alpha0.json": "6a8d583e094c62c9c5a8e5744fec21f28da5e5b41e6f30755889d81c2d5689dc",
+    "../results/eps0.1/nu0_alpha0.09.json": "d4fd0ea5c1775530b8830b20cc1648de13a892c56373cb1a5ff84f9f9990ebec",
+    "../results/eps0.1/nu0_alpha0.json": "746136076b7f5ca8d3ad30006a9a1d0a63db4793fbb2cad7bb66a55d019e648f",
+    "../simulate_events.py": "bc3883aa3e2288c602dc995423bfdc77ca09322a8dd4711628edf565e07baada",
+    "../simulate_noise.py": "dbe001b171aac32b350ae5acc59f8c09b4a6faf1db2010888d589c91b101f05b",
+    "../test_regressions.py": "4d5c207dafa17ad646e9f84200b06c61a03eb0bfafeb9f18931b823cc1fba788",
+    "../tests.py": "3b611118b59f5ea38f42091970c7cdc77eff6733910ed0c47381824e06abe5a4",
+    "../validate.py": "458a5eb8e608a9f0c760a90f22def9efdd82ec608e34944556890eff8861e35f",
+    "../verify.py": "dfe18b1e90b5e91de741b2d6e7ae6a44e9eddbdb9d657131805d438b1fab5901",
+    "README.md": "46451ee1f999aeada513404ce6800fab9074aad346377fa96ff6a35ecea6d0d9",
+    "THEOREM.md": "c1213a5ac963f225f4037e319d0b38f120eea94e16481d08beb9af78262aeb69",
+    "certify_chain.py": "32fce647fc14d712acd84a0566be70fb49afef613f810039e03632c78b077505",
+    "tests.py": "d475a5561eb3dea63af4b9e61e2270c84e9b3af92c25ace2b79bb515f34c4b24",
+    "validate.py": "44d4bf830414e0cbb8db6c7497910c625017b9150436652d86b1cbb2d1cf967c"
+  },
+  "trace_sha256": "ca06b642d344377682a04da3ae46ed66d2aa19531e1040bb4f76952133376f0d",
+  "acceptance_tolerance": 3e-08,
+  "elapsed_seconds": 235.1577173249998,
+  "cases": [
+    {
+      "N": 1,
+      "K": 11,
+      "epsilon": "0.1",
+      "period": "15/2",
+      "scenario": "oscillatory",
+      "seed": 41,
+      "sigma_each": [],
+      "nodes": [
+        {
+          "cell": 0,
+          "inputs": 11,
+          "outputs": 8,
+          "minimum_input_gap": 7.5,
+          "latency_range": [
+            0.6261497325881109,
+            0.6531644735850151
+          ],
+          "doses": [
+            0.6000000000000002,
+            0.6000000000000001,
+            0.6000000000000025
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99872866058604,
+            100.00000000000007
+          ],
+          "ready_by": 81.74338574948645,
+          "nfev": 7188
+        }
+      ],
+      "max_dose_identity_residual": 2.55351295663786e-15,
+      "max_distance_outside_certified_dose": 2.55351295663786e-15,
+      "packets": [
+        {
+          "cell": 0,
+          "rest_latency": 0.6531644735785775,
+          "first_advance": 0.027014740990466635,
+          "max_rest_latency_change": 6.437517185986508e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 6.437517185986508e-12,
+          "minimum_output_gap": 7.499999999997506,
+          "fixed_wire_tail_gap_error": 2.4940050025179517e-12
+        }
+      ]
+    },
+    {
+      "N": 2,
+      "K": 14,
+      "epsilon": "0.1",
+      "period": "15/2",
+      "scenario": "oscillatory",
+      "seed": 41,
+      "sigma_each": [
+        "0"
+      ],
+      "nodes": [
+        {
+          "cell": 0,
+          "inputs": 14,
+          "outputs": 11,
+          "minimum_input_gap": 7.5,
+          "latency_range": [
+            0.6261497325881109,
+            0.6531644735850151
+          ],
+          "doses": [
+            0.6000000000000002,
+            0.6000000000000001,
+            0.6000000000000025
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99872866058604,
+            100.00000000000007
+          ],
+          "ready_by": 104.24338574949674,
+          "nfev": 9189
+        },
+        {
+          "cell": 1,
+          "inputs": 11,
+          "outputs": 8,
+          "minimum_input_gap": 7.499999999997506,
+          "latency_range": [
+            0.6261794873244142,
+            0.6531962023082869
+          ],
+          "doses": [
+            0.6000000000000031,
+            0.5999999999999948,
+            0.6000000000000034
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 105.24714756337599,
+          "nfev": 8438
+        }
+      ],
+      "max_dose_identity_residual": 5.218048215738236e-15,
+      "max_distance_outside_certified_dose": 5.218048215738236e-15,
+      "packets": [
+        {
+          "cell": 0,
+          "rest_latency": 0.6531644735778777,
+          "first_advance": 0.02701474098976675,
+          "max_rest_latency_change": 7.137401780710206e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 7.137401780710206e-12,
+          "minimum_output_gap": 7.499999999997506,
+          "fixed_wire_tail_gap_error": 2.4940050025179517e-12
+        },
+        {
+          "cell": 1,
+          "rest_latency": 0.6531962023023112,
+          "first_advance": 0.02701671497789704,
+          "max_rest_latency_change": 5.9756644077424426e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 5.243805389909539e-12,
+          "minimum_output_gap": 7.499999999990415,
+          "fixed_wire_tail_gap_error": 9.585221505403752e-12
+        }
+      ]
+    },
+    {
+      "N": 4,
+      "K": 20,
+      "epsilon": "0.1",
+      "period": "15/2",
+      "scenario": "oscillatory",
+      "seed": 41,
+      "sigma_each": [
+        "0",
+        "0",
+        "0"
+      ],
+      "nodes": [
+        {
+          "cell": 0,
+          "inputs": 20,
+          "outputs": 17,
+          "minimum_input_gap": 7.5,
+          "latency_range": [
+            0.6261497325881109,
+            0.6531644735870827
+          ],
+          "doses": [
+            0.6000000000000002,
+            0.6000000000000001,
+            0.6000000000000025
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99872866058604,
+            100.00000000000007
+          ],
+          "ready_by": 149.24338574946432,
+          "nfev": 13119
+        },
+        {
+          "cell": 1,
+          "inputs": 17,
+          "outputs": 14,
+          "minimum_input_gap": 7.499999999997506,
+          "latency_range": [
+            0.6261794873244142,
+            0.6531962023082869
+          ],
+          "doses": [
+            0.6000000000000031,
+            0.5999999999999948,
+            0.6000000000000034
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 150.24714756337585,
+          "nfev": 12428
+        },
+        {
+          "cell": 2,
+          "inputs": 14,
+          "outputs": 11,
+          "minimum_input_gap": 7.499999999990408,
+          "latency_range": [
+            0.6261646386744815,
+            0.6531803374927279
+          ],
+          "doses": [
+            0.6000000000000021,
+            0.6000000000000013,
+            0.600000000000006
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 151.2500450794636,
+          "nfev": 11603
+        },
+        {
+          "cell": 3,
+          "inputs": 11,
+          "outputs": 8,
+          "minimum_input_gap": 7.499999999986571,
+          "latency_range": [
+            0.6261497908128035,
+            0.6531644735872248
+          ],
+          "doses": [
+            0.6000000000000024,
+            0.5999999999999911,
+            0.6000000000000119
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.00328074021284,
+            100.00000000000007
+          ],
+          "ready_by": 152.25292676281333,
+          "nfev": 10562
+        }
+      ],
+      "max_dose_identity_residual": 1.1879386363489175e-14,
+      "max_distance_outside_certified_dose": 1.1879386363489175e-14,
+      "packets": [
+        {
+          "cell": 0,
+          "rest_latency": 0.6531644735798352,
+          "first_advance": 0.027014740991724295,
+          "max_rest_latency_change": 7.247535904753022e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 7.247535904753022e-12,
+          "minimum_output_gap": 7.499999999997506,
+          "fixed_wire_tail_gap_error": 3.566924533515703e-12
+        },
+        {
+          "cell": 1,
+          "rest_latency": 0.653196202301757,
+          "first_advance": 0.027016714977342815,
+          "max_rest_latency_change": 6.529887741635321e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.27613475342514e-11,
+          "minimum_output_gap": 7.499999999990415,
+          "fixed_wire_tail_gap_error": 1.0061285138363019e-11
+        },
+        {
+          "cell": 2,
+          "rest_latency": 0.6531803374874912,
+          "first_advance": 0.027015698813009692,
+          "max_rest_latency_change": 6.0040861171728466e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.1283418643870391e-11,
+          "minimum_output_gap": 7.499999999986571,
+          "fixed_wire_tail_gap_error": 1.5447199075424578e-11
+        },
+        {
+          "cell": 3,
+          "rest_latency": 0.6531644735829332,
+          "first_advance": 0.02701468277012964,
+          "max_rest_latency_change": 4.291678123991005e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.5546675058430992e-11,
+          "minimum_output_gap": 7.499999999982776,
+          "fixed_wire_tail_gap_error": 1.722355591482483e-11
+        }
+      ]
+    },
+    {
+      "N": 8,
+      "K": 32,
+      "epsilon": "0.1",
+      "period": "15/2",
+      "scenario": "oscillatory",
+      "seed": 41,
+      "sigma_each": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "nodes": [
+        {
+          "cell": 0,
+          "inputs": 32,
+          "outputs": 29,
+          "minimum_input_gap": 7.5,
+          "latency_range": [
+            0.6261497325881109,
+            0.6531644735870827
+          ],
+          "doses": [
+            0.6000000000000002,
+            0.6000000000000001,
+            0.6000000000000025
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99685109830413,
+            100.00000000000007
+          ],
+          "ready_by": 239.24338574948305,
+          "nfev": 21135
+        },
+        {
+          "cell": 1,
+          "inputs": 29,
+          "outputs": 26,
+          "minimum_input_gap": 7.499999999997499,
+          "latency_range": [
+            0.6261794873244142,
+            0.6531962023084361
+          ],
+          "doses": [
+            0.6000000000000031,
+            0.5999999999999948,
+            0.6000000000000034
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 240.2471475633485,
+          "nfev": 20396
+        },
+        {
+          "cell": 2,
+          "inputs": 26,
+          "outputs": 23,
+          "minimum_input_gap": 7.499999999990251,
+          "latency_range": [
+            0.6261646386744815,
+            0.6531803374930405
+          ],
+          "doses": [
+            0.6000000000000021,
+            0.6000000000000013,
+            0.600000000000006
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 241.25004507942762,
+          "nfev": 19487
+        },
+        {
+          "cell": 3,
+          "inputs": 23,
+          "outputs": 20,
+          "minimum_input_gap": 7.49999999998235,
+          "latency_range": [
+            0.6261497908128035,
+            0.6531644735874522
+          ],
+          "doses": [
+            0.6000000000000024,
+            0.5999999999999911,
+            0.6000000000000119
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99668636370309,
+            100.00000000000007
+          ],
+          "ready_by": 242.25292676287913,
+          "nfev": 18554
+        },
+        {
+          "cell": 4,
+          "inputs": 20,
+          "outputs": 17,
+          "minimum_input_gap": 7.499999999982464,
+          "latency_range": [
+            0.6261794873245776,
+            0.6531962023094309
+          ],
+          "doses": [
+            0.6000000000000033,
+            0.6000000000000103,
+            0.5999999999999929
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 243.25668857674373,
+          "nfev": 17801
+        },
+        {
+          "cell": 5,
+          "inputs": 17,
+          "outputs": 14,
+          "minimum_input_gap": 7.499999999977376,
+          "latency_range": [
+            0.6261646386749362,
+            0.6531803374924152
+          ],
+          "doses": [
+            0.6000000000000048,
+            0.5999999999999972,
+            0.6000000000000262
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 244.25958609274568,
+          "nfev": 16976
+        },
+        {
+          "cell": 6,
+          "inputs": 14,
+          "outputs": 11,
+          "minimum_input_gap": 7.499999999980446,
+          "latency_range": [
+            0.6261497908118656,
+            0.6531644735870827
+          ],
+          "doses": [
+            0.59999999999998,
+            0.6000000000000003,
+            0.6000000000000028
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99798445087285,
+            100.00000000000006
+          ],
+          "ready_by": 245.26246777622316,
+          "nfev": 16007
+        },
+        {
+          "cell": 7,
+          "inputs": 11,
+          "outputs": 8,
+          "minimum_input_gap": 7.499999999977717,
+          "latency_range": [
+            0.6261794873248903,
+            0.6531962023074698
+          ],
+          "doses": [
+            0.5999999999999761,
+            0.5999999999999964,
+            0.599999999999976
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000013
+          ],
+          "ready_by": 246.26622959006227,
+          "nfev": 15266
+        }
+      ],
+      "max_dose_identity_residual": 2.6201263381153694e-14,
+      "max_distance_outside_certified_dose": 2.6201263381153694e-14,
+      "packets": [
+        {
+          "cell": 0,
+          "rest_latency": 0.6531644735828657,
+          "first_advance": 0.02701474099475476,
+          "max_rest_latency_change": 6.711076139254146e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 6.707523425575346e-12,
+          "minimum_output_gap": 7.499999999997499,
+          "fixed_wire_tail_gap_error": 3.566924533515703e-12
+        },
+        {
+          "cell": 1,
+          "rest_latency": 0.653196202301757,
+          "first_advance": 0.027016714977342815,
+          "max_rest_latency_change": 6.679101716144942e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.0032863428932615e-11,
+          "minimum_output_gap": 7.499999999990251,
+          "fixed_wire_tail_gap_error": 1.0061285138363019e-11
+        },
+        {
+          "cell": 2,
+          "rest_latency": 0.653180337488422,
+          "first_advance": 0.027015698813940503,
+          "max_rest_latency_change": 6.934897101018578e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.4239276424632408e-11,
+          "minimum_output_gap": 7.49999999998235,
+          "fixed_wire_tail_gap_error": 1.793409865058493e-11
+        },
+        {
+          "cell": 3,
+          "rest_latency": 0.6531644735829332,
+          "first_advance": 0.02701468277012964,
+          "max_rest_latency_change": 7.133849067031406e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.3415046851150692e-11,
+          "minimum_output_gap": 7.499999999982464,
+          "fixed_wire_tail_gap_error": 1.7536194718559273e-11
+        },
+        {
+          "cell": 4,
+          "rest_latency": 0.653196202304045,
+          "first_advance": 0.027016714979467338,
+          "max_rest_latency_change": 5.9543481256696396e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.5575096767861396e-11,
+          "minimum_output_gap": 7.499999999977376,
+          "fixed_wire_tail_gap_error": 2.262368070660159e-11
+        },
+        {
+          "cell": 5,
+          "rest_latency": 0.6531803374880383,
+          "first_advance": 0.027015698813102063,
+          "max_rest_latency_change": 5.7696070143720135e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.5575096767861396e-11,
+          "minimum_output_gap": 7.499999999980446,
+          "fixed_wire_tail_gap_error": 1.9554136088117957e-11
+        },
+        {
+          "cell": 6,
+          "rest_latency": 0.6531644735838285,
+          "first_advance": 0.02701468277196284,
+          "max_rest_latency_change": 7.460698725481052e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.142996891052462e-11,
+          "minimum_output_gap": 7.499999999977717,
+          "fixed_wire_tail_gap_error": 2.2282620193436742e-11
+        },
+        {
+          "cell": 7,
+          "rest_latency": 0.653196202304656,
+          "first_advance": 0.027016714979765766,
+          "max_rest_latency_change": 6.30961949354969e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.5011104298755527e-11,
+          "minimum_output_gap": 7.499999999980446,
+          "fixed_wire_tail_gap_error": 1.9554136088117957e-11
+        }
+      ]
+    },
+    {
+      "N": 16,
+      "K": 56,
+      "epsilon": "0.1",
+      "period": "15/2",
+      "scenario": "oscillatory",
+      "seed": 41,
+      "sigma_each": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "nodes": [
+        {
+          "cell": 0,
+          "inputs": 56,
+          "outputs": 53,
+          "minimum_input_gap": 7.5,
+          "latency_range": [
+            0.6261497325881109,
+            0.6531644735878785
+          ],
+          "doses": [
+            0.6000000000000002,
+            0.6000000000000001,
+            0.6000000000000025
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99685109830413,
+            100.00000000000007
+          ],
+          "ready_by": 419.24338574947546,
+          "nfev": 37203
+        },
+        {
+          "cell": 1,
+          "inputs": 53,
+          "outputs": 50,
+          "minimum_input_gap": 7.499999999997044,
+          "latency_range": [
+            0.6261794873244142,
+            0.6531962023085498
+          ],
+          "doses": [
+            0.6000000000000031,
+            0.5999999999999948,
+            0.6000000000000034
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 420.2471475633463,
+          "nfev": 36416
+        },
+        {
+          "cell": 2,
+          "inputs": 50,
+          "outputs": 47,
+          "minimum_input_gap": 7.499999999990251,
+          "latency_range": [
+            0.6261646386744815,
+            0.6531803374930405
+          ],
+          "doses": [
+            0.6000000000000021,
+            0.6000000000000013,
+            0.600000000000006
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 421.2500450792926,
+          "nfev": 35519
+        },
+        {
+          "cell": 3,
+          "inputs": 47,
+          "outputs": 44,
+          "minimum_input_gap": 7.49999999998235,
+          "latency_range": [
+            0.6261497908128035,
+            0.6531644735874522
+          ],
+          "doses": [
+            0.6000000000000024,
+            0.5999999999999911,
+            0.6000000000000119
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99668636370309,
+            100.00000000000007
+          ],
+          "ready_by": 422.25292676290275,
+          "nfev": 34538
+        },
+        {
+          "cell": 4,
+          "inputs": 44,
+          "outputs": 41,
+          "minimum_input_gap": 7.49999999998073,
+          "latency_range": [
+            0.6261794873245776,
+            0.6531962023094309
+          ],
+          "doses": [
+            0.6000000000000033,
+            0.6000000000000103,
+            0.5999999999999929
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 423.2566885767984,
+          "nfev": 33857
+        },
+        {
+          "cell": 5,
+          "inputs": 41,
+          "outputs": 38,
+          "minimum_input_gap": 7.499999999976353,
+          "latency_range": [
+            0.6261646386749362,
+            0.6531803374933247
+          ],
+          "doses": [
+            0.6000000000000048,
+            0.5999999999999972,
+            0.6000000000000262
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 424.2595860927913,
+          "nfev": 33032
+        },
+        {
+          "cell": 6,
+          "inputs": 38,
+          "outputs": 35,
+          "minimum_input_gap": 7.499999999979536,
+          "latency_range": [
+            0.6261497908118656,
+            0.6531644735878217
+          ],
+          "doses": [
+            0.59999999999998,
+            0.6000000000000003,
+            0.6000000000000028
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99675584114809,
+            100.00000000000006
+          ],
+          "ready_by": 425.2624677762413,
+          "nfev": 32027
+        },
+        {
+          "cell": 7,
+          "inputs": 35,
+          "outputs": 32,
+          "minimum_input_gap": 7.499999999977717,
+          "latency_range": [
+            0.6261794873248903,
+            0.6531962023083224
+          ],
+          "doses": [
+            0.5999999999999761,
+            0.5999999999999964,
+            0.599999999999976
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000013
+          ],
+          "ready_by": 426.26622959016873,
+          "nfev": 31250
+        },
+        {
+          "cell": 8,
+          "inputs": 32,
+          "outputs": 29,
+          "minimum_input_gap": 7.499999999980446,
+          "latency_range": [
+            0.6261646386762436,
+            0.6531803374925857
+          ],
+          "doses": [
+            0.6000000000000137,
+            0.6000000000000211,
+            0.5999999999999983
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 427.26912710605177,
+          "nfev": 30305
+        },
+        {
+          "cell": 9,
+          "inputs": 29,
+          "outputs": 26,
+          "minimum_input_gap": 7.4999999999701,
+          "latency_range": [
+            0.6261497908135141,
+            0.6531644735865143
+          ],
+          "doses": [
+            0.5999999999999899,
+            0.6000000000000159,
+            0.599999999999985
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99771721058309,
+            100.00000000000006
+          ],
+          "ready_by": 428.272008789628,
+          "nfev": 29348
+        },
+        {
+          "cell": 10,
+          "inputs": 26,
+          "outputs": 23,
+          "minimum_input_gap": 7.499999999973568,
+          "latency_range": [
+            0.6261794873238955,
+            0.6531962023094025
+          ],
+          "doses": [
+            0.6000000000000151,
+            0.6000000000000166,
+            0.5999999999999852
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 429.2757706035856,
+          "nfev": 28679
+        },
+        {
+          "cell": 11,
+          "inputs": 23,
+          "outputs": 20,
+          "minimum_input_gap": 7.499999999975557,
+          "latency_range": [
+            0.6261646386769826,
+            0.6531803374929268
+          ],
+          "doses": [
+            0.6000000000000233,
+            0.599999999999982,
+            0.5999999999999843
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 430.27866811943335,
+          "nfev": 27782
+        },
+        {
+          "cell": 12,
+          "inputs": 20,
+          "outputs": 17,
+          "minimum_input_gap": 7.499999999967713,
+          "latency_range": [
+            0.6261497908125762,
+            0.6531644735870259
+          ],
+          "doses": [
+            0.6000000000000415,
+            0.600000000000032,
+            0.6000000000000393
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99746927327888,
+            100.00000000000007
+          ],
+          "ready_by": 431.2815498030065,
+          "nfev": 26729
+        },
+        {
+          "cell": 13,
+          "inputs": 17,
+          "outputs": 14,
+          "minimum_input_gap": 7.499999999962199,
+          "latency_range": [
+            0.6261794873247482,
+            0.6531962023086635
+          ],
+          "doses": [
+            0.6000000000000512,
+            0.6000000000000386,
+            0.5999999999999459
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 432.28531161686004,
+          "nfev": 26060
+        },
+        {
+          "cell": 14,
+          "inputs": 14,
+          "outputs": 11,
+          "minimum_input_gap": 7.499999999960437,
+          "latency_range": [
+            0.6261646386773805,
+            0.6531803374925857
+          ],
+          "doses": [
+            0.5999999999999719,
+            0.6000000000000307,
+            0.6000000000000014
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000013
+          ],
+          "ready_by": 433.28820913294464,
+          "nfev": 25187
+        },
+        {
+          "cell": 15,
+          "inputs": 11,
+          "outputs": 8,
+          "minimum_input_gap": 7.499999999953104,
+          "latency_range": [
+            0.6261497908094498,
+            0.6531644735879922
+          ],
+          "doses": [
+            0.6000000000000365,
+            0.599999999999986,
+            0.5999999999999773
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99754491162426,
+            100.00000000000007
+          ],
+          "ready_by": 434.29109081637546,
+          "nfev": 24182
+        }
+      ],
+      "max_dose_identity_residual": 5.4067861299245124e-14,
+      "max_distance_outside_certified_dose": 5.4067861299245124e-14,
+      "packets": [
+        {
+          "cell": 0,
+          "rest_latency": 0.6531644735810858,
+          "first_advance": 0.02701474099297485,
+          "max_rest_latency_change": 6.792788553866558e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 6.764366844436154e-12,
+          "minimum_output_gap": 7.499999999997044,
+          "fixed_wire_tail_gap_error": 3.808509063674137e-12
+        },
+        {
+          "cell": 1,
+          "rest_latency": 0.6531962023018423,
+          "first_advance": 0.02701671497742808,
+          "max_rest_latency_change": 6.707523425575346e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.2505552149377763e-11,
+          "minimum_output_gap": 7.499999999990251,
+          "fixed_wire_tail_gap_error": 1.3301360013429075e-11
+        },
+        {
+          "cell": 2,
+          "rest_latency": 0.6531803374883509,
+          "first_advance": 0.02701569881386945,
+          "max_rest_latency_change": 6.863842827442568e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.6427748050773516e-11,
+          "minimum_output_gap": 7.49999999998235,
+          "fixed_wire_tail_gap_error": 1.793409865058493e-11
+        },
+        {
+          "cell": 3,
+          "rest_latency": 0.65316447358299,
+          "first_advance": 0.027014682770186482,
+          "max_rest_latency_change": 7.190692485892214e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.3301360013429075e-11,
+          "minimum_output_gap": 7.49999999998073,
+          "fixed_wire_tail_gap_error": 1.9269918993813917e-11
+        },
+        {
+          "cell": 4,
+          "rest_latency": 0.6531962023042865,
+          "first_advance": 0.027016714979708922,
+          "max_rest_latency_change": 6.821210263296962e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.7053025658242404e-11,
+          "minimum_output_gap": 7.499999999976353,
+          "fixed_wire_tail_gap_error": 2.3646862246096134e-11
+        },
+        {
+          "cell": 5,
+          "rest_latency": 0.653180337488493,
+          "first_advance": 0.02701569881355681,
+          "max_rest_latency_change": 6.59383658785373e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.574562702444382e-11,
+          "minimum_output_gap": 7.499999999979536,
+          "fixed_wire_tail_gap_error": 2.0463630789890885e-11
+        },
+        {
+          "cell": 6,
+          "rest_latency": 0.6531644735834021,
+          "first_advance": 0.027014682771536513,
+          "max_rest_latency_change": 7.034373084024992e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.9980461729574017e-11,
+          "minimum_output_gap": 7.499999999977717,
+          "fixed_wire_tail_gap_error": 2.2282620193436742e-11
+        },
+        {
+          "cell": 7,
+          "rest_latency": 0.653196202304656,
+          "first_advance": 0.027016714979765766,
+          "max_rest_latency_change": 7.58859641791787e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.3590018827235326e-11,
+          "minimum_output_gap": 7.499999999980446,
+          "fixed_wire_tail_gap_error": 2.233946361229755e-11
+        },
+        {
+          "cell": 8,
+          "rest_latency": 0.6531803374889762,
+          "first_advance": 0.02701569881273258,
+          "max_rest_latency_change": 7.531752999057062e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.8137492336099967e-11,
+          "minimum_output_gap": 7.4999999999701,
+          "fixed_wire_tail_gap_error": 3.001332515850663e-11
+        },
+        {
+          "cell": 9,
+          "rest_latency": 0.6531644735821942,
+          "first_advance": 0.02701468276868013,
+          "max_rest_latency_change": 5.8548721426632255e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.6943780540023e-11,
+          "minimum_output_gap": 7.499999999973568,
+          "fixed_wire_tail_gap_error": 3.291233952040784e-11
+        },
+        {
+          "cell": 10,
+          "rest_latency": 0.6531962023022686,
+          "first_advance": 0.027016714978373102,
+          "max_rest_latency_change": 7.133849067031406e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.4158453015843406e-11,
+          "minimum_output_gap": 7.499999999975557,
+          "fixed_wire_tail_gap_error": 3.3310243452433497e-11
+        },
+        {
+          "cell": 11,
+          "rest_latency": 0.6531803374896299,
+          "first_advance": 0.027015698812647315,
+          "max_rest_latency_change": 7.673861546209082e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.1661784305470064e-11,
+          "minimum_output_gap": 7.499999999967713,
+          "fixed_wire_tail_gap_error": 3.228706191293895e-11
+        },
+        {
+          "cell": 12,
+          "rest_latency": 0.6531644735806594,
+          "first_advance": 0.027014682768083276,
+          "max_rest_latency_change": 6.366462912410498e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.5072389437118545e-11,
+          "minimum_output_gap": 7.499999999962199,
+          "fixed_wire_tail_gap_error": 3.780087354243733e-11
+        },
+        {
+          "cell": 13,
+          "rest_latency": 0.6531962023025812,
+          "first_advance": 0.02701671497783309,
+          "max_rest_latency_change": 6.0822458181064576e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.7630343285854906e-11,
+          "minimum_output_gap": 7.499999999960437,
+          "fixed_wire_tail_gap_error": 3.956301952712238e-11
+        },
+        {
+          "cell": 14,
+          "rest_latency": 0.6531803374864751,
+          "first_advance": 0.0270156988090946,
+          "max_rest_latency_change": 6.110667527536862e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.143441063002683e-11,
+          "minimum_output_gap": 7.499999999953104,
+          "fixed_wire_tail_gap_error": 4.689582056016661e-11
+        },
+        {
+          "cell": 15,
+          "rest_latency": 0.6531644735828195,
+          "first_advance": 0.027014682773369714,
+          "max_rest_latency_change": 6.934897101018578e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.6261659513693303e-11,
+          "minimum_output_gap": 7.499999999957311,
+          "fixed_wire_tail_gap_error": 4.268940756446682e-11
+        }
+      ]
+    },
+    {
+      "N": 32,
+      "K": 104,
+      "epsilon": "0.1",
+      "period": "15/2",
+      "scenario": "oscillatory",
+      "seed": 41,
+      "sigma_each": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "nodes": [
+        {
+          "cell": 0,
+          "inputs": 104,
+          "outputs": 101,
+          "minimum_input_gap": 7.5,
+          "latency_range": [
+            0.6261497325881109,
+            0.6531644735880491
+          ],
+          "doses": [
+            0.6000000000000002,
+            0.6000000000000001,
+            0.6000000000000025
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99685109830413,
+            100.00000000000007
+          ],
+          "ready_by": 779.2433857494843,
+          "nfev": 69315
+        },
+        {
+          "cell": 1,
+          "inputs": 101,
+          "outputs": 98,
+          "minimum_input_gap": 7.499999999996248,
+          "latency_range": [
+            0.6261794873244142,
+            0.6531962023088909
+          ],
+          "doses": [
+            0.6000000000000031,
+            0.5999999999999948,
+            0.6000000000000034
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 780.2471475633764,
+          "nfev": 68396
+        },
+        {
+          "cell": 2,
+          "inputs": 98,
+          "outputs": 95,
+          "minimum_input_gap": 7.499999999990109,
+          "latency_range": [
+            0.6261646386744815,
+            0.6531803374930405
+          ],
+          "doses": [
+            0.6000000000000021,
+            0.6000000000000013,
+            0.600000000000006
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 781.250045079345,
+          "nfev": 67487
+        },
+        {
+          "cell": 3,
+          "inputs": 95,
+          "outputs": 92,
+          "minimum_input_gap": 7.49999999998235,
+          "latency_range": [
+            0.6261497908128035,
+            0.6531644735874522
+          ],
+          "doses": [
+            0.6000000000000024,
+            0.5999999999999911,
+            0.6000000000000119
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99668636370309,
+            100.00000000000007
+          ],
+          "ready_by": 782.2529267628947,
+          "nfev": 66614
+        },
+        {
+          "cell": 4,
+          "inputs": 92,
+          "outputs": 89,
+          "minimum_input_gap": 7.499999999977035,
+          "latency_range": [
+            0.6261794873245776,
+            0.6531962023094309
+          ],
+          "doses": [
+            0.6000000000000033,
+            0.6000000000000103,
+            0.5999999999999929
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 783.2566885768522,
+          "nfev": 65969
+        },
+        {
+          "cell": 5,
+          "inputs": 89,
+          "outputs": 86,
+          "minimum_input_gap": 7.4999999999747615,
+          "latency_range": [
+            0.6261646386749362,
+            0.6531803374937226
+          ],
+          "doses": [
+            0.6000000000000048,
+            0.5999999999999972,
+            0.6000000000000262
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 784.2595860927288,
+          "nfev": 65192
+        },
+        {
+          "cell": 6,
+          "inputs": 86,
+          "outputs": 83,
+          "minimum_input_gap": 7.499999999979309,
+          "latency_range": [
+            0.6261497908118656,
+            0.6531644735881628
+          ],
+          "doses": [
+            0.59999999999998,
+            0.6000000000000003,
+            0.6000000000000028
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99675584114809,
+            100.00000000000006
+          ],
+          "ready_by": 785.2624677762936,
+          "nfev": 64247
+        },
+        {
+          "cell": 7,
+          "inputs": 83,
+          "outputs": 80,
+          "minimum_input_gap": 7.499999999972829,
+          "latency_range": [
+            0.6261794873248903,
+            0.6531962023090045
+          ],
+          "doses": [
+            0.5999999999999761,
+            0.5999999999999964,
+            0.599999999999976
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000013
+          ],
+          "ready_by": 786.266229590074,
+          "nfev": 63194
+        },
+        {
+          "cell": 8,
+          "inputs": 80,
+          "outputs": 77,
+          "minimum_input_gap": 7.499999999967372,
+          "latency_range": [
+            0.6261646386762436,
+            0.6531803374928131
+          ],
+          "doses": [
+            0.6000000000000137,
+            0.6000000000000211,
+            0.5999999999999983
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 787.2691271060933,
+          "nfev": 62225
+        },
+        {
+          "cell": 9,
+          "inputs": 77,
+          "outputs": 74,
+          "minimum_input_gap": 7.499999999960437,
+          "latency_range": [
+            0.6261497908135141,
+            0.6531644735871396
+          ],
+          "doses": [
+            0.5999999999999899,
+            0.6000000000000159,
+            0.599999999999985
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99682779863944,
+            100.00000000000006
+          ],
+          "ready_by": 788.272008789586,
+          "nfev": 61280
+        },
+        {
+          "cell": 10,
+          "inputs": 74,
+          "outputs": 71,
+          "minimum_input_gap": 7.499999999967599,
+          "latency_range": [
+            0.6261794873238955,
+            0.6531962023094593
+          ],
+          "doses": [
+            0.6000000000000151,
+            0.6000000000000166,
+            0.5999999999999852
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 789.2757706034797,
+          "nfev": 60755
+        },
+        {
+          "cell": 11,
+          "inputs": 71,
+          "outputs": 68,
+          "minimum_input_gap": 7.499999999966576,
+          "latency_range": [
+            0.6261646386769826,
+            0.6531803374932679
+          ],
+          "doses": [
+            0.6000000000000233,
+            0.599999999999982,
+            0.5999999999999843
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 790.278668119454,
+          "nfev": 59786
+        },
+        {
+          "cell": 12,
+          "inputs": 68,
+          "outputs": 65,
+          "minimum_input_gap": 7.499999999956231,
+          "latency_range": [
+            0.6261497908125762,
+            0.6531644735870259
+          ],
+          "doses": [
+            0.6000000000000415,
+            0.600000000000032,
+            0.6000000000000393
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99669799284564,
+            100.00000000000007
+          ],
+          "ready_by": 791.2815498030095,
+          "nfev": 58697
+        },
+        {
+          "cell": 13,
+          "inputs": 65,
+          "outputs": 62,
+          "minimum_input_gap": 7.499999999954412,
+          "latency_range": [
+            0.6261794873247482,
+            0.6531962023092319
+          ],
+          "doses": [
+            0.6000000000000512,
+            0.6000000000000386,
+            0.5999999999999459
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 792.2853116169665,
+          "nfev": 58148
+        },
+        {
+          "cell": 14,
+          "inputs": 62,
+          "outputs": 59,
+          "minimum_input_gap": 7.499999999952024,
+          "latency_range": [
+            0.6261646386773805,
+            0.6531803374926994
+          ],
+          "doses": [
+            0.5999999999999719,
+            0.6000000000000307,
+            0.6000000000000014
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000013
+          ],
+          "ready_by": 793.2882091328148,
+          "nfev": 57191
+        },
+        {
+          "cell": 15,
+          "inputs": 59,
+          "outputs": 56,
+          "minimum_input_gap": 7.499999999942929,
+          "latency_range": [
+            0.6261497908094498,
+            0.6531644735882765
+          ],
+          "doses": [
+            0.6000000000000365,
+            0.599999999999986,
+            0.5999999999999773
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99739408814773,
+            100.00000000000007
+          ],
+          "ready_by": 794.2910908163683,
+          "nfev": 56330
+        },
+        {
+          "cell": 16,
+          "inputs": 56,
+          "outputs": 53,
+          "minimum_input_gap": 7.499999999942247,
+          "latency_range": [
+            0.6261794873254303,
+            0.6531962023085498
+          ],
+          "doses": [
+            0.5999999999999657,
+            0.599999999999983,
+            0.6000000000000058
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 795.2948526302952,
+          "nfev": 55553
+        },
+        {
+          "cell": 17,
+          "inputs": 53,
+          "outputs": 50,
+          "minimum_input_gap": 7.499999999942588,
+          "latency_range": [
+            0.6261646386758457,
+            0.6531803374931542
+          ],
+          "doses": [
+            0.6000000000000112,
+            0.6000000000000119,
+            0.6000000000000367
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 796.2977501462423,
+          "nfev": 54584
+        },
+        {
+          "cell": 18,
+          "inputs": 50,
+          "outputs": 47,
+          "minimum_input_gap": 7.499999999941906,
+          "latency_range": [
+            0.626149790813713,
+            0.6531644735869122
+          ],
+          "doses": [
+            0.5999999999999598,
+            0.599999999999959,
+            0.6000000000000163
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.9980318195962,
+            100.00000000000006
+          ],
+          "ready_by": 797.300631829659,
+          "nfev": 53567
+        },
+        {
+          "cell": 19,
+          "inputs": 47,
+          "outputs": 44,
+          "minimum_input_gap": 7.499999999947136,
+          "latency_range": [
+            0.6261794873249187,
+            0.6531962023087772
+          ],
+          "doses": [
+            0.6000000000000257,
+            0.599999999999963,
+            0.5999999999999946
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 798.3043936435853,
+          "nfev": 52814
+        },
+        {
+          "cell": 20,
+          "inputs": 44,
+          "outputs": 41,
+          "minimum_input_gap": 7.499999999945089,
+          "latency_range": [
+            0.6261646386761299,
+            0.6531803374931542
+          ],
+          "doses": [
+            0.599999999999973,
+            0.5999999999999911,
+            0.5999999999999805
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 799.3072911596173,
+          "nfev": 51905
+        },
+        {
+          "cell": 21,
+          "inputs": 41,
+          "outputs": 38,
+          "minimum_input_gap": 7.499999999938609,
+          "latency_range": [
+            0.6261497908121783,
+            0.6531644735874806
+          ],
+          "doses": [
+            0.59999999999999,
+            0.5999999999999583,
+            0.5999999999999786
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.01198245353957,
+            100.00000000000007
+          ],
+          "ready_by": 800.3101728431029,
+          "nfev": 50912
+        },
+        {
+          "cell": 22,
+          "inputs": 38,
+          "outputs": 35,
+          "minimum_input_gap": 7.49999999993031,
+          "latency_range": [
+            0.6261794873257713,
+            0.6531962023093456
+          ],
+          "doses": [
+            0.5999999999999408,
+            0.5999999999999815,
+            0.6000000000000493
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 801.3139346570701,
+          "nfev": 50267
+        },
+        {
+          "cell": 23,
+          "inputs": 35,
+          "outputs": 32,
+          "minimum_input_gap": 7.499999999932015,
+          "latency_range": [
+            0.6261646386763005,
+            0.653180337492131
+          ],
+          "doses": [
+            0.6000000000000943,
+            0.6000000000000103,
+            0.6000000000001001
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 802.316832173093,
+          "nfev": 49322
+        },
+        {
+          "cell": 24,
+          "inputs": 32,
+          "outputs": 29,
+          "minimum_input_gap": 7.499999999925876,
+          "latency_range": [
+            0.6261497908134288,
+            0.6531644735874806
+          ],
+          "doses": [
+            0.5999999999999727,
+            0.6000000000000513,
+            0.5999999999999172
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99779111076158,
+            100.00000000000007
+          ],
+          "ready_by": 803.3197138565369,
+          "nfev": 48317
+        },
+        {
+          "cell": 25,
+          "inputs": 29,
+          "outputs": 26,
+          "minimum_input_gap": 7.499999999919055,
+          "latency_range": [
+            0.626179487324066,
+            0.6531962023086635
+          ],
+          "doses": [
+            0.6000000000000169,
+            0.5999999999999271,
+            0.6000000000000711
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 804.323475670372,
+          "nfev": 47600
+        },
+        {
+          "cell": 26,
+          "inputs": 26,
+          "outputs": 23,
+          "minimum_input_gap": 7.49999999991212,
+          "latency_range": [
+            0.6261646386756183,
+            0.6531803374924721
+          ],
+          "doses": [
+            0.5999999999999526,
+            0.5999999999999587,
+            0.5999999999999529
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 805.3263731863456,
+          "nfev": 46703
+        },
+        {
+          "cell": 27,
+          "inputs": 23,
+          "outputs": 20,
+          "minimum_input_gap": 7.4999999999126885,
+          "latency_range": [
+            0.6261497908119509,
+            0.6531644735874806
+          ],
+          "doses": [
+            0.6000000000000275,
+            0.5999999999999623,
+            0.5999999999999435
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99899657800769,
+            100.00000000000006
+          ],
+          "ready_by": 806.3292548698868,
+          "nfev": 45782
+        },
+        {
+          "cell": 28,
+          "inputs": 20,
+          "outputs": 17,
+          "minimum_input_gap": 7.499999999967599,
+          "latency_range": [
+            0.6261794873249755,
+            0.6531962023082087
+          ],
+          "doses": [
+            0.6000000000000055,
+            0.6000000000000995,
+            0.6000000000000614
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 807.3330166838398,
+          "nfev": 44981
+        },
+        {
+          "cell": 29,
+          "inputs": 17,
+          "outputs": 14,
+          "minimum_input_gap": 7.499999999967372,
+          "latency_range": [
+            0.6261646386744815,
+            0.6531803374926994
+          ],
+          "doses": [
+            0.5999999999999817,
+            0.600000000000088,
+            0.6000000000000254
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 808.3359141997817,
+          "nfev": 44108
+        },
+        {
+          "cell": 30,
+          "inputs": 14,
+          "outputs": 11,
+          "minimum_input_gap": 7.499999999971806,
+          "latency_range": [
+            0.6261497908128604,
+            0.6531644735866848
+          ],
+          "doses": [
+            0.6000000000000208,
+            0.599999999999991,
+            0.6000000000001099
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.00374351450724,
+            100.00000000000007
+          ],
+          "ready_by": 809.3387958832163,
+          "nfev": 43115
+        },
+        {
+          "cell": 31,
+          "inputs": 11,
+          "outputs": 8,
+          "minimum_input_gap": 7.49999999997317,
+          "latency_range": [
+            0.6261794873228155,
+            0.6531962023078677
+          ],
+          "doses": [
+            0.6000000000000641,
+            0.5999999999998975,
+            0.6000000000000638
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 810.3425576971595,
+          "nfev": 42326
+        }
+      ],
+      "max_dose_identity_residual": 1.099120794378905e-13,
+      "max_distance_outside_certified_dose": 1.099120794378905e-13,
+      "packets": [
+        {
+          "cell": 0,
+          "rest_latency": 0.653164473582823,
+          "first_advance": 0.027014740994712128,
+          "max_rest_latency_change": 7.393197165583842e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 7.389644451905042e-12,
+          "minimum_output_gap": 7.499999999996248,
+          "fixed_wire_tail_gap_error": 5.4569682106375694e-12
+        },
+        {
+          "cell": 1,
+          "rest_latency": 0.6531962023018423,
+          "first_advance": 0.02701671497742808,
+          "max_rest_latency_change": 7.048583938740194e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.0800249583553523e-11,
+          "minimum_output_gap": 7.499999999990109,
+          "fixed_wire_tail_gap_error": 1.4210854715202004e-11
+        },
+        {
+          "cell": 2,
+          "rest_latency": 0.6531803374879246,
+          "first_advance": 0.027015698813443123,
+          "max_rest_latency_change": 6.437517185986508e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.546140993013978e-11,
+          "minimum_output_gap": 7.49999999998235,
+          "fixed_wire_tail_gap_error": 1.887201506178826e-11
+        },
+        {
+          "cell": 3,
+          "rest_latency": 0.6531644735827626,
+          "first_advance": 0.02701468276995911,
+          "max_rest_latency_change": 6.991740519879386e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.8189894035458565e-11,
+          "minimum_output_gap": 7.499999999977035,
+          "fixed_wire_tail_gap_error": 2.2964741219766438e-11
+        },
+        {
+          "cell": 4,
+          "rest_latency": 0.6531962023042865,
+          "first_advance": 0.027016714979708922,
+          "max_rest_latency_change": 7.105427357601002e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.1600499167107046e-11,
+          "minimum_output_gap": 7.4999999999747615,
+          "fixed_wire_tail_gap_error": 2.523847797419876e-11
+        },
+        {
+          "cell": 5,
+          "rest_latency": 0.6531803374880383,
+          "first_advance": 0.027015698813102063,
+          "max_rest_latency_change": 6.707523425575346e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.1941559680271894e-11,
+          "minimum_output_gap": 7.499999999979309,
+          "fixed_wire_tail_gap_error": 2.0691004465334117e-11
+        },
+        {
+          "cell": 6,
+          "rest_latency": 0.653164473582649,
+          "first_advance": 0.027014682770783338,
+          "max_rest_latency_change": 6.30961949354969e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.808064891723916e-11,
+          "minimum_output_gap": 7.499999999972829,
+          "fixed_wire_tail_gap_error": 2.717115421546623e-11
+        },
+        {
+          "cell": 7,
+          "rest_latency": 0.6531962023049687,
+          "first_advance": 0.027016714980078405,
+          "max_rest_latency_change": 7.901235221652314e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.7398527890909463e-11,
+          "minimum_output_gap": 7.499999999967372,
+          "fixed_wire_tail_gap_error": 3.26281224261038e-11
+        },
+        {
+          "cell": 8,
+          "rest_latency": 0.6531803374886351,
+          "first_advance": 0.02701569881239152,
+          "max_rest_latency_change": 7.190692485892214e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.3651303965598345e-11,
+          "minimum_output_gap": 7.499999999960437,
+          "fixed_wire_tail_gap_error": 3.956301952712238e-11
+        },
+        {
+          "cell": 9,
+          "rest_latency": 0.653164473580091,
+          "first_advance": 0.027014682766576925,
+          "max_rest_latency_change": 7.048583938740194e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.6493474908638746e-11,
+          "minimum_output_gap": 7.499999999967599,
+          "fixed_wire_tail_gap_error": 4.1040948417503387e-11
+        },
+        {
+          "cell": 10,
+          "rest_latency": 0.6531962023053097,
+          "first_advance": 0.027016714981414225,
+          "max_rest_latency_change": 7.901235221652314e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 4.433786671143025e-11,
+          "minimum_output_gap": 7.499999999966576,
+          "fixed_wire_tail_gap_error": 4.354205884737894e-11
+        },
+        {
+          "cell": 11,
+          "rest_latency": 0.653180337488152,
+          "first_advance": 0.027015698811169386,
+          "max_rest_latency_change": 6.707523425575346e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 4.7975845518521965e-11,
+          "minimum_output_gap": 7.499999999956231,
+          "fixed_wire_tail_gap_error": 5.218225851422176e-11
+        },
+        {
+          "cell": 12,
+          "rest_latency": 0.65316447358191,
+          "first_advance": 0.02701468276933383,
+          "max_rest_latency_change": 6.366462912410498e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 4.445155354915187e-11,
+          "minimum_output_gap": 7.499999999954412,
+          "fixed_wire_tail_gap_error": 4.979483492206782e-11
+        },
+        {
+          "cell": 13,
+          "rest_latency": 0.6531962023035476,
+          "first_advance": 0.027016714978799428,
+          "max_rest_latency_change": 6.0254023992456496e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 4.0813574742060155e-11,
+          "minimum_output_gap": 7.499999999952024,
+          "fixed_wire_tail_gap_error": 5.0590642786119133e-11
+        },
+        {
+          "cell": 14,
+          "rest_latency": 0.6531803374877256,
+          "first_advance": 0.027015698810345157,
+          "max_rest_latency_change": 5.5990767577895895e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.6266101233195513e-11,
+          "minimum_output_gap": 7.499999999942929,
+          "fixed_wire_tail_gap_error": 5.707079253625125e-11
+        },
+        {
+          "cell": 15,
+          "rest_latency": 0.6531644735825921,
+          "first_advance": 0.02701468277314234,
+          "max_rest_latency_change": 6.821210263296962e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 4.149569576838985e-11,
+          "minimum_output_gap": 7.499999999942247,
+          "fixed_wire_tail_gap_error": 5.775291356258094e-11
+        },
+        {
+          "cell": 16,
+          "rest_latency": 0.6531962023042581,
+          "first_advance": 0.02701671497882785,
+          "max_rest_latency_change": 5.7127635955112055e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 4.5702108764089644e-11,
+          "minimum_output_gap": 7.499999999942588,
+          "fixed_wire_tail_gap_error": 5.7411853049416095e-11
+        },
+        {
+          "cell": 17,
+          "rest_latency": 0.6531803374864467,
+          "first_advance": 0.027015698810600952,
+          "max_rest_latency_change": 6.707523425575346e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 4.6497916628140956e-11,
+          "minimum_output_gap": 7.499999999941906,
+          "fixed_wire_tail_gap_error": 5.809397407574579e-11
+        },
+        {
+          "cell": 18,
+          "rest_latency": 0.6531644735824784,
+          "first_advance": 0.027014682768765397,
+          "max_rest_latency_change": 6.821210263296962e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 4.8771653382573277e-11,
+          "minimum_output_gap": 7.499999999947136,
+          "fixed_wire_tail_gap_error": 5.2864379540551454e-11
+        },
+        {
+          "cell": 19,
+          "rest_latency": 0.6531962023050255,
+          "first_advance": 0.027016714980106826,
+          "max_rest_latency_change": 8.29913915367797e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 5.3660187404602766e-11,
+          "minimum_output_gap": 7.499999999945089,
+          "fixed_wire_tail_gap_error": 5.491074261954054e-11
+        },
+        {
+          "cell": 20,
+          "rest_latency": 0.653180337487413,
+          "first_advance": 0.027015698811283073,
+          "max_rest_latency_change": 6.0822458181064576e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 5.979927664157003e-11,
+          "minimum_output_gap": 7.499999999938609,
+          "fixed_wire_tail_gap_error": 6.139089236967266e-11
+        },
+        {
+          "cell": 21,
+          "rest_latency": 0.6531644735844111,
+          "first_advance": 0.027014682772232845,
+          "max_rest_latency_change": 6.366462912410498e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 6.559730536537245e-11,
+          "minimum_output_gap": 7.49999999993031,
+          "fixed_wire_tail_gap_error": 6.969003152335063e-11
+        },
+        {
+          "cell": 22,
+          "rest_latency": 0.6531962023047981,
+          "first_advance": 0.0270167149790268,
+          "max_rest_latency_change": 6.707523425575346e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 7.23048287909478e-11,
+          "minimum_output_gap": 7.499999999932015,
+          "fixed_wire_tail_gap_error": 6.798472895752639e-11
+        },
+        {
+          "cell": 23,
+          "rest_latency": 0.6531803374876972,
+          "first_advance": 0.02701569881139676,
+          "max_rest_latency_change": 6.480149750132114e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 6.855316314613447e-11,
+          "minimum_output_gap": 7.499999999925876,
+          "fixed_wire_tail_gap_error": 7.412381819449365e-11
+        },
+        {
+          "cell": 24,
+          "rest_latency": 0.6531644735828195,
+          "first_advance": 0.027014682769390674,
+          "max_rest_latency_change": 7.389644451905042e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 6.855316314613447e-11,
+          "minimum_output_gap": 7.499999999919055,
+          "fixed_wire_tail_gap_error": 8.094502845779061e-11
+        },
+        {
+          "cell": 25,
+          "rest_latency": 0.6531962023045708,
+          "first_advance": 0.02701671498050473,
+          "max_rest_latency_change": 6.707523425575346e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 5.820766091346741e-11,
+          "minimum_output_gap": 7.49999999991212,
+          "fixed_wire_tail_gap_error": 8.787992555880919e-11
+        },
+        {
+          "cell": 26,
+          "rest_latency": 0.6531803374892888,
+          "first_advance": 0.027015698813670497,
+          "max_rest_latency_change": 7.73070496506989e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 5.60476109967567e-11,
+          "minimum_output_gap": 7.4999999999126885,
+          "fixed_wire_tail_gap_error": 8.731149137020111e-11
+        },
+        {
+          "cell": 27,
+          "rest_latency": 0.65316447358191,
+          "first_advance": 0.02701468276995911,
+          "max_rest_latency_change": 5.5706550483591855e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 5.60476109967567e-11,
+          "minimum_output_gap": 7.499999999967599,
+          "fixed_wire_tail_gap_error": 4.001776687800884e-11
+        },
+        {
+          "cell": 28,
+          "rest_latency": 0.6531962023020128,
+          "first_advance": 0.02701671497703728,
+          "max_rest_latency_change": 6.195932655828074e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.6489033189136535e-11,
+          "minimum_output_gap": 7.499999999967372,
+          "fixed_wire_tail_gap_error": 3.842615114990622e-11
+        },
+        {
+          "cell": 29,
+          "rest_latency": 0.6531803374875835,
+          "first_advance": 0.027015698813102063,
+          "max_rest_latency_change": 5.115907697472721e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.2964741219766438e-11,
+          "minimum_output_gap": 7.499999999971806,
+          "fixed_wire_tail_gap_error": 2.9899638320785016e-11
+        },
+        {
+          "cell": 30,
+          "rest_latency": 0.6531644735823079,
+          "first_advance": 0.027014682769447518,
+          "max_rest_latency_change": 5.5138116294983774e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.921307557495311e-11,
+          "minimum_output_gap": 7.49999999997317,
+          "fixed_wire_tail_gap_error": 3.0240698833949864e-11
+        },
+        {
+          "cell": 31,
+          "rest_latency": 0.6531962023025244,
+          "first_advance": 0.027016714979708922,
+          "max_rest_latency_change": 5.343281372915953e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.807620719773695e-11,
+          "minimum_output_gap": 7.499999999968054,
+          "fixed_wire_tail_gap_error": 3.1946001399774104e-11
+        }
+      ]
+    },
+    {
+      "N": 8,
+      "K": 32,
+      "epsilon": "0.1",
+      "period": "15/2",
+      "scenario": "switching",
+      "seed": 41,
+      "sigma_each": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "nodes": [
+        {
+          "cell": 0,
+          "inputs": 32,
+          "outputs": 29,
+          "minimum_input_gap": 7.5,
+          "latency_range": [
+            0.6261497325874963,
+            0.6531644735867701
+          ],
+          "doses": [
+            0.6000000000000009,
+            0.6000000000000012,
+            0.5999999999999979
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.00403676952577,
+            100.00000000000007
+          ],
+          "ready_by": 239.24338574946069,
+          "nfev": 21757
+        },
+        {
+          "cell": 1,
+          "inputs": 29,
+          "outputs": 26,
+          "minimum_input_gap": 7.4999999999898606,
+          "latency_range": [
+            0.6261794873234763,
+            0.6531962023084077
+          ],
+          "doses": [
+            0.6000000000000043,
+            0.599999999999999,
+            0.600000000000003
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 240.24714756326975,
+          "nfev": 21538
+        },
+        {
+          "cell": 2,
+          "inputs": 26,
+          "outputs": 23,
+          "minimum_input_gap": 7.499999999999886,
+          "latency_range": [
+            0.6261646386739699,
+            0.6531803374867877
+          ],
+          "doses": [
+            0.6000000000000064,
+            0.6000000000000039,
+            0.6000000000000008
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 241.2500450793682,
+          "nfev": 22033
+        },
+        {
+          "cell": 3,
+          "inputs": 23,
+          "outputs": 20,
+          "minimum_input_gap": 7.499999999998039,
+          "latency_range": [
+            0.626149790811283,
+            0.6531644735868269
+          ],
+          "doses": [
+            0.5999999999999922,
+            0.6000000000000109,
+            0.6000000000000018
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.00403676977419,
+            100.00000000000007
+          ],
+          "ready_by": 242.2529267628306,
+          "nfev": 19962
+        },
+        {
+          "cell": 4,
+          "inputs": 20,
+          "outputs": 17,
+          "minimum_input_gap": 7.499999999991616,
+          "latency_range": [
+            0.6261794873228155,
+            0.6531962023083508
+          ],
+          "doses": [
+            0.5999999999999989,
+            0.5999999999999971,
+            0.6000000000000099
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 243.25668857671752,
+          "nfev": 19689
+        },
+        {
+          "cell": 5,
+          "inputs": 17,
+          "outputs": 14,
+          "minimum_input_gap": 7.499999999997911,
+          "latency_range": [
+            0.6261646386752489,
+            0.6531803374924721
+          ],
+          "doses": [
+            0.5999999999999954,
+            0.6000000000000043,
+            0.600000000000029
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 244.25958609261957,
+          "nfev": 20954
+        },
+        {
+          "cell": 6,
+          "inputs": 14,
+          "outputs": 11,
+          "minimum_input_gap": 7.499999999988148,
+          "latency_range": [
+            0.6261497908118656,
+            0.6531644735867417
+          ],
+          "doses": [
+            0.6000000000000222,
+            0.5999999999999981,
+            0.5999999999999877
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.00403676952585,
+            100.00000000000006
+          ],
+          "ready_by": 245.26246777634947,
+          "nfev": 18461
+        },
+        {
+          "cell": 7,
+          "inputs": 11,
+          "outputs": 8,
+          "minimum_input_gap": 7.499999999998209,
+          "latency_range": [
+            0.6261794873208544,
+            0.653196202298659
+          ],
+          "doses": [
+            0.6000000000000086,
+            0.599999999999996,
+            0.6000000000000183
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 246.2662295900915,
+          "nfev": 18248
+        }
+      ],
+      "max_dose_identity_residual": 2.8976820942716586e-14,
+      "max_distance_outside_certified_dose": 2.8976820942716586e-14,
+      "packets": [
+        {
+          "cell": 0,
+          "rest_latency": 0.6531644735816897,
+          "first_advance": 0.02701474099419343,
+          "max_rest_latency_change": 5.080380560684716e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 5.087485988042317e-12,
+          "minimum_output_gap": 7.4999999999898606,
+          "fixed_wire_tail_gap_error": 1.013944483929663e-11
+        },
+        {
+          "cell": 1,
+          "rest_latency": 0.653196202298318,
+          "first_advance": 0.027016714974841705,
+          "max_rest_latency_change": 1.0089706847793423e-11,
+          "jitter_budget": 0.0,
+          "max_phase_error": 5.087485988042317e-12,
+          "minimum_output_gap": 7.499999999999886,
+          "fixed_wire_tail_gap_error": 1.4210854715202004e-13
+        },
+        {
+          "cell": 2,
+          "rest_latency": 0.6531803374857432,
+          "first_advance": 0.027015698811773348,
+          "max_rest_latency_change": 1.0444978215673473e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 6.0254023992456496e-12,
+          "minimum_output_gap": 7.499999999998039,
+          "fixed_wire_tail_gap_error": 1.9610979506978765e-12
+        },
+        {
+          "cell": 3,
+          "rest_latency": 0.6531644735867133,
+          "first_advance": 0.027014682775430288,
+          "max_rest_latency_change": 1.0089706847793423e-11,
+          "jitter_budget": 0.0,
+          "max_phase_error": 6.0254023992456496e-12,
+          "minimum_output_gap": 7.499999999991616,
+          "fixed_wire_tail_gap_error": 8.384404281969182e-12
+        },
+        {
+          "cell": 4,
+          "rest_latency": 0.6531962023033344,
+          "first_advance": 0.02701671498051894,
+          "max_rest_latency_change": 5.186961971048731e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 4.106937012693379e-12,
+          "minimum_output_gap": 7.499999999997911,
+          "fixed_wire_tail_gap_error": 2.0889956431346945e-12
+        },
+        {
+          "cell": 5,
+          "rest_latency": 0.6531803374823824,
+          "first_advance": 0.027015698807133504,
+          "max_rest_latency_change": 1.0089706847793423e-11,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.0970779840135947e-11,
+          "minimum_output_gap": 7.499999999988148,
+          "fixed_wire_tail_gap_error": 1.1937117960769683e-11
+        },
+        {
+          "cell": 6,
+          "rest_latency": 0.6531644735817252,
+          "first_advance": 0.027014682769859633,
+          "max_rest_latency_change": 5.101696842757519e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 5.9685589803848416e-12,
+          "minimum_output_gap": 7.499999999998209,
+          "fixed_wire_tail_gap_error": 1.9326762412674725e-12
+        },
+        {
+          "cell": 7,
+          "rest_latency": 0.653196202297778,
+          "first_advance": 0.027016714976923595,
+          "max_rest_latency_change": 8.810729923425242e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 6.764366844436154e-12,
+          "minimum_output_gap": 7.4999999999973,
+          "fixed_wire_tail_gap_error": 2.8421709430404007e-12
+        }
+      ]
+    },
+    {
+      "N": 8,
+      "K": 32,
+      "epsilon": "0.1",
+      "period": "41/5",
+      "scenario": "switching",
+      "seed": 41,
+      "sigma_each": [
+        "1/20",
+        "1/20",
+        "1/20",
+        "1/20",
+        "1/20",
+        "1/20",
+        "1/20"
+      ],
+      "nodes": [
+        {
+          "cell": 0,
+          "inputs": 32,
+          "outputs": 29,
+          "minimum_input_gap": 8.199999999999989,
+          "latency_range": [
+            0.6340532854047218,
+            0.6531644735907207
+          ],
+          "doses": [
+            0.6000000000000009,
+            0.6000000000000012,
+            0.5999999999999992
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.00407473518275,
+            100.00000000000007
+          ],
+          "ready_by": 260.94338574946903,
+          "nfev": 23551
+        },
+        {
+          "cell": 1,
+          "inputs": 29,
+          "outputs": 26,
+          "minimum_input_gap": 8.099999999986004,
+          "latency_range": [
+            0.6349910825689307,
+            0.653196202308493
+          ],
+          "doses": [
+            0.6000000000000012,
+            0.5999999999999988,
+            0.6000000000000012
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 261.89714756333365,
+          "nfev": 22960
+        },
+        {
+          "cell": 2,
+          "inputs": 26,
+          "outputs": 23,
+          "minimum_input_gap": 7.999999999984851,
+          "latency_range": [
+            0.6321169166615306,
+            0.6531803374925857
+          ],
+          "doses": [
+            0.6000000000000038,
+            0.6000000000000033,
+            0.6000000000000065
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 262.85004507926504,
+          "nfev": 23215
+        },
+        {
+          "cell": 3,
+          "inputs": 23,
+          "outputs": 20,
+          "minimum_input_gap": 7.8999999999840895,
+          "latency_range": [
+            0.6366492649697761,
+            0.6531644735868554
+          ],
+          "doses": [
+            0.599999999999995,
+            0.5999999999999982,
+            0.6000000000000113
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.00407407378071,
+            100.00000000000007
+          ],
+          "ready_by": 263.8029267629056,
+          "nfev": 21358
+        },
+        {
+          "cell": 4,
+          "inputs": 20,
+          "outputs": 17,
+          "minimum_input_gap": 7.7999999999939575,
+          "latency_range": [
+            0.6299836575784354,
+            0.6531962023084361
+          ],
+          "doses": [
+            0.5999999999999951,
+            0.5999999999999959,
+            0.6000000000000133
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 264.7566885767047,
+          "nfev": 21099
+        },
+        {
+          "cell": 5,
+          "inputs": 17,
+          "outputs": 14,
+          "minimum_input_gap": 7.6999999999911495,
+          "latency_range": [
+            0.6381971761715874,
+            0.653180337492671
+          ],
+          "doses": [
+            0.6000000000000241,
+            0.5999999999999766,
+            0.5999999999999778
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 265.70958609274453,
+          "nfev": 22434
+        },
+        {
+          "cell": 6,
+          "inputs": 14,
+          "outputs": 11,
+          "minimum_input_gap": 7.59999999998098,
+          "latency_range": [
+            0.6275898819782526,
+            0.6531644735868838
+          ],
+          "doses": [
+            0.5999999999999763,
+            0.600000000000008,
+            0.5999999999999971
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.00406078994338,
+            100.00000000000007
+          ],
+          "ready_by": 266.66246777620427,
+          "nfev": 19917
+        },
+        {
+          "cell": 7,
+          "inputs": 11,
+          "outputs": 8,
+          "minimum_input_gap": 7.4999999999841975,
+          "latency_range": [
+            0.6396032941464682,
+            0.6531962023083793
+          ],
+          "doses": [
+            0.5999999999999972,
+            0.599999999999996,
+            0.5999999999999993
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 267.61622959009856,
+          "nfev": 19586
+        }
+      ],
+      "max_dose_identity_residual": 2.4091839634365897e-14,
+      "max_distance_outside_certified_dose": 2.4091839634365897e-14,
+      "packets": [
+        {
+          "cell": 0,
+          "rest_latency": 0.6531644735804889,
+          "first_advance": 0.01911118817576707,
+          "max_rest_latency_change": 1.0231815394945443e-11,
+          "jitter_budget": 0.0,
+          "max_phase_error": 1.0231815394945443e-11,
+          "minimum_output_gap": 8.199999999985977,
+          "fixed_wire_tail_gap_error": 1.4022560890225577e-11
+        },
+        {
+          "cell": 1,
+          "rest_latency": 0.6531962023032065,
+          "first_advance": 0.018205119734275854,
+          "max_rest_latency_change": 1.0487610779819079e-11,
+          "jitter_budget": 0.05,
+          "max_phase_error": 0.05000000001263061,
+          "minimum_output_gap": 8.099999999984846,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 2,
+          "rest_latency": 0.6531803374863827,
+          "first_advance": 0.02106342082485213,
+          "max_rest_latency_change": 6.203038083185675e-12,
+          "jitter_budget": 0.1,
+          "max_phase_error": 0.1000000000083503,
+          "minimum_output_gap": 7.999999999984112,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 3,
+          "rest_latency": 0.6531644735803752,
+          "first_advance": 0.016515208610599075,
+          "max_rest_latency_change": 6.480149750132114e-12,
+          "jitter_budget": 0.15000000000000002,
+          "max_phase_error": 0.15000000000756586,
+          "minimum_output_gap": 7.89999999999398,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 4,
+          "rest_latency": 0.6531962022998528,
+          "first_advance": 0.023212544721417316,
+          "max_rest_latency_change": 8.58335624798201e-12,
+          "jitter_budget": 0.2,
+          "max_phase_error": 0.20000000001411422,
+          "minimum_output_gap": 7.799999999991172,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 5,
+          "rest_latency": 0.6531803374862193,
+          "first_advance": 0.014983161314631843,
+          "max_rest_latency_change": 6.45172804070171e-12,
+          "jitter_budget": 0.25,
+          "max_phase_error": 0.2500000000131877,
+          "minimum_output_gap": 7.699999999981003,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 6,
+          "rest_latency": 0.6531644735785562,
+          "first_advance": 0.02557459160030362,
+          "max_rest_latency_change": 8.469669410260394e-12,
+          "jitter_budget": 0.3,
+          "max_phase_error": 0.30000000001135163,
+          "minimum_output_gap": 7.59999999998422,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 7,
+          "rest_latency": 0.6531962023050824,
+          "first_advance": 0.013592908158614136,
+          "max_rest_latency_change": 6.764366844436154e-12,
+          "jitter_budget": 0.35,
+          "max_phase_error": 0.35000000000931664,
+          "minimum_output_gap": 7.500000000000284,
+          "fixed_wire_tail_gap_error": null
+        }
+      ]
+    },
+    {
+      "N": 32,
+      "K": 104,
+      "epsilon": "0.1",
+      "period": "8",
+      "scenario": "oscillatory",
+      "seed": 41,
+      "sigma_each": [
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620",
+        "3/620"
+      ],
+      "nodes": [
+        {
+          "cell": 0,
+          "inputs": 104,
+          "outputs": 101,
+          "minimum_input_gap": 8.0,
+          "latency_range": [
+            0.6320641730713952,
+            0.6531644735880491
+          ],
+          "doses": [
+            0.6000000000000002,
+            0.6000000000000016,
+            0.6000000000000025
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99704842133282,
+            100.00000000000007
+          ],
+          "ready_by": 830.743385749502,
+          "nfev": 72807
+        },
+        {
+          "cell": 1,
+          "inputs": 101,
+          "outputs": 98,
+          "minimum_input_gap": 7.990322580638399,
+          "latency_range": [
+            0.6321931299442625,
+            0.6531962023087772
+          ],
+          "doses": [
+            0.5999999999999985,
+            0.6000000000000062,
+            0.6000000000000045
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 831.7423088536508,
+          "nfev": 71924
+        },
+        {
+          "cell": 2,
+          "inputs": 98,
+          "outputs": 95,
+          "minimum_input_gap": 7.980645161275419,
+          "latency_range": [
+            0.6318802613659074,
+            0.6531803374932679
+          ],
+          "doses": [
+            0.5999999999999973,
+            0.5999999999999933,
+            0.5999999999999911
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 832.740367660018,
+          "nfev": 70487
+        },
+        {
+          "cell": 3,
+          "inputs": 95,
+          "outputs": 92,
+          "minimum_input_gap": 7.970967741914933,
+          "latency_range": [
+            0.6323592306023471,
+            0.653164473587708
+          ],
+          "doses": [
+            0.6000000000000129,
+            0.6000000000000079,
+            0.6000000000000086
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.996744793945,
+            100.00000000000007
+          ],
+          "ready_by": 833.7384106337918,
+          "nfev": 69686
+        },
+        {
+          "cell": 4,
+          "inputs": 92,
+          "outputs": 89,
+          "minimum_input_gap": 7.961290322557602,
+          "latency_range": [
+            0.6316944563671427,
+            0.6531962023098004
+          ],
+          "doses": [
+            0.6000000000000043,
+            0.6000000000000085,
+            0.5999999999999975
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.0000000000002
+          ],
+          "ready_by": 834.7373337380463,
+          "nfev": 69113
+        },
+        {
+          "cell": 5,
+          "inputs": 89,
+          "outputs": 86,
+          "minimum_input_gap": 7.951612903195269,
+          "latency_range": [
+            0.6325687271860261,
+            0.6531803374937795
+          ],
+          "doses": [
+            0.6000000000000068,
+            0.5999999999999994,
+            0.5999999999999736
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 835.7353925444094,
+          "nfev": 68048
+        },
+        {
+          "cell": 6,
+          "inputs": 86,
+          "outputs": 83,
+          "minimum_input_gap": 7.941935483833447,
+          "latency_range": [
+            0.6314616402955835,
+            0.6531644735880491
+          ],
+          "doses": [
+            0.5999999999999956,
+            0.5999999999999793,
+            0.5999999999999844
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99667868871543,
+            100.00000000000007
+          ],
+          "ready_by": 836.7334355182927,
+          "nfev": 67127
+        },
+        {
+          "cell": 7,
+          "inputs": 83,
+          "outputs": 80,
+          "minimum_input_gap": 7.9322580644730465,
+          "latency_range": [
+            0.6327764383277952,
+            0.6531962023085498
+          ],
+          "doses": [
+            0.6000000000000016,
+            0.6000000000000097,
+            0.6000000000000254
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 837.7323586223988,
+          "nfev": 66182
+        },
+        {
+          "cell": 8,
+          "inputs": 80,
+          "outputs": 77,
+          "minimum_input_gap": 7.922580645117193,
+          "latency_range": [
+            0.6312720618372794,
+            0.6531803374932679
+          ],
+          "doses": [
+            0.6000000000000129,
+            0.5999999999999949,
+            0.6000000000000124
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 838.730417428703,
+          "nfev": 65297
+        },
+        {
+          "cell": 9,
+          "inputs": 77,
+          "outputs": 74,
+          "minimum_input_gap": 7.9129032257565655,
+          "latency_range": [
+            0.6329370949167128,
+            0.6531644735874238
+          ],
+          "doses": [
+            0.5999999999999792,
+            0.6000000000000169,
+            0.6000000000000002
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99691968058015,
+            100.00000000000006
+          ],
+          "ready_by": 839.7284604025355,
+          "nfev": 64316
+        },
+        {
+          "cell": 10,
+          "inputs": 74,
+          "outputs": 71,
+          "minimum_input_gap": 7.903225806405942,
+          "latency_range": [
+            0.6310805612652075,
+            0.6531962023093456
+          ],
+          "doses": [
+            0.599999999999985,
+            0.5999999999999597,
+            0.6000000000000144
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 840.7273835067971,
+          "nfev": 63671
+        },
+        {
+          "cell": 11,
+          "inputs": 71,
+          "outputs": 68,
+          "minimum_input_gap": 7.89354838705583,
+          "latency_range": [
+            0.6331412592977017,
+            0.6531803374936089
+          ],
+          "doses": [
+            0.5999999999999658,
+            0.6000000000000282,
+            0.6000000000000177
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000013
+          ],
+          "ready_by": 841.7254423130183,
+          "nfev": 62618
+        },
+        {
+          "cell": 12,
+          "inputs": 68,
+          "outputs": 65,
+          "minimum_input_gap": 7.88387096769236,
+          "latency_range": [
+            0.6308420663648917,
+            0.6531644735871396
+          ],
+          "doses": [
+            0.6000000000000425,
+            0.6000000000000371,
+            0.6000000000000396
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99665209282321,
+            100.00000000000006
+          ],
+          "ready_by": 842.7234852868567,
+          "nfev": 61601
+        },
+        {
+          "cell": 13,
+          "inputs": 65,
+          "outputs": 62,
+          "minimum_input_gap": 7.87419354833321,
+          "latency_range": [
+            0.633343685573152,
+            0.6531962023094593
+          ],
+          "doses": [
+            0.6000000000000485,
+            0.6000000000000416,
+            0.60000000000005
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 843.722408391095,
+          "nfev": 60872
+        },
+        {
+          "cell": 14,
+          "inputs": 62,
+          "outputs": 59,
+          "minimum_input_gap": 7.864516128977357,
+          "latency_range": [
+            0.6306466903044452,
+            0.6531803374934952
+          ],
+          "doses": [
+            0.5999999999999901,
+            0.5999999999999884,
+            0.6000000000000357
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000013
+          ],
+          "ready_by": 844.7204671974986,
+          "nfev": 60023
+        },
+        {
+          "cell": 15,
+          "inputs": 59,
+          "outputs": 56,
+          "minimum_input_gap": 7.854838709629803,
+          "latency_range": [
+            0.6334990422735132,
+            0.6531644735879922
+          ],
+          "doses": [
+            0.6000000000000077,
+            0.6000000000000031,
+            0.59999999999997
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99728094048861,
+            100.00000000000007
+          ],
+          "ready_by": 845.7185101713079,
+          "nfev": 59102
+        },
+        {
+          "cell": 16,
+          "inputs": 56,
+          "outputs": 53,
+          "minimum_input_gap": 7.84516129026656,
+          "latency_range": [
+            0.63044934020553,
+            0.6531962023093456
+          ],
+          "doses": [
+            0.6000000000000014,
+            0.6000000000000288,
+            0.599999999999957
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 846.7174332754502,
+          "nfev": 58385
+        },
+        {
+          "cell": 17,
+          "inputs": 53,
+          "outputs": 50,
+          "minimum_input_gap": 7.835483870910025,
+          "latency_range": [
+            0.6336980158352503,
+            0.6531803374930405
+          ],
+          "doses": [
+            0.5999999999999844,
+            0.5999999999999576,
+            0.5999999999999661
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 847.7154920817406,
+          "nfev": 57296
+        },
+        {
+          "cell": 18,
+          "inputs": 50,
+          "outputs": 47,
+          "minimum_input_gap": 7.825806451558151,
+          "latency_range": [
+            0.630205013006389,
+            0.653164473587367
+          ],
+          "doses": [
+            0.6000000000000244,
+            0.5999999999999764,
+            0.5999999999999531
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.00174355276837,
+            100.00000000000013
+          ],
+          "ready_by": 848.7135350555523,
+          "nfev": 56243
+        },
+        {
+          "cell": 19,
+          "inputs": 47,
+          "outputs": 44,
+          "minimum_input_gap": 7.8161290322024115,
+          "latency_range": [
+            0.6338952974635959,
+            0.6531962023085498
+          ],
+          "doses": [
+            0.6000000000000046,
+            0.59999999999999,
+            0.6000000000000423
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 849.7124581598299,
+          "nfev": 55634
+        },
+        {
+          "cell": 20,
+          "inputs": 44,
+          "outputs": 41,
+          "minimum_input_gap": 7.806451612846104,
+          "latency_range": [
+            0.6300036828774864,
+            0.6531803374926994
+          ],
+          "doses": [
+            0.5999999999999489,
+            0.6000000000000155,
+            0.5999999999999678
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 850.7105169660591,
+          "nfev": 54653
+        },
+        {
+          "cell": 21,
+          "inputs": 41,
+          "outputs": 38,
+          "minimum_input_gap": 7.796774193500255,
+          "latency_range": [
+            0.634045494952602,
+            0.6531644735875943
+          ],
+          "doses": [
+            0.6000000000000643,
+            0.5999999999999419,
+            0.5999999999999761
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.9966376997362,
+            100.00000000000006
+          ],
+          "ready_by": 851.7085599398773,
+          "nfev": 53648
+        },
+        {
+          "cell": 22,
+          "inputs": 38,
+          "outputs": 35,
+          "minimum_input_gap": 7.7870967741365575,
+          "latency_range": [
+            0.6298003254933064,
+            0.6531962023094593
+          ],
+          "doses": [
+            0.599999999999987,
+            0.6000000000000703,
+            0.6000000000000036
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 852.7074830440738,
+          "nfev": 53003
+        },
+        {
+          "cell": 23,
+          "inputs": 35,
+          "outputs": 32,
+          "minimum_input_gap": 7.77741935478025,
+          "latency_range": [
+            0.6342394156025648,
+            0.6531803374925857
+          ],
+          "doses": [
+            0.5999999999999029,
+            0.6000000000000605,
+            0.5999999999999823
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 853.7055418504372,
+          "nfev": 51950
+        },
+        {
+          "cell": 24,
+          "inputs": 32,
+          "outputs": 29,
+          "minimum_input_gap": 7.767741935417234,
+          "latency_range": [
+            0.6295500087754817,
+            0.6531644735875943
+          ],
+          "doses": [
+            0.5999999999999123,
+            0.6000000000000644,
+            0.5999999999999291
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99660152728705,
+            100.00000000000006
+          ],
+          "ready_by": 854.703584824236,
+          "nfev": 51173
+        },
+        {
+          "cell": 25,
+          "inputs": 29,
+          "outputs": 26,
+          "minimum_input_gap": 7.758064516064223,
+          "latency_range": [
+            0.6344316893787436,
+            0.6531962023091182
+          ],
+          "doses": [
+            0.5999999999999145,
+            0.5999999999999169,
+            0.5999999999998931
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 855.7025079284778,
+          "nfev": 50348
+        },
+        {
+          "cell": 26,
+          "inputs": 26,
+          "outputs": 23,
+          "minimum_input_gap": 7.748387096703482,
+          "latency_range": [
+            0.6293425642722923,
+            0.6531803374924721
+          ],
+          "doses": [
+            0.5999999999999465,
+            0.6000000000000338,
+            0.5999999999998902
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 856.7005667347554,
+          "nfev": 49415
+        },
+        {
+          "cell": 27,
+          "inputs": 23,
+          "outputs": 20,
+          "minimum_input_gap": 7.738709677347856,
+          "latency_range": [
+            0.6345768648669718,
+            0.6531644735870259
+          ],
+          "doses": [
+            0.6000000000000778,
+            0.6000000000000075,
+            0.5999999999998981
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            98.99713396712605,
+            100.00000000000007
+          ],
+          "ready_by": 857.6986097086045,
+          "nfev": 48458
+        },
+        {
+          "cell": 28,
+          "inputs": 20,
+          "outputs": 17,
+          "minimum_input_gap": 7.729032257992344,
+          "latency_range": [
+            0.6291330380141744,
+            0.6531962023086635
+          ],
+          "doses": [
+            0.6000000000000466,
+            0.5999999999999129,
+            0.6000000000000402
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 858.6975328127957,
+          "nfev": 47513
+        },
+        {
+          "cell": 29,
+          "inputs": 17,
+          "outputs": 14,
+          "minimum_input_gap": 7.719354838638424,
+          "latency_range": [
+            0.6347658671481895,
+            0.6531803374922447
+          ],
+          "doses": [
+            0.5999999999999136,
+            0.6000000000000434,
+            0.6000000000000711
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 859.6955916191023,
+          "nfev": 46628
+        },
+        {
+          "cell": 30,
+          "inputs": 14,
+          "outputs": 11,
+          "minimum_input_gap": 7.709677419291097,
+          "latency_range": [
+            0.6288765707108723,
+            0.6531644735869122
+          ],
+          "doses": [
+            0.6000000000000919,
+            0.5999999999999674,
+            0.6000000000000487
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.01427642669167,
+            100.00000000000007
+          ],
+          "ready_by": 860.6936345929271,
+          "nfev": 45623
+        },
+        {
+          "cell": 31,
+          "inputs": 11,
+          "outputs": 8,
+          "minimum_input_gap": 7.6999999999401325,
+          "latency_range": [
+            0.6349532664858089,
+            0.6531962023088909
+          ],
+          "doses": [
+            0.6000000000000849,
+            0.5999999999999317,
+            0.6000000000000246
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 861.6925576972591,
+          "nfev": 44870
+        }
+      ],
+      "max_dose_identity_residual": 1.0980105713542798e-13,
+      "max_distance_outside_certified_dose": 1.0980105713542798e-13,
+      "packets": [
+        {
+          "cell": 0,
+          "rest_latency": 0.6531644735827058,
+          "first_advance": 0.02110030051131062,
+          "max_rest_latency_change": 7.048583938740194e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 7.048583938740194e-12,
+          "minimum_output_gap": 7.999999999993243,
+          "fixed_wire_tail_gap_error": 1.0132339411939029e-11
+        },
+        {
+          "cell": 1,
+          "rest_latency": 0.6531962023035476,
+          "first_advance": 0.021003072359285113,
+          "max_rest_latency_change": 6.252776074688882e-12,
+          "jitter_budget": 0.004838709677419355,
+          "max_phase_error": 0.004838709687703613,
+          "minimum_output_gap": 7.990322580630249,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 2,
+          "rest_latency": 0.6531803374883225,
+          "first_advance": 0.021300076122415135,
+          "max_rest_latency_change": 6.991740519879386e-12,
+          "jitter_budget": 0.00967741935483871,
+          "max_phase_error": 0.009677419370291318,
+          "minimum_output_gap": 7.980645161269763,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 3,
+          "rest_latency": 0.6531644735830611,
+          "first_advance": 0.020805242980713956,
+          "max_rest_latency_change": 7.403855306620244e-12,
+          "jitter_budget": 0.014516129032258065,
+          "max_phase_error": 0.014516129051855842,
+          "minimum_output_gap": 7.970967741912432,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 4,
+          "rest_latency": 0.6531962023042155,
+          "first_advance": 0.02150174593707277,
+          "max_rest_latency_change": 7.0912165028858e-12,
+          "jitter_budget": 0.01935483870967742,
+          "max_phase_error": 0.019354838734784607,
+          "minimum_output_gap": 7.961290322550099,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 5,
+          "rest_latency": 0.6531803374886067,
+          "first_advance": 0.02061161030258063,
+          "max_rest_latency_change": 7.16227077646181e-12,
+          "jitter_budget": 0.024193548387096774,
+          "max_phase_error": 0.02419354841850918,
+          "minimum_output_gap": 7.951612903188277,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 6,
+          "rest_latency": 0.6531644735827911,
+          "first_advance": 0.021702833287207568,
+          "max_rest_latency_change": 6.906475391588174e-12,
+          "jitter_budget": 0.029032258064516127,
+          "max_phase_error": 0.0290322580966631,
+          "minimum_output_gap": 7.941935483827876,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 7,
+          "rest_latency": 0.6531962023043434,
+          "first_advance": 0.02041976397654821,
+          "max_rest_latency_change": 6.991740519879386e-12,
+          "jitter_budget": 0.03387096774193548,
+          "max_phase_error": 0.03387096778061505,
+          "minimum_output_gap": 7.932258064472023,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 8,
+          "rest_latency": 0.6531803374879104,
+          "first_advance": 0.021908275650631026,
+          "max_rest_latency_change": 6.579625733138528e-12,
+          "jitter_budget": 0.038709677419354833,
+          "max_phase_error": 0.03870967746001952,
+          "minimum_output_gap": 7.922580645111395,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 9,
+          "rest_latency": 0.6531644735827058,
+          "first_advance": 0.020227378665993,
+          "max_rest_latency_change": 7.16227077646181e-12,
+          "jitter_budget": 0.04354838709677419,
+          "max_phase_error": 0.04354838713788922,
+          "minimum_output_gap": 7.912903225760772,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 10,
+          "rest_latency": 0.6531962023051676,
+          "first_advance": 0.02211564103996011,
+          "max_rest_latency_change": 7.645439836778678e-12,
+          "jitter_budget": 0.04838709677419354,
+          "max_phase_error": 0.04838709681484943,
+          "minimum_output_gap": 7.90322580641066,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 11,
+          "rest_latency": 0.6531803374880383,
+          "first_advance": 0.020039078190336568,
+          "max_rest_latency_change": 7.16227077646181e-12,
+          "jitter_budget": 0.05322580645161289,
+          "max_phase_error": 0.053225806498460315,
+          "minimum_output_gap": 7.89354838704719,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 12,
+          "rest_latency": 0.65316447358191,
+          "first_advance": 0.02232240721701828,
+          "max_rest_latency_change": 6.934897101018578e-12,
+          "jitter_budget": 0.05806451612903225,
+          "max_phase_error": 0.05806451617138464,
+          "minimum_output_gap": 7.88387096768804,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 13,
+          "rest_latency": 0.6531962023038886,
+          "first_advance": 0.019852516730736625,
+          "max_rest_latency_change": 6.252776074688882e-12,
+          "jitter_budget": 0.06290322580645161,
+          "max_phase_error": 0.06290322584544583,
+          "minimum_output_gap": 7.874193548332187,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 14,
+          "rest_latency": 0.6531803374879814,
+          "first_advance": 0.022533647183536232,
+          "max_rest_latency_change": 6.30961949354969e-12,
+          "jitter_budget": 0.06774193548387096,
+          "max_phase_error": 0.06774193552598717,
+          "minimum_output_gap": 7.864516128984633,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 15,
+          "rest_latency": 0.6531644735831605,
+          "first_advance": 0.019665431309647374,
+          "max_rest_latency_change": 7.275957614183426e-12,
+          "jitter_budget": 0.07258064516129031,
+          "max_phase_error": 0.07258064520738117,
+          "minimum_output_gap": 7.85483870962139,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 16,
+          "rest_latency": 0.6531962023034907,
+          "first_advance": 0.02274686209796073,
+          "max_rest_latency_change": 6.0822458181064576e-12,
+          "jitter_budget": 0.07741935483870967,
+          "max_phase_error": 0.07741935489025309,
+          "minimum_output_gap": 7.845161290264855,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 17,
+          "rest_latency": 0.6531803374878109,
+          "first_advance": 0.019482321652560586,
+          "max_rest_latency_change": 5.229594535194337e-12,
+          "jitter_budget": 0.08225806451612902,
+          "max_phase_error": 0.08225806457221552,
+          "minimum_output_gap": 7.835483870912981,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 18,
+          "rest_latency": 0.6531644735824784,
+          "first_advance": 0.02295946057608944,
+          "max_rest_latency_change": 6.366462912410498e-12,
+          "jitter_budget": 0.08709677419354837,
+          "max_phase_error": 0.08709677424735673,
+          "minimum_output_gap": 7.825806451557241,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 19,
+          "rest_latency": 0.6531962023076403,
+          "first_advance": 0.019300904844044453,
+          "max_rest_latency_change": 2.6147972675971687e-12,
+          "jitter_budget": 0.09193548387096773,
+          "max_phase_error": 0.09193548392454431,
+          "minimum_output_gap": 7.816129032200934,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 20,
+          "rest_latency": 0.6531803374886636,
+          "first_advance": 0.023176654611177128,
+          "max_rest_latency_change": 7.332801033044234e-12,
+          "jitter_budget": 0.09677419354838708,
+          "max_phase_error": 0.09677419360434669,
+          "minimum_output_gap": 7.806451612855085,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 21,
+          "rest_latency": 0.6531644735820237,
+          "first_advance": 0.01911897862942169,
+          "max_rest_latency_change": 6.480149750132114e-12,
+          "jitter_budget": 0.10161290322580643,
+          "max_phase_error": 0.101612903285627,
+          "minimum_output_gap": 7.7967741934913875,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 22,
+          "rest_latency": 0.653196202303775,
+          "first_advance": 0.023395876810468508,
+          "max_rest_latency_change": 6.252776074688882e-12,
+          "jitter_budget": 0.10645161290322579,
+          "max_phase_error": 0.10645161296304195,
+          "minimum_output_gap": 7.78709677413508,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 23,
+          "rest_latency": 0.6531803374896299,
+          "first_advance": 0.018940921887065088,
+          "max_rest_latency_change": 8.185452315956354e-12,
+          "jitter_budget": 0.11129032258064514,
+          "max_phase_error": 0.11129032263397676,
+          "minimum_output_gap": 7.777419354772064,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 24,
+          "rest_latency": 0.65316447358191,
+          "first_advance": 0.02361446480642826,
+          "max_rest_latency_change": 6.0254023992456496e-12,
+          "jitter_budget": 0.1161290322580645,
+          "max_phase_error": 0.11612903229286076,
+          "minimum_output_gap": 7.767741935419053,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 25,
+          "rest_latency": 0.6531962023025244,
+          "first_advance": 0.018764512923780785,
+          "max_rest_latency_change": 6.59383658785373e-12,
+          "jitter_budget": 0.12096774193548385,
+          "max_phase_error": 0.12096774197175364,
+          "minimum_output_gap": 7.758064516058312,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 26,
+          "rest_latency": 0.6531803374897436,
+          "first_advance": 0.023837773217451286,
+          "max_rest_latency_change": 7.73070496506989e-12,
+          "jitter_budget": 0.12580645161290321,
+          "max_phase_error": 0.12580645164985071,
+          "minimum_output_gap": 7.748387096702686,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 27,
+          "rest_latency": 0.6531644735830469,
+          "first_advance": 0.01858760871607501,
+          "max_rest_latency_change": 7.048583938740194e-12,
+          "jitter_budget": 0.13064516129032258,
+          "max_phase_error": 0.13064516133022153,
+          "minimum_output_gap": 7.738709677347174,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 28,
+          "rest_latency": 0.6531962023044002,
+          "first_advance": 0.024063164290225814,
+          "max_rest_latency_change": 6.87805368215777e-12,
+          "jitter_budget": 0.13548387096774195,
+          "max_phase_error": 0.13548387101116077,
+          "minimum_output_gap": 7.7290322579932536,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 29,
+          "rest_latency": 0.6531803374887204,
+          "first_advance": 0.018414470340530897,
+          "max_rest_latency_change": 7.503331289626658e-12,
+          "jitter_budget": 0.14032258064516132,
+          "max_phase_error": 0.1403225806810724,
+          "minimum_output_gap": 7.719354838645927,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 30,
+          "rest_latency": 0.6531644735838427,
+          "first_advance": 0.024287902872970335,
+          "max_rest_latency_change": 6.707523425575346e-12,
+          "jitter_budget": 0.14516129032258068,
+          "max_phase_error": 0.14516129035769154,
+          "minimum_output_gap": 7.709677419294962,
+          "fixed_wire_tail_gap_error": null
+        },
+        {
+          "cell": 31,
+          "rest_latency": 0.6531962023043434,
+          "first_advance": 0.018242935818534534,
+          "max_rest_latency_change": 5.002220859751105e-12,
+          "jitter_budget": 0.15000000000000005,
+          "max_phase_error": 0.1500000000351065,
+          "minimum_output_gap": 7.69999999997458,
+          "fixed_wire_tail_gap_error": null
+        }
+      ]
+    },
+    {
+      "N": 16,
+      "K": 56,
+      "epsilon": "0.003",
+      "period": "15/2",
+      "scenario": "switching",
+      "seed": 41,
+      "sigma_each": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "nodes": [
+        {
+          "cell": 0,
+          "inputs": 56,
+          "outputs": 53,
+          "minimum_input_gap": 7.5,
+          "latency_range": [
+            0.6261497325891874,
+            0.6531644735827058
+          ],
+          "doses": [
+            0.5999999999999996,
+            0.6000000000000016,
+            0.5999999999999999
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.01173228643593,
+            100.00000000000007
+          ],
+          "ready_by": 419.2433857494916,
+          "nfev": 38869
+        },
+        {
+          "cell": 1,
+          "inputs": 53,
+          "outputs": 50,
+          "minimum_input_gap": 7.4999999999990905,
+          "latency_range": [
+            0.626179487325274,
+            0.6531962023041729
+          ],
+          "doses": [
+            0.6000000000000026,
+            0.5999999999999991,
+            0.6000000000000058
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 420.24714756343116,
+          "nfev": 39034
+        },
+        {
+          "cell": 2,
+          "inputs": 50,
+          "outputs": 47,
+          "minimum_input_gap": 7.499999999999659,
+          "latency_range": [
+            0.6261646386858928,
+            0.6531803375144989
+          ],
+          "doses": [
+            0.6000000000000009,
+            0.6000000000000066,
+            0.6000000000000012
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 421.25004507937666,
+          "nfev": 38965
+        },
+        {
+          "cell": 3,
+          "inputs": 47,
+          "outputs": 44,
+          "minimum_input_gap": 7.499999999995708,
+          "latency_range": [
+            0.6261497908136278,
+            0.6531644735826205
+          ],
+          "doses": [
+            0.5999999999999991,
+            0.6000000000000055,
+            0.5999999999999999
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.01173228668546,
+            100.00000000000007
+          ],
+          "ready_by": 422.25292676288836,
+          "nfev": 37314
+        },
+        {
+          "cell": 4,
+          "inputs": 44,
+          "outputs": 41,
+          "minimum_input_gap": 7.499999999996106,
+          "latency_range": [
+            0.6261794873250324,
+            0.653196202304116
+          ],
+          "doses": [
+            0.5999999999999964,
+            0.6000000000000121,
+            0.6000000000000115
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000013
+          ],
+          "ready_by": 423.25668857675595,
+          "nfev": 36849
+        },
+        {
+          "cell": 5,
+          "inputs": 41,
+          "outputs": 38,
+          "minimum_input_gap": 7.499999999995765,
+          "latency_range": [
+            0.6261646386770678,
+            0.653180337488493
+          ],
+          "doses": [
+            0.5999999999999939,
+            0.5999999999999989,
+            0.6000000000000252
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 424.25958609275085,
+          "nfev": 38102
+        },
+        {
+          "cell": 6,
+          "inputs": 38,
+          "outputs": 35,
+          "minimum_input_gap": 7.499999999995509,
+          "latency_range": [
+            0.626149790813713,
+            0.653164473582649
+          ],
+          "doses": [
+            0.5999999999999922,
+            0.5999999999999849,
+            0.6000000000000045
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.01173228643803,
+            100.00000000000014
+          ],
+          "ready_by": 425.26246777631724,
+          "nfev": 35753
+        },
+        {
+          "cell": 7,
+          "inputs": 35,
+          "outputs": 32,
+          "minimum_input_gap": 7.499999999995964,
+          "latency_range": [
+            0.6261794873392148,
+            0.6531962023229312
+          ],
+          "doses": [
+            0.600000000000003,
+            0.6000000000000073,
+            0.6000000000000217
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 426.26622959014946,
+          "nfev": 35264
+        },
+        {
+          "cell": 8,
+          "inputs": 32,
+          "outputs": 29,
+          "minimum_input_gap": 7.499999999997897,
+          "latency_range": [
+            0.6261646386769257,
+            0.6531803374883225
+          ],
+          "doses": [
+            0.6000000000000009,
+            0.6000000000000195,
+            0.5999999999999951
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 427.26912710614414,
+          "nfev": 37297
+        },
+        {
+          "cell": 9,
+          "inputs": 29,
+          "outputs": 26,
+          "minimum_input_gap": 7.499999999998238,
+          "latency_range": [
+            0.6261497908136846,
+            0.6531644735827626
+          ],
+          "doses": [
+            0.5999999999999923,
+            0.599999999999985,
+            0.6000000000000164
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.011732286438,
+            100.00000000000006
+          ],
+          "ready_by": 428.272008789656,
+          "nfev": 34180
+        },
+        {
+          "cell": 10,
+          "inputs": 26,
+          "outputs": 23,
+          "minimum_input_gap": 7.499999999997726,
+          "latency_range": [
+            0.6261794873252597,
+            0.6531962023040023
+          ],
+          "doses": [
+            0.5999999999999964,
+            0.600000000000012,
+            0.5999999999999911
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000006
+          ],
+          "ready_by": 429.2757706035243,
+          "nfev": 33825
+        },
+        {
+          "cell": 11,
+          "inputs": 23,
+          "outputs": 20,
+          "minimum_input_gap": 7.499999999997613,
+          "latency_range": [
+            0.6261646386770963,
+            0.6531803374884362
+          ],
+          "doses": [
+            0.5999999999999942,
+            0.6000000000000247,
+            0.5999999999999724
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.0000000000002
+          ],
+          "ready_by": 430.27866811951475,
+          "nfev": 36384
+        },
+        {
+          "cell": 12,
+          "inputs": 20,
+          "outputs": 17,
+          "minimum_input_gap": 7.499999999998067,
+          "latency_range": [
+            0.6261497908246838,
+            0.6531644735810005
+          ],
+          "doses": [
+            0.599999999999999,
+            0.599999999999979,
+            0.5999999999999615
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.01173229159194,
+            100.0000000000002
+          ],
+          "ready_by": 431.2815498030244,
+          "nfev": 32559
+        },
+        {
+          "cell": 13,
+          "inputs": 17,
+          "outputs": 14,
+          "minimum_input_gap": 7.499999999997442,
+          "latency_range": [
+            0.6261794873249755,
+            0.6531962023042297
+          ],
+          "doses": [
+            0.600000000000003,
+            0.5999999999999547,
+            0.5999999999999817
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 432.2853116168935,
+          "nfev": 32192
+        },
+        {
+          "cell": 14,
+          "inputs": 14,
+          "outputs": 11,
+          "minimum_input_gap": 7.499999999997613,
+          "latency_range": [
+            0.6261646386770963,
+            0.6531803374884362
+          ],
+          "doses": [
+            0.5999999999999944,
+            0.600000000000025,
+            0.5999999999999805
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            50.0,
+            100.00000000000007
+          ],
+          "ready_by": 433.28820913288666,
+          "nfev": 35447
+        },
+        {
+          "cell": 15,
+          "inputs": 11,
+          "outputs": 8,
+          "minimum_input_gap": 7.499999999997101,
+          "latency_range": [
+            0.6261497908135425,
+            0.6531644735825353
+          ],
+          "doses": [
+            0.5999999999999923,
+            0.6000000000000373,
+            0.5999999999999698
+          ],
+          "max_later_dose": 0.0,
+          "probe_counts": [
+            0,
+            8
+          ],
+          "reserve_sample_range": [
+            99.01173229197676,
+            100.00000000000006
+          ],
+          "ready_by": 434.29109081639876,
+          "nfev": 30892
+        }
+      ],
+      "max_dose_identity_residual": 4.529709940470639e-14,
+      "max_distance_outside_certified_dose": 4.529709940470639e-14,
+      "packets": [
+        {
+          "cell": 0,
+          "rest_latency": 0.6531644735822866,
+          "first_advance": 0.027014740993099196,
+          "max_rest_latency_change": 4.902744876744691e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 5.115907697472721e-13,
+          "minimum_output_gap": 7.4999999999990905,
+          "fixed_wire_tail_gap_error": 9.094947017729282e-13
+        },
+        {
+          "cell": 1,
+          "rest_latency": 0.6531962023036897,
+          "first_advance": 0.027016714978415735,
+          "max_rest_latency_change": 4.831690603168681e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.410605131648481e-13,
+          "minimum_output_gap": 7.499999999999659,
+          "fixed_wire_tail_gap_error": 3.410605131648481e-13
+        },
+        {
+          "cell": 2,
+          "rest_latency": 0.6531803375125094,
+          "first_advance": 0.027015698826616585,
+          "max_rest_latency_change": 2.1884716261411086e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.2595258997171186e-12,
+          "minimum_output_gap": 7.499999999995708,
+          "fixed_wire_tail_gap_error": 4.291678123991005e-12
+        },
+        {
+          "cell": 3,
+          "rest_latency": 0.6531644735824216,
+          "first_advance": 0.02701468276879382,
+          "max_rest_latency_change": 4.263256414560601e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.2453150450019166e-12,
+          "minimum_output_gap": 7.499999999996106,
+          "fixed_wire_tail_gap_error": 3.893774191965349e-12
+        },
+        {
+          "cell": 4,
+          "rest_latency": 0.6531962023039029,
+          "first_advance": 0.027016714978870482,
+          "max_rest_latency_change": 2.1316282072803006e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.1884716261411086e-12,
+          "minimum_output_gap": 7.499999999995765,
+          "fixed_wire_tail_gap_error": 4.234834705130197e-12
+        },
+        {
+          "cell": 5,
+          "rest_latency": 0.6531803374878677,
+          "first_advance": 0.027015698810799904,
+          "max_rest_latency_change": 6.252776074688882e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.5579538487363607e-12,
+          "minimum_output_gap": 7.499999999995509,
+          "fixed_wire_tail_gap_error": 4.689582056016661e-12
+        },
+        {
+          "cell": 6,
+          "rest_latency": 0.6531644735823647,
+          "first_advance": 0.02701468276865171,
+          "max_rest_latency_change": 3.410605131648481e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 2.2168933355715126e-12,
+          "minimum_output_gap": 7.499999999995964,
+          "fixed_wire_tail_gap_error": 4.092726157978177e-12
+        },
+        {
+          "cell": 7,
+          "rest_latency": 0.6531962023228743,
+          "first_advance": 0.02701671498365954,
+          "max_rest_latency_change": 5.6274984672199935e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.581135388230905e-12,
+          "minimum_output_gap": 7.499999999997897,
+          "fixed_wire_tail_gap_error": 2.1032064978498966e-12
+        },
+        {
+          "cell": 8,
+          "rest_latency": 0.6531803374879956,
+          "first_advance": 0.02701569881106991,
+          "max_rest_latency_change": 3.268496584496461e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.382183422218077e-12,
+          "minimum_output_gap": 7.499999999998238,
+          "fixed_wire_tail_gap_error": 1.8189894035458565e-12
+        },
+        {
+          "cell": 9,
+          "rest_latency": 0.653164473582251,
+          "first_advance": 0.027014682768566445,
+          "max_rest_latency_change": 5.115907697472721e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.495870259939693e-12,
+          "minimum_output_gap": 7.499999999997726,
+          "fixed_wire_tail_gap_error": 2.2737367544323206e-12
+        },
+        {
+          "cell": 10,
+          "rest_latency": 0.6531962023039455,
+          "first_advance": 0.02701671497868574,
+          "max_rest_latency_change": 1.7053025658242404e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.410605131648481e-12,
+          "minimum_output_gap": 7.499999999997613,
+          "fixed_wire_tail_gap_error": 2.3874235921539366e-12
+        },
+        {
+          "cell": 11,
+          "rest_latency": 0.6531803374879814,
+          "first_advance": 0.02701569881088517,
+          "max_rest_latency_change": 4.547473508864641e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.183231456205249e-12,
+          "minimum_output_gap": 7.499999999998067,
+          "fixed_wire_tail_gap_error": 1.9326762412674725e-12
+        },
+        {
+          "cell": 12,
+          "rest_latency": 0.653164473578812,
+          "first_advance": 0.027014682754128216,
+          "max_rest_latency_change": 2.1884716261411086e-12,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.183231456205249e-12,
+          "minimum_output_gap": 7.499999999997442,
+          "fixed_wire_tail_gap_error": 2.5579538487363607e-12
+        },
+        {
+          "cell": 13,
+          "rest_latency": 0.6531962023041729,
+          "first_advance": 0.02701671497919733,
+          "max_rest_latency_change": 2.8421709430404007e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.183231456205249e-12,
+          "minimum_output_gap": 7.499999999997613,
+          "fixed_wire_tail_gap_error": 2.3874235921539366e-12
+        },
+        {
+          "cell": 14,
+          "rest_latency": 0.653180337487953,
+          "first_advance": 0.027015698810856748,
+          "max_rest_latency_change": 4.831690603168681e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.240074875066057e-12,
+          "minimum_output_gap": 7.499999999997101,
+          "fixed_wire_tail_gap_error": 2.8990143619012088e-12
+        },
+        {
+          "cell": 15,
+          "rest_latency": 0.653164473582251,
+          "first_advance": 0.027014682768708553,
+          "max_rest_latency_change": 2.8421709430404007e-13,
+          "jitter_budget": 0.0,
+          "max_phase_error": 3.240074875066057e-12,
+          "minimum_output_gap": 7.499999999996817,
+          "fixed_wire_tail_gap_error": 3.183231456205249e-12
+        }
+      ]
+    }
+  ],
+  "refinement": [
+    {
+      "N": 8,
+      "K": 32,
+      "epsilon": "0.1",
+      "period": "15/2",
+      "scenario": "oscillatory",
+      "seed": 41,
+      "sigma_each": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "max_output_time_change": 2.8563817977556027e-11
+    },
+    {
+      "N": 8,
+      "K": 32,
+      "epsilon": "0.1",
+      "period": "15/2",
+      "scenario": "switching",
+      "seed": 41,
+      "sigma_each": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "max_output_time_change": 1.3926637620897964e-11
+    },
+    {
+      "N": 8,
+      "K": 32,
+      "epsilon": "0.1",
+      "period": "41/5",
+      "scenario": "switching",
+      "seed": 41,
+      "sigma_each": [
+        "1/20",
+        "1/20",
+        "1/20",
+        "1/20",
+        "1/20",
+        "1/20",
+        "1/20"
+      ],
+      "max_output_time_change": 2.2566837287740782e-11
+    }
+  ],
+  "cells_tested": 127,
+  "outputs_tested": 4985,
+  "scope": "zero noise and identical waveforms; written proof for arbitrary N, simulations only for recorded histories"
+}

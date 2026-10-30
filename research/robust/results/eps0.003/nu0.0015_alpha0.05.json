@@ -1,0 +1,753 @@
+{
+  "schema_version": 2,
+  "status": "CERTIFIED_ROBUST_LOCAL_PREPARED_SECTION",
+  "model": {
+    "drift": "measurable per-port C, Lm, Ls, Le, M in the nominal relative box",
+    "noise": "measurable additive disturbances bounded by nu on q and each m in every mode; E is noise-free",
+    "amplitude": "measurable received-current multipliers in [1-alpha,1+alpha]; support [arrival,arrival+1)",
+    "emission": "canonical one-unit waveform triggered by firing, independent of the noisy FAST exit time",
+    "kernel": "other R laws unchanged; continuous first-crossing semantics"
+  },
+  "section": {
+    "main_mode": "READY",
+    "aux_modes": "all READY",
+    "no_active_currents": true,
+    "q": [
+      "0.09999",
+      "0.10001"
+    ],
+    "m_each": [
+      "0.02499",
+      "0.02501"
+    ],
+    "active_port": 2,
+    "active_log_gain": "ln(3/10) + [-1e-5,1e-5]",
+    "other_gains": "positive and initially below their own caps",
+    "b": [
+      "0.17999",
+      "0.18001"
+    ],
+    "E": [
+      "50",
+      "100"
+    ]
+  },
+  "protocol": {
+    "B_source": "16 pulses at 0,8,...,120 on B port 2",
+    "route": "B -> A port 2; each delay in [0.3,0.4]",
+    "other_inputs": "none",
+    "measurement": "139.9"
+  },
+  "conclusion": {
+    "B_emissions": 13,
+    "A_emissions": 10,
+    "A_full_error_doses": 3,
+    "A_final_log_gain": "initial log gain + D1 + D2 + D3; each Di in gain_log_dose",
+    "A_recovery": "unchanged",
+    "isolated_probe_before": "0/8",
+    "isolated_probe_after": "8/8",
+    "probe_period": "20"
+  },
+  "trusted_base": [
+    "authentic execution of the verifier and all its imports",
+    "Python runtime and integer interval implementation",
+    "written hybrid-flow argument; not a Lean formalization"
+  ],
+  "parameters": {
+    "epsilon_relative": "0.003",
+    "noise_bound": "0.0015",
+    "amplitude_deviation": "0.05",
+    "section_excess": "0.03"
+  },
+  "bounds": {
+    "epsilon": [
+      "0.0030000000000000000000000000000000000000",
+      "0.0030000000000000000000000000000000000000"
+    ],
+    "nu": [
+      "0.0015000000000000000000000000000000000000",
+      "0.0015000000000000000000000000000000000000"
+    ],
+    "alpha": [
+      "0.0500000000000000000000000000000000000000",
+      "0.0500000000000000000000000000000000000000"
+    ],
+    "section_excess": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "a": [
+      "1.3862943611198906188344642429163531361510",
+      "1.3862943611198906188344642429163531361511"
+    ],
+    "kappa": [
+      "0.5000000000000000000000000000000000000000",
+      "0.5000000000000000000000000000000000000000"
+    ],
+    "cap": [
+      "3.9880000000000000000000000000000000000000",
+      "4.0120000000000000000000000000000000000000"
+    ],
+    "Lm": [
+      "11.1237060330133563249498102519452499932238",
+      "11.1906490984076192516796987790382003442363"
+    ],
+    "Ls": [
+      "1.9558520915611286985537181842277416180319",
+      "1.9676225153819579585249542013845785786219"
+    ],
+    "Le": [
+      "9.2142365202435396465197390012506938449503",
+      "9.2696882946883352712731175709673479703964"
+    ],
+    "M": [
+      "35.7273420760588861992766890170194236673938",
+      "35.9423511557543258353806610672722988349008"
+    ],
+    "b": [
+      "0.1799900000000000000000000000000000000000",
+      "0.1800100000000000000000000000000000000000"
+    ],
+    "h_increases_through_raw_window.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "h_increases_through_raw_window.right": [
+      "1.1506125789288178013078098393876846217522",
+      "1.1506125789288178013078098393876846217523"
+    ],
+    "aux_rest_deviation": [
+      "0.0030100000000000000000000000000000000000",
+      "0.0030100000000000000000000000000000000000"
+    ],
+    "aux_rest_below_threshold.left": [
+      "0.0280100000000000000000000000000000000000",
+      "0.0280100000000000000000000000000000000000"
+    ],
+    "aux_rest_below_threshold.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux_below_threshold_until_0.015.left": [
+      "0.8017842454964961657947604383968658600924",
+      "0.8017842454964961657947604383968658600925"
+    ],
+    "aux_below_threshold_until_0.015.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux_above_threshold_by_0.03.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux_above_threshold_by_0.03.right": [
+      "1.3941712071412640220531758438860943494512",
+      "1.3941712071412640220531758438860943494513"
+    ],
+    "decay_1_0.8_dominates_noise.left": [
+      "0.0001348471449666364028152371288288382808",
+      "0.0001348471449666364028152371288288382809"
+    ],
+    "decay_1_0.8_dominates_noise.right": [
+      "0.8000000000000000000000000000000000000000",
+      "0.8000000000000000000000000000000000000000"
+    ],
+    "decay_0.8_0.1_dominates_noise.left": [
+      "0.0007669291591485963950860181353370138744",
+      "0.0007669291591485963950860181353370138745"
+    ],
+    "decay_0.8_0.1_dominates_noise.right": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "decay_0.1_0.025_dominates_noise.left": [
+      "0.0001627915668004096121644849815573850205",
+      "0.0001627915668004096121644849815573850206"
+    ],
+    "decay_0.1_0.025_dominates_noise.right": [
+      "0.0250000000000000000000000000000000000000",
+      "0.0250000000000000000000000000000000000000"
+    ],
+    "mark_duration": [
+      "0.0199371854379606771968073315818486404827",
+      "0.0200632116268676105999074341075082474130"
+    ],
+    "silent_duration": [
+      "1.0534538491562378573921748510534737674337",
+      "1.0666354993125567664736000929720941775295"
+    ],
+    "error_duration": [
+      "0.1490297553947109019254741211136396862436",
+      "0.1509835429050956672268239957377214714870"
+    ],
+    "mark_end": [
+      "0.0349371854379606771968073315818486404827",
+      "0.0500632116268676105999074341075082474130"
+    ],
+    "error_start": [
+      "1.0883910345941985345889821826353224079164",
+      "1.1166987109394243770735075270796024249425"
+    ],
+    "aux_finish": [
+      "1.2374207899889094365144563037489620941600",
+      "1.2676822538445200443003315228173238964294"
+    ],
+    "gain_log_dose": [
+      "0.5981881974851388519932781120511473423421",
+      "0.6018118025148611480067218879488526576579"
+    ],
+    "initial_gain": [
+      "0.2999970000149999500001249997500004166660",
+      "0.3000030000150000500001250002500004166673"
+    ],
+    "learned_gain": [
+      "1.8050382598075511598536356081579095800744",
+      "1.8248040350580714659061356682819187382262"
+    ],
+    "decay_1_0.25_dominates_noise.left": [
+      "0.0010820212806667225555199435107514191030",
+      "0.0010820212806667225555199435107514191031"
+    ],
+    "decay_1_0.25_dominates_noise.right": [
+      "0.2500000000000000000000000000000000000000",
+      "0.2500000000000000000000000000000000000000"
+    ],
+    "decay_0.25_0.1_dominates_noise.left": [
+      "0.0083337963220178898827712650702816823156",
+      "0.0083337963220178898827712650702816823157"
+    ],
+    "decay_0.25_0.1_dominates_noise.right": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "min_input_gap": [
+      "7.5000000000000000000000000000000000000000",
+      "7.5000000000000000000000000000000000000000"
+    ],
+    "fast_duration": [
+      "0.9976647747599025414441940102112403596681",
+      "1.0023478933472733465378803961331398237335"
+    ],
+    "slow_duration": [
+      "4.8277336163705634414818531930297291087590",
+      "5.3858752829014213814937278293478451478281"
+    ],
+    "main_reopen_bound": [
+      "7.2882231762486947280316082254809849715614",
+      "7.2882231762486947280316082254809849715615"
+    ],
+    "aux_cycle_ends_after_raw_pulse.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux_cycle_ends_after_raw_pulse.right": [
+      "1.2374207899889094365144563037489620941600",
+      "1.2374207899889094365144563037489620941601"
+    ],
+    "aux_cycle_ends_before_next_input.left": [
+      "1.2676822538445200443003315228173238964293",
+      "1.2676822538445200443003315228173238964294"
+    ],
+    "aux_cycle_ends_before_next_input.right": [
+      "7.5000000000000000000000000000000000000000",
+      "7.5000000000000000000000000000000000000000"
+    ],
+    "learned_gain_below_all_caps.left": [
+      "1.8050382598075511598536356081579095800744",
+      "1.8248040350580714659061356682819187382262"
+    ],
+    "learned_gain_below_all_caps.right": [
+      "3.9880000000000000000000000000000000000000",
+      "3.9880000000000000000000000000000000000000"
+    ],
+    "mark_finishes_before_any_main_firing.left": [
+      "0.0500632116268676105999074341075082474129",
+      "0.0500632116268676105999074341075082474130"
+    ],
+    "mark_finishes_before_any_main_firing.right": [
+      "0.5000000000000000000000000000000000000000",
+      "0.5000000000000000000000000000000000000000"
+    ],
+    "main_fires_before_error_begins.left": [
+      "0.9000000000000000000000000000000000000000",
+      "0.9000000000000000000000000000000000000000"
+    ],
+    "main_fires_before_error_begins.right": [
+      "1.0883910345941985345889821826353224079164",
+      "1.0883910345941985345889821826353224079165"
+    ],
+    "error_finishes_during_main_fast.left": [
+      "1.2676822538445200443003315228173238964293",
+      "1.2676822538445200443003315228173238964294"
+    ],
+    "error_finishes_during_main_fast.right": [
+      "1.4976647747599025414441940102112403596681",
+      "1.4976647747599025414441940102112403596682"
+    ],
+    "main_reopens_after_raw_pulse.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "main_reopens_after_raw_pulse.right": [
+      "6.3253983911304659829260472032409694684271",
+      "6.3253983911304659829260472032409694684272"
+    ],
+    "main_reopens_before_next_input.left": [
+      "7.2882231762486947280316082254809849715614",
+      "7.2882231762486947280316082254809849715615"
+    ],
+    "main_reopens_before_next_input.right": [
+      "7.5000000000000000000000000000000000000000",
+      "7.5000000000000000000000000000000000000000"
+    ],
+    "arbitrary_initial_silence_inside_section.left": [
+      "0.0030100000000000000000000000000000000000",
+      "0.0030100000000000000000000000000000000000"
+    ],
+    "arbitrary_initial_silence_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "rest_noise_inside_section.left": [
+      "0.0030000000000000000000000000000000000000",
+      "0.0030000000000000000000000000000000000000"
+    ],
+    "rest_noise_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "gain_before_0": [
+      "0.2999970000149999500001249997500004166660",
+      "0.3000030000150000500001250002500004166673"
+    ],
+    "peak_bound_0": [
+      "0.3071666219827193383274134334287322912463",
+      "0.3071666219827193383274134334287322912464"
+    ],
+    "carry_bound_0": [
+      "0.0110327216565537492641570965085915293020",
+      "0.0110327216565537492641570965085915293021"
+    ],
+    "silent_0_no_first_crossing.left": [
+      "0.3071666219827193383274134334287322912463",
+      "0.3071666219827193383274134334287322912464"
+    ],
+    "silent_0_no_first_crossing.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_0_stays_below_threshold_after_raw_end.left": [
+      "0.1030000000000000000000000000000000000000",
+      "0.1030000000000000000000000000000000000000"
+    ],
+    "silent_0_stays_below_threshold_after_raw_end.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_0_excess_returns_inside_section.left": [
+      "0.0110327216565537492641570965085915293020",
+      "0.0110327216565537492641570965085915293021"
+    ],
+    "silent_0_excess_returns_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "gain_before_1": [
+      "0.5456406845147689995049126052665357533169",
+      "0.5476324099842692196934909821395751190768"
+    ],
+    "peak_bound_1": [
+      "0.4521659118254890512879272932746639868142",
+      "0.4521659118254890512879272932746639868143"
+    ],
+    "carry_bound_1": [
+      "0.0166549542563694003480202097999694832622",
+      "0.0166549542563694003480202097999694832623"
+    ],
+    "silent_1_no_first_crossing.left": [
+      "0.4521659118254890512879272932746639868142",
+      "0.4521659118254890512879272932746639868143"
+    ],
+    "silent_1_no_first_crossing.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_1_stays_below_threshold_after_raw_end.left": [
+      "0.1030000000000000000000000000000000000000",
+      "0.1030000000000000000000000000000000000000"
+    ],
+    "silent_1_stays_below_threshold_after_raw_end.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_1_excess_returns_inside_section.left": [
+      "0.0166549542563694003480202097999694832622",
+      "0.0166549542563694003480202097999694832623"
+    ],
+    "silent_1_excess_returns_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "gain_before_2": [
+      "0.9924224461673262971869313186393298178298",
+      "0.9996608582253636359730769009270069163225"
+    ],
+    "peak_bound_2": [
+      "0.7168509667703837955138142041863994832136",
+      "0.7168509667703837955138142041863994832137"
+    ],
+    "carry_bound_2": [
+      "0.0269179075867535086396391762317692681073",
+      "0.0269179075867535086396391762317692681074"
+    ],
+    "silent_2_no_first_crossing.left": [
+      "0.7168509667703837955138142041863994832136",
+      "0.7168509667703837955138142041863994832137"
+    ],
+    "silent_2_no_first_crossing.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_2_stays_below_threshold_after_raw_end.left": [
+      "0.1030000000000000000000000000000000000000",
+      "0.1030000000000000000000000000000000000000"
+    ],
+    "silent_2_stays_below_threshold_after_raw_end.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_2_excess_returns_inside_section.left": [
+      "0.0269179075867535086396391762317692681073",
+      "0.0269179075867535086396391762317692681074"
+    ],
+    "silent_2_excess_returns_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "learned_start_excess": [
+      "0.0269179075867535086396391762317692681073",
+      "0.0269179075867535086396391762317692681074"
+    ],
+    "learned_upper_at_0_5": [
+      "0.9632266573856784495616418695573795987885",
+      "0.9632266573856784495616418695573795987886"
+    ],
+    "learned_lower_at_0_9": [
+      "1.0356186015604858010121163878308161357460",
+      "1.0356186015604858010121163878308161357461"
+    ],
+    "learned_below_threshold_until_0.5.left": [
+      "0.9632266573856784495616418695573795987885",
+      "0.9632266573856784495616418695573795987886"
+    ],
+    "learned_below_threshold_until_0.5.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "learned_above_threshold_by_0.9.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "learned_above_threshold_by_0.9.right": [
+      "1.0356186015604858010121163878308161357460",
+      "1.0356186015604858010121163878308161357461"
+    ],
+    "probe_gap_exceeds_cycle.left": [
+      "7.2882231762486947280316082254809849715614",
+      "7.2882231762486947280316082254809849715615"
+    ],
+    "probe_gap_exceeds_cycle.right": [
+      "20.0000000000000000000000000000000000000000",
+      "20.0000000000000000000000000000000000000000"
+    ],
+    "probe_aux_cycle_ends.left": [
+      "1.2676822538445200443003315228173238964293",
+      "1.2676822538445200443003315228173238964294"
+    ],
+    "probe_aux_cycle_ends.right": [
+      "20.0000000000000000000000000000000000000000",
+      "20.0000000000000000000000000000000000000000"
+    ],
+    "work_bound": [
+      "249.6345308139547268836240769902730598561352",
+      "249.6345308139547268836240769902730598561353"
+    ],
+    "reserve_gate_stays_open.left": [
+      "249.6345308139547268836240769902730598561352",
+      "249.6345308139547268836240769902730598561353"
+    ],
+    "reserve_gate_stays_open.right": [
+      "500.0000000000000000000000000000000000000000",
+      "500.0000000000000000000000000000000000000000"
+    ],
+    "A_gain_complete_by": [
+      "42.5676822538445200443003315228173238964293",
+      "42.5676822538445200443003315228173238964294"
+    ],
+    "A_first_emission": [
+      "49.3000000000000000000000000000000000000000",
+      "50.2000000000000000000000000000000000000000"
+    ],
+    "A_last_return_by": [
+      "128.5882231762486947280316082254809849715614",
+      "128.5882231762486947280316082254809849715615"
+    ],
+    "B_last_return_by": [
+      "127.2882231762486947280316082254809849715614",
+      "127.2882231762486947280316082254809849715615"
+    ],
+    "A_learning_complete_before_first_response.left": [
+      "42.5676822538445200443003315228173238964293",
+      "42.5676822538445200443003315228173238964294"
+    ],
+    "A_learning_complete_before_first_response.right": [
+      "49.3000000000000000000000000000000000000000",
+      "49.3000000000000000000000000000000000000000"
+    ],
+    "A_quiescent_before_measurement.left": [
+      "128.5882231762486947280316082254809849715614",
+      "128.5882231762486947280316082254809849715615"
+    ],
+    "A_quiescent_before_measurement.right": [
+      "139.9000000000000000000000000000000000000000",
+      "139.9000000000000000000000000000000000000000"
+    ],
+    "B_quiescent_before_measurement.left": [
+      "127.2882231762486947280316082254809849715614",
+      "127.2882231762486947280316082254809849715615"
+    ],
+    "B_quiescent_before_measurement.right": [
+      "139.9000000000000000000000000000000000000000",
+      "139.9000000000000000000000000000000000000000"
+    ]
+  },
+  "obligations": [
+    {
+      "name": "h_increases_through_raw_window",
+      "relation": "strict_lt",
+      "left": "h_increases_through_raw_window.left",
+      "right": "h_increases_through_raw_window.right"
+    },
+    {
+      "name": "aux_rest_below_threshold",
+      "relation": "strict_lt",
+      "left": "aux_rest_below_threshold.left",
+      "right": "aux_rest_below_threshold.right"
+    },
+    {
+      "name": "aux_below_threshold_until_0.015",
+      "relation": "strict_lt",
+      "left": "aux_below_threshold_until_0.015.left",
+      "right": "aux_below_threshold_until_0.015.right"
+    },
+    {
+      "name": "aux_above_threshold_by_0.03",
+      "relation": "strict_lt",
+      "left": "aux_above_threshold_by_0.03.left",
+      "right": "aux_above_threshold_by_0.03.right"
+    },
+    {
+      "name": "decay_1_0.8_dominates_noise",
+      "relation": "strict_lt",
+      "left": "decay_1_0.8_dominates_noise.left",
+      "right": "decay_1_0.8_dominates_noise.right"
+    },
+    {
+      "name": "decay_0.8_0.1_dominates_noise",
+      "relation": "strict_lt",
+      "left": "decay_0.8_0.1_dominates_noise.left",
+      "right": "decay_0.8_0.1_dominates_noise.right"
+    },
+    {
+      "name": "decay_0.1_0.025_dominates_noise",
+      "relation": "strict_lt",
+      "left": "decay_0.1_0.025_dominates_noise.left",
+      "right": "decay_0.1_0.025_dominates_noise.right"
+    },
+    {
+      "name": "decay_1_0.25_dominates_noise",
+      "relation": "strict_lt",
+      "left": "decay_1_0.25_dominates_noise.left",
+      "right": "decay_1_0.25_dominates_noise.right"
+    },
+    {
+      "name": "decay_0.25_0.1_dominates_noise",
+      "relation": "strict_lt",
+      "left": "decay_0.25_0.1_dominates_noise.left",
+      "right": "decay_0.25_0.1_dominates_noise.right"
+    },
+    {
+      "name": "aux_cycle_ends_after_raw_pulse",
+      "relation": "strict_lt",
+      "left": "aux_cycle_ends_after_raw_pulse.left",
+      "right": "aux_cycle_ends_after_raw_pulse.right"
+    },
+    {
+      "name": "aux_cycle_ends_before_next_input",
+      "relation": "strict_lt",
+      "left": "aux_cycle_ends_before_next_input.left",
+      "right": "aux_cycle_ends_before_next_input.right"
+    },
+    {
+      "name": "learned_gain_below_all_caps",
+      "relation": "strict_lt",
+      "left": "learned_gain_below_all_caps.left",
+      "right": "learned_gain_below_all_caps.right"
+    },
+    {
+      "name": "mark_finishes_before_any_main_firing",
+      "relation": "strict_lt",
+      "left": "mark_finishes_before_any_main_firing.left",
+      "right": "mark_finishes_before_any_main_firing.right"
+    },
+    {
+      "name": "main_fires_before_error_begins",
+      "relation": "strict_lt",
+      "left": "main_fires_before_error_begins.left",
+      "right": "main_fires_before_error_begins.right"
+    },
+    {
+      "name": "error_finishes_during_main_fast",
+      "relation": "strict_lt",
+      "left": "error_finishes_during_main_fast.left",
+      "right": "error_finishes_during_main_fast.right"
+    },
+    {
+      "name": "main_reopens_after_raw_pulse",
+      "relation": "strict_lt",
+      "left": "main_reopens_after_raw_pulse.left",
+      "right": "main_reopens_after_raw_pulse.right"
+    },
+    {
+      "name": "main_reopens_before_next_input",
+      "relation": "strict_lt",
+      "left": "main_reopens_before_next_input.left",
+      "right": "main_reopens_before_next_input.right"
+    },
+    {
+      "name": "arbitrary_initial_silence_inside_section",
+      "relation": "strict_lt",
+      "left": "arbitrary_initial_silence_inside_section.left",
+      "right": "arbitrary_initial_silence_inside_section.right"
+    },
+    {
+      "name": "rest_noise_inside_section",
+      "relation": "strict_lt",
+      "left": "rest_noise_inside_section.left",
+      "right": "rest_noise_inside_section.right"
+    },
+    {
+      "name": "silent_0_no_first_crossing",
+      "relation": "strict_lt",
+      "left": "silent_0_no_first_crossing.left",
+      "right": "silent_0_no_first_crossing.right"
+    },
+    {
+      "name": "silent_0_stays_below_threshold_after_raw_end",
+      "relation": "strict_lt",
+      "left": "silent_0_stays_below_threshold_after_raw_end.left",
+      "right": "silent_0_stays_below_threshold_after_raw_end.right"
+    },
+    {
+      "name": "silent_0_excess_returns_inside_section",
+      "relation": "strict_lt",
+      "left": "silent_0_excess_returns_inside_section.left",
+      "right": "silent_0_excess_returns_inside_section.right"
+    },
+    {
+      "name": "silent_1_no_first_crossing",
+      "relation": "strict_lt",
+      "left": "silent_1_no_first_crossing.left",
+      "right": "silent_1_no_first_crossing.right"
+    },
+    {
+      "name": "silent_1_stays_below_threshold_after_raw_end",
+      "relation": "strict_lt",
+      "left": "silent_1_stays_below_threshold_after_raw_end.left",
+      "right": "silent_1_stays_below_threshold_after_raw_end.right"
+    },
+    {
+      "name": "silent_1_excess_returns_inside_section",
+      "relation": "strict_lt",
+      "left": "silent_1_excess_returns_inside_section.left",
+      "right": "silent_1_excess_returns_inside_section.right"
+    },
+    {
+      "name": "silent_2_no_first_crossing",
+      "relation": "strict_lt",
+      "left": "silent_2_no_first_crossing.left",
+      "right": "silent_2_no_first_crossing.right"
+    },
+    {
+      "name": "silent_2_stays_below_threshold_after_raw_end",
+      "relation": "strict_lt",
+      "left": "silent_2_stays_below_threshold_after_raw_end.left",
+      "right": "silent_2_stays_below_threshold_after_raw_end.right"
+    },
+    {
+      "name": "silent_2_excess_returns_inside_section",
+      "relation": "strict_lt",
+      "left": "silent_2_excess_returns_inside_section.left",
+      "right": "silent_2_excess_returns_inside_section.right"
+    },
+    {
+      "name": "learned_below_threshold_until_0.5",
+      "relation": "strict_lt",
+      "left": "learned_below_threshold_until_0.5.left",
+      "right": "learned_below_threshold_until_0.5.right"
+    },
+    {
+      "name": "learned_above_threshold_by_0.9",
+      "relation": "strict_lt",
+      "left": "learned_above_threshold_by_0.9.left",
+      "right": "learned_above_threshold_by_0.9.right"
+    },
+    {
+      "name": "probe_gap_exceeds_cycle",
+      "relation": "strict_lt",
+      "left": "probe_gap_exceeds_cycle.left",
+      "right": "probe_gap_exceeds_cycle.right"
+    },
+    {
+      "name": "probe_aux_cycle_ends",
+      "relation": "strict_lt",
+      "left": "probe_aux_cycle_ends.left",
+      "right": "probe_aux_cycle_ends.right"
+    },
+    {
+      "name": "reserve_gate_stays_open",
+      "relation": "strict_lt",
+      "left": "reserve_gate_stays_open.left",
+      "right": "reserve_gate_stays_open.right"
+    },
+    {
+      "name": "A_learning_complete_before_first_response",
+      "relation": "strict_lt",
+      "left": "A_learning_complete_before_first_response.left",
+      "right": "A_learning_complete_before_first_response.right"
+    },
+    {
+      "name": "A_quiescent_before_measurement",
+      "relation": "strict_lt",
+      "left": "A_quiescent_before_measurement.left",
+      "right": "A_quiescent_before_measurement.right"
+    },
+    {
+      "name": "B_quiescent_before_measurement",
+      "relation": "strict_lt",
+      "left": "B_quiescent_before_measurement.left",
+      "right": "B_quiescent_before_measurement.right"
+    }
+  ],
+  "source_sha256": {
+    "bounds.py": "fc57e085e180e59e8b4b919173534478793121eb66c7da3e7df1e9f2c2ba40aa",
+    "certify.py": "01c77fa785bbdc2eb142a63e9e16d7df6b9e9b62d69945b9636665bacd3afce3",
+    "contract.py": "9f40233deef9dc6e56be9e8a65d9a8fcbf1fc00714fd097e7d298bba9327bb08",
+    "decimal_intervals.py": "b7797c2be191b6baff61fd4d1e3087999aca097bf871c3452d801be7741ec444",
+    "integer_intervals.py": "24732cfecccf069a3e3d21e97b6088f811adae4ad1d499ece266f21695f1c68d",
+    "verify.py": "dfe18b1e90b5e91de741b2d6e7ae6a44e9eddbdb9d657131805d438b1fab5901",
+    "chain.py": "b5ab30791fd2d5563a7ede570c47df17eef00ee1c3b46e4b98c6854c24cb6b46",
+    "THEOREM_ROBUST.md": "7432c8a5a056b122967c7c32143517b2e88d892379c20514c41fe950573c56ca",
+    "THEOREM_N.md": "c538c633b159edc8e0fb00c5d08ea1a1707c41de7bdb2d0038e740ea3725dbdf"
+  }
+}

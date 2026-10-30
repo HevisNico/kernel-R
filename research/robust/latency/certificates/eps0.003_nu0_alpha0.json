@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "status": "CERTIFIED_NOISE_DEPENDENT_LATENCY_RADIUS",
+  "reference": "first crossing of .1 + g*h(t)=1 for the same cell and its actual fixed learned gain g",
+  "radius": "each regular latency differs from its reference by at most delta; two errors may differ by 2*delta",
+  "first_output": "a nonnegative advance plus a one-sided delay error <=delta",
+  "chain": "T >= 7.5 + 2*sum_{i=0}^{N-2}(sigma_i+delta_i)",
+  "preparation": "the pinned robust birth certificate and its widened local section",
+  "trust": "authentic sources; integer interval arithmetic; written first-crossing/packet proof, not Lean",
+  "parameters": {
+    "epsilon": "0.003",
+    "nu": "0",
+    "alpha": "0",
+    "reference_lo": "0.653164",
+    "reference_hi": "0.653197",
+    "delta": "0"
+  },
+  "birth_certificate": {
+    "path": "birth/certificates/eps0.003_nu0_alpha0.json",
+    "sha256": "653a2ece1a21f5b25536316ac3492cb47a998ce2349c6ece7af0b57bd34a17a4"
+  },
+  "source_sha256": {
+    "schema.py": "cdbae319c3444fb7f8cd77b38ee65d0fc7a8e01ea3bf0ced06fe2af1d5c4fb4f",
+    "obligations.py": "bffcd9e32a982d342454084393fe6d8a8c4f10b353e117e9ab29c454e58aeff3",
+    "certify.py": "9f148085f05bed0843e74e1666c7cdf177ac117442b40d7ea09d3eecd9409590",
+    "verify.py": "d27292ffa1c6a5a3013328a67dd6a6925f4d9bdcc2b517cf9a75451ce15a57c3",
+    "THEOREM.md": "0c8d6011559041b330cd05f426c441dc793b760feee2a95b7f16de31abe89695"
+  },
+  "bounds": {
+    "nu": [
+      "0E-40",
+      "0E-40"
+    ],
+    "alpha": [
+      "0E-40",
+      "0E-40"
+    ],
+    "latency_radius": [
+      "0E-40",
+      "0E-40"
+    ],
+    "reference_lower": [
+      "0.6531640000000000000000000000000000000000",
+      "0.6531640000000000000000000000000000000000"
+    ],
+    "reference_upper": [
+      "0.6531970000000000000000000000000000000000",
+      "0.6531970000000000000000000000000000000000"
+    ],
+    "learned_gain": [
+      "1.8148760904722349957656331678657619638566",
+      "1.8149123883570220784068819983289122355248"
+    ],
+    "reference_before_all_roots.left": [
+      "0.9999997313179605968967799377545509085323",
+      "0.9999997313179605968967799377545509085324"
+    ],
+    "reference_before_all_roots.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "reference_after_all_roots.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "reference_after_all_roots.right": [
+      "1.0000004525151628596130920993931986495160",
+      "1.0000004525151628596130920993931986495161"
+    ],
+    "response_strictly_concave_through_raw_window.left": [
+      "2.4261226388505336944151981399647218137676",
+      "2.4261226388505336944151981399647218137677"
+    ],
+    "response_strictly_concave_through_raw_window.right": [
+      "7.6872482226912227946736404212266395476888",
+      "7.6872482226912227946736404212266395476889"
+    ]
+  },
+  "obligations": [
+    {
+      "name": "reference_before_all_roots",
+      "relation": "strict_lt",
+      "left": "reference_before_all_roots.left",
+      "right": "reference_before_all_roots.right"
+    },
+    {
+      "name": "reference_after_all_roots",
+      "relation": "strict_lt",
+      "left": "reference_after_all_roots.left",
+      "right": "reference_after_all_roots.right"
+    },
+    {
+      "name": "response_strictly_concave_through_raw_window",
+      "relation": "strict_lt",
+      "left": "response_strictly_concave_through_raw_window.left",
+      "right": "response_strictly_concave_through_raw_window.right"
+    }
+  ]
+}
