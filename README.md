@@ -9,6 +9,7 @@ A22 network engines and historical proof archive stay in the
 
 ## Start here
 
+- [N-cell composition theorem](proof/reciprocal_composition/THEOREM.md): every finite chain, with source-length and path-jitter budgets.
 - [R kernel definition](kernel/README.md) and [original model](model/full_model_reference.md).
 - [Cadence cascade proof](proof/reciprocal_cadence/THEOREM.md): C's faster cadence reaches A through B, from birth through time 789.9.
 - [Birth-to-feedback proof](proof/reciprocal_entry/THEOREM.md): pulses-only initialization through time 459.9.
@@ -18,7 +19,7 @@ A22 network engines and historical proof archive stay in the
 - [Learned teaching choice](experiments/reciprocal/pedagogy/README.md) and [within-lesson adaptation](experiments/reciprocal/adaptive/README.md).
 - [Complete English prototype ZIP](downloads/R_Reciprocal_Prototype.zip): runnable code, recordings, reports and proofs in titled folders.
 
-Extract the ZIP and open `11_Certified_Cadence_Cascade/RESULTS.html` for the latest
+Extract the ZIP and open `12_Certified_N_Cell_Composition/RESULTS.html` for the latest
 proof, or `03_Visualization/OPEN_IN_BROWSER.html` for the recorded three-cell
 network. The viewer replays simulations rather than solving the equations.
 
@@ -33,6 +34,7 @@ network. The viewer replays simulations rather than solving the equations.
 | Local feedback theorem | ±0.3% and ±10% physical boxes, from a prepared section. |
 | Entry and composed theorem | The declared READY birth family reaches that section; pulses-only protocol through time 459.9. |
 | Cadence cascade theorem | From birth through 789.9, on 45-parameter boxes: C->B->A; b gains 0.2 in each cell's fast stage; A's frozen period-4 probe improves 4/8 to 8/8. |
+| N-cell composition theorem | Every finite directed chain, 15*N independent physical parameters: K>=4*N+12 and summed link-jitter budgets <=0.15. Fixed link delays allow arbitrary depth. |
 
 The composed proof starts with b near 0.08, establishes one protected full MARK
 in each cell, and reaches b near 0.18 at time 319.9. It then proves
@@ -60,6 +62,14 @@ per-input dose-counter replay and explicit treatment of wire jitter. Lean checks
 the two 95-case cadence traces and the recorded adaptive scores. Proving that the complete hybrid execution
 satisfies those abstractions and enclosures remains separate work.
 
+The [N-cell extension](results/reciprocal_composition/README.md) uses a closed
+packet contract and a written induction, supported by 81 N-independent local
+inequalities and 12 exact polynomial identities. Physical tolerances stay at
+±10% as N grows. Source length and time grow linearly; fast-block traffic is
+quadratic at the supplied minimum source length. Per-pulse wire jitter must
+obey the path budget; the old 25-pulse train and full ±0.05 jitter per link
+are not claimed to work unchanged at arbitrary depth.
+
 ## Verify the proofs
 
 Python 3.12 and its standard library suffice; no numerical packages or network
@@ -71,9 +81,11 @@ python -B certify/reciprocal_learning/tests.py
 python -B certify/reciprocal_entry/tests.py --link-code certify/reciprocal_learning --link-003 results/reciprocal_learning/eps3e-3/certificate.json --link-01 results/reciprocal_learning/eps1e-1/certificate.json
 python -B certify/reciprocal_entry/verify.py results/reciprocal_entry/eps1e-1/certificate.json --link-certificate results/reciprocal_learning/eps1e-1/certificate.json --link-code certify/reciprocal_learning
 python -B certify/reciprocal_cadence/tests.py
+python -B certify/reciprocal_composition/tests.py
 ```
 
-There are 14 local-theorem, 16 entry/composition and 18 cadence tests. The cadence
+There are 14 local-theorem, 16 entry/composition, 18 cadence and 21 N-composition
+tests, plus three project-layout checks. The cadence
 checker replays 95 actual input cases, 1,030 strict obligations and 2,533 enclosures
 for each physical box, and rechecks the authenticated earlier theorems.
 The entry checker

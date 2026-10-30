@@ -39,3 +39,16 @@ jobs:
               --local-certificate results/reciprocal_learning/$box/certificate.json \
               --local-code certify/reciprocal_learning
           done
+      - name: Uniform N-cell contracts, symbolic induction and refusal cases
+        run: python -B certify/reciprocal_composition/tests.py
+      - name: Replay uniform N-cell certificates and instantiate a large chain
+        run: |
+          for box in eps3e-3 eps1e-1; do
+            python -B certify/reciprocal_composition/verify.py \
+              results/reciprocal_composition/$box/certificate.json \
+              --entry-certificate results/reciprocal_entry/$box/certificate.json \
+              --entry-code certify/reciprocal_entry \
+              --local-certificate results/reciprocal_learning/$box/certificate.json \
+              --local-code certify/reciprocal_learning \
+              --cells 100000000000000000000
+          done

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kernel-R — composition for every finite chain</title>
+<style>
+  :root{font:17px/1.6 system-ui,sans-serif;color:#172b38;background:#f4f7f8;color-scheme:light}
+  body{max-width:920px;margin:auto;padding:36px 20px 64px}h1{font-size:clamp(2rem,6vw,3.5rem);line-height:1.1;letter-spacing:-.04em}
+  h2{margin-top:2em;font-size:1.3rem}p{max-width:76ch}a{color:#075f70}.label{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:#426b74;font-weight:750}
+  .card{background:white;border:1px solid #d9e3e6;border-radius:12px;padding:24px;margin:26px 0}.formula{font:600 1.1rem/1.7 ui-monospace,monospace;overflow-wrap:anywhere}
+  table{border-collapse:collapse;width:100%;font-size:.94rem}th,td{padding:12px 10px;border-bottom:1px solid #d9e3e6;text-align:left}.scroll{overflow-x:auto}
+  code{font-size:.88em;background:#e9f0f2;padding:2px 5px}@media(max-width:500px){body{padding:22px 14px 40px}.card{padding:16px}th,td{padding:10px 7px}}
+</style>
+<main>
+<p class="label">Kernel-R / Proof 12 / Composition</p>
+<h1>Every finite chain, from one local contract.</h1>
+<p>The three-cell cadence result extends to a directed chain of arbitrary finite size.
+The physical boxes remain at <strong>±0.3% and ±10%</strong>, with <strong>15 × N independent parameters</strong>.
+Training length and the path jitter budget are explicit assumptions.</p>
+<div class="card">
+  <p class="label">The contract that closes</p>
+  <p class="formula">P(m, L, J) → P(m + 2, L − 4, J)</p>
+  <p>A prepared relay adds two outputs to the slow prefix, consumes four entries of the regular tail,
+  and preserves its phase-error envelope. Each wire adds its own jitter allowance.</p>
+  <p>One cell learns <strong>two full recovery MARK doses</strong> and one ERROR gain dose.
+  The raw-current tail and the actual changing recovery rate are included. No live state is reset.</p>
+</div>
+<h2>What arbitrary depth costs</h2>
+<p>Send <code>K ≥ 4N + 12</code> period-4 pulses only to the leaf after preparation.
+The root emits <code>K − 2N − 3</code> responses and has at least eight regular-tail outputs.
+Every cell gains exactly 0.2 in b, and every disconnected frozen probe finishes at 8/8.</p>
+<div class="scroll"><table>
+  <thead><tr><th>Cells N</th><th>Minimum K</th><th>Per-link jitter</th><th>Root responses</th></tr></thead>
+  <tbody>
+    <tr><td>3</td><td>24</td><td>±0.05</td><td>15</td></tr>
+    <tr><td>4</td><td>28</td><td>±0.05</td><td>17</td></tr>
+    <tr><td>16</td><td>76</td><td>±0.01</td><td>41</td></tr>
+    <tr><td>100</td><td>412</td><td>±1/660</td><td>209</td></tr>
+  </tbody>
+</table></div>
+<p>The sum of per-link jitter allowances must be at most <strong>0.15</strong>.
+With fixed wire delays there is no jitter sum to accumulate, so every finite depth is covered with
+each fixed delay free in [0.3,0.4]. At arbitrary depth, the old ±0.05 allowance per link is not kept unchanged.</p>
+<p>Source length and terminal time are linear in N. Total fast-phase traffic is
+<code>N(K − N − 4)</code>, which is quadratic at minimum K. This is a sufficient construction,
+not an optimized hardware resource bound.</p>
+<h2>Proof and independent checks</h2>
+<p>The local certificate has <strong>81 strict inequalities and 176 enclosures</strong> per physical box.
+A separate integer checker replays them and authenticates the preceding preparation theorem.
+Twelve polynomial identities check the count and resource algebra. The written packet induction
+establishes arbitrary finite N; a collection of finite simulations does not replace that argument.</p>
+<p>The 21 tests cover both boxes, huge exact instances without enumerating cells, budget rejection,
+symbolic steps, changed assumptions, missing guards and corrupted certificates.
+Numerical chains of 1,3,4,16,32 cells independently reproduce the predicted counts and retained probes.</p>
+<p><a href="eps3e-3/certificate.json">±0.3% certificate</a> · <a href="eps3e-3/independent_check.json">integer replay</a><br>
+<a href="eps1e-1/certificate.json">±10% certificate</a> · <a href="eps1e-1/independent_check.json">integer replay</a><br>
+<a href="instances.json">Example instances</a> · <a href="numerical_checks.json">Supplementary numerical checks</a></p>
+<h2>Boundary of the theorem</h2>
+<p>This is a computer-assisted written proof, not a full Lean formalization or independent mathematical
+peer review. It assumes a directed chain, canonical pulses, an exact source cadence, fixed device parameters
+and the stated preparation and jitter budgets. Arbitrary graphs, cycles, repeated lessons after saturation,
+general learned pedagogy and chip energy/area benefits are outside the result.</p>
+<p><a href="../../proof/reciprocal_composition/THEOREM.md">Complete theorem and induction</a> ·
+<a href="README.md">Reproduce or instantiate</a> · <a href="SOURCE_MANIFEST.json">Source identities</a></p>
+</main>
+</html>

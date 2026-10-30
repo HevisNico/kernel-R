@@ -20,6 +20,10 @@ READY birth-family/pulses-only entry proof covers the prefix through time 459.9.
 The subsequent C->B->A cadence proof composes that authenticated result with C's
 birth and the later pulse blocks through 789.9, on 45-parameter physical boxes.
 It includes a retained period-4 probe and a written route-cut argument.
+The N-cell theorem adds a closed packet contract and a written induction for
+every finite directed chain, with an explicit source-length and summed-jitter
+budget. Its new scalable preparation schedule reuses the authenticated entry
+proof's single-cell arguments; it is not the original fixed birth calendar.
 These results do not certify settings-copy ordering, the open reciprocal phase,
 adaptive pedagogy, silicon behavior or the full original A22 network at ±10%.
 
