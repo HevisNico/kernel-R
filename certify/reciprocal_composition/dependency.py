@@ -1,30 +1,41 @@
 """Authenticate and replay the preceding composed theorem before using its state."""
 from pathlib import Path
-import hashlib, json, subprocess, sys
+import hashlib, json, subprocess, sys, tempfile
 
 ANCHORS = {
-    '0.003':'50fa4ae306d62e8ec13f90bd20779aa6d1a51636e3f2dd3dc0c07215ed9f716e',
-    '0.1':'db7ab2d38d56504446bca019f0f17c298507123009e50b82831d4ab570d703c1',
+    '0.003':'15953bd414f201fcdba7a4e37ac10ef35186ac841088c8dfd711647e2d32d7ef',
+    '0.1':'faa093a143073ccb96bad743d1b8a10e1ff2b8a6726f3c11c67b8ace29929edd',
 }
 
 def verify_dependency(epsilon, entry_certificate, entry_code, local_certificate, local_code):
     if epsilon not in ANCHORS:
         raise RuntimeError('no published prefix theorem for this box')
-    digest = hashlib.sha256(entry_certificate.read_bytes()).hexdigest()
+    artifact = entry_certificate.read_bytes()
+    digest = hashlib.sha256(artifact).hexdigest()
     if digest != ANCHORS[epsilon]:
         raise RuntimeError('entry certificate differs from pinned published theorem')
-    document = json.loads(entry_certificate.read_text())
+    document = json.loads(artifact)
     required = {'certify.py','verify.py','tests.py','dependency.py','decimal_intervals.py','integer_intervals.py'}
     if set(document['source_sha256']) != required:
         raise RuntimeError('entry source set differs')
+    sources = {}
     for name, want in document['source_sha256'].items():
-        if hashlib.sha256((entry_code/name).read_bytes()).hexdigest() != want:
+        data = (entry_code/name).read_bytes()
+        if hashlib.sha256(data).hexdigest() != want:
             raise RuntimeError('entry source changed: '+name)
+        sources[name] = data
     # The entry check authenticates the older local certificate and all its
     # sources itself, before executing that second checker.
-    result = subprocess.run([sys.executable,'-E','-B',str((entry_code/'verify.py').resolve()),
-        str(entry_certificate.resolve()),'--link-certificate',str(local_certificate.resolve()),
-        '--link-code',str(local_code.resolve())],capture_output=True,text=True)
+    # Copy authenticated bytes, not the supplied directory. The authenticated
+    # entry wrapper applies the same isolation to its local-theorem dependency.
+    with tempfile.TemporaryDirectory(prefix='r-entry-replay-') as temporary:
+        root = Path(temporary); clean = root/'code'; clean.mkdir()
+        for name, data in sources.items(): (clean/name).write_bytes(data)
+        pinned = root/'certificate.json'; pinned.write_bytes(artifact)
+        bootstrap = 'import runpy,sys; source=sys.argv.pop(1); sys.argv=sys.argv[1:]; sys.path.insert(0,source); runpy.run_path(sys.argv[0],run_name="__main__")'
+        result = subprocess.run([sys.executable,'-I','-S','-B','-c',bootstrap,str(clean),str(clean/'verify.py'),
+            str(pinned),'--link-certificate',str(local_certificate.resolve()),
+            '--link-code',str(local_code.resolve())],cwd=root,capture_output=True,text=True)
     if result.returncode:
         raise RuntimeError('prefix replay refused: '+result.stderr)
     checked = json.loads(result.stdout)

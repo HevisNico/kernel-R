@@ -67,6 +67,7 @@ def prepare_auxiliary(arrivals, device):
     return sorted(events,key=lambda e:(e[0],e[1],e[2]))
 
 def simulate(arrivals, device, end, mode='a22', fixed=None, checkpoints=()):
+    if not math.isfinite(end) or end < 0: raise ValueError('end must be finite and nonnegative')
     if mode not in ('a22','fixed','gain_only','recovery_only'):
         raise ValueError('invalid mode')
     learn_g=mode in ('a22','gain_only'); learn_b=mode in ('a22','recovery_only')
@@ -102,15 +103,22 @@ def simulate(arrivals, device, end, mode='a22', fixed=None, checkpoints=()):
         return {'energy':energy.tolist(),'gain':np.exp(z).tolist(),'b':b,'main_mode':main,'q':q,
                 'aux_modes':list(aux),'aux_charge':charges,'raw_active':raw.tolist(),
                 'outgoing_active':main==1}
-    while t < end-1e-11:
-        while idx<len(events) and events[idx][0]<=t+2e-11:
+    def consume_events(now):
+        nonlocal idx
+        pending_checkpoints=[]
+        while idx<len(events) and events[idx][0]<=now:
             time,kind,j,phase,value=events[idx]
             if kind=='on': raw[j]=True;raw_origin[j]=time
             elif kind=='off': raw[j]=False
             elif kind=='aux': aux[j]=phase;aux_origin[j]=time;aux_value[j]=value
-            elif kind=='checkpoint':
-                snapshots[str(time)]=snapshot(time)
+            elif kind=='checkpoint':pending_checkpoints.append(time)
             idx+=1
+        # Snapshots are right-continuous: all physical events at this instant
+        # are applied first, including raw off/on and auxiliary transitions.
+        for time in pending_checkpoints:snapshots[str(time)]=snapshot(time)
+    while True:
+        consume_events(t)
+        if t>=end:break
         boundary=min(end,events[idx][0] if idx<len(events) else end)
         dt=boundary-t
         if dt<=0: raise RuntimeError('event scheduler did not advance')
@@ -160,7 +168,7 @@ def simulate(arrivals, device, end, mode='a22', fixed=None, checkpoints=()):
                 q=ready(dt)
         elif main==1:
             remaining=fire_start+1-t
-            if remaining<=dt+1e-12:dt=max(0,remaining);event='fast_end'
+            if remaining<=dt:dt=max(0,remaining);event='fast_end'
             q=q0*math.exp(-A*dt)
         else:
             target=math.log(q0/R)
@@ -185,7 +193,7 @@ def simulate(arrivals, device, end, mode='a22', fixed=None, checkpoints=()):
             if aux[j]==0:aux_work+=mult[j]*pulses[j]*(-math.expm1(-A*dt))/A
             else:aux_work+=mnow[j]*(-math.expm1(-[0,lm[j],ls[j],le[j]][aux[j]]*dt))
         energy+=np.array([main_work,aux_work,float(np.sum(z-z0))+b-b0])
-        t+=dt
+        t=t+dt if event else boundary
         if event:
             main_events.append({'time':t,'event':event,'b':b})
             if abs(t-boundary)<2e-9:near+=1
@@ -193,11 +201,7 @@ def simulate(arrivals, device, end, mode='a22', fixed=None, checkpoints=()):
                 outputs.append(t);main=1;q=1.;fire_start=t
             elif event=='fast_end':main=2;q=.25
             else:main=0;q=R
-        if dt<=1e-14 and event is None:raise RuntimeError('zero step')
-    # End checkpoints, if present, have not been consumed by the main loop.
-    for time,kind,_,_,_ in events[idx:]:
-        if kind=='checkpoint' and abs(time-end)<1e-8:
-            snapshots[str(time)]=snapshot(time)
+        if dt<=0 and event is None:raise RuntimeError('zero step')
     return {'main_events':main_events,'outputs':outputs,'energy':energy.tolist(),'snapshots':snapshots,
             'final_gain':np.exp(z).tolist(),'final_b':b,'near_main_external_coincidences':near,
             'nonlinear_ready_segments':nonlinear,'segments':steps,'activity':activity,

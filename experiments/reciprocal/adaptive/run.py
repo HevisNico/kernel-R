@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse,json,hashlib,time,itertools
 import numpy as np
 import model as m
+import provenance
 
 ROOT=Path(__file__).resolve().parents[3]
 ARMS=['actual_credit','wrong_credit','frozen','uninformative']
@@ -50,7 +51,7 @@ def run(out,replicates=3,training_students=64,comparisons_per_context=8,test_stu
        'frozen teacher plasticity','uninformative outcomes','frozen learner plasticity',
        'fresh bank inheriting learned settings'],
       design_provenance='Stopping-only task, block protocol and rollout preference were designed on separate development trajectories. Training and two fresh test seeds are locked before this run. No claim of preregistration of the preceding development search.',
-      source_sha256={name:hashlib.sha256((m.HERE/name).read_bytes()).hexdigest() for name in ['model.py','run.py']})
+      **provenance.capture())
     write(out,'plan.json',plan)
     development=ROOT/'audit_runs'/'adaptive_development'
     for name in ['prefixes.json','blocks.json','preferences.json']:

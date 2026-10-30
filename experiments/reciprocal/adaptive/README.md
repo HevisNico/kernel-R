@@ -201,6 +201,18 @@ for a measured 1.78e-15 exp/log round-trip difference; dynamics were unchanged.
 
 ## Reproduce
 
+New runs write a version-2 provenance manifest before training. It locks
+`model.py`, `run.py`, `provenance.py`, both numerical engines (`engine.py` and
+`simulate.py`), and the actual Python, NumPy and SciPy versions. Both validators
+refuse incomplete manifests, changed engines or different runtime versions
+before replaying dynamics.
+
+The bundled historical results retain their original two-file plan and reports.
+Those old reports do not establish full engine/runtime provenance. The updated
+validators intentionally refuse that legacy plan; run a fresh experiment to
+obtain the stronger check. No hashes have been retroactively added to the old
+plan, and the recorded scores have not been relabelled as newly reproduced.
+
 From the extracted ZIP's main directory:
 
 ```sh

@@ -37,6 +37,8 @@ def query(bank,context,origin):
 
 
 def validate_live(out):
+    import provenance
+    provenance.verify(json.loads((out/'plan.json').read_text()))
     training=json.loads((out/'training.json').read_text())
     policies=json.loads((out/'policies.json').read_text())
     evaluation=json.loads((out/'evaluation.json').read_text())

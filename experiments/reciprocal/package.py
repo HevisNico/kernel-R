@@ -67,7 +67,7 @@ def package():
         adaptive_source=SOURCE/'adaptive'
         source_dir=STAGE/'02_R_Simulation'/'adaptive'
         source_dir.mkdir(parents=True,exist_ok=True)
-        for name in ['model.py','run.py','validate.py','live_validate.py','analyze.py','report.py']:
+        for name in ['model.py','run.py','provenance.py','validate.py','live_validate.py','analyze.py','report.py']:
             shutil.copyfile(adaptive_source/name,source_dir/name)
         target=STAGE/'08_Adaptive_Lessons'
         target.mkdir(parents=True,exist_ok=True)

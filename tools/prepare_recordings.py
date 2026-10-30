@@ -4,7 +4,7 @@ import argparse,hashlib,json,stat,zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 BUNDLE=ROOT/'downloads'/'R_Reciprocal_Prototype.zip'
-BUNDLE_SHA256='918f0680dbe37d293c3b052a4a0c51cf8ed11d041bbd4a17ce338edb25797dce'
+BUNDLE_SHA256='07c68330ebed5fe440358e22f11971b3d9486c1a24c471869ee1b8c3cf53cb3a'
 PREFIX='R_Reciprocal_Prototype/'
 
 

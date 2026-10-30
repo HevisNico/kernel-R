@@ -34,10 +34,24 @@ work. This avoids duplicating the same evidence across many source-tree files.
 Historical source hashes describe the source at each run, not an assertion that
 every old pilot can be rerun with a later version of a script.
 
-Pinned certificate programs and their dependencies remain byte-identical.
+The interval arithmetic cores and mathematical certificate data remain unchanged.
+The entry, cadence and N-cell composition dependency launchers now execute temporary snapshots of
+only the authenticated source bytes, with isolated Python startup. Their source
+identities, entry anchors, dependent certificates and replay reports have been
+regenerated together; bounds, obligations, pulse traces and conclusions were
+compared to the preceding commit and are identical. These are revalidated
+certificates, not a new numerical training campaign.
+
 Portability edits concern packaging and optional viewer QA: the source recording
 fragment is included, outputs go into `dist/`, and QA uses repository-relative
 paths. The local SOURCE_MANIFEST files still match their retained reference files.
+
+The numerical cell simulator now consumes terminal physical events before
+returning the final state and checkpoints. New adaptive runs lock both engines
+and Python/NumPy/SciPy versions in addition to their controller sources. Historical
+two-file adaptive plans and recordings are preserved as historical evidence;
+the new validators reject their incomplete provenance instead of silently
+reporting a complete source match. A fresh run is needed for the stronger claim.
 
 The original full A22 campaign was not freshly rerun to completion during this
 session. The new proofs are computer-assisted written arguments with independent
