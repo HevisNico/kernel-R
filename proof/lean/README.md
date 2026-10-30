@@ -4,6 +4,14 @@ This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
 Mathlib v4.35.0. It is a **partial formalization**. Neither the complete hybrid
 execution nor the Python interval implementations have been verified in Lean.
 
+## Physical execution foundation
+
+The [hybrid execution notes](HYBRID_EXECUTION.md) describe the operational
+semantics and exact ledger balances in `Hybrid` and `Refinement`. These modules
+now derive memory and queue balances from physical flows and guarded jumps.
+Protocol-specific gate exposure, real enclosure soundness, progress and the
+complete execution-to-abstraction theorem remain open.
+
 ## Reproduce
 
 Install [elan](https://github.com/leanprover/elan), then from this directory:
@@ -15,6 +23,7 @@ lake env lean Audit.lean
 python3 scripts/generate_evidence.py --check
 python3 scripts/check_sources.py
 python3 scripts/check_negative.py
+python3 scripts/check_hybrid_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
