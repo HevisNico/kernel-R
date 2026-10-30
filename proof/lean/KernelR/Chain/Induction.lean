@@ -128,6 +128,24 @@ theorem traffic_closed_form {N K : ℕ} (hK : 4 * N + 12 ≤ K) :
     rw [traffic, ih hk, h₁]
     nlinarith
 
+theorem traffic_sum (K N : ℕ) :
+    traffic K N = (Finset.range N).sum (fun j => K - 5 - 2 * j) := by
+  induction N with
+  | zero => simp [traffic]
+  | succ n ih => simp [traffic, Finset.sum_range_succ, ih]
+
+theorem total_emissions_sum {N K : ℕ} (hK : 4 * N + 12 ≤ K) :
+    (Finset.range N).sum (fun j => prefixLength j + tailLength K j) =
+      N * (K - N - 4) := by
+  calc
+    (Finset.range N).sum (fun j => prefixLength j + tailLength K j) =
+        (Finset.range N).sum (fun j => K - 5 - 2 * j) := by
+      apply Finset.sum_congr rfl
+      intro j hj
+      exact node_outputs hK (Finset.mem_range.mp hj)
+    _ = traffic K N := (traffic_sum K N).symm
+    _ = N * (K - N - 4) := traffic_closed_form hK
+
 theorem traffic_at_minimum (N : ℕ) :
     traffic (4 * N + 12) N = 3 * N * N + 8 * N := by
   rw [traffic_closed_form (by omega)]
@@ -172,6 +190,6 @@ theorem uniform_jitter_total {n : ℕ} (hn : 0 < n) :
     (n : ℝ) * min (1 / 20 : ℝ) (3 / (20 * (n : ℝ))) ≤
         (n : ℝ) * (3 / (20 * (n : ℝ))) :=
       mul_le_mul_of_nonneg_left (min_le_right _ _) (Nat.cast_nonneg n)
-    _ = 3 / 20 := by field_simp; ring
+    _ = 3 / 20 := by field_simp <;> ring
 
 end KernelR.Chain
