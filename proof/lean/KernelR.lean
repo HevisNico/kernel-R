@@ -28,3 +28,4 @@ import KernelR.Chain.Consequences
 import KernelR.Chain.Algebra
 import KernelR.Certificates.Composition003
 import KernelR.Certificates.Composition010
+import KernelR.Chain.Refinement

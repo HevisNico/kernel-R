@@ -203,6 +203,6 @@ theorem Packet.ideal_gap {m L J} (p : Packet m L J) (i : ℕ) :
 
 theorem Packet.actual_gap {m L J} (p : Packet m L J) (hJ : J ≤ 3 / 20) (i : ℕ) :
     (37 / 10 : ℝ) ≤ p.actual (i + 1) - p.actual i := by
-  exact actual_gap (p.ideal_gap i) (p.phase_bounds i) (p.phase_bounds (i + 1)) hJ
+  exact KernelR.Chain.actual_gap (p.ideal_gap i) (p.phase_bounds i) (p.phase_bounds (i + 1)) hJ
 
 end KernelR.Chain
