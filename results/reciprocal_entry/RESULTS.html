@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Certified birth-to-section entry and feedback learning</title>
+<style>:root{color-scheme:light dark}body{font:17px/1.6 system-ui,sans-serif;max-width:940px;margin:36px auto;padding:0 22px;color:light-dark(#20242a,#e8edf3);background:light-dark(#fafbfc,#16191e)}h1{font-size:30px;line-height:1.2}h2{font-size:23px;margin-top:30px}table{border-collapse:collapse;width:100%;margin:22px 0}td,th{text-align:left;padding:10px 8px;border-bottom:1px solid light-dark(#cdd4dc,#46515e)}a{color:light-dark(#17657d,#80c8df)}.note{font-size:15px}.scroll{overflow-x:auto}strong{font-weight:650}code{overflow-wrap:anywhere}</style>
+<h1>The entry assumption is discharged for pulses-only learning</h1>
+<p><strong>The proof now starts from the declared READY birth family, with b≈0.08,
+and reaches the feedback-learning effect through time 459.9.</strong> It no longer
+assumes that this variant has already reached the prepared section.</p>
+<div class="scroll"><table><thead><tr><th>Physical box</th><th>New entry conditions</th><th>Integer replay</th><th>Previous local theorem</th></tr></thead><tbody>
+<tr><td>±0.3%</td><td>59 pass</td><td>170 enclosures</td><td>Reverified and composed</td></tr>
+<tr><td>±10%</td><td>59 pass</td><td>170 enclosures</td><td>Reverified and composed</td></tr>
+</tbody></table></div>
+<p class="note">The 59 new conditions are 55 strict inequalities and four closed
+section inclusions. The pinned local theorem adds 31 strict inequalities and 103
+enclosures. Sixteen new tests pass, including deliberate dependency and statement tampering.</p>
+<h2>What is proved from initialization</h2>
+<p>A starts at time 0. B is introduced at 160 with its specified birth state. Both
+start with b in [0.07999,0.08001]. Each receives exactly one full protected MARK,
+which raises b by exactly 0.1. Both reach the complete prepared section by 319.9,
+without reset or settings copy.</p>
+<p>The next B→A phase then multiplies A's feedback gain by exp(1.8), within
+<strong>[1.814876,1.814913]</strong> for the declared initial uncertainty. The
+isolated retained probe gives <strong>0/8 before and 8/8 after</strong>.</p>
+<h2>The recovery proof uses the continuous dynamics</h2>
+<p>Even allowing the full recovery increase, the SLOW integral through the
+protected input's ERROR end is below 0.827486, less than its return target
+ln(2.5)≈0.916291. Thus the whole MARK is protected and adds the exact 0.1 dose.
+The lower integral by three units exceeds 0.978514, forcing return before then.
+All subsequent inputs follow the stable return, bounded by 6.990787 units.</p>
+<h2>The certified prefix</h2>
+<table><thead><tr><th>Phase</th><th>A emissions</th><th>B emissions</th></tr></thead><tbody>
+<tr><td>A learns its own source, 0–160</td><td>12</td><td>Not yet introduced</td></tr>
+<tr><td>A teaches B, 160–320</td><td>16</td><td>14</td></tr>
+<tr><td>B teaches back, 320–459.9</td><td>10</td><td>13</td></tr>
+<tr><td>Total</td><td>38</td><td>27</td></tr>
+</tbody></table>
+<h2>Exact scope</h2>
+<p>This covers all 30 original per-port physical parameters independently in the
+box, with the stated small READY birth-state uncertainty and positive wire delays
+in [0.3,0.4]. It concerns the original <strong>pulses-only</strong> protocol. The
+settings-copy variant, C's later introduction, fully open recurrence and adaptive
+pedagogy are outside this theorem.</p>
+<p>The physical kernel and the previous local certificate are unchanged. A written
+hybrid-flow induction is paired with outward-rounded finite checks and a separate
+integer-arithmetic replay. This is not a complete Lean formalization or silicon validation.</p>
+<p><a href="THEOREM.md">Complete entry and composition proof</a> ·
+<a href="README.md">Scope and reproduction</a> ·
+<a href="eps1e-1/certificate.json">±10% composed certificate</a> ·
+<a href="eps1e-1/independent_check.json">Integer replay</a> ·
+<a href="tests.json">Test report</a> ·
+<a href="../09_Certified_A_Learns_From_B/RESULTS.html">Pinned local theorem</a></p>
+</html>

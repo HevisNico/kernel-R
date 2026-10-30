@@ -1,0 +1,29 @@
+name: R research checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  local-and-entry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Project layout, source identities and bundled evidence
+        run: python -B -m unittest discover -s tests
+      - name: Local theorem tests and refusal cases
+        run: python -B certify/reciprocal_learning/tests.py
+      - name: Birth-to-section and composition tests
+        run: python -B certify/reciprocal_entry/tests.py --link-code certify/reciprocal_learning --link-003 results/reciprocal_learning/eps3e-3/certificate.json --link-01 results/reciprocal_learning/eps1e-1/certificate.json
+      - name: Replay both published composed certificates
+        run: |
+          python -B certify/reciprocal_entry/verify.py results/reciprocal_entry/eps3e-3/certificate.json --link-certificate results/reciprocal_learning/eps3e-3/certificate.json --link-code certify/reciprocal_learning
+          python -B certify/reciprocal_entry/verify.py results/reciprocal_entry/eps1e-1/certificate.json --link-certificate results/reciprocal_learning/eps1e-1/certificate.json --link-code certify/reciprocal_learning
