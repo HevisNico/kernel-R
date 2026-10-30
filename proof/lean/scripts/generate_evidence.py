@@ -30,16 +30,16 @@ def ident(x):return re.sub('[^A-Za-z0-9_]','_',x)
 
 def certificates():
     provenance={}
-    for kind in ['local','entry']:
+    for kind in ['local','entry','composition']:
         for box in ['eps3e-3','eps1e-1']:
-            source=REPO/'results'/('reciprocal_learning' if kind=='local' else 'reciprocal_entry')/box/'certificate.json'
+            source=REPO/'results'/{'local':'reciprocal_learning','entry':'reciprocal_entry','composition':'reciprocal_composition'}[kind]/box/'certificate.json'
             data=json.loads(source.read_text())
             if len({ident(k) for k in data['bounds']}) != len(data['bounds']):
                 raise ValueError('bound names collide after Lean identifier conversion')
             names=[ident(o['name']) for o in data['obligations']]
             if len(set(names)) != len(names):
                 raise ValueError('obligation names collide')
-            module=('Local' if kind=='local' else 'Entry')+('003' if box=='eps3e-3' else '010')
+            module={'local':'Local','entry':'Entry','composition':'Composition'}[kind]+('003' if box=='eps3e-3' else '010')
             lines=['import KernelR.Intervals','',
               '/-! Generated exact endpoint checks. Analytic enclosure soundness is NOT asserted. -/',
               f'namespace KernelR.Certificates.{module}',

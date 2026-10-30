@@ -16,6 +16,7 @@ def main():
     cadence = next(path for path in sorted((ROOT / 'KernelR/Certificates/Cadence010').glob('Checks*.lean'))
                    if 'return_before_ERROR_verified' in path.read_text())
     files.append(cadence)
+    files.append(ROOT / 'KernelR/Certificates/Composition010.lean')
     for path in files:
         source = path.read_text()
         pattern = (r'theorem \w*return_before_ERROR_verified : RationalBox.StrictBefore (\w+) (\w+) :='
@@ -48,6 +49,17 @@ set_option maxHeartbeats 0
 example : successes test = {score} := by decide
 '''
     cases.append(('adaptive score',replay.format(score=score),replay.format(score=score+1),'false'))
+    chain = '''import KernelR.Chain.Induction
+open KernelR.Chain
+example : traffic 16 1 = {count} := by decide
+'''
+    cases.append(('N-cell traffic', chain.format(count=11), chain.format(count=12), 'false'))
+    jitter = '''import KernelR.Chain.Induction
+open KernelR.Chain
+example : pathJitter (fun _ => (1 / 20 : ℝ)) {links} ≤ 3 / 20 := by
+  norm_num [pathJitter]
+'''
+    cases.append(('N-cell jitter', jitter.format(links=3), jitter.format(links=4), 'unsolved goals'))
     with tempfile.TemporaryDirectory(prefix='lean-negative-', dir=ROOT) as tmp:
         path = Path(tmp) / 'Check.lean'
         for name, good, bad, diagnostic in cases:

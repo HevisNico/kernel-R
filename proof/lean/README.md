@@ -38,7 +38,7 @@ proofs, project axioms or native-evaluation proofs.
 | `Inheritance` | Bounded monotone copying, idempotence, deterministic readout under exact copying, impossibility of erasing acquired increases with monotone memory | A supplied mathematical copying operation; no claim of physical realization or invented pedagogy |
 | `Adaptive` | Stop at the first `notLate` observation, budget bounds, independence from future observations after stopping and from final grades | Categories and decoder are supplied; learning them is not formalized |
 | `Intervals` | Exact rational interval algebra and transfer of endpoint order to enclosed real values | Membership of the real quantities in the boxes is an explicit hypothesis |
-| `Certificates/*` | 2,240 endpoint-order obligations and validity of 5,612 intervals, across the two local, two entry and two cadence certificates | These are exact rational checks of the published endpoints, **not** proofs that exp/log evaluations or model trajectories lie in the intervals |
+| `Certificates/*` | 2,402 endpoint-order obligations and validity of 5,964 intervals, across the two local, two entry, two cadence and two N-cell certificates | These are exact rational checks of the published endpoints, **not** proofs that exp/log evaluations or model trajectories lie in the intervals |
 | `Recorded` | Exact finite replay: 140/160 and 147/160 successes; 882 and 873 student pulses; four fixed-duration scores per lot | Recorded observations and grade flags are inputs, not formally derived from differential equations; this is no statistical or generalization theorem |
 
 The five upstream modules `StrictRoot`, `PeakBounds`, `CommutationE`,
@@ -49,7 +49,7 @@ perturbation range to ±10%. See [upstream provenance](evidence/UPSTREAM.json).
 
 ## How the evidence is connected
 
-`scripts/generate_evidence.py` reads the six certificates already in
+`scripts/generate_evidence.py` reads the eight certificates already in
 [results](../../results) and the adaptive evaluation inside the repository's
 [pinned prototype ZIP](../../downloads/R_Reciprocal_Prototype.zip). It validates
 the ZIP and its manifest using the existing repository verifier. It does not
@@ -102,6 +102,20 @@ checks, with aggregate theorems importing every chunk. This limits individual
 compilation size while preserving the exact published inputs. Neither the
 retained 4/8→8/8 probes nor the causal cuts are upgraded to complete Lean
 theorems of the hybrid system by this arithmetic/trace replay.
+
+## Every finite N: compositional extension
+
+The [N-cell coverage guide](N_CELL_COVERAGE.md) maps the written argument to
+`Chain.Packets`, `Chain.Induction`, `Chain.Refinement`, `Chain.Algebra` and
+`Chain.Consequences`. Lean checks packet-date closure, induction for arbitrary
+finite depth, nonuniform jitter budgets, natural emission/traffic counts, dose
+words, conditional cut propagation and terminal-time bounds. Both N-cell
+certificates add 162 exact endpoint comparisons and 352 interval-validity checks.
+
+The physical leaf and relay refinements remain explicit premises. The extension
+does not claim a complete formal proof of the R hybrid trajectories or interval
+enclosure soundness. In particular, the finite-chain theorem is conditional on
+local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
