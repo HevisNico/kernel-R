@@ -1,0 +1,1694 @@
+{
+  "status": "CERTIFIED_UNIFORM_N_CHAIN_COMPOSITION",
+  "epsilon_relative": "0.1",
+  "quantifier": "Every finite integer N>=1, every K>=4*N+12, every independent fixed point of the 15*N physical parameter box, and all wire-error sequences within the stated budgets",
+  "scope": "Directed chain with supplied preparation and input protocol; not arbitrary graphs, cycles, fixed 25-pulse scalability or unlimited per-hop jitter",
+  "physical_family": "All C,Lm,Ls,Le,M parameters independently in the nominal relative box for each port of each cell; other R constants unchanged",
+  "birth_family": {
+    "time": "0",
+    "modes": "all READY",
+    "q": [
+      "0.09999",
+      "0.10001"
+    ],
+    "m_each": [
+      "0.02499",
+      "0.02501"
+    ],
+    "log_gains": "ln(0.3,1.2,0.3) + independent [-1e-5,1e-5]",
+    "b": [
+      "0.07999",
+      "0.08001"
+    ],
+    "E": [
+      "50",
+      "100"
+    ],
+    "currents": "none"
+  },
+  "protocol": {
+    "preparation": "Routes closed. Each relay: 16 direct port-2 pulses at 0,8,...,120. Leaf: same train on port 1. Wait until 160.",
+    "fast": "K direct leaf port-0 pulses at 160+4*k, k=0,...,K-1. Each downstream emission drives its parent port 2. No other fast source.",
+    "routes": "A finite directed leaf-to-root chain, enabled from 160, with no reverse edge or feedback cycle",
+    "copies": "none",
+    "live_resets": "none",
+    "wire": "One canonical pulse per emission, without loss or waveform deformation. delay_i,k = d_i + error_i,k; sigma_i in [0,0.05], d_i fixed in [0.3+sigma_i,0.4-sigma_i], abs(error_i,k)<=sigma_i",
+    "jitter_sum": "sum(sigma_i)<=0.15; fixed-link case sigma_i=0 supports any finite depth without tightening the physical boxes"
+  },
+  "packet_contract": {
+    "name": "P(m,L,J)",
+    "prefix": "m>=1 ideal dates with consecutive gaps in [7.4,8.3]",
+    "tail": "L>=1 ideal dates starting d in [4,4.1] after the final prefix date, then period 4",
+    "actual": "Each actual date equals its ideal date plus an arbitrary phase error in [-J,J]; an existential template, no independent-noise assumption",
+    "local_assumption": "Prepared relay at exact main rest, gain = own birth active gain * exp(1.8), b = birth b + 0.1, auxiliaries READY, no currents, E in [50,100]; J<=0.15, L>=5",
+    "local_guarantee": "P(m,L,J) -> P(m+2,L-4,J); exactly two full MARK doses and one full ERROR dose; no raw-tail refiring",
+    "wire_rule": "P(m,L,J) -> P(m,L,J+sigma_i)",
+    "leaf_base": "K>=9 exact period-4 source -> P(3,K-8,0), with two full MARK doses and four full ERROR doses on its active port"
+  },
+  "composition": {
+    "node_index": "j=0 at leaf, j=N-1 at root",
+    "prefix_length": "3+2*j",
+    "tail_length": "K-8-4*j",
+    "node_outputs": "K-5-2*j",
+    "root_outputs": "K-2*N-3",
+    "root_tail": "K-4*N-4 >= 8",
+    "total_fast_emissions": "N*(K-N-4)",
+    "minimum_K": "4*N+12",
+    "quiescent_by": "160+4*(K-1)+(11/10)*(N-1)+8",
+    "scaling": "Source length and time horizon are linear in N; total fast-block traffic is quadratic at the minimum K"
+  },
+  "conclusion": {
+    "recovery": "b_after = b_birth+0.3 = b_before_fast+0.2 in every cell",
+    "final_recovery": [
+      "0.37999",
+      "0.38001"
+    ],
+    "active_gain": "Own birth active gain * exp(2.4) on leaf port 0 and every relay port 2",
+    "retained_probe": "Eight canonical period-4 pulses on disconnected standardized-rest copies with learning disabled: leaf 0/8 -> 8/8, every relay 4/8 -> 8/8",
+    "cut": "Cut any link during the fast phase: every ancestor above that cut remains at its prepared settings and its retained probe stays 4/8",
+    "end": "All cells READY with main q exactly 0.1 and no active currents; no cell is removed"
+  },
+  "arithmetic": "N-independent local inequalities: outward Decimal generation and separate integer replay. Polynomial identities checked exactly. Universal composition uses the written packet induction, not finite-N enumeration or full Lean formalization",
+  "preparation_theorem": {
+    "certificate_sha256": "db7ab2d38d56504446bca019f0f17c298507123009e50b82831d4ab570d703c1",
+    "source_sha256": {
+      "certify.py": "3df55030ad2d13d04913661c24b3fb434aa15fd137bedd9e60fd838470f20aff",
+      "decimal_intervals.py": "b7797c2be191b6baff61fd4d1e3087999aca097bf871c3452d801be7741ec444",
+      "dependency.py": "cc9b0e4501699ad0e2a7c4b656182051ac2072f2ef8a1d861d551f69bdb935ca",
+      "integer_intervals.py": "24732cfecccf069a3e3d21e97b6088f811adae4ad1d499ece266f21695f1c68d",
+      "tests.py": "430b9de19394fb80a5fd5638daf45b80f47ee0f0b8f35d4ddccd3c2155f1c32b",
+      "verify.py": "eb1a6f3cf4720d132e770709f44b3f03d06e31021064109a33d5d3edb2eb194c"
+    },
+    "independent_check": {
+      "status": "VERIFIED_ENTRY_AND_COMPOSITION_WITH_INTEGER_ARITHMETIC",
+      "epsilon": "0.1",
+      "entry_obligations": 59,
+      "strict_entry_inequalities": 55,
+      "closed_section_inclusions": 4,
+      "entry_enclosures": 170,
+      "local_link_obligations": 31,
+      "local_link_enclosures": 103,
+      "certificate_sha256": "db7ab2d38d56504446bca019f0f17c298507123009e50b82831d4ab570d703c1",
+      "dependency_certificate_sha256": "8334b5d0b4110782944405e7e364679f3e7b6bf5f04594e95882f524328c72e1",
+      "scope": "Pulses-only prefix from the declared birth family through 459.9, not settings copies or later reciprocal/adaptive phases"
+    }
+  },
+  "symbolic_identities": [
+    {
+      "name": "base_prefix",
+      "left": "3+2*0",
+      "right": "3",
+      "substitute_K": false,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": 3
+        }
+      ]
+    },
+    {
+      "name": "base_tail",
+      "left": "K-8-4*0",
+      "right": "K-8",
+      "substitute_K": false,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": -8
+        },
+        {
+          "powers": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "coefficient": 1
+        }
+      ]
+    },
+    {
+      "name": "prefix_step",
+      "left": "3+2*(j+1)",
+      "right": "(3+2*j)+2",
+      "substitute_K": false,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": 5
+        },
+        {
+          "powers": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "coefficient": 2
+        }
+      ]
+    },
+    {
+      "name": "tail_step",
+      "left": "K-8-4*(j+1)",
+      "right": "(K-8-4*j)-4",
+      "substitute_K": false,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": -12
+        },
+        {
+          "powers": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "coefficient": -4
+        },
+        {
+          "powers": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "coefficient": 1
+        }
+      ]
+    },
+    {
+      "name": "node_outputs",
+      "left": "(3+2*j)+(K-8-4*j)",
+      "right": "K-5-2*j",
+      "substitute_K": false,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": -5
+        },
+        {
+          "powers": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "coefficient": -2
+        },
+        {
+          "powers": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "coefficient": 1
+        }
+      ]
+    },
+    {
+      "name": "remaining_tail",
+      "left": "K-8-4*j",
+      "right": "8+4*(N-1-j)+R",
+      "substitute_K": true,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": 4
+        },
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "coefficient": 1
+        },
+        {
+          "powers": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "coefficient": -4
+        },
+        {
+          "powers": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "coefficient": 4
+        }
+      ]
+    },
+    {
+      "name": "last_tail",
+      "left": "K-8-4*(N-1)",
+      "right": "8+R",
+      "substitute_K": true,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": 8
+        },
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "coefficient": 1
+        }
+      ]
+    },
+    {
+      "name": "root_outputs",
+      "left": "K-5-2*(N-1)",
+      "right": "K-2*N-3",
+      "substitute_K": false,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": -3
+        },
+        {
+          "powers": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "coefficient": 1
+        },
+        {
+          "powers": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "coefficient": -2
+        }
+      ]
+    },
+    {
+      "name": "root_outputs_surplus",
+      "left": "K-2*N-3",
+      "right": "2*N+9+R",
+      "substitute_K": true,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": 9
+        },
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "coefficient": 1
+        },
+        {
+          "powers": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "coefficient": 2
+        }
+      ]
+    },
+    {
+      "name": "traffic_base",
+      "left": "1*(K-1-4)",
+      "right": "K-5",
+      "substitute_K": false,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": -5
+        },
+        {
+          "powers": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "coefficient": 1
+        }
+      ]
+    },
+    {
+      "name": "traffic_step",
+      "left": "(N+1)*(K-(N+1)-4)",
+      "right": "N*(K-N-4)+(K-5-2*N)",
+      "substitute_K": false,
+      "normal_form": [
+        {
+          "powers": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "coefficient": -5
+        },
+        {
+          "powers": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "coefficient": 1
+        },
+        {
+          "powers": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "coefficient": -6
+        },
+        {
+          "powers": [
+            1,
+            1,
+            0,
+            0
+          ],
+          "coefficient": 1
+        },
+        {
+          "powers": [
+            2,
+            0,
+            0,
+            0
+          ],
+          "coefficient": -1
+        }
+      ]
+    },
+    {
+      "name": "traffic_at_minimum",
+      "left": "N*(K-N-4)",
+      "right": "3*N*N+8*N+N*R",
+      "substitute_K": true,
+      "normal_form": [
+        {
+          "powers": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "coefficient": 8
+        },
+        {
+          "powers": [
+            1,
+            0,
+            0,
+            1
+          ],
+          "coefficient": 1
+        },
+        {
+          "powers": [
+            2,
+            0,
+            0,
+            0
+          ],
+          "coefficient": 3
+        }
+      ]
+    }
+  ],
+  "bounds": {
+    "aux.birth_below_threshold.left": [
+      "0.0249900000000000000000000000000000000000",
+      "0.0250100000000000000000000000000000000000"
+    ],
+    "aux.birth_below_threshold.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux.root_lower.left": [
+      "0.6862221603167993367126272202855841815224",
+      "0.8331824743439729479472226366139379380094"
+    ],
+    "aux.root_lower.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux.root_upper.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux.root_upper.right": [
+      "1.3289056706323197692444281225825371354033",
+      "1.6186843777048264526912227117860303553874"
+    ],
+    "aux.root_strict.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "aux.root_strict.right": [
+      "41.8611015637873601805995928265320858346932",
+      "55.1043848806866081130729606957643045555192"
+    ],
+    "aux.finish_after_raw.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux.finish_after_raw.right": [
+      "1.1331818181818181818181818181818181818181",
+      "1.1331818181818181818181818181818181818182"
+    ],
+    "aux.finish_before_fastest_next_input.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "aux.finish_before_fastest_next_input.right": [
+      "3.7000000000000000000000000000000000000000",
+      "3.7000000000000000000000000000000000000000"
+    ],
+    "energy.reserve_invariant.left": [
+      "264.3484207581302613426928466726857330789750",
+      "264.3484207581302613426928466726857330789751"
+    ],
+    "energy.reserve_invariant.right": [
+      "500.0000000000000000000000000000000000000000",
+      "500.0000000000000000000000000000000000000000"
+    ],
+    "caps.final_gain.left": [
+      "3.3069198448286856654186081040763087818268",
+      "3.3069859838869706173461596013866802027669"
+    ],
+    "caps.final_gain.right": [
+      "3.6000000000000000000000000000000000000000",
+      "3.6000000000000000000000000000000000000000"
+    ],
+    "caps.final_recovery.left": [
+      "0.3799900000000000000000000000000000000000",
+      "0.3800100000000000000000000000000000000000"
+    ],
+    "caps.final_recovery.right": [
+      "1.1000000000000000000000000000000000000000",
+      "1.1000000000000000000000000000000000000000"
+    ],
+    "jitter_budget": [
+      "0.1500000000000000000000000000000000000000",
+      "0.1500000000000000000000000000000000000000"
+    ],
+    "prepared_recovery": [
+      "0.1799900000000000000000000000000000000000",
+      "0.1800100000000000000000000000000000000000"
+    ],
+    "final_recovery": [
+      "0.3799900000000000000000000000000000000000",
+      "0.3800100000000000000000000000000000000000"
+    ],
+    "prepared_gain": [
+      "1.8148760904722349957656331678657619638566",
+      "1.8149123883570220784068819983289122355248"
+    ],
+    "final_gain": [
+      "3.3069198448286856654186081040763087818268",
+      "3.3069859838869706173461596013866802027669"
+    ],
+    "aux.mark_end": [
+      "0.0331818181818181818181818181818181818181",
+      "0.0522222222222222222222222222222222222223"
+    ],
+    "aux.ERROR_start": [
+      "0.9968181818181818181818181818181818181818",
+      "1.2300000000000000000000000000000000000001"
+    ],
+    "aux.finish": [
+      "1.1331818181818181818181818181818181818181",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "MARK_integral_deficit": [
+      "0.0023753093049537268852600859055970767301",
+      "0.0040698224838323328597623272179519826702"
+    ],
+    "relay.low_root.positive_coefficient.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "relay.low_root.positive_coefficient.right": [
+      "1.4193661839244368378670752113396837949134",
+      "1.4193945715319904558864276320758301034385"
+    ],
+    "relay.low_root.increasing.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "relay.low_root.increasing.right": [
+      "0.4916933708220933621744372151311901423328",
+      "0.4918409497999965294131471985264556758491"
+    ],
+    "relay.low_root.lower_sign.left": [
+      "0.9981782012403109479024857263025100051490",
+      "0.9981961649839725919464288313052310149421"
+    ],
+    "relay.low_root.lower_sign.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "relay.low_root.upper_sign.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "relay.low_root.upper_sign.right": [
+      "1.0038205768967666081894931882952735198470",
+      "1.0038386534890698640011383234336898167722"
+    ],
+    "relay.low_root.MARK_precedes_fire.left": [
+      "0.0522222222222222222222222222222222222222",
+      "0.0522222222222222222222222222222222222223"
+    ],
+    "relay.low_root.MARK_precedes_fire.right": [
+      "0.6500000000000000000000000000000000000000",
+      "0.6500000000000000000000000000000000000000"
+    ],
+    "relay.low_root.fire_precedes_ERROR.left": [
+      "0.6600000000000000000000000000000000000000",
+      "0.6600000000000000000000000000000000000000"
+    ],
+    "relay.low_root.fire_precedes_ERROR.right": [
+      "0.9968181818181818181818181818181818181818",
+      "0.9968181818181818181818181818181818181819"
+    ],
+    "relay.low_root.ERROR_entirely_protected.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "relay.low_root.ERROR_entirely_protected.right": [
+      "6.7402212758966449929644309303261544994728",
+      "6.7407868874612759885745164274015838182683"
+    ],
+    "relay.low_root_at_b2.ERROR_entirely_protected.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "relay.low_root_at_b2.ERROR_entirely_protected.right": [
+      "4.9223500299066285674923296016856936232638",
+      "4.9225837775426088974017901059609667182761"
+    ],
+    "relay.high_rest_root.positive_coefficient.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "relay.high_rest_root.positive_coefficient.right": [
+      "2.5862538083672493751472440333704446637612",
+      "2.5863055339606709301638497706358408511659"
+    ],
+    "relay.high_rest_root.increasing.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "relay.high_rest_root.increasing.right": [
+      "0.8959237350023184447660006239728104215247",
+      "0.8961926414324982212865722928405075842499"
+    ],
+    "relay.high_rest_root.lower_sign.left": [
+      "0.9790304931478480597693570265572100652703",
+      "0.9790480739335182874066397828442359145340"
+    ],
+    "relay.high_rest_root.lower_sign.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "relay.high_rest_root.upper_sign.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "relay.high_rest_root.upper_sign.right": [
+      "1.0072067388313910438687942470007903395045",
+      "1.0072248831476102290709830092986839797295"
+    ],
+    "relay.high_rest_root.MARK_precedes_fire.left": [
+      "0.0522222222222222222222222222222222222222",
+      "0.0522222222222222222222222222222222222223"
+    ],
+    "relay.high_rest_root.MARK_precedes_fire.right": [
+      "0.2400000000000000000000000000000000000000",
+      "0.2400000000000000000000000000000000000000"
+    ],
+    "relay.high_rest_root.fire_precedes_ERROR.left": [
+      "0.2500000000000000000000000000000000000000",
+      "0.2500000000000000000000000000000000000000"
+    ],
+    "relay.high_rest_root.fire_precedes_ERROR.right": [
+      "0.9968181818181818181818181818181818181818",
+      "0.9968181818181818181818181818181818181819"
+    ],
+    "relay.high_rest_root.ERROR_entirely_protected.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "relay.high_rest_root.ERROR_entirely_protected.right": [
+      "3.6512279463018211762414863076445648047422",
+      "3.6513548563755758445841396135898604475121"
+    ],
+    "slow_prefix.ready_before_every_input.left": [
+      "6.7502212758966449929644309303261544994728",
+      "6.7507868874612759885745164274015838182683"
+    ],
+    "slow_prefix.ready_before_every_input.right": [
+      "7.1000000000000000000000000000000000000000",
+      "7.1000000000000000000000000000000000000000"
+    ],
+    "steady_tail.ready_before_every_input.left": [
+      "3.6612279463018211762414863076445648047422",
+      "3.6613548563755758445841396135898604475121"
+    ],
+    "steady_tail.ready_before_every_input.right": [
+      "3.7000000000000000000000000000000000000000",
+      "3.7000000000000000000000000000000000000000"
+    ],
+    "h.increasing_through_raw_end.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "h.increasing_through_raw_end.right": [
+      "0.0433082604236559429067162932334980573167",
+      "0.0433082604236559429067162932334980573168"
+    ],
+    "relay.first_miss.past_FAST.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "relay.first_miss.past_FAST.right": [
+      "2.0400000000000000000000000000000000000000",
+      "2.7500000000000000000000000000000000000000"
+    ],
+    "relay.first_miss.still_in_SLOW.left": [
+      "0.3671796000000000000000000000000000000000",
+      "0.4950275000000000000000000000000000000000"
+    ],
+    "relay.first_miss.still_in_SLOW.right": [
+      "0.9162907318741550651835272117680110714501",
+      "0.9162907318741550651835272117680110714502"
+    ],
+    "relay.first_miss.return": [
+      "1.5129407563269482949494207266655053325961",
+      "1.9757168268794864032404355119324370660392"
+    ],
+    "relay.first_miss.entire_MARK_protected.left": [
+      "0.0522222222222222222222222222222222222222",
+      "0.0522222222222222222222222222222222222223"
+    ],
+    "relay.first_miss.entire_MARK_protected.right": [
+      "1.5129407563269482949494207266655053325961",
+      "1.5129407563269482949494207266655053325962"
+    ],
+    "relay.first_miss.ready_before_following_input.left": [
+      "1.9757168268794864032404355119324370660391",
+      "1.9757168268794864032404355119324370660392"
+    ],
+    "relay.first_miss.ready_before_following_input.right": [
+      "3.7000000000000000000000000000000000000000",
+      "3.7000000000000000000000000000000000000000"
+    ],
+    "relay.first_miss.entire_ERROR_protected.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "relay.first_miss.entire_ERROR_protected.right": [
+      "1.5129407563269482949494207266655053325961",
+      "1.5129407563269482949494207266655053325962"
+    ],
+    "relay.second_miss.past_FAST.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "relay.second_miss.past_FAST.right": [
+      "2.0400000000000000000000000000000000000000",
+      "2.6500000000000000000000000000000000000000"
+    ],
+    "relay.second_miss.still_in_SLOW.left": [
+      "0.5711796000000000000000000000000000000000",
+      "0.7420265000000000000000000000000000000000"
+    ],
+    "relay.second_miss.still_in_SLOW.right": [
+      "0.9162907318741550651835272117680110714501",
+      "0.9162907318741550651835272117680110714502"
+    ],
+    "relay.second_miss.return": [
+      "0.4648286655064571776237133172116737669541",
+      "0.9189214304533998211618451511512488594971"
+    ],
+    "relay.second_miss.entire_MARK_protected.left": [
+      "0.0522222222222222222222222222222222222222",
+      "0.0522222222222222222222222222222222222223"
+    ],
+    "relay.second_miss.entire_MARK_protected.right": [
+      "0.4648286655064571776237133172116737669541",
+      "0.4648286655064571776237133172116737669542"
+    ],
+    "relay.second_miss.ready_before_following_input.left": [
+      "0.9189214304533998211618451511512488594970",
+      "0.9189214304533998211618451511512488594971"
+    ],
+    "relay.second_miss.ready_before_following_input.right": [
+      "3.7000000000000000000000000000000000000000",
+      "3.7000000000000000000000000000000000000000"
+    ],
+    "relay.second_miss.ready_before_ERROR.left": [
+      "0.9189214304533998211618451511512488594970",
+      "0.9189214304533998211618451511512488594971"
+    ],
+    "relay.second_miss.ready_before_ERROR.right": [
+      "0.9968181818181818181818181818181818181818",
+      "0.9968181818181818181818181818181818181819"
+    ],
+    "relay.second_miss.before_raw_end.left": [
+      "0.9189214304533998211618451511512488594970",
+      "0.9189214304533998211618451511512488594971"
+    ],
+    "relay.second_miss.before_raw_end.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "relay.second_miss.no_refire_from_tail.left": [
+      "0.5323821882718414442980678837981667436613",
+      "0.5323821882718414442980678837981667436614"
+    ],
+    "relay.second_miss.no_refire_from_tail.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "relay.transient_charge_excess": [
+      "0E-40",
+      "0.1120908711862331101286710291420534555653"
+    ],
+    "relay.high_transient_root.positive_coefficient.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "relay.high_transient_root.positive_coefficient.right": [
+      "2.5862538083672493751472440333704446637612",
+      "2.6423509695537874852281852852068675789485"
+    ],
+    "relay.high_transient_root.increasing.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "relay.high_transient_root.increasing.right": [
+      "0.7599506349056188821617202204814653163332",
+      "0.8961926414324982212865722928405075842499"
+    ],
+    "relay.high_transient_root.lower_sign.left": [
+      "0.8602506941545303328095229754626923529702",
+      "0.9616899137900170803181479048228574334221"
+    ],
+    "relay.high_transient_root.lower_sign.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "relay.high_transient_root.upper_sign.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "relay.high_transient_root.upper_sign.right": [
+      "1.0072067388313910438687942470007903395045",
+      "1.1061447297774698218079526895917511874770"
+    ],
+    "relay.high_transient_root.MARK_precedes_fire.left": [
+      "0.0522222222222222222222222222222222222222",
+      "0.0522222222222222222222222222222222222223"
+    ],
+    "relay.high_transient_root.MARK_precedes_fire.right": [
+      "0.2000000000000000000000000000000000000000",
+      "0.2000000000000000000000000000000000000000"
+    ],
+    "relay.high_transient_root.fire_precedes_ERROR.left": [
+      "0.2500000000000000000000000000000000000000",
+      "0.2500000000000000000000000000000000000000"
+    ],
+    "relay.high_transient_root.fire_precedes_ERROR.right": [
+      "0.9968181818181818181818181818181818181818",
+      "0.9968181818181818181818181818181818181819"
+    ],
+    "relay.high_transient_root.ERROR_entirely_protected.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "relay.high_transient_root.ERROR_entirely_protected.right": [
+      "3.6112279463018211762414863076445648047422",
+      "3.6113548563755758445841396135898604475121"
+    ],
+    "relay.transient_return_before_next_input.left": [
+      "3.6612279463018211762414863076445648047422",
+      "3.6613548563755758445841396135898604475121"
+    ],
+    "relay.transient_return_before_next_input.right": [
+      "3.7000000000000000000000000000000000000000",
+      "3.7000000000000000000000000000000000000000"
+    ],
+    "output.first_new_slow_lower.left": [
+      "7.4000000000000000000000000000000000000000",
+      "7.4000000000000000000000000000000000000000"
+    ],
+    "output.first_new_slow_lower.right": [
+      "8.0000000000000000000000000000000000000000",
+      "8.0000000000000000000000000000000000000000"
+    ],
+    "output.first_new_slow_upper.left": [
+      "8.1000000000000000000000000000000000000000",
+      "8.1000000000000000000000000000000000000000"
+    ],
+    "output.first_new_slow_upper.right": [
+      "8.3000000000000000000000000000000000000000",
+      "8.3000000000000000000000000000000000000000"
+    ],
+    "output.second_new_slow_lower.left": [
+      "7.4000000000000000000000000000000000000000",
+      "7.4000000000000000000000000000000000000000"
+    ],
+    "output.second_new_slow_lower.right": [
+      "7.5400000000000000000000000000000000000000",
+      "7.5400000000000000000000000000000000000000"
+    ],
+    "output.second_new_slow_upper.left": [
+      "7.6000000000000000000000000000000000000000",
+      "7.6000000000000000000000000000000000000000"
+    ],
+    "output.second_new_slow_upper.right": [
+      "8.3000000000000000000000000000000000000000",
+      "8.3000000000000000000000000000000000000000"
+    ],
+    "output.settling_upper.left": [
+      "4.0500000000000000000000000000000000000000",
+      "4.0500000000000000000000000000000000000000"
+    ],
+    "output.settling_upper.right": [
+      "4.1000000000000000000000000000000000000000",
+      "4.1000000000000000000000000000000000000000"
+    ],
+    "leaf.weak_0.increasing.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "leaf.weak_0.increasing.right": [
+      "0.0812763675428163105435705291892405716897",
+      "0.0813007621837885821746462634639154150982"
+    ],
+    "leaf.weak_0.no_fire.left": [
+      "0.2672981987480121658249516336462404357628",
+      "0.2675747233281622654574416170679308701212"
+    ],
+    "leaf.weak_0.no_fire.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "leaf.weak_1.increasing.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "leaf.weak_1.increasing.right": [
+      "0.1027376520373868584674715763113250977452",
+      "0.1481396472611589081027451772779758082724"
+    ],
+    "leaf.weak_1.no_fire.left": [
+      "0.4048371932102208780699436302992418423410",
+      "0.4280198264913963152081716301959279865364"
+    ],
+    "leaf.weak_1.no_fire.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "leaf.weak_2.increasing.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "leaf.weak_2.increasing.right": [
+      "0.1810617310465845535959827520722683051457",
+      "0.2699280363577760180318380519671658038876"
+    ],
+    "leaf.weak_2.no_fire.left": [
+      "0.6554495808066174739081597481067146189162",
+      "0.7007603308701641100078658696269039947780"
+    ],
+    "leaf.weak_2.no_fire.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "leaf.first_firing_excess": [
+      "0E-40",
+      "0.1340477488378834102332721463394815230110"
+    ],
+    "leaf.first_root.positive_coefficient.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "leaf.first_root.positive_coefficient.right": [
+      "1.4193661839244368378670752113396837949134",
+      "1.4864184459509321610030637052455708649440"
+    ],
+    "leaf.first_root.increasing.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "leaf.first_root.increasing.right": [
+      "0.3290852317508237318650832275911727880772",
+      "0.4918409497999965294131471985264556758491"
+    ],
+    "leaf.first_root.lower_sign.left": [
+      "0.7937338887033313321733448144278221012446",
+      "0.9034967778743015535151913758989714411249"
+    ],
+    "leaf.first_root.lower_sign.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "leaf.first_root.upper_sign.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "leaf.first_root.upper_sign.right": [
+      "1.0038205768967666081894931882952735198470",
+      "1.1002087615417461477978865155212745211639"
+    ],
+    "leaf.first_root.MARK_precedes_fire.left": [
+      "0.0522222222222222222222222222222222222222",
+      "0.0522222222222222222222222222222222222223"
+    ],
+    "leaf.first_root.MARK_precedes_fire.right": [
+      "0.4000000000000000000000000000000000000000",
+      "0.4000000000000000000000000000000000000000"
+    ],
+    "leaf.first_root.fire_precedes_ERROR.left": [
+      "0.6600000000000000000000000000000000000000",
+      "0.6600000000000000000000000000000000000000"
+    ],
+    "leaf.first_root.fire_precedes_ERROR.right": [
+      "0.9968181818181818181818181818181818181818",
+      "0.9968181818181818181818181818181818181819"
+    ],
+    "leaf.first_root.ERROR_entirely_protected.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "leaf.first_root.ERROR_entirely_protected.right": [
+      "6.4902212758966449929644309303261544994728",
+      "6.4907868874612759885745164274015838182683"
+    ],
+    "leaf.first_miss.past_FAST.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "leaf.first_miss.past_FAST.right": [
+      "2.3400000000000000000000000000000000000000",
+      "2.6000000000000000000000000000000000000000"
+    ],
+    "leaf.first_miss.still_in_SLOW.left": [
+      "0.4211766000000000000000000000000000000000",
+      "0.4680260000000000000000000000000000000000"
+    ],
+    "leaf.first_miss.still_in_SLOW.right": [
+      "0.9162907318741550651835272117680110714501",
+      "0.9162907318741550651835272117680110714502"
+    ],
+    "leaf.first_miss.return": [
+      "1.6093712409524973824820088485182963043472",
+      "1.7828635106896224795288743847493233834077"
+    ],
+    "leaf.first_miss.entire_MARK_protected.left": [
+      "0.0522222222222222222222222222222222222222",
+      "0.0522222222222222222222222222222222222223"
+    ],
+    "leaf.first_miss.entire_MARK_protected.right": [
+      "1.6093712409524973824820088485182963043472",
+      "1.6093712409524973824820088485182963043473"
+    ],
+    "leaf.first_miss.ready_before_following_input.left": [
+      "1.7828635106896224795288743847493233834076",
+      "1.7828635106896224795288743847493233834077"
+    ],
+    "leaf.first_miss.ready_before_following_input.right": [
+      "3.7000000000000000000000000000000000000000",
+      "3.7000000000000000000000000000000000000000"
+    ],
+    "leaf.first_miss.entire_ERROR_protected.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "leaf.first_miss.entire_ERROR_protected.right": [
+      "1.6093712409524973824820088485182963043472",
+      "1.6093712409524973824820088485182963043473"
+    ],
+    "leaf.first_output_gap_lower.left": [
+      "7.4000000000000000000000000000000000000000",
+      "7.4000000000000000000000000000000000000000"
+    ],
+    "leaf.first_output_gap_lower.right": [
+      "7.9900000000000000000000000000000000000000",
+      "7.9900000000000000000000000000000000000000"
+    ],
+    "leaf.first_output_gap_upper.left": [
+      "8.2600000000000000000000000000000000000000",
+      "8.2600000000000000000000000000000000000000"
+    ],
+    "leaf.first_output_gap_upper.right": [
+      "8.3000000000000000000000000000000000000000",
+      "8.3000000000000000000000000000000000000000"
+    ],
+    "preparation.last_return_before_fast_start.left": [
+      "126.9902212758966449929644309303261544994728",
+      "126.9907868874612759885745164274015838182683"
+    ],
+    "preparation.last_return_before_fast_start.right": [
+      "159.9000000000000000000000000000000000000000",
+      "159.9000000000000000000000000000000000000000"
+    ],
+    "horizon.cell_latency.left": [
+      "0.6600000000000000000000000000000000000000",
+      "0.6600000000000000000000000000000000000000"
+    ],
+    "horizon.cell_latency.right": [
+      "0.7000000000000000000000000000000000000000",
+      "0.7000000000000000000000000000000000000000"
+    ],
+    "horizon.hop_budget.left": [
+      "1.0600000000000000000000000000000000000000",
+      "1.0600000000000000000000000000000000000000"
+    ],
+    "horizon.hop_budget.right": [
+      "1.1000000000000000000000000000000000000000",
+      "1.1000000000000000000000000000000000000000"
+    ],
+    "horizon.last_return_budget.left": [
+      "6.7502212758966449929644309303261544994728",
+      "6.7507868874612759885745164274015838182683"
+    ],
+    "horizon.last_return_budget.right": [
+      "8.0000000000000000000000000000000000000000",
+      "8.0000000000000000000000000000000000000000"
+    ],
+    "probe.before.next_raw_entirely_protected.left": [
+      "5.0000000000000000000000000000000000000000",
+      "5.0000000000000000000000000000000000000000"
+    ],
+    "probe.before.next_raw_entirely_protected.right": [
+      "6.7402212758966449929644309303261544994728",
+      "6.7402212758966449929644309303261544994729"
+    ],
+    "probe.before.ready_for_third.left": [
+      "6.7507868874612759885745164274015838182682",
+      "6.7507868874612759885745164274015838182683"
+    ],
+    "probe.before.ready_for_third.right": [
+      "8.0000000000000000000000000000000000000000",
+      "8.0000000000000000000000000000000000000000"
+    ],
+    "probe.after.ready_for_every_next.left": [
+      "3.6613548563755758445841396135898604475120",
+      "3.6613548563755758445841396135898604475121"
+    ],
+    "probe.after.ready_for_every_next.right": [
+      "4.0000000000000000000000000000000000000000",
+      "4.0000000000000000000000000000000000000000"
+    ],
+    "probe.leaf_before.flow_increases.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "probe.leaf_before.flow_increases.right": [
+      "0.0289050807189461614880226478357419531764",
+      "0.0289305227751807229853387545682035567811"
+    ],
+    "probe.leaf_before.never_fires.left": [
+      "0.2934833184523160954196053880940963649213",
+      "0.2934871881573820634110248296564943485390"
+    ],
+    "probe.leaf_before.never_fires.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ]
+  },
+  "obligations": [
+    {
+      "name": "aux.birth_below_threshold",
+      "relation": "strict_lt",
+      "left": "aux.birth_below_threshold.left",
+      "right": "aux.birth_below_threshold.right"
+    },
+    {
+      "name": "aux.root_lower",
+      "relation": "strict_lt",
+      "left": "aux.root_lower.left",
+      "right": "aux.root_lower.right"
+    },
+    {
+      "name": "aux.root_upper",
+      "relation": "strict_lt",
+      "left": "aux.root_upper.left",
+      "right": "aux.root_upper.right"
+    },
+    {
+      "name": "aux.root_strict",
+      "relation": "strict_lt",
+      "left": "aux.root_strict.left",
+      "right": "aux.root_strict.right"
+    },
+    {
+      "name": "aux.finish_after_raw",
+      "relation": "strict_lt",
+      "left": "aux.finish_after_raw.left",
+      "right": "aux.finish_after_raw.right"
+    },
+    {
+      "name": "aux.finish_before_fastest_next_input",
+      "relation": "strict_lt",
+      "left": "aux.finish_before_fastest_next_input.left",
+      "right": "aux.finish_before_fastest_next_input.right"
+    },
+    {
+      "name": "energy.reserve_invariant",
+      "relation": "strict_lt",
+      "left": "energy.reserve_invariant.left",
+      "right": "energy.reserve_invariant.right"
+    },
+    {
+      "name": "caps.final_gain",
+      "relation": "strict_lt",
+      "left": "caps.final_gain.left",
+      "right": "caps.final_gain.right"
+    },
+    {
+      "name": "caps.final_recovery",
+      "relation": "strict_lt",
+      "left": "caps.final_recovery.left",
+      "right": "caps.final_recovery.right"
+    },
+    {
+      "name": "relay.low_root.positive_coefficient",
+      "relation": "strict_lt",
+      "left": "relay.low_root.positive_coefficient.left",
+      "right": "relay.low_root.positive_coefficient.right"
+    },
+    {
+      "name": "relay.low_root.increasing",
+      "relation": "strict_lt",
+      "left": "relay.low_root.increasing.left",
+      "right": "relay.low_root.increasing.right"
+    },
+    {
+      "name": "relay.low_root.lower_sign",
+      "relation": "strict_lt",
+      "left": "relay.low_root.lower_sign.left",
+      "right": "relay.low_root.lower_sign.right"
+    },
+    {
+      "name": "relay.low_root.upper_sign",
+      "relation": "strict_lt",
+      "left": "relay.low_root.upper_sign.left",
+      "right": "relay.low_root.upper_sign.right"
+    },
+    {
+      "name": "relay.low_root.MARK_precedes_fire",
+      "relation": "strict_lt",
+      "left": "relay.low_root.MARK_precedes_fire.left",
+      "right": "relay.low_root.MARK_precedes_fire.right"
+    },
+    {
+      "name": "relay.low_root.fire_precedes_ERROR",
+      "relation": "strict_lt",
+      "left": "relay.low_root.fire_precedes_ERROR.left",
+      "right": "relay.low_root.fire_precedes_ERROR.right"
+    },
+    {
+      "name": "relay.low_root.ERROR_entirely_protected",
+      "relation": "strict_lt",
+      "left": "relay.low_root.ERROR_entirely_protected.left",
+      "right": "relay.low_root.ERROR_entirely_protected.right"
+    },
+    {
+      "name": "relay.low_root_at_b2.ERROR_entirely_protected",
+      "relation": "strict_lt",
+      "left": "relay.low_root_at_b2.ERROR_entirely_protected.left",
+      "right": "relay.low_root_at_b2.ERROR_entirely_protected.right"
+    },
+    {
+      "name": "relay.high_rest_root.positive_coefficient",
+      "relation": "strict_lt",
+      "left": "relay.high_rest_root.positive_coefficient.left",
+      "right": "relay.high_rest_root.positive_coefficient.right"
+    },
+    {
+      "name": "relay.high_rest_root.increasing",
+      "relation": "strict_lt",
+      "left": "relay.high_rest_root.increasing.left",
+      "right": "relay.high_rest_root.increasing.right"
+    },
+    {
+      "name": "relay.high_rest_root.lower_sign",
+      "relation": "strict_lt",
+      "left": "relay.high_rest_root.lower_sign.left",
+      "right": "relay.high_rest_root.lower_sign.right"
+    },
+    {
+      "name": "relay.high_rest_root.upper_sign",
+      "relation": "strict_lt",
+      "left": "relay.high_rest_root.upper_sign.left",
+      "right": "relay.high_rest_root.upper_sign.right"
+    },
+    {
+      "name": "relay.high_rest_root.MARK_precedes_fire",
+      "relation": "strict_lt",
+      "left": "relay.high_rest_root.MARK_precedes_fire.left",
+      "right": "relay.high_rest_root.MARK_precedes_fire.right"
+    },
+    {
+      "name": "relay.high_rest_root.fire_precedes_ERROR",
+      "relation": "strict_lt",
+      "left": "relay.high_rest_root.fire_precedes_ERROR.left",
+      "right": "relay.high_rest_root.fire_precedes_ERROR.right"
+    },
+    {
+      "name": "relay.high_rest_root.ERROR_entirely_protected",
+      "relation": "strict_lt",
+      "left": "relay.high_rest_root.ERROR_entirely_protected.left",
+      "right": "relay.high_rest_root.ERROR_entirely_protected.right"
+    },
+    {
+      "name": "slow_prefix.ready_before_every_input",
+      "relation": "strict_lt",
+      "left": "slow_prefix.ready_before_every_input.left",
+      "right": "slow_prefix.ready_before_every_input.right"
+    },
+    {
+      "name": "steady_tail.ready_before_every_input",
+      "relation": "strict_lt",
+      "left": "steady_tail.ready_before_every_input.left",
+      "right": "steady_tail.ready_before_every_input.right"
+    },
+    {
+      "name": "h.increasing_through_raw_end",
+      "relation": "strict_lt",
+      "left": "h.increasing_through_raw_end.left",
+      "right": "h.increasing_through_raw_end.right"
+    },
+    {
+      "name": "relay.first_miss.past_FAST",
+      "relation": "strict_lt",
+      "left": "relay.first_miss.past_FAST.left",
+      "right": "relay.first_miss.past_FAST.right"
+    },
+    {
+      "name": "relay.first_miss.still_in_SLOW",
+      "relation": "strict_lt",
+      "left": "relay.first_miss.still_in_SLOW.left",
+      "right": "relay.first_miss.still_in_SLOW.right"
+    },
+    {
+      "name": "relay.first_miss.entire_MARK_protected",
+      "relation": "strict_lt",
+      "left": "relay.first_miss.entire_MARK_protected.left",
+      "right": "relay.first_miss.entire_MARK_protected.right"
+    },
+    {
+      "name": "relay.first_miss.ready_before_following_input",
+      "relation": "strict_lt",
+      "left": "relay.first_miss.ready_before_following_input.left",
+      "right": "relay.first_miss.ready_before_following_input.right"
+    },
+    {
+      "name": "relay.first_miss.entire_ERROR_protected",
+      "relation": "strict_lt",
+      "left": "relay.first_miss.entire_ERROR_protected.left",
+      "right": "relay.first_miss.entire_ERROR_protected.right"
+    },
+    {
+      "name": "relay.second_miss.past_FAST",
+      "relation": "strict_lt",
+      "left": "relay.second_miss.past_FAST.left",
+      "right": "relay.second_miss.past_FAST.right"
+    },
+    {
+      "name": "relay.second_miss.still_in_SLOW",
+      "relation": "strict_lt",
+      "left": "relay.second_miss.still_in_SLOW.left",
+      "right": "relay.second_miss.still_in_SLOW.right"
+    },
+    {
+      "name": "relay.second_miss.entire_MARK_protected",
+      "relation": "strict_lt",
+      "left": "relay.second_miss.entire_MARK_protected.left",
+      "right": "relay.second_miss.entire_MARK_protected.right"
+    },
+    {
+      "name": "relay.second_miss.ready_before_following_input",
+      "relation": "strict_lt",
+      "left": "relay.second_miss.ready_before_following_input.left",
+      "right": "relay.second_miss.ready_before_following_input.right"
+    },
+    {
+      "name": "relay.second_miss.ready_before_ERROR",
+      "relation": "strict_lt",
+      "left": "relay.second_miss.ready_before_ERROR.left",
+      "right": "relay.second_miss.ready_before_ERROR.right"
+    },
+    {
+      "name": "relay.second_miss.before_raw_end",
+      "relation": "strict_lt",
+      "left": "relay.second_miss.before_raw_end.left",
+      "right": "relay.second_miss.before_raw_end.right"
+    },
+    {
+      "name": "relay.second_miss.no_refire_from_tail",
+      "relation": "strict_lt",
+      "left": "relay.second_miss.no_refire_from_tail.left",
+      "right": "relay.second_miss.no_refire_from_tail.right"
+    },
+    {
+      "name": "relay.high_transient_root.positive_coefficient",
+      "relation": "strict_lt",
+      "left": "relay.high_transient_root.positive_coefficient.left",
+      "right": "relay.high_transient_root.positive_coefficient.right"
+    },
+    {
+      "name": "relay.high_transient_root.increasing",
+      "relation": "strict_lt",
+      "left": "relay.high_transient_root.increasing.left",
+      "right": "relay.high_transient_root.increasing.right"
+    },
+    {
+      "name": "relay.high_transient_root.lower_sign",
+      "relation": "strict_lt",
+      "left": "relay.high_transient_root.lower_sign.left",
+      "right": "relay.high_transient_root.lower_sign.right"
+    },
+    {
+      "name": "relay.high_transient_root.upper_sign",
+      "relation": "strict_lt",
+      "left": "relay.high_transient_root.upper_sign.left",
+      "right": "relay.high_transient_root.upper_sign.right"
+    },
+    {
+      "name": "relay.high_transient_root.MARK_precedes_fire",
+      "relation": "strict_lt",
+      "left": "relay.high_transient_root.MARK_precedes_fire.left",
+      "right": "relay.high_transient_root.MARK_precedes_fire.right"
+    },
+    {
+      "name": "relay.high_transient_root.fire_precedes_ERROR",
+      "relation": "strict_lt",
+      "left": "relay.high_transient_root.fire_precedes_ERROR.left",
+      "right": "relay.high_transient_root.fire_precedes_ERROR.right"
+    },
+    {
+      "name": "relay.high_transient_root.ERROR_entirely_protected",
+      "relation": "strict_lt",
+      "left": "relay.high_transient_root.ERROR_entirely_protected.left",
+      "right": "relay.high_transient_root.ERROR_entirely_protected.right"
+    },
+    {
+      "name": "relay.transient_return_before_next_input",
+      "relation": "strict_lt",
+      "left": "relay.transient_return_before_next_input.left",
+      "right": "relay.transient_return_before_next_input.right"
+    },
+    {
+      "name": "output.first_new_slow_lower",
+      "relation": "strict_lt",
+      "left": "output.first_new_slow_lower.left",
+      "right": "output.first_new_slow_lower.right"
+    },
+    {
+      "name": "output.first_new_slow_upper",
+      "relation": "strict_lt",
+      "left": "output.first_new_slow_upper.left",
+      "right": "output.first_new_slow_upper.right"
+    },
+    {
+      "name": "output.second_new_slow_lower",
+      "relation": "strict_lt",
+      "left": "output.second_new_slow_lower.left",
+      "right": "output.second_new_slow_lower.right"
+    },
+    {
+      "name": "output.second_new_slow_upper",
+      "relation": "strict_lt",
+      "left": "output.second_new_slow_upper.left",
+      "right": "output.second_new_slow_upper.right"
+    },
+    {
+      "name": "output.settling_upper",
+      "relation": "strict_lt",
+      "left": "output.settling_upper.left",
+      "right": "output.settling_upper.right"
+    },
+    {
+      "name": "leaf.weak_0.increasing",
+      "relation": "strict_lt",
+      "left": "leaf.weak_0.increasing.left",
+      "right": "leaf.weak_0.increasing.right"
+    },
+    {
+      "name": "leaf.weak_0.no_fire",
+      "relation": "strict_lt",
+      "left": "leaf.weak_0.no_fire.left",
+      "right": "leaf.weak_0.no_fire.right"
+    },
+    {
+      "name": "leaf.weak_1.increasing",
+      "relation": "strict_lt",
+      "left": "leaf.weak_1.increasing.left",
+      "right": "leaf.weak_1.increasing.right"
+    },
+    {
+      "name": "leaf.weak_1.no_fire",
+      "relation": "strict_lt",
+      "left": "leaf.weak_1.no_fire.left",
+      "right": "leaf.weak_1.no_fire.right"
+    },
+    {
+      "name": "leaf.weak_2.increasing",
+      "relation": "strict_lt",
+      "left": "leaf.weak_2.increasing.left",
+      "right": "leaf.weak_2.increasing.right"
+    },
+    {
+      "name": "leaf.weak_2.no_fire",
+      "relation": "strict_lt",
+      "left": "leaf.weak_2.no_fire.left",
+      "right": "leaf.weak_2.no_fire.right"
+    },
+    {
+      "name": "leaf.first_root.positive_coefficient",
+      "relation": "strict_lt",
+      "left": "leaf.first_root.positive_coefficient.left",
+      "right": "leaf.first_root.positive_coefficient.right"
+    },
+    {
+      "name": "leaf.first_root.increasing",
+      "relation": "strict_lt",
+      "left": "leaf.first_root.increasing.left",
+      "right": "leaf.first_root.increasing.right"
+    },
+    {
+      "name": "leaf.first_root.lower_sign",
+      "relation": "strict_lt",
+      "left": "leaf.first_root.lower_sign.left",
+      "right": "leaf.first_root.lower_sign.right"
+    },
+    {
+      "name": "leaf.first_root.upper_sign",
+      "relation": "strict_lt",
+      "left": "leaf.first_root.upper_sign.left",
+      "right": "leaf.first_root.upper_sign.right"
+    },
+    {
+      "name": "leaf.first_root.MARK_precedes_fire",
+      "relation": "strict_lt",
+      "left": "leaf.first_root.MARK_precedes_fire.left",
+      "right": "leaf.first_root.MARK_precedes_fire.right"
+    },
+    {
+      "name": "leaf.first_root.fire_precedes_ERROR",
+      "relation": "strict_lt",
+      "left": "leaf.first_root.fire_precedes_ERROR.left",
+      "right": "leaf.first_root.fire_precedes_ERROR.right"
+    },
+    {
+      "name": "leaf.first_root.ERROR_entirely_protected",
+      "relation": "strict_lt",
+      "left": "leaf.first_root.ERROR_entirely_protected.left",
+      "right": "leaf.first_root.ERROR_entirely_protected.right"
+    },
+    {
+      "name": "leaf.first_miss.past_FAST",
+      "relation": "strict_lt",
+      "left": "leaf.first_miss.past_FAST.left",
+      "right": "leaf.first_miss.past_FAST.right"
+    },
+    {
+      "name": "leaf.first_miss.still_in_SLOW",
+      "relation": "strict_lt",
+      "left": "leaf.first_miss.still_in_SLOW.left",
+      "right": "leaf.first_miss.still_in_SLOW.right"
+    },
+    {
+      "name": "leaf.first_miss.entire_MARK_protected",
+      "relation": "strict_lt",
+      "left": "leaf.first_miss.entire_MARK_protected.left",
+      "right": "leaf.first_miss.entire_MARK_protected.right"
+    },
+    {
+      "name": "leaf.first_miss.ready_before_following_input",
+      "relation": "strict_lt",
+      "left": "leaf.first_miss.ready_before_following_input.left",
+      "right": "leaf.first_miss.ready_before_following_input.right"
+    },
+    {
+      "name": "leaf.first_miss.entire_ERROR_protected",
+      "relation": "strict_lt",
+      "left": "leaf.first_miss.entire_ERROR_protected.left",
+      "right": "leaf.first_miss.entire_ERROR_protected.right"
+    },
+    {
+      "name": "leaf.first_output_gap_lower",
+      "relation": "strict_lt",
+      "left": "leaf.first_output_gap_lower.left",
+      "right": "leaf.first_output_gap_lower.right"
+    },
+    {
+      "name": "leaf.first_output_gap_upper",
+      "relation": "strict_lt",
+      "left": "leaf.first_output_gap_upper.left",
+      "right": "leaf.first_output_gap_upper.right"
+    },
+    {
+      "name": "preparation.last_return_before_fast_start",
+      "relation": "strict_lt",
+      "left": "preparation.last_return_before_fast_start.left",
+      "right": "preparation.last_return_before_fast_start.right"
+    },
+    {
+      "name": "horizon.cell_latency",
+      "relation": "strict_lt",
+      "left": "horizon.cell_latency.left",
+      "right": "horizon.cell_latency.right"
+    },
+    {
+      "name": "horizon.hop_budget",
+      "relation": "strict_lt",
+      "left": "horizon.hop_budget.left",
+      "right": "horizon.hop_budget.right"
+    },
+    {
+      "name": "horizon.last_return_budget",
+      "relation": "strict_lt",
+      "left": "horizon.last_return_budget.left",
+      "right": "horizon.last_return_budget.right"
+    },
+    {
+      "name": "probe.before.next_raw_entirely_protected",
+      "relation": "strict_lt",
+      "left": "probe.before.next_raw_entirely_protected.left",
+      "right": "probe.before.next_raw_entirely_protected.right"
+    },
+    {
+      "name": "probe.before.ready_for_third",
+      "relation": "strict_lt",
+      "left": "probe.before.ready_for_third.left",
+      "right": "probe.before.ready_for_third.right"
+    },
+    {
+      "name": "probe.after.ready_for_every_next",
+      "relation": "strict_lt",
+      "left": "probe.after.ready_for_every_next.left",
+      "right": "probe.after.ready_for_every_next.right"
+    },
+    {
+      "name": "probe.leaf_before.flow_increases",
+      "relation": "strict_lt",
+      "left": "probe.leaf_before.flow_increases.left",
+      "right": "probe.leaf_before.flow_increases.right"
+    },
+    {
+      "name": "probe.leaf_before.never_fires",
+      "relation": "strict_lt",
+      "left": "probe.leaf_before.never_fires.left",
+      "right": "probe.leaf_before.never_fires.right"
+    }
+  ],
+  "source_sha256": {
+    "algebra.py": "3c5dd65c2cf12a0c5ce74e1e77b9c3c9c2987f5381d1e2cebe42b8c092a0c747",
+    "certify.py": "4f1eea3f2779f3a5701999e3e0288077bb93dc8230a3e0e2ae25f64ca4981480",
+    "decimal_intervals.py": "b7797c2be191b6baff61fd4d1e3087999aca097bf871c3452d801be7741ec444",
+    "dependency.py": "38dacdb8de24fb2353901cc22320f7bb5f0733e1f3a1c7cf7b2fd66ca98195d0",
+    "integer_intervals.py": "24732cfecccf069a3e3d21e97b6088f811adae4ad1d499ece266f21695f1c68d",
+    "tests.py": "4828c9bb3c6ab9f920349a2cfb917f5d69ace90bee66b3524933f6445c180216",
+    "verify.py": "557ccf67b584fe2e872972fec1d50a3fdd272ab0a25e534c2d336f2319e07dfb"
+  }
+}

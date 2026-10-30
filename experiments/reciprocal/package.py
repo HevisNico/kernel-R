@@ -132,6 +132,27 @@ def package():
             shutil.copyfile(ROOT/'certify'/'reciprocal_cadence'/name,target/'code'/name)
         with (STAGE/'START_HERE.txt').open('a') as guide:
             guide.write('\nLATEST: CERTIFIED C-TO-B-TO-A CADENCE CASCADE\nOpen 11_Certified_Cadence_Cascade/RESULTS.html\nComplete proof: 11_Certified_Cadence_Cascade/THEOREM.md\nRun: python -B 11_Certified_Cadence_Cascade/code/tests.py\nScope: pulses-only birth family through 789.9; 45 physical parameters, no settings copies or open recurrence.\n')
+    composition=ROOT/'results'/'reciprocal_composition'
+    if (composition/'eps1e-1'/'independent_check.json').exists():
+        target=STAGE/'12_Certified_N_Cell_Composition'
+        target.mkdir(parents=True,exist_ok=True)
+        for name in ['README.md','RESULTS.html','tests.json','SOURCE_MANIFEST.json','instances.json','numerical_checks.json']:
+            shutil.copyfile(composition/name,target/name)
+        for name in ['README.md','RESULTS.html']:
+            page=target/name
+            page.write_text(page.read_text().replace('../../proof/reciprocal_composition/THEOREM.md','THEOREM.md'))
+        shutil.copyfile(ROOT/'proof/reciprocal_composition/THEOREM.md',target/'THEOREM.md')
+        for box in ['eps3e-3','eps1e-1']:
+            (target/box).mkdir(parents=True,exist_ok=True)
+            for name in ['certificate.json','independent_check.json']:
+                shutil.copyfile(composition/box/name,target/box/name)
+        (target/'code').mkdir(parents=True,exist_ok=True)
+        for name in ['certify.py','verify.py','tests.py','dependency.py','algebra.py','decimal_intervals.py','integer_intervals.py']:
+            shutil.copyfile(ROOT/'certify/reciprocal_composition'/name,target/'code'/name)
+        (STAGE/'02_R_Simulation/composition').mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(ROOT/'experiments/composition/run.py',STAGE/'02_R_Simulation/composition/run.py')
+        with (STAGE/'START_HERE.txt').open('a') as guide:
+            guide.write('\nLATEST: EVERY FINITE CHAIN BY COMPOSITION\nOpen 12_Certified_N_Cell_Composition/RESULTS.html\nComplete written induction: 12_Certified_N_Cell_Composition/THEOREM.md\nRun: python -B 12_Certified_N_Cell_Composition/code/tests.py\nScope: directed finite chains, K>=4*N+12 source pulses, summed link jitter<=0.15; not arbitrary graphs or cycles.\n')
     files=[p for p in STAGE.rglob('*') if p.is_file() and p.name!='SHA256SUMS.json']
     manifest={str(p.relative_to(STAGE)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
     (STAGE/'05_Verification'/'SHA256SUMS.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
