@@ -23,9 +23,9 @@ theorem checked_latency_margins {earlyError earlyIncrement lateError lateIncreme
     (hle : late_reference_separation_dominates_perturbation_left.Contains lateError)
     (hli : late_reference_separation_dominates_perturbation_right.Contains lateIncrement) :
     earlyError < earlyIncrement ∧ lateError < lateIncrement := by
-  exact ⟨RationalBox.strict_of_enclosures he hi
+  exact ⟨KernelR.strict_of_enclosures he hi
     early_reference_separation_dominates_perturbation_verified,
-    RationalBox.strict_of_enclosures hle hli
+    KernelR.strict_of_enclosures hle hli
     late_reference_separation_dominates_perturbation_verified⟩
 
 end KernelR.Robust
