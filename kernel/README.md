@@ -1,23 +1,43 @@
 # The physical kernel R
 
-R is the hybrid cell of A22 and the network it forms. **It is not modified in this repository.**
-Only the training protocol, the verification engine and the proof change. This page restates R
-in English. The authoritative texts are in [`../model/`](../model/):
-- `full_model_reference.md` is the original definition, in French; its status banner and section
-  7 are historical;
-- `CURRENT_SPEC.md` is the specification of the ±0.1 % / 28-pulse result.
+R is a three-input hybrid learning cell. This repository studies how R cells
+learn through pulses, exchange responses and transmit an acquired cadence.
+The q/m/z/b/E laws below describe one cell; wiring, source schedules, connection
+delays, communication windows and optional settings copies are supplied by each
+experimental protocol.
 
-The executable kernel is `../engine_eps3e-3/kernel/`. `KERNEL_SHA256SUMS` lists its 52 source files. They
-are byte-identical to the kernel of the base engine, so any change made for wider boxes lives
-outside it, in `../engine_eps3e-3/affine/`.
+## Implementations and reference material
 
-## Network and source
+- [Single-cell numerical engine](../experiments/reciprocal/engine.py).
+- [Three-cell network simulator](../experiments/reciprocal/simulate.py) and its
+  [experimental guide](../experiments/reciprocal/README.md).
+- [Finite-chain numerical checks](../experiments/composition/run.py) and the
+  [N-cell composition theorem](../proof/reciprocal_composition/THEOREM.md).
+- [Robust-chain research](../research/robust/README.md), with separately stated
+  drift, disturbance and received-amplitude assumptions.
 
-- 18 directed layers of 12 periodic lanes. Cell (n, j) receives, on ports 0, 1, 2, the emissions
-  of (n−1, j−1), (n−1, j), (n−1, j+1), with lanes taken modulo 12.
-- Layer 0 is the external source; only its lane 0 emits. Contacts have zero delay.
-- A firing at time F emits the canonical current p_F(t) = a·e^(−a(t−F)) on [F, F+1), with a = ln 4.
-- Each port carries at most one pulse at a time.
+The [original model](../model/full_model_reference.md) and
+[A22 specification snapshot](../model/CURRENT_SPEC.md) retain the upstream
+definition and historical network/calendar context. The theorem and experiment
+guides define the initial families and protocols used in kernel-R.
+
+## Topologies and sources in this repository
+
+| Setup | Supplied topology and protocol | Scope |
+|---|---|---|
+| Reciprocal prototype | Three living cells A, B and C; staged teaching and return links; nominal connection delay 0.35; later open exchanges | Numerical scenarios include pulses only and optional external settings copies. The local and cadence proofs cover their declared pulses-only prefixes. |
+| Cadence composition | A finite directed leaf-to-root chain; a prepared source schedule and explicit path-jitter budget | The [packet theorem](../proof/reciprocal_composition/THEOREM.md) specifies the preparation, source length and delay assumptions for each N. |
+| Robust prepared chains | Directed chains with bounded drift, disturbances and received-amplitude variation | The [robust theorem](../research/robust/THEOREM_N.md) uses its own prepared section and cadence budget; it is separate from the fast period-4 packet protocol. |
+
+The upstream A22 18-by-12 graph and zero-delay contacts are historical network
+choices, not properties of an individual R cell or a common topology imposed
+on these experiments. Port roles such as local experience, teaching and feedback
+are assigned by the bench.
+
+A firing at time F emits the canonical current
+p_F(t) = a·e^(−a(t−F)) on [F,F+1), with a = ln 4. The supported protocols require
+non-overlapping raw pulses on each port; routing and separation conditions are
+part of the individual result.
 
 ## Constants
 
@@ -34,8 +54,12 @@ outside it, in `../engine_eps3e-3/affine/`.
 | nominal initial gains | (3/10, 6/5, 3/10) |
 | nominal initial recovery b₀ | 2/25 |
 
-The five **per-port parameters** are fixed in time and chosen independently for each cell and
-each port, within the relative box ±ε. This box is the subject of the repository.
+The five **per-port parameters** are chosen independently for each cell and port.
+The base local and cadence theorems use fixed-in-time values in their declared
+relative boxes, including ±0.3% and ±10%. These parameter boxes are assumptions
+of particular results, alongside their state sections, schedules and link
+conditions. The robust research module separately defines permitted histories,
+disturbances and received-amplitude variation.
 
 | Parameter | Nominal value |
 |---|---|
@@ -84,7 +108,8 @@ While E > 0, the actuations are
     z_i′ = 8 v_e,i · 1[P = READY] · 1[z_i < ln C_i]
     b′   = ½ Σ_i v_m,i · 1[P ≠ READY] · 1[b < 1.1]
 
-Both are monotone and are projected exactly onto their caps.
+Both are monotone and are projected exactly onto their caps. The full-dose
+identities below require the energy gate to remain open and no cap contact:
 - A whole ERROR section received while the main unit is READY adds exactly Δz = 8(0.1 − 0.025) = 0.6,
   whatever L_e,i is.
 - A whole MARK received under protection adds Δb = (1 − 0.8)/2 = 0.1.
@@ -100,18 +125,28 @@ E′ = 10(100 − E) − W. The work W is non-negative:
 - the drains of protected auxiliaries;
 - the actuation movements.
 
-The uniform bound W ≤ (3C + 3M + 1)a + 1.1 + 4.5 L_m + 2.4 L_e stays below 500 throughout the box
-(it must be rechecked for each ε). So [50, 100] is invariant, and the power gates never close.
+For a result's admissible parameter and state family, the proof checks a bound
+of the form W ≤ (3C + 3M + 1)a + 1.1 + 4.5 L_m + 2.4 L_e < 500.
+When that bound holds and E starts in [50,100], this interval is invariant and
+the power gates stay open. The bound and any added disturbance assumptions
+must be justified for the particular theorem.
 
-## Initial family
+## Initial and prepared sections
 
-Independently in each cell, with δ = 1e-5:
-- P is READY, q ∈ [r − δ, r + δ], z_i ∈ [ln g_i,nom − δ, ln g_i,nom + δ], b ∈ [0.08 − δ, 0.08 + δ],
-  E ∈ [50, 100];
-- each auxiliary is either READY with m_i ∈ [r_m − δ, r_m + δ], or at the end of its ERROR phase
-  with m_i ∈ [r_m, r_m + δ].
+Initial states are specified by each theorem, rather than by the topology.
 
-There is no hidden earlier pulse.
+The [birth-to-section theorem](../proof/reciprocal_entry/THEOREM.md) uses a READY
+birth family: the main unit and all auxiliaries start READY, charges and
+log-gains have the stated 1e-5 perturbations, b is near 0.08 and E is in [50,100].
+The [cadence](../proof/reciprocal_cadence/THEOREM.md) and
+[chain](../proof/reciprocal_composition/THEOREM.md) results state their own birth
+calendars and preparation protocols.
+
+The [local feedback theorem](../proof/reciprocal_learning/THEOREM.md) instead
+starts from an explicit prepared section with b near 0.18 and no active currents.
+Prepared robust chains have their own section and noise assumptions.
+Residual initial ERROR phases permitted in the archived A22 family are not
+automatically included in the current READY birth theorems.
 
 ## Event semantics
 
@@ -121,4 +156,19 @@ There is no hidden earlier pulse.
   Equalities may belong to several zero-duration linearizations. No priority comes from a
   floating-point sort.
 - Cap contacts are monotone projections.
-- An unresolved root or an exhausted budget is a refusal, never a success.
+- Verification programs refuse unresolved roots or exhausted budgets; these are not success cases.
+
+These model conventions and checked interval obligations do not by themselves
+close the complete hybrid-execution-to-abstraction proof. The
+[Lean coverage guide](../proof/lean/README.md) states the established lemmas and
+remaining correspondence obligations.
+
+## Upstream provenance
+
+R's reference laws originate from
+[A22](https://github.com/HevisNico/a22-going-further/tree/269483eb2c6227b369cffb2c46f86eaae5272bb8).
+[KERNEL_SHA256SUMS](KERNEL_SHA256SUMS) is an identity record for source files in
+that upstream engine, not an executable-file inventory for this checkout.
+The byte-identical [historical kernel guide](reference/A22_KERNEL_README.txt)
+preserves the document used by the local-learning source manifest. Its old
+relative paths and network description belong to that archived context.

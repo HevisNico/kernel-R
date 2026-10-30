@@ -1,8 +1,13 @@
 # Robust prepared chains: drift, bounded noise and pulse amplitude
 
-Offline review and extension of the supplied `robust_noise_drift.zip`.
-All code and documentation in this package are in English. Nothing here requires
-or modifies a GitHub repository.
+This research module is maintained in the kernel-R repository. It contains the
+code, written theorems, certificates and numerical evidence for robust prepared
+chains with bounded drift, disturbances and received-amplitude variation.
+
+It originated in a review and extension of `robust_noise_drift.zip`.
+[ORIGIN.json](ORIGIN.json) records that delivery's provenance; the
+[original delivery README](reference/README_OFFLINE_DELIVERY.txt) preserves its
+wording. The sections below describe this module as it is used in the repository.
 
 ## Result and scope
 
@@ -31,8 +36,11 @@ outside scope. There is no complete Lean formalization in this package.
 
 The certifier, verifier and rational chain contract use only the Python standard
 library. Numerical testing additionally needs the versions in requirements.txt.
+Run these commands from this module's directory:
 
 ```sh
+# From the repository root:
+cd research/robust
 python -B -m unittest tests test_regressions -v
 python -B verify.py results/eps0.1/nu0.002_alpha0.json
 python -B chain.py results/eps0.1/nu0.0015_alpha0.05.json --n 32 --k 104
@@ -72,6 +80,11 @@ cover only their recorded histories and do not establish the universal theorem.
 The report is evidence/validation.json; full state/event traces are in
  evidence/traces.jsonl.gz. The report locks code, written proof, certificates,
 Python/NumPy/SciPy versions and trace bytes. Source mismatch is a refusal.
+
+Documentation-only updates are recorded in the validation reports' separate
+`documentation_revision` metadata. Their source maps match the current README;
+the archived delivery README preserves the exact as-run text and hash. Such a
+documentation refresh does not rerun or change the numerical campaign.
 
 ## Review fixes
 

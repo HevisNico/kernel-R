@@ -4,15 +4,18 @@ The physical R definition and the unchanged Decimal interval core originate from
 [HevisNico/a22-going-further](https://github.com/HevisNico/a22-going-further), base
 commit `269483eb2c6227b369cffb2c46f86eaae5272bb8`. Author and license notices are retained.
 
-The original kernel/model definition snapshots and exact dependencies of
+The original model definition snapshots, archived kernel guide and exact dependencies of
 the new certificates are kept here. Five reusable upstream Lean lemma modules
 are also vendored, unchanged, under `proof/lean/`; their original paths and Git
 blob identities are recorded in `proof/lean/evidence/UPSTREAM.json` and checked
 by `proof/lean/scripts/check_sources.py`. The complete A22 engines, inherited network
 proof archive and old global campaign records remain upstream. In particular,
-historical executable locations in `kernel/README.md` and the entries of
-`kernel/KERNEL_SHA256SUMS` identify that upstream reference; they do not imply
-those entire engines are present in this focused checkout.
+historical executable locations in the byte-identical
+[kernel guide snapshot](../kernel/reference/A22_KERNEL_README.txt) and the entries
+of `kernel/KERNEL_SHA256SUMS` identify that upstream reference; they do not imply
+those engines are present here. The current `kernel/README.md` describes the cell
+and the topologies studied in kernel-R. The local-learning source manifest
+references the archived guide so its original document hash remains checkable.
 
 This repository adds the reciprocal prototype, teaching-choice and stopping
 experiments, their written arguments and local interval certificates. The

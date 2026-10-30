@@ -153,8 +153,9 @@ The original reports distinguish DOM/SVG checks from unavailable full-browser te
 ## Where the robust results live
 
 The robust results are in `research/robust/`, not in `certify/`, `proof/` and `results/`.
-They are a tested snapshot of an offline package, preserved byte for byte with its source
-manifests. Their protocol is a different, slow-input chain: it is not the fast period-4
+They originate in a tested offline package. The numerical sources, certificates and
+traces retain their identities; the current guide and its documented provenance
+updates adapt that snapshot to this repository. Their protocol is a different, slow-input chain: it is not the fast period-4
 packet protocol of the N-cell composition theorem. Their status is that of the other
 written theorems: hybrid arguments written by hand, finite inequalities replayed in
 independent integer arithmetic, and, in Lean, the chain induction and the certificate
@@ -163,9 +164,11 @@ endpoints. Proving each cell's `CellLaw` from the hybrid execution is the open s
 
 ## Reference boundary and limitations
 
-The retained `kernel/` and `model/` documents preserve the original definition and
-its hashes. Their historical A22 engine locations refer to the upstream project,
-which is not vendored here. See [provenance](docs/PROVENANCE.md).
+The [kernel guide](kernel/README.md) describes R as a cell and links the current
+three-cell and chain protocols. The `model/` snapshots and
+[archived A22 kernel guide](kernel/reference/A22_KERNEL_README.txt) preserve the
+original reference context. `kernel/KERNEL_SHA256SUMS` identifies upstream engine
+files; those engines are not vendored here. See [provenance](docs/PROVENANCE.md).
 
 General pedagogy, semantic memory, new waveform invention and chip energy/area
 benefits remain unproved. Observation bins, feedback coding, lesson primitives
