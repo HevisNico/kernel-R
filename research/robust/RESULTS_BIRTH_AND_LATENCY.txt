@@ -1,0 +1,59 @@
+BIRTH ENTRY AND NOISE-DEPENDENT SCALING — VALIDATED OFFLINE
+
+New tests: 12 birth and 11 latency regression tests, all passing.
+New numerical campaigns: 51 configurations, 296 cell histories,
+3552 warm-up emissions and 9972 chain emissions.
+Every tested cell is integrated from birth without resetting its physical state,
+and checked with frozen 0/8 before-learning and 8/8 after-learning port-2 probes.
+These totals exclude repeated tighter-tolerance runs and the earlier campaigns.
+
+ENTRY RESULT
+Each READY-born cell is externally prepared with sixteen port-0 pulses at
+0,8,...,120, contacts closed, then the chain opens on port 2 at 160. The section
+at 159.9 is checked, including unmodified port-2 gain and the noise-widened charge
+and recovery intervals. The same cell continues, with no settings copy or reset.
+Eight certificates independently replay 150 enclosures and 48 strict inequalities
+each. The original narrow resting section is not assumed under persistent noise.
+
+INTERMEDIATE SCALING RESULT
+For the same cell's actual learned-gain reference latency, regular phase error
+is bounded by delta_i. The sufficient input period is
+  T >= 7.5 + 2 sum_(i=0,...,N-2)(sigma_i + delta_i).
+The final cell's radius enters output jitter but not an absent successor's input.
+The first residual firing is handled as a nonnegative advance plus a bounded
+delay error; the incoming exceptional prefix is removed during local learning.
+At zero noise and zero amplitude variation, delta=0 exactly.
+
+For epsilon=.1, nu=.002, alpha=0, the certified uniform radius is .00748.
+For N=32 and fixed wires this gives T>=7.96376. Two independent history families
+passed full birth-to-chain runs at T=8, yielding eight root outputs each.
+The previous coarse bound was T>=23. The improvement does not assert a constant
+period for unlimited depth with nonzero uniform delta.
+
+The guessed radius .003 is not sound uniformly over arbitrary long quiet gaps:
+an integer-interval test gives a reference crossing above .653 and an admissible
+perturbed crossing below .650. The bound .00748 covers this longer-wait scope.
+At large amplitude deviation the symmetric-radius method can be conservative;
+the old full-envelope sufficient bound is still available. Stored certificates
+cover eight points; there is no unchecked interpolation between them.
+
+NUMERICAL QUALITY
+Maximum output-time change under tighter tolerance, birth campaign:
+1.06809e-10.
+Maximum output-time change under tighter tolerance, latency campaign:
+2.77396e-11.
+Acceptance tolerance is 3e-8. These are numerical comparisons, not rigorous ODE
+integration error enclosures. Source/runtime/trace correspondence checks pass.
+
+READ AND REPRODUCE
+Start with START_BIRTH_AND_LATENCY.txt. Proofs are birth/THEOREM.md and
+latency/THEOREM.md; instructions are in each folder's README.txt. Certificates,
+regression logs, campaign reports and gzipped traces are included. Earlier
+prepared-chain reports remain intact with their own provenance scopes.
+
+LIMITS
+This is a written hybrid comparison/packet-induction proof with checked interval
+inequalities, not complete Lean semantics. Preparation requires external drives
+at every cell; it does not claim single-source autonomous entry, residual ERROR
+birth modes, feedback or the original fast period-4 protocol. No Lean additions,
+GitHub writes or pull requests were made. Code and documents are in English.

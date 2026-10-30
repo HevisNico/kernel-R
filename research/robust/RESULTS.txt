@@ -1,0 +1,55 @@
+ROBUST N-CELL CHAINS — TESTED OFFLINE DELIVERABLE
+
+Result: all 36 unit/regression tests passed (29 baseline + 7 periodic).
+All 63 numerical chain cases passed: 351 cells and
+10373 chain emissions checked, excluding tolerance-refinement reruns.
+Every tested cell also passed eight before-learning and eight after-learning
+frozen probes (0/8 then 8/8). Tests use the recorded histories, not all histories.
+
+GENERAL BOUNDED-DISTURBANCE RESULT
+53 cases, 224 cells, 5388 emissions. All eight parameter points and four history
+families were exercised. N reached 32; this case used period 23 with nonzero
+noise and amplitude variation and produced eight root outputs.
+A sufficient universal-N condition is T >= 7.5 + 0.5(N-1), from a prepared state.
+The local certificates replay 115 enclosures and 36 strict inequalities each.
+
+STRONGER ZERO-NOISE, IDENTICAL-WAVEFORM RESULT
+10 further cases, 127 cells, 4985 emissions. The written packet induction gives
+T >= 7.5 for every finite N with fixed wires. Parameter drift remains allowed.
+The N=32 fixed-wire case passed at T=7.5 with eight root outputs.
+With per-link phase errors +/-sigma_i, the sufficient period is
+T >= 7.5 + 2*sum(sigma_i). An aligned-jitter N=8 case exercised total jitter .35
+at T=8.2, and an N=32 case exercised global jitter .15 at T=8.
+The first firing advances; its exceptional prefix is discarded during the next
+cell's three silent inputs. It does not add a depth-dependent latency penalty.
+
+NUMERICAL QUALITY
+DOP853 root-localized transitions replace Euler endpoint overshoot. Analytic
+oracles check ERROR doses and FAST exit times with signed constant noise.
+Ten baseline and three periodic cases were rerun with rtol=1e-12, atol=1e-14
+and max_step=.08 instead of 1e-9, 1e-11 and .25.
+Maximum baseline output-time change: 1.17069e-10.
+Maximum periodic output-time change: 2.85638e-11.
+Maximum baseline dose-identity residual: 3.19078e-13.
+Maximum baseline distance outside an exact dose interval:
+4.03511e-12 (numerical tolerance is 3e-8).
+N=32 fixed-wire maximum periodic-tail gap error:
+8.78799e-11.
+These errors are measured differences, not rigorous integration error bounds.
+
+EVIDENCE AND REPRODUCTION
+Read START_HERE.txt, README.md and periodic/README.md. Reports and gzipped traces
+are in evidence/ and periodic/evidence/. Traces record inputs, outputs, hybrid
+transitions, initial/final states and sampled extrema; they are not a certified
+continuous enclosure or a complete dense trajectory. The reports record code
+and proof hashes, certificate identities, runtime versions and trace hashes.
+The baseline and stronger layer have separate source scopes and reports.
+Both verify-record commands passed after the campaigns.
+
+LIMITS
+The universal-N result is a written comparison/packet-induction argument with
+integer-checked inequalities. It is not a complete Lean proof. Numerical tests
+alone do not establish a theorem for arbitrary measurable disturbances.
+The prepared slow-input chain is covered; the original fast period-4 packet
+protocol, entry from birth, feedback, losses and arbitrary waveforms are not.
+No GitHub writes were made. All package text and code are in English.
