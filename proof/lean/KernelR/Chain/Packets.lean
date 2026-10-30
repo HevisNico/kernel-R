@@ -6,20 +6,20 @@ separate local dynamical contract. -/
 namespace KernelR.Chain
 
 structure Packet (m L : ℕ) (J : ℝ) where
-  prefix : ℕ → ℝ
+  slowDate : ℕ → ℝ
   settle : ℝ
   phase : ℕ → ℝ
   prefix_pos : 1 ≤ m
   tail_pos : 1 ≤ L
   jitter_nonneg : 0 ≤ J
   prefix_gap : ∀ i, i + 1 < m →
-    (37 / 5 : ℝ) ≤ prefix (i + 1) - prefix i ∧
-    prefix (i + 1) - prefix i ≤ 83 / 10
+    (37 / 5 : ℝ) ≤ slowDate (i + 1) - slowDate i ∧
+    slowDate (i + 1) - slowDate i ≤ 83 / 10
   settle_bounds : 4 ≤ settle ∧ settle ≤ 41 / 10
   phase_bounds : ∀ i, -J ≤ phase i ∧ phase i ≤ J
 
 noncomputable def Packet.ideal {m L J} (p : Packet m L J) (i : ℕ) : ℝ :=
-  if i < m then p.prefix i else p.prefix (m - 1) + p.settle + 4 * (i - m : ℕ)
+  if i < m then p.slowDate i else p.slowDate (m - 1) + p.settle + 4 * (i - m : ℕ)
 
 noncomputable def Packet.actual {m L J} (p : Packet m L J) (i : ℕ) : ℝ :=
   p.ideal i + p.phase i
@@ -43,7 +43,7 @@ theorem width_one_disjoint {s t : ℝ} (h : (37 / 10 : ℝ) ≤ t - s) :
 noncomputable def Packet.wire {m L J} (p : Packet m L J)
     (d σ : ℝ) (hσ : 0 ≤ σ) (e : ℕ → ℝ)
     (he : ∀ i, -σ ≤ e i ∧ e i ≤ σ) : Packet m L (J + σ) where
-  prefix i := p.prefix i + d
+  slowDate i := p.slowDate i + d
   settle := p.settle
   phase i := p.phase i + e i
   prefix_pos := p.prefix_pos
@@ -79,9 +79,9 @@ noncomputable def Packet.relay {m L J} (p : Packet m L J) (hL : 5 ≤ L)
     (h₁ : 20 / 100 ≤ l₁ ∧ l₁ ≤ 25 / 100)
     (h₂ : 24 / 100 ≤ l₂ ∧ l₂ ≤ 25 / 100)
     (horder : l₁ ≤ l₂) : Packet (m + 2) (L - 4) J where
-  prefix i := if i < m then p.prefix i + l₀
-    else if i = m then p.prefix (m - 1) + p.settle + 4 + l₀
-    else p.prefix (m - 1) + p.settle + 12 + l₁
+  slowDate i := if i < m then p.slowDate i + l₀
+    else if i = m then p.slowDate (m - 1) + p.settle + 4 + l₀
+    else p.slowDate (m - 1) + p.settle + 12 + l₁
   settle := 4 + l₂ - l₁
   phase i := p.phase (relayIndex m i)
   prefix_pos := by omega
@@ -129,7 +129,7 @@ noncomputable def leafPacket (K : ℕ) (hK : 9 ≤ K) (start a l₀ l₁ l₂ : 
     (h₁ : 20 / 100 ≤ l₁ ∧ l₁ ≤ 25 / 100)
     (h₂ : 24 / 100 ≤ l₂ ∧ l₂ ≤ 25 / 100)
     (ho : l₁ ≤ l₂) : Packet 3 (K - 8) 0 where
-  prefix i := if i = 0 then start + 12 + a
+  slowDate i := if i = 0 then start + 12 + a
     else if i = 1 then start + 20 + l₀ else start + 28 + l₁
   settle := 4 + l₂ - l₁
   phase _ := 0
@@ -142,5 +142,67 @@ noncomputable def leafPacket (K : ℕ) (hK : 9 ≤ K) (start a l₀ l₁ l₂ : 
       constructor <;> linarith [ha.1, ha.2, h₀.1, h₀.2, h₁.1, h₁.2]
   settle_bounds := by constructor <;> linarith [h₁.1, h₂.2]
   phase_bounds _ := by norm_num
+
+/-- Exact event correspondence for the slowDate retained by the relay. -/
+theorem relay_actual_prefix {m L J} (p : Packet m L J) (hL : 5 ≤ L)
+    (l₀ l₁ l₂ : ℝ) (h₀) (h₁) (h₂) (ho) {i : ℕ} (hi : i < m) :
+    (p.relay hL l₀ l₁ l₂ h₀ h₁ h₂ ho).actual i = p.actual i + l₀ := by
+  have hi' : i < m + 2 := by omega
+  simp [Packet.actual, Packet.ideal, Packet.relay, relayIndex, hi, hi']
+  ring
+
+theorem relay_actual_second_fire {m L J} (p : Packet m L J) (hL : 5 ≤ L)
+    (l₀ l₁ l₂ : ℝ) (h₀) (h₁) (h₂) (ho) :
+    (p.relay hL l₀ l₁ l₂ h₀ h₁ h₂ ho).actual m = p.actual (m + 1) + l₀ := by
+  have h : m < m + 2 := by omega
+  have h' : ¬ m + 1 < m := by omega
+  simp [Packet.actual, Packet.ideal, Packet.relay, relayIndex, h, h']
+  ring
+
+theorem relay_actual_first_high {m L J} (p : Packet m L J) (hL : 5 ≤ L)
+    (l₀ l₁ l₂ : ℝ) (h₀) (h₁) (h₂) (ho) :
+    (p.relay hL l₀ l₁ l₂ h₀ h₁ h₂ ho).actual (m + 1) = p.actual (m + 3) + l₁ := by
+  have h : m + 1 < m + 2 := by omega
+  have h' : ¬ m + 1 < m := by omega
+  have h'' : ¬ m + 3 < m := by omega
+  have hn : m + 1 ≠ m := by omega
+  simp [Packet.actual, Packet.ideal, Packet.relay, relayIndex, h, h', h'', hn, Nat.add_assoc]
+  ring
+
+theorem relay_actual_regular_tail {m L J} (p : Packet m L J) (hL : 5 ≤ L)
+    (l₀ l₁ l₂ : ℝ) (h₀) (h₁) (h₂) (ho) {i : ℕ} (hi : m + 2 ≤ i) :
+    (p.relay hL l₀ l₁ l₂ h₀ h₁ h₂ ho).actual i = p.actual (i + 2) + l₂ := by
+  have h₁' : ¬ i < m + 2 := by omega
+  have h₂' : ¬ i < m := by omega
+  have h₃' : i ≠ m := by omega
+  have h₄' : ¬ i + 2 < m := by omega
+  have h₅' : ¬ m + 1 < m := by omega
+  have h₆' : m + 1 ≠ m := by omega
+  have hs : m + 2 - 1 = m + 1 := by omega
+  have hd : i + 2 - m = (i - (m + 2)) + 4 := by omega
+  simp [Packet.actual, Packet.ideal, Packet.relay, relayIndex,
+    h₁', h₂', h₃', h₄', h₅', h₆', hs, hd, Nat.cast_add, Nat.cast_ofNat]
+  ring
+
+theorem Packet.ideal_gap {m L J} (p : Packet m L J) (i : ℕ) :
+    4 ≤ p.ideal (i + 1) - p.ideal i := by
+  by_cases hn : i + 1 < m
+  · have hi : i < m := by omega
+    simp only [Packet.ideal, hn, hi, if_true]
+    linarith [(p.prefix_gap i hn).1]
+  · by_cases hi : i < m
+    · have he : i + 1 = m := by omega
+      have he' : i = m - 1 := by omega
+      simp only [Packet.ideal, hn, hi, if_false, if_true]
+      rw [he, he']
+      simp only [Nat.sub_self, Nat.cast_zero, mul_zero, add_zero]
+      linarith [p.settle_bounds.1]
+    · have hs : i + 1 - m = (i - m) + 1 := by omega
+      simp only [Packet.ideal, hn, hi, if_false, hs, Nat.cast_add, Nat.cast_one]
+      linarith
+
+theorem Packet.actual_gap {m L J} (p : Packet m L J) (hJ : J ≤ 3 / 20) (i : ℕ) :
+    (37 / 10 : ℝ) ≤ p.actual (i + 1) - p.actual i := by
+  exact actual_gap (p.ideal_gap i) (p.phase_bounds i) (p.phase_bounds (i + 1)) hJ
 
 end KernelR.Chain

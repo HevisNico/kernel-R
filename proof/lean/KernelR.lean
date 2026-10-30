@@ -26,3 +26,5 @@ import KernelR.Chain.Packets
 import KernelR.Chain.Induction
 import KernelR.Chain.Consequences
 import KernelR.Chain.Algebra
+import KernelR.Certificates.Composition003
+import KernelR.Certificates.Composition010

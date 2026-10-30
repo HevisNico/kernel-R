@@ -157,4 +157,21 @@ theorem full_jitter_iff_four_cells {N : ℕ} (hN : 0 < N) :
     have : (N : ℝ) ≤ 4 := by exact_mod_cast h
     linarith
 
+theorem uniform_jitter_nonneg (n : ℕ) :
+    0 ≤ min (1 / 20 : ℝ) (3 / (20 * (n : ℝ))) := by
+  apply le_min <;> positivity
+
+theorem uniform_jitter_per_link (n : ℕ) :
+    min (1 / 20 : ℝ) (3 / (20 * (n : ℝ))) ≤ 1 / 20 := min_le_left _ _
+
+theorem uniform_jitter_total {n : ℕ} (hn : 0 < n) :
+    pathJitter (fun _ => min (1 / 20 : ℝ) (3 / (20 * (n : ℝ)))) n ≤ 3 / 20 := by
+  have hn' : (n : ℝ) ≠ 0 := by exact_mod_cast (Nat.ne_of_gt hn)
+  rw [constant_jitter]
+  calc
+    (n : ℝ) * min (1 / 20 : ℝ) (3 / (20 * (n : ℝ))) ≤
+        (n : ℝ) * (3 / (20 * (n : ℝ))) :=
+      mul_le_mul_of_nonneg_left (min_le_right _ _) (Nat.cast_nonneg n)
+    _ = 3 / 20 := by field_simp; ring
+
 end KernelR.Chain
