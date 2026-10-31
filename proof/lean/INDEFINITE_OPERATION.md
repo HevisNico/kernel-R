@@ -16,6 +16,9 @@ in this repository.**
 | `KernelR/LearnedResponse.lean` | An observed single-input READY firing has the reference latency for its actual gain | The stated READY span, exact initial rest, one fresh raw input and no ERROR on that port |
 | `KernelR/Indefinite.lean` | Compatible responding execution prefixes reach unbounded times; a complete execution exists at every finite horizon of an arbitrary sufficiently separated input schedule | `PulseContract`: actual one-input execution, learned-domain closure, exact firing count and fixed latency |
 | `KernelR/FutureControls.lean` | A nonempty learned section and positive-duration idle execution; concrete counterexamples to dropping the positive gap, strengthening the energy floor, allowing a weak gain, or ignoring a token due at an endpoint | No responding-cycle witness is supplied by these controls |
+| `KernelR/HybridFrozen.lean` | Existence of active fixed-mode flows with actual canonical current origins and a reserve driven by the integrated work | The discrete modes must physically suppress plasticity; candidate first-guard and raw/calendar inequalities must hold |
+| `KernelR/LearnedCycleBounds.lean`, `KernelR/LearnedCycle.lean` | Auxiliary first contact in `(0.01,0.05]`, main first contact after `0.5`, actual protected phase durations and uniform event chronology in both physical boxes | These clock bounds do not themselves assemble the entire reacting execution |
+| `KernelR/LearnedCycleStart.lean` | A queued input is consumed, an actual positive-duration active flow reaches the first auxiliary guard and a legal MARK jump occurs, with unchanged memory, no emission yet and reserve in `[50,100]` | One cell, through the first MARK entry only |
 
 All statements use the fixed-parameter, canonical-amplitude operational field of
 `Hybrid.lean`. They do not instantiate the conditional drift/noise/amplitude
@@ -114,8 +117,8 @@ event orders, is needed for that stronger guarantee.
 
 ## Next physical obligations
 
-1. Construct the one-input hybrid cycle from the learned section, including
-   auxiliary crossings, raw end, FAST/SLOW exits and all compatible event orders.
+1. Extend the constructed first-MARK prefix through the remaining one-input
+   hybrid cycle, including raw end, FAST/SLOW exits and compatible event orders.
 2. Derive the chronology that suppresses further gain/recovery updates and
    excludes extra firings; prove the selected section closes under that cycle.
 3. Instantiate routing, fixed wire delays and a sufficient network settling
@@ -127,6 +130,38 @@ The added theorem therefore closes the *waiting, compatible-prefix construction
 and arbitrary-horizon extraction* parts of the indefinite-operation argument.
 It leaves the local responding cycle and birth-to-learned execution as explicit
 physical work, rather than treating them as consequences of finite certificates.
+
+## Checkpoint for the next session
+
+`FirstMarkPrefix.last` is an actual reached state: the main unit is READY and
+the selected auxiliary has just entered MARK. The source token has been
+consumed. The current origin, physical coordinates, gain/recovery memory and
+reserve belong to the same live cell. This prefix is constructed uniformly over
+the declared learned section and either fabrication box, not from a supplied
+event word or a nominal simulation.
+Its `physical_state` equality exposes the full analytic endpoint, including the
+active raw origin, empty pending queue and passive auxiliary coordinates, for
+use by the next flow segment.
+
+`frozenFlow` is the constructor for the next active segments. Its charge
+solutions are derived analytically; its reserve solves the forced linear ODE
+with the actual work. It accepts first-guard/raw/calendar inequalities, not an
+assumed `Flow` or a pre-existing reacting execution. `FrozenModes` is checked
+from the actual main/auxiliary modes. It excludes READY/ERROR and protected/MARK
+combinations; concrete counterexamples in `LearnedCycleControls` enforce this
+boundary. The guard conditions must still be instantiated for each later phase.
+
+The proved `LearnedClock.chronology` puts MARK before the main fire, ERROR fully
+inside FAST, raw end before auxiliary completion, and reopening before `7.5`.
+It deliberately does not choose an order between raw end and ERROR entry: both
+orders (including equality) must be handled in the subsequent construction.
+
+Resume by flowing from MARK entry to SILENT entry, then to the main fire; handle
+the raw-end/ERROR-entry alternatives, auxiliary completion, FAST exit and SLOW
+reopening. Return to the learned domain, wait to a uniform cycle deadline and
+instantiate `PulseContract` for one cell. The finite-chain routing/product
+construction, universal event-order refinement and birth/training connection
+remain later obligations. No `PulseContract` instance is claimed at this checkpoint.
 
 ## Validation
 

@@ -44,6 +44,11 @@ import KernelR.HybridFuture
 import KernelR.LearnedResponse
 import KernelR.Indefinite
 import KernelR.FutureControls
+import KernelR.HybridFrozen
+import KernelR.LearnedCycleBounds
+import KernelR.LearnedCycle
+import KernelR.LearnedCycleStart
+import KernelR.LearnedCycleControls
 import KernelR.Robust.Birth
 import KernelR.Robust.Latency
 import KernelR.Robust.Induction
