@@ -2,7 +2,9 @@
 
 The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. They do not
-yet derive the four pulse cases or the training calendars from complete executions.
+yet derive the four main-cell pulse cases or the full training calendars from
+complete executions. Sensor triggering and the protected auxiliary cycle are
+now extracted from actual executions by the modules described below.
 
 ## Physical definitions
 
@@ -64,6 +66,14 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridEvents` | Emission dates are chronological and inside the actual execution interval; causal wiring preserves future delivery dates; FAST potential telescopes across all legal interleavings; per-cell firing count is at most T+1 from birth | A due token is allowed at the current date; port availability and progress remain separate |
 | `HybridAuxEvents` | Protected SILENT decay supplies a clock; a discrete rank counts all four auxiliary transitions; at most 8T+10 auxiliary jumps per cell and port from birth, including residual ERROR | This is a coarse event budget, not a prescribed pulse-case sequence or full-dose conclusion |
 | `HybridEventBudget` | Every jump is partitioned into main, auxiliary, arrival or raw-end events; queue and raw-current balances give a uniform natural budget for all finite prefixes ending by T | Requires an explicit routing fanout bound; no continuation or complete protocol execution is constructed |
+| `HybridEnvelope` | READY comparison with variable physical gains, every active port and attenuation from each actual raw origin | Comparison gain bounds remain explicit; monotonicity and caps supply a general physical instance |
+| `HybridClipping` | ERROR gain increase is at most eight times actual auxiliary charge loss; per-port MARK dose is at most half the loss, including closed gates; strict cap exposure follows from remaining-charge headroom | Complete dose still requires actual main-mode chronology; a real headroom lemma does not establish a dose count |
+| `HybridPrefix` and `HybridPulseSpans` | Cut an actual execution using its existing flow path; preserve observed flow modes; retain raw origins; compose exact READY sensor responses across legal events | Prefixes of given executions, not future continuation constructions |
+| `HybridPhases` | Select the first actual mode-changing jump and reconstruct the original execution; extract complete FAST and protected auxiliary phases | Requires starting mode/charge and a sufficiently long actual execution; existence is not asserted |
+| `HybridAuxCycle` | From actual MARK entry at m=1, extract MARK, SILENT, ERROR and the READY successor, with real protected duration in [123/110,41/30] | Main-cell interactions and subsequent inputs remain separate |
+| `HybridResponseBounds` | Real response bounds, including response<=3/4 in the raw window and a positive lower bound at 9/10 | Selected coarse analytic bounds, not soundness of every stored enclosure |
+| `HybridSensor` | A received pulse at a READY sensor in its rest band forces MARK in (t+1/100,t+1/40); ERROR starts after t+99/100; READY returns after t+1 and before t+419/300 | Given an execution reaching that horizon; no phase word is supplied; main firing and dose exposure remain open |
+| `HybridInputs` | Queue and delivery provenance from actual sources/emissions; actual delivery dates; input isolation from queue/routing dates; raw validity, persistence and expiry | Concrete source queue and wiring must still be instantiated |
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -90,8 +100,39 @@ span exposure predicates still require the relevant mode chronology and strict
 cap inactivity. For a flow reached from the declared birth family, the energy
 part is now derived by `reachable_power_gate_open`, rather than postulated.
 
+The clipped ERROR budget bounds `z+8*m` across an ERROR span regardless of
+gate closures. Thus a strict inequality on the initial `z+8*(m-1/40)` proves
+gain-cap inactivity throughout that span. Together with a reachable reserve
+and actual READY main-mode spans, `error_exposed_of_headroom` derives the
+complete exposure predicate across legal intervening events. The real low-gain
+headroom estimate covers an increase of 12/5 above the low nominal log-gain;
+it does not establish that the protocol has produced that increase.
+
 Neither full-dose lemmas nor mode-span predicates derive the four pulse cases of
 the certified protocol. That remaining distinction is explicit in signatures.
+
+## Actual sensor cycle
+
+`Execution.sensor_cycle` starts immediately after a canonical input has been
+received: its active raw origin is the current date, the sensor is READY and
+its charge lies in the declared rest band. The initial physical upper region
+and independent fabrication box are required. The theorem takes an actual
+execution reaching at least t+419/300.
+
+It extracts the first READY-to-MARK jump, then the three protected auxiliary
+phases and their actual outgoing jumps. Every decomposition reconstructs the
+given execution. Trigger and protected durations follow from integral equations,
+physical guards and proved real exponential inequalities; no recorded phase
+word, desired count or stored root enclosure is assumed. Other cells, ports
+and main-mode switches may interleave freely.
+
+ERROR starts after t+99/100 and may overlap the last part of the raw pulse,
+which is retained by the variable-gain comparison lemmas. READY returns after
+the raw end t+1 and before t+419/300. Times are in the model's time units.
+Determining the main cell's firing and protection of doses during this cycle
+remains part of the pulse-case proof. The theorem does not construct its input
+execution or exclude later inputs. `HybridInputs` supplies provenance and
+isolation lemmas to discharge source and routing obligations separately.
 
 ## Physical event budget
 
@@ -140,10 +181,11 @@ It connects to PR #6's interface but does not supply its leaf or `RelayLaw` witn
 
 1. Instantiate and review the semantics with the supplied protocols, including
    staged births where relevant, and prove routing adequacy and port separation.
-2. Prove strict cap inactivity and the main/auxiliary chronology in each actual
-   pulse case, including combined MARK/ERROR, variable-gain raw-tail overlap and
-   absence of extra firings. Select the mode spans from executions rather than
-   assuming the desired case word.
+2. Prove the main/auxiliary interactions in each actual pulse case, including
+   combined MARK/ERROR, strict cap inactivity, variable-gain raw-tail overlap
+   and absence of extra firings. Sensor triggering, the protected auxiliary
+   cycle and phase selection are now derived from actual executions; their
+   synchronization with main firing and reopening remains open.
 3. Establish sound real enclosure membership for the remaining root, calendar,
    recovery and residual-tail expressions in the certificates. Exact comparisons
    of stored endpoints alone remain insufficient.
@@ -164,13 +206,15 @@ Use the pinned Lean/Mathlib versions and the standard project workflow:
 
 ```sh
 lake build
-lake env lean Audit.lean
+lake build Audit
+python scripts/check_audit_negative.py
 python scripts/check_sources.py
 python scripts/generate_evidence.py --check
 python scripts/check_negative.py
 python scripts/check_hybrid_negative.py
 python scripts/check_hybrid_analytic_negative.py
 python scripts/check_hybrid_event_negative.py
+python scripts/check_hybrid_phase_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -181,3 +225,8 @@ attenuation of a raw tail. The axiom audit imports all new modules through Kerne
 Event controls reject removal of the unfinished-FAST allowance, altered FAST
 departure and auxiliary bounds, strict future dating of a token due now, and
 omission of routed fanout from the published global budget.
+
+Phase controls reject an absent received input, altered sensor/error/return
+dates, a shortened protected cycle, freezing a variable gain, an incorrect
+clipped-dose coefficient, a retained expired raw current, and omission of
+routed tokens from delivery provenance.

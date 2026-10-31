@@ -1,4 +1,5 @@
 import KernelR.HybridEventBudget
+import KernelR.HybridPhases
 
 /-! Physical building blocks for an indefinitely repeatable learned regime.
 Silence is constructed from the ODEs. A future-source queue extension preserves
@@ -151,12 +152,6 @@ theorem learned_idle_complete {n θ active s route} (h : @LearnedRest n θ activ
   · let f := learnedIdleFlow h (lt_of_le_of_ne hT he)
     exact ⟨.cons (.flow f) (.nil _),
       ⟨rfl, hrest.no_jump, by simp [idleAt, h.pending]⟩, hrest, rfl⟩
-
-def Execution.append {n θ route s u v} (e : @Execution n θ route s u)
-    (f : Execution θ route u v) : Execution θ route s v :=
-  match e with
-  | .nil _ => f
-  | .cons step rest => .cons step (rest.append f)
 
 theorem Execution.append_ledger {n θ route s u v} (e : @Execution n θ route s u)
     (f : Execution θ route u v) : (e.append f).ledger = e.ledger.add f.ledger := by

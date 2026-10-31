@@ -1,5 +1,6 @@
 import KernelR.HybridReady
 import KernelR.HybridRegion
+import KernelR.HybridResponseBounds
 import CommutationE
 import FirstCrossing
 import FutureWave
@@ -9,12 +10,6 @@ exp/log expressions, not to stored certificate endpoints. They do not construct
 the complete hybrid pulse cycle or assert its reachability from birth. -/
 namespace KernelR.Hybrid
 open Set
-
-theorem response_nonnegative {t : ℝ} (ht : 0 ≤ t) : 0 ≤ response t := by
-  have ha := a_coarse_bounds.1
-  have he : Real.exp (-a * t) ≤ Real.exp (-(1/2:ℝ) * t) :=
-    Real.exp_le_exp.mpr (by nlinarith)
-  exact mul_nonneg (div_nonneg (by linarith) (by linarith)) (sub_nonneg.mpr he)
 
 theorem response_linear_upper {t : ℝ} (ht : 0 ≤ t) : response t ≤ a * t := by
   simpa [response, A22.LemmaE.h] using
