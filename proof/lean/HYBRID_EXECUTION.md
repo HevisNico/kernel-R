@@ -5,8 +5,10 @@ prove physical flow and invariant results needed for that theorem. They do not
 yet derive all four main-cell pulse cases or the full training calendars from
 complete executions. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
-learned input and its exact single-emission count. Sensor triggering and the
-protected auxiliary cycle are also extracted from actual executions.
+learned input and its exact single-emission count. From the declared prepared
+section the learned-input case now returns and preserves all memories. Sensor
+triggering and the protected auxiliary cycle are also extracted from actual
+executions.
 
 ## Physical definitions
 
@@ -83,7 +85,12 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridMainComparison` | READY upper/lower comparisons across actual flows and jumps, using smooth comparison currents and the original pulse date | Requires actual drive bounds and READY flow spans |
 | `HybridSilent` | An isolated low-gain input has no main emissions, total ERROR dose 3/5, log-gain increase 3/5, and unchanged recovery | Declared charge/gain/rest section, reachable birth state, no new arrivals, and an actual execution reaching t+419/300 |
 | `HybridFiring` | An isolated learned input's first actual main firing lies in (t+3/10,t+9/10); its entry contributes exactly one emission and every earlier same-cell emission is excluded | First-departure extraction; does not construct the input execution |
-| `HybridSingleOutput` | The learned isolated input emits exactly once; after FAST the raw current is gone before SLOW can reopen, and zero-input READY cannot fire again | ERROR protection, SLOW return bounds and the full learned-input dose case remain open |
+| `HybridSingleOutput` | The learned isolated input emits exactly once; after FAST the raw current is gone before SLOW can reopen, and zero-input READY cannot fire again | Does not assert execution existence |
+| `HybridSlowProtection` | Actual recovery-cap integral bounds give SLOW duration >4/5 and at least 9/5 protection after firing; the entire learned ERROR span is protected and its total dose is zero | Fixed fabrication semantics and the declared input/gain/rest section |
+| `HybridReadyReturn` | A sufficiently long actual learned-input trace contains its FAST and SLOW exits and a READY return before t+6.990787, with q=1/10 and no raw input | Requires initial recovery >=17999/100000 and an actual trace reaching t+7.5 |
+| `HybridStableMemory` | MARK ends before t+1/20, hence before main firing; no receiving-port MARK dose is delivered; READY other ports stay quiescent and recovery is unchanged | Other ports must initially be READY in their rest bands with no raw current or later arrivals |
+| `HybridPulseSection` | The actual isolated learned-pulse case restores the prepared section, exact resting main charge, no raw inputs, unchanged memories, zero ERROR/MARK doses on every port, and exactly one emission | Prepared-section reachability and full source calendars are not supplied |
+| `HybridPulseRoot` | The actual first firing satisfies the real threshold equation with its original residual charge; the response root is unique in the firing window; positive residual advances the first firing relative to its rest reference | Fine latency enclosure membership remains to be proved |
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -143,8 +150,8 @@ ERROR starts after t+99/100 and may overlap the last part of the raw pulse,
 which is retained by the variable-gain comparison lemmas. READY returns after
 the raw end t+1 and before t+419/300. Times are in the model's time units.
 Silent learning and the first learned firing are now derived as described below;
-protection and return after that firing remain open. The theorem does not
-construct its input execution or exclude later inputs. `HybridInputs` supplies provenance and
+the prepared-section case below also derives protection and return. The theorem
+does not construct its input execution or exclude later inputs. `HybridInputs` supplies provenance and
 isolation lemmas to discharge source and routing obligations separately.
 
 ## Isolated main inputs
@@ -182,8 +189,38 @@ output count. `Execution.learned_input_single_emission` strengthens this to an
 exact singleton emission list and count one. Any first FAST departure occurs one
 time unit after firing, hence after the raw cutoff. A later SLOW-to-READY departure
 reopens at q=1/10 with no raw input and cannot create an extra firing. The proof
-also covers executions ending in an incomplete FAST or SLOW phase. ERROR
-protection, SLOW return bounds and the full learned-input dose case remain open.
+also covers executions ending in an incomplete FAST or SLOW phase. The modules
+below supply ERROR protection and the prepared-section return.
+
+`PreparedSection` declares READY main mode, q in [1/10-1/100000,7/50],
+recovery in [17999/100000,18001/100000], and every auxiliary port READY in its
+rest band. It does not assert that training has reached this section, and it
+does not change the prescribed birth recovery near 2/25. The arrival raw tag
+is specified separately.
+
+`Execution.learned_pulse` takes this section, the same learned-gain interval and
+isolation conditions, reachability from `BirthState`, and an actual execution
+reaching t+7.5. The actual recovery cap gives SLOW duration greater than 4/5;
+together with the one-unit FAST phase this keeps ERROR protected. Its total
+ERROR dose is zero. The sensor MARK phase ends before t+1/20, when the main
+cell is still READY, so its MARK gate remains closed. Other initially READY
+ports without inputs stay quiescent. All gain coordinates and recovery are
+therefore unchanged, with zero ERROR and MARK ledgers on every port.
+
+Accumulated recovery, rather than a frozen SLOW rate, gives the READY return
+before t+6.990787. The selected return jump and its prefix/suffix reconstruct
+the actual execution. The main charge is exactly 1/10 afterwards, all raw
+currents are gone, and the final state belongs to `PreparedSection` again.
+This proves this isolated learned-input case with its exact emission count;
+it does not prove the other protected/combined cases or the training word.
+
+`MainTrigger.firing_equation` identifies the actual threshold with
+`readyPulse initial_charge exp(initial_log_gain) input_date firing_date = 1`.
+Gain freezing before ERROR is derived from the sensor cycle. The actual initial
+charge is retained. Direct real derivative bounds prove strict monotonicity and
+root uniqueness in the firing window. A positive residual can advance a first
+firing relative to a rest-started reference; no physical pulse is retimed and
+no equality of first and steady firing latencies is asserted.
 
 `HybridInputBalance` retains every routed token in a multiset conservation law.
 For empty routing, an execution complete after all supplied source dates has an
@@ -241,10 +278,11 @@ It connects to PR #6's interface but does not supply its leaf or `RelayLaw` witn
    staged births where relevant, and prove routing adequacy and port separation.
 2. Prove the main/auxiliary interactions in each actual pulse case, including
    combined MARK/ERROR, strict cap inactivity and absence of extra firings.
-   The isolated silent input and its total dose are now proved with variable-gain
-   raw-tail overlap; a learned input's first firing is extracted. Protection,
-   return after that firing and the other cadence cases remain open. The
-   isolated learned input now has an exact single-emission count.
+   The isolated silent input and its total dose are proved with variable-gain
+   raw-tail overlap. The prepared learned-input case now has an exact single
+   emission, zero ERROR/MARK doses, preserved memories and an actual READY
+   return. The other protected/combined cases and their protocol occurrence
+   remain open.
 3. Establish sound real enclosure membership for the remaining root, calendar,
    recovery and residual-tail expressions in the certificates. Exact comparisons
    of stored endpoints alone remain insufficient.

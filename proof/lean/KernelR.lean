@@ -63,3 +63,8 @@ import KernelR.HybridMainComparison
 import KernelR.HybridSilent
 import KernelR.HybridFiring
 import KernelR.HybridSingleOutput
+import KernelR.HybridSlowProtection
+import KernelR.HybridReadyReturn
+import KernelR.HybridStableMemory
+import KernelR.HybridPulseSection
+import KernelR.HybridPulseRoot

@@ -21,8 +21,12 @@ READY comparisons retain every active raw tail. An isolated low-gain input now
 has no actual emissions, a total ERROR dose of 3/5 and unchanged recovery. A
 learned input emits exactly once, with its actual firing extracted in the real
 (3/10,9/10) bracket.
-Full protocol chronology and exact counts, remaining real enclosures, progress
-and the complete execution-to-abstraction theorem remain open.
+From the declared prepared section this learned-input case now returns before
+6.990787, preserves all gains and recovery, and restores READY at exact resting
+charge. Its actual firing equation retains the initial residual charge.
+Birth-to-preparation, the other pulse cases, full protocol chronology, fine real
+enclosures, progress and the complete execution-to-abstraction theorem remain
+open.
 
 ## Reproduce
 
@@ -42,6 +46,7 @@ python3 scripts/check_hybrid_analytic_negative.py
 python3 scripts/check_hybrid_event_negative.py
 python3 scripts/check_hybrid_phase_negative.py
 python3 scripts/check_hybrid_pulse_negative.py
+python3 scripts/check_hybrid_return_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
