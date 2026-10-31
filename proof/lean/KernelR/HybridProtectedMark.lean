@@ -4,21 +4,6 @@ import KernelR.HybridProtectedWindow
 namespace KernelR.Hybrid
 open Set
 
-theorem SensorCycle.error_zero_of_protected {n θ route s u i p} {e : @Execution n θ route s u}
-    (cycle : SensorCycle e i p) (hv : RawValid s)
-    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p)
-    (hm : cycle.phases.errorPhase.span.AllStates (fun v => v.main i ≠ .ready)) :
-    e.ledger.error i p = 0 ∧ u.x i (.z p) = s.x i (.z p) := by
-  let er := cycle.phases.errorPhase
-  have herr := er.span.gain_constant_protected_states i p hm
-  have hafter : er.afterExit.x i (.z p) = s.x i (.z p) := by
-    rw [er.exit.physical_continuous,herr,cycle.error_initial_gain]
-  have hquiet := cycle.error_rest_ready hv hr hno
-  have hgain := (er.rest.gain_constant_aux i p .ready (by decide)
-    (er.rest.allStates_aux_flows i p .ready hquiet)).1
-  have hu := hgain.trans hafter
-  exact ⟨by have h := e.gain_balance i p; linarith,hu⟩
-
 theorem SensorCycle.full_protected_mark {n θ ε route born s u i p} {e : @Execution n θ route s u}
     (cycle : SensorCycle e i p) (past : Execution θ route born s) (hborn : BirthState born)
     (hb : PhysicalBox θ ε) (hs : MarkEntry s i)

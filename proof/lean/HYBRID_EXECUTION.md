@@ -352,6 +352,21 @@ This discharges source isolation without requiring globally empty routing; it
 does not yet derive the later incoming wire calendars or realize staged births.
 
 
+The `*_of_valid` prepared-input and return theorems take `UpperRegion` and
+`RawValid` at the current starting snapshot directly. The current prepared
+section and strong-gain bounds, actual received pulse, arrival isolation and
+return horizon remain explicit. This also applies to `prepared_cell_train_of_valid`
+with variable gaps. Each arrival advances the physical-region/raw-validity
+invariants through its actual prefix; the induction preserves the same global
+execution. The former birth-reachable statements are corollaries of these
+variants, with unchanged signatures.
+
+These local statements apply at arbitrary starting times and do not require all
+cells' current memories to be nominal birth memories. They provide the prepared
+case needed after a staged birth once the current invariants are established.
+Positive-dose silent/protected cases retain their reserve and exposure proofs.
+
+
 `HybridInputBalance` retains every routed token in a multiset conservation law.
 For empty routing, an execution complete after all supplied source dates has an
 actual delivery list permuting the initial source queue. Filtering by cell/port
@@ -449,6 +464,7 @@ python scripts/check_hybrid_bootstrap_negative.py
 python scripts/check_hybrid_protected_negative.py
 python scripts/check_hybrid_source_negative.py
 python scripts/check_hybrid_cell_negative.py
+python scripts/check_hybrid_local_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -478,3 +494,7 @@ Multicell controls reject erasing other-cell arrivals or future pending tokens,
 replacing cell-specific conservation with a global claim, altered arrival dates,
 extra prepared outputs, omission of the first gap and weakened gap/final-horizon
 requirements.
+
+Local-invariant controls exercise the prepared pulse and variable-gap train
+without a common-birth history argument, and reject a protected-input
+substitution, a receiving-gain increase, an extra output and a missing firing.

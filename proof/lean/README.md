@@ -39,6 +39,9 @@ inputs, the first strong input, the protected input and the learned remainder.
 It does not assume their case word or counts. A receiving-cell refinement also retains other cells’ arrivals and derives
 prepared-train counts for arbitrary input gaps of at least 7.5. Cell-specific
 source conservation permits outgoing routes and future tokens at other cells.
+Prepared cases and their variable-gap trains can now be proved directly from
+the current physical region and raw-origin validity, at arbitrary starting
+times. The earlier birth-reachable statements are retained as corollaries.
 The remaining routed/staged-birth calendars, combined pulse case, fine real
 enclosures, progress and complete
 execution-to-abstraction theorem remain open.
@@ -67,6 +70,7 @@ python3 scripts/check_hybrid_bootstrap_negative.py
 python3 scripts/check_hybrid_protected_negative.py
 python3 scripts/check_hybrid_source_negative.py
 python3 scripts/check_hybrid_cell_negative.py
+python3 scripts/check_hybrid_local_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

@@ -140,18 +140,16 @@ theorem SensorCycle.error_protected_by_trigger {n θ route s u i p} {e : @Execut
   exact h.1 (by have ht := h.2.1; linarith [cycle.error_starts_late])
     (by have ht := h.2.2; linarith)
 
-theorem SensorCycle.total_error_zero_of_trigger {n θ route born s u i p}
-    {e : @Execution n θ route s u} (cycle : SensorCycle e i p) (tr : MainTrigger e i)
-    (past : Execution θ route born s) (hborn : BirthState born)
-    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p) :
+theorem SensorCycle.error_zero_of_protected {n θ route s u i p} {e : @Execution n θ route s u}
+    (cycle : SensorCycle e i p) (hv₀ : RawValid s)
+    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p)
+    (hm : cycle.phases.errorPhase.span.AllStates (fun v => v.main i ≠ .ready)) :
     e.ledger.error i p = 0 ∧ u.x i (.z p) = s.x i (.z p) := by
   let er := cycle.phases.errorPhase
-  have hb : s.x i .b ≤ 11 / 10 := past.recovery_cap i (by linarith [(hborn.2.2 i).2.2.1.2])
-  have hprotected := cycle.error_protected_by_trigger tr hb
-  have herr := er.span.gain_constant_protected_states i p hprotected
+  have herr := er.span.gain_constant_protected_states i p hm
   have hafter : er.afterExit.x i (.z p) = s.x i (.z p) := by
     rw [er.exit.physical_continuous,herr,cycle.error_initial_gain]
-  have hvalid := e.allStates_raw_valid (past.raw_valid hborn.raw_valid)
+  have hvalid := e.allStates_raw_valid hv₀
   have hallowed := e.raw_allowed_states i p s.time (Or.inr hr) hno
   have hv := er.rest.allStates_initial (cycle.error_states hvalid).2
   have ha := er.rest.allStates_initial (cycle.error_states hallowed).2
@@ -167,5 +165,14 @@ theorem SensorCycle.total_error_zero_of_trigger {n θ route born s u i p}
   refine ⟨?_,hu⟩
   have hb := e.gain_balance i p
   linarith
+
+theorem SensorCycle.total_error_zero_of_trigger {n θ route born s u i p}
+    {e : @Execution n θ route s u} (cycle : SensorCycle e i p) (tr : MainTrigger e i)
+    (past : Execution θ route born s) (hborn : BirthState born)
+    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p) :
+    e.ledger.error i p = 0 ∧ u.x i (.z p) = s.x i (.z p) := by
+  have hb : s.x i .b ≤ 11 / 10 := past.recovery_cap i (by linarith [(hborn.2.2 i).2.2.1.2])
+  exact cycle.error_zero_of_protected (past.raw_valid hborn.raw_valid) hr hno
+    (cycle.error_protected_by_trigger tr hb)
 
 end KernelR.Hybrid
