@@ -4,6 +4,24 @@ This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
 Mathlib v4.35.0. It is a **partial formalization**. Neither the complete hybrid
 execution nor the Python interval implementations have been verified in Lean.
 
+## Physical execution foundation
+
+The [hybrid execution notes](HYBRID_EXECUTION.md) describe the operational
+semantics and exact ledger balances in `Hybrid` and `Refinement`. These modules
+derive memory/queue balances, mode-local ODE solutions and observed guard
+endpoints from physical flows and jumps. Their extensions prove birth-family
+cap, charge and reserve invariants, including work <=500 and positive energy
+throughout reachable flows. `HybridEvents`, `HybridAuxEvents` and
+`HybridEventBudget` derive emission chronology and a uniform physical jump budget
+for every finite prefix before a bounded horizon, with initial delivery tokens
+and bounded routing fanout counted explicitly. The phase-selection and sensor
+modules now extract actual protected phases and the complete auxiliary cycle
+of a received pulse, with directly proved real timing bounds. Variable-gain
+READY comparisons retain every active raw tail. Protocol-specific main/auxiliary
+chronology, remaining real enclosures, progress and the complete
+execution-to-abstraction
+theorem remain open.
+
 ## Reproduce
 
 Install [elan](https://github.com/leanprover/elan), then from this directory:
@@ -11,18 +29,27 @@ Install [elan](https://github.com/leanprover/elan), then from this directory:
 ```sh
 lake exe cache get
 lake build
-lake env lean Audit.lean
+lake build Audit
+python3 scripts/check_audit_negative.py
 python3 scripts/generate_evidence.py --check
 python3 scripts/robust_evidence.py --check
 python3 scripts/check_sources.py
 python3 scripts/check_negative.py
+python3 scripts/check_hybrid_negative.py
+python3 scripts/check_hybrid_analytic_negative.py
+python3 scripts/check_hybrid_event_negative.py
+python3 scripts/check_hybrid_phase_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
 `lake-manifest.json`. The first build downloads Mathlib's compiled dependencies.
 The build checks proof terms; the audit rejects any project theorem using axioms
 other than `propext`, `Classical.choice` and `Quot.sound`. There are no admitted
-proofs, project axioms or native-evaluation proofs.
+proofs, project axioms or native-evaluation proofs. The Audit build target uses
+Lake's exact artifact paths. Its scan includes every imported and current
+`KernelR`/`A22` theorem; negative controls cover corruption in both locations.
+Standalone proof controls reuse the same dependency artifacts and compiler
+options.
 
 ## Coverage and hypotheses
 
@@ -35,7 +62,7 @@ noise-dependent latency and arbitrary-depth slow-chain formalization.
 | `Flow` | Exponential decay solves a single mode; FAST ends at 1/4; SLOW returns at accumulated recovery log(5/2); protected charge inequality | A mode-local result; it does not construct a hybrid execution |
 | `Recovery` | Bounds on the actual real logarithms log(5/2) and log(4), return before 6.990787 and protection throughout the specified dose window | The displayed bounds on recovery, firing latency and accumulated integral |
 | `Calendar` | Routed latency hulls, gaps in [7.5,8.5], disjoint pulses, causal delay, quiescence and preservation of intervals under fixed latency | The latency and duration enclosures |
-| `Energy` | Integrating-factor barrier; reserve stays in [50,100] on a smooth interval with work in [0,500]; explicit constant-work comparison bounds | The derivative and work bounds must hold; composition across hybrid event boundaries is not proved |
+| `Energy` | Integrating-factor barrier; reserve stays in [50,100] on a smooth interval with work in [0,500]; explicit constant-work comparison bounds | The derivative and work bounds must hold; the separate `HybridWork` module derives the work bound and composes the birth-family reserve invariant across hybrid events |
 | `Protocol` | Cycle counts 13/10 for local feedback and 38/27 for the composed words, dose updates and logical composition | The words are supplied abstractions; producing those words from the hybrid equations is not proved |
 | `Cadence` | Four pulse cases, including MARK followed by full ERROR; integral of the exponential MARK profile; post-MARK return equation and monotonicity; two extra MARK doses and four total ERROR doses; retained wire jitter after shared-latency cancellation | Physical guards, clipping inactivity, the validity of the phase decomposition and the interval enclosures remain separate obligations |
 | `CadenceRecorded/*` | Per-input cumulative dose counters for both 95-case traces, teaching counts 16/14, fast counts 20/18/16, route input/output counts and totals A=54/B=61/C=34 composed with the earlier cycle words | Case labels and recorded counters are inputs; the hybrid equations are not proved to produce these traces |
@@ -123,12 +150,13 @@ local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Define the hybrid state, continuous flows, guards, resets and delayed events
-   in Lean, including simultaneous-event conventions.
+1. Instantiate and extend the hybrid semantics for the supplied protocols,
+   including staged births, routing, simultaneous events and execution progress.
 2. Prove soundness of the interval arithmetic and the exp/log enclosures used by
    the certificate checker, or derive the necessary enclosures directly in Lean.
-3. Connect the flow semantics and bounds to the declared cycle words, cap
-   inactivity, energy invariant and birth-to-section transition.
+3. Derive the actual pulse cases, strict cap inactivity and birth-to-section
+   transition. The common birth-family energy/cap invariants are now proved,
+   but do not establish the protocol chronology.
 4. Instantiate the composition rule to obtain the complete reciprocal theorem.
 5. For pedagogy, separately formalize the observation/readout/training interface
    and connect numerical records to that semantics.

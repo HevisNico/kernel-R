@@ -35,7 +35,22 @@ jobs:
           use-mathlib-cache: 'true'
       - name: Audit every KernelR and A22 theorem
         working-directory: proof/lean
-        run: lake env lean Audit.lean
+        run: lake build Audit
+      - name: Reject axioms in current and imported project declarations
+        working-directory: proof/lean
+        run: python scripts/check_audit_negative.py
       - name: Reject corrupted endpoints, cadence dose counters and adaptive scores
         working-directory: proof/lean
         run: python scripts/check_negative.py
+      - name: Reject invalid physical transitions and doses
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_negative.py
+      - name: Reject altered physical durations, reserve bounds and raw tails
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_analytic_negative.py
+      - name: Reject altered physical event budgets and delivery chronology
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_event_negative.py
+      - name: Reject altered sensor phases, clipped doses and input provenance
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_phase_negative.py
