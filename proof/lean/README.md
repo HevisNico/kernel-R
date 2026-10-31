@@ -26,14 +26,19 @@ From the declared prepared section this learned-input case now returns before
 charge. Its actual firing equation retains the initial residual charge.
 A broader silent case now covers the nominal fast gain and low birth recovery,
 preserving READY charge/sensor bands before the next input. The learned case
-also covers actual gains in [1.8,2.4]. Birth-to-preparation still requires concrete source chronology. The first strong
-low-recovery input is now proved to emit once and remain SLOW at the next
-input, with unchanged memories and a derived charge band for that next stage.
-The following protected input now supplies exactly one MARK dose of 1/10,
-emits nothing, preserves all gains and restores the prepared section before
-the next input, with recovery increased by 1/10. The other pulse cases,
-fine real enclosures, progress and complete execution-to-abstraction theorem
-remain open.
+also covers actual gains in [1.8,2.4]. The first strong low-recovery input
+remains SLOW at the next input; its following protected input supplies MARK 1/10
+and restores the prepared section without emissions or gain changes.
+
+The first complete source phase is now derived from a READY birth: with the
+initial queue 0,8,...,120 on a low port, empty routing and an actual execution
+complete through any T>=128 (including 159.9), it reaches the prepared section
+with exactly 12 emissions, total receiving ERROR 1.8 and MARK 0.1. Source-token
+conservation selects every actual arrival. The proof derives three silent
+inputs, the first strong input, the protected input and the learned remainder.
+It does not assume their case word or counts. The remaining routed/staged-birth
+calendars, combined pulse case, fine real enclosures, progress and complete
+execution-to-abstraction theorem remain open.
 
 ## Reproduce
 
@@ -57,6 +62,7 @@ python3 scripts/check_hybrid_return_negative.py
 python3 scripts/check_hybrid_training_negative.py
 python3 scripts/check_hybrid_bootstrap_negative.py
 python3 scripts/check_hybrid_protected_negative.py
+python3 scripts/check_hybrid_source_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

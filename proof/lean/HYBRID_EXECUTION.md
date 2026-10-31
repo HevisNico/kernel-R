@@ -103,6 +103,12 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridProtectedReturn` | The gained recovery forces an actual SLOW-to-READY return before t+6.990787, with all raw currents gone | Quantifies over an actual execution reaching t+7.5 |
 | `HybridProtectedPulse` | No emissions, MARK 1/10 on the receiving port and zero on others, ERROR zero everywhere, all gains unchanged, recovery increased by 1/10, prepared section restored at exact q=1/10 | Concrete source calendars and birth-to-entry chronology remain separate |
 
+| `HybridArrivals` | Select the first actual delivered token and reconstruct the execution; derive its due date, fresh raw origin and unchanged modes; a complete single-slot source queue has the exact chronological delivery list | Empty routing and all source tokens due by the horizon for queue-to-list transfer; no existence claim |
+| `HybridPreparedTrain` | An actual period-eight train after preparation has exactly one emission per input, unchanged memories, zero ERROR/MARK doses and prepared-section restoration | Receiving gain in [1.8,2.4]; actual source-delivery list and final quiet horizon |
+| `HybridBirthInput` | Select source zero from a READY birth, preserving its physical coordinates across all legal zero-time interleavings | Receiving cell's auxiliaries must be READY, as in the written entry theorem |
+| `HybridWarmup` | Extract the first three low-port silent spans, with total ERROR 1.8, no emissions or MARK, unchanged recovery and the actual next strong-entry snapshot | Actual period-eight sources; no case word or reset |
+| `HybridBirthSourceTrain` | From the exact sixteen-token low-port queue, an actual complete execution reaches the prepared section with 12 emissions, ERROR 1.8 and MARK 0.1 | Empty routing, READY-born receiving cell and T>=128; does not cover B's staged birth or later routed phases |
+
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -282,8 +288,41 @@ t+6.990787. Protection excludes a return before the raw pulse has ended, and
 zero-input READY relaxation then holds q exactly at 1/10. The whole input has
 no emissions, no remaining raw current, READY sensors in their rest bands and
 ends in `PreparedSection`. Neither a phase word nor the desired dose/count is
-supplied. Concrete source chronology and the full birth-to-preparation theorem
-remain separate obligations.
+supplied. The first low-port source phase is proved below. Later routed source chronology
+and the complete two-cell birth-to-preparation theorem remain separate obligations.
+
+## First actual birth-to-preparation source phase
+
+`Execution.birth_low_source_queue` takes a `BirthState`, READY auxiliaries in
+the receiving cell, the independent `PhysicalBox`, empty routing and exactly
+the sixteen source tokens 0,8,...,120 on a low port (port 0 or 2). For any given
+execution `CompleteThrough` a horizon T>=128, including the written phase end
+159.9, it derives the complete first phase. The full later reciprocal protocol
+is not asserted.
+
+Exact multiset conservation and chronological delivery establish the ordered
+source list, retaining every occurrence. `DeliveryStep` then selects actual
+arrival jumps and their isolated prefixes. Source zero preserves birth
+coordinates across legal zero-time interleavings. Three actual silent spans
+give log-gain increase 1.8 with unchanged recovery. The input at 24 emits once
+and leaves the derived SLOW entry at 32. The protected input at 32 gives MARK
+0.1, no emission and no ERROR, then restores preparation before 40. Actual
+arrival cuts and induction handle the remaining eleven learned inputs through
+120. There are exactly twelve main emissions in total.
+
+At the horizon the receiving cell’s modes are READY, q is exactly 0.1, sensors are in their rest
+bands and no raw current remains. The receiving log-gain equals its birth value
+plus 1.8, all other gains are unchanged, and recovery equals its birth value
+plus 0.1. The total receiving ERROR and MARK ledgers are 1.8 and 0.1, with zero
+contributions on other ports. These conclusions follow from the original
+execution; no recorded case labels, desired counters or latency boxes are
+premises. General birth-family cap, work and reserve bounds remain available.
+
+`CompleteThrough` is a premise, so existence and progress remain open. The first
+phase covers the written READY birth family, not immediate input into an
+ERROR-born receiving sensor. Later A-to-B/B-to-A routing and B's staged birth
+still require their own semantic realization and calendar proofs.
+
 
 `HybridInputBalance` retains every routed token in a multiset conservation law.
 For empty routing, an execution complete after all supplied source dates has an
@@ -380,6 +419,7 @@ python scripts/check_hybrid_return_negative.py
 python scripts/check_hybrid_training_negative.py
 python scripts/check_hybrid_bootstrap_negative.py
 python scripts/check_hybrid_protected_negative.py
+python scripts/check_hybrid_source_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -399,3 +439,8 @@ routed tokens from delivery provenance.
 Protected-input controls reject a missing MARK dose, two recovery increments,
 a positive ERROR dose, an extra emission, changed gains, a missing READY return
 and an altered resting charge. Each changed claim must fail with a Lean diagnostic.
+
+Source controls reject a missing source token, changed delivery date/raw origin,
+wrong isolation segment, altered prepared-train counts or MARK dose, altered
+warmup doses/outputs, fabricated preparation at source zero, and changed first
+source-phase output/dose/memory conclusions.

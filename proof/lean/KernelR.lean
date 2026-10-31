@@ -79,3 +79,8 @@ import KernelR.HybridProtectedWindow
 import KernelR.HybridProtectedMark
 import KernelR.HybridProtectedReturn
 import KernelR.HybridProtectedPulse
+import KernelR.HybridArrivals
+import KernelR.HybridPreparedTrain
+import KernelR.HybridBirthInput
+import KernelR.HybridWarmup
+import KernelR.HybridBirthSourceTrain
