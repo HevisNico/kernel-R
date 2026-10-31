@@ -75,3 +75,19 @@ import KernelR.HybridMidGainInput
 import KernelR.HybridRecoveryTrace
 import KernelR.HybridLowRecovery
 import KernelR.HybridMarkBudget
+
+import KernelR.HybridFuture
+import KernelR.LearnedResponse
+import KernelR.Indefinite
+import KernelR.FutureControls
+import KernelR.HybridFrozen
+import KernelR.LearnedCycleBounds
+import KernelR.LearnedCycle
+import KernelR.LearnedCycleStart
+import KernelR.LearnedDriven
+import KernelR.LearnedFiring
+import KernelR.LearnedProtected
+import KernelR.LearnedRecovery
+import KernelR.LearnedReturn
+import KernelR.LearnedSingleCell
+import KernelR.LearnedCycleControls

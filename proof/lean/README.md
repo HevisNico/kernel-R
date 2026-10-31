@@ -1,8 +1,15 @@
 # Lean formalization of selected Kernel R results
 
+The [indefinite-operation extension](INDEFINITE_OPERATION.md) constructs a physical
+one-cell learned `PulseContract`, complete cycles with settling duration `7.5`,
+and compatible responding continuations for indefinitely many separated inputs.
+Universal refinement, finite-chain routing and birth-to-learned reachability
+remain open.
+
 This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
-Mathlib v4.35.0. It is a **partial formalization**. Neither the complete hybrid
-execution nor the Python interval implementations have been verified in Lean.
+Mathlib v4.35.0. It is a **partial formalization**. The full birth/training and
+finite-chain execution, and the Python interval implementations, remain
+unverified in Lean.
 
 ## Physical execution foundation
 
