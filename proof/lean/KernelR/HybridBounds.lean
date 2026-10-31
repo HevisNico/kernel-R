@@ -9,6 +9,13 @@ theorem a_coarse_bounds : 1 < a ∧ a < 7 / 5 := by
   dsimp [a]
   constructor <;> linarith [KernelR.log_four_bounds.1, KernelR.log_four_bounds.2]
 
+theorem log_eight_lower : (3 / 2 : ℝ) < Real.log 8 := by
+  have h := a_coarse_bounds.1
+  rw [a, show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow] at h
+  rw [show (8 : ℝ) = 2 ^ 3 by norm_num, Real.log_pow]
+  norm_num at h ⊢
+  linarith
+
 theorem response_lower_bound (t : ℝ) : a * t * Real.exp (-a * t) ≤ response t := by
   have ha := a_coarse_bounds.1
   have hd : 0 < a - 1 / 2 := by linarith
@@ -16,8 +23,7 @@ theorem response_lower_bound (t : ℝ) : a * t * Real.exp (-a * t) ≤ response 
   have he : Real.exp (-(1 / 2) * t) - Real.exp (-a * t) =
       Real.exp (-a * t) * (Real.exp ((a - 1 / 2) * t) - 1) := by
     rw [mul_sub, mul_one, ← Real.exp_add]
-    congr 1
-    ring
+    rw [show -a * t + (a - 1 / 2) * t = -(1 / 2) * t by ring]
   have h := mul_le_mul_of_nonneg_left
     (show (a - 1 / 2) * t ≤ Real.exp ((a - 1 / 2) * t) - 1 by
       linarith [Real.add_one_le_exp ((a - 1 / 2) * t)])

@@ -1,0 +1,753 @@
+{
+  "schema_version": 2,
+  "status": "CERTIFIED_ROBUST_LOCAL_PREPARED_SECTION",
+  "model": {
+    "drift": "measurable per-port C, Lm, Ls, Le, M in the nominal relative box",
+    "noise": "measurable additive disturbances bounded by nu on q and each m in every mode; E is noise-free",
+    "amplitude": "measurable received-current multipliers in [1-alpha,1+alpha]; support [arrival,arrival+1)",
+    "emission": "canonical one-unit waveform triggered by firing, independent of the noisy FAST exit time",
+    "kernel": "other R laws unchanged; continuous first-crossing semantics"
+  },
+  "section": {
+    "main_mode": "READY",
+    "aux_modes": "all READY",
+    "no_active_currents": true,
+    "q": [
+      "0.09999",
+      "0.10001"
+    ],
+    "m_each": [
+      "0.02499",
+      "0.02501"
+    ],
+    "active_port": 2,
+    "active_log_gain": "ln(3/10) + [-1e-5,1e-5]",
+    "other_gains": "positive and initially below their own caps",
+    "b": [
+      "0.17999",
+      "0.18001"
+    ],
+    "E": [
+      "50",
+      "100"
+    ]
+  },
+  "protocol": {
+    "B_source": "16 pulses at 0,8,...,120 on B port 2",
+    "route": "B -> A port 2; each delay in [0.3,0.4]",
+    "other_inputs": "none",
+    "measurement": "139.9"
+  },
+  "conclusion": {
+    "B_emissions": 13,
+    "A_emissions": 10,
+    "A_full_error_doses": 3,
+    "A_final_log_gain": "initial log gain + D1 + D2 + D3; each Di in gain_log_dose",
+    "A_recovery": "unchanged",
+    "isolated_probe_before": "0/8",
+    "isolated_probe_after": "8/8",
+    "probe_period": "20"
+  },
+  "trusted_base": [
+    "authentic execution of the verifier and all its imports",
+    "Python runtime and integer interval implementation",
+    "written hybrid-flow argument; not a Lean formalization"
+  ],
+  "parameters": {
+    "epsilon_relative": "0.1",
+    "noise_bound": "0",
+    "amplitude_deviation": "0",
+    "section_excess": "0.03"
+  },
+  "bounds": {
+    "epsilon": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "nu": [
+      "0E-40",
+      "0E-40"
+    ],
+    "alpha": [
+      "0E-40",
+      "0E-40"
+    ],
+    "section_excess": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "a": [
+      "1.3862943611198906188344642429163531361510",
+      "1.3862943611198906188344642429163531361511"
+    ],
+    "kappa": [
+      "0.5000000000000000000000000000000000000000",
+      "0.5000000000000000000000000000000000000000"
+    ],
+    "cap": [
+      "3.6000000000000000000000000000000000000000",
+      "4.4000000000000000000000000000000000000000"
+    ],
+    "Lm": [
+      "10.0414598091394390094832790639425526518570",
+      "12.2728953222815365671462299670408976856031"
+    ],
+    "Ls": [
+      "1.7655635731243889956854025735255440884941",
+      "2.1579110338186976613932698120867761081596"
+    ],
+    "Le": [
+      "8.3177661667193437130067854574981188169060",
+      "10.1661586482125312047860711147199229984407"
+    ],
+    "M": [
+      "32.2513619543159454155958075379312751260325",
+      "39.4183312774972666190615425463604473762621"
+    ],
+    "b": [
+      "0.1799900000000000000000000000000000000000",
+      "0.1800100000000000000000000000000000000000"
+    ],
+    "h_increases_through_raw_window.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "h_increases_through_raw_window.right": [
+      "1.1506125789288178013078098393876846217522",
+      "1.1506125789288178013078098393876846217523"
+    ],
+    "aux_rest_deviation": [
+      "0.0000100000000000000000000000000000000000",
+      "0.0000100000000000000000000000000000000000"
+    ],
+    "aux_rest_below_threshold.left": [
+      "0.0250100000000000000000000000000000000000",
+      "0.0250100000000000000000000000000000000000"
+    ],
+    "aux_rest_below_threshold.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux_below_threshold_until_0.015.left": [
+      "0.8331825490634247565629174212947371657425",
+      "0.8331825490634247565629174212947371657426"
+    ],
+    "aux_below_threshold_until_0.015.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux_above_threshold_by_0.03.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux_above_threshold_by_0.03.right": [
+      "1.3289055217517157998710428754658553708558",
+      "1.3289055217517157998710428754658553708559"
+    ],
+    "decay_1_0.8_dominates_noise.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "decay_1_0.8_dominates_noise.right": [
+      "0.8000000000000000000000000000000000000000",
+      "0.8000000000000000000000000000000000000000"
+    ],
+    "decay_0.8_0.1_dominates_noise.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "decay_0.8_0.1_dominates_noise.right": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "decay_0.1_0.025_dominates_noise.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "decay_0.1_0.025_dominates_noise.right": [
+      "0.0250000000000000000000000000000000000000",
+      "0.0250000000000000000000000000000000000000"
+    ],
+    "mark_duration": [
+      "0.0181818181818181818181818181818181818181",
+      "0.0222222222222222222222222222222222222223"
+    ],
+    "silent_duration": [
+      "0.9636363636363636363636363636363636363636",
+      "1.1777777777777777777777777777777777777778"
+    ],
+    "error_duration": [
+      "0.1363636363636363636363636363636363636363",
+      "0.1666666666666666666666666666666666666667"
+    ],
+    "mark_end": [
+      "0.0331818181818181818181818181818181818181",
+      "0.0522222222222222222222222222222222222223"
+    ],
+    "error_start": [
+      "0.9968181818181818181818181818181818181818",
+      "1.2300000000000000000000000000000000000001"
+    ],
+    "aux_finish": [
+      "1.1331818181818181818181818181818181818181",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "gain_log_dose": [
+      "0.6000000000000000000000000000000000000000",
+      "0.6000000000000000000000000000000000000000"
+    ],
+    "initial_gain": [
+      "0.2999970000149999500001249997500004166660",
+      "0.3000030000150000500001250002500004166673"
+    ],
+    "learned_gain": [
+      "1.8148760904722349957656331678657619638566",
+      "1.8149123883570220784068819983289122355248"
+    ],
+    "decay_1_0.25_dominates_noise.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "decay_1_0.25_dominates_noise.right": [
+      "0.2500000000000000000000000000000000000000",
+      "0.2500000000000000000000000000000000000000"
+    ],
+    "decay_0.25_0.1_dominates_noise.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "decay_0.25_0.1_dominates_noise.right": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "min_input_gap": [
+      "7.5000000000000000000000000000000000000000",
+      "7.5000000000000000000000000000000000000000"
+    ],
+    "fast_duration": [
+      "0.9999999999999999999999999999999999999999",
+      "1.0000000000000000000000000000000000000001"
+    ],
+    "slow_duration": [
+      "5.0902212758966449929644309303261544994728",
+      "5.0907868874612759885745164274015838182683"
+    ],
+    "main_reopen_bound": [
+      "6.9907868874612759885745164274015838182682",
+      "6.9907868874612759885745164274015838182683"
+    ],
+    "aux_cycle_ends_after_raw_pulse.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "aux_cycle_ends_after_raw_pulse.right": [
+      "1.1331818181818181818181818181818181818181",
+      "1.1331818181818181818181818181818181818182"
+    ],
+    "aux_cycle_ends_before_next_input.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "aux_cycle_ends_before_next_input.right": [
+      "7.5000000000000000000000000000000000000000",
+      "7.5000000000000000000000000000000000000000"
+    ],
+    "learned_gain_below_all_caps.left": [
+      "1.8148760904722349957656331678657619638566",
+      "1.8149123883570220784068819983289122355248"
+    ],
+    "learned_gain_below_all_caps.right": [
+      "3.6000000000000000000000000000000000000000",
+      "3.6000000000000000000000000000000000000000"
+    ],
+    "mark_finishes_before_any_main_firing.left": [
+      "0.0522222222222222222222222222222222222222",
+      "0.0522222222222222222222222222222222222223"
+    ],
+    "mark_finishes_before_any_main_firing.right": [
+      "0.5000000000000000000000000000000000000000",
+      "0.5000000000000000000000000000000000000000"
+    ],
+    "main_fires_before_error_begins.left": [
+      "0.9000000000000000000000000000000000000000",
+      "0.9000000000000000000000000000000000000000"
+    ],
+    "main_fires_before_error_begins.right": [
+      "0.9968181818181818181818181818181818181818",
+      "0.9968181818181818181818181818181818181819"
+    ],
+    "error_finishes_during_main_fast.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "error_finishes_during_main_fast.right": [
+      "1.4999999999999999999999999999999999999999",
+      "1.5000000000000000000000000000000000000000"
+    ],
+    "main_reopens_after_raw_pulse.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "main_reopens_after_raw_pulse.right": [
+      "6.5902212758966449929644309303261544994728",
+      "6.5902212758966449929644309303261544994729"
+    ],
+    "main_reopens_before_next_input.left": [
+      "6.9907868874612759885745164274015838182682",
+      "6.9907868874612759885745164274015838182683"
+    ],
+    "main_reopens_before_next_input.right": [
+      "7.5000000000000000000000000000000000000000",
+      "7.5000000000000000000000000000000000000000"
+    ],
+    "arbitrary_initial_silence_inside_section.left": [
+      "0.0000100000000000000000000000000000000000",
+      "0.0000100000000000000000000000000000000000"
+    ],
+    "arbitrary_initial_silence_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "rest_noise_inside_section.left": [
+      "0E-40",
+      "0E-40"
+    ],
+    "rest_noise_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "gain_before_0": [
+      "0.2999970000149999500001249997500004166660",
+      "0.3000030000150000500001250002500004166673"
+    ],
+    "peak_bound_0": [
+      "0.2973015447454469888832508889797450392822",
+      "0.2975747233281622654574416170679308701212"
+    ],
+    "carry_bound_0": [
+      "0.0076502111014797612039591395319919326685",
+      "0.0076608033846211385997830662276493284235"
+    ],
+    "silent_0_no_first_crossing.left": [
+      "0.2973015447454469888832508889797450392822",
+      "0.2975747233281622654574416170679308701212"
+    ],
+    "silent_0_no_first_crossing.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_0_stays_below_threshold_after_raw_end.left": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "silent_0_stays_below_threshold_after_raw_end.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_0_excess_returns_inside_section.left": [
+      "0.0076502111014797612039591395319919326685",
+      "0.0076608033846211385997830662276493284235"
+    ],
+    "silent_0_excess_returns_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "gain_before_1": [
+      "0.5466301737880832118358310538380565094145",
+      "0.5466411065008857371015603460060223743358"
+    ],
+    "peak_bound_1": [
+      "0.4348432900150529275811724078307610346724",
+      "0.4353410538464824667624989767539894589034"
+    ],
+    "carry_bound_1": [
+      "0.0129832833181012294984503081678729369348",
+      "0.0130025837163521926909072554158361379498"
+    ],
+    "silent_1_no_first_crossing.left": [
+      "0.4348432900150529275811724078307610346724",
+      "0.4353410538464824667624989767539894589034"
+    ],
+    "silent_1_no_first_crossing.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_1_stays_below_threshold_after_raw_end.left": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "silent_1_stays_below_threshold_after_raw_end.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_1_excess_returns_inside_section.left": [
+      "0.0129832833181012294984503081678729369348",
+      "0.0130025837163521926909072554158361379498"
+    ],
+    "silent_1_excess_returns_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "gain_before_2": [
+      "0.9960251165199976250523787258791057471269",
+      "0.9960450372215343763490081857984907714419"
+    ],
+    "peak_bound_2": [
+      "0.6854606899093242630221054935906895584826",
+      "0.6863676747447264384832788284286067542410"
+    ],
+    "carry_bound_2": [
+      "0.0227007744678474919256957572937454392384",
+      "0.0227359420863555960555152490402771368035"
+    ],
+    "silent_2_no_first_crossing.left": [
+      "0.6854606899093242630221054935906895584826",
+      "0.6863676747447264384832788284286067542410"
+    ],
+    "silent_2_no_first_crossing.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_2_stays_below_threshold_after_raw_end.left": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "silent_2_stays_below_threshold_after_raw_end.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "silent_2_excess_returns_inside_section.left": [
+      "0.0227007744678474919256957572937454392384",
+      "0.0227359420863555960555152490402771368035"
+    ],
+    "silent_2_excess_returns_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "learned_start_excess": [
+      "0.0227007744678474919256957572937454392384",
+      "0.0227359420863555960555152490402771368035"
+    ],
+    "learned_upper_at_0_5": [
+      "0.9141574105286877539613250877447147989252",
+      "0.9141925781471958580911445794912464964902"
+    ],
+    "learned_lower_at_0_9": [
+      "1.0948338723541673275652124472354811616418",
+      "1.0948338723541673275652124472354811616419"
+    ],
+    "learned_below_threshold_until_0.5.left": [
+      "0.9141574105286877539613250877447147989252",
+      "0.9141925781471958580911445794912464964902"
+    ],
+    "learned_below_threshold_until_0.5.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "learned_above_threshold_by_0.9.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "learned_above_threshold_by_0.9.right": [
+      "1.0948338723541673275652124472354811616418",
+      "1.0948338723541673275652124472354811616419"
+    ],
+    "probe_gap_exceeds_cycle.left": [
+      "6.9907868874612759885745164274015838182682",
+      "6.9907868874612759885745164274015838182683"
+    ],
+    "probe_gap_exceeds_cycle.right": [
+      "20.0000000000000000000000000000000000000000",
+      "20.0000000000000000000000000000000000000000"
+    ],
+    "probe_aux_cycle_ends.left": [
+      "1.3966666666666666666666666666666666666666",
+      "1.3966666666666666666666666666666666666667"
+    ],
+    "probe_aux_cycle_ends.right": [
+      "20.0000000000000000000000000000000000000000",
+      "20.0000000000000000000000000000000000000000"
+    ],
+    "work_bound": [
+      "264.3484207581302613426928466726857330789750",
+      "264.3484207581302613426928466726857330789751"
+    ],
+    "reserve_gate_stays_open.left": [
+      "264.3484207581302613426928466726857330789750",
+      "264.3484207581302613426928466726857330789751"
+    ],
+    "reserve_gate_stays_open.right": [
+      "500.0000000000000000000000000000000000000000",
+      "500.0000000000000000000000000000000000000000"
+    ],
+    "A_gain_complete_by": [
+      "42.6966666666666666666666666666666666666666",
+      "42.6966666666666666666666666666666666666667"
+    ],
+    "A_first_emission": [
+      "49.3000000000000000000000000000000000000000",
+      "50.2000000000000000000000000000000000000000"
+    ],
+    "A_last_return_by": [
+      "128.2907868874612759885745164274015838182682",
+      "128.2907868874612759885745164274015838182683"
+    ],
+    "B_last_return_by": [
+      "126.9907868874612759885745164274015838182682",
+      "126.9907868874612759885745164274015838182683"
+    ],
+    "A_learning_complete_before_first_response.left": [
+      "42.6966666666666666666666666666666666666666",
+      "42.6966666666666666666666666666666666666667"
+    ],
+    "A_learning_complete_before_first_response.right": [
+      "49.3000000000000000000000000000000000000000",
+      "49.3000000000000000000000000000000000000000"
+    ],
+    "A_quiescent_before_measurement.left": [
+      "128.2907868874612759885745164274015838182682",
+      "128.2907868874612759885745164274015838182683"
+    ],
+    "A_quiescent_before_measurement.right": [
+      "139.9000000000000000000000000000000000000000",
+      "139.9000000000000000000000000000000000000000"
+    ],
+    "B_quiescent_before_measurement.left": [
+      "126.9907868874612759885745164274015838182682",
+      "126.9907868874612759885745164274015838182683"
+    ],
+    "B_quiescent_before_measurement.right": [
+      "139.9000000000000000000000000000000000000000",
+      "139.9000000000000000000000000000000000000000"
+    ]
+  },
+  "obligations": [
+    {
+      "name": "h_increases_through_raw_window",
+      "relation": "strict_lt",
+      "left": "h_increases_through_raw_window.left",
+      "right": "h_increases_through_raw_window.right"
+    },
+    {
+      "name": "aux_rest_below_threshold",
+      "relation": "strict_lt",
+      "left": "aux_rest_below_threshold.left",
+      "right": "aux_rest_below_threshold.right"
+    },
+    {
+      "name": "aux_below_threshold_until_0.015",
+      "relation": "strict_lt",
+      "left": "aux_below_threshold_until_0.015.left",
+      "right": "aux_below_threshold_until_0.015.right"
+    },
+    {
+      "name": "aux_above_threshold_by_0.03",
+      "relation": "strict_lt",
+      "left": "aux_above_threshold_by_0.03.left",
+      "right": "aux_above_threshold_by_0.03.right"
+    },
+    {
+      "name": "decay_1_0.8_dominates_noise",
+      "relation": "strict_lt",
+      "left": "decay_1_0.8_dominates_noise.left",
+      "right": "decay_1_0.8_dominates_noise.right"
+    },
+    {
+      "name": "decay_0.8_0.1_dominates_noise",
+      "relation": "strict_lt",
+      "left": "decay_0.8_0.1_dominates_noise.left",
+      "right": "decay_0.8_0.1_dominates_noise.right"
+    },
+    {
+      "name": "decay_0.1_0.025_dominates_noise",
+      "relation": "strict_lt",
+      "left": "decay_0.1_0.025_dominates_noise.left",
+      "right": "decay_0.1_0.025_dominates_noise.right"
+    },
+    {
+      "name": "decay_1_0.25_dominates_noise",
+      "relation": "strict_lt",
+      "left": "decay_1_0.25_dominates_noise.left",
+      "right": "decay_1_0.25_dominates_noise.right"
+    },
+    {
+      "name": "decay_0.25_0.1_dominates_noise",
+      "relation": "strict_lt",
+      "left": "decay_0.25_0.1_dominates_noise.left",
+      "right": "decay_0.25_0.1_dominates_noise.right"
+    },
+    {
+      "name": "aux_cycle_ends_after_raw_pulse",
+      "relation": "strict_lt",
+      "left": "aux_cycle_ends_after_raw_pulse.left",
+      "right": "aux_cycle_ends_after_raw_pulse.right"
+    },
+    {
+      "name": "aux_cycle_ends_before_next_input",
+      "relation": "strict_lt",
+      "left": "aux_cycle_ends_before_next_input.left",
+      "right": "aux_cycle_ends_before_next_input.right"
+    },
+    {
+      "name": "learned_gain_below_all_caps",
+      "relation": "strict_lt",
+      "left": "learned_gain_below_all_caps.left",
+      "right": "learned_gain_below_all_caps.right"
+    },
+    {
+      "name": "mark_finishes_before_any_main_firing",
+      "relation": "strict_lt",
+      "left": "mark_finishes_before_any_main_firing.left",
+      "right": "mark_finishes_before_any_main_firing.right"
+    },
+    {
+      "name": "main_fires_before_error_begins",
+      "relation": "strict_lt",
+      "left": "main_fires_before_error_begins.left",
+      "right": "main_fires_before_error_begins.right"
+    },
+    {
+      "name": "error_finishes_during_main_fast",
+      "relation": "strict_lt",
+      "left": "error_finishes_during_main_fast.left",
+      "right": "error_finishes_during_main_fast.right"
+    },
+    {
+      "name": "main_reopens_after_raw_pulse",
+      "relation": "strict_lt",
+      "left": "main_reopens_after_raw_pulse.left",
+      "right": "main_reopens_after_raw_pulse.right"
+    },
+    {
+      "name": "main_reopens_before_next_input",
+      "relation": "strict_lt",
+      "left": "main_reopens_before_next_input.left",
+      "right": "main_reopens_before_next_input.right"
+    },
+    {
+      "name": "arbitrary_initial_silence_inside_section",
+      "relation": "strict_lt",
+      "left": "arbitrary_initial_silence_inside_section.left",
+      "right": "arbitrary_initial_silence_inside_section.right"
+    },
+    {
+      "name": "rest_noise_inside_section",
+      "relation": "strict_lt",
+      "left": "rest_noise_inside_section.left",
+      "right": "rest_noise_inside_section.right"
+    },
+    {
+      "name": "silent_0_no_first_crossing",
+      "relation": "strict_lt",
+      "left": "silent_0_no_first_crossing.left",
+      "right": "silent_0_no_first_crossing.right"
+    },
+    {
+      "name": "silent_0_stays_below_threshold_after_raw_end",
+      "relation": "strict_lt",
+      "left": "silent_0_stays_below_threshold_after_raw_end.left",
+      "right": "silent_0_stays_below_threshold_after_raw_end.right"
+    },
+    {
+      "name": "silent_0_excess_returns_inside_section",
+      "relation": "strict_lt",
+      "left": "silent_0_excess_returns_inside_section.left",
+      "right": "silent_0_excess_returns_inside_section.right"
+    },
+    {
+      "name": "silent_1_no_first_crossing",
+      "relation": "strict_lt",
+      "left": "silent_1_no_first_crossing.left",
+      "right": "silent_1_no_first_crossing.right"
+    },
+    {
+      "name": "silent_1_stays_below_threshold_after_raw_end",
+      "relation": "strict_lt",
+      "left": "silent_1_stays_below_threshold_after_raw_end.left",
+      "right": "silent_1_stays_below_threshold_after_raw_end.right"
+    },
+    {
+      "name": "silent_1_excess_returns_inside_section",
+      "relation": "strict_lt",
+      "left": "silent_1_excess_returns_inside_section.left",
+      "right": "silent_1_excess_returns_inside_section.right"
+    },
+    {
+      "name": "silent_2_no_first_crossing",
+      "relation": "strict_lt",
+      "left": "silent_2_no_first_crossing.left",
+      "right": "silent_2_no_first_crossing.right"
+    },
+    {
+      "name": "silent_2_stays_below_threshold_after_raw_end",
+      "relation": "strict_lt",
+      "left": "silent_2_stays_below_threshold_after_raw_end.left",
+      "right": "silent_2_stays_below_threshold_after_raw_end.right"
+    },
+    {
+      "name": "silent_2_excess_returns_inside_section",
+      "relation": "strict_lt",
+      "left": "silent_2_excess_returns_inside_section.left",
+      "right": "silent_2_excess_returns_inside_section.right"
+    },
+    {
+      "name": "learned_below_threshold_until_0.5",
+      "relation": "strict_lt",
+      "left": "learned_below_threshold_until_0.5.left",
+      "right": "learned_below_threshold_until_0.5.right"
+    },
+    {
+      "name": "learned_above_threshold_by_0.9",
+      "relation": "strict_lt",
+      "left": "learned_above_threshold_by_0.9.left",
+      "right": "learned_above_threshold_by_0.9.right"
+    },
+    {
+      "name": "probe_gap_exceeds_cycle",
+      "relation": "strict_lt",
+      "left": "probe_gap_exceeds_cycle.left",
+      "right": "probe_gap_exceeds_cycle.right"
+    },
+    {
+      "name": "probe_aux_cycle_ends",
+      "relation": "strict_lt",
+      "left": "probe_aux_cycle_ends.left",
+      "right": "probe_aux_cycle_ends.right"
+    },
+    {
+      "name": "reserve_gate_stays_open",
+      "relation": "strict_lt",
+      "left": "reserve_gate_stays_open.left",
+      "right": "reserve_gate_stays_open.right"
+    },
+    {
+      "name": "A_learning_complete_before_first_response",
+      "relation": "strict_lt",
+      "left": "A_learning_complete_before_first_response.left",
+      "right": "A_learning_complete_before_first_response.right"
+    },
+    {
+      "name": "A_quiescent_before_measurement",
+      "relation": "strict_lt",
+      "left": "A_quiescent_before_measurement.left",
+      "right": "A_quiescent_before_measurement.right"
+    },
+    {
+      "name": "B_quiescent_before_measurement",
+      "relation": "strict_lt",
+      "left": "B_quiescent_before_measurement.left",
+      "right": "B_quiescent_before_measurement.right"
+    }
+  ],
+  "source_sha256": {
+    "bounds.py": "fc57e085e180e59e8b4b919173534478793121eb66c7da3e7df1e9f2c2ba40aa",
+    "certify.py": "01c77fa785bbdc2eb142a63e9e16d7df6b9e9b62d69945b9636665bacd3afce3",
+    "contract.py": "9f40233deef9dc6e56be9e8a65d9a8fcbf1fc00714fd097e7d298bba9327bb08",
+    "decimal_intervals.py": "b7797c2be191b6baff61fd4d1e3087999aca097bf871c3452d801be7741ec444",
+    "integer_intervals.py": "24732cfecccf069a3e3d21e97b6088f811adae4ad1d499ece266f21695f1c68d",
+    "verify.py": "dfe18b1e90b5e91de741b2d6e7ae6a44e9eddbdb9d657131805d438b1fab5901",
+    "chain.py": "b5ab30791fd2d5563a7ede570c47df17eef00ee1c3b46e4b98c6854c24cb6b46",
+    "THEOREM_ROBUST.md": "7432c8a5a056b122967c7c32143517b2e88d892379c20514c41fe950573c56ca",
+    "THEOREM_N.md": "c538c633b159edc8e0fb00c5d08ea1a1707c41de7bdb2d0038e740ea3725dbdf"
+  }
+}

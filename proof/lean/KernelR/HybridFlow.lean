@@ -287,23 +287,22 @@ theorem Jump.fast_departure_guard {n route s u} (j : @Jump n route s u) (i : Fin
 theorem Jump.fast_entry_guard {n route s u} (j : @Jump n route s u) (i : Fin n)
     (hs : s.main i ≠ .fast) (hu : u.main i = .fast) : u.x i .q = 1 := by
   cases j <;> simp_all [setMain, setAux, setRaw, Function.update_apply]
-  all_goals split_ifs at * <;> simp_all [Function.update_apply]
+  all_goals (split_ifs at *; simp_all)
 
 theorem Jump.slow_entry_guard {n route s u} (j : @Jump n route s u) (i : Fin n)
     (hs : s.main i ≠ .slow) (hu : u.main i = .slow) : u.x i .q = 1 / 4 := by
   cases j <;> simp_all [setMain, setAux, setRaw, Function.update_apply]
-  all_goals split_ifs at * <;> simp_all [Function.update_apply]
+  all_goals (split_ifs at *; simp_all)
 
 theorem Jump.slow_departure_guard {n route s u} (j : @Jump n route s u) (i : Fin n)
     (hs : s.main i = .slow) (hu : u.main i ≠ .slow) : s.x i .q = 1 / 10 := by
   cases j <;> simp_all [setMain, setAux, setRaw, Function.update_apply]
-  all_goals split_ifs at * <;> simp_all [Function.update_apply]
 
 theorem Jump.mark_entry_guard {n route s u} (j : @Jump n route s u) (i : Fin n) (p : Port)
     (hs : s.aux i p ≠ .mark) (hu : u.aux i p = .mark) : u.x i (.m p) = 1 := by
   cases j <;> simp_all [setMain, setAux, setRaw, Function.update_apply]
   all_goals split_ifs at * <;> simp_all [Function.update_apply]
-  all_goals split_ifs at * <;> simp_all [Function.update_apply]
+  all_goals (split_ifs at *; simp_all)
 
 theorem Jump.mark_departure_guard {n route s u} (j : @Jump n route s u) (i : Fin n) (p : Port)
     (hs : s.aux i p = .mark) (hu : u.aux i p ≠ .mark) : s.x i (.m p) = 4 / 5 := by
@@ -314,7 +313,7 @@ theorem Jump.silent_entry_guard {n route s u} (j : @Jump n route s u) (i : Fin n
     (hs : s.aux i p ≠ .silent) (hu : u.aux i p = .silent) : u.x i (.m p) = 4 / 5 := by
   cases j <;> simp_all [setMain, setAux, setRaw, Function.update_apply]
   all_goals split_ifs at * <;> simp_all [Function.update_apply]
-  all_goals split_ifs at * <;> simp_all [Function.update_apply]
+  all_goals (split_ifs at *; simp_all)
 
 theorem Jump.silent_departure_guard {n route s u} (j : @Jump n route s u) (i : Fin n) (p : Port)
     (hs : s.aux i p = .silent) (hu : u.aux i p ≠ .silent) : s.x i (.m p) = 1 / 10 := by
@@ -325,7 +324,7 @@ theorem Jump.error_entry_guard {n route s u} (j : @Jump n route s u) (i : Fin n)
     (hs : s.aux i p ≠ .error) (hu : u.aux i p = .error) : u.x i (.m p) = 1 / 10 := by
   cases j <;> simp_all [setMain, setAux, setRaw, Function.update_apply]
   all_goals split_ifs at * <;> simp_all [Function.update_apply]
-  all_goals split_ifs at * <;> simp_all [Function.update_apply]
+  all_goals (split_ifs at *; simp_all)
 
 theorem Jump.error_departure_guard {n route s u} (j : @Jump n route s u) (i : Fin n) (p : Port)
     (hs : s.aux i p = .error) (hu : u.aux i p ≠ .error) : s.x i (.m p) = 1 / 40 := by

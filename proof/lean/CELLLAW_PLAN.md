@@ -1,0 +1,88 @@
+# Plan: deriving `CellLaw` from the hybrid execution
+
+Status: proposal. Nothing here is proved yet. `CellLaw` (in `KernelR/Robust/Induction.lean`)
+is the only physical hypothesis of the robust chain induction. This note splits its
+derivation into three local lemmas, so that the hybrid semantics is needed in two places
+only and the third step is a finite induction.
+
+## Shape of the hypotheses
+
+Each lemma takes the numerical enclosures it uses as **explicit hypotheses**: latency
+brackets, phase durations, dose intervals, return bounds. Their rational endpoints are
+already checked in `Robust.Evidence`; the remaining premise, as today, is that the real
+quantities lie in those intervals. This keeps the semantic part separate from the
+arithmetic part, and lets the same lemma serve every certified (ε, ν, α) point.
+
+All local sections require main READY, auxiliaries READY within their rest band, no
+active current, gain and b in their intervals, and E in [50,100]. Distinguish two main
+charge conditions:
+
+- During the three silent inputs and before the first emitting input, use the wider
+  entry/carry section and its certified upper excess bound. Also establish and preserve
+  q − r ≥ −ν/κ, using the main return during preparation and nonnegative input drives.
+  The positive residual need not be at most ν/κ.
+- Before later emitting inputs, use |q − r| ≤ ν/κ. A completed FAST/SLOW cycle returns
+  exactly to q = r; subsequent input-free READY evolution preserves this noise band.
+
+These are the separate initial-state conditions in the
+[latency argument](../../research/robust/latency/THEOREM.md). In particular, at ν = α = 0,
+a positive residual can advance the first firing even though the regular radius is δ = 0.
+
+## Lemma 1: a silent input
+
+From the entry/carry section with the gain bound for silent input j ∈ {0,1,2}, one
+canonical input on the active port, and no other input before the next one at least
+G = 7.5 later:
+
+- the main charge stays below threshold (no firing, no output);
+- the auxiliary runs exactly one MARK, SILENT, ERROR cycle and returns to READY before G;
+- the ERROR phase is wholly READY, so the gain receives one full dose in its interval;
+- b is unchanged, since MARK occurs while the main cell is READY;
+- at the next input the state is back in the entry/carry section, with the next gain
+  bound, the certified carried excess bound and q − r ≥ −ν/κ. This does not establish
+  the narrower regular-input noise band.
+
+Semantic content: first-crossing semantics of the auxiliary, protected phases ignoring
+input, and the READY variation-of-constants envelope with noise and amplitude.
+
+## Lemma 2: an emitting input
+
+From the appropriate section with the learned gain, one input and none before G later,
+let ℓ* be the reference latency from exact rest at that same learned gain. Prove two cases:
+
+- **First emitting input:** from the entry/carry section after three silent inputs,
+  prove ℓ_first ≤ ℓ* + δ, together with the certified local latency bracket. Do not
+  require ℓ_first ≥ ℓ* − δ: the positive residual can advance this firing.
+- **Regular emitting input:** from |q − r| ≤ ν/κ after a completed main cycle,
+  prove |ℓ − ℓ*| ≤ δ (the `Robust.Latency` radius applied to the execution).
+
+In both cases, prove:
+
+- exactly one main crossing, with latency in its certified local bracket;
+- MARK ends before the crossing, ERROR lies inside FAST or SLOW: no dose, b unchanged;
+- FAST and SLOW complete and the main cell returns to READY with q = r before G;
+  subsequent silence establishes the regular-input noise band at the next input;
+- exactly one output, at input date plus that latency.
+
+Semantic content: the FAST and SLOW solutions already checked in Lean, the guard at
+q = 1/4 and at q = r, and the protected-phase ordering.
+
+## Lemma 3: the input word (finite induction)
+
+Given a stream with L ≥ 4 inputs and gaps at least 7.5: apply Lemma 1 to the first three
+inputs, the first-emission case of Lemma 2 to input 4, and its regular case to every
+later input. Show that no output occurs between inputs (no spontaneous firing from the
+appropriate section). This produces exactly the fields of
+[`CellWitness`](KernelR/Robust/Induction.lean): count L − 3, the output dates,
+`first : latency 0 ≤ reference + δ`, and the two-sided `regular` bound for output indices
+i ≠ 0. The first advance is retained by the existing packet construction; it is not
+charged to δ. The finite induction starts only after these distinct cases are established.
+
+## Order of work
+
+1. Lemma 2 first, with separate first-emission and regular cases: it carries the latency
+   radius, and its modes (FAST, SLOW) are already solved in Lean.
+2. Lemma 1: same READY envelope, plus the auxiliary cycle and the dose.
+3. Lemma 3 and the instance `CellLaw` from Lemmas 1 to 3.
+4. Optionally, add the learning conclusions (three doses, b, probes) to `CellWitness`,
+   so that the chain induction concludes them too.

@@ -11,7 +11,10 @@ coordinates, main and three auxiliary modes, raw-current origins and pending
 delivery tokens. Parameters are independent per cell and port. `PhysicalBox`
 states the ±0.3% or ±10% fabrication family. `BirthState` states the common
 zero-time birth family, including allowed residual ERROR phases. Its pending
-queue must separately be fixed to the supplied source protocol.
+queue must separately be fixed to the supplied source protocol. The field here
+uses fixed fabrication parameters and canonical amplitudes. The drift, charge
+noise and amplitude variation studied by the conditional `Robust` modules have
+not yet been instantiated in this operational semantics.
 
 `field` contains the actual equations, complete work expression, energy gates,
 and gain/recovery cap gates. A positive-duration `Flow` supplies continuous
@@ -55,6 +58,9 @@ but existence for the training protocols remains unproved.
 | `HybridRegion` | Main charge upper bound and mode-dependent auxiliary upper bounds, including m<=0.1 in ERROR, preserved from birth across flows and jumps | Port-separation/protocol-calendar results are not asserted |
 | `HybridWork` | Actual work is nonnegative and <=500, derived before assuming positive reserve; reserve stays in [50,100] for every finite admissible execution from the declared family, and throughout each reachable flow | Does not supply existence of those protocol executions |
 | `HybridWork` | Energy exposure in ERROR/MARK lemmas follows from reachability and the reserve invariant | Required main/auxiliary chronology and strict cap inactivity remain premises |
+| `HybridEvents` | Emission dates are chronological and inside the actual execution interval; causal wiring preserves future delivery dates; FAST potential telescopes across all legal interleavings; per-cell firing count is at most T+1 from birth | A due token is allowed at the current date; port availability and progress remain separate |
+| `HybridAuxEvents` | Protected SILENT decay supplies a clock; a discrete rank counts all four auxiliary transitions; at most 8T+10 auxiliary jumps per cell and port from birth, including residual ERROR | This is a coarse event budget, not a prescribed pulse-case sequence or full-dose conclusion |
+| `HybridEventBudget` | Every jump is partitioned into main, auxiliary, arrival or raw-end events; queue and raw-current balances give a uniform natural budget for all finite prefixes ending by T | Requires an explicit routing fanout bound; no continuation or complete protocol execution is constructed |
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -84,6 +90,42 @@ part is now derived by `reachable_power_gate_open`, rather than postulated.
 Neither full-dose lemmas nor mode-span predicates derive the four pulse cases of
 the certified protocol. That remaining distinction is explicit in signatures.
 
+## Physical event budget
+
+For a network of n cells born at zero, let Q be the length of its actual initial
+pending queue and suppose each firing routes at most F delivery tokens
+(`FanoutBound`). Every finite admissible prefix ending by T satisfies
+
+```
+physical jumps <= n*(27*T + 33) + 2*(Q + F*n*(T + 1)).
+```
+
+All nine `Jump` constructors are counted, including events exactly at T and
+arbitrary compatible zero-time interleavings. No supplied firing count or event
+word is used. The bound is deliberately coarse:
+
+- A FAST logarithmic potential gains one at a real firing and decreases by the
+  elapsed FAST time. Its terminal value is at most one, so an incomplete final
+  phase is retained. Each cell fires at most T+1 times, and has at most 3T+3 main
+  mode changes. A newly entered FAST phase cannot be left before one time unit,
+  even across intervening other-cell or auxiliary events.
+- On each port, a SILENT logarithmic potential decreases at the actual rate
+  Ls/log(8), proved at most two in both fabrication families. A mode rank relates
+  the number of all auxiliary changes to SILENT entries, giving 8T+10 changes.
+  These clocks are proof potentials, not added physical coordinates.
+- Every arrival consumes an initial or routed token. Every raw end consumes a
+  current created by an arrival; raw currents are absent at birth. The initial
+  queue and actual routed fanout therefore remain in the global bound.
+
+`finite_prefix_event_budget` converts this real bound to one natural budget
+shared by every finite admissible prefix with the same birth state and horizon.
+Thus physical jump counts cannot grow without bound at bounded times. Splitting
+a continuous flow into arbitrarily many pieces is not counted as a physical
+event. This settles the uniform finite-prefix event-count obligation under
+bounded fanout; it does not establish existence of a future flow, availability
+of an occupied destination port, or terminal saturation. Concrete protocol
+wiring and initial queue adequacy still need to be proved.
+
 ## Connection to finite-chain composition
 
 `Execution.signal` extracts a `Chain.Signal` from actual fire jumps, retaining
@@ -102,8 +144,9 @@ It connects to PR #6's interface but does not supply its leaf or `RelayLaw` witn
 3. Establish sound real enclosure membership for the remaining root, calendar,
    recovery and residual-tail expressions in the certificates. Exact comparisons
    of stored endpoints alone remain insufficient.
-4. Prove protocol-specific execution existence, extension/progress, finite-event
-   or non-Zeno bounds and terminal saturation for all compatible event orders.
+4. Prove protocol-specific execution existence, extension/progress and terminal
+   saturation for all compatible event orders. Instantiate the checked uniform
+   finite-prefix event budget with the concrete source queue and routing fanout.
 5. Lift the resulting physical case theorem through preparation, the cadence
    cascade, retained probes and the packet induction for every finite chain.
 
@@ -124,6 +167,7 @@ python scripts/generate_evidence.py --check
 python scripts/check_negative.py
 python scripts/check_hybrid_negative.py
 python scripts/check_hybrid_analytic_negative.py
+python scripts/check_hybrid_event_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -131,3 +175,6 @@ checks reject under-threshold firing, nonconsuming delivery, closed-gate positiv
 actuation, a rounded partial dose and an omitted raw current. Analytic controls
 reject altered FAST/MARK durations, an invalid reserve floor and removal of the
 attenuation of a raw tail. The axiom audit imports all new modules through KernelR.
+Event controls reject removal of the unfinished-FAST allowance, altered FAST
+departure and auxiliary bounds, strict future dating of a token due now, and
+omission of routed fanout from the published global budget.

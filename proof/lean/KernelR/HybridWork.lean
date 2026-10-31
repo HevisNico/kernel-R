@@ -81,14 +81,13 @@ theorem Flow.actual_work_bound {n θ ε s u} (f : @Flow n θ s u) (hb : Physical
     · have hpos := (f.protected_aux_positive i p h ht).le
       rcases hb.rates_positive i p with ⟨hmpos, hspos, hepos⟩
       cases hmode : s.aux i p <;> simp_all [auxDrain]
-      all_goals positivity
   have hx (p : Port) : (if s.aux i p = .ready then (θ i).inputGain p * current s i p t
       else auxDrain (θ i) (s.aux i p) p (f.path t i (.m p))) ≤ 60 * a + 28 := by
     have hp := hb.coarse_upper i p
     have hmport := hmu p
     cases hmode : s.aux i p with
     | ready =>
-      simp only [reduceCtorEq, ite_true]
+      simp only [ite_true]
       have hmul := mul_le_mul hp.2.2.2.2 (current_bounds s i p t).2
         (current_bounds s i p t).1 (by norm_num : (0 : ℝ) ≤ 60)
       linarith
@@ -96,10 +95,7 @@ theorem Flow.actual_work_bound {n θ ε s u} (f : @Flow n θ s u) (hb : Physical
       have hpos := (f.protected_aux_positive i p (by simp [hmode]) ht).le
       simp only [hmode, auxUpper] at hmport
       simp only [reduceCtorEq, ite_false, auxDrain]
-      all_goals first
-        | nlinarith [mul_le_mul hp.2.1 hmport hpos (by norm_num : (0 : ℝ) ≤ 14)]
-        | nlinarith [mul_le_mul hp.2.2.1 hmport hpos (by norm_num : (0 : ℝ) ≤ 3)]
-        | nlinarith [mul_le_mul hp.2.2.2.1 hmport hpos (by norm_num : (0 : ℝ) ≤ 11)]
+      nlinarith [mul_le_mul hp.2.1 hmport hpos (by norm_num : (0 : ℝ) ≤ 14)]
   have hg (p : Port) : errorAct θ s (f.path t) i p ≤ 44 / 5 := by
     unfold errorAct
     split_ifs with h

@@ -1,0 +1,976 @@
+{
+  "schema_version": 1,
+  "status": "CERTIFIED_ROBUST_BIRTH_ENTRY_AND_LOCAL_CONTINUATION",
+  "birth": {
+    "modes": "main and all auxiliaries READY",
+    "q": [
+      ".09999",
+      ".10001"
+    ],
+    "m_each": [
+      ".02499",
+      ".02501"
+    ],
+    "log_gains": "ln(.3,1.2,.3) + independent [-1e-5,1e-5]",
+    "b": [
+      ".07999",
+      ".08001"
+    ],
+    "E": [
+      "50",
+      "100"
+    ],
+    "currents": "none"
+  },
+  "physics": {
+    "parameters": "measurable C,Lm,Ls,Le,M in relative epsilon boxes",
+    "noise": "measurable additive disturbances |w|<=nu on q and each m in every mode",
+    "amplitude": "measurable received multiplier in [1-alpha,1+alpha]",
+    "pulse": "canonical unit-support emission independent of noisy FAST exit",
+    "energy": "unchanged noise-free reserve law"
+  },
+  "protocol": {
+    "warmup": "16 port-0 pulses at 0,8,...,120 on each cell; all intercell routes closed",
+    "cut": "159.9",
+    "chain_start": "160",
+    "chain_port": 2,
+    "resets": "none",
+    "settings_copies": "none"
+  },
+  "entry": {
+    "main": "READY",
+    "aux": "all READY",
+    "currents": "none",
+    "q": "entry_q",
+    "m_each": "entry_m",
+    "b": "entry_recovery",
+    "E": [
+      "50",
+      "100"
+    ],
+    "port2_log_gain": "unchanged birth value",
+    "warmup_emissions_per_cell": 12,
+    "port0_full_ERRORs": 3,
+    "full_protected_MARKs": 1
+  },
+  "continuation": {
+    "local": "three silent port-2 inputs then one response per input; minimum gap 7.5",
+    "noisy_period": "T >= 7.5 + .5*(N-1)",
+    "noiseless_identical_waveform_period": "T >= 7.5 + 2*sum(sigma_i)",
+    "root_count": "K-3*N, for K>=3*N+1",
+    "root_eight": "K=3*N+8",
+    "probes": "isolated frozen port-2 probe: 0/8 before, 8/8 after"
+  },
+  "trust": "authentic verifier and imports; Python integer arithmetic; written hybrid comparison and induction, not full Lean semantics",
+  "parameters": {
+    "epsilon": "0.1",
+    "nu": "0.0015",
+    "alpha": "0.05"
+  },
+  "bounds": {
+    "local.epsilon": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "local.nu": [
+      "0.0015000000000000000000000000000000000000",
+      "0.0015000000000000000000000000000000000000"
+    ],
+    "local.alpha": [
+      "0.0500000000000000000000000000000000000000",
+      "0.0500000000000000000000000000000000000000"
+    ],
+    "local.section_excess": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "local.a": [
+      "1.3862943611198906188344642429163531361510",
+      "1.3862943611198906188344642429163531361511"
+    ],
+    "local.kappa": [
+      "0.5000000000000000000000000000000000000000",
+      "0.5000000000000000000000000000000000000000"
+    ],
+    "local.cap": [
+      "3.6000000000000000000000000000000000000000",
+      "4.4000000000000000000000000000000000000000"
+    ],
+    "local.Lm": [
+      "10.0414598091394390094832790639425526518570",
+      "12.2728953222815365671462299670408976856031"
+    ],
+    "local.Ls": [
+      "1.7655635731243889956854025735255440884941",
+      "2.1579110338186976613932698120867761081596"
+    ],
+    "local.Le": [
+      "8.3177661667193437130067854574981188169060",
+      "10.1661586482125312047860711147199229984407"
+    ],
+    "local.M": [
+      "32.2513619543159454155958075379312751260325",
+      "39.4183312774972666190615425463604473762621"
+    ],
+    "local.b": [
+      "0.1799733305435414061262153776634724841456",
+      "0.1800266694564585938737846223365275158544"
+    ],
+    "local.h_increases_through_raw_window.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.h_increases_through_raw_window.right": [
+      "1.1506125789288178013078098393876846217522",
+      "1.1506125789288178013078098393876846217523"
+    ],
+    "local.aux_rest_deviation": [
+      "0.0030100000000000000000000000000000000000",
+      "0.0030100000000000000000000000000000000000"
+    ],
+    "local.aux_rest_below_threshold.left": [
+      "0.0280100000000000000000000000000000000000",
+      "0.0280100000000000000000000000000000000000"
+    ],
+    "local.aux_rest_below_threshold.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.aux_below_threshold_until_0.015.left": [
+      "0.8766136765165959943910632923594740240296",
+      "0.8766136765165959943910632923594740240297"
+    ],
+    "local.aux_below_threshold_until_0.015.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.aux_above_threshold_by_0.03.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.aux_above_threshold_by_0.03.right": [
+      "1.2606647456641300098774907316925626023130",
+      "1.2606647456641300098774907316925626023131"
+    ],
+    "local.decay_1_0.8_dominates_noise.left": [
+      "0.0001493806705908183262297682416026130733",
+      "0.0001493806705908183262297682416026130734"
+    ],
+    "local.decay_1_0.8_dominates_noise.right": [
+      "0.8000000000000000000000000000000000000000",
+      "0.8000000000000000000000000000000000000000"
+    ],
+    "local.decay_0.8_0.1_dominates_noise.left": [
+      "0.0008495870796346117843341778677011142587",
+      "0.0008495870796346117843341778677011142588"
+    ],
+    "local.decay_0.8_0.1_dominates_noise.right": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "local.decay_0.1_0.025_dominates_noise.left": [
+      "0.0001803368801111204259199905851252365171",
+      "0.0001803368801111204259199905851252365172"
+    ],
+    "local.decay_0.1_0.025_dominates_noise.right": [
+      "0.0250000000000000000000000000000000000000",
+      "0.0250000000000000000000000000000000000000"
+    ],
+    "local.mark_duration": [
+      "0.0181793288803395837134479371526243239200",
+      "0.0222259419447918317128297820366878057621"
+    ],
+    "local.silent_duration": [
+      "0.9608287407408279694237912272979784098306",
+      "1.1820085052281713985146159771978124084819"
+    ],
+    "local.error_duration": [
+      "0.1359298255100298772629004427658528820806",
+      "0.1673200417647698070916242891265732700335"
+    ],
+    "local.mark_end": [
+      "0.0331793288803395837134479371526243239200",
+      "0.0522259419447918317128297820366878057621"
+    ],
+    "local.error_start": [
+      "0.9940080696211675531372391644506027337506",
+      "1.2342344471729632302274457592345002142439"
+    ],
+    "local.aux_finish": [
+      "1.1299378951311974304001396072164556158313",
+      "1.4015544889377330373190700483610734842774"
+    ],
+    "local.gain_log_dose": [
+      "0.5979921594988227623149005085304811207595",
+      "0.6020078405011772376850994914695188792405"
+    ],
+    "local.initial_gain": [
+      "0.2999970000149999500001249997500004166660",
+      "0.3000030000150000500001250002500004166673"
+    ],
+    "local.learned_gain": [
+      "1.8039770037108736479462143235049149524624",
+      "1.8258775434251201858230347897968046580838"
+    ],
+    "local.decay_1_0.25_dominates_noise.left": [
+      "0.0010820212806667225555199435107514191030",
+      "0.0010820212806667225555199435107514191031"
+    ],
+    "local.decay_1_0.25_dominates_noise.right": [
+      "0.2500000000000000000000000000000000000000",
+      "0.2500000000000000000000000000000000000000"
+    ],
+    "local.decay_0.25_0.1_dominates_noise.left": [
+      "0.0083345682133559293138469990392704026923",
+      "0.0083345682133559293138469990392704026924"
+    ],
+    "local.decay_0.25_0.1_dominates_noise.right": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "local.min_input_gap": [
+      "7.5000000000000000000000000000000000000000",
+      "7.5000000000000000000000000000000000000000"
+    ],
+    "local.fast_duration": [
+      "0.9976647747599025414441940102112403596681",
+      "1.0023478933472733465378803961331398237335"
+    ],
+    "local.slow_duration": [
+      "4.8273095672531876802953086592477302846264",
+      "5.3864031737819950195316545296520257748269"
+    ],
+    "local.main_reopen_bound": [
+      "7.2887510671292683660695349257851655985602",
+      "7.2887510671292683660695349257851655985603"
+    ],
+    "local.aux_cycle_ends_after_raw_pulse.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.aux_cycle_ends_after_raw_pulse.right": [
+      "1.1299378951311974304001396072164556158313",
+      "1.1299378951311974304001396072164556158314"
+    ],
+    "local.aux_cycle_ends_before_next_input.left": [
+      "1.4015544889377330373190700483610734842773",
+      "1.4015544889377330373190700483610734842774"
+    ],
+    "local.aux_cycle_ends_before_next_input.right": [
+      "7.5000000000000000000000000000000000000000",
+      "7.5000000000000000000000000000000000000000"
+    ],
+    "local.learned_gain_below_all_caps.left": [
+      "1.8039770037108736479462143235049149524624",
+      "1.8258775434251201858230347897968046580838"
+    ],
+    "local.learned_gain_below_all_caps.right": [
+      "3.6000000000000000000000000000000000000000",
+      "3.6000000000000000000000000000000000000000"
+    ],
+    "local.mark_finishes_before_any_main_firing.left": [
+      "0.0522259419447918317128297820366878057620",
+      "0.0522259419447918317128297820366878057621"
+    ],
+    "local.mark_finishes_before_any_main_firing.right": [
+      "0.5000000000000000000000000000000000000000",
+      "0.5000000000000000000000000000000000000000"
+    ],
+    "local.main_fires_before_error_begins.left": [
+      "0.9000000000000000000000000000000000000000",
+      "0.9000000000000000000000000000000000000000"
+    ],
+    "local.main_fires_before_error_begins.right": [
+      "0.9940080696211675531372391644506027337506",
+      "0.9940080696211675531372391644506027337507"
+    ],
+    "local.error_finishes_during_main_fast.left": [
+      "1.4015544889377330373190700483610734842773",
+      "1.4015544889377330373190700483610734842774"
+    ],
+    "local.error_finishes_during_main_fast.right": [
+      "1.4976647747599025414441940102112403596681",
+      "1.4976647747599025414441940102112403596682"
+    ],
+    "local.main_reopens_after_raw_pulse.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.main_reopens_after_raw_pulse.right": [
+      "6.3249743420130902217395026694589706442946",
+      "6.3249743420130902217395026694589706442947"
+    ],
+    "local.main_reopens_before_next_input.left": [
+      "7.2887510671292683660695349257851655985602",
+      "7.2887510671292683660695349257851655985603"
+    ],
+    "local.main_reopens_before_next_input.right": [
+      "7.5000000000000000000000000000000000000000",
+      "7.5000000000000000000000000000000000000000"
+    ],
+    "local.arbitrary_initial_silence_inside_section.left": [
+      "0.0030100000000000000000000000000000000000",
+      "0.0030100000000000000000000000000000000000"
+    ],
+    "local.arbitrary_initial_silence_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "local.rest_noise_inside_section.left": [
+      "0.0030000000000000000000000000000000000000",
+      "0.0030000000000000000000000000000000000000"
+    ],
+    "local.rest_noise_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "local.gain_before_0": [
+      "0.2999970000149999500001249997500004166660",
+      "0.3000030000150000500001250002500004166673"
+    ],
+    "local.peak_bound_0": [
+      "0.3071666219827193383274134334287322912463",
+      "0.3077113121158389794491152780152238039107"
+    ],
+    "local.carry_bound_0": [
+      "0.0110327216565537492641570965085915293020",
+      "0.0110538415849792185570595069633065470213"
+    ],
+    "local.silent_0_no_first_crossing.left": [
+      "0.3071666219827193383274134334287322912463",
+      "0.3077113121158389794491152780152238039107"
+    ],
+    "local.silent_0_no_first_crossing.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.silent_0_stays_below_threshold_after_raw_end.left": [
+      "0.1030000000000000000000000000000000000000",
+      "0.1030000000000000000000000000000000000000"
+    ],
+    "local.silent_0_stays_below_threshold_after_raw_end.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.silent_0_excess_returns_inside_section.left": [
+      "0.0110327216565537492641570965085915293020",
+      "0.0110538415849792185570595069633065470213"
+    ],
+    "local.silent_0_excess_returns_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "local.gain_before_1": [
+      "0.5455337286977686201426066852375180619345",
+      "0.5477397772628526562519882170139110391963"
+    ],
+    "local.peak_bound_1": [
+      "0.4522287806872647229701988769169180866996",
+      "0.4532232655830067937744416504369888341803"
+    ],
+    "local.carry_bound_1": [
+      "0.0166573919466820340454680097563876933953",
+      "0.0166959523107150454937291347004438356502"
+    ],
+    "local.silent_1_no_first_crossing.left": [
+      "0.4522287806872647229701988769169180866996",
+      "0.4532232655830067937744416504369888341803"
+    ],
+    "local.silent_1_no_first_crossing.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.silent_1_stays_below_threshold_after_raw_end.left": [
+      "0.1030000000000000000000000000000000000000",
+      "0.1030000000000000000000000000000000000000"
+    ],
+    "local.silent_1_stays_below_threshold_after_raw_end.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.silent_1_excess_returns_inside_section.left": [
+      "0.0166573919466820340454680097563876933953",
+      "0.0166959523107150454937291347004438356502"
+    ],
+    "local.silent_1_excess_returns_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "local.gain_before_2": [
+      "0.9920334174408749623577536582219774604042",
+      "1.0000528780744145776337228402428398882798"
+    ],
+    "local.peak_bound_2": [
+      "0.7170805138170117000610605821416795034569",
+      "0.7188962254440880871074917117483251119763"
+    ],
+    "local.carry_bound_2": [
+      "0.0269268080916466169935153112539439769999",
+      "0.0269972108716373509535127362582226644295"
+    ],
+    "local.silent_2_no_first_crossing.left": [
+      "0.7170805138170117000610605821416795034569",
+      "0.7188962254440880871074917117483251119763"
+    ],
+    "local.silent_2_no_first_crossing.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.silent_2_stays_below_threshold_after_raw_end.left": [
+      "0.1030000000000000000000000000000000000000",
+      "0.1030000000000000000000000000000000000000"
+    ],
+    "local.silent_2_stays_below_threshold_after_raw_end.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.silent_2_excess_returns_inside_section.left": [
+      "0.0269268080916466169935153112539439769999",
+      "0.0269972108716373509535127362582226644295"
+    ],
+    "local.silent_2_excess_returns_inside_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "local.learned_start_excess": [
+      "0.0269268080916466169935153112539439769999",
+      "0.0269972108716373509535127362582226644295"
+    ],
+    "local.learned_upper_at_0_5": [
+      "0.9637271061838880887037583637596791278733",
+      "0.9637975089638788226637557887639578153029"
+    ],
+    "local.learned_lower_at_0_9": [
+      "1.0350659495509052259152913891764843939853",
+      "1.0350659495509052259152913891764843939854"
+    ],
+    "local.learned_below_threshold_until_0.5.left": [
+      "0.9637271061838880887037583637596791278733",
+      "0.9637975089638788226637557887639578153029"
+    ],
+    "local.learned_below_threshold_until_0.5.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.learned_above_threshold_by_0.9.left": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "local.learned_above_threshold_by_0.9.right": [
+      "1.0350659495509052259152913891764843939853",
+      "1.0350659495509052259152913891764843939854"
+    ],
+    "local.probe_gap_exceeds_cycle.left": [
+      "7.2887510671292683660695349257851655985602",
+      "7.2887510671292683660695349257851655985603"
+    ],
+    "local.probe_gap_exceeds_cycle.right": [
+      "20.0000000000000000000000000000000000000000",
+      "20.0000000000000000000000000000000000000000"
+    ],
+    "local.probe_aux_cycle_ends.left": [
+      "1.4015544889377330373190700483610734842773",
+      "1.4015544889377330373190700483610734842774"
+    ],
+    "local.probe_aux_cycle_ends.right": [
+      "20.0000000000000000000000000000000000000000",
+      "20.0000000000000000000000000000000000000000"
+    ],
+    "local.work_bound": [
+      "273.5295013107379249376452587299694269938502",
+      "273.5295013107379249376452587299694269938503"
+    ],
+    "local.reserve_gate_stays_open.left": [
+      "273.5295013107379249376452587299694269938502",
+      "273.5295013107379249376452587299694269938503"
+    ],
+    "local.reserve_gate_stays_open.right": [
+      "500.0000000000000000000000000000000000000000",
+      "500.0000000000000000000000000000000000000000"
+    ],
+    "local.A_gain_complete_by": [
+      "42.7015544889377330373190700483610734842773",
+      "42.7015544889377330373190700483610734842774"
+    ],
+    "local.A_first_emission": [
+      "49.3000000000000000000000000000000000000000",
+      "50.2000000000000000000000000000000000000000"
+    ],
+    "local.A_last_return_by": [
+      "128.5887510671292683660695349257851655985602",
+      "128.5887510671292683660695349257851655985603"
+    ],
+    "local.B_last_return_by": [
+      "127.2887510671292683660695349257851655985602",
+      "127.2887510671292683660695349257851655985603"
+    ],
+    "local.A_learning_complete_before_first_response.left": [
+      "42.7015544889377330373190700483610734842773",
+      "42.7015544889377330373190700483610734842774"
+    ],
+    "local.A_learning_complete_before_first_response.right": [
+      "49.3000000000000000000000000000000000000000",
+      "49.3000000000000000000000000000000000000000"
+    ],
+    "local.A_quiescent_before_measurement.left": [
+      "128.5887510671292683660695349257851655985602",
+      "128.5887510671292683660695349257851655985603"
+    ],
+    "local.A_quiescent_before_measurement.right": [
+      "139.9000000000000000000000000000000000000000",
+      "139.9000000000000000000000000000000000000000"
+    ],
+    "local.B_quiescent_before_measurement.left": [
+      "127.2887510671292683660695349257851655985602",
+      "127.2887510671292683660695349257851655985603"
+    ],
+    "local.B_quiescent_before_measurement.right": [
+      "139.9000000000000000000000000000000000000000",
+      "139.9000000000000000000000000000000000000000"
+    ],
+    "birth_slow_decay_dominates_noise.left": [
+      "0.0187523440430053756719589948743592949118",
+      "0.0187523440430053756719589948743592949119"
+    ],
+    "birth_slow_decay_dominates_noise.right": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "protected_arrival_after_FAST.left": [
+      "1.9023478933472733465378803961331398237334",
+      "1.9023478933472733465378803961331398237335"
+    ],
+    "protected_arrival_after_FAST.right": [
+      "8.0000000000000000000000000000000000000000",
+      "8.0000000000000000000000000000000000000000"
+    ],
+    "entire_protected_MARK_and_ERROR_before_reopen.left": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "entire_protected_MARK_and_ERROR_before_reopen.right": [
+      "0.1076894448250999286140271722541969858614",
+      "0.1076894448250999286140271722541969858615"
+    ],
+    "protected_input_reopens_by_deadline.left": [
+      "0.0899602167791794954448808358015671898040",
+      "0.0899602167791794954448808358015671898041"
+    ],
+    "protected_input_reopens_by_deadline.right": [
+      "0.1000000000000000000000000000000000000000",
+      "0.1000000000000000000000000000000000000000"
+    ],
+    "protected_aux_cycle_before_deadline.left": [
+      "1.4015544889377330373190700483610734842773",
+      "1.4015544889377330373190700483610734842774"
+    ],
+    "protected_aux_cycle_before_deadline.right": [
+      "3.5000000000000000000000000000000000000000",
+      "3.5000000000000000000000000000000000000000"
+    ],
+    "protected_return_before_next_input.left": [
+      "3.5000000000000000000000000000000000000000",
+      "3.5000000000000000000000000000000000000000"
+    ],
+    "protected_return_before_next_input.right": [
+      "8.0000000000000000000000000000000000000000",
+      "8.0000000000000000000000000000000000000000"
+    ],
+    "recovery_cap_not_reached.left": [
+      "0.1799733305435414061262153776634724841456",
+      "0.1800266694564585938737846223365275158544"
+    ],
+    "recovery_cap_not_reached.right": [
+      "1.1000000000000000000000000000000000000000",
+      "1.1000000000000000000000000000000000000000"
+    ],
+    "unused_port1_birth_gain_below_caps.left": [
+      "1.1999880000599998000004999990000016666642",
+      "1.2000120000600002000005000010000016666691"
+    ],
+    "unused_port1_birth_gain_below_caps.right": [
+      "3.6000000000000000000000000000000000000000",
+      "3.6000000000000000000000000000000000000000"
+    ],
+    "warmup_returns_before_entry_cut.left": [
+      "127.2887510671292683660695349257851655985602",
+      "127.2887510671292683660695349257851655985603"
+    ],
+    "warmup_returns_before_entry_cut.right": [
+      "159.9000000000000000000000000000000000000000",
+      "159.9000000000000000000000000000000000000000"
+    ],
+    "entry_charge_radius_inside_local_section.left": [
+      "0.0030100000000000000000000000000000000000",
+      "0.0030100000000000000000000000000000000000"
+    ],
+    "entry_charge_radius_inside_local_section.right": [
+      "0.0300000000000000000000000000000000000000",
+      "0.0300000000000000000000000000000000000000"
+    ],
+    "entry_aux_band_below_threshold.left": [
+      "0.0280100000000000000000000000000000000000",
+      "0.0280100000000000000000000000000000000000"
+    ],
+    "entry_aux_band_below_threshold.right": [
+      "1.0000000000000000000000000000000000000000",
+      "1.0000000000000000000000000000000000000000"
+    ],
+    "birth_recovery": [
+      "0.0799900000000000000000000000000000000000",
+      "0.0800100000000000000000000000000000000000"
+    ],
+    "protected_MARK_dose": [
+      "0.0999833305435414061262153776634724841456",
+      "0.1000166694564585938737846223365275158544"
+    ],
+    "entry_recovery": [
+      "0.1799733305435414061262153776634724841456",
+      "0.1800266694564585938737846223365275158544"
+    ],
+    "entry_charge_radius": [
+      "0.0030100000000000000000000000000000000000",
+      "0.0030100000000000000000000000000000000000"
+    ],
+    "entry_q": [
+      "0.0969900000000000000000000000000000000000",
+      "0.1030100000000000000000000000000000000000"
+    ],
+    "entry_m": [
+      "0.0219900000000000000000000000000000000000",
+      "0.0280100000000000000000000000000000000000"
+    ],
+    "q_lower_at_protected_arrival": [
+      "0.1409881143490926314351838905489220779155",
+      "0.1409881143490926314351838905489220779156"
+    ],
+    "q_lower_through_protected_cycle": [
+      "0.1076894448250999286140271722541969858614",
+      "0.1076894448250999286140271722541969858615"
+    ],
+    "q_upper_at_reopen_deadline": [
+      "0.0899602167791794954448808358015671898040",
+      "0.0899602167791794954448808358015671898041"
+    ],
+    "protected_reopen_deadline": [
+      "3.5000000000000000000000000000000000000000",
+      "3.5000000000000000000000000000000000000000"
+    ],
+    "last_warmup_return": [
+      "127.2887510671292683660695349257851655985602",
+      "127.2887510671292683660695349257851655985603"
+    ],
+    "no_noise_positive_residual.left": [
+      "0.0000100000000000000000000000000000000000",
+      "0.0000100000000000000000000000000000000000"
+    ],
+    "no_noise_positive_residual.right": [
+      "0.1672981987480121658249516336462404357628",
+      "0.1672981987480121658249516336462404357629"
+    ]
+  },
+  "obligations": [
+    {
+      "name": "local.h_increases_through_raw_window",
+      "relation": "strict_lt",
+      "left": "local.h_increases_through_raw_window.left",
+      "right": "local.h_increases_through_raw_window.right"
+    },
+    {
+      "name": "local.aux_rest_below_threshold",
+      "relation": "strict_lt",
+      "left": "local.aux_rest_below_threshold.left",
+      "right": "local.aux_rest_below_threshold.right"
+    },
+    {
+      "name": "local.aux_below_threshold_until_0.015",
+      "relation": "strict_lt",
+      "left": "local.aux_below_threshold_until_0.015.left",
+      "right": "local.aux_below_threshold_until_0.015.right"
+    },
+    {
+      "name": "local.aux_above_threshold_by_0.03",
+      "relation": "strict_lt",
+      "left": "local.aux_above_threshold_by_0.03.left",
+      "right": "local.aux_above_threshold_by_0.03.right"
+    },
+    {
+      "name": "local.decay_1_0.8_dominates_noise",
+      "relation": "strict_lt",
+      "left": "local.decay_1_0.8_dominates_noise.left",
+      "right": "local.decay_1_0.8_dominates_noise.right"
+    },
+    {
+      "name": "local.decay_0.8_0.1_dominates_noise",
+      "relation": "strict_lt",
+      "left": "local.decay_0.8_0.1_dominates_noise.left",
+      "right": "local.decay_0.8_0.1_dominates_noise.right"
+    },
+    {
+      "name": "local.decay_0.1_0.025_dominates_noise",
+      "relation": "strict_lt",
+      "left": "local.decay_0.1_0.025_dominates_noise.left",
+      "right": "local.decay_0.1_0.025_dominates_noise.right"
+    },
+    {
+      "name": "local.decay_1_0.25_dominates_noise",
+      "relation": "strict_lt",
+      "left": "local.decay_1_0.25_dominates_noise.left",
+      "right": "local.decay_1_0.25_dominates_noise.right"
+    },
+    {
+      "name": "local.decay_0.25_0.1_dominates_noise",
+      "relation": "strict_lt",
+      "left": "local.decay_0.25_0.1_dominates_noise.left",
+      "right": "local.decay_0.25_0.1_dominates_noise.right"
+    },
+    {
+      "name": "local.aux_cycle_ends_after_raw_pulse",
+      "relation": "strict_lt",
+      "left": "local.aux_cycle_ends_after_raw_pulse.left",
+      "right": "local.aux_cycle_ends_after_raw_pulse.right"
+    },
+    {
+      "name": "local.aux_cycle_ends_before_next_input",
+      "relation": "strict_lt",
+      "left": "local.aux_cycle_ends_before_next_input.left",
+      "right": "local.aux_cycle_ends_before_next_input.right"
+    },
+    {
+      "name": "local.learned_gain_below_all_caps",
+      "relation": "strict_lt",
+      "left": "local.learned_gain_below_all_caps.left",
+      "right": "local.learned_gain_below_all_caps.right"
+    },
+    {
+      "name": "local.mark_finishes_before_any_main_firing",
+      "relation": "strict_lt",
+      "left": "local.mark_finishes_before_any_main_firing.left",
+      "right": "local.mark_finishes_before_any_main_firing.right"
+    },
+    {
+      "name": "local.main_fires_before_error_begins",
+      "relation": "strict_lt",
+      "left": "local.main_fires_before_error_begins.left",
+      "right": "local.main_fires_before_error_begins.right"
+    },
+    {
+      "name": "local.error_finishes_during_main_fast",
+      "relation": "strict_lt",
+      "left": "local.error_finishes_during_main_fast.left",
+      "right": "local.error_finishes_during_main_fast.right"
+    },
+    {
+      "name": "local.main_reopens_after_raw_pulse",
+      "relation": "strict_lt",
+      "left": "local.main_reopens_after_raw_pulse.left",
+      "right": "local.main_reopens_after_raw_pulse.right"
+    },
+    {
+      "name": "local.main_reopens_before_next_input",
+      "relation": "strict_lt",
+      "left": "local.main_reopens_before_next_input.left",
+      "right": "local.main_reopens_before_next_input.right"
+    },
+    {
+      "name": "local.arbitrary_initial_silence_inside_section",
+      "relation": "strict_lt",
+      "left": "local.arbitrary_initial_silence_inside_section.left",
+      "right": "local.arbitrary_initial_silence_inside_section.right"
+    },
+    {
+      "name": "local.rest_noise_inside_section",
+      "relation": "strict_lt",
+      "left": "local.rest_noise_inside_section.left",
+      "right": "local.rest_noise_inside_section.right"
+    },
+    {
+      "name": "local.silent_0_no_first_crossing",
+      "relation": "strict_lt",
+      "left": "local.silent_0_no_first_crossing.left",
+      "right": "local.silent_0_no_first_crossing.right"
+    },
+    {
+      "name": "local.silent_0_stays_below_threshold_after_raw_end",
+      "relation": "strict_lt",
+      "left": "local.silent_0_stays_below_threshold_after_raw_end.left",
+      "right": "local.silent_0_stays_below_threshold_after_raw_end.right"
+    },
+    {
+      "name": "local.silent_0_excess_returns_inside_section",
+      "relation": "strict_lt",
+      "left": "local.silent_0_excess_returns_inside_section.left",
+      "right": "local.silent_0_excess_returns_inside_section.right"
+    },
+    {
+      "name": "local.silent_1_no_first_crossing",
+      "relation": "strict_lt",
+      "left": "local.silent_1_no_first_crossing.left",
+      "right": "local.silent_1_no_first_crossing.right"
+    },
+    {
+      "name": "local.silent_1_stays_below_threshold_after_raw_end",
+      "relation": "strict_lt",
+      "left": "local.silent_1_stays_below_threshold_after_raw_end.left",
+      "right": "local.silent_1_stays_below_threshold_after_raw_end.right"
+    },
+    {
+      "name": "local.silent_1_excess_returns_inside_section",
+      "relation": "strict_lt",
+      "left": "local.silent_1_excess_returns_inside_section.left",
+      "right": "local.silent_1_excess_returns_inside_section.right"
+    },
+    {
+      "name": "local.silent_2_no_first_crossing",
+      "relation": "strict_lt",
+      "left": "local.silent_2_no_first_crossing.left",
+      "right": "local.silent_2_no_first_crossing.right"
+    },
+    {
+      "name": "local.silent_2_stays_below_threshold_after_raw_end",
+      "relation": "strict_lt",
+      "left": "local.silent_2_stays_below_threshold_after_raw_end.left",
+      "right": "local.silent_2_stays_below_threshold_after_raw_end.right"
+    },
+    {
+      "name": "local.silent_2_excess_returns_inside_section",
+      "relation": "strict_lt",
+      "left": "local.silent_2_excess_returns_inside_section.left",
+      "right": "local.silent_2_excess_returns_inside_section.right"
+    },
+    {
+      "name": "local.learned_below_threshold_until_0.5",
+      "relation": "strict_lt",
+      "left": "local.learned_below_threshold_until_0.5.left",
+      "right": "local.learned_below_threshold_until_0.5.right"
+    },
+    {
+      "name": "local.learned_above_threshold_by_0.9",
+      "relation": "strict_lt",
+      "left": "local.learned_above_threshold_by_0.9.left",
+      "right": "local.learned_above_threshold_by_0.9.right"
+    },
+    {
+      "name": "local.probe_gap_exceeds_cycle",
+      "relation": "strict_lt",
+      "left": "local.probe_gap_exceeds_cycle.left",
+      "right": "local.probe_gap_exceeds_cycle.right"
+    },
+    {
+      "name": "local.probe_aux_cycle_ends",
+      "relation": "strict_lt",
+      "left": "local.probe_aux_cycle_ends.left",
+      "right": "local.probe_aux_cycle_ends.right"
+    },
+    {
+      "name": "local.reserve_gate_stays_open",
+      "relation": "strict_lt",
+      "left": "local.reserve_gate_stays_open.left",
+      "right": "local.reserve_gate_stays_open.right"
+    },
+    {
+      "name": "local.A_learning_complete_before_first_response",
+      "relation": "strict_lt",
+      "left": "local.A_learning_complete_before_first_response.left",
+      "right": "local.A_learning_complete_before_first_response.right"
+    },
+    {
+      "name": "local.A_quiescent_before_measurement",
+      "relation": "strict_lt",
+      "left": "local.A_quiescent_before_measurement.left",
+      "right": "local.A_quiescent_before_measurement.right"
+    },
+    {
+      "name": "local.B_quiescent_before_measurement",
+      "relation": "strict_lt",
+      "left": "local.B_quiescent_before_measurement.left",
+      "right": "local.B_quiescent_before_measurement.right"
+    },
+    {
+      "name": "birth_slow_decay_dominates_noise",
+      "relation": "strict_lt",
+      "left": "birth_slow_decay_dominates_noise.left",
+      "right": "birth_slow_decay_dominates_noise.right"
+    },
+    {
+      "name": "protected_arrival_after_FAST",
+      "relation": "strict_lt",
+      "left": "protected_arrival_after_FAST.left",
+      "right": "protected_arrival_after_FAST.right"
+    },
+    {
+      "name": "entire_protected_MARK_and_ERROR_before_reopen",
+      "relation": "strict_lt",
+      "left": "entire_protected_MARK_and_ERROR_before_reopen.left",
+      "right": "entire_protected_MARK_and_ERROR_before_reopen.right"
+    },
+    {
+      "name": "protected_input_reopens_by_deadline",
+      "relation": "strict_lt",
+      "left": "protected_input_reopens_by_deadline.left",
+      "right": "protected_input_reopens_by_deadline.right"
+    },
+    {
+      "name": "protected_aux_cycle_before_deadline",
+      "relation": "strict_lt",
+      "left": "protected_aux_cycle_before_deadline.left",
+      "right": "protected_aux_cycle_before_deadline.right"
+    },
+    {
+      "name": "protected_return_before_next_input",
+      "relation": "strict_lt",
+      "left": "protected_return_before_next_input.left",
+      "right": "protected_return_before_next_input.right"
+    },
+    {
+      "name": "recovery_cap_not_reached",
+      "relation": "strict_lt",
+      "left": "recovery_cap_not_reached.left",
+      "right": "recovery_cap_not_reached.right"
+    },
+    {
+      "name": "unused_port1_birth_gain_below_caps",
+      "relation": "strict_lt",
+      "left": "unused_port1_birth_gain_below_caps.left",
+      "right": "unused_port1_birth_gain_below_caps.right"
+    },
+    {
+      "name": "warmup_returns_before_entry_cut",
+      "relation": "strict_lt",
+      "left": "warmup_returns_before_entry_cut.left",
+      "right": "warmup_returns_before_entry_cut.right"
+    },
+    {
+      "name": "entry_charge_radius_inside_local_section",
+      "relation": "strict_lt",
+      "left": "entry_charge_radius_inside_local_section.left",
+      "right": "entry_charge_radius_inside_local_section.right"
+    },
+    {
+      "name": "entry_aux_band_below_threshold",
+      "relation": "strict_lt",
+      "left": "entry_aux_band_below_threshold.left",
+      "right": "entry_aux_band_below_threshold.right"
+    },
+    {
+      "name": "no_noise_positive_residual",
+      "relation": "strict_lt",
+      "left": "no_noise_positive_residual.left",
+      "right": "no_noise_positive_residual.right"
+    }
+  ],
+  "source_sha256": {
+    "obligations.py": "f84e430bb6acda3a00a9908dda60e006788270e1e69084962a04a78c706ec934",
+    "local_bounds.py": "91a0bad9a1b0e3f40c80f998f22892a4c8201d69d57972b9b463e64e676d1858",
+    "schema.py": "91c7a76d896f06fdcc65814198f4a1d7e2f5829c7e8a3c6edabe4ca2d7e6a01b",
+    "certify.py": "59505b22e664230d06dca9d1bcd28479687236616fd5f0dd6eeb599b1cfd1126",
+    "verify.py": "8ef5bea084442967e3db43b3b0c7fff2d5a8af5b9ac9b2b10b9e6e5e56e18f68",
+    "THEOREM.md": "bec8f1f04ceb4d2c26408d2ce5f724e27ee657bba306065f73d370827187576e",
+    "../bounds.py": "fc57e085e180e59e8b4b919173534478793121eb66c7da3e7df1e9f2c2ba40aa",
+    "../integer_intervals.py": "24732cfecccf069a3e3d21e97b6088f811adae4ad1d499ece266f21695f1c68d",
+    "../decimal_intervals.py": "b7797c2be191b6baff61fd4d1e3087999aca097bf871c3452d801be7741ec444",
+    "../THEOREM_ROBUST.md": "7432c8a5a056b122967c7c32143517b2e88d892379c20514c41fe950573c56ca",
+    "../THEOREM_N.md": "c538c633b159edc8e0fb00c5d08ea1a1707c41de7bdb2d0038e740ea3725dbdf",
+    "../periodic/THEOREM.md": "c1213a5ac963f225f4037e319d0b38f120eea94e16481d08beb9af78262aeb69"
+  }
+}

@@ -103,7 +103,7 @@ theorem Jump.upper_region {n route s u} (j : @Jump n route s u)
     have h := (hi i).2.2 p
     cases j <;> simp_all [setMain, setAux, setRaw, Function.update_apply]
     all_goals split_ifs at * <;> simp_all [Function.update_apply]
-    all_goals split_ifs at * <;> simp_all [Function.update_apply, auxUpper]
+    all_goals split_ifs at * <;> simp_all [auxUpper]
     all_goals norm_num [auxUpper] at *
 
 theorem BirthState.upper_region {n s} (hs : @BirthState n s) : UpperRegion s := by

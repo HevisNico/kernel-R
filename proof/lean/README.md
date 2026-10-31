@@ -11,8 +11,12 @@ semantics and exact ledger balances in `Hybrid` and `Refinement`. These modules
 derive memory/queue balances, mode-local ODE solutions and observed guard
 endpoints from physical flows and jumps. Their extensions prove birth-family
 cap, charge and reserve invariants, including work <=500 and positive energy
-throughout reachable flows. Protocol-specific chronology, the remaining real
-enclosures, progress and the complete execution-to-abstraction theorem remain open.
+throughout reachable flows. `HybridEvents`, `HybridAuxEvents` and
+`HybridEventBudget` derive emission chronology and a uniform physical jump budget
+for every finite prefix before a bounded horizon, with initial delivery tokens
+and bounded routing fanout counted explicitly. Protocol-specific chronology,
+the remaining real enclosures, progress and the complete execution-to-abstraction
+theorem remain open.
 
 ## Reproduce
 
@@ -23,10 +27,12 @@ lake exe cache get
 lake build
 lake env lean Audit.lean
 python3 scripts/generate_evidence.py --check
+python3 scripts/robust_evidence.py --check
 python3 scripts/check_sources.py
 python3 scripts/check_negative.py
 python3 scripts/check_hybrid_negative.py
 python3 scripts/check_hybrid_analytic_negative.py
+python3 scripts/check_hybrid_event_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -37,13 +43,16 @@ proofs, project axioms or native-evaluation proofs.
 
 ## Coverage and hypotheses
 
+The [robust coverage guide](ROBUST_COVERAGE.md) covers the additional birth,
+noise-dependent latency and arbitrary-depth slow-chain formalization.
+
 | Module | What Lean establishes | Remaining premise or boundary |
 |---|---|---|
 | `Doses` | Fundamental-theorem-of-calculus charge balance; full ERROR dose 3/5, full MARK dose 1/10; exponential gain after three doses; recovery entry interval | The charge derivative, integrability, mode endpoints and lack of clipping must hold on the relevant interval |
 | `Flow` | Exponential decay solves a single mode; FAST ends at 1/4; SLOW returns at accumulated recovery log(5/2); protected charge inequality | A mode-local result; it does not construct a hybrid execution |
 | `Recovery` | Bounds on the actual real logarithms log(5/2) and log(4), return before 6.990787 and protection throughout the specified dose window | The displayed bounds on recovery, firing latency and accumulated integral |
 | `Calendar` | Routed latency hulls, gaps in [7.5,8.5], disjoint pulses, causal delay, quiescence and preservation of intervals under fixed latency | The latency and duration enclosures |
-| `Energy` | Integrating-factor barrier; reserve stays in [50,100] on a smooth interval with work in [0,500]; explicit constant-work comparison bounds | The derivative and work bounds must hold; composition across hybrid event boundaries is not proved |
+| `Energy` | Integrating-factor barrier; reserve stays in [50,100] on a smooth interval with work in [0,500]; explicit constant-work comparison bounds | The derivative and work bounds must hold; the separate `HybridWork` module derives the work bound and composes the birth-family reserve invariant across hybrid events |
 | `Protocol` | Cycle counts 13/10 for local feedback and 38/27 for the composed words, dose updates and logical composition | The words are supplied abstractions; producing those words from the hybrid equations is not proved |
 | `Cadence` | Four pulse cases, including MARK followed by full ERROR; integral of the exponential MARK profile; post-MARK return equation and monotonicity; two extra MARK doses and four total ERROR doses; retained wire jitter after shared-latency cancellation | Physical guards, clipping inactivity, the validity of the phase decomposition and the interval enclosures remain separate obligations |
 | `CadenceRecorded/*` | Per-input cumulative dose counters for both 95-case traces, teaching counts 16/14, fast counts 20/18/16, route input/output counts and totals A=54/B=61/C=34 composed with the earlier cycle words | Case labels and recorded counters are inputs; the hybrid equations are not proved to produce these traces |
