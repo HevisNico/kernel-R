@@ -24,9 +24,12 @@ learned input emits exactly once, with its actual firing extracted in the real
 From the declared prepared section this learned-input case now returns before
 6.990787, preserves all gains and recovery, and restores READY at exact resting
 charge. Its actual firing equation retains the initial residual charge.
-Birth-to-preparation, the other pulse cases, full protocol chronology, fine real
-enclosures, progress and the complete execution-to-abstraction theorem remain
-open.
+A broader silent case now covers the nominal fast gain and low birth recovery,
+preserving READY charge/sensor bands before the next input. The learned case
+also covers actual gains in [1.8,2.4]. Birth-to-preparation still requires the
+protected MARK bootstrap and concrete source chronology. The other pulse cases,
+fine real enclosures, progress and complete execution-to-abstraction theorem
+remain open.
 
 ## Reproduce
 
@@ -47,6 +50,7 @@ python3 scripts/check_hybrid_event_negative.py
 python3 scripts/check_hybrid_phase_negative.py
 python3 scripts/check_hybrid_pulse_negative.py
 python3 scripts/check_hybrid_return_negative.py
+python3 scripts/check_hybrid_training_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

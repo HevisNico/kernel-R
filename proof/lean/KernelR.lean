@@ -68,3 +68,7 @@ import KernelR.HybridReadyReturn
 import KernelR.HybridStableMemory
 import KernelR.HybridPulseSection
 import KernelR.HybridPulseRoot
+import KernelR.HybridPulseBounds
+import KernelR.HybridNominalSilent
+import KernelR.HybridSilentReturn
+import KernelR.HybridMidGainInput

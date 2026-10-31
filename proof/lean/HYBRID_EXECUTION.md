@@ -91,6 +91,10 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridStableMemory` | MARK ends before t+1/20, hence before main firing; no receiving-port MARK dose is delivered; READY other ports stay quiescent and recovery is unchanged | Other ports must initially be READY in their rest bands with no raw current or later arrivals |
 | `HybridPulseSection` | The actual isolated learned-pulse case restores the prepared section, exact resting main charge, no raw inputs, unchanged memories, zero ERROR/MARK doses on every port, and exactly one emission | Prepared-section reachability and full source calendars are not supplied |
 | `HybridPulseRoot` | The actual first firing satisfies the real threshold equation with its original residual charge; the response root is unique in the firing window; positive residual advances the first firing relative to its rest reference | Fine latency enclosure membership remains to be proved |
+| `HybridPulseBounds` | A direct real bound response<=16/25, nominal raw-gain headroom and early-time comparisons for gains through 12/5 | Does not assume stored exp/log certificate enclosures |
+| `HybridNominalSilent` | No emission and total ERROR dose 3/5 for inputs with q<=7/50 and log-gain<=log(6/5)+1/1000, at any reachable recovery | Receiving sensor must be READY in its rest band, input isolated, and the actual trace long enough |
+| `HybridSilentReturn` | At a gap >=7.5 the silent input restores READY charge/sensor bands, consumes its raw current, changes only the receiving gain by 3/5 and leaves recovery unchanged | No prepared-recovery premise; source/route instantiation and existence remain separate |
+| `HybridMidGainInput` | First firing and the prepared learned-input case hold for actual gains in [9/5,12/5], covering both training gain regimes | The first firing alone does not establish a low-recovery cell's later MARK bootstrap |
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -221,6 +225,26 @@ charge is retained. Direct real derivative bounds prove strict monotonicity and
 root uniqueness in the firing window. A positive residual can advance a first
 firing relative to a rest-started reference; no physical pulse is retimed and
 no equality of first and steady firing latencies is asserted.
+
+The broader `Execution.silent_pulse` case uses `ReadyCoordinates`: READY main
+and auxiliary modes, q in [1/10-1/100000,7/50], and the auxiliary rest bands.
+It requires no high-recovery premise. With receiving log-gain at most
+log(6/5)+1/1000, an isolated canonical input, birth reachability and a given
+trace reaching t+7.5, it proves no emission, exactly one receiving-port ERROR
+dose of 3/5, zero MARK doses on every port, unchanged other gains and recovery,
+no remaining raw current, and the same READY coordinate bands at the end.
+Silent relaxation is an actual exponential flow, not a reset to q=1/10.
+If the cell was already in `PreparedSection`, that section is preserved too.
+
+The uniform real response bound 16/25 and raw-window gain budget suffice to
+cover both the three low-port silent training levels and the nominal fast-port
+silent input. The tolerance here is a stated input-section bound, not a proof
+of birth-to-section reachability. `Execution.learned_mid_pulse` handles the
+prepared emitting case for actual initial gains in [9/5,12/5], without fixing a
+nominal gain formula. This includes the low-port gain after three ERROR doses
+and the fast-port gain after one. The protected MARK that raises birth recovery
+by 1/10, and the actual source chronology producing those dose counts, remain
+to be proved.
 
 `HybridInputBalance` retains every routed token in a multiset conservation law.
 For empty routing, an execution complete after all supplied source dates has an

@@ -61,16 +61,14 @@ structure LearnedPulse {n θ route s u} (e : @Execution n θ route s u) (i : Fin
 
 /-- An actual isolated learned-pulse case with return and preserved memories.
 It neither supplies a case word nor asserts birth-to-section reachability. -/
-theorem Execution.learned_pulse {n θ ε route born s u} (e : @Execution n θ route s u)
+theorem MainTrigger.prepared_case {n θ ε route born s u i} {e : @Execution n θ route s u}
+    (tr : MainTrigger e i)
     (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
-    (i : Fin n) (p : Port) (hs : PreparedSection s i)
-    (hz : Real.log (3 / 10) + 9 / 5 - 1 / 100000 ≤ s.x i (.z p) ∧
-      s.x i (.z p) ≤ Real.log (3 / 10) + 9 / 5 + 1 / 100000)
+    (p : Port) (hs : PreparedSection s i)
     (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
     (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (LearnedPulse e i) := by
   have hi := past.upper_region hb hborn.upper_region
   have hv := past.raw_valid hborn.raw_valid
-  obtain ⟨tr⟩ := e.learned_input_trigger hb hi i p hs.ready hs.charge hz (hs.auxiliary p).1 hr (hs.auxiliary p).2 ho hno (by linarith)
   obtain ⟨cycle⟩ := e.sensor_cycle hb hi i p (hs.auxiliary p).1 hr (hs.auxiliary p).2 (by linarith)
   obtain ⟨ret⟩ := tr.ready_return past hborn hb hs.recovery.1 p hr ho hno ht
   have hu := ret.final_ready hno
@@ -109,5 +107,16 @@ theorem Execution.learned_pulse {n θ ε route born s u} (e : @Execution n θ ro
       exact ⟨htarget.1,by rw [htarget.2]; norm_num [RestBand]⟩
     · exact (hother q hq).1
   · exact e.allStates_final hraw (by linarith)
+
+theorem Execution.learned_pulse {n θ ε route born s u} (e : @Execution n θ route s u)
+    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+    (i : Fin n) (p : Port) (hs : PreparedSection s i)
+    (hz : Real.log (3 / 10) + 9 / 5 - 1 / 100000 ≤ s.x i (.z p) ∧
+      s.x i (.z p) ≤ Real.log (3 / 10) + 9 / 5 + 1 / 100000)
+    (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (LearnedPulse e i) := by
+  have hi := past.upper_region hb hborn.upper_region
+  obtain ⟨tr⟩ := e.learned_input_trigger hb hi i p hs.ready hs.charge hz (hs.auxiliary p).1 hr (hs.auxiliary p).2 ho hno (by linarith)
+  exact tr.prepared_case past hborn hb p hs hr ho hno ht
 
 end KernelR.Hybrid
