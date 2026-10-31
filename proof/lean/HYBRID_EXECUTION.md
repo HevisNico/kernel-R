@@ -109,6 +109,10 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridWarmup` | Extract the first three low-port silent spans, with total ERROR 1.8, no emissions or MARK, unchanged recovery and the actual next strong-entry snapshot | Actual period-eight sources; no case word or reset |
 | `HybridBirthSourceTrain` | From the exact sixteen-token low-port queue, an actual complete execution reaches the prepared section with 12 emissions, ERROR 1.8 and MARK 0.1 | Empty routing, READY-born receiving cell and T>=128; does not cover B's staged birth or later routed phases |
 
+| `HybridCellInputs` | Extract the next actual arrival at one cell while retaining every other-cell arrival and event in the original execution | Isolation is local to the receiving cell, not global deletion of traffic |
+| `HybridCellPreparedTrain` | An actual receiving-cell input calendar with variable gaps >=7.5 emits once per prepared input, preserves memories and restores preparation | Initial strong-gain/section bounds and a quiet final horizon; does not infer wire-delay bounds |
+| `HybridCellSources` | Cell-specific source conservation and exact chronological source lists allow outgoing routes, other-cell arrivals and future tokens at other cells | No route targets the receiving cell during this trace; its initial source tokens are due by the complete horizon |
+
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -324,6 +328,30 @@ ERROR-born receiving sensor. Later A-to-B/B-to-A routing and B's staged birth
 still require their own semantic realization and calendar proofs.
 
 
+## Receiving-cell calendars inside a multicell execution
+
+`Execution.first_cell_delivery` selects the first actual arrival at one cell.
+Its isolated prefix can contain arbitrarily many arrivals and legal events at
+other cells. It reconstructs the same global execution and derives the selected
+jump's due date, fresh raw origin and unchanged main/sensor modes. No global
+traffic is discarded.
+
+`prepared_cell_train` accepts any finite receiving-cell calendar whose gaps,
+including the gap from its current input to the next, are at least 7.5. The final
+input also has a quiet horizon of at least 7.5. Actual arrival cuts and induction
+produce exactly one emission per input, zero ERROR/MARK doses, preserved gains
+and recovery, and the prepared section at exact resting charge. Other-cell
+arrivals may interleave throughout. A short cadence gap cannot reuse this case.
+
+`Execution.cell_sources_exact` derives such a receiving-cell source list from
+token conservation and chronological delivery when routes do not target that
+cell during the observed execution interval, its initial tokens are due by the
+complete horizon and those tokens use one ordered receiving port. Outgoing
+routes and other cells' traffic and future pending tokens remain unrestricted.
+This discharges source isolation without requiring globally empty routing; it
+does not yet derive the later incoming wire calendars or realize staged births.
+
+
 `HybridInputBalance` retains every routed token in a multiset conservation law.
 For empty routing, an execution complete after all supplied source dates has an
 actual delivery list permuting the initial source queue. Filtering by cell/port
@@ -420,6 +448,7 @@ python scripts/check_hybrid_training_negative.py
 python scripts/check_hybrid_bootstrap_negative.py
 python scripts/check_hybrid_protected_negative.py
 python scripts/check_hybrid_source_negative.py
+python scripts/check_hybrid_cell_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -444,3 +473,8 @@ Source controls reject a missing source token, changed delivery date/raw origin,
 wrong isolation segment, altered prepared-train counts or MARK dose, altered
 warmup doses/outputs, fabricated preparation at source zero, and changed first
 source-phase output/dose/memory conclusions.
+
+Multicell controls reject erasing other-cell arrivals or future pending tokens,
+replacing cell-specific conservation with a global claim, altered arrival dates,
+extra prepared outputs, omission of the first gap and weakened gap/final-horizon
+requirements.

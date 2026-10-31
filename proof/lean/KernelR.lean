@@ -84,3 +84,6 @@ import KernelR.HybridPreparedTrain
 import KernelR.HybridBirthInput
 import KernelR.HybridWarmup
 import KernelR.HybridBirthSourceTrain
+import KernelR.HybridCellInputs
+import KernelR.HybridCellPreparedTrain
+import KernelR.HybridCellSources
