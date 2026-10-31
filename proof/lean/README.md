@@ -1,5 +1,10 @@
 # Lean formalization of selected Kernel R results
 
+The [indefinite-operation extension](INDEFINITE_OPERATION.md) proves learned-state
+idle closure, real learned-response bounds and compatible future executions
+under an explicit one-input physical contract. That contract and birth-to-learned
+reachability remain open; indefinite physical transmission is not yet claimed.
+
 This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
 Mathlib v4.35.0. It is a **partial formalization**. Neither the complete hybrid
 execution nor the Python interval implementations have been verified in Lean.

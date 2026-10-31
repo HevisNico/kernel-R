@@ -40,6 +40,10 @@ import KernelR.HybridWork
 import KernelR.HybridEvents
 import KernelR.HybridAuxEvents
 import KernelR.HybridEventBudget
+import KernelR.HybridFuture
+import KernelR.LearnedResponse
+import KernelR.Indefinite
+import KernelR.FutureControls
 import KernelR.Robust.Birth
 import KernelR.Robust.Latency
 import KernelR.Robust.Induction
