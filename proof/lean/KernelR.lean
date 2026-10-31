@@ -87,3 +87,4 @@ import KernelR.HybridBirthSourceTrain
 import KernelR.HybridCellInputs
 import KernelR.HybridCellPreparedTrain
 import KernelR.HybridCellSources
+import KernelR.HybridPhysicalInvariant

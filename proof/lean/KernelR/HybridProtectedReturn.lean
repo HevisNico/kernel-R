@@ -82,15 +82,14 @@ theorem SensorCycle.markHead_recovery {n θ route s u i p} {e : @Execution n θ 
   rw [cycle.markHead.recovery_balance i,cycle.markHead.recovery_sum_marks i,
     Finset.sum_eq_single p (fun q _ hq => hother q hq) (by simp),hmark]
 
-theorem SensorCycle.protected_return {n θ ε route born s u i p} {e : @Execution n θ route s u}
-    (cycle : SensorCycle e i p) (past : Execution θ route born s) (hborn : BirthState born)
-    (hb : PhysicalBox θ ε) (hs : MarkEntry s i)
+theorem SensorCycle.protected_return_of_invariant {n θ ε route s u i p} {e : @Execution n θ route s u}
+    (cycle : SensorCycle e i p) (hb : PhysicalBox θ ε) (hf : PhysicalInvariant θ s)
+    (hv : RawValid s) (hs : MarkEntry s i)
     (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
     (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (ReadyReturn e i) := by
   let mk := cycle.phases.markPhase
-  have hv := past.raw_valid hborn.raw_valid
   have hw := (cycle.protected_window hb hv hs hr ho hno).1
-  have hd := (cycle.full_protected_mark past hborn hb hs hr ho hno).1
+  have hd := (cycle.full_protected_mark_of_invariant hb hf hv hs hr ho hno).1
   have hdPhase : mk.span.ledger.mark i p = 1 / 10 := by
     rw [← cycle.mark_ledger_eq_phase hv hr (hno p)]; exact hd
   have hbrecovery := cycle.markHead_recovery hs ho hno hdPhase
@@ -141,5 +140,13 @@ theorem SensorCycle.protected_return {n θ ε route born s u i p} {e : @Executio
   calc
     e = cycle.markHead.append mk.rest := cycle.markHead_reconstruct
     _ = _ := by rw [heslow,Execution.append_assoc]
+
+theorem SensorCycle.protected_return {n θ ε route born s u i p} {e : @Execution n θ route s u}
+    (cycle : SensorCycle e i p) (past : Execution θ route born s) (hborn : BirthState born)
+    (hb : PhysicalBox θ ε) (hs : MarkEntry s i)
+    (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (ReadyReturn e i) := by
+  exact cycle.protected_return_of_invariant hb (past.physical_invariant hb (hborn.physical_invariant hb))
+    (past.raw_valid hborn.raw_valid) hs hr ho hno ht
 
 end KernelR.Hybrid

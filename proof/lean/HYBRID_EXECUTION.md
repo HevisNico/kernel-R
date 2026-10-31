@@ -113,6 +113,8 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridCellPreparedTrain` | An actual receiving-cell input calendar with variable gaps >=7.5 emits once per prepared input, preserves memories and restores preparation | Initial strong-gain/section bounds and a quiet final horizon; does not infer wire-delay bounds |
 | `HybridCellSources` | Cell-specific source conservation and exact chronological source lists allow outgoing routes, other-cell arrivals and future tokens at other cells | No route targets the receiving cell during this trace; its initial source tokens are due by the complete horizon |
 
+| `HybridPhysicalInvariant` | Propagate current charge/sensor bounds, gain/recovery caps and reserve [50,100]; derive positive power throughout actual flows and ERROR exposure from charge headroom | Current physical bounds and fabrication box, at any start date; raw validity is supplied separately where needed |
+
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -367,6 +369,23 @@ case needed after a staged birth once the current invariants are established.
 Positive-dose silent/protected cases retain their reserve and exposure proofs.
 
 
+`PhysicalInvariant` packages the current upper physical region, actual per-port
+gain caps, recovery cap and reserve in [50,100]. It is preserved by every actual
+execution. The reserve proof still derives work <=500 before using positivity.
+Current-state flow bounds therefore open the energy gates throughout complete
+ERROR/MARK phases; strict cap exposure is derived from the same charge budgets
+and headroom as before.
+
+The `*_of_invariant` silent and protected-input theorems now use these current
+physical bounds and raw validity directly. The first strong low-recovery case
+also has an `*_of_valid` variant. Actual sensor cycles, phase protection, full
+doses, counts, return and memory balances remain conclusions, with the same
+input separation and charge/gain/recovery bands. Earlier birth-family theorems
+remain corollaries with their original signatures. These results provide the
+local dose cases for a later staged-birth composition; its introduction event
+and complete routed protocol are not established by this invariant alone.
+
+
 `HybridInputBalance` retains every routed token in a multiset conservation law.
 For empty routing, an execution complete after all supplied source dates has an
 actual delivery list permuting the initial source queue. Filtering by cell/port
@@ -465,6 +484,7 @@ python scripts/check_hybrid_protected_negative.py
 python scripts/check_hybrid_source_negative.py
 python scripts/check_hybrid_cell_negative.py
 python scripts/check_hybrid_local_negative.py
+python scripts/check_hybrid_invariant_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -498,3 +518,7 @@ requirements.
 Local-invariant controls exercise the prepared pulse and variable-gap train
 without a common-birth history argument, and reject a protected-input
 substitution, a receiving-gain increase, an extra output and a missing firing.
+
+Current-invariant controls reject a strengthened reserve floor, loss of possible
+cap contact, a missing silent ERROR dose, a missing protected MARK dose, doubled
+recovery gain and removal of the actual first strong emission.

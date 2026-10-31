@@ -104,19 +104,26 @@ theorem SensorCycle.mark_flows {n θ route s u i p} {e : @Execution n θ route s
   rw [cycle.phases.markPhase.reconstruct,Execution.allFlows_append] at hrest
   exact hrest.1
 
+theorem Execution.mark_exposed_of_invariant {n θ ε route s u} (e : @Execution n θ route s u)
+    (hb : PhysicalBox θ ε) (hs : PhysicalInvariant θ s) (i : Fin n) (p : Port)
+    (ha : e.AuxFlows i p .mark) (hm : e.AllStates (fun v => v.main i ≠ .ready))
+    (hcap : e.AllFlows (fun {v w} f => ∀ t ∈ Icc v.time w.time, f.path t i .b < 11 / 10)) :
+    e.MarkExposed i p := by
+  induction e with
+  | nil => trivial
+  | @cons s v u move rest ih =>
+    have hnext := (.cons move (.nil _) : Execution θ route s v).physical_invariant hb hs
+    cases move with
+    | flow f => exact ⟨f.mark_open_of_invariant hb hs i p ha.1 hm.1 hcap.1,ih hnext ha.2 hm.2 hcap.2⟩
+    | jump j => exact ih hnext ha hm.2 hcap
+
 theorem Execution.mark_exposed_of_upper {n θ ε route born s u} (e : @Execution n θ route s u)
     (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
     (i : Fin n) (p : Port) (ha : e.AuxFlows i p .mark)
     (hm : e.AllStates (fun v => v.main i ≠ .ready))
     (hc : e.AllFlows (fun {v w} f => ∀ t ∈ Icc v.time w.time, f.path t i .b < 11 / 10)) :
     e.MarkExposed i p := by
-  induction e with
-  | nil => trivial
-  | @cons s v u move rest ih =>
-    let progressed := past.append (.cons move (.nil _))
-    cases move with
-    | flow f =>
-      exact ⟨f.mark_open_of_reachable past hborn hb i p ha.1 hm.1 hc.1,ih progressed ha.2 hm.2 hc.2⟩
-    | jump j => exact ih progressed ha hm.2 hc
+  exact e.mark_exposed_of_invariant hb
+    (past.physical_invariant hb (hborn.physical_invariant hb)) i p ha hm hc
 
 end KernelR.Hybrid

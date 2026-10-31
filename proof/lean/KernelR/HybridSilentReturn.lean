@@ -114,20 +114,19 @@ structure SilentPulse {n θ route s u} (e : @Execution n θ route s u) (i : Fin 
 
 /-- The complete silent input case works at low birth recovery as well as
 after preparation. No MARK dose or training word is assumed. -/
-theorem Execution.silent_pulse {n θ ε route born s u} (e : @Execution n θ route s u)
-    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+theorem Execution.silent_pulse_of_invariant {n θ ε route s u} (e : @Execution n θ route s u)
+    (hb : PhysicalBox θ ε) (hf : PhysicalInvariant θ s) (hv : RawValid s)
     (i : Fin n) (p : Port) (hs : ReadyCoordinates s i)
     (hz : s.x i (.z p) ≤ Real.log (6 / 5) + 1 / 1000)
     (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
     (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (SilentPulse e i p) := by
-  have hi := past.upper_region hb hborn.upper_region
-  have hv := past.raw_valid hborn.raw_valid
+  have hi := hf.region
   have hsilent := e.nominal_silent_input hb hi i p hs.ready hs.charge.2 hz (hs.auxiliary p).1 hr (hs.auxiliary p).2 ho hno (by linarith)
   have hflows := e.allStates_main_flows i .ready hsilent.1
   obtain ⟨cycle⟩ := e.sensor_cycle hb hi i p (hs.auxiliary p).1 hr (hs.auxiliary p).2 (by linarith)
   have hh : s.x i (.z p) + 3 / 5 < Real.log ((θ i).cap p) :=
     lt_of_le_of_lt (by linarith) (hb.fast_nominal_headroom i p)
-  have hd := cycle.total_error_of_headroom past hborn hb hsilent.1 hh hr (hno p)
+  have hd := cycle.total_error_of_invariant hb hf hv hsilent.1 hh hr (hno p)
   have hqreturn := e.silent_charge_return hb hi i p hsilent.1 hr ho hno ht
   have hqlower := e.ready_charge_lower i hflows hs.charge.1
   have htarget := cycle.final_rest hv hr (hno p)
@@ -145,6 +144,15 @@ theorem Execution.silent_pulse {n θ ε route born s u} (e : @Execution n θ rou
     have h := e.gain_balance i q
     rw [(hother q hq).2] at h
     linarith
+
+theorem Execution.silent_pulse {n θ ε route born s u} (e : @Execution n θ route s u)
+    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+    (i : Fin n) (p : Port) (hs : ReadyCoordinates s i)
+    (hz : s.x i (.z p) ≤ Real.log (6 / 5) + 1 / 1000)
+    (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (SilentPulse e i p) := by
+  exact e.silent_pulse_of_invariant hb (past.physical_invariant hb (hborn.physical_invariant hb))
+    (past.raw_valid hborn.raw_valid) i p hs hz hr ho hno ht
 
 theorem SilentPulse.prepared {n θ route s u i p} {e : @Execution n θ route s u}
     (pulse : SilentPulse e i p) (hs : PreparedSection s i) : PreparedSection u i :=

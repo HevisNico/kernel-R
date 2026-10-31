@@ -35,22 +35,21 @@ theorem exp_low_recovery_lower : (14 / 25 : ℝ) ≤ Real.exp (-(577 / 1000 : �
 
 /-- The first strong input at birth recovery emits once and remains SLOW at
 the next input. No MARK word or prepared recovery is assumed. -/
-theorem Execution.first_strong_low_recovery {n θ ε route born s u} (e : @Execution n θ route s u)
-    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+theorem Execution.first_strong_low_recovery_of_valid {n θ ε route s u} (e : @Execution n θ route s u)
+    (hb : PhysicalBox θ ε) (hi : UpperRegion s) (hv : RawValid s)
     (i : Fin n) (p : Port) (hs : ReadyCoordinates s i)
     (hb₀ : 7999 / 100000 ≤ s.x i .b ∧ s.x i .b ≤ 8001 / 100000)
     (hz : 9 / 5 ≤ Real.exp (s.x i (.z p)) ∧ Real.exp (s.x i (.z p)) ≤ 12 / 5)
     (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
     (hno : ∀ q, NoArrivalAt e i q)
     (ht : s.time + 15 / 2 ≤ u.time ∧ u.time ≤ s.time + 17 / 2) : Nonempty (LowRecoveryPulse e i) := by
-  have hi := past.upper_region hb hborn.upper_region
-  have hv := past.raw_valid hborn.raw_valid
   obtain ⟨tr⟩ := e.mid_gain_input_trigger hb hi i p hs.ready hs.charge hz (hs.auxiliary p).1 hr (hs.auxiliary p).2 ho hno (by linarith [ht.1])
   obtain ⟨cycle⟩ := e.sensor_cycle hb hi i p (hs.auxiliary p).1 hr (hs.auxiliary p).2 (by linarith [ht.1])
   have hbstable := e.learned_recovery_unchanged cycle tr hb hv hr hno ho
     (fun q _ => ⟨(hs.auxiliary q).1,(hs.auxiliary q).2.2⟩)
   have hconst := e.recovery_constant_of_end hb i hbstable
-  have hzero := cycle.total_error_zero_of_trigger tr past hborn hr (hno p)
+  have hzero := cycle.error_zero_of_protected hv hr (hno p)
+    (cycle.error_protected_by_trigger tr (by linarith [hb₀.2]))
   have hother : ∀ q, q ≠ p →
       (u.aux i q = .ready ∧ RestBand (u.x i (.m q))) ∧ u.x i (.z q) = s.x i (.z q) :=
     fun q hq => e.aux_no_input_rest_band i q (hs.auxiliary q).1 (hs.auxiliary q).2 (ho q hq) (hno q)
@@ -118,7 +117,7 @@ theorem Execution.first_strong_low_recovery {n θ ε route born s u} (e : @Execu
       slow_date := hbtime
       slow_charge := hqslow
       integral := hI
-      emissions := tr.only_emission past hborn p hr ho hno
+      emissions := tr.only_emission_of_valid hv p hr ho hno
       error_zero := ?_
       mark_zero := hmark
       gain_preserved := hgain
@@ -138,5 +137,16 @@ theorem Execution.first_strong_low_recovery {n θ ε route born s u} (e : @Execu
       by_cases hq : q = p
       · subst q; exact ⟨htarget.1,by rw [htarget.2]; norm_num [RestBand]⟩
       · exact (hother q hq).1
+
+theorem Execution.first_strong_low_recovery {n θ ε route born s u} (e : @Execution n θ route s u)
+    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+    (i : Fin n) (p : Port) (hs : ReadyCoordinates s i)
+    (hb₀ : 7999 / 100000 ≤ s.x i .b ∧ s.x i .b ≤ 8001 / 100000)
+    (hz : 9 / 5 ≤ Real.exp (s.x i (.z p)) ∧ Real.exp (s.x i (.z p)) ≤ 12 / 5)
+    (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q)
+    (ht : s.time + 15 / 2 ≤ u.time ∧ u.time ≤ s.time + 17 / 2) : Nonempty (LowRecoveryPulse e i) := by
+  exact e.first_strong_low_recovery_of_valid hb (past.upper_region hb hborn.upper_region)
+    (past.raw_valid hborn.raw_valid) i p hs hb₀ hz hr ho hno ht
 
 end KernelR.Hybrid

@@ -42,6 +42,9 @@ source conservation permits outgoing routes and future tokens at other cells.
 Prepared cases and their variable-gap trains can now be proved directly from
 the current physical region and raw-origin validity, at arbitrary starting
 times. The earlier birth-reachable statements are retained as corollaries.
+A current-state physical invariant now also propagates gain/recovery caps and
+reserve in [50,100]. It derives positive ERROR/MARK exposure, so the silent,
+first-strong and protected-input cases can be reused from current bounds.
 The remaining routed/staged-birth calendars, combined pulse case, fine real
 enclosures, progress and complete
 execution-to-abstraction theorem remain open.
@@ -71,6 +74,7 @@ python3 scripts/check_hybrid_protected_negative.py
 python3 scripts/check_hybrid_source_negative.py
 python3 scripts/check_hybrid_cell_negative.py
 python3 scripts/check_hybrid_local_negative.py
+python3 scripts/check_hybrid_invariant_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

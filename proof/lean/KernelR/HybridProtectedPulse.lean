@@ -49,16 +49,15 @@ structure ProtectedPulse {n θ route s u} (e : @Execution n θ route s u) (i : F
 /-- A protected input at the SLOW entry left by the first strong low-recovery
 pulse supplies exactly one MARK dose and prepares the next learned input.
 The sensor cycle, open gates, zero output count and return are derived from e. -/
-theorem Execution.protected_pulse {n θ ε route born s u} (e : @Execution n θ route s u)
-    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+theorem Execution.protected_pulse_of_invariant {n θ ε route s u} (e : @Execution n θ route s u)
+    (hb : PhysicalBox θ ε) (hf : PhysicalInvariant θ s) (hv : RawValid s)
     (i : Fin n) (p : Port) (hs : MarkEntry s i)
     (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
     (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (ProtectedPulse e i p) := by
-  have hi := past.upper_region hb hborn.upper_region
-  have hv := past.raw_valid hborn.raw_valid
+  have hi := hf.region
   obtain ⟨cycle⟩ := e.sensor_cycle hb hi i p (hs.auxiliary p).1 hr (hs.auxiliary p).2 (by linarith)
-  have hd := cycle.full_protected_mark past hborn hb hs hr ho hno
-  obtain ⟨ret⟩ := cycle.protected_return past hborn hb hs hr ho hno ht
+  have hd := cycle.full_protected_mark_of_invariant hb hf hv hs hr ho hno
+  obtain ⟨ret⟩ := cycle.protected_return_of_invariant hb hf hv hs hr ho hno ht
   have hu := ret.final_ready hno
   have hother : ∀ q, q ≠ p →
       (u.aux i q = .ready ∧ RestBand (u.x i (.m q))) ∧ u.x i (.z q) = s.x i (.z q) :=
@@ -103,5 +102,13 @@ theorem Execution.protected_pulse {n θ ε route born s u} (e : @Execution n θ 
     by_cases hq : q = p
     · subst q; exact ⟨htarget.1,by rw [htarget.2]; norm_num [RestBand]⟩
     · exact (hother q hq).1
+
+theorem Execution.protected_pulse {n θ ε route born s u} (e : @Execution n θ route s u)
+    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+    (i : Fin n) (p : Port) (hs : MarkEntry s i)
+    (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (ProtectedPulse e i p) := by
+  exact e.protected_pulse_of_invariant hb (past.physical_invariant hb (hborn.physical_invariant hb))
+    (past.raw_valid hborn.raw_valid) i p hs hr ho hno ht
 
 end KernelR.Hybrid
