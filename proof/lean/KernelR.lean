@@ -55,3 +55,11 @@ import KernelR.HybridPulseSpans
 import KernelR.HybridResponseBounds
 import KernelR.HybridSensor
 import KernelR.HybridInputs
+import KernelR.HybridExecutionTools
+import KernelR.HybridSensorGain
+import KernelR.HybridInputBalance
+import KernelR.HybridMainBounds
+import KernelR.HybridMainComparison
+import KernelR.HybridSilent
+import KernelR.HybridFiring
+import KernelR.HybridSingleOutput

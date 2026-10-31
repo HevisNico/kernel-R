@@ -2,9 +2,11 @@
 
 The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. They do not
-yet derive the four main-cell pulse cases or the full training calendars from
-complete executions. Sensor triggering and the protected auxiliary cycle are
-now extracted from actual executions by the modules described below.
+yet derive all four main-cell pulse cases or the full training calendars from
+complete executions. They now derive an isolated silent input's absence of
+emissions and total ERROR dose, and extract the first firing of an isolated
+learned input and its exact single-emission count. Sensor triggering and the
+protected auxiliary cycle are also extracted from actual executions.
 
 ## Physical definitions
 
@@ -72,8 +74,16 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridPhases` | Select the first actual mode-changing jump and reconstruct the original execution; extract complete FAST and protected auxiliary phases | Requires starting mode/charge and a sufficiently long actual execution; existence is not asserted |
 | `HybridAuxCycle` | From actual MARK entry at m=1, extract MARK, SILENT, ERROR and the READY successor, with real protected duration in [123/110,41/30] | Main-cell interactions and subsequent inputs remain separate |
 | `HybridResponseBounds` | Real response bounds, including response<=3/4 in the raw window and a positive lower bound at 9/10 | Selected coarse analytic bounds, not soundness of every stored enclosure |
-| `HybridSensor` | A received pulse at a READY sensor in its rest band forces MARK in (t+1/100,t+1/40); ERROR starts after t+99/100; READY returns after t+1 and before t+419/300 | Given an execution reaching that horizon; no phase word is supplied; main firing and dose exposure remain open |
+| `HybridSensor` | A received pulse at a READY sensor in its rest band forces MARK in (t+1/100,t+1/40); ERROR starts after t+99/100; READY returns after t+1 and before t+419/300 | Given an execution reaching that horizon; no phase word is supplied; main-cell consequences are supplied by the later pulse modules |
 | `HybridInputs` | Queue and delivery provenance from actual sources/emissions; actual delivery dates; input isolation from queue/routing dates; raw validity, persistence and expiry | Concrete source queue and wiring must still be instantiated |
+| `HybridExecutionTools` | Flow and snapshot predicates, cuts inside actual flows, first changing jumps, and all discrete READY states including the terminal snapshot | Does not construct future continuations |
+| `HybridSensorGain` | Actual log-gain is frozen before t+99/100 and can increase by at most 11/125 during the raw window, using the extracted sensor cycle and ERROR speed bound | Allows ERROR overlap near the raw end; does not freeze the entire input |
+| `HybridInputBalance` | Exact multiset queue/delivery/routing conservation with duplicate tokens retained; actual arrival chronology; exact source-date lists when complete and all source tokens are due | Exact source exhaustion requires empty routing and terminal saturation |
+| `HybridMainBounds` | Global response<=3/4, silent charge bound, learned-gain interval [9/5,2], and real firing comparisons at 3/10 and 9/10 | Selected coarse real bounds; fine latency enclosures remain open |
+| `HybridMainComparison` | READY upper/lower comparisons across actual flows and jumps, using smooth comparison currents and the original pulse date | Requires actual drive bounds and READY flow spans |
+| `HybridSilent` | An isolated low-gain input has no main emissions, total ERROR dose 3/5, log-gain increase 3/5, and unchanged recovery | Declared charge/gain/rest section, reachable birth state, no new arrivals, and an actual execution reaching t+419/300 |
+| `HybridFiring` | An isolated learned input's first actual main firing lies in (t+3/10,t+9/10); its entry contributes exactly one emission and every earlier same-cell emission is excluded | First-departure extraction; does not construct the input execution |
+| `HybridSingleOutput` | The learned isolated input emits exactly once; after FAST the raw current is gone before SLOW can reopen, and zero-input READY cannot fire again | ERROR protection, SLOW return bounds and the full learned-input dose case remain open |
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -108,8 +118,11 @@ complete exposure predicate across legal intervening events. The real low-gain
 headroom estimate covers an increase of 12/5 above the low nominal log-gain;
 it does not establish that the protocol has produced that increase.
 
-Neither full-dose lemmas nor mode-span predicates derive the four pulse cases of
-the certified protocol. That remaining distinction is explicit in signatures.
+`HybridSilent` now derives the READY chronology, strict headroom and positive
+reserve for the isolated low-gain case. Its total ERROR dose follows from the
+actual sensor cycle and the absence of later arrivals, including the post-cycle
+READY sensor span. The other protected and combined cases, and their occurrence
+in the certified protocol, remain separate obligations.
 
 ## Actual sensor cycle
 
@@ -129,10 +142,55 @@ and main-mode switches may interleave freely.
 ERROR starts after t+99/100 and may overlap the last part of the raw pulse,
 which is retained by the variable-gain comparison lemmas. READY returns after
 the raw end t+1 and before t+419/300. Times are in the model's time units.
-Determining the main cell's firing and protection of doses during this cycle
-remains part of the pulse-case proof. The theorem does not construct its input
-execution or exclude later inputs. `HybridInputs` supplies provenance and
+Silent learning and the first learned firing are now derived as described below;
+protection and return after that firing remain open. The theorem does not
+construct its input execution or exclude later inputs. `HybridInputs` supplies provenance and
 isolation lemmas to discharge source and routing obligations separately.
+
+## Isolated main inputs
+
+`Execution.silent_input_dose` starts immediately after an actual canonical input
+arrival. The main cell is READY with q<=3/25; the receiving sensor is READY in
+the 1/40 +/- 1/100000 rest band; its log-gain is at most
+log(3/10)+6/5+1/100000. Other ports have no raw current. No new arrival at this
+cell occurs during the given execution, which must reach t+419/300. The initial
+state is reached by an actual execution from `BirthState`.
+
+These section assumptions imply that every actual discrete main state remains
+READY, including simultaneous jumps and the terminal snapshot. The actual
+emission list is empty. The total receiving-port ERROR integral is exactly 3/5,
+the final log-gain increases by 3/5, and recovery is unchanged. The proof derives
+ERROR exposure from reachable reserve and the remaining-charge cap budget. It
+also proves that the sensor stays READY after its extracted cycle, so the total
+dose does not hide a later contribution. It does not supply the training input
+list or assert that the protocol reaches this section.
+
+The raw-window gain increase is bounded by 11/125 using ERROR start after
+t+99/100 and Le<=11. Gain is constant before that date as a consequence of the
+selected sensor phases. The main READY comparison retains the late variable-gain
+part and bounds it by a smooth exponential upper current. The direct real bound
+response<=3/4 holds for every nonnegative age, so extending this comparison tail
+after the physical cutoff cannot create a false silent conclusion.
+
+`Execution.learned_input_trigger` instead takes log-gain in
+log(3/10)+9/5 +/- 1/100000 and q in [1/10-1/100000,7/50], with the same sensor,
+raw-input, isolation and execution-horizon conditions. Its first main departure
+is an actual firing at a date strictly between t+3/10 and t+9/10. The returned
+`MainTrigger` reconstructs the given execution, proves there was no earlier
+same-cell emission, and identifies its first actual emission and a positive
+output count. `Execution.learned_input_single_emission` strengthens this to an
+exact singleton emission list and count one. Any first FAST departure occurs one
+time unit after firing, hence after the raw cutoff. A later SLOW-to-READY departure
+reopens at q=1/10 with no raw input and cannot create an extra firing. The proof
+also covers executions ending in an incomplete FAST or SLOW phase. ERROR
+protection, SLOW return bounds and the full learned-input dose case remain open.
+
+`HybridInputBalance` retains every routed token in a multiset conservation law.
+For empty routing, an execution complete after all supplied source dates has an
+actual delivery list permuting the initial source queue. Filtering by cell/port
+and chronological sorting gives the exact source-date list, including duplicate
+tokens. This result remains conditional on a complete execution; it does not
+establish source availability, port separation or progress.
 
 ## Physical event budget
 
@@ -182,10 +240,11 @@ It connects to PR #6's interface but does not supply its leaf or `RelayLaw` witn
 1. Instantiate and review the semantics with the supplied protocols, including
    staged births where relevant, and prove routing adequacy and port separation.
 2. Prove the main/auxiliary interactions in each actual pulse case, including
-   combined MARK/ERROR, strict cap inactivity, variable-gain raw-tail overlap
-   and absence of extra firings. Sensor triggering, the protected auxiliary
-   cycle and phase selection are now derived from actual executions; their
-   synchronization with main firing and reopening remains open.
+   combined MARK/ERROR, strict cap inactivity and absence of extra firings.
+   The isolated silent input and its total dose are now proved with variable-gain
+   raw-tail overlap; a learned input's first firing is extracted. Protection,
+   return after that firing and the other cadence cases remain open. The
+   isolated learned input now has an exact single-emission count.
 3. Establish sound real enclosure membership for the remaining root, calendar,
    recovery and residual-tail expressions in the certificates. Exact comparisons
    of stored endpoints alone remain insufficient.
