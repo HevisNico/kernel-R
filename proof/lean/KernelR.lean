@@ -75,3 +75,7 @@ import KernelR.HybridMidGainInput
 import KernelR.HybridRecoveryTrace
 import KernelR.HybridLowRecovery
 import KernelR.HybridMarkBudget
+import KernelR.HybridProtectedWindow
+import KernelR.HybridProtectedMark
+import KernelR.HybridProtectedReturn
+import KernelR.HybridProtectedPulse

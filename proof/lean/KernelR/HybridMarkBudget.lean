@@ -13,11 +13,12 @@ theorem Execution.mark_split {n θ route s u v w} (e : @Execution n θ route s u
       congrArg (fun actual => actual.ledger.mark i p) he
     _ = _ := by simp [mark_append,ledger,Move.ledger,Ledger.add,exit.mark_zero]
 
-/-- One autonomous sensor cycle can add at most one full MARK charge, even
-before the main-mode and actuator-gate chronology has been established. -/
-theorem SensorCycle.mark_budget {n θ ε route s u i p} {e : @Execution n θ route s u}
-    (cycle : SensorCycle e i p) (hb : PhysicalBox θ ε) (hv : RawValid s)
-    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p) : e.ledger.mark i p ≤ 1 / 10 := by
+/-- The actual sensor decomposition places the entire MARK ledger in its
+selected MARK phase, including all zero-time interleavings. -/
+theorem SensorCycle.mark_ledger_eq_phase {n θ route s u i p} {e : @Execution n θ route s u}
+    (cycle : SensorCycle e i p) (hv : RawValid s)
+    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p) :
+    e.ledger.mark i p = cycle.phases.markPhase.span.ledger.mark i p := by
   let st := cycle.trigger
   let mk := cycle.phases.markPhase
   let si := cycle.phases.silentPhase
@@ -31,8 +32,16 @@ theorem SensorCycle.mark_budget {n θ ε route s u i p} {e : @Execution n θ rou
     (er.span.mark_zero_aux i p .error (by decide) er.flows)
   have htail := er.rest.mark_zero_aux i p .ready (by decide)
     (er.rest.allStates_aux_flows i p .ready (cycle.error_rest_ready hv hr hno))
-  have hbound := mk.span.mark_charge_upper hb i p mk.flows
-  rw [st.charge,mk.charge] at hbound
+  linarith
+
+/-- One autonomous sensor cycle can add at most one full MARK charge, even
+before the main-mode and actuator-gate chronology has been established. -/
+theorem SensorCycle.mark_budget {n θ ε route s u i p} {e : @Execution n θ route s u}
+    (cycle : SensorCycle e i p) (hb : PhysicalBox θ ε) (hv : RawValid s)
+    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p) : e.ledger.mark i p ≤ 1 / 10 := by
+  rw [cycle.mark_ledger_eq_phase hv hr hno]
+  have hbound := cycle.phases.markPhase.span.mark_charge_upper hb i p cycle.phases.markPhase.flows
+  rw [cycle.trigger.charge,cycle.phases.markPhase.charge] at hbound
   norm_num only [protectedFloor] at hbound
   linarith
 

@@ -96,8 +96,13 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridSilentReturn` | At a gap >=7.5 the silent input restores READY charge/sensor bands, consumes its raw current, changes only the receiving gain by 3/5 and leaves recovery unchanged | No prepared-recovery premise; source/route instantiation and existence remain separate |
 | `HybridMidGainInput` | First firing and the prepared learned-input case hold for actual gains in [9/5,12/5], covering both training gain regimes | The first firing alone does not establish a low-recovery cell's later MARK bootstrap |
 | `HybridRecoveryTrace` | Nondecreasing recovery bounds every intermediate point; equal endpoint recovery freezes it throughout; exact constant-rate accumulated integrals and a SLOW no-departure budget | Only actual execution segments are compared |
-| `HybridLowRecovery` | The first strong low-recovery input emits once, preserves every gain and recovery, has zero ERROR/MARK doses, and is still SLOW at a successor gap in [7.5,8.5], with q in [7/50,1/4] and READY sensors | The following protected MARK dose is not assumed or yet derived |
+| `HybridLowRecovery` | The first strong low-recovery input emits once, preserves every gain and recovery, has zero ERROR/MARK doses, and is still SLOW at a successor gap in [7.5,8.5], with q in [7/50,1/4] and READY sensors | The next protected input is handled separately by `HybridProtectedPulse` |
 | `HybridMarkBudget` | A single sensor cycle adds at most 1/10 to recovery, including clipped or closed gates; this bound precedes proof of main protection or full MARK exposure | An upper budget does not imply a full dose |
+| `HybridProtectedWindow` | The unconditional recovery budget keeps the actual main state SLOW through the whole sensor cycle | Requires the derived `MarkEntry`, a single canonical input and no new arrivals |
+| `HybridProtectedMark` | Actual birth-reachable MARK gates are open throughout its selected phase; total MARK is 1/10 and total ERROR is zero | No full-dose or main-mode word is assumed |
+| `HybridProtectedReturn` | The gained recovery forces an actual SLOW-to-READY return before t+6.990787, with all raw currents gone | Quantifies over an actual execution reaching t+7.5 |
+| `HybridProtectedPulse` | No emissions, MARK 1/10 on the receiving port and zero on others, ERROR zero everywhere, all gains unchanged, recovery increased by 1/10, prepared section restored at exact q=1/10 | Concrete source calendars and birth-to-entry chronology remain separate |
+
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -135,8 +140,8 @@ it does not establish that the protocol has produced that increase.
 `HybridSilent` now derives the READY chronology, strict headroom and positive
 reserve for the isolated low-gain case. Its total ERROR dose follows from the
 actual sensor cycle and the absence of later arrivals, including the post-cycle
-READY sensor span. The other protected and combined cases, and their occurrence
-in the certified protocol, remain separate obligations.
+READY sensor span. The isolated protected case is proved below. The combined case and the pulse
+cases’ occurrence in the certified protocol remain separate obligations.
 
 ## Actual sensor cycle
 
@@ -257,14 +262,28 @@ log(5/2), so the main cell is still SLOW at the next input, with q in [7/50,1/4]
 All auxiliaries are READY in their rest bands and raw currents are gone. These
 are the proved `MarkEntry` conditions for the following input.
 
-The following input's complete protected MARK dose remains open. The new
-`SensorCycle.mark_budget` first bounds its possible contribution by 1/10 without
-assuming that the main gate remains open. The corresponding recovery upper
-bound can therefore be used to establish protection without assuming the dose
-whose exposure is being proved. Positive-reserve and strict-cap exposure helpers
-retain their actual reachable prefixes. Neither an upper budget nor `MarkEntry`
-asserts that the full MARK dose has already occurred. Concrete source chronology
-and the full birth-to-preparation theorem remain separate obligations.
+`Execution.protected_pulse` now closes the following isolated protected input.
+It takes the derived `MarkEntry`, an isolated canonical input at a READY sensor,
+birth reachability and an actual execution reaching t+7.5. First the unconditional
+one-input MARK budget bounds recovery by 0.18001. If SLOW exited within the sensor
+window, its exact charge equation and the actual recovery integral upper bound
+would contradict initial q>=7/50. Thus the cell stays SLOW through t+419/300,
+without assuming a full MARK dose.
+
+MARK ends before t+1/20. The proved main protection, strict recovery headroom and
+birth-family reserve invariant open its actual gates throughout the selected
+MARK phase. The physical charge endpoints give exactly 1/10. The same main
+protection makes ERROR zero. All other ports remain quiescent; every gain is
+unchanged and recovery increases by exactly 1/10, into [0.17999,0.18001].
+
+Starting at the actual MARK end, SLOW has charge in [1/10,1/4] and recovery at
+least 0.17999. Its integral comparison forces a selected READY return before
+t+6.990787. Protection excludes a return before the raw pulse has ended, and
+zero-input READY relaxation then holds q exactly at 1/10. The whole input has
+no emissions, no remaining raw current, READY sensors in their rest bands and
+ends in `PreparedSection`. Neither a phase word nor the desired dose/count is
+supplied. Concrete source chronology and the full birth-to-preparation theorem
+remain separate obligations.
 
 `HybridInputBalance` retains every routed token in a multiset conservation law.
 For empty routing, an execution complete after all supplied source dates has an
@@ -325,7 +344,7 @@ It connects to PR #6's interface but does not supply its leaf or `RelayLaw` witn
    The isolated silent input and its total dose are proved with variable-gain
    raw-tail overlap. The prepared learned-input case now has an exact single
    emission, zero ERROR/MARK doses, preserved memories and an actual READY
-   return. The other protected/combined cases and their protocol occurrence
+   return. The combined case and the pulse cases’ protocol occurrence
    remain open.
 3. Establish sound real enclosure membership for the remaining root, calendar,
    recovery and residual-tail expressions in the certificates. Exact comparisons
@@ -356,6 +375,11 @@ python scripts/check_hybrid_negative.py
 python scripts/check_hybrid_analytic_negative.py
 python scripts/check_hybrid_event_negative.py
 python scripts/check_hybrid_phase_negative.py
+python scripts/check_hybrid_pulse_negative.py
+python scripts/check_hybrid_return_negative.py
+python scripts/check_hybrid_training_negative.py
+python scripts/check_hybrid_bootstrap_negative.py
+python scripts/check_hybrid_protected_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -371,3 +395,7 @@ Phase controls reject an absent received input, altered sensor/error/return
 dates, a shortened protected cycle, freezing a variable gain, an incorrect
 clipped-dose coefficient, a retained expired raw current, and omission of
 routed tokens from delivery provenance.
+
+Protected-input controls reject a missing MARK dose, two recovery increments,
+a positive ERROR dose, an extra emission, changed gains, a missing READY return
+and an altered resting charge. Each changed claim must fail with a Lean diagnostic.
