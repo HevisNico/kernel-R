@@ -4,6 +4,8 @@ from pathlib import Path
 import subprocess
 import tempfile
 
+from lean_check import lean_check_command
+
 ROOT = Path(__file__).resolve().parents[1]
 PREFIX = 'import KernelR.HybridEventBudget\nopen KernelR.Hybrid\n'
 
@@ -47,10 +49,11 @@ def main():
     ]
     with tempfile.TemporaryDirectory(prefix='hybrid-event-negative-', dir=ROOT) as tmp:
         path = Path(tmp) / 'Check.lean'
+        command = lean_check_command(tmp)
         for name, good, bad in cases:
             for expected, source in [(True, good), (False, bad)]:
                 path.write_text(PREFIX + source)
-                result = subprocess.run(['lake', 'env', 'lean', str(path)], cwd=ROOT,
+                result = subprocess.run([*command, str(path)], cwd=ROOT,
                                         text=True, stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT, timeout=120)
                 if (result.returncode == 0) != expected:

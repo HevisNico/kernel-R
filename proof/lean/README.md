@@ -14,8 +14,12 @@ cap, charge and reserve invariants, including work <=500 and positive energy
 throughout reachable flows. `HybridEvents`, `HybridAuxEvents` and
 `HybridEventBudget` derive emission chronology and a uniform physical jump budget
 for every finite prefix before a bounded horizon, with initial delivery tokens
-and bounded routing fanout counted explicitly. Protocol-specific chronology,
-the remaining real enclosures, progress and the complete execution-to-abstraction
+and bounded routing fanout counted explicitly. The phase-selection and sensor
+modules now extract actual protected phases and the complete auxiliary cycle
+of a received pulse, with directly proved real timing bounds. Variable-gain
+READY comparisons retain every active raw tail. Protocol-specific main/auxiliary
+chronology, remaining real enclosures, progress and the complete
+execution-to-abstraction
 theorem remain open.
 
 ## Reproduce
@@ -25,7 +29,8 @@ Install [elan](https://github.com/leanprover/elan), then from this directory:
 ```sh
 lake exe cache get
 lake build
-lake env lean Audit.lean
+lake build Audit
+python3 scripts/check_audit_negative.py
 python3 scripts/generate_evidence.py --check
 python3 scripts/robust_evidence.py --check
 python3 scripts/check_sources.py
@@ -33,13 +38,18 @@ python3 scripts/check_negative.py
 python3 scripts/check_hybrid_negative.py
 python3 scripts/check_hybrid_analytic_negative.py
 python3 scripts/check_hybrid_event_negative.py
+python3 scripts/check_hybrid_phase_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
 `lake-manifest.json`. The first build downloads Mathlib's compiled dependencies.
 The build checks proof terms; the audit rejects any project theorem using axioms
 other than `propext`, `Classical.choice` and `Quot.sound`. There are no admitted
-proofs, project axioms or native-evaluation proofs.
+proofs, project axioms or native-evaluation proofs. The Audit build target uses
+Lake's exact artifact paths. Its scan includes every imported and current
+`KernelR`/`A22` theorem; negative controls cover corruption in both locations.
+Standalone proof controls reuse the same dependency artifacts and compiler
+options.
 
 ## Coverage and hypotheses
 

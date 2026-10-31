@@ -46,3 +46,12 @@ import KernelR.Robust.Induction
 import KernelR.Robust.Evidence
 import KernelR.Robust.Response
 import KernelR.Robust.Certified
+import KernelR.HybridEnvelope
+import KernelR.HybridClipping
+import KernelR.HybridPhases
+import KernelR.HybridPrefix
+import KernelR.HybridAuxCycle
+import KernelR.HybridPulseSpans
+import KernelR.HybridResponseBounds
+import KernelR.HybridSensor
+import KernelR.HybridInputs
