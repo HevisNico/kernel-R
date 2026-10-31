@@ -95,6 +95,9 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridNominalSilent` | No emission and total ERROR dose 3/5 for inputs with q<=7/50 and log-gain<=log(6/5)+1/1000, at any reachable recovery | Receiving sensor must be READY in its rest band, input isolated, and the actual trace long enough |
 | `HybridSilentReturn` | At a gap >=7.5 the silent input restores READY charge/sensor bands, consumes its raw current, changes only the receiving gain by 3/5 and leaves recovery unchanged | No prepared-recovery premise; source/route instantiation and existence remain separate |
 | `HybridMidGainInput` | First firing and the prepared learned-input case hold for actual gains in [9/5,12/5], covering both training gain regimes | The first firing alone does not establish a low-recovery cell's later MARK bootstrap |
+| `HybridRecoveryTrace` | Nondecreasing recovery bounds every intermediate point; equal endpoint recovery freezes it throughout; exact constant-rate accumulated integrals and a SLOW no-departure budget | Only actual execution segments are compared |
+| `HybridLowRecovery` | The first strong low-recovery input emits once, preserves every gain and recovery, has zero ERROR/MARK doses, and is still SLOW at a successor gap in [7.5,8.5], with q in [7/50,1/4] and READY sensors | The following protected MARK dose is not assumed or yet derived |
+| `HybridMarkBudget` | A single sensor cycle adds at most 1/10 to recovery, including clipped or closed gates; this bound precedes proof of main protection or full MARK exposure | An upper budget does not imply a full dose |
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -242,9 +245,26 @@ silent input. The tolerance here is a stated input-section bound, not a proof
 of birth-to-section reachability. `Execution.learned_mid_pulse` handles the
 prepared emitting case for actual initial gains in [9/5,12/5], without fixing a
 nominal gain formula. This includes the low-port gain after three ERROR doses
-and the fast-port gain after one. The protected MARK that raises birth recovery
-by 1/10, and the actual source chronology producing those dose counts, remain
-to be proved.
+and the fast-port gain after one.
+
+`Execution.first_strong_low_recovery` now covers the first strong input before
+recovery has been prepared. The initial READY coordinate bands and gain range
+are as above, but b is in [0.07999,0.08001], and the given isolated trace ends
+at a gap in [7.5,8.5]. Its actual firing, FAST exit, SLOW suffix and reconstruction
+are returned. There is exactly one emission, no ERROR or MARK dose on any port,
+and every gain and b are unchanged. The accumulated SLOW recovery stays below
+log(5/2), so the main cell is still SLOW at the next input, with q in [7/50,1/4].
+All auxiliaries are READY in their rest bands and raw currents are gone. These
+are the proved `MarkEntry` conditions for the following input.
+
+The following input's complete protected MARK dose remains open. The new
+`SensorCycle.mark_budget` first bounds its possible contribution by 1/10 without
+assuming that the main gate remains open. The corresponding recovery upper
+bound can therefore be used to establish protection without assuming the dose
+whose exposure is being proved. Positive-reserve and strict-cap exposure helpers
+retain their actual reachable prefixes. Neither an upper budget nor `MarkEntry`
+asserts that the full MARK dose has already occurred. Concrete source chronology
+and the full birth-to-preparation theorem remain separate obligations.
 
 `HybridInputBalance` retains every routed token in a multiset conservation law.
 For empty routing, an execution complete after all supplied source dates has an

@@ -27,7 +27,9 @@ charge. Its actual firing equation retains the initial residual charge.
 A broader silent case now covers the nominal fast gain and low birth recovery,
 preserving READY charge/sensor bands before the next input. The learned case
 also covers actual gains in [1.8,2.4]. Birth-to-preparation still requires the
-protected MARK bootstrap and concrete source chronology. The other pulse cases,
+full protected MARK dose and concrete source chronology. The first strong
+low-recovery input is now proved to emit once and remain SLOW at the next
+input, with unchanged memories and a derived charge band for that next stage. The other pulse cases,
 fine real enclosures, progress and complete execution-to-abstraction theorem
 remain open.
 
@@ -51,6 +53,7 @@ python3 scripts/check_hybrid_phase_negative.py
 python3 scripts/check_hybrid_pulse_negative.py
 python3 scripts/check_hybrid_return_negative.py
 python3 scripts/check_hybrid_training_negative.py
+python3 scripts/check_hybrid_bootstrap_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

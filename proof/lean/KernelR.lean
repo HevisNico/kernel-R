@@ -72,3 +72,6 @@ import KernelR.HybridPulseBounds
 import KernelR.HybridNominalSilent
 import KernelR.HybridSilentReturn
 import KernelR.HybridMidGainInput
+import KernelR.HybridRecoveryTrace
+import KernelR.HybridLowRecovery
+import KernelR.HybridMarkBudget
