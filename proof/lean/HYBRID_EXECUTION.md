@@ -41,8 +41,11 @@ confluence or simulator coverage of all simultaneous events.
 `CompleteThrough` requires reaching the horizon and discharging enabled jumps
 and due deliveries, including events exactly at the horizon. `Flow.prefix`
 constructs a valid shorter prefix of an existing flow; it does not construct a
-future continuation. A complete positive-duration silent execution is exhibited,
-but existence for the training protocols remains unproved.
+future continuation. `birth_resting_complete_exists` exhibits a complete
+positive-duration silent execution from a nominal READY state and proves that
+this state belongs to `BirthState`, with the prescribed nominal log-gains and
+an empty source queue. This is one concrete birth-family witness, not existence
+for every initial state or for the training protocols; those remain unproved.
 
 ## Checked implications
 

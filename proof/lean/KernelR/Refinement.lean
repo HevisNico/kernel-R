@@ -280,6 +280,66 @@ theorem resting_complete_exists {n} (θ : Fin n → Parameters) (route : Router 
   · intro u; exact resting_no_jump
   · simp [resting]
 
+/-- A nominal READY birth with no sources. Unlike `resting`, its log-gains
+belong to the declared birth family. -/
+noncomputable def birthResting {n : ℕ} (t : ℝ) : Snapshot n :=
+  ⟨t, (fun _ c => match c with
+    | .q => 1 / 10 | .m _ => 1 / 40 | .z p => Real.log (nominalGain p)
+    | .b => 2 / 25 | .energy => 100),
+   fun _ => .ready, fun _ _ => .ready, fun _ _ => none, []⟩
+
+theorem birthResting_birth {n} : BirthState (birthResting (n := n) 0) := by
+  refine ⟨rfl, fun _ _ => rfl, ?_⟩
+  intro i
+  refine ⟨rfl, ?_, ?_, ?_, ?_⟩
+  · norm_num [birthResting]
+  · norm_num [birthResting]
+  · norm_num [birthResting]
+  · intro p
+    refine ⟨?_, Or.inl ?_⟩
+    · change Real.log (nominalGain p) - 1 / 100000 ≤ Real.log (nominalGain p) ∧
+        Real.log (nominalGain p) ≤ Real.log (nominalGain p) + 1 / 100000
+      constructor <;> linarith
+    · norm_num [birthResting]
+
+theorem birthResting_field {n} (θ : Fin n → Parameters) (s t : ℝ)
+    (i : Fin n) (c : Coord) : field θ (birthResting s) (birthResting s).x t i c = 0 := by
+  cases c <;> simp [field, birthResting, drive, current, work, errorAct, markAct]
+
+noncomputable def birthRestingFlow {n} (θ : Fin n → Parameters) {T : ℝ} (hT : 0 < T) :
+    Flow θ (birthResting 0) (birthResting T) where
+  positive := hT
+  path := fun _ => (birthResting 0).x
+  initial := rfl
+  final := rfl
+  main_fixed := rfl
+  aux_fixed := rfl
+  raw_fixed := rfl
+  queue_fixed := rfl
+  continuous := fun _ _ => continuousOn_const
+  integrable := by intros; simp only [birthResting_field]; exact intervalIntegrable_const
+  mark_integrable := by intros; simp [markAct, birthResting]
+  integral_eq := by intros; simp [birthResting_field]
+  guards := by intros; constructor <;> intros <;> norm_num [BeforeGuards, birthResting]
+  raw_support := by intros; simp_all [birthResting]
+  pending_urgent := by intros; simp_all [birthResting]
+
+theorem birthResting_no_jump {n route T u} : IsEmpty (@Jump n route (birthResting T) u) := by
+  constructor
+  intro j
+  cases j <;> simp_all [birthResting]
+
+/-- A complete positive-duration silent execution starts in the actual birth
+family. This is a concrete witness, not existence for the training protocols
+or for every member of the birth family. -/
+theorem birth_resting_complete_exists {n} (θ : Fin n → Parameters) (route : Router n)
+    {T : ℝ} (hT : 0 < T) :
+    ∃ e : Execution θ route (birthResting 0) (birthResting T),
+      BirthState (birthResting (n := n) 0) ∧ CompleteThrough e T := by
+  refine ⟨.cons (.flow (birthRestingFlow θ hT)) (.nil _), birthResting_birth, rfl, ?_, ?_⟩
+  · intro u; exact birthResting_no_jump
+  · simp [birthResting]
+
 /-- Two compatible simultaneous guards admit both zero-duration orders.
 No priority between a main firing and an auxiliary MARK is imposed. -/
 theorem simultaneous_fire_mark_orders {n θ} (s : Snapshot n) (i : Fin n) (p : Port)
