@@ -13,9 +13,9 @@ theorem receivedInput_amplitude {theta active s} (hs : LearnedRest theta active 
     mainAmplitude (receivedInput s port) 0 = Real.exp (s.x 0 (.z port)) := by
   unfold mainAmplitude
   rw [Finset.sum_eq_single port]
-  · simp [rawAmplitude, receivedInput, setRaw]
+  · simp [frozenRawAmplitude, receivedInput, setRaw]
   · intro other _ hne
-    simp [rawAmplitude, receivedInput, setRaw, hne, hs.raw]
+    simp [frozenRawAmplitude, receivedInput, setRaw, hne, hs.raw]
   · simp
 
 theorem receivedInput_main_charge {theta active s} (hs : LearnedRest theta active s)
@@ -33,8 +33,8 @@ theorem receivedInput_active_charge {theta active s} (hs : LearnedRest theta act
       auxPulse (s.x 0 (.m port)) ((theta 0).inputGain port) 0 (t-s.time) := by
   have hm : (receivedInput s port).aux 0 port = .ready := hs.aux 0 port
   simp only [frozenValues, frozenBody, frozenAux, hm, ite_true]
-  have hr : rawAmplitude (receivedInput s port) 0 port = 1 := by
-    simp [rawAmplitude, receivedInput, setRaw]
+  have hr : frozenRawAmplitude (receivedInput s port) 0 port = 1 := by
+    simp [frozenRawAmplitude, receivedInput, setRaw]
   rw [hr, mul_one]
   simp [receivedInput, setRaw, auxPulse, readyPulse]
 
@@ -43,8 +43,8 @@ theorem receivedInput_passive_charge {theta active s} (hs : LearnedRest theta ac
     frozenValues theta (receivedInput s port) t 0 (.m other) = idleValues s t 0 (.m other) := by
   have hm : (receivedInput s port).aux 0 other = .ready := hs.aux 0 other
   simp only [frozenValues, frozenBody, frozenAux, hm, ite_true]
-  have hr : rawAmplitude (receivedInput s port) 0 other = 0 := by
-    simp [rawAmplitude, receivedInput, setRaw, hne, hs.raw]
+  have hr : frozenRawAmplitude (receivedInput s port) 0 other = 0 := by
+    simp [frozenRawAmplitude, receivedInput, setRaw, hne, hs.raw]
   rw [hr, mul_zero]
   simp [receivedInput, setRaw, auxPulse, readyPulse, idleValues]
   ring

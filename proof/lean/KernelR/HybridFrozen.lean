@@ -31,7 +31,7 @@ noncomputable def extendedCurrent {n} (s : Snapshot n) (i : Fin n) (p : Port) (t
   | none => 0
   | some origin => a * Real.exp (-a*(t-origin))
 
-noncomputable def rawAmplitude {n} (s : Snapshot n) (i : Fin n) (p : Port) : ℝ :=
+noncomputable def frozenRawAmplitude {n} (s : Snapshot n) (i : Fin n) (p : Port) : ℝ :=
   match s.raw i p with
   | none => 0
   | some origin => Real.exp (-a*(s.time-origin))
@@ -42,14 +42,14 @@ noncomputable def rawAmplitude {n} (s : Snapshot n) (i : Fin n) (p : Port) : ℝ
   cases hr : s.raw i p <;> simp only [extendedCurrent, hr] <;> fun_prop
 
 theorem extendedCurrent_factor {n} (s : Snapshot n) (i : Fin n) (p : Port) (t : ℝ) :
-    extendedCurrent s i p t = rawAmplitude s i p * a * Real.exp (-a*(t-s.time)) := by
+    extendedCurrent s i p t = frozenRawAmplitude s i p * a * Real.exp (-a*(t-s.time)) := by
   cases hr : s.raw i p with
-  | none => simp [extendedCurrent, rawAmplitude, hr]
+  | none => simp [extendedCurrent, frozenRawAmplitude, hr]
   | some origin =>
     have he : Real.exp (-a*(t-origin)) =
         Real.exp (-a*(s.time-origin)) * Real.exp (-a*(t-s.time)) := by
       rw [← Real.exp_add]; congr 1; ring
-    simp only [extendedCurrent, rawAmplitude, hr]
+    simp only [extendedCurrent, frozenRawAmplitude, hr]
     rw [he]
     ring
 
@@ -77,7 +77,7 @@ noncomputable def extendedField {n} (θ : Fin n → Parameters) (s : Snapshot n)
   | .energy => 10*(100-x i .energy) - extendedWork θ s x i t
 
 noncomputable def mainAmplitude {n} (s : Snapshot n) (i : Fin n) : ℝ :=
-  ∑ p : Port, Real.exp (s.x i (.z p)) * rawAmplitude s i p
+  ∑ p : Port, Real.exp (s.x i (.z p)) * frozenRawAmplitude s i p
 
 noncomputable def frozenMain {n} (s : Snapshot n) (i : Fin n) (t : ℝ) : ℝ :=
   match s.main i with
@@ -88,7 +88,7 @@ noncomputable def frozenMain {n} (s : Snapshot n) (i : Fin n) (t : ℝ) : ℝ :=
 noncomputable def frozenAux {n} (θ : Fin n → Parameters) (s : Snapshot n)
     (i : Fin n) (p : Port) (t : ℝ) : ℝ :=
   if s.aux i p = .ready then
-    auxPulse (s.x i (.m p)) ((θ i).inputGain p * rawAmplitude s i p) s.time t
+    auxPulse (s.x i (.m p)) ((θ i).inputGain p * frozenRawAmplitude s i p) s.time t
   else s.x i (.m p) * Real.exp (-auxRate (θ i) p (s.aux i p)*(t-s.time))
 
 noncomputable def frozenBody {n} (θ : Fin n → Parameters) (s : Snapshot n) (t : ℝ) : Values n :=
@@ -196,7 +196,7 @@ theorem frozenValues_derivative {n} (θ : Fin n → Parameters) (s : Snapshot n)
     by_cases hm : s.aux i p = .ready
     · simpa only [frozenValues, frozenBody, frozenAux, hm, ite_true, extendedField,
         extendedCurrent_factor, mul_assoc]
-        using auxPulse_derivative (s.x i (.m p)) ((θ i).inputGain p*rawAmplitude s i p) s.time t
+        using auxPulse_derivative (s.x i (.m p)) ((θ i).inputGain p*frozenRawAmplitude s i p) s.time t
     · have hd := (((((hasDerivAt_id t).sub_const s.time).const_mul
         (-auxRate (θ i) p (s.aux i p))).exp).const_mul (s.x i (.m p)))
       convert hd using 1
