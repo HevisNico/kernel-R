@@ -341,3 +341,9 @@ import KernelR.HybridCadenceMixedResponse
 import KernelR.HybridCadenceMixedNextSource
 import KernelR.HybridCadenceHighFireExistence
 import KernelR.HybridCadenceHighCompletion
+import KernelR.HybridLocalCadenceHighTrain
+import KernelR.HybridLocalCadenceTail
+import KernelR.HybridBirthCadenceLocalCTail
+import KernelR.HybridAutonomousCellProjection
+import KernelR.HybridBirthCadenceLocalC
+import KernelR.HybridConstructedCadenceLeafPacket

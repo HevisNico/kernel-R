@@ -64,9 +64,22 @@ C's protected C656 MARK derives its own newborn recovery+0.2, near0.28.
 It retains A/B's actual paths and consumes C660, leaving19 later C sources.
 This does not change the bridge above, which concerns the actual639.9
 Aport2/Bport2 projections and imported recovery domain[0.17,0.2]. C660's
-recovery is outside that domain. The separate local C664/668, high-gain FIRE
-and high-completion constructors do not supply new isolated contracts for
-every C state or a global indefinite network theorem.
+recovery is outside that domain.
+
+The separate `ConstructedCadenceLocalC` now gives an actual finite C-only
+execution639.9→789.9. `c.local_c_full_exists hb` projects C's actual global
+prefix through660, retaining its source queue and physical observations, then
+appends the constructed local tail. It consumes all 25 sources640..736 and
+emits 20 cadence signals (cumulative C34 including teaching). At789.9 C is
+READY/q=0.1 with no RAW or pending tokens, own newborn port0 log-gain+2.4 and
+recovery+0.3; other gains retain their teaching values. Its real ledger derives
+P(3,17,0), and bounded delays sampled at FIRE give P(3,17,1/20) token labels.
+These labels do not construct global arrivals or advance A/B beyond660.
+
+This finite cadence construction does not instantiate `LearnedRest` for its
+higher gain/recovery endpoint or provide indefinite contracts for every C
+state. The isolated learned-domain theorem above and the global network
+continuation remain separate results.
 
 ## Proof map
 
@@ -79,6 +92,7 @@ every C state or a global indefinite network theorem.
 | `LearnedReturn`, `LearnedSingleCell` | Actual FAST/SLOW exits, learned-domain closure, settling and the one-cell contract |
 | `HybridFuture`, `Indefinite` | Physical waiting, future-queue extension, compatible prefixes and complete horizon extraction |
 | `FutureControls`, `LearnedCycleControls` | Nonempty physical witnesses, periodic finite-horizon executions and counterexamples to overstrong assumptions |
+| `HybridBirthCadenceLocalC` / `HybridConstructedCadenceLeafPacket` | Separate finite autonomous C639.9→789.9 execution and real-ledger leaf packet; no learned-domain or global indefinite-network conclusion |
 | `HybridBirthLearnedRest` | Exact learned-domain membership of Aport2/Bport2 projections at639.9, isolated pulse contracts and complete finite-horizon futures |
 
 Every flow checks strict guards, raw support and pending-token urgency. The
@@ -119,15 +133,16 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
 `lake build` includes all modules and the global `Audit` target. Only `propext`,
 `Classical.choice` and `Quot.sound` are allowed. Controls instantiate the full
 return, the contract and complete periodic executions at every finite horizon.
-The C660 checkpoint passed the complete pinned build (9,452 jobs) and global
-audit (25,342 project theorems). Source identities cover399 Lean files and
-five unchanged upstream modules. Generated evidence, all16 robust certificates
-and12 project tests pass. All73 new paired controls pass:24 global C656/C660,
-25 local second-stage and24 high-response pairs. Each valid conclusion compiles
-and every altered conclusion is rejected with a Lean diagnostic. The preceding
-62 first-cadence-wire and43 first-wave pairs also passed. CI configures824
-paired controls; this inventory does not assert a local rerun of every suite.
-Fresh CI status is reported on the PR.
+The autonomous-C/leaf-packet checkpoint passed the complete pinned build
+(9,458 jobs) and global audit (25,538 project theorems). Source identities
+cover405 Lean files and five unchanged upstream modules. Generated evidence,
+all16 robust certificates and12 project tests pass. Its53 additional paired
+controls pass:25 local-C-tail,20 constructed-leaf/projection and8 new actual
+high-return-prefix checks. The complete high suite now has32 passing pairs.
+Each valid conclusion compiles and every altered conclusion is rejected with
+a Lean diagnostic. Earlier C660/first-wire/first-wave controls passed at their
+checkpoints. CI configures877 paired controls; this inventory does not assert
+a local rerun of every suite. Fresh CI status is reported on the PR.
 
 These isolated future contracts remain distinct from the actual C→B→A network
 construction and do not establish network routing or universal refinement.

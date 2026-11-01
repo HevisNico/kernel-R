@@ -323,6 +323,14 @@ structure CadenceHighReadyReturn (θ : Fin 1 → Parameters) (route : Router 1)
   reconstruct : execution = head.append rest
   return_date : returnState.time = s.time + slowReopenDuration s 0
   return_deadline : returnState.time < source + 19 / 5
+  return_ready : ∀ j, ReadyCoordinates returnState j
+  return_charge : returnState.x 0 .q = 1 / 10
+  return_raw_none : ∀ j q, returnState.raw j q = none
+  return_pending : returnState.pending = s.pending
+  return_gains : ∀ j q, returnState.x j (.z q) = s.x j (.z q)
+  return_recovery : ∀ j, returnState.x j .b = s.x j .b
+  head_emissions : head.ledger.emissions = []
+  head_deliveries : head.deliveries = []
 
 private theorem cadence_high_ready_return_exists {θ route} (s : Snapshot 1) (source F B : ℝ)
     (hm : s.main 0 = .slow)
@@ -406,6 +414,9 @@ private theorem cadence_high_ready_return_exists {θ route} (s : Snapshot 1) (so
     charge := ?_, raw_none := hr, pending := rfl, gains := fun _ _ => rfl, recovery := fun _ => rfl
     emissions := rfl, deliveries := rfl, returnState := reopened, head := head, rest := rest
     reconstruct := rfl, return_date := rfl, return_deadline := hdeadline
+    return_ready := hready, return_charge := hthreshold, return_raw_none := hr
+    return_pending := rfl, return_gains := fun _ _ => rfl, return_recovery := fun _ => rfl
+    head_emissions := rfl, head_deliveries := rfl
   }⟩
   change relax (1 / 2) (1 / 10) (before.x 0 .q) T (source + 4) = 1 / 10
   rw [hthreshold]
@@ -428,6 +439,11 @@ structure CadenceHighCompletion {θ : Fin 1 → Parameters} {s : Snapshot 1} {p 
   raw_valid : RawValid final
   slowSection : Snapshot 1
   toSlow : Execution θ (fun _ _ => []) fire.final slowSection
+  toSlow_pending : slowSection.pending = fire.final.pending
+  toSlow_gains : ∀ j q, slowSection.x j (.z q) = fire.final.x j (.z q)
+  toSlow_recovery : ∀ j, slowSection.x j .b = fire.final.x j .b
+  toSlow_emissions : toSlow.ledger.emissions = []
+  toSlow_deliveries : toSlow.deliveries = []
   returned : CadenceHighReadyReturn θ (fun _ _ => []) slowSection s.time
   returned_final : final = returned.final
   reconstruct : HEq execution (toSlow.append returned.execution)
@@ -595,7 +611,12 @@ theorem CadenceHighFire.high_completion_exists {θ ε} {s : Snapshot 1} {p : Por
     pending := ?_, gains := ?_, recovery := ?_, emissions := ?_, deliveries := ?_
     physical := execution.physical_invariant hb fire.physical
     raw_valid := execution.raw_valid fire.raw_valid
-    slowSection := slow.final, toSlow := toSlow, returned := returned, returned_final := rfl, reconstruct := HEq.rfl
+    slowSection := slow.final, toSlow := toSlow
+    toSlow_pending := slow.pending.trans (err.pending.trans silent.pending)
+    toSlow_gains := fun j q => (slow.gains j q).trans ((err.gains j q).trans (silent.gains j q))
+    toSlow_recovery := fun j => (slow.recovery j).trans ((err.recovery j).trans (silent.recovery j))
+    toSlow_emissions := ?_, toSlow_deliveries := ?_
+    returned := returned, returned_final := rfl, reconstruct := HEq.rfl
   }⟩
   · exact returned.pending.trans (slow.pending.trans (err.pending.trans silent.pending))
   · intro j q
@@ -609,9 +630,42 @@ theorem CadenceHighFire.high_completion_exists {θ ε} {s : Snapshot 1} {p : Por
       slow.deliveries,err.deliveries,silent.deliveries,Execution.deliveries,Move.deliveries,
       Jump.deliveries,List.append_nil]
 
+  · simp only [toSlow,toReady,toError,Execution.emissions_append,
+      slow.emissions,err.emissions,silent.emissions,Execution.ledger,Move.ledger,Jump.ledger,
+      Ledger.add,Ledger.zero,List.append_nil]
+  · simp only [toSlow,toReady,toError,Execution.deliveries_append,
+      slow.deliveries,err.deliveries,silent.deliveries,Execution.deliveries,Move.deliveries,
+      Jump.deliveries,List.append_nil]
+
 namespace CadenceHighCompletion
 variable {θ : Fin 1 → Parameters} {s : Snapshot 1} {p : Port}
   {fire : CadenceHighFire θ (fun _ _ => []) s 0 p} (c : CadenceHighCompletion fire)
+
+/-- The actual protected prefix ends after its guarded logarithmic reopen. -/
+noncomputable def returnExecution : Execution θ (fun _ _ => []) fire.final c.returned.returnState :=
+  c.toSlow.append c.returned.head
+
+theorem return_ready : ∀ j, ReadyCoordinates c.returned.returnState j := c.returned.return_ready
+
+theorem return_charge : c.returned.returnState.x 0 .q = 1 / 10 := c.returned.return_charge
+
+theorem return_raw_none : ∀ j q, c.returned.returnState.raw j q = none := c.returned.return_raw_none
+
+theorem return_pending : c.returned.returnState.pending = fire.final.pending :=
+  c.returned.return_pending.trans c.toSlow_pending
+
+theorem return_gains (j : Fin 1) (q : Port) :
+    c.returned.returnState.x j (.z q) = fire.final.x j (.z q) :=
+  (c.returned.return_gains j q).trans (c.toSlow_gains j q)
+
+theorem return_recovery (j : Fin 1) : c.returned.returnState.x j .b = fire.final.x j .b :=
+  (c.returned.return_recovery j).trans (c.toSlow_recovery j)
+
+theorem return_emissions : c.returnExecution.ledger.emissions = [] := by
+  rw [returnExecution,Execution.emissions_append,c.toSlow_emissions,c.returned.head_emissions,List.nil_append]
+
+theorem return_deliveries : c.returnExecution.deliveries = [] := by
+  rw [returnExecution,Execution.deliveries_append,c.toSlow_deliveries,c.returned.head_deliveries,List.nil_append]
 
 /-- The actual logarithmic reopen is complete strictly before3.8 after
 its source, leaving room for later independently jittered gaps of at least3.9. -/

@@ -20,10 +20,21 @@ The empty analysis queues do not physically remove global C tokens. Cport1's
 gain is outside the imported narrow domain; the bridge does not instantiate
 network routing or the finite-chain physical contracts.
 
-The actual C656 input, protected MARK and C660 arrival are now constructed
-by `birth_protocol_cadence_first_mark_return_exists`. Local C responses
-through664/668 and high-gain completion remain separate current-state results;
-their global wire and relay handoffs still need construction.
+The actual C656 input, protected MARK and C660 arrival are constructed by
+`birth_protocol_cadence_first_mark_return_exists`. Separately,
+`c.local_c_full_exists hb` constructs `ConstructedCadenceLocalC c`: C's actual
+639.9→660 projection followed by its physical local continuation to789.9.
+All 25 C640..736 sources are consumed and exactly 20 cadence emissions give
+cumulative C34. C finishes READY/q=0.1 with no RAW or pending tokens, its own
+newborn port0 log-gain+2.4 and recovery+0.3; other gains retain teaching values.
+This advances only C, leaving the global network frontier at660.
+
+`HybridConstructedCadenceLeafPacket` derives P(3,17,0) from that actual
+20-emission ledger. `receivedLeafPacket` gives P(3,17,1/20) with each bounded
+delay sampled at the actual FIRE, F+delay(F). Its Bport2 token labels are not
+global preloads or later physical receipts. Actual global issuance requires
+the explicit same-calendar/contact hypotheses of `issued_leaf_tokens`;
+later B/A relay executions still need construction.
 
 ## Checked composition
 
@@ -33,6 +44,7 @@ their global wire and relay handoffs still need construction.
 | Wire rule | `Packet.wire`, `wire_actual`, `wire_delay_bounds` | Fixed centres shift ideal dates, arbitrary bounded errors add their full budgets |
 | Relay closure | `Packet.relay`, `relay_actual_prefix`, `relay_actual_second_fire`, `relay_actual_first_high`, `relay_actual_regular_tail` | Constructs P(m+2,L-4,J), preserves retained errors and proves exact correspondence to the declared emitted input indices |
 | Leaf packet | `leafPacket` | Constructs P(3,K-8,0) from the declared leaf firing dates and latency bounds |
+| Constructed physical C leaf | `HybridBirthCadenceLocalC`, `HybridConstructedCadenceLeafPacket` | Actual autonomous C639.9→789.9 ledger refines P(3,17,0); bounded-delay labels refine P(3,17,1/20), without later global wire receipts |
 | Universal induction | `Chain.Induction.compose_every_finite_chain`, `root_contract` | Every positive finite N; validates every intermediate tail and cumulative jitter budget |
 | Actual stream interface | `Chain.Refinement.realized_chain` | Composes explicit routed streams, given a leaf refinement and local `RelayLaw` proofs |
 | Resource algebra | `Chain.Algebra`, `traffic_closed_form`, `traffic_at_minimum` | Twelve integer identities, natural-number counts, root tail, root emissions and quadratic total traffic |
@@ -80,9 +92,11 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    derives own memories, exact traffic and the final empty queue
    **conditionally on a supplied later execution**. These results do not
    construct arbitrary later introductions or an arbitrary-N execution.
-4. Proofs of the leaf refinement and `RelayLaw` from those semantics. In
-   particular, no omitted or extra emissions, the full protected doses, the
-   residual-raw-tail bound and the first-crossing latency bounds must be derived.
+4. Extend the concrete autonomous C leaf refinement to arbitrary physical
+   introductions and derive `RelayLaw` from those semantics. The C witness
+   already derives its exact 20-emission ledger, doses and firing dates;
+   later global relay contracts and their residual-raw-tail and latency bounds
+   remain to be discharged.
 5. Physical silence/setting preservation after cuts, the local settling bound,
    and the 0/8, 4/8 and 8/8 frozen-probe response patterns.
 
@@ -109,15 +123,16 @@ sources and wires, retained own memories and A38/B27: all valid conclusions
 compile and all altered claims are rejected. The 50 new pairs in
 `python scripts/check_hybrid_c_teaching_existence_negative.py` pass for the
 actual C birth/teaching, three-cell execution, own memories and A38/B43/C14.
-The C660 checkpoint passed the complete pinned build (9,452 jobs) and global
-audit (25,342 project theorems). Source identities cover399 Lean files and
-five unchanged upstream modules. Generated evidence, all16 robust certificates
-and12 project tests pass. All73 new paired controls pass:24 global C656/C660,
-25 local second-stage and24 high-response pairs. Each valid conclusion compiles
-and every altered conclusion is rejected with a Lean diagnostic. The preceding
-62 first-cadence-wire and43 first-wave pairs also passed. CI configures824
-paired controls; this inventory does not assert a local rerun of every suite.
-Fresh CI status is reported on the PR.
+The autonomous-C/leaf-packet checkpoint passed the complete pinned build
+(9,458 jobs) and global audit (25,538 project theorems). Source identities
+cover405 Lean files and five unchanged upstream modules. Generated evidence,
+all16 robust certificates and12 project tests pass. Its53 additional paired
+controls pass:25 local-C-tail,20 constructed-leaf/projection and8 new actual
+high-return-prefix checks. The complete high suite now has32 passing pairs.
+Each valid conclusion compiles and every altered conclusion is rejected with
+a Lean diagnostic. Earlier C660/first-wire/first-wave controls passed at their
+checkpoints. CI configures877 paired controls; this inventory does not assert
+a local rerun of every suite. Fresh CI status is reported on the PR.
 
 Only `propext`, `Classical.choice` and `Quot.sound` are allowed; no physical
 leaf/relay premise is replaced by a project axiom.

@@ -94,6 +94,22 @@ def cases():
         pair('energy is the endpoint of the same actual return path', complete +
              ': c.final.x 0 .energy=@v@ := by rw [c.returned_final]\n',
              'c.returned.final.x 0 .energy', 'f.final.x 0 .energy'),
+        pair('the actual reopen prefix ends in READY before quiet waiting', complete +
+             ': c.returned.returnState.main 0=.@v@ := by exact (c.return_ready 0).ready\n', 'ready', 'slow'),
+        pair('the actual reopen prefix has its exact physical rest charge', complete +
+             ': c.returned.returnState.x 0 .q=@v@ := by exact c.return_charge\n', '1/10', '1/4'),
+        pair('the actual reopen prefix has already expired every RAW current', complete +
+             '(q : Port) : c.returned.returnState.raw 0 q=@v@ := by exact c.return_raw_none 0 q\n', 'none', 'some s.time'),
+        pair('the actual reopen prefix retains the complete future queue', complete +
+             ': c.returned.returnState.pending=@v@ := by exact c.return_pending\n', 'f.final.pending', '[]'),
+        pair('the actual reopen prefix preserves own acquired gains', complete +
+             '(q : Port) : c.returned.returnState.x 0 (.z q)=f.final.x 0 (.z q)@v@ := by exact c.return_gains 0 q\n', '', '+3/5'),
+        pair('the actual reopen prefix preserves own acquired recovery', complete +
+             ': c.returned.returnState.x 0 .b=f.final.x 0 .b@v@ := by exact c.return_recovery 0\n', '', '+1/10'),
+        pair('the actual protected prefix adds no extra output before its quiet tail', complete +
+             ': c.returnExecution.ledger.emissions=@v@ := by exact c.return_emissions\n', '[]', '[(0,c.returned.returnState.time)]'),
+        pair('the actual protected prefix consumes no future source', complete +
+             ': c.returnExecution.deliveries=@v@ := by exact c.return_deliveries\n', '[]', '[⟨0,p,c.returned.returnState.time⟩]'),
     ]
 
 

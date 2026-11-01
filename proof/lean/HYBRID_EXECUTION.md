@@ -20,6 +20,12 @@ section the learned-input case now returns and preserves all memories. Sensor
 triggering and the protected auxiliary cycle are also extracted from actual
 executions.
 
+A separate autonomous-C execution now reaches789.9 from the actual639.9
+state, using the projected global prefix through660 and a constructed local
+tail. Its 20 cadence emissions and all 25 C source arrivals are real local
+jumps. This supplies a concrete leaf packet, while the global network frontier
+remains660; later global issuance, B/A responses and wire receipts remain open.
+
 ## Physical definitions
 
 `KernelR/Hybrid.lean` defines a pulses-only finite network with all q/m/z/b/E
@@ -360,18 +366,44 @@ through `birth_protocol_cadence_first_mark_return_exists`: cumulative A39/B44/C1
 exactly 19 C664..736 sources, physical bounds, raw validity and
 `CompleteThrough660`, including the actual source due at660.
 
-The separate local `HybridCadenceSecondStrongResponse` constructs the next
-period-four FIRE/FAST/SLOW response and its next source from an exact-rest
-section with recovery near0.28. `HybridCadenceMixedResponse` treats the following
-mixed MARK/ERROR input from its actual SLOW charge, adding recovery0.1 and
-ERROR0.6. These are current-state local constructors for the intended660→664
-and664→668 steps, not an already composed global continuation. The separate
-`HybridCadenceHighFireExistence` constructs the genuine high-gain root
-in(0.16,0.26), which has a different latency domain from `FirstLearnedFire`.
-`HybridCadenceHighCompletion` constructs the corresponding FAST/SLOW and
-auxiliary completion across the actual FAST exit, retaining RAW expiry and
-energy clocks. These local constructors compile; no global668 endpoint or
-full789.9 cadence follows until their real wire/relay paths are composed.
+### Constructed autonomous C through789.9 and its leaf packet
+
+`c.local_c_full_exists hb` in
+[HybridBirthCadenceLocalC](KernelR/HybridBirthCadenceLocalC.lean) constructs
+`ConstructedCadenceLocalC c` from the actual original-birth witness at660 and
+its physical parameter box. No reaching local execution or desired calendar is
+supplied. `HybridAutonomousCellProjection` projects C's actual639.9→660 global
+execution because the cadence router has no incoming contact to C. It retains
+C's exact coordinates, modes, RAW origins, energy, selected source queue and
+actual ERROR/MARK, delivery and emission observations. Irrelevant other-cell
+jumps are omitted; the projection is an actual one-cell execution with empty
+routing, rather than an operation that deletes any global queue.
+
+`HybridBirthCadenceLocalCTail` attaches `HybridLocalCadenceTail` to that exact
+660 C endpoint. The tail constructs the second strong response to664, the
+mixed protected MARK/ERROR response to668, and `HybridLocalCadenceHighTrain`
+through the final source736 and READY return740. A true quiet flow reaches789.9.
+`HybridCadenceHighCompletion` exposes its actual READY-return prefix, RAW,
+memory and ledger observations; no charge or energy reset is used.
+
+The full local execution consumes exactly the 25 Cport0 sources640..736 and
+emits exactly 20 cadence signals. With the 14 prior teaching signals, C's
+cumulative count is34. At789.9 it is READY with q=0.1, no RAW and an empty local
+queue, with physical bounds and `CompleteThrough`. Its port0 log-gain is its
+own newborn value+2.4, its recovery is its own newborn value+0.3, and its other
+gains retain their teaching values. This is a C endpoint, not a later A/B/C
+network endpoint.
+
+`HybridConstructedCadenceLeafPacket` defines `full.leafPacket : Packet 3 17 0`
+and proves its 20 actual dates equal `full.execution.emissionTimes 0`. The
+three prefix dates are the actual first strong, second strong and first
+high-gain FIREs; the 17-date tail uses C's own fixed high-gain latency.
+For any delay function in[0.3,0.4], `full.receivedLeafPacket` has type
+`Packet 3 17 (1/20)` and each date is F+delay(F), sampled at that actual FIRE.
+`leafTokens` gives the corresponding Bport2 token labels with real emission
+provenance. It does not preload the global queue or assert later global
+arrivals. `issued_leaf_tokens` identifies actual issuance only for a supplied
+global execution preserving that calendar and the declared routing.
 
 ### Projected one-cell learned-domain bridge
 
@@ -387,12 +419,12 @@ this is domain membership of projections, not a network continuation theorem.
 
 ### Current boundary
 
-The global C660 response and later source/relay handoffs toward664/668 remain
-to be constructed. Local second-strong, mixed and high-gain completion results
-are available from their physical sections; they do not supply those global
-wire calendars. The full cadence through789.9, targeting A54/B61/C34, still
-takes a later actual execution as a premise. Fine enclosure membership,
-retained probes/copies and physical every-N refinement remain separate obligations.
+The C-only continuation and its concrete leaf packet are now constructed
+through789.9. Weaving its later FIREs and token labels into the actual global
+B/A executions after660 remains to be done. The full network cadence through
+789.9, targeting A54/B61/C34, still takes a later actual execution as a premise.
+Fine enclosure membership, retained probes/copies and physical every-N
+refinement remain separate obligations.
 
 ## Checked implications
 
@@ -509,6 +541,8 @@ retained probes/copies and physical every-N refinement remain separate obligatio
 | `HybridCadenceFirstMarkSource` / `HybridCadenceFirstMarkReturn` / `HybridBirthCadenceFirstMarkReturn` | Construct the actual C656 protected source, MARK0.1, READY return and C660 arrival from the original births; A39/B44/C15 and19 future C sources | C READY/q=0.1/RAW660, own recovery+0.2; A/B actual cuts retained, no global664/668 continuation asserted |
 | `HybridCadenceSecondStrongSlowSpan` / `HybridCadenceSecondStrongResponse` | Construct a local second strong pulse, SLOW carry and next actual source at period4 with unchanged memories | Exact-rest source and own recovery near0.28; later routed network responses remain separate |
 | `HybridCadenceMixedPrefix` / `HybridCadenceMixedReopen` / `HybridReadySilentErrorStart` / `HybridCadenceMixedResponse` / `HybridCadenceMixedNextSource` | Construct local protected MARK, real reopening, remaining-RAW ERROR and next source with recovery+0.1/gain+0.6 | Actual SLOW entry/charge bands and future queue; no supplied reaching trace, but no global668 network construction |
+| `HybridAutonomousCellProjection` / `HybridBirthCadenceLocalCTail` / `HybridBirthCadenceLocalC` | Project actual C639.9→660 and construct its local tail to789.9; 20 cadence emissions, cumulative C34, all25 sources consumed | C-only execution; later global A/B paths and wire receipts are not supplied |
+| `HybridLocalCadenceHighTrain` / `HybridLocalCadenceTail` / `HybridConstructedCadenceLeafPacket` | Actual high train and terminal C return; ledger-derived P(3,17,0) and bounded-delay labels P(3,17,1/20) | Token labels acquire global issuance only under the explicit same-calendar/routing hypotheses |
 | `HybridCadenceHighFireExistence` / `HybridCadenceHighCompletion` | Construct high-gain FIRE in(0.16,0.26) and its actual protected completion across FAST exit | Own four-dose gain/current-state hypotheses and isolated future queue; no universal network continuation |
 | `HybridBirthLearnedRest` | Derive Aport2/Bport2 learned-domain membership and isolated one-cell future contracts from the639.9 endpoint | Empty analysis queues do not erase the global queue; Cport1 and network routing are outside this bridge |
 | `HybridCadenceRouter` / `HybridCadenceQuiet` / `HybridCadencePrelude` | Actual C-to-B-to-A contacts; three weak C cases through fresh source652 with ERROR 1.8, quiet A/B and twenty-one future C tokens | Actual execution reaching 789.9, initial prepared states and C's declared twenty-five sources; no complete cadence count claim |
@@ -1292,12 +1326,14 @@ queue must still instantiate these hypotheses.
 `Execution.signal` extracts a `Chain.Signal` from actual fire jumps, retaining
 the exact number of emissions. `hasPacket_of_emission_witness` exposes both
 outstanding packet obligations: exact event count and every actual emission date.
-It connects to PR #6's interface but does not supply its leaf or `RelayLaw` witness.
+The concrete autonomous C result now supplies its leaf packet from a real
+ledger. General physical leaf introductions and the local `RelayLaw` witnesses
+remain to be constructed.
 
 ## Remaining obligations for the complete theorem
 
-1. Continue the constructed C660 endpoint through actual routed responses
-   toward664/668 and the remaining cadence to789.9. The conditional
+1. Weave the constructed autonomous C continuation after660 with the actual
+   B/A responses and routed issuance/receipt paths to789.9. The conditional
    analysis already derives A54/B61/C34. Construct the later
    traces while retaining every own memory, global queue and actual wire token.
 2. Prove the main/auxiliary interactions in each actual pulse case, including
@@ -1351,15 +1387,16 @@ and every altered conclusion is rejected. The 50 new pairs in
 `check_hybrid_c_teaching_existence_negative.py` also pass for C's real birth,
 weak and retained SLOW paths, protected MARK, true three-cell execution,
 own memories, cumulative A38/B43/C14 and exact 25-source queue.
-The C660 checkpoint passed the complete pinned build (9,452 jobs) and global
-audit (25,342 project theorems). Source identities cover399 Lean files and
-five unchanged upstream modules. Generated evidence, all16 robust certificates
-and12 project tests pass. All73 new paired controls pass:24 global C656/C660,
-25 local second-stage and24 high-response pairs. Each valid conclusion compiles
-and every altered conclusion is rejected with a Lean diagnostic. The preceding
-62 first-cadence-wire and43 first-wave pairs also passed. CI configures824
-paired controls; this inventory does not assert a local rerun of every suite.
-Fresh CI status is reported on the PR.
+The autonomous-C/leaf-packet checkpoint passed the complete pinned build
+(9,458 jobs) and global audit (25,538 project theorems). Source identities
+cover405 Lean files and five unchanged upstream modules. Generated evidence,
+all16 robust certificates and12 project tests pass. Its53 additional paired
+controls pass:25 local-C-tail,20 constructed-leaf/projection and8 new actual
+high-return-prefix checks. The complete high suite now has32 passing pairs.
+Each valid conclusion compiles and every altered conclusion is rejected with
+a Lean diagnostic. Earlier C660/first-wire/first-wave controls passed at their
+checkpoints. CI configures877 paired controls; this inventory does not assert
+a local rerun of every suite. Fresh CI status is reported on the PR.
 
 Only `propext`, `Classical.choice` and `Quot.sound` are allowed. Fresh CI status
 is reported separately on the PR.

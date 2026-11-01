@@ -20,6 +20,15 @@ Exactly 19 Cport0 sources664..736 remain. The earlier639.9 checkpoint retains
 three prepared cells, RAW absent and25 C sources. Parameters are fixed
 independent fabrication-box members, with canonical pulses and bounded delays.
 
+A separate autonomous-C construction now runs from the actual 639.9 state
+through **789.9**. It projects C's already constructed global prefix through660,
+then appends C's physical local continuation. It consumes all 25 C640..736
+sources and emits exactly 20 cadence signals, giving C34 including teaching.
+The endpoint is READY/q=0.1, with no RAW or pending source, own newborn port0
+log-gain+2.4 and recovery+0.3. Its real emission ledger supplies a leaf packet
+P(3,17,0); bounded delays label P(3,17,0.05) at the actual FIRE times. These
+labels do not assert global issuance or receipt of the later wires.
+
 The globally routed responses toward664/668 and the remaining cadence through
 789.9 (**A54/B61/C34**) still require construction. The complete cadence
 analysis is checked **conditionally on supplied later executions**. An

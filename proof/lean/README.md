@@ -12,6 +12,13 @@ The historical639.9 checkpoint has three prepared cells, RAW absent and25 C
 sources. The remaining global cadence is conditional; Python interval
 implementations have not been verified in Lean.
 
+The separate autonomous-C result constructs C's full 639.9→789.9 execution
+from that actual global prefix: 20 cadence emissions, all 25 C640..736 arrivals,
+and a READY/q=0.1 endpoint with no RAW or pending tokens. C's cumulative count
+including its 14 teaching emissions is 34. A/B are not advanced beyond660 by
+this local result. The derived leaf packet and its delayed token labels are
+available without assuming the later global relay execution.
+
 ## Repeatable learned one-cell operation
 
 The [one-cell extension](INDEFINITE_OPERATION.md) constructs a physical
@@ -36,6 +43,7 @@ physical event budget. These invariants alone do not supply future executions.
 | Proof layer | Current result | Explicit boundary |
 |---|---|---|
 | Constructed execution | Original READY birth through the first C→B→A wave and C protected MARK return at660; A39/B44/C15 | C READY/q=0.1/RAW660, own recovery+0.2; A/B actual cuts retained; exact19 C664..736 sources |
+| Autonomous C and concrete leaf packet | Actual projected prefix639.9→660 plus constructed local continuation to789.9; 20 cadence emissions, cumulative C34, empty local queue | P(3,17,0) comes from the real ledger; delayed P(3,17,0.05) labels do not construct later global wire arrivals or A/B responses |
 | Conditional physical protocol | Complete cadence at789.9 (A54/B61/C34) | The later actual execution is supplied; both genuine births, the first cadence wave and C660 MARK return are constructed |
 | Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing/new future queues; broader birth domains, network routing and universal refinement remain open |
 | Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
@@ -114,13 +122,30 @@ exactly 19 C664..736 sources, C's own newborn recovery+0.2 and own port0
 log-gain+1.8. A/B remain at their actual cuts, preserving every own gain and
 recovery. `CompleteThrough660` includes the source due at that endpoint.
 
-The next construction is the globally routed C660 response, its later relay
-receipts and the stages toward664/668 and789.9. The local second-strong and
-mixed-response constructors already address C660→664 and C664→668 from their
-stated physical sections. A separate high-gain FIRE constructor has latency
-in(0.16,0.26), and its FAST/SLOW completion is also constructed. These local
-results do not establish a global668 or789.9 endpoint. Retained probes,
-fine enclosure soundness and physical every-N refinement remain open. The
+`ConstructedCadenceFirstMarkReturn.local_c_full_exists hb` in
+[HybridBirthCadenceLocalC](KernelR/HybridBirthCadenceLocalC.lean) returns
+`ConstructedCadenceLocalC c`. Its prefix is the autonomous projection of the
+same actual global639.9→660 execution, with C's source queue retained. C has no
+incoming routed contact, so this projection preserves its actual coordinates,
+energy, RAW events, ERROR/MARK integrals and emission dates. The local tail
+continues the actual660 state through the second strong response, mixed
+MARK/ERROR response, high-gain train and final quiet flow to789.9. All 25 sources
+are consumed, the ledger has exactly 20 cadence emissions, and `CompleteThrough`
+holds at789.9. C's own newborn port0 log-gain has gained2.4 and recovery0.3;
+its other gains retain the teaching values.
+
+[HybridConstructedCadenceLeafPacket](KernelR/HybridConstructedCadenceLeafPacket.lean)
+derives `leafPacket : Packet 3 17 0` from those 20 real emission dates.
+`receivedLeafPacket` samples each bounded delay at its actual FIRE time and
+produces `Packet 3 17 (1/20)`. `leafTokens` labels the corresponding Bport2
+wire tokens; it does not insert them into a global queue or prove their later
+receipt. An explicit future global execution with the same C calendar and
+contact routing can use `issued_leaf_tokens` to identify its actual issuance.
+
+The next network construction is the globally routed C660 response and later
+relay handoffs toward789.9 (A54/B61/C34). The autonomous C result does not advance
+A/B or construct that global endpoint. Retained probes, fine enclosure
+soundness and physical every-N refinement remain open. The
 [robust coverage guide](ROBUST_COVERAGE.md) describes conditional noisy/drifting
 slow-chain results.
 
@@ -182,6 +207,8 @@ python3 scripts/check_hybrid_cadence_first_wave_negative.py
 python3 scripts/check_hybrid_cadence_first_mark_return_negative.py
 python3 scripts/check_hybrid_cadence_second_stage_negative.py
 python3 scripts/check_hybrid_cadence_high_existence_negative.py
+python3 scripts/check_hybrid_local_cadence_tail_negative.py
+python3 scripts/check_hybrid_constructed_leaf_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -207,15 +234,16 @@ The 50 new pairs in `check_hybrid_c_teaching_existence_negative.py` pass for
 the actual C birth, retained weak/SLOW paths, protected MARK, real three-cell
 execution, own memories, A38/B43/C14 and exact 25-source queue. Every valid
 conclusion compiles and every altered conclusion is rejected.
-The C660 checkpoint passed the complete pinned build (9,452 jobs) and global
-audit (25,342 project theorems). Source identities cover399 Lean files and
-five unchanged upstream modules. Generated evidence, all16 robust certificates
-and12 project tests pass. All73 new paired controls pass:24 global C656/C660,
-25 local second-stage and24 high-response pairs. Each valid conclusion compiles
-and every altered conclusion is rejected with a Lean diagnostic. The preceding
-62 first-cadence-wire and43 first-wave pairs also passed. CI configures824
-paired controls; this inventory does not assert a local rerun of every suite.
-Fresh CI status is reported on the PR.
+The autonomous-C/leaf-packet checkpoint passed the complete pinned build
+(9,458 jobs) and global audit (25,538 project theorems). Source identities
+cover405 Lean files and five unchanged upstream modules. Generated evidence,
+all16 robust certificates and12 project tests pass. Its53 additional paired
+controls pass:25 local-C-tail,20 constructed-leaf/projection and8 new actual
+high-return-prefix checks. The complete high suite now has32 passing pairs.
+Each valid conclusion compiles and every altered conclusion is rejected with
+a Lean diagnostic. Earlier C660/first-wire/first-wave controls passed at their
+checkpoints. CI configures877 paired controls; this inventory does not assert
+a local rerun of every suite. Fresh CI status is reported on the PR.
 
 
 ## Coverage and hypotheses
@@ -315,15 +343,17 @@ finite depth, nonuniform jitter budgets, natural emission/traffic counts, dose
 words, conditional cut propagation and terminal-time bounds. Both N-cell
 certificates add 162 exact endpoint comparisons and 352 interval-validity checks.
 
-The physical leaf and relay refinements remain explicit premises. The extension
+The concrete autonomous C leaf now has its actual emission-packet refinement;
+physical leaf contracts for other introductions and relay refinements remain
+explicit premises. The extension
 does not claim a complete formal proof of the R hybrid trajectories or interval
 enclosure soundness. In particular, the finite-chain theorem is conditional on
 local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Continue the constructed C660 endpoint through the actual routed responses
-   toward664/668 and the remaining cadence to789.9. Its conditional
+1. Weave the constructed autonomous C continuation after660 with actual B/A
+   responses and routed token issuance/receipts through789.9. Its conditional
    analysis is already checked. Preserve global queues, own
    memories, actual wire provenance and port availability.
 2. Prove the remaining real enclosure memberships, retained probe responses,
