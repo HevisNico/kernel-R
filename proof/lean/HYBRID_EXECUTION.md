@@ -125,6 +125,12 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridRoutedInputs` | Actual receiving-cell deliveries equal the ordered issued wire tokens while future external sources remain pending | Issued tokens strictly before the endpoint, external sources strictly after it and a future terminal queue |
 | `HybridContact` | Causal half-open gated wire with fanout at most one; actual routed tokens extracted from actual sending emissions | The target projection of routing at actual emissions is fixed to the declared contact |
 | `HybridPreparedContact` | Derive actual wire inputs from a prepared sender's queue and ODE; specialize to sixteen B arrivals with fresh jitter and dates in (160.6,281.3) | A input 160 is already active; fifteen pending successors, current bounds, no return route to A and B sources at 320 or later; B output classification and staged-boundary queue connection remain open |
+| `HybridRestingInput` | A READY cell retains its coordinate bands and memories through the quiet prefix before its first actual received input | Other-cell traffic is retained; initially absent raw inputs and READY bands |
+| `HybridBirthQueueBridge` | Couple source160 raw absence/activity to the exact remaining queue, and preserve it across birth | Actual first phase with both initial source trains, empty pre-birth routing and birth at 160 |
+| `HybridBTeachingPhase` / `HybridBTeachingCalendar` | Derive B14, ERROR0.6, MARK0.1 and prepared return from actual sixteen-input wire dates, including the quiet pre-input prefix | Fresh READY/current bounds, low birth recovery and the derived separated calendar |
+| `HybridTeachingActivation` / `HybridTeachingBoundaryPhase` | Select the pending source160 after birth without changing physical coordinates or losing future B tokens; cover both legal boundary orders | Given execution reaching 319.9 and the proved raw/queue alternatives |
+| `HybridTeachingActivePhase` | Compose the actual A16 source train and B14 wire-response phase with memory preservation | Current physical bounds and the source/route state, discharged by the staged theorem |
+| `HybridEntryRouter` / `HybridStagedTeaching` | Instantiate forward/reverse contacts and derive cumulative A28/B14 plus prepared memories across B's actual birth | READY A birth, given staged executions at 160/319.9, B sources due from320 and bounded independent wire delays; no existence/progress claim |
 
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
@@ -306,7 +312,8 @@ zero-input READY relaxation then holds q exactly at 1/10. The whole input has
 no emissions, no remaining raw current, READY sensors in their rest bands and
 ends in `PreparedSection`. Neither a phase word nor the desired dose/count is
 supplied. The first low-port source phase is proved below. Later routed source chronology
-and the complete two-cell birth-to-preparation theorem remain separate obligations.
+and the later feedback phase remain separate obligations. The complete first
+two-cell teaching epoch is proved below.
 
 ## First actual birth-to-preparation source phase
 
@@ -339,7 +346,8 @@ premises. General birth-family cap, work and reserve bounds remain available.
 progress remain open. The first phase covers the written READY birth family,
 not immediate input into an ERROR-born receiving sensor. The prefix refinement
 below retains later sources and connects the state at 160 to a scheduled birth.
-Post-birth A-to-B/B-to-A routing still requires its calendar proofs.
+The A-to-B teaching route is instantiated below; the later B-to-A feedback
+phase still requires its physical protocol proof.
 
 
 ## Receiving-cell calendars inside a multicell execution
@@ -424,9 +432,9 @@ existing cell.
 
 This defines the birth boundary needed for B at 160 and later introductions.
 The next section connects the first source phase to a birth at 160 while
-retaining the legal boundary-source alternatives. Post-birth contact calendars,
-later introductions, complete routed counts and execution existence still need
-their protocol proofs. A one-birth execution is supplied to these theorems; it
+retaining the legal boundary-source alternatives. The complete A-to-B epoch is
+now connected below. Later feedback, introductions, complete protocol counts and
+execution existence still need their proofs. A one-birth execution is supplied to these theorems; it
 is not a construction of the whole reciprocal trajectory.
 
 
@@ -546,10 +554,66 @@ arrival list. Their dates are 160+8k+latency+delay(160+8k+latency), strictly
 between 160.6 and 281.3. Successive dates have gaps in [7.9,8.1]: the common
 latency cancels while both fresh wire delays remain.
 
-The initial active input, pending A queue and current physical bounds in this
-specialization still need their full connection to both staged-birth boundary
-alternatives. B's pulse cases and fourteen outputs are not asserted by this
-calendar theorem. Protocol-specific execution existence remains open.
+The standalone calendar theorem takes the initial active input, pending A
+queue and current bounds as premises. The staged teaching result below now
+discharges them in both birth-boundary alternatives and derives B's fourteen
+outputs. Protocol-specific execution existence remains open.
+
+
+## Complete physical teaching across B's birth
+
+`StagedExecution.reciprocal_teaching_epoch` connects the first two source epochs
+in the declared one-cell-to-two-cell semantics. A starts in `BirthState`, with
+READY auxiliaries and the complete source queue 0,8,...,120 and 160,168,...,280
+on port 0. B is introduced by a real `BirthStep` at 160, with its own independent
+nominal READY coordinate family and fabrication parameters. New B sources must
+be due at 320 or later. The supplied post-birth execution ends at 319.9.
+
+`HybridBirthQueueBridge` proves the exact raw/queue dichotomy at 160: the source
+is either pending with the full second train, or active with exactly its fifteen
+successors left. Multiplicity conservation excludes a duplicate consumption.
+The actual birth preserves this relation under index extension. If the source
+is still pending, `HybridTeachingActivation` selects its real post-birth arrival.
+The intervening trace has zero duration; physical guards exclude outputs from
+both cells, coordinates stay unchanged and B's future tokens are retained.
+No event-priority rule or reset is introduced.
+
+`HybridRestingInput` carries the freshly born B cell through its actual quiet
+prefix to the first received wire pulse. `HybridBTeachingPhase` then derives
+one silent input, the first strong input, the protected input and thirteen
+learned inputs from the actual variable-gap trace. `HybridBTeachingCalendar`
+proves the required gaps, first-strong upper gap and final quiet horizon from
+the real wire dates, retaining all A traffic. `HybridTeachingActivePhase` and
+`HybridTeachingBoundaryPhase` compose this with the sixteen learned A inputs
+in both legal source/birth orders.
+
+`reciprocalEntryRouter` declares the forward [160,310) contact on B port 1 and
+the reverse [320,470) contact on A port 2, with independent per-emission delays
+in [0.3,0.4]. Actual emission-time bounds keep the reverse route closed during
+teaching and discharge the target-routing premises. Invariants, raw validity,
+causal future queues, received calendars, pulse cases and counts are all derived.
+
+At 319.9 the conclusions are:
+
+| Quantity | A, relative to its birth | B, relative to its own fresh birth |
+|---|---|---|
+| Actual emissions | 12 before B's birth plus 16 after, total 28 | 14 |
+| Receiving log-gain increase | 1.8 on port 0 | 0.6 on port 1 |
+| Receiving ERROR / MARK | 1.8 / 0.1 cumulatively | 0.6 / 0.1 |
+| Recovery increase | 0.1 | 0.1 |
+| Terminal section | Prepared READY, q exactly 0.1, no raw current | Prepared READY, q exactly 0.1, no raw current |
+
+Every other gain is preserved. B's memories are measured from its independent
+newborn data; no acquisition from A is copied. `StagedTeaching` retains the
+actual before/after phase witnesses and these cumulative balances.
+
+This is a conditional physical protocol theorem. The two executions, birth at
+160 and terminal date are supplied; their existence/progress is not constructed.
+B's exact source list for the later return phase is not fixed here, only its
+absence before 320. The B-to-A phase through 459.9, later C/cadence, probes,
+remaining enclosure membership and full-chain physical refinement remain open.
+Parameters are fixed members of the stated fabrication boxes, with canonical
+pulse amplitudes; noise and drift require their separate extensions.
 
 ## Physical event budget
 
@@ -596,8 +660,10 @@ It connects to PR #6's interface but does not supply its leaf or `RelayLaw` witn
 
 ## Remaining obligations for the complete theorem
 
-1. Instantiate and review the semantics with the supplied protocols, including
-   staged births where relevant, and prove routing adequacy and port separation.
+1. Extend the checked A28/B14 teaching epoch to B-to-A feedback, C's later
+   introduction and the remaining protocols, including their source queues,
+   contacts and port separation. The birth/source orders at 160 and concrete
+   teaching contact windows are now connected.
 2. Prove the main/auxiliary interactions in each actual pulse case, including
    combined MARK/ERROR, strict cap inactivity and absence of extra firings.
    The isolated silent input and its total dose are proved with variable-gain
@@ -647,6 +713,7 @@ python scripts/check_hybrid_staged_negative.py
 python scripts/check_hybrid_boundary_negative.py
 python scripts/check_hybrid_calendar_negative.py
 python scripts/check_hybrid_routed_negative.py
+python scripts/check_hybrid_teaching_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -710,3 +777,10 @@ sender and receiver ports, deleting other-cell traffic or future pending
 queues, forcing delivery at the terminal date, changing the derived sixteen
 B deliveries, and replacing the proved coarse date bracket by a sharper
 unproved certificate bound. A causal contact with fanout one is constructed.
+
+Teaching controls compile the full concrete staged-epoch contract and reject a
+missing source160, early B external sources, a shifted birth date, altered A/B
+counts or B doses, extra A learning, inherited recovery in B, an incorrect
+terminal mode, instantaneous learning during source activation, lost future
+B tokens, inconsistent raw/queue alternatives and closure of the reverse gate
+at its actual opening date.

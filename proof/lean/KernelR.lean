@@ -98,3 +98,12 @@ import KernelR.HybridCellDueSources
 import KernelR.HybridRoutedInputs
 import KernelR.HybridContact
 import KernelR.HybridPreparedContact
+import KernelR.HybridRestingInput
+import KernelR.HybridBirthQueueBridge
+import KernelR.HybridBTeachingPhase
+import KernelR.HybridBTeachingCalendar
+import KernelR.HybridTeachingActivation
+import KernelR.HybridTeachingActivePhase
+import KernelR.HybridTeachingBoundaryPhase
+import KernelR.HybridEntryRouter
+import KernelR.HybridStagedTeaching
