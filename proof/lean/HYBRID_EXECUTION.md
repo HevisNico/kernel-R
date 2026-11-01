@@ -120,6 +120,7 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridDueSources` | Strictly past sources have all been delivered; exact ordered prefixes and remaining pending multisets retain later source tokens | Empty routing and a future terminal queue; a source due exactly now may remain pending |
 | `HybridBoundaryIdle` | A prepared cell at exact resting charge stays prepared through input-free time and terminal-date deliveries; zero-time guards exclude spurious departures or emissions | Actual execution and arrivals only at its terminal date |
 | `HybridBirthPreparation` | With both 16-token source trains already queued, derive preparation at 128, twelve emissions and exact doses through 160, then transfer the prepared state and acquired memories across a birth at 160 | Actual executions, READY receiving auxiliaries, empty pre-birth routing and the birth date are supplied; post-birth calendars and existence remain open |
+| `HybridPreparedCalendar` | Derive a unique real rest-started firing latency in (0.3,0.9), identify actual learned-output dates and translate an entire separated input calendar by that one latency | Exact initial q=0.1, strong-gain and current-invariant bounds, actual receiving-cell calendar and return horizon; fresh wire jitter remains separate |
 
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
@@ -476,6 +477,31 @@ and chronological sorting gives the exact source-date list, including duplicate
 tokens. This result remains conditional on a complete execution; it does not
 establish source availability, port separation or progress.
 
+
+## A common latency derived from the physical response
+
+`HybridPreparedCalendar` proves existence and uniqueness of a rest-started
+threshold root for every actual gain in [1.8,2.4]. The intermediate value theorem
+uses direct real response bounds at 0.3 and 0.9; monotonicity gives uniqueness.
+`restLatency` selects this mathematical root and its specification proves
+0.3 < latency < 0.9 and the real threshold equation. It is not a supplied
+certificate enclosure or a protocol event date.
+
+`LearnedPulse.emission_at_rest` identifies an actual output with input date plus
+that root. Its firing equation comes from the original execution and the
+selected sensor cycle. The starting charge must be exactly 0.1; a general
+prepared charge band does not give the same latency.
+
+`prepared_cell_calendar_of_valid` extends this to a finite receiving-cell train:
+the actual emission list is exactly the input-date list translated by one
+latency at the initial physical gain. Each actual pulse preserves that gain and
+restores exact resting charge before the next input, so root uniqueness applies
+again. The initially active input and every later receiving-cell arrival are
+retained, and other-cell traffic remains unrestricted. Current physical/raw
+bounds, separated inputs with gaps at least 7.5, and the final quiet horizon
+remain premises. Fresh per-pulse wire delays still need their own bounds; this
+result does not make routed input dates periodic or instantiate the A-to-B queue.
+
 ## Physical event budget
 
 For a network of n cells born at zero, let Q be the length of its actual initial
@@ -570,6 +596,7 @@ python scripts/check_hybrid_local_negative.py
 python scripts/check_hybrid_invariant_negative.py
 python scripts/check_hybrid_staged_negative.py
 python scripts/check_hybrid_boundary_negative.py
+python scripts/check_hybrid_calendar_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -620,3 +647,9 @@ using the wrong READY threshold, forcing a terminal source to have arrived,
 changing preparation counts or resting charge, resetting the old gain at birth,
 and moving the 160 contract to 168. A zero-duration trace with a source due now
 still pending is also constructed.
+
+Calendar controls reject a strengthened latency bracket, an altered firing
+threshold, a shifted supposedly unique root, omission of the actual input
+origin or initially active input, and replacement of exact resting charge by
+the broader prepared band. A real root for gain 2 is constructed independently
+of any assumed execution.

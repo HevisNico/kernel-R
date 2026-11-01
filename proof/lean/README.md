@@ -54,6 +54,10 @@ in the initial queue: a genuine execution cut at 128 retains the remaining
 trajectory and future tokens. An actual endpoint at 160 is still prepared with
 12 emissions, ERROR 1.8 and MARK 0.1, whether the source due at 160 is pending or
 already delivered. This preparation transfers across a birth at that date.
+A separated prepared train starting at exact resting charge now also has its
+actual emission calendar: every input date plus one unique real response-root
+latency in (0.3,0.9), derived from its preserved physical gain. This retains
+other-cell traffic and does not assume a latency box.
 The later routed calendars, post-birth source classification, combined pulse
 case, fine real enclosures, progress and complete execution-to-abstraction
 theorem remain open.
@@ -86,6 +90,7 @@ python3 scripts/check_hybrid_local_negative.py
 python3 scripts/check_hybrid_invariant_negative.py
 python3 scripts/check_hybrid_staged_negative.py
 python3 scripts/check_hybrid_boundary_negative.py
+python3 scripts/check_hybrid_calendar_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
