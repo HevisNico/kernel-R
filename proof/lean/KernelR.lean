@@ -89,3 +89,7 @@ import KernelR.HybridCellPreparedTrain
 import KernelR.HybridCellSources
 import KernelR.HybridPhysicalInvariant
 import KernelR.HybridStagedBirth
+import KernelR.HybridFlowCuts
+import KernelR.HybridDueSources
+import KernelR.HybridBoundaryIdle
+import KernelR.HybridBirthPreparation

@@ -49,9 +49,14 @@ An explicit birth event now appends a fresh READY cell at the current date,
 retaining existing cells and all their pending tokens. Its independent new
 parameters and source queue are explicit; physical bounds and memory balances
 compose across the two execution phases.
-The remaining routed/staged-birth calendars, combined pulse case, fine real
-enclosures, progress and complete
-execution-to-abstraction theorem remain open.
+The first physical phase is now also derived with both source trains already
+in the initial queue: a genuine execution cut at 128 retains the remaining
+trajectory and future tokens. An actual endpoint at 160 is still prepared with
+12 emissions, ERROR 1.8 and MARK 0.1, whether the source due at 160 is pending or
+already delivered. This preparation transfers across a birth at that date.
+The later routed calendars, post-birth source classification, combined pulse
+case, fine real enclosures, progress and complete execution-to-abstraction
+theorem remain open.
 
 ## Reproduce
 
@@ -80,6 +85,7 @@ python3 scripts/check_hybrid_cell_negative.py
 python3 scripts/check_hybrid_local_negative.py
 python3 scripts/check_hybrid_invariant_negative.py
 python3 scripts/check_hybrid_staged_negative.py
+python3 scripts/check_hybrid_boundary_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

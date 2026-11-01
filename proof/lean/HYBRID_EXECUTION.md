@@ -34,10 +34,11 @@ A fire appends routed tokens. An arrival removes one actual occurrence and requi
 a free port. Canonical currents have half-open support, independently of main mode;
 reopening admission retains any unfinished raw tail.
 
-Sources must be in the initial pending queue. `CausalRouter` states causality of
-the supplied wiring; generic ledger identities do not require that extra premise.
-There is no staged-birth or settings-copy operation. Those protocols need a
-separate semantic extension or a proved reduction.
+Source tokens are supplied in the initial pending queue or explicitly at a
+`BirthStep` for the fresh cell. `CausalRouter` states causality of the supplied
+wiring; generic ledger identities do not require that extra premise. The
+staged-birth extension is described below. Settings copying still needs a
+separate semantic operation or a proved reduction.
 
 `Execution` retains arbitrary legal zero-time interleavings without a total event
 priority. `simultaneous_fire_mark_orders` constructs both compatible orders for
@@ -46,8 +47,9 @@ confluence or simulator coverage of all simultaneous events.
 
 `CompleteThrough` requires reaching the horizon and discharging enabled jumps
 and due deliveries, including events exactly at the horizon. `Flow.prefix`
-constructs a valid shorter prefix of an existing flow; it does not construct a
-future continuation. `birth_resting_complete_exists` exhibits a complete
+constructs a valid shorter prefix of an existing flow; `Flow.suffix` later
+retains its already-given remainder. Neither result extends beyond the supplied
+execution. `birth_resting_complete_exists` exhibits a complete
 positive-duration silent execution from a nominal READY state and proves that
 this state belongs to `BirthState`, with the prescribed nominal log-gains and
 an empty source queue. This is one concrete birth-family witness, not existence
@@ -102,20 +104,22 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridProtectedMark` | Actual birth-reachable MARK gates are open throughout its selected phase; total MARK is 1/10 and total ERROR is zero | No full-dose or main-mode word is assumed |
 | `HybridProtectedReturn` | The gained recovery forces an actual SLOW-to-READY return before t+6.990787, with all raw currents gone | Quantifies over an actual execution reaching t+7.5 |
 | `HybridProtectedPulse` | No emissions, MARK 1/10 on the receiving port and zero on others, ERROR zero everywhere, all gains unchanged, recovery increased by 1/10, prepared section restored at exact q=1/10 | Concrete source calendars and birth-to-entry chronology remain separate |
-
 | `HybridArrivals` | Select the first actual delivered token and reconstruct the execution; derive its due date, fresh raw origin and unchanged modes; a complete single-slot source queue has the exact chronological delivery list | Empty routing and all source tokens due by the horizon for queue-to-list transfer; no existence claim |
 | `HybridPreparedTrain` | An actual period-eight train after preparation has exactly one emission per input, unchanged memories, zero ERROR/MARK doses and prepared-section restoration | Receiving gain in [1.8,2.4]; actual source-delivery list and final quiet horizon |
 | `HybridBirthInput` | Select source zero from a READY birth, preserving its physical coordinates across all legal zero-time interleavings | Receiving cell's auxiliaries must be READY, as in the written entry theorem |
 | `HybridWarmup` | Extract the first three low-port silent spans, with total ERROR 1.8, no emissions or MARK, unchanged recovery and the actual next strong-entry snapshot | Actual period-eight sources; no case word or reset |
 | `HybridBirthSourceTrain` | From the exact sixteen-token low-port queue, an actual complete execution reaches the prepared section with 12 emissions, ERROR 1.8 and MARK 0.1 | Empty routing, READY-born receiving cell and T>=128; does not cover B's staged birth or later routed phases |
-
 | `HybridCellInputs` | Extract the next actual arrival at one cell while retaining every other-cell arrival and event in the original execution | Isolation is local to the receiving cell, not global deletion of traffic |
 | `HybridCellPreparedTrain` | An actual receiving-cell input calendar with variable gaps >=7.5 emits once per prepared input, preserves memories and restores preparation | Initial strong-gain/section bounds and a quiet final horizon; does not infer wire-delay bounds |
 | `HybridCellSources` | Cell-specific source conservation and exact chronological source lists allow outgoing routes, other-cell arrivals and future tokens at other cells | No route targets the receiving cell during this trace; its initial source tokens are due by the complete horizon |
-
 | `HybridPhysicalInvariant` | Propagate current charge/sensor bounds, gain/recovery caps and reserve [50,100]; derive positive power throughout actual flows and ERROR exposure from charge headroom | Current physical bounds and fabrication box, at any start date; raw validity is supplied separately where needed |
-
 | `HybridStagedBirth` | A fresh READY birth changes n to n+1 at the current date; old coordinates, modes, currents, source tokens and parameters are retained; physical/raw/pending invariants and old/new memory balances compose across both actual phases | Routes, birth date and phase executions are supplied; the complete routed protocol and progress remain separate |
+
+
+| `HybridFlowCuts` | Reuse the original flow path after a cut; every actual prefix has a remaining execution retaining all deliveries and emissions and additive ERROR/recovery balances | No extension beyond the given execution; split flows need not have identical constructor syntax |
+| `HybridDueSources` | Strictly past sources have all been delivered; exact ordered prefixes and remaining pending multisets retain later source tokens | Empty routing and a future terminal queue; a source due exactly now may remain pending |
+| `HybridBoundaryIdle` | A prepared cell at exact resting charge stays prepared through input-free time and terminal-date deliveries; zero-time guards exclude spurious departures or emissions | Actual execution and arrivals only at its terminal date |
+| `HybridBirthPreparation` | With both 16-token source trains already queued, derive preparation at 128, twelve emissions and exact doses through 160, then transfer the prepared state and acquired memories across a birth at 160 | Actual executions, READY receiving auxiliaries, empty pre-birth routing and the birth date are supplied; post-birth calendars and existence remain open |
 
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
@@ -326,10 +330,11 @@ contributions on other ports. These conclusions follow from the original
 execution; no recorded case labels, desired counters or latency boxes are
 premises. General birth-family cap, work and reserve bounds remain available.
 
-`CompleteThrough` is a premise, so existence and progress remain open. The first
-phase covers the written READY birth family, not immediate input into an
-ERROR-born receiving sensor. Later A-to-B/B-to-A routing and B's scheduled introduction
-still require their protocol instantiation and calendar proofs.
+`CompleteThrough` is a premise of this full-queue corollary, so existence and
+progress remain open. The first phase covers the written READY birth family,
+not immediate input into an ERROR-born receiving sensor. The prefix refinement
+below retains later sources and connects the state at 160 to a scheduled birth.
+Post-birth A-to-B/B-to-A routing still requires its calendar proofs.
 
 
 ## Receiving-cell calendars inside a multicell execution
@@ -413,10 +418,55 @@ and use its post-birth ledger. The step provides no reset or learning dose to an
 existing cell.
 
 This defines the birth boundary needed for B at 160 and later introductions.
-Its application to the specified source/contact calendars, simultaneous birth
-and delivery orders, complete routed counts and execution existence still need
+The next section connects the first source phase to a birth at 160 while
+retaining the legal boundary-source alternatives. Post-birth contact calendars,
+later introductions, complete routed counts and execution existence still need
 their protocol proofs. A one-birth execution is supplied to these theorems; it
 is not a construction of the whole reciprocal trajectory.
+
+
+## Preparation at the actual birth boundary
+
+`Flow.suffix` reuses an existing flow path from an intermediate date through its
+original endpoint. The integral equation follows by subtracting the two original
+integral equations; all modes, raw inputs, pending tokens and guards are retained.
+Every `Execution.IsPrefix` therefore has a genuine remaining execution, including
+when the cut is inside a flow. Actual delivery and emission lists concatenate,
+and ERROR/recovery balances add across the cut. A split flow need not have the
+same constructor representation as its original, so no syntactic reconstruction
+of the full execution is asserted.
+
+`Execution.deliveries_before_perm_sources` derives exactly the multiset of
+sources strictly before the terminal date for empty routing and a terminal
+`PendingFuture` queue. A source due exactly at that date may still be pending.
+An ordered one-slot prefix is fixed by chronology even when later sources were
+already present in the original queue. A second conservation lemma retains all
+later pending tokens, with their multiplicities.
+
+`Execution.birth_low_two_trains_prefix` now applies the physical first-phase
+proof inside the queue containing both 0,8,...,120 and 160,168,...,280. Any given
+execution reaching 128 has a prefix at exactly 128 with twelve emissions,
+receiving ERROR 1.8, MARK 0.1 and the prepared state at exact resting charge.
+Pending urgency, rather than an assumed arrival list or `CompleteThrough`,
+forces the first sixteen sources to have arrived. The remaining execution and
+the full future queue are retained.
+
+`Execution.birth_prepared_at_second_train` extends this result to an actual
+endpoint at 160. All possible remaining arrivals through that endpoint are due
+exactly at 160. Before their first arrival the prepared cell remains at rest;
+after it, all remaining events have zero duration. The actual guards exclude
+main or sensor departures from their READY rest values during those jumps.
+The complete prefix still has twelve emissions, ERROR 1.8, MARK 0.1, acquired
+log-gain 1.8 and recovery gain 0.1. Its receiving raw input is either absent or
+fresh at 160; other raw inputs are absent. Both legal boundary orders are kept.
+
+`StagedExecution.preparation_at_birth` transfers these conclusions across a
+birth whose pre-birth endpoint is 160. Existing coordinates, modes and raw
+origins are preserved by the birth step. The new cell retains its independent
+nominal birth family. This connects the first physical phase to the introduction
+boundary; it does not yet classify the post-birth A-to-B train, establish the
+later wire calendars or construct a complete execution. The actual executions
+and the birth at 160 are still premises.
 
 
 `HybridInputBalance` retains every routed token in a multiset conservation law.
@@ -519,6 +569,7 @@ python scripts/check_hybrid_cell_negative.py
 python scripts/check_hybrid_local_negative.py
 python scripts/check_hybrid_invariant_negative.py
 python scripts/check_hybrid_staged_negative.py
+python scripts/check_hybrid_boundary_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -562,3 +613,10 @@ old pending tokens, fabricated preparation or inherited gains in the fresh cell,
 source injection into an existing cell, changed due-date bounds, omitted old
 learning, invented pre-birth learning in the new cell and an altered reserve
 floor. Nominal fresh coordinates and an empty-source birth are also constructed.
+
+Boundary controls reject replacing the strict source cutoff by a non-strict one,
+losing deliveries or learning across a flow cut, deleting future pending tokens,
+using the wrong READY threshold, forcing a terminal source to have arrived,
+changing preparation counts or resting charge, resetting the old gain at birth,
+and moving the 160 contract to 168. A zero-duration trace with a source due now
+still pending is also constructed.
