@@ -68,8 +68,15 @@ at 160 and B's complete response. The concrete forward [160,310) and reverse
 emissions, B has 14, and both are prepared at exact resting charge with their
 own derived learning and recovery. No received calendar, case word or output
 count is assumed. The phase executions and birth remain premises.
-The later feedback/C/cadence phases, combined pulse case, fine real enclosures,
-progress and complete execution-to-abstraction theorem remain open.
+The B-to-A return is now connected too: B's direct sixteen sources yield three
+silent inputs and thirteen outputs; their actual delayed arrivals yield three
+silent A inputs and ten outputs. At 459.9 the cumulative counts are A=38/B=27,
+with prepared resting states, raw validity, physical reserve and each cell's
+own derived memories. The first strong output retains its residual-dependent
+latency; only later prepared outputs share the rest latency. B's next train at
+480..600 remains in its initial birth queue throughout the entry proof.
+The later C/cadence phases, combined pulse case, fine real enclosures, progress
+and complete execution-to-abstraction theorem remain open.
 
 ## Reproduce
 
@@ -102,6 +109,7 @@ python3 scripts/check_hybrid_boundary_negative.py
 python3 scripts/check_hybrid_calendar_negative.py
 python3 scripts/check_hybrid_routed_negative.py
 python3 scripts/check_hybrid_teaching_negative.py
+python3 scripts/check_hybrid_reciprocal_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

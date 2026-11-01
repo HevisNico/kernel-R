@@ -107,3 +107,13 @@ import KernelR.HybridTeachingActivePhase
 import KernelR.HybridTeachingBoundaryPhase
 import KernelR.HybridEntryRouter
 import KernelR.HybridStagedTeaching
+import KernelR.HybridTeachingQueueClosure
+import KernelR.HybridResidualLatency
+import KernelR.HybridPreparedLearningTrain
+import KernelR.HybridResidualPreparedCalendar
+import KernelR.HybridFeedbackCalendar
+import KernelR.HybridFeedbackSender
+import KernelR.HybridFeedbackReceiver
+import KernelR.HybridFeedbackInitialSource
+import KernelR.HybridFeedbackEpoch
+import KernelR.HybridReciprocalEntry
