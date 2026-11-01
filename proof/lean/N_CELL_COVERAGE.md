@@ -4,9 +4,11 @@ This extension formalizes the compositional part of the
 [finite-chain argument](../reciprocal_composition/THEOREM.md).
 It does **not** turn the entire physical theorem into an unconditional Lean theorem.
 The distinction is explicit in theorem signatures, not hidden in project axioms.
-The separately constructed birth prefix currently ends at B's first reverse
-FIRE in (344.3,344.9): cumulative A28/B15, with its actual reverse token
-issued but not yet delivered.
+The separately constructed birth prefix currently reaches352: cumulative
+A28/B15, the first reverse wire actually received, the next B352 source
+actually delivered and exactly27 later external sources retained. A's true
+weak-response cut and continuation are kept; B is prepared at exact rest
+with fresh RAW352.
 
 ## Checked composition
 
@@ -39,10 +41,15 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
 
 1. Instantiate the hybrid semantics with physical leaf/relay protocols, source
    queues and contact gates, proving existence, port availability and terminal
-   saturation. The constructed READY birth prefix currently reaches the first
-   reverse FIRE in (344.3,344.9): A28/B15 and exactly 29 pending tokens
-   (28 future B sources plus its issued reverse wire). That wire's receipt and
-   the subsequent reciprocal/C/cadence constructions remain open. See the
+   saturation. The constructed READY birth prefix now reaches352 after the
+   first actual reverse receipt and B352 source delivery: A28/B15 and27
+   sources (B360..440, B480..600). It derives own Aport2 log-gain+0.6 and
+   own independent B newborn port2 log-gain+1.8. A's main and auxiliaries
+   are READY, with rest-band sensors, no RAW and actual charge at least0.1;
+   its exact cut and continuation to H+7.5 are retained without assuming
+   an A PreparedSection or charge reset. B is prepared/q=0.1 with fresh
+   RAW352. The next B FIRE/second reverse receipt and complete459.9,
+   later C/cadence and arbitrary-N constructions remain open. See the
    [current checkpoint and factory map](HYBRID_EXECUTION.md#constructed-protocol-checkpoint).
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
@@ -73,8 +80,11 @@ over-budget four-link jitter claim, in addition to the existing endpoint,
 cadence and adaptive-record corruption cases. The 29 paired controls in
 `python scripts/check_hybrid_feedback_entry_negative.py` additionally check
 the constructed weak entry and first reverse FIRE, own memories and exact
-source/wire queues. They do not supply the pending token's receipt or any
-later reciprocal reaching execution.
+source/wire queues. The 40 additional paired controls in
+`python scripts/check_hybrid_reverse_receipt_negative.py` pass for the
+actual first receipt and352 handoff, own memories, exact queues and
+A28/B15. They leave the second reverse receipt and any complete459.9
+reaching execution open.
 
 The original written theorem and its authenticated snapshots are retained
 unchanged. This guide states the current machine-checked coverage separately.

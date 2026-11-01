@@ -251,3 +251,14 @@ import KernelR.HybridFirstCoupledTeaching
 import KernelR.HybridFeedbackWeakEntry
 import KernelR.HybridFeedbackFirstFire
 import KernelR.HybridIntervalClosedExecutionProduct
+import KernelR.HybridPortFastCompletion
+import KernelR.HybridFeedbackFireProjection
+import KernelR.HybridFeedbackSenderFastEnd
+import KernelR.HybridQuietLeftWireArrival
+import KernelR.HybridPrefixStableMemory
+import KernelR.HybridFirstReverseWiredArrival
+import KernelR.HybridBirthFirstReverseArrival
+import KernelR.HybridFeedbackSenderReturn
+import KernelR.HybridFirstReverseInterleavedPair
+import KernelR.HybridFirstReverseInterleavedMemory
+import KernelR.HybridBirthFirstReverseInterleavedPair

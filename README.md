@@ -11,9 +11,12 @@ A22 network engines and historical proof archive stay in the
 
 The [Lean formalization](proof/lean/README.md) constructs an actual execution
 from A's READY birth through the first complete A-to-B teaching epoch at 319.9
-(**A28/B14**), then B's first reverse-contact firing in **(344.3,344.9)**
-(**A28/B15**). Its reverse token is issued and still pending; its receipt is
-the next construction step. Parameters are fixed, independently perturbed
+(**A28/B14**), then the first real B-to-A receipt and interleaved source
+handoff at **352** (**A28/B15**, **27 future sources**). A's own birth port2
+log-gain has gained0.6; B's own newborn port2 log-gain has gained1.8. A's
+true weak-response cut and continuation are retained, while B is prepared
+at q=0.1 with fresh RAW352. The next construction step is B's response to
+that source and its second reverse wire/receipt. Parameters are fixed, independently perturbed
 within the stated fabrication boxes, with canonical pulses and bounded wire delays.
 
 The later three-cell analysis through 789.9 is checked **conditionally on

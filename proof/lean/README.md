@@ -2,10 +2,11 @@
 
 This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
 Mathlib v4.35.0. It is a **partial formalization**. The actual protocol is now
-constructed from A's original birth through B's first reverse-contact FIRE in
-(344.3,344.9), with cumulative **A28/B15** and its issued reverse token still
-pending. The full later hybrid execution and the Python interval
-implementations have not been verified in Lean.
+constructed from A's original birth through **352**, including the actual
+first reverse FIRE, its delayed Aport2 receipt, A's first weak response and
+the real B352 source delivery. Cumulative counts are **A28/B15**, with exactly
+**27** later external sources. The full later hybrid execution and the Python
+interval implementations have not been verified in Lean.
 
 ## Physical execution foundation
 
@@ -18,7 +19,7 @@ physical event budget. These invariants alone do not supply future executions.
 
 | Proof layer | Current result | Explicit boundary |
 |---|---|---|
-| Constructed execution | From the original READY A birth through teaching at 319.9 (A28/B14), then B's first reverse FIRE in (344.3,344.9) (A28/B15) | The reverse token is issued but not received; 28 external B sources plus that wire remain pending |
+| Constructed execution | From the original READY A birth through teaching at 319.9, the first actual reverse receipt and interleaved B352 source delivery; A28/B15 | Exactly27 future sources; B prepared/q=0.1 with fresh RAW352; A's true weak cut and continuation retained without a prepared charge reset |
 | Conditional physical protocol | Reciprocal epoch at 459.9 (A38/B27), C teaching at 639.9, complete cadence at 789.9 (A54/B61/C34) | Actual executions reaching the required horizons and genuine staged births are supplied |
 | Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
@@ -27,16 +28,25 @@ The constructive factories take A's READY `BirthState` with initially READY
 auxiliaries and the exact 32-source queue, B's independent READY `Newborn`,
 independent fixed `PhysicalBox` parameters (±0.3% or ±10%), canonical amplitudes
 and the declared contacts. Delays are sampled at each actual emission and lie
-in [0.3,0.4]; the backward bound is needed for the saturated reverse-FIRE cut.
+in [0.3,0.4]; the backward bound supplies the actual reverse receipt.
 There is no supplied reaching execution, recorded case word, desired output
 count or assumed firing date. Every source and wire is consumed by an actual
 arrival; old memories, reserve and unfinished raw tails are carried forward.
 No drift, charge noise or settings-copy operation is asserted by this execution
 construction.
 
-The next obligation is receipt of the issued reverse token and the remaining
-coupled return cycles. Later C/cadence constructions, retained probes, fine
-enclosure soundness and physical every-N refinement remain open. The separate
+At352, A is main READY with auxiliaries in their READY rest bands, no RAW
+and its actual charge at least0.1. Its exact cut and continuation to H+7.5
+are retained; no A `PreparedSection` or charge reset is assumed. A's own
+birth port2 log-gain has gained0.6, while B's own independent newborn port2
+log-gain has gained1.8. Other gains and both recoveries are preserved; on
+the receipt-to352 suffix ERROR is zero elsewhere and total recovery is zero.
+The [checkpoint/factory map](HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
+describes the eleven new sender, receipt, interleaving and memory modules.
+
+The next obligation is B's actual FIRE from fresh source352, its second
+reverse wire/receipt and the remaining coupled return cycles. Later C/cadence
+constructions, retained probes, fine enclosure soundness and physical every-N refinement remain open. The separate
 [robust coverage guide](ROBUST_COVERAGE.md) describes conditional noisy/drifting
 slow-chain results.
 
@@ -89,6 +99,7 @@ python3 scripts/check_hybrid_receiver_fire_negative.py
 python3 scripts/check_hybrid_coupled_preparation_negative.py
 python3 scripts/check_hybrid_coupled_teaching_negative.py
 python3 scripts/check_hybrid_feedback_entry_negative.py
+python3 scripts/check_hybrid_reverse_receipt_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -103,6 +114,11 @@ options. `check_hybrid_feedback_entry_negative.py` adds 29 paired controls for
 the real B344 weak entry, first residual-dependent B FIRE, issued reverse
 token, own memories, A28/B15 and both interval-scoped emitting products. Each
 positive conclusion is compiled before its altered version must be rejected.
+The 40 paired controls in `check_hybrid_reverse_receipt_negative.py` also pass
+for the actual reverse receipt and352 handoff, real sender clocks and RAW
+expiry, retained weak continuation, own memories, exact source/wire queues,
+A28/B15 and27 sources. They do not construct the second reverse receipt or
+the complete459.9 epoch.
 
 ## Coverage and hypotheses
 
@@ -208,9 +224,9 @@ local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Continue the constructed reverse FIRE through its actual receipt and the
-   reciprocal epoch at 459.9, then construct C's birth/teaching and the cadence
-   through 789.9. Preserve global queues, own memories and port availability.
+1. Continue the constructed352 handoff through the next actual B FIRE,
+   second reverse receipt and the reciprocal epoch at 459.9, then construct
+   C's birth/teaching and the cadence through 789.9. Preserve global queues, own memories and port availability.
 2. Prove the remaining real enclosure memberships, retained probe responses,
    causal cuts and protocol extension/saturation obligations. Exact comparisons
    of stored endpoints do not establish these facts.

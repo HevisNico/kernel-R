@@ -3,10 +3,11 @@
 The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. The
 complete conditional three-cell prefix is derived below; its reaching traces
-are still supplied. Constructive source-driven existence now reaches B's first
-reverse-contact FIRE in (344.3,344.9), after the complete first coupled
-teaching epoch at319.9 and three actual reciprocal weak cycles. Cumulative
-counts are A28/B15; its newly issued reverse token is still pending. The
+are still supplied. Constructive source-driven existence now reaches352 from
+A's original birth, including the first reverse FIRE, its actual Aport2
+receipt, A's first weak response and the real B352 source delivery. Cumulative
+counts are A28/B15 and exactly27 external sources remain. A's true weak cut
+and its continuation are retained; B is prepared at q=0.1 with fresh RAW352. The
 modules also derive an isolated silent input's absence of emissions and total
 ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
@@ -64,14 +65,14 @@ with initially READY auxiliaries and the exact protocol queue.
 ## Constructed protocol checkpoint
 
 The current top-level factory is
-[`birth_protocol_feedback_first_fire_exists`](KernelR/HybridFeedbackFirstFire.lean).
-It constructs the actual staged trace from the original A birth through B's
-first reverse-contact FIRE. It takes the independent fixed fabrication box,
+[`birth_protocol_first_reverse_interleaved_pair_exists`](KernelR/HybridBirthFirstReverseInterleavedPair.lean).
+It constructs the actual staged trace from the original A birth through the
+first reverse receipt, A's first weak response and the real B352 source delivery. It takes the independent fixed fabrication box,
 A's READY birth and exact 32-source queue, an independent READY B newborn,
 the declared contact gates and emission-dependent delays in [0.3,0.4].
 Neither a reaching execution nor a pulse-case word, desired count, dose or
-firing date is supplied. The backward-delay bound is needed for the saturated
-FIRE endpoint; the earlier silent reciprocal entry needs no backward bound.
+firing date is supplied. The backward-delay bound supplies the actual reverse
+receipt; the earlier silent reciprocal entry needs no backward bound.
 
 | Constructed checkpoint | Derived state and traffic | Public factory / source |
 |---|---|---|
@@ -82,6 +83,8 @@ FIRE endpoint; the earlier silent reciprocal entry needs no backward bound.
 | Complete first teaching, 319.9 | Cumulative A28/B14; both prepared, no RAW; all 32 B sources retained | `birth_protocol_first_coupled_teaching_exists` in [HybridFirstCoupledTeaching](KernelR/HybridFirstCoupledTeaching.lean) |
 | Fresh reciprocal input, 344 | Three actual Bport2 weak cycles, ERROR1.8, no new output/MARK; B's true q>=0.1; 28 future sources | `birth_protocol_feedback_weak_entry_exists` in [HybridFeedbackWeakEntry](KernelR/HybridFeedbackWeakEntry.lean) |
 | First reverse FIRE, F in (344.3,344.9) | Cumulative A28/B15; A remains at q=0.1; reverse Aport2 token due at F+backward(F); 29 pending tokens | `birth_protocol_feedback_first_fire_exists` in [HybridFeedbackFirstFire](KernelR/HybridFeedbackFirstFire.lean) |
+| First reverse receipt, H in (344.7,345.3) | The actual B-issued Aport2 wire is consumed; A has fresh RAW at H; B's true sender cut is retained; A28/B15 and28 external sources | `birth_protocol_first_reverse_wired_arrival_exists` in [HybridBirthFirstReverseArrival](KernelR/HybridBirthFirstReverseArrival.lean) |
+| Interleaved source handoff, 352 | Real A weak response and B FAST/SLOW return; actual B352 source consumed; A28/B15, own Aport2+0.6/Bport2+1.8 and27 sources | `birth_protocol_first_reverse_interleaved_pair_exists` in [HybridBirthFirstReverseInterleavedPair](KernelR/HybridBirthFirstReverseInterleavedPair.lean) |
 
 At 319.9 A retains its own birth port0 log-gain+1.8 and recovery+0.1;
 B retains its own newborn port1 log-gain+0.6 and recovery+0.1. All other gains
@@ -89,7 +92,12 @@ are unchanged. B's remaining queue is exactly the two port2 source trains
 320..440 and 480..600, each with sixteen inputs spaced by eight. At 344 its own
 port2 log-gain has increased by1.8. The FIRE extension preserves memories and
 recovery; its queue contains B352..440 (twelve), B480..600 (sixteen) and the
-single newly issued reverse token. That token has **not** been delivered.
+single newly issued reverse token. Its actual receipt then removes that wire.
+At352 the subsequent B source has also been consumed: the exact remaining
+queue is B360..440 (eleven sources) followed by B480..600 (sixteen), with no
+unconsumed reverse wire. A's port2 log-gain is its own birth value+0.6; B's
+port2 log-gain is its own independent newborn value+1.8. The previously
+acquired Aport0/Bport1 gains and both recoveries are retained.
 
 ### How the execution is constructed
 
@@ -133,11 +141,47 @@ future, proving saturation at the FIRE cut. At a source boundary with a token
 due now, the caller must perform its actual arrival before claiming
 `CompleteThrough`; reaching a date alone is insufficient.
 
+### Actual reverse receipt and source352 handoff
+
+Eleven modules extend the previous FIRE checkpoint: `HybridPortFastCompletion`,
+`HybridFeedbackFireProjection`, `HybridFeedbackSenderFastEnd`,
+`HybridPrefixStableMemory`, `HybridQuietLeftWireArrival`,
+`HybridFirstReverseWiredArrival`, `HybridFeedbackSenderReturn`,
+`HybridFirstReverseInterleavedPair`, `HybridFirstReverseInterleavedMemory`,
+`HybridBirthFirstReverseArrival` and `HybridBirthFirstReverseInterleavedPair`.
+
+The actual global FIRE projection supplies B's FAST/SILENT coordinates,
+SILENT-entry clock, sensor floor dates and RAW origin344. The port-generic
+constructor performs the real auxiliary transitions, RAW expiry and FAST
+exit at F+1. A maximal cut of that same path at H=F+backward(F) retains
+coincident events and its remaining execution. The real root gives F>344.4;
+bounded backward delay therefore yields H in(344.7,345.3). A remains at exact
+rest until an actual arrival consumes the unique B-issued Aport2 token.
+The next retained sender flow proves saturation at that receipt. No reaching
+execution or received calendar is supplied by the original-birth factory.
+
+B's actual SLOW return reopens at q=0.1, reaches a prepared section by351.5
+and waits physically to352. A's first received weak cycle is constructed
+through H+7.5 and cut maximally at352, with its true continuation retained.
+The two real paths are woven with the separate global queue unchanged.
+Only after reaching352 does an arrival consume the actual next B source.
+This suffix adds no output and has exactly the B352 delivery.
+
+At352, B is prepared/q=0.1 with fresh port2 RAW352. A is main READY, its
+auxiliaries are READY in their rest bands, RAW is absent and its actual
+charge is at least0.1. Its exact cut and continuation to H+7.5 remain in the
+witness; no A `PreparedSection` or reset to q=0.1 is asserted at352. A's
+ERROR0.6 on port2 is derived, with ERROR zero on its other ports and every B
+port. Both cells' total recovery contributions on this suffix are zero.
+The own-memory equalities, A28/B15, exact27-source queue and
+CompleteThrough352 follow from the original-birth factory.
+
 ### Current boundary
 
-The next step is the first reverse token's real receipt, then A's three weak
-received inputs, first learned response and remaining coupled returns. The
-next complete target is459.9, cumulative A38/B27 with sixteen B480..600 sources
+The next step is B's actual response to fresh source352, its second reverse
+wire and the next real A receipt, using A's retained weak continuation. The
+remaining weak A inputs, first learned response and coupled returns still
+need an original-birth construction. The next complete target is459.9, cumulative A38/B27 with sixteen B480..600 sources
 remaining. The conditional theorem already proves those consequences **given
 reaching executions**. The later conditional C/cadence theorem through789.9 is
 also checked; constructing its reaching traces and the physical every-N
@@ -224,8 +268,14 @@ these conditional results from the factories above.
 | `HybridResidualLatency` / `HybridResidualPreparedCalendar` | Positive READY residual cannot delay the actual first firing; later outputs share the same-gain rest-root latency | Initial q>=0.1, prepared gain/section and actual separated input calendar |
 | `HybridPreparedLearningTrain` | Three actual low-gain silent inputs give ERROR 1.8/MARK0, then a prepared learned train emits once per input | Current prepared section, nominal low gain, real receiving-cell dates with minimum gap 7.5 and final quiet horizon |
 | `HybridFeedbackWeakEntry` | Construct the real B320/328/336 weak cycles and B344 source activation; derive ERROR1.8, A28/B14, own memories, the true B residual and28 future sources | Current prepared319.9 endpoint and exact B source queue; the original-birth factory discharges these without a reaching-execution premise |
-| `HybridFeedbackFirstFire` | Construct the actual B FIRE in (344.3,344.9), its reverse Aport2 token, A28/B15 and29 pending tokens; bound its residual latency by the own rest reference | Receipt is not constructed; positive bounded backward delay supplies saturation at the FIRE cut |
+| `HybridFeedbackFirstFire` | Construct the actual B FIRE in (344.3,344.9), its reverse Aport2 token, A28/B15 and29 pending tokens; bound its residual latency by the own rest reference | This factory ends before receipt; bounded backward delay supplies saturation at the FIRE cut, and the next factories construct the continuation |
 | `HybridIntervalClosedExecutionProduct` | Weave either emitting cell with a neutral partner using contact closure only on the actual execution interval; retain every genuine FIRE and its exact emission ledger | No arrivals in the woven interval, a fixed future global queue and equal initial/final clocks; not an open-contact routing product |
+| `HybridPortFastCompletion` / `HybridFeedbackFireProjection` / `HybridFeedbackSenderFastEnd` | Complete the actual projected B FAST/SILENT path, original RAW expiry and FAST exit at F+1, retaining own memories | Current physical clocks come from the actual global FIRE; no incoming continuation is assumed |
+| `HybridPrefixStableMemory` | A real prefix of a memory-preserving path preserves the same own gains/recovery | Physical monotonicity on both the actual prefix and its retained suffix |
+| `HybridQuietLeftWireArrival` / `HybridFirstReverseWiredArrival` | Consume the actual issued reverse wire at H in(344.7,345.3), retaining B's true cut and28 sources | Maximal sender cut and bounded backward delay; no event-priority or preloaded-wire assumption |
+| `HybridFeedbackSenderReturn` | Construct B's real SLOW return/reopen and quiet prepared endpoint352 at q=0.1 | Actual FAST endpoint, own prepared recovery and first latency below0.9 |
+| `HybridFirstReverseInterleavedPair` / `HybridFirstReverseInterleavedMemory` | Weave A's weak cut with B's true return and consume B352; derive27 sources, Aport2 ERROR0.6, zero ERROR elsewhere and zero total recovery | A's exact cut and later H+7.5 continuation are kept; no A PreparedSection or charge reset at352 |
+| `HybridBirthFirstReverseArrival` / `HybridBirthFirstReverseInterleavedPair` | Construct original birth-to-receipt and birth-to352 traces, A28/B15 and own Aport2+0.6/Bport2+1.8 | Original READY birth/source family and independent own B newborn; the next reverse receipt and complete459.9 construction remain open |
 | `HybridFeedbackSender` / `HybridFeedbackInitialSource` | Select direct B sources 320..440 and derive thirteen actual B outputs, retaining the first residual latency and later source tokens | B's actual initial queue, current prepared nominal return port and no incoming B route |
 | `HybridFeedbackCalendar` / `HybridFeedbackReceiver` | Derive thirteen actual A return arrivals with fresh delays, then three silent inputs and ten learned outputs | Real B output calendar, initially empty A queue and concrete return contact; current prepared A bounds |
 | `HybridFeedbackEpoch` / `HybridReciprocalEntry` | Physical A38/B27 and derived port gains/recovery at 459.9, with terminal preparation, raw validity and reserve | Given staged teaching and continuing executions, fresh birth160, exact source queues/contact windows; no global existence/progress claim |
@@ -1012,8 +1062,9 @@ It connects to PR #6's interface but does not supply its leaf or `RelayLaw` witn
 
 ## Remaining obligations for the complete theorem
 
-1. Continue the constructed fresh B344 and its first actual reverse FIRE
-   through the real return-wire receipts and coupled cycles to459.9. The
+1. Continue the constructed352 handoff through B's next actual FIRE, its
+   second reverse wire and the next A receipt, retaining A's weak continuation.
+   Construct the remaining coupled cycles to459.9. The
    conditional A38/B27 reciprocal theorem already exists. Construct C's
    later birth/teaching and the cadence traces through789.9, whose conditional
    analyses are also already checked; retain all queues and port separation.
@@ -1057,5 +1108,8 @@ bounds, event budgets, exact queues and deliveries, staged births, own memories,
 wire jitter, conditional cadence and the original-birth constructors. The
 29 paired controls in `check_hybrid_feedback_entry_negative.py` additionally
 check B344, its residual first FIRE, cumulative A28/B15, the issued Aport2 token
-and both interval-scoped emitting products. They do not assert the pending
-token's receipt or a later reaching execution.
+and both interval-scoped emitting products. The additional 40 paired controls
+in `check_hybrid_reverse_receipt_negative.py` pass for the actual reverse
+receipt and352 handoff, including the original-birth factory, own memories,
+real sender clocks/RAW expiry, retained A cut, B352 source, A28/B15 and27
+sources. They leave the second reverse receipt and complete459.9 epoch open.
