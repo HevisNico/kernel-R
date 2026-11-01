@@ -75,7 +75,21 @@ with prepared resting states, raw validity, physical reserve and each cell's
 own derived memories. The first strong output retains its residual-dependent
 latency; only later prepared outputs share the rest latency. B's next train at
 480..600 remains in its initial birth queue throughout the entry proof.
-The later C/cadence phases, combined pulse case, fine real enclosures, progress
+The physical prefix now continues through C's genuine birth at 480 and its
+teaching endpoint at 639.9. The future B source train is conserved through the
+return, and both old cells stay prepared up to 480. Whether source 480 is still
+pending or already delivered, birth preserves B's coordinates and actual
+remaining queue. B's sixteen prepared outputs give C sixteen real wire inputs
+on its own fast port; C emits fourteen times and gains ERROR 0.6 and MARK 0.1.
+A remains quiescent with unchanged memories. C's gains and recovery are measured
+from its own newborn coordinates, with independent fabrication parameters.
+The composed `CEntry` theorem derives cumulative A=38/B=43/C=14 from A's original
+birth, given the actual executions and both birth events. At 639.9 all cells
+are prepared at exact resting charge without raw current; A/B queues are empty
+and C retains exactly its external birth sources. A corollary retains all
+twenty-five period-four inputs 640,644,...,736 on C port 0 in that same queue.
+It does not yet classify their fast responses.
+Period-four cadence, the combined pulse case, fine real enclosures, progress
 and complete execution-to-abstraction theorem remain open.
 
 ## Reproduce
@@ -110,6 +124,7 @@ python3 scripts/check_hybrid_calendar_negative.py
 python3 scripts/check_hybrid_routed_negative.py
 python3 scripts/check_hybrid_teaching_negative.py
 python3 scripts/check_hybrid_reciprocal_negative.py
+python3 scripts/check_hybrid_c_introduction_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

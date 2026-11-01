@@ -117,3 +117,14 @@ import KernelR.HybridFeedbackReceiver
 import KernelR.HybridFeedbackInitialSource
 import KernelR.HybridFeedbackEpoch
 import KernelR.HybridReciprocalEntry
+import KernelR.HybridFeedbackQueueClosure
+import KernelR.HybridFastTeachingCalendar
+import KernelR.HybridPreparedSourceContact
+import KernelR.HybridCTeachingRouter
+import KernelR.HybridSourceActivation
+import KernelR.HybridCIntroductionActivePhase
+import KernelR.HybridCIntroductionBoundary
+import KernelR.HybridCIntroductionBoundaryPhase
+import KernelR.HybridCIntroductionQueueClosure
+import KernelR.HybridStagedCIntroduction
+import KernelR.HybridCEntry

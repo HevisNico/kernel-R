@@ -6,6 +6,7 @@ namespace KernelR.Hybrid
 structure FeedbackEpoch {θ route s u} (e : @Execution 2 θ route s u) where
   a_learning : PreparedLearningTrain e 0 2 10
   b_learning : PreparedLearningTrain e 1 2 13
+  b_sender : FeedbackSender e
 
 /-- The declared return contacts and actual pending sources determine both
 physical learning trains. No output count, received calendar, or pulse-case
@@ -64,6 +65,6 @@ theorem Execution.feedback_epoch {θ ε s u} (forward backward : ℝ → ℝ)
     houtputs backward hbackward hu hfuture hAempty hwire
   obtain ⟨receiver⟩ := e.feedback_receiver_phase hb hf hv hsA hqA hzA hrA hu sender.first rest
     hfirst hrest sender.first_le_rest backward hbackward hcalendar
-  exact ⟨⟨receiver,sender.learning⟩⟩
+  exact ⟨⟨receiver,sender.learning,sender⟩⟩
 
 end KernelR.Hybrid

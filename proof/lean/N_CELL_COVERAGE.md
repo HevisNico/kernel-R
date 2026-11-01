@@ -44,9 +44,13 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    physical quantities lie between those endpoints.
 3. Complete preparation reachability for the leaf/relay protocols, including
    port permutations and later staged introductions. The first low-port phase,
-   the complete conditional A38/B27 reciprocal entry across B's birth at 160,
+   the complete conditional A38/B43/C14 prefix across births at 160 and 480,
    prepared-input returns and physical reserve invariance are checked in the
    [hybrid guide](HYBRID_EXECUTION.md).
+   The B-to-C teaching transition through 639.9 now preserves A/B memories,
+   derives C's own preparation and retains its future source queue. Period-four
+   cadence, its combined MARK/ERROR case and arbitrary later introductions
+   remain to be connected physically.
 4. Proofs of the leaf refinement and `RelayLaw` from those semantics. In
    particular, no omitted or extra emissions, the full protected doses, the
    residual-raw-tail bound and the first-crossing latency bounds must be derived.

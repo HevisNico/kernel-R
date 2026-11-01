@@ -1,5 +1,6 @@
 import KernelR.HybridTeachingQueueClosure
 import KernelR.HybridFeedbackEpoch
+import KernelR.HybridFeedbackQueueClosure
 /-! Physical reciprocal entry through 459.9, retaining both complete source epochs. -/
 namespace KernelR.Hybrid
 
@@ -22,6 +23,10 @@ structure ReciprocalEntry {θ fresh routeBefore born s u}
   recovery_b : u.x 1 .b = teaching.birth.newborn.x .b + 1 / 10
   physical : PhysicalInvariant (extendParameters θ fresh) u
   raw_valid : RawValid u
+  pending_future : PendingFuture u
+  a_pending_empty : u.pending.filter (fun d => d.cell = 0) = []
+  b_pending_sources : (u.pending.filter (fun d => d.cell = 1)).Perm
+    (teaching.birth.sources.filter (fun d => u.time < d.due))
 
 /-- The actual teaching prefix and return execution yield A38/B27. Both cells
 retain their own memories and every case/calendar/count comes from the physical
@@ -81,8 +86,35 @@ theorem StagedExecution.reciprocal_entry {θ fresh ε routeBefore born s u}
     teach.teaching.a_train.prepared teach.teaching.a_train.charge_rest hza teach.teaching.a_train.raw_finished
     teach.teaching.b_phase.prepared teach.teaching.b_phase.charge_rest hzb teach.teaching.b_phase.raw_finished
     later closure.a_empty hbqueue (by simpa only [hend] using hlater) hteaching hend hpf hforward hbackward
+  have hG : 9 / 5 ≤ Real.exp (s.x 1 (.z 2) + 9 / 5) ∧
+      Real.exp (s.x 1 (.z 2) + 9 / 5) ≤ 12 / 5 := by
+    have hlog : Real.log (3 / 10) + 9 / 5 - 1 / 100000 ≤ s.x 1 (.z 2) + 9 / 5 ∧
+        s.x 1 (.z 2) + 9 / 5 ≤ Real.log (3 / 10) + 9 / 5 + 1 / 100000 := by
+      constructor <;> linarith [hzb.1,hzb.2]
+    have h := learned_gain_bounds hlog.1 hlog.2
+    exact ⟨h.1,by linarith [h.2]⟩
+  have finalQueue := following.feedback_queue_closure forward backward feedback.b_sender later
+    closure.a_empty hbqueue (by simpa only [hend] using hlater) hteaching hend
+    (following.pending_future hcausal hpf) (restLatency_spec hG).2.1 (fun t => (hbackward t).2)
+  have hfiltered : e.birth.sources.filter (fun d => u.time < d.due) = later := by
+    rw [hsources,List.filter_append]
+    have hfirst : (sourceTrain (1 : Fin 2) 2 320 8 16).filter (fun d => u.time < d.due) = [] := by
+      apply List.filter_eq_nil_iff.mpr
+      intro d hd
+      obtain ⟨k,rfl⟩ := List.mem_ofFn.mp hd
+      have hk : (k.val : ℝ) ≤ 15 := by exact_mod_cast (show k.val ≤ 15 by omega)
+      simp only [decide_eq_true_eq]
+      rw [hend]
+      change ¬ (4599 / 10 : ℝ) < 320 + 8 * (k.val : ℝ)
+      linarith
+    have hlast : later.filter (fun d => u.time < d.due) = later := by
+      apply List.filter_eq_self.mpr
+      intro d hd
+      exact decide_eq_true (by simpa only [hend] using hlater d hd)
+    rw [hfirst,hlast,List.nil_append]
   refine ⟨⟨teach,feedback,?_,?_,?_,?_,?_,?_,?_,?_,?_,?_,
-    following.physical_invariant hb hfi,following.raw_valid hvalid⟩⟩
+    following.physical_invariant hb hfi,following.raw_valid hvalid,
+    following.pending_future hcausal hpf,finalQueue.a_empty,?_⟩⟩
   · rw [teach.a_emissions,feedback.a_learning.emissions]
   · rw [teach.b_emissions,feedback.b_learning.emissions]
   · rw [feedback.a_learning.gain_other 0 (by decide),teach.gain_a_target]
@@ -93,6 +125,8 @@ theorem StagedExecution.reciprocal_entry {θ fresh ε routeBefore born s u}
   · rw [feedback.b_learning.gain_other 0 (by decide),teach.gain_b_other 0 (by decide)]
   · rw [feedback.a_learning.recovery_preserved,teach.recovery_a]
   · rw [feedback.b_learning.recovery_preserved,teach.recovery_b]
+  · rw [hfiltered]
+    exact finalQueue.b_sources
 
 /-- Keep the later B teaching train at 480..600 in the same birth queue while
 deriving the complete physical reciprocal entry at 459.9. -/

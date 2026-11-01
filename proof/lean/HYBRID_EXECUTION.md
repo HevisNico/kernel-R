@@ -137,6 +137,11 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridFeedbackSender` / `HybridFeedbackInitialSource` | Select direct B sources 320..440 and derive thirteen actual B outputs, retaining the first residual latency and later source tokens | B's actual initial queue, current prepared nominal return port and no incoming B route |
 | `HybridFeedbackCalendar` / `HybridFeedbackReceiver` | Derive thirteen actual A return arrivals with fresh delays, then three silent inputs and ten learned outputs | Real B output calendar, initially empty A queue and concrete return contact; current prepared A bounds |
 | `HybridFeedbackEpoch` / `HybridReciprocalEntry` | Physical A38/B27 and derived port gains/recovery at 459.9, with terminal preparation, raw validity and reserve | Given staged teaching and continuing executions, fresh birth160, exact source queues/contact windows; no global existence/progress claim |
+| `HybridFeedbackQueueClosure` | Empty A queue and exact remaining future B sources at 459.9, with multiplicities | Real B sender outputs, source conservation and future terminal queue |
+| `HybridFastTeachingCalendar` / `HybridPreparedSourceContact` | Generic sixteen-input physical sender/contact and fresh receiver teaching at arbitrary cells and epochs | Actual source queue, current physical bounds, gated contact and a complete supplied execution |
+| `HybridSourceActivation` / `HybridCIntroductionBoundary` | Old cells remain prepared through 480; the source due at birth is either pending or already fresh | Actual reciprocal prefix and exact remaining B sources; no event-priority assumption |
+| `HybridCTeachingRouter` / `HybridCIntroductionActivePhase` / `HybridCIntroductionBoundaryPhase` | Actual B16/C14 and quiet A across both legal birth/source orders | B-to-C port-1 contact [480,630), current bounds and C's own READY birth data |
+| `HybridCIntroductionQueueClosure` / `HybridStagedCIntroduction` / `HybridCEntry` | Physical cumulative A38/B43/C14 at 639.9; own memories and future C source queue retained | Actual executions and births supplied, independent device parameters and wire delays; cadence/existence remain open |
 
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
@@ -680,10 +685,66 @@ The final physical invariant includes all gain/recovery caps and reserve in
 [50,100], and raw validity is propagated. This remains conditional on actual
 executions reaching 160,319.9 and459.9 and the genuine fresh birth at 160. A's
 initial auxiliaries are READY; this is not an ERROR-born generalization.
-C's introduction, period-four cadence and its combined MARK/ERROR case, probes,
+The C introduction described below extends this prefix. Period-four cadence
+and its combined MARK/ERROR case, probes,
 remaining fine enclosures, global existence/progress and physical every-N
 refinement are still open. Fixed fabrication parameters and canonical pulse
 amplitudes remain the scope; noise and drift need separate extensions.
+
+## Physical C introduction through 639.9
+
+`HybridFeedbackQueueClosure` exposes the reciprocal handoff: A's queue is empty,
+while B retains exactly the future part of its own newborn source queue. This
+is a multiset equality expressed by `List.Perm`; every occurrence is retained,
+without claiming that the physical queue has a particular ordering.
+`ReciprocalEntry` also records this handoff and terminal `PendingFuture`.
+For the concrete two B trains, its remaining queue is exactly 480,488,...,600
+on port 2.
+
+`HybridCIntroductionBoundary` follows the actual old-cell execution from 459.9
+to 480. Both cells preserve their prepared section, exact resting charge,
+all log-gains and recovery, with no emissions. At 480 B has either no raw and
+all sixteen source tokens, or a fresh raw on port 2 and the fifteen successors
+488,...,600. The two states are coupled by token conservation, not a chosen
+priority. `BirthStep` then appends the independent READY newborn C without
+resetting either old cell or losing a pending token.
+
+`HybridSourceActivation` handles the pending alternative using the actual first
+receiving-cell delivery. The preceding zero-time interleavings cannot reach a
+READY firing or sensor threshold; coordinates, other raw inputs and source
+provenance are preserved. The active alternative uses the same physical phase
+directly. `HybridPreparedSourceContact` derives B's sixteen physical outputs and
+the actual C arrivals through `cTeachingContact`, B-to-C on port 1 during
+[480,630). The latter lie strictly in (480.6,601.3); common sender latency
+cancels between successive inputs while each fresh wire delay remains.
+
+`HybridFastTeachingCalendar` derives C's one silent, first strong, protected and
+learned cases from those real dates. It gives C fourteen outputs, ERROR 0.6,
+MARK 0.1 and a prepared return. These are conclusions, not a supplied case word.
+A receives nothing and remains idle in the same three-cell trace.
+
+`StagedExecution.reciprocal_c_entry` composes the entire physical prefix:
+
+| Quantity at 639.9 | A | B | C |
+|---|---|---|---|
+| Cumulative actual emissions | 38 | 43 | 14 |
+| New emissions during C introduction | 0 | 16 | 14 |
+| Log-gain changes from own birth | Ports 0 and 2: +1.8 each; port 1 preserved | Port 1: +0.6; port 2: +1.8; port 0 preserved | Port 1: +0.6; other ports preserved |
+| Recovery from own birth | +0.1 | +0.1 | +0.1 |
+| Terminal section | Prepared READY, q=0.1, no raw | Prepared READY, q=0.1, no raw | Prepared READY, q=0.1, no raw |
+| Pending queue | Empty | Empty | Exactly C's external newborn sources, up to permutation |
+
+The physical gain/recovery caps, reserve in [50,100], raw validity and future
+queue property propagate through both births. `CEntry.cadence_sources` retains
+the twenty-five C port-0 tokens 640,644,...,736 if they were declared at C's
+birth. It proves their conservation, not the subsequent period-four responses.
+The general theorem only requires C sources due at 640 or later.
+
+This is still a conditional physical prefix: actual executions reaching the
+listed endpoints and fresh births at 160 and 480 are supplied. It does not
+construct existence/progress, instantiate the later cadence contacts or prove
+the fast combined MARK/ERROR case. Fixed fabrication parameters, canonical
+pulse amplitudes and initial READY auxiliaries on A remain explicit scope.
 
 ## Physical event budget
 
