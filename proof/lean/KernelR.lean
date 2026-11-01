@@ -218,3 +218,9 @@ import KernelR.HybridMidLearnedFastEnd
 import KernelR.HybridFirstReceiverWeak
 import KernelR.HybridFirstSenderReturn
 import KernelR.HybridFirstInterleavedPair
+
+import KernelR.HybridGuardedQuietProduct
+import KernelR.HybridSameGainLatency
+import KernelR.HybridReceiverQuietReady
+import KernelR.HybridSecondSenderFire
+import KernelR.HybridSecondWiredArrival

@@ -60,7 +60,10 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    two active event-free local traces are proved. Their first actual weave
    now reaches168 and consumes A168: B's real ERROR0.6 is derived, A's memories
    and B's own recovery are preserved, and46 future sources remain. Further
-   teaching inputs and later births remain open.
+   teaching inputs and later births remain open. The second actual A FIRE
+   and Bport1 receipt are also constructed, with F2=F1+8 derived from the
+   own response roots and received gap[7.9,8.1] from fresh delays. B's true
+   READY learned entry and46 future tokens are retained.
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.

@@ -4,7 +4,7 @@ The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. The
 complete conditional three-cell prefix is derived below; its reaching traces
 are still supplied. Constructive source-driven existence now reaches the
-the first interleaved A/B response through168 from the original A birth queue. They now derive an isolated silent input's absence of
+the second real A-to-B wire receipt from the original A birth queue. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
 section the learned-input case now returns and preserves all memories. Sensor
@@ -538,6 +538,53 @@ its real FAST exit at FIRE+1, including all orders of RAW expiry and the
 trained port's own independently chosen rates. It preserves gains, recovery
 and every future token. These tools do not by themselves construct the
 remaining network teaching epoch, the full789.9 trace or every-N existence.
+
+## Constructed second actual wire receipt
+
+`birth_protocol_second_wired_arrival_exists` extends the original-birth
+witness through the next actual A emission and the second Bport1 contact
+receipt. No received calendar, common latency, pulse count or firing date
+is supplied as a premise.
+
+`HybridSameGainLatency` proves uniqueness of the real response root at
+q=0.1 with the same own gain. It applies to the first and second actual A
+firings: A's own gain is preserved and each input starts at its real reopen
+charge. Since the actual sources are160 and168, F2=F1+8 is derived. The
+wire functions are evaluated separately at these two firing dates, so the
+received gap lies in[7.9,8.1]; independent jitter is retained.
+
+`HybridGuardedQuietProduct` accepts only actual READY modes, absent raw
+and strict q/m guards for the quiet cell. It does not demand the narrow
+READY charge band at168. Its quiet trajectory evolves from the current
+values and the single global queue remains exact.
+
+`HybridReceiverQuietReady` recovers the future READY charge band from B's
+real remaining weak execution. The READY/no-current scalar solution and
+`relax_restart` relate quietAt from the state168 to the actual weak endpoint.
+The band is asserted only at a date at least H1+7.5. In this protocol,
+F2=F1+8 and forward(F1)≤0.4 imply H1+7.5<F2, so B's READY band at FIRE2 is a
+conclusion of that construction, not an assumption at168.
+
+`HybridSecondSenderFire` constructs A's real source168 pulse alongside B's
+current quiet residue. The global queue has46 external sources until a
+real `Jump.fire` appends exactly one Bport1 token. A retains RAW origin168.
+`HybridSecondWiredArrival` cuts the actual A FAST continuation at
+H2=F2+forward(F2), after all local zero-time jumps at that date, then builds
+the real global receipt of that already-issued token. Only the prefix to
+the due date is lifted; no flow crosses an urgent delivery.
+
+H2 lies in(168.7,169.3). The queue follows46→47→46. B receives fresh port1
+RAW at H2, with its own newborn log-gain plus0.6, own unchanged low recovery
+and the real READY charge/auxiliary bands. Its learned gain is proved in
+[1.8,2.2]; no false gain cap2 or copied nominal value is used. The extension
+emits once from A and delivers exactly this one wire token. Physical
+invariants, raw validity and `CompleteThrough` after receipt hold, including
+coincidences with A guards or RAW expiry.
+
+This is the actual learned entry for B's first strong response. That
+response, its later protected input, the rest of the teaching epoch and
+subsequent births still need their global executions. The full789.9 and
+every-N execution-existence goals remain open.
 
 ## Checked implications
 
@@ -1615,3 +1662,9 @@ reject wrong endpoint/saturation/token counts, an unconsumed A168 source,
 invented B outputs, reset A charge/raw, learning copied to A, missing or
 doubled B ERROR, fictitious B MARK/recovery, wrong returned modes/raw,
 a false learned-gain cap2 and an unjustified firing bound after0.5.
+
+Second-wire controls compile the original birth-to-second-receipt factory.
+They reject altered source counts, wrong dates/gaps/delay sampling, stale
+raw origins, lost or premature tokens, wrong target/output cells, copied B
+birth values, false learned-gain/recovery bounds and an invented latency
+shift. READY at FIRE2 is checked from the real future weak-return band.

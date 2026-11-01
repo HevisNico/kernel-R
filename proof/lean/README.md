@@ -187,7 +187,13 @@ return and B's first weak response through168, then consumes the actual A168
 source. A remains prepared with q=0.1 and fresh RAW168. B is READY with
 ERROR0.6, MARK0, own gain+0.6, own recovery unchanged and raw absent;
 its charge is the real carried value. Exactly46 future external sources
-remain. Later teaching inputs and the trace reaching789.9 remain open.
+remain. `birth_protocol_second_wired_arrival_exists` now constructs the
+next actual A FIRE and Bport1 receipt. Equality of A's own response roots
+proves F2=F1+8; the two fresh delays then give a received gap in[7.9,8.1].
+B's READY charge band at this next input comes from its real weak return,
+with own learned gain in[1.8,2.2], own low recovery and fresh RAW. The queue
+follows46→47→46. B's first strong response and later teaching inputs still
+need their global executions; the trace reaching789.9 remains supplied.
 
 ## Reproduce
 
@@ -233,6 +239,7 @@ python3 scripts/check_hybrid_preparation_existence_negative.py
 python3 scripts/check_hybrid_b_birth_product_negative.py
 python3 scripts/check_hybrid_first_wire_negative.py
 python3 scripts/check_hybrid_first_interleaved_negative.py
+python3 scripts/check_hybrid_second_wire_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
