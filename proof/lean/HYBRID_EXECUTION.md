@@ -4,7 +4,7 @@ The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. The
 complete conditional three-cell prefix is derived below; its reaching traces
 are still supplied. Constructive source-driven existence now reaches the
-the genuine B birth and A160 arrival from the original A birth queue. They now derive an isolated silent input's absence of
+the first real A-to-B contact delivery from the original A birth queue. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
 section the learned-input case now returns and preserves all memories. Sensor
@@ -416,10 +416,68 @@ either cell while preserving the other cell and the global queue. Its
 whose particular route is empty. Those events still need their actual routed
 insertions or head-token consumption.
 
-These products are construction tools. A scheduler interleaving the cells'
-real moves and each issued delivery is still needed; no positive-duration
-concurrent network continuation after160 is claimed here. The complete
-789.9 and every-N execution-existence goals remain open.
+The following construction uses these tools for the first actual concurrent
+prefix and wire delivery. Scheduling the remaining routed events and later
+births is still needed; the complete789.9 and every-N goals remain open.
+
+## Constructed first actual A-to-B contact delivery
+
+`birth_protocol_first_wired_arrival_exists` has only the original A
+BirthState, physical box for independently chosen A/B parameters, initially
+READY auxiliaries, original source queue, arbitrary READY newborn B and the
+contact-delay functions as inputs. The forward delay lies in[0.3,0.4].
+It constructs a genuine staged execution through B's first contact receipt,
+without a supplied reaching trace, firing date, delivery calendar or output
+count.
+
+`HybridQuietExecutionProduct` runs an actual local execution with no
+emissions or deliveries alongside a real quiet trajectory of the other
+cell. It preserves the one explicit global queue and the original sender
+path. Receiver coordinates evolve from their current values by `quietAt`;
+they are not replaced by nominal coordinates.
+
+`HybridTwoCellFirstFire` first builds A's learned pulse from the actual
+A160 input. Its pre-FIRE local execution is transported with B quiet and
+exactly the47 external pending sources. A real global `Jump.fire` then
+creates exactly one port1 token for B. The first actual firing date F lies
+in(160.4,160.9), and the queue is now47 external tokens plus that one token
+at H=F+forward(F). No wired token occurs in the pre-FIRE state.
+
+`HybridPrefixBeforeFlow` selects a real finite prefix after every actual
+zero-time jump at H and before the next positive flow. The next flow is a
+real part of the supplied finite continuation. Its initial strict guards
+and RAW support prove that all enabled local guards/RAW ends at H have
+already been discharged; its continuation and event lists are retained.
+This does not postulate extension beyond the supplied execution.
+
+`HybridQuietWireArrival` transports the actual sender FAST prefix to H
+while B continues quietly. Only this prefix is lifted with the token due at
+H pending; no global flow crosses that due delivery. `Jump.arrive` consumes
+the actual final occurrence in Q47++[token], leaving exactly Q47. The new B
+raw origin is H, while A retains the real raw state at the cut, including
+any RAW expiry already executed.
+
+`HybridFirstWiredArrival` joins the actual issuing FIRE and actual receipt.
+The date is in(160.7,161.3), the queue follows47→48→47 and all future A/B
+external sources remain. The post-birth extension emits once from A and
+delivers exactly that Bport1 token. B remains READY with its own newborn
+log-gains and recovery, and its narrow perturbed charge band is preserved.
+Physical invariants and raw validity hold. `CompleteThrough` holds after
+the receipt, even when H coincides with a sender guard or RAW end.
+
+`HybridNeutralExecutionProduct` additionally weaves two active local
+executions with no emissions or arrivals. Induction on the sum of their
+move counts consumes local jumps and splits the longer real flow at the
+shorter's endpoint. Prefix/suffix use the original paths and integrals;
+there is no time rescaling. The global queue stays exact and its urgency is
+checked at each interval. ERROR/MARK activity may be nonzero and remains
+physical; only emissions and deliveries are excluded by this helper.
+The helper permits a delivery due at the final clock and does not claim
+terminal saturation on its own.
+
+The first B learning cycle, remaining teaching inputs, later births and
+complete protocol existence still need their actual concurrent executions.
+The full789.9 and every-N execution-existence results remain open.
 
 ## Checked implications
 
@@ -1484,3 +1542,10 @@ B-birth/product controls compile the original birth-to160 factory. They reject
 lost A/B sources, wrong B source port, copied newborn coordinates, modified A
 memories, stale raw origins, wrong boundary deliveries or saturation clocks,
 discarded global queues and cross-cell energy/RAW transport.
+
+First-wire controls compile the original birth-to-contact factory. They reject
+missing original sources, wrong receipt/saturation/port/output data, premature
+wire tokens, lost external sources, fixed delays substituted for the actual
+delay function, emission time substituted for raw origin, copied B memories,
+discarded newborn charge perturbations, altered sender endpoints and a
+nonpositive next flow at a claimed saturated cut.

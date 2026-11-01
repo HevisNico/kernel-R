@@ -203,3 +203,10 @@ import KernelR.HybridBirthPreparationExists
 import KernelR.HybridTwoCellFlowProduct
 import KernelR.HybridTwoCellJumpProduct
 import KernelR.HybridConstructedBBirth
+
+import KernelR.HybridQuietExecutionProduct
+import KernelR.HybridPrefixBeforeFlow
+import KernelR.HybridTwoCellFirstFire
+import KernelR.HybridQuietWireArrival
+import KernelR.HybridFirstWiredArrival
+import KernelR.HybridNeutralExecutionProduct

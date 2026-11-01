@@ -176,8 +176,14 @@ real B birth at160 and the actual A160 delivery. A retains its own memories;
 B has its own arbitrary READY newborn coordinates and independent parameters.
 Exactly47 future sources remain: fifteen A sources168..280 and both sixteen-
 source Bport2 trains320..440 and480..600. Two-cell flow and queue-neutral
-jump products are proved, but the concurrent continuation after160 and the
-trace reaching789.9 remain open.
+jump products are proved. `birth_protocol_first_wired_arrival_exists` now
+constructs the first concurrent prefix: A fires in(160.4,160.9), that real
+FIRE issues one Bport1 token, and B receives it at the actual delayed date
+in(160.7,161.3). The queue goes47→48→47, B keeps its own newborn memories
+and narrow charge band, and saturation includes simultaneous A jumps.
+A product of two active executions with no emissions/arrivals is also
+constructed. The continuation after this first receipt and the trace
+reaching789.9 remain open.
 
 ## Reproduce
 
@@ -221,6 +227,7 @@ python3 scripts/check_hybrid_protected_mark_negative.py
 python3 scripts/check_hybrid_prepared40_negative.py
 python3 scripts/check_hybrid_preparation_existence_negative.py
 python3 scripts/check_hybrid_b_birth_product_negative.py
+python3 scripts/check_hybrid_first_wire_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
