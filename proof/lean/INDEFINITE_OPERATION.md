@@ -6,8 +6,9 @@ all gain/recovery memory and returns to the same learned domain. Reserve stays
 in `[50,100]`; sensor charges and energy evolve through their actual ODEs.
 
 The resulting guarantee is constructive existence of compatible responding
-continuations. It does not assert birth/training reachability, finite-chain
-routing or universal refinement of every admissible execution.
+continuations. A separate bridge now derives this domain for Aport2/Bport2
+coordinate projections of the constructed639.9 state. Finite-chain routing and
+universal refinement of every admissible execution remain open.
 
 ## Main results
 
@@ -34,13 +35,26 @@ reserve may differ between rounds and are never reset.
 
 The physical foundation's `PreparedSection` allows residual main charge and a
 narrower recovery band. Its `Execution.learned_pulse` analyses a supplied,
-birth-reachable isolated-input execution. The main branch also constructs the
-birth-to-teaching prefix and first reverse FIRE described in the
-[physical checkpoint](HYBRID_EXECUTION.md#constructed-protocol-checkpoint).
-This extension constructs repeatable executions from `LearnedRest`; a formal
-bridge from those birth/training endpoints to this exact domain is still needed. Fixed reference latency here uses exact main
-rest; it does not extend to the positive residuals covered by
-`first_firing_le_rest_reference` in the physical foundation.
+birth-reachable isolated-input execution. The original READY-birth construction
+now reaches the [first cadence wire](HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
+after the fully prepared639.9 endpoint.
+
+[HybridBirthLearnedRest](KernelR/HybridBirthLearnedRest.lean) proves
+`ConstructedCTeaching.a_learned_rest` and `b_learned_rest` for the Aport2/Bport2
+coordinate projections at639.9. The actual prepared coordinates supply exact
+charge rest, READY modes, RAW absence, sensor bands, reserve/caps and recovery.
+Each own birth port2 log-gain+1.8 yields active gain in[1.8,1.9]. The resulting
+`a_pulse_contract`/`b_pulse_contract` and finite-horizon wrappers construct
+isolated one-cell futures from these projected states. No additional newborn
+or desired output trace is assumed.
+
+The projections' empty analysis queues are not physical operations on the
+global state: its25 C640..736 tokens remain. Each isolated continuation uses a
+new future source queue and empty routing. Cport1's learned gain near2.18 is
+outside the imported domain, so this bridge does not cover that port. Broader
+birth families, network routing and universal refinement remain open. Fixed
+reference latency uses exact main rest; it does not extend to the positive
+residuals covered by `first_firing_le_rest_reference`.
 
 ## Proof map
 
@@ -53,6 +67,7 @@ rest; it does not extend to the positive residuals covered by
 | `LearnedReturn`, `LearnedSingleCell` | Actual FAST/SLOW exits, learned-domain closure, settling and the one-cell contract |
 | `HybridFuture`, `Indefinite` | Physical waiting, future-queue extension, compatible prefixes and complete horizon extraction |
 | `FutureControls`, `LearnedCycleControls` | Nonempty physical witnesses, periodic finite-horizon executions and counterexamples to overstrong assumptions |
+| `HybridBirthLearnedRest` | Exact learned-domain membership of Aport2/Bport2 projections at639.9, isolated pulse contracts and complete finite-horizon futures |
 
 Every flow checks strict guards, raw support and pending-token urgency. The
 auxiliary finishes ERROR after raw end and before FAST exit, keeping the
@@ -81,7 +96,8 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
 
 ## Remaining work
 
-- Connect the existing birth/training constructions to this exact learned domain.
+- Extend the projected Aport2/Bport2 bridge beyond the declared READY-birth
+  subfamily and establish physically routed network continuations.
 - Finite-chain routing, wire delays and a sufficient network settling duration.
 - Universal refinement across all admissible complete executions.
 - Operational drift, noise and amplitude histories.
@@ -91,5 +107,10 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
 `lake build` includes all modules and the global `Audit` target. Only `propext`,
 `Classical.choice` and `Quot.sound` are allowed. Controls instantiate the full
 return, the contract and complete periodic executions at every finite horizon.
-Existing physical/audit negative controls, Python tests, source identities and
-all 16 robust certificate replays remain part of validation.
+The first-cadence-wire checkpoint, including this birth-domain bridge, passed
+the complete pinned build (9,434 jobs), global audit (24,743 project theorems),
+source/evidence checks (381 Lean files and five unchanged upstream modules),
+all16 robust certificates and12 project tests. Its62 new paired controls pass,
+including the isolated bridge domain and future contracts. CI configures708
+paired controls; this inventory does not assert a local rerun of every suite.
+The isolated future contracts do not certify network routing.

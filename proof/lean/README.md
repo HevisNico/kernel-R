@@ -2,21 +2,26 @@
 
 This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
 Mathlib v4.35.0. It is a **partial formalization**. The actual protocol is now
-constructed from A's original birth through **639.9**, including independent
-B/C births at160/480, actual teaching sources, wire receipts and guarded returns.
-Cumulative counts are **A38/B43/C14**, with exactly **25** later Cport0
-sources640..736. All three cells are prepared at q=0.1 with RAW absent and
-own acquired memories retained. The later cadence execution remains conditional;
-the Python interval implementations have not been verified in Lean.
+constructed from A's original birth through the first cadence wire receipt
+at **H in (652.7,653.3)**, including independent B/C births at160/480.
+Cumulative counts are **A38/B43/C15**, with exactly **21** Cport0 sources656..736
+remaining. A and B are prepared at q=0.1; A has no RAW and B has fresh port2
+RAW at H. C retains its real FAST cut and unfinished physical path. The earlier
+639.9 checkpoint has all three cells prepared at rest with RAW absent and25
+C640..736 sources. The full later cadence remains conditional; Python interval
+implementations have not been verified in Lean.
 
 ## Repeatable learned one-cell operation
 
 The [one-cell extension](INDEFINITE_OPERATION.md) constructs a physical
-`PulseContract` with one emission per input and settling duration `7.5`, then
+`PulseContract` with one emission per input and settling duration7.5, then
 compatible responding prefixes and complete executions at every finite horizon.
-It uses an exact-rest learned domain, fixed parameters, canonical amplitudes and
-empty routing. Connecting the birth/training constructors to this domain,
-network routing and universal refinement remain open.
+`HybridBirthLearnedRest` now derives its exact-rest domain for Aport2/Bport2
+coordinate projections of the actual639.9 state. It preserves each cell's own
+memory and supplies isolated contracts with empty routing and new future source
+queues. These analysis projections do not physically erase the global C queue.
+Cport1's gain is outside this domain; network routing and universal refinement
+remain open.
 
 ## Physical execution foundation
 
@@ -29,9 +34,9 @@ physical event budget. These invariants alone do not supply future executions.
 
 | Proof layer | Current result | Explicit boundary |
 |---|---|---|
-| Constructed execution | From the original READY A birth through the reciprocal epoch at459.9 and C teaching at639.9; A38/B43/C14 | Three cells prepared/q=0.1, RAW absent; exact25 C640..736 sources and own memories retained |
-| Conditional physical protocol | Complete cadence at789.9 (A54/B61/C34) | The later actual execution is supplied; both genuine births and the prefix through639.9 are constructed |
-| Learned one-cell continuation | Constructed complete cycles and compatible finite-horizon executions for input spacing >=7.5 | Exact-rest learned domain and empty routing; the birth-to-domain connection and universal refinement remain open |
+| Constructed execution | From the original READY A birth through C teaching639.9 and the first cadence wire at H in(652.7,653.3); A38/B43/C15 | A/B prepared at q=0.1; Bport2 RAW fresh, C actual FAST cut retained; exact21 C656..736 sources |
+| Conditional physical protocol | Complete cadence at789.9 (A54/B61/C34) | The later actual execution is supplied; both genuine births and the first C-to-B cadence receipt are constructed |
+| Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing/new future queues; broader birth domains, network routing and universal refinement remain open |
 | Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
 
@@ -77,11 +82,23 @@ C's own port1 log-gain gains0.6, its own recovery gains0.1, and its ports0/2
 are unchanged. All earlier A/B memories remain. The final queue is exactly25
 Cport0 sources640..736, with `CompleteThrough639.9`.
 
-The next construction is the period-four cadence through789.9. Its conditional
-analysis already derives later counts and memories from a supplied execution.
-Retained probes, fine enclosure soundness and physical every-N refinement remain
-open. The separate [robust coverage guide](ROBUST_COVERAGE.md) describes
-conditional noisy/drifting slow-chain results.
+`birth_protocol_cadence_first_wire_exists` in
+[HybridBirthCadenceFirstWire](KernelR/HybridBirthCadenceFirstWire.lean) returns
+`ConstructedCadenceFirstWire` from the original birth assumptions. Three real
+period-four weak C inputs640/644/648 derive own Cport0 ERROR1.8 without MARK,
+then source652 arrives with the actual carried charge in[0.1,0.3]. A strict
+response margin through0.4 constructs the first C FIRE in652+(0.4,0.9).
+That FIRE issues the actual Bport2 token, consumed at H=F+delay(F).
+C's same FAST flow is cut at H with its remaining execution retained; raw expiry
+may lie on either side of that cut. All other gains and every recovery remain
+as at639.9. The endpoint is `CompleteThrough` with exactly21 C656..736 sources.
+
+The next construction is B's actual response and its relay to A, followed by
+the remaining period-four cadence through789.9. The conditional analysis already
+derives later counts and memories from a supplied execution. Retained probes,
+fine enclosure soundness and physical every-N refinement remain open. The
+[robust coverage guide](ROBUST_COVERAGE.md) describes conditional noisy/drifting
+slow-chain results.
 
 ## Reproduce
 
@@ -135,6 +152,8 @@ python3 scripts/check_hybrid_feedback_entry_negative.py
 python3 scripts/check_hybrid_reverse_receipt_negative.py
 python3 scripts/check_hybrid_reverse_epoch_negative.py
 python3 scripts/check_hybrid_c_teaching_existence_negative.py
+python3 scripts/check_hybrid_cadence_first_strong_negative.py
+python3 scripts/check_hybrid_cadence_first_wire_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -160,11 +179,13 @@ The 50 new pairs in `check_hybrid_c_teaching_existence_negative.py` pass for
 the actual C birth, retained weak/SLOW paths, protected MARK, real three-cell
 execution, own memories, A38/B43/C14 and exact 25-source queue. Every valid
 conclusion compiles and every altered conclusion is rejected.
-The complete build passes 9,422 jobs; the global audit checks 24,523 project
-theorems using only the three allowed logical axioms. Source identities pass
-for 369 Lean files and five unchanged upstream modules. Generated evidence,
-all 16 robust certificates and 12 project tests pass. CI includes 646 paired
-controls in total; fresh CI status is reported separately on the PR.
+The first-cadence-wire checkpoint passed the full pinned build (9,434 jobs)
+and global axiom audit (24,743 project theorems). Source identities cover381 Lean
+files and five unchanged upstream modules. Generated evidence, all16 robust
+certificates and12 project tests pass. The22 first-strong and40 first-wire paired
+controls also pass: each valid conclusion compiles and every altered conclusion
+is rejected with a Lean diagnostic. These bring the configured CI total to708;
+that inventory is not a claim of a local rerun of every suite.
 
 ## Coverage and hypotheses
 
@@ -270,8 +291,9 @@ local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Continue the constructed639.9 endpoint through the period-four cadence
-   to789.9. Its conditional analysis is already checked. Preserve global queues, own
+1. Continue the constructed first C-to-B cadence receipt through B's actual
+   response, the relay to A and the remaining cadence to789.9. Its conditional
+   analysis is already checked. Preserve global queues, own
    memories, actual wire provenance and port availability.
 2. Prove the remaining real enclosure memberships, retained probe responses,
    causal cuts and protocol extension/saturation obligations. Exact comparisons

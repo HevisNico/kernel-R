@@ -311,3 +311,15 @@ import KernelR.LearnedRecovery
 import KernelR.LearnedReturn
 import KernelR.LearnedSingleCell
 import KernelR.LearnedCycleControls
+import KernelR.HybridResponseMarginInput
+import KernelR.HybridCadenceWeakStepExistence
+import KernelR.HybridConstructedCadenceWeakWarmup
+import KernelR.HybridConstructedCadenceStart
+import KernelR.HybridQuietHeadNeutralProduct
+import KernelR.HybridBirthCadenceWeakWarmup
+import KernelR.HybridCadenceResidualRootBounds
+import KernelR.HybridCadenceFirstStrongFireExistence
+import KernelR.HybridNeutralFutureFrame
+import KernelR.HybridCadenceFirstWire
+import KernelR.HybridBirthCadenceFirstWire
+import KernelR.HybridBirthLearnedRest

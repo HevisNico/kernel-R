@@ -4,12 +4,20 @@ This extension formalizes the compositional part of the
 [finite-chain argument](../reciprocal_composition/THEOREM.md).
 It does **not** turn the entire physical theorem into an unconditional Lean theorem.
 The distinction is explicit in theorem signatures, not hidden in project axioms.
-The separately constructed birth prefix now reaches639.9: cumulative
-A38/B43/C14, independent B/C births at160/480, all three cells prepared at exact
-rest with RAW absent, and exactly25 Cport0 sources640..736 retained. Own gains
-and recoveries follow from constructed sources, FIRE jumps, delayed receipts
-and guarded returns. This finite prefix does not supply physical leaf/relay
-contracts for arbitrary introductions or every finite N.
+The separately constructed birth prefix now reaches the first cadence C-to-B
+wire at H in(652.7,653.3): cumulative A38/B43/C15, exact21 Cport0 sources656..736,
+A/B prepared at q=0.1, fresh Bport2 RAW and C's actual FAST cut retained.
+The earlier639.9 checkpoint retains three prepared cells, RAW absent and25 C
+sources. Both births at160/480 are genuine and independent. Own memories
+follow from actual sources, FIRE jumps, delayed receipts and guarded returns.
+This finite prefix does not supply physical leaf/relay contracts for arbitrary
+introductions or every finite N.
+
+`HybridBirthLearnedRest` separately bridges Aport2/Bport2 coordinate projections
+of the639.9 state to isolated learned one-cell contracts with settling duration7.5.
+The empty analysis queues do not physically remove global C tokens. Cport1's
+gain is outside the imported narrow domain; the bridge does not instantiate
+network routing or the finite-chain physical contracts.
 
 ## Checked composition
 
@@ -49,15 +57,17 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    port1 log-gain has gained0.6. Each recovery has gained0.1 from its own
    independent birth value; all other gains are retained. The intermediate352
    weak cut and the low-recovery C path through496 remain in the witnesses,
-   without charge resets. The cadence and arbitrary-N constructions remain
-   open. See the
+   without charge resets. The new first cadence wire adds Cport0+1.8 and
+   reaches H in(652.7,653.3) with A38/B43/C15 and21 future C sources. B is
+   prepared with fresh RAW; C retains its true FAST cut. B's response, relay
+   to A, the remaining cadence and arbitrary-N constructions remain open. See the
    [current checkpoint and factory map](HYBRID_EXECUTION.md#constructed-protocol-checkpoint).
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.
 3. Complete preparation reachability for arbitrary leaf/relay introductions
    and port permutations. The specific original-birth A/B/C execution through
-   639.9 is constructed. The complete cadence through789.9 (A54/B61/C34)
+   639.9 and its first cadence wire are constructed. The complete cadence through789.9 (A54/B61/C34)
    derives own memories, exact traffic and the final empty queue
    **conditionally on a supplied later execution**. These results do not
    construct arbitrary later introductions or an arbitrary-N execution.
@@ -90,12 +100,15 @@ sources and wires, retained own memories and A38/B27: all valid conclusions
 compile and all altered claims are rejected. The 50 new pairs in
 `python scripts/check_hybrid_c_teaching_existence_negative.py` pass for the
 actual C birth/teaching, three-cell execution, own memories and A38/B43/C14.
-The complete build passes 9,422 jobs; the audit checks 24,523 project theorems
-with only `propext`, `Classical.choice` and `Quot.sound`. Source identities
-(369 Lean files, five unchanged upstream modules), generated evidence, all
-16 robust certificates and 12 project tests pass. CI includes 646 paired controls
-in total; fresh CI is reported separately on the PR. No physical leaf/relay
-premise is replaced by a project axiom.
+The first-cadence-wire checkpoint passed its complete pinned build (9,434 jobs)
+and global audit (24,743 project theorems), plus source/evidence checks covering
+381 Lean files, five unchanged upstream modules,16 robust certificates and12
+project tests. Its22 first-strong and40 first-wire paired controls pass: every
+valid conclusion compiles and every altered conclusion is rejected with a Lean
+diagnostic. The configured CI inventory is708; this does not assert a local
+rerun of every suite.
+Only `propext`, `Classical.choice` and `Quot.sound` are allowed; no physical
+leaf/relay premise is replaced by a project axiom.
 
 The original written theorem and its authenticated snapshots are retained
 unchanged. This guide states the current machine-checked coverage separately.

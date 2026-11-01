@@ -10,25 +10,27 @@ A22 network engines and historical proof archive stay in the
 ## Physical Lean proof status
 
 The [Lean formalization](proof/lean/README.md) constructs an actual execution
-from A's READY birth through C's teaching epoch at **639.9**, with cumulative
-**A38/B43/C14**. B and C have independent genuine births at160 and480.
-All three cells are prepared at q=0.1, RAW is absent, and the exact25 Cport0
-sources640..736 remain. A and B retain their acquired own memories; C's own
-newborn port1 log-gain has gained0.6 and recovery0.1, while its other gains
-are unchanged. Actual FIRE jumps issue the wire tokens and actual arrivals
-consume them. Parameters are fixed, independently perturbed within the stated
-fabrication boxes, with canonical pulses and bounded wire delays.
+from A's READY birth through the first cadence C-to-B wire receipt at
+**H in (652.7,653.3)**, with cumulative **A38/B43/C15**. B and C have independent
+genuine births at160 and480. C's actual FIRE issues the token, then an actual
+arrival consumes it on Bport2. A and B are prepared at q=0.1; B has fresh RAW
+at H, while C retains its actual FAST cut, modes, raw tail and energy path.
+Exactly21 Cport0 sources656..736 remain. The earlier639.9 checkpoint has all
+three cells prepared, RAW absent and25 C sources. Parameters are fixed,
+independently perturbed within the fabrication boxes, with canonical pulses
+and bounded wire delays.
 
-The cadence through789.9 (**A54/B61/C34**) remains checked **conditionally
-on supplied later executions**. Constructing that continuation and an end-to-end
-physical Lean proof for every finite N remain open. See the
-[checkpoint and theorem map](proof/lean/HYBRID_EXECUTION.md).
+B's next response and relay to A remain to be constructed. The complete cadence
+through789.9 (**A54/B61/C34**) is checked **conditionally on supplied later
+executions**. An end-to-end physical Lean proof for every finite N remains
+open. See the [checkpoint and theorem map](proof/lean/HYBRID_EXECUTION.md).
 
 The [one-cell continuation proof](proof/lean/INDEFINITE_OPERATION.md) constructs
 repeatable learned cycles and compatible complete executions at every finite
-horizon, for input spacing at least 7.5. It starts from an exact-rest learned
-domain with fixed parameters and empty routing; its connection to the birth
-constructors and network refinement remains open.
+horizon, for input spacing at least7.5. Aport2/Bport2 coordinate projections of
+the actual639.9 state now satisfy its exact-rest learned domain. These isolated
+one-cell contracts use empty routing and new future sources; the empty analysis
+queues do not erase the global C source queue. Network refinement remains open.
 
 ## Start here
 
