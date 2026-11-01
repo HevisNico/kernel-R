@@ -144,9 +144,17 @@ ERROR/raw-expiry boundary. The actual birth execution has one source delivery,
 no output, ERROR 0.6, MARK zero and all thirty-one future sources intact. Gains
 and recovery are measured from that same birth; the real residual main charge
 is retained. Both fabrication boxes are covered. The proof constructs every
-Flow/Jump before applying the earlier silent-input outcome theorem. Repeating
-this construction through subsequent sources, the first firing and later
-births remains open; the trace reaching 789.9 is still supplied.
+Flow/Jump before applying the earlier silent-input outcome theorem. The construction now continues through the weak inputs at 8 and16, their
+actual waits and the fresh input at 24. `birth_protocol_weak_prefix_exists`
+constructs that source 24 entry with four delivered tokens, ERROR1.8 and exactly
+twenty-eight future source tokens. Each later weak input uses READY charge
+up to 0.14 and its own learned gain, without reusing the narrow birth band.
+`birth_protocol_first_fire_exists` then constructs one actual output in
+(24.3,24.9), with main FAST at charge1 and its original raw origin24 retained.
+All newly routed tokens are appended exactly; the closed pre-birth contact
+also gives a saturated endpoint after the first firing. No execution, firing
+date or output count is assumed. FAST/SLOW continuation, the preparation train
+and later births remain open; the trace reaching 789.9 is still supplied.
 
 ## Reproduce
 
@@ -185,6 +193,7 @@ python3 scripts/check_hybrid_cadence_negative.py
 python3 scripts/check_hybrid_cascade_negative.py
 python3 scripts/check_hybrid_existence_negative.py
 python3 scripts/check_hybrid_weak_existence_negative.py
+python3 scripts/check_hybrid_first_fire_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

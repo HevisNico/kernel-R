@@ -173,3 +173,10 @@ import KernelR.HybridErrorTailFlowExistence
 import KernelR.HybridFirstInputError
 import KernelR.HybridErrorCompletion
 import KernelR.HybridBirthFirstWeakCycle
+import KernelR.HybridWeakInputErrorExistence
+import KernelR.HybridQuietSourceArrival
+import KernelR.HybridBirthWeakSources
+import KernelR.HybridWeakInputCycleExistence
+import KernelR.HybridBirthWeakPrefix
+import KernelR.HybridFirstLearnedFireExistence
+import KernelR.HybridBirthFirstFire

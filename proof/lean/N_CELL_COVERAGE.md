@@ -42,8 +42,10 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    source-driven prefix is now constructed from every READY A birth with the
    original thirty-two-source queue, through its complete first weak cycle and
    quiet horizon 7.5. It gives ERROR 0.6, no MARK or output, READY and exactly
-   thirty-one future tokens. Iteration through later sources, first firing and
-   the later births remains open.
+   thirty-one future tokens. The next two weak inputs and fresh source at 24 are
+   now also constructed, followed by one actual first output in (24.3,24.9),
+   retaining twenty-eight future sources plus all routed tokens. FAST/SLOW
+   continuation, the remaining preparation train and later births remain open.
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.

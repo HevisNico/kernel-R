@@ -4,7 +4,7 @@ The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. The
 complete conditional three-cell prefix is derived below; its reaching traces
 are still supplied. Constructive source-driven existence now reaches the
-complete first weak cycle from the original A birth queue. They now derive an isolated silent input's absence of
+first actual main firing from the original A birth queue. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
 section the learned-input case now returns and preserves all memories. Sensor
@@ -56,8 +56,8 @@ this state belongs to `BirthState`, with the prescribed nominal log-gains and
 an empty source queue. This is one concrete birth-family witness, not existence
 for every initial state or for the complete training protocols. The
 source-driven construction below covers every READY A birth through its
-complete first weak input and the quiet horizon 7.5; subsequent source
-iteration remains open.
+first three weak inputs and the first actual output in (24.3,24.9).
+The later FAST/SLOW and preparation continuation remains open.
 
 ## Constructive first-source existence
 
@@ -169,11 +169,76 @@ without delivering that source.
 
 Both physical fabrication boxes and every READY member of A's perturbed birth
 family are covered. Routing is arbitrary here because the constructed weak
-prefix never fires. This is the first complete weak input, not yet the three
-weak inputs, first firing, preparation train, later births or trace reaching
-789.9. In particular, source at 8 must retain the real residual charge; its main
+prefix never fires. The next section extends the first weak input through the other two weak
+inputs and the first actual firing. Preparation, later births and the trace
+reaching789.9 remain to be constructed. In particular, source at 8 must retain the real residual charge; its main
 charge cannot simply reuse the original narrow birth band. Physical every-N
 existence/progress remains open.
+
+## Constructed first firing from the birth queue
+
+`birth_protocol_first_fire_exists` takes only A's READY birth family,
+`PhysicalBox`, initially READY auxiliaries and the full original thirty-two
+sources. It constructs a `BirthFirstFire` and its actual birth execution.
+There is exactly one main emission, at a date strictly in (24.3,24.9). Its
+first firing equation uses the real residual charge, not a resting-reference
+latency or an assumed output date. Both fabrication boxes are covered.
+
+The weak prefix is constructed first:
+
+- The complete first cycle ends at 7.5. A real quiet flow then reaches8 and a
+  real `Jump.arrive` consumes exactly its head token. The queue tail is kept
+  in its original order, including every future occurrence.
+- `HybridWeakInputErrorExistence` proves the main-response margin for current
+  READY charge up to 0.14 and actual weak gain up to 7/6. It uses the existing
+  ERROR-entry record and all three raw-expiry branches; it does not impose the
+  original narrow birth-charge bound at the later sources.
+- `HybridWeakInputCycleExistence` constructs a whole isolated weak cycle for
+  arbitrary cell/port and source origin, from current physical invariants,
+  READY coordinates, a single fresh raw input and future tokens at least8
+  later. Its horizon is source time plus 7.5, and its pending queue is unchanged.
+- `HybridQuietSourceArrival` constructs waiting and exact head delivery with
+  the real relaxed q/m values. It preserves READY bands, physical invariants,
+  raw validity, gains and recovery. Saturation after delivery requires any
+  remaining simultaneous tokens to be strictly future.
+- `HybridBirthWeakSources` discharges both weak-gain bounds from the cell's
+  own birth log-gain plus its earlier actual ERROR doses. `HybridBirthWeakPrefix`
+  assembles inputs0,8,16 and fresh input 24, with no previous execution supplied.
+
+At24 the main cell is still READY. Four source tokens have been consumed,
+but only three ERROR cycles have completed: the actual ERROR ledger is1.8,
+port 0's own birth log-gain has increased by1.8, and recovery is unchanged.
+The fourth pulse remains fresh, the pending queue is exactly the twelve
+sources32..120 followed by sixteen sources160..280, and the actual gain lies
+in [1.8,2]. The true carried q/m values remain in their READY bands.
+
+`HybridFirstLearnedFireExistence` constructs the receiving sensor's first
+MARK and SILENT spans for this learned gain. It constructs the first main
+threshold root in (0.3,0.9), proves the main guard strictly before that root,
+and constructs the real SILENT-mode flow followed by `Jump.fire`. The
+auxiliary SILENT charge remains strictly above 0.1 at firing. It does not
+reuse the low-gain nominal-silence bound for this learned input.
+
+`HybridBirthFirstFire` composes the weak prefix and this firing. The main is
+FAST at q=1, the original raw origin24 is preserved, its own gain remains
+birth plus 1.8 and its own recovery is unchanged. No fourth ERROR dose or
+protected MARK dose is invented. All twenty-eight future source tokens
+remain, followed by every token returned by `route 0 actualFireTime`.
+No token filtering or multiplicity loss occurs.
+
+For a generic supplied router, saturation after FIRE requires its newly
+issued tokens to be strictly future. The actual closed contact before B's
+birth satisfies this, and `birth_protocol_first_fire_complete_exists`
+constructs the saturated first-output prefix with the empty router. It does
+not claim saturation for an immediately due routed delivery without executing
+that arrival. `PhysicalInvariant` and `RawValid` hold at the firing state.
+
+The state after FIRE is FAST with raw still active and the trained auxiliary
+still SILENT. FAST end, the later SLOW path, the protected input at 32 and the
+remaining preparation train must still be constructed. After a later birth,
+other cells may already be active: the all-READY single-input constructors
+alone do not yet supply those concurrent network flows. Global existence,
+the trace reaching 789.9 and the physical every-N result remain open.
 
 ## Checked implications
 
@@ -1203,3 +1268,11 @@ source token, invented output, double ERROR, protected MARK during READY,
 wrong own memories/recovery, lost future trains, retained raw, incorrect
 terminal modes, a full-dose restart after an intermediate cut, a shifted ERROR
 completion date and omitted ERROR energy work.
+
+First-firing controls compile the complete birth-to-output existence factory
+without an incoming execution. They reject missing initial sources, non-strict
+routed deadlines for saturation, wrong weak-prefix dates/doses/delivery counts,
+lost future sources, erased fourth raw, a premature FAST state, discarded
+relaxation, weakened weak-gain bounds, a horizon detached from its origin,
+wrong firing bounds, missing output, wrong main mode/charge, lost issued tokens,
+a reset raw origin, an invented fourth ERROR and an extra recovery dose.
