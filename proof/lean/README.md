@@ -45,6 +45,10 @@ times. The earlier birth-reachable statements are retained as corollaries.
 A current-state physical invariant now also propagates gain/recovery caps and
 reserve in [50,100]. It derives positive ERROR/MARK exposure, so the silent,
 first-strong and protected-input cases can be reused from current bounds.
+An explicit birth event now appends a fresh READY cell at the current date,
+retaining existing cells and all their pending tokens. Its independent new
+parameters and source queue are explicit; physical bounds and memory balances
+compose across the two execution phases.
 The remaining routed/staged-birth calendars, combined pulse case, fine real
 enclosures, progress and complete
 execution-to-abstraction theorem remain open.
@@ -75,6 +79,7 @@ python3 scripts/check_hybrid_source_negative.py
 python3 scripts/check_hybrid_cell_negative.py
 python3 scripts/check_hybrid_local_negative.py
 python3 scripts/check_hybrid_invariant_negative.py
+python3 scripts/check_hybrid_staged_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -186,8 +191,8 @@ local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Instantiate and extend the hybrid semantics for the supplied protocols,
-   including staged births, routing, simultaneous events and execution progress.
+1. Instantiate and review the fixed-population and staged-birth semantics for
+   the supplied protocols, including routing, simultaneous events and progress.
 2. Prove soundness of the interval arithmetic and the exp/log enclosures used by
    the certificate checker, or derive the necessary enclosures directly in Lean.
 3. Derive the actual pulse cases, strict cap inactivity and birth-to-section

@@ -88,3 +88,4 @@ import KernelR.HybridCellInputs
 import KernelR.HybridCellPreparedTrain
 import KernelR.HybridCellSources
 import KernelR.HybridPhysicalInvariant
+import KernelR.HybridStagedBirth

@@ -115,6 +115,8 @@ for every initial state or for the training protocols; those remain unproved.
 
 | `HybridPhysicalInvariant` | Propagate current charge/sensor bounds, gain/recovery caps and reserve [50,100]; derive positive power throughout actual flows and ERROR exposure from charge headroom | Current physical bounds and fabrication box, at any start date; raw validity is supplied separately where needed |
 
+| `HybridStagedBirth` | A fresh READY birth changes n to n+1 at the current date; old coordinates, modes, currents, source tokens and parameters are retained; physical/raw/pending invariants and old/new memory balances compose across both actual phases | Routes, birth date and phase executions are supplied; the complete routed protocol and progress remain separate |
+
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
 Le<=11 and M<=60. The sensor response at 1/50 is proved >=1/55 using real
@@ -326,8 +328,8 @@ premises. General birth-family cap, work and reserve bounds remain available.
 
 `CompleteThrough` is a premise, so existence and progress remain open. The first
 phase covers the written READY birth family, not immediate input into an
-ERROR-born receiving sensor. Later A-to-B/B-to-A routing and B's staged birth
-still require their own semantic realization and calendar proofs.
+ERROR-born receiving sensor. Later A-to-B/B-to-A routing and B's scheduled introduction
+still require their protocol instantiation and calendar proofs.
 
 
 ## Receiving-cell calendars inside a multicell execution
@@ -351,7 +353,7 @@ cell during the observed execution interval, its initial tokens are due by the
 complete horizon and those tokens use one ordered receiving port. Outgoing
 routes and other cells' traffic and future pending tokens remain unrestricted.
 This discharges source isolation without requiring globally empty routing; it
-does not yet derive the later incoming wire calendars or realize staged births.
+does not yet derive the later incoming wire calendars or instantiate the birth schedule.
 
 
 The `*_of_valid` prepared-input and return theorems take `UpperRegion` and
@@ -384,6 +386,37 @@ input separation and charge/gain/recovery bands. Earlier birth-family theorems
 remain corollaries with their original signatures. These results provide the
 local dose cases for a later staged-birth composition; its introduction event
 and complete routed protocol are not established by this invariant alone.
+
+
+## An explicit staged-birth event
+
+`Newborn` carries the declared READY birth-coordinate family, including nominal
+per-port log-gain bands, low recovery, auxiliary rest bands and reserve anywhere
+in [50,100]. Its nominal member is constructed and checked. A `BirthStep` places
+that fresh cell at the current execution date and appends it after the existing
+cell indices. `Newborn.snapshot` witnesses the coordinate family at zero; the
+birth event itself uses the shared current date.
+
+Every existing coordinate, main/sensor mode and raw origin is retained exactly.
+The old queue is mapped to the extended index type without changing ports,
+dates, order or multiplicities. Additional source tokens are explicit, target
+only the new cell and cannot be past due. The new cell has READY modes, no raw
+current, nominal gain bands and its own low-recovery band. Existing parameters
+are preserved; the added cell's parameters are independent members of the same
+fabrication family.
+
+`StagedExecution` joins a real n-cell phase, this birth event and a real (n+1)-cell
+phase. It preserves physical bounds and reserve, raw validity, causal pending
+queues and the shared time order. Old gain/recovery balances retain contributions
+from both phases. The fresh cell's balances start from its own birth coordinates
+and use its post-birth ledger. The step provides no reset or learning dose to an
+existing cell.
+
+This defines the birth boundary needed for B at 160 and later introductions.
+Its application to the specified source/contact calendars, simultaneous birth
+and delivery orders, complete routed counts and execution existence still need
+their protocol proofs. A one-birth execution is supplied to these theorems; it
+is not a construction of the whole reciprocal trajectory.
 
 
 `HybridInputBalance` retains every routed token in a multiset conservation law.
@@ -485,6 +518,7 @@ python scripts/check_hybrid_source_negative.py
 python scripts/check_hybrid_cell_negative.py
 python scripts/check_hybrid_local_negative.py
 python scripts/check_hybrid_invariant_negative.py
+python scripts/check_hybrid_staged_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -522,3 +556,9 @@ substitution, a receiving-gain increase, an extra output and a missing firing.
 Current-invariant controls reject a strengthened reserve floor, loss of possible
 cap contact, a missing silent ERROR dose, a missing protected MARK dose, doubled
 recovery gain and removal of the actual first strong emission.
+
+Staged-birth controls reject changes to old gains/recovery or the clock, loss of
+old pending tokens, fabricated preparation or inherited gains in the fresh cell,
+source injection into an existing cell, changed due-date bounds, omitted old
+learning, invented pre-birth learning in the new cell and an altered reserve
+floor. Nominal fresh coordinates and an empty-source birth are also constructed.
