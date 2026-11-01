@@ -89,8 +89,28 @@ are prepared at exact resting charge without raw current; A/B queues are empty
 and C retains exactly its external birth sources. A corollary retains all
 twenty-five period-four inputs 640,644,...,736 on C port 0 in that same queue.
 It does not yet classify their fast responses.
-Period-four cadence, the combined pulse case, fine real enclosures, progress
-and complete execution-to-abstraction theorem remain open.
+The cadence contacts C-to-B-to-A and C's twenty-five period-four source inputs
+are now instantiated too. From the actual C-entry state, source conservation
+and receiving-cell cuts derive the three weak C inputs and reach the fresh
+fourth input at 652. Their ERROR is 1.8 and MARK is zero. The real carried
+charge lies in [0.1,0.3]; it is not reset to rest. A/B remain idle and their
+queues empty while all twenty-one later C sources 656..736 remain pending.
+The supplied complete execution still reaches 789.9; this prelude theorem
+only identifies its prefix through 652.
+
+The local period-four pulse cases are now derived directly from current
+physical states: the first strong input, protected MARK-only input, second
+strong input, mixed MARK-then-ERROR input, and final high-gain learned train.
+In the mixed case the real SLOW return lies between 0.5 and 0.99 after input;
+the remaining raw current is integrated, produces no extra output, and gives
+the full ERROR 0.6 after the full MARK 0.1. Its final charge retains its actual
+residue. The MARK clock includes its finite exponential ramp. High-gain learned
+inputs settle before 3.8 with one output and unchanged memories. A direct real
+enclosure puts the three-dose rest latency in (0.65,0.66), without certificate
+membership premises. These are local cases under explicit current-state/gap
+bounds. Their assembly into the complete C20/B18/A16 cascade remains open,
+as do fine enclosure membership, probes, global existence/progress and the
+complete execution-to-abstraction theorem.
 
 ## Reproduce
 
@@ -125,6 +145,7 @@ python3 scripts/check_hybrid_routed_negative.py
 python3 scripts/check_hybrid_teaching_negative.py
 python3 scripts/check_hybrid_reciprocal_negative.py
 python3 scripts/check_hybrid_c_introduction_negative.py
+python3 scripts/check_hybrid_cadence_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

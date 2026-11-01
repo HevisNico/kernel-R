@@ -49,8 +49,11 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    [hybrid guide](HYBRID_EXECUTION.md).
    The B-to-C teaching transition through 639.9 now preserves A/B memories,
    derives C's own preparation and retains its future source queue. Period-four
-   cadence, its combined MARK/ERROR case and arbitrary later introductions
-   remain to be connected physically.
+   cadence initiation now reaches the actual fourth C input at 652, retaining
+   its residual charge and all later sources. The local strong, MARK-only,
+   combined MARK/ERROR and high-gain learned cases are proved from current
+   physical bounds. Their complete cascade assembly and arbitrary later
+   introductions remain to be connected physically.
 4. Proofs of the leaf refinement and `RelayLaw` from those semantics. In
    particular, no omitted or extra emissions, the full protected doses, the
    residual-raw-tail bound and the first-crossing latency bounds must be derived.

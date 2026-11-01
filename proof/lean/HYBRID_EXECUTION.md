@@ -142,6 +142,12 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridSourceActivation` / `HybridCIntroductionBoundary` | Old cells remain prepared through 480; the source due at birth is either pending or already fresh | Actual reciprocal prefix and exact remaining B sources; no event-priority assumption |
 | `HybridCTeachingRouter` / `HybridCIntroductionActivePhase` / `HybridCIntroductionBoundaryPhase` | Actual B16/C14 and quiet A across both legal birth/source orders | B-to-C port-1 contact [480,630), current bounds and C's own READY birth data |
 | `HybridCIntroductionQueueClosure` / `HybridStagedCIntroduction` / `HybridCEntry` | Physical cumulative A38/B43/C14 at 639.9; own memories and future C source queue retained | Actual executions and births supplied, independent device parameters and wire delays; cadence/existence remain open |
+| `HybridCadenceRouter` / `HybridCadenceQuiet` / `HybridCadencePrelude` | Actual C-to-B-to-A contacts; three weak C cases through fresh source652 with ERROR1.8, quiet A/B and twenty-one future C tokens | Actual execution reaching789.9, initial prepared states and C's declared twenty-five sources; no complete cadence count claim |
+| `HybridCadenceSilent` / `HybridCadenceWeakStages` / `HybridCadenceWeakWarmup` | Real four-period weak inputs with charge caps 0.1→0.15→0.2→0.3 | Current physical invariants and actual receiving-cell cuts; no reset or inherited period-eight cap |
+| `HybridHighGainTrigger` / `HybridHighGainReturn` / `HybridCadenceHighTrain` | Real firing at high gain and residual charge; one output per 3.8-separated learned input with unchanged memories | Explicit current charge/gain/recovery bands and no additional receiving-cell arrivals within each pulse segment |
+| `HybridMarkRecoveryIntegral` / `HybridSlowMarkWindow` / `HybridSlowMarkReturn` | Finite real MARK ramp, exact SLOW clock, and selected return before ERROR from current bounds | Physical cap/protection and current SLOW charge; global trace existence remains supplied |
+| `HybridRawTailNoFire` / `HybridCadenceMixedPulse` | MARK0.1 plus ERROR0.6, no output, with the remaining raw tail and its final charge retained | Current SLOW charge [0.122,0.14], recovery near0.28, own three-dose gain and isolated horizon at least3.8 |
+| `HybridCadenceRestRoot` / `HybridCadenceStrongPulse` / `HybridCadenceMarkOnly` | Direct three-dose rest root (0.65,0.66), strong-to-SLOW charge bounds and the MARK-only physical case | Explicit current-state and gap bounds; full cascade placement is not yet derived |
 
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
@@ -685,8 +691,8 @@ The final physical invariant includes all gain/recovery caps and reserve in
 [50,100], and raw validity is propagated. This remains conditional on actual
 executions reaching 160,319.9 and459.9 and the genuine fresh birth at 160. A's
 initial auxiliaries are READY; this is not an ERROR-born generalization.
-The C introduction described below extends this prefix. Period-four cadence
-and its combined MARK/ERROR case, probes,
+The C introduction and cadence initiation described below extend this prefix.
+Complete period-four cascade assembly, probes,
 remaining fine enclosures, global existence/progress and physical every-N
 refinement are still open. Fixed fabrication parameters and canonical pulse
 amplitudes remain the scope; noise and drift need separate extensions.
@@ -742,9 +748,73 @@ The general theorem only requires C sources due at 640 or later.
 
 This is still a conditional physical prefix: actual executions reaching the
 listed endpoints and fresh births at 160 and 480 are supplied. It does not
-construct existence/progress, instantiate the later cadence contacts or prove
-the fast combined MARK/ERROR case. Fixed fabrication parameters, canonical
+construct existence/progress or prove the entire fast cascade. The later
+section instantiates the cadence contacts
+and proves its local combined MARK/ERROR case. Fixed fabrication parameters, canonical
 pulse amplitudes and initial READY auxiliaries on A remain explicit scope.
+
+## Physical cadence initiation and local cases
+
+`cadenceRouter` contains C-to-B on port 2 and B-to-A on port 2 during [640,780).
+Its fanout is one, its receiving projections are exact, and it routes nothing
+to C. Actual token conservation therefore derives all twenty-five C port-0
+inputs 640,644,...,736 from its preserved birth queue. The two wire delays
+remain independent functions of their own actual emission dates.
+
+`CadencePrelude` reaches the fresh source at 652 from those actual inputs.
+The first three physical weak cases give ERROR1.8, MARK0 and no C output.
+The main charge is retained quantitatively: the four-unit relaxation bounds
+are 0.1→0.15→0.2→0.3. The source at 652 is already delivered, so four tokens
+have been consumed but only three ERROR cycles completed. All twenty-one
+tokens 656,660,...,736 remain pending, and the continuation retains that exact
+receiving calendar. C's silence closes the actual C-to-B route; B's derived
+silence then closes B-to-A. Both old cells retain their own prepared memories,
+exact resting charge and empty queues, without discarding other-cell events.
+The physical invariant, raw validity and future-queue property reach this
+prefix. `CEntry.cadence_prelude` supplies these premises from the preceding
+physical theorem and each cell's own birth data.
+
+The standalone prelude needs only an upper bound on C's initial low gain. Its
+fourth input is described as fresh, not assumed to fire. The lower nominal
+gain at that entry comes from C's own birth when composing the next pulse.
+The actual complete cadence execution through 789.9 remains a premise; the
+prelude does not prove its later output counts or construct its existence.
+
+The following local pulse cases are proved from physical state inequalities,
+guarded phases and actual isolated receiving-cell spans:
+
+| Local case | Current input conditions | Derived behavior |
+|---|---|---|
+| Weak C stages | Own low-port gain with zero, one or two ERROR doses; four-unit gaps and the distinct charge caps above | No output, ERROR0.6 per input, no MARK, next real charge bound and no remaining raw |
+| Strong before MARK | READY charge at most0.3, own three-dose gain, recovery at most0.28001, gap in[3.8,4.2] | One output, no ERROR/MARK, preserved memories and actual SLOW charge at the next input |
+| First strong at recovery near0.18 | Same strong case with the current recovery band | Next SLOW charge at least0.148 |
+| Second strong at recovery near0.28 | Rest-started same-gain case | Next SLOW charge in[0.122,0.14], using the real response root |
+| Protected MARK-only input | SLOW charge in[0.148,0.25], recovery near0.18, isolated horizon at least3.8 | No output or ERROR; full MARK0.1; READY return before3.8, q exactly0.1, raw absent |
+| Mixed MARK then ERROR | SLOW charge in[0.122,0.14], recovery near0.28, own three-dose gain, isolated horizon at least3.8 | No output, full MARK0.1 and ERROR0.6; own gain +0.6 and recovery +0.1; READY with actual charge in[0.1,0.5], raw absent |
+| High-gain learned input/train | Gain in[3.2,3.5], recovery at least0.37999, READY charge in[0.09999,0.5], gaps at least3.8 | Exactly one output per input; no additional learning or recovery; settling before3.8 at exact resting charge |
+
+The high-gain trigger uses a proved lower firing time 0.1 rather than reusing
+the previous 0.3 bound. Its firing equation retains the initial residual.
+At gains at least3.2 the actual firing is before0.3. A same-gain comparison
+does not identify a first residual-dependent latency with a resting one.
+The separate three-dose reference has the directly proved real enclosure
+(0.65,0.66); this reference must not be applied to the four-dose high gain.
+
+The mixed case is a physical case theorem, not a recorded case-word check.
+Its first SLOW return is selected between input+0.5 and input+0.99. During
+MARK, the actual recovery profile is exponential, and its accumulated clock
+contains the full `markDeficit` correction. Other auxiliary modes and physical
+cap opening are derived under the stated current-state hypotheses.
+On reopening, the still-active raw input keeps its original origin. A real
+gain bound during raw, allowing ERROR growth, bounds its remaining charge
+by 0.1+G/4<1. The actual raw-end event is selected; the final charge then
+relaxes from that real endpoint. No artificial raw deletion or resting reset
+is used. READY on the actual ERROR span supplies the full positive ERROR dose.
+
+Complete cascade assembly remains open: select and connect these cases from
+the routed C/B/A arrival dates, derive the sparse prefix and shared-latency
+calendars where applicable, and obtain C20/B18/A16 with final memories through
+789.9. These local theorems do not assume or prove those global counts.
 
 ## Physical event budget
 
@@ -923,3 +993,12 @@ altered cumulative38/27 counts, missing return ERROR or extra MARK, extra gain
 or recovery, forcing the first residual latency to equal the rest reference,
 reusing the regular upper wire-gap bound for the first gap, and loss of the
 later external B queue.
+
+Cadence controls compile the actual source-to-prelude and physical mixed-pulse
+contracts. They reject a missing C source, treating the fourth arrival as a
+fourth completed ERROR, losing a future token, reusing the period-eight charge
+cap, erasing the fresh raw, an invented early B output, weakened mixed-input
+bounds, missing mixed ERROR/MARK, an extra recovery dose or a fictitious reset
+of residual charge. They also check the MARK-only case, required high-gain
+recovery, exact learned count, firing/return bounds, the three-dose real root,
+the finite MARK-ramp correction and absence of extra high-gain train outputs.
