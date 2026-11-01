@@ -49,8 +49,10 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    protected MARK are also constructed: one output, ERROR 1.8, MARK 0.1 and 27
    future sources. The remaining auxiliary/SLOW return and source40 delivery
    are now also constructed: READY, q=0.1, own memories retained, six actual
-   deliveries and 26 future tokens. The remaining preparation train and later
-   births remain open.
+   deliveries and 26 future tokens. The complete initial sixteen-source train
+   is now constructed through128: twelve outputs, ERROR1.8/MARK0.1, READY,
+   q=0.1, raw absent and all sixteen second-train tokens retained. Later births
+   and concurrent network executions remain open.
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.

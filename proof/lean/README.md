@@ -166,8 +166,13 @@ quiet wait and source40 delivery are now also constructed.
 `birth_protocol_prepared40_exists` gives a prepared READY state at 40 with
 q=0.1, fresh RAW40, six actual deliveries, one emission and exactly 26 future
 sources. Own memories remain birth gain+1.8 and birth recovery+0.1, with
-ERROR 1.8 and MARK 0.1. The remaining preparation train and later births
-remain open; the trace reaching 789.9 is still supplied.
+ERROR 1.8 and MARK 0.1. The eleven learned inputs from40 through120 and the
+quiet suffix to128 are now also constructed.
+`birth_protocol_preparation_exists` gives the whole first sixteen-source
+train from birth: twelve actual outputs, ERROR1.8/MARK0.1, all READY,
+q=0.1, raw absent and all sixteen sources160..280 retained. The second train,
+later births and concurrent network flows remain open; the trace reaching
+789.9 is still supplied.
 
 ## Reproduce
 
@@ -209,6 +214,7 @@ python3 scripts/check_hybrid_weak_existence_negative.py
 python3 scripts/check_hybrid_first_fire_negative.py
 python3 scripts/check_hybrid_protected_mark_negative.py
 python3 scripts/check_hybrid_prepared40_negative.py
+python3 scripts/check_hybrid_preparation_existence_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

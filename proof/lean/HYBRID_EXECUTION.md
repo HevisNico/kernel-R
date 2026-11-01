@@ -4,7 +4,7 @@ The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. The
 complete conditional three-cell prefix is derived below; its reaching traces
 are still supplied. Constructive source-driven existence now reaches the
-prepared source40 entry from the original A birth queue. They now derive an isolated silent input's absence of
+complete first-train preparation at128 from the original A birth queue. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
 section the learned-input case now returns and preserves all memories. Sensor
@@ -58,7 +58,8 @@ for every initial state or for the complete training protocols. The
 source-driven construction below covers every READY A birth through its
 first three weak inputs and the first actual output in (24.3,24.9).
 Its FAST/SLOW continuation and the protected input now return to READY and
-consume source40. The remaining preparation train remains open.
+consume source40. The subsequent learned-source iteration now reaches128;
+the second source train and later network continuation remain open.
 
 ## Constructive first-source existence
 
@@ -332,9 +333,50 @@ PhysicalInvariant, RawValid and CompleteThrough at40 hold. The raw-free
 reopen state and the fresh-source endpoint are distinct actual snapshots;
 no raw-free assertion is made at the source40 endpoint.
 
-The remaining learned preparation inputs and subsequent births/network flows
-are not yet constructed. The full789.9 and every-N existence claims remain
-open.
+The following construction extends these learned preparation inputs through
+the first complete train. Subsequent births/network flows, full789.9 and
+every-N existence remain open.
+
+## Constructed complete initial preparation
+
+`birth_protocol_preparation_exists` assumes only the original one-cell
+BirthState, PhysicalBox, initially READY auxiliaries and exact full
+thirty-two-source queue. It constructs an execution through128 and derives
+its complete `BirthSourceTrain` outcome. No reaching execution, output
+count, desired dose, pulse word or firing calendar is supplied.
+
+`HybridLearnedFastEnd` generalizes the earlier actual FAST continuation to
+the current source time. Its first firing is derived in(source+0.4,source+0.9).
+The auxiliary return and RAW expiry occur before actual FIRE+1; the real
+fastEnd jump enters SLOW at q=0.25, preserving own gains and recovery.
+
+`HybridPreparedSlowReturn` uses the current acquired recovery in its true
+root log(2.5)/b. The positive duration is below5.6. Combined with the actual
+firing latency and FAST duration, the real reopen occurs before source+7.5.
+A quiet flow then reaches that section with all modes READY, q=0.1 and raw
+absent. This is a built execution, not selection of a return from a trace.
+
+`HybridPreparedLearnedCycle` composes these witnesses. Each current learned
+pulse gives one actual emission, no delivery and unchanged memories.
+`HybridPreparedLearnedTrainExistence` recurses over the future source queue:
+the current raw is already delivered, so count future tokens give count+1
+pulses. Each step constructs the cycle, a waiting flow and exactly the next
+head delivery at source+8, then recurses with all current coordinates intact.
+The arbitrary later queue is retained exactly.
+
+From the fresh source40 entry, ten future sources48..120 yield eleven
+learned emissions through127.5. `HybridBirthPreparationExists` then builds
+a quiet flow to128 and joins this actual execution to the earlier birth
+prefix. It proves the complete delivery calendar0,8,...,120 before applying
+the existing analytical `birth_low_train` theorem to that constructed trace.
+
+At128 the outcome is twelve total outputs, ERROR1.8, MARK0.1, own birth
+gain+1.8 and own birth recovery+0.1. Other own memories are preserved.
+Main and auxiliaries are READY, q is exactly0.1, raw is absent, physical
+invariants and raw validity hold, and `CompleteThrough` holds at128.
+All sixteen second-train sources160,168,...,280 remain queued. Actual
+later births, simultaneous active cells and global progress are still to be
+constructed; this does not establish the full789.9 or every-N theorem.
 
 ## Checked implications
 
@@ -1387,3 +1429,10 @@ premature main/aux modes, wrong reopen charge, stale RAW32, lost future tokens,
 wrong sixth delivery, invented output or ERROR, missing MARK, copied nominal
 recovery, altered suffix events, gain learning under SLOW protection and a
 reopen clock that discards the current cell's own recovery.
+
+Complete-preparation controls compile the original birth factory and the
+learned iteration without a continuation. They reject changed initial or
+remaining source counts, wrong horizon/saturation/calendar, stale raw,
+wrong total outputs/doses, copied birth memories, wrong main mode, double
+counting the current raw, discarded later queues and altered learned return
+or FAST clocks.

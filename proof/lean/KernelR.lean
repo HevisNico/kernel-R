@@ -193,3 +193,9 @@ import KernelR.HybridSlowAuxLeg
 import KernelR.HybridProtectedAuxReturn
 import KernelR.HybridSlowReopenExistence
 import KernelR.HybridBirthPrepared40
+
+import KernelR.HybridLearnedFastEnd
+import KernelR.HybridPreparedSlowReturn
+import KernelR.HybridPreparedLearnedCycle
+import KernelR.HybridPreparedLearnedTrainExistence
+import KernelR.HybridBirthPreparationExists
