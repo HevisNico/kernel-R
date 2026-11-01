@@ -4,6 +4,9 @@ This extension formalizes the compositional part of the
 [finite-chain argument](../reciprocal_composition/THEOREM.md).
 It does **not** turn the entire physical theorem into an unconditional Lean theorem.
 The distinction is explicit in theorem signatures, not hidden in project axioms.
+The separately constructed birth prefix currently ends at B's first reverse
+FIRE in (344.3,344.9): cumulative A28/B15, with its actual reverse token
+issued but not yet delivered.
 
 ## Checked composition
 
@@ -77,8 +80,15 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    constructed, with each wire issued and consumed by real global events.
    The trace reaches288, then waits physically to319.9: cumulative A28/B14,
    both prepared at q=0.1, RAW absent, own acquired memories retained and the
-   complete32-source B queue preserved. The later reciprocal teaching epochs,
-   births and arbitrary-N continuation remain open.
+   complete32-source B queue preserved. Its real reciprocal weak continuation
+   now reaches fresh B344: three Bport2 weak cycles, four external deliveries,
+   own log-gain2+1.8, no new output/MARK and exactly28 future B sources. B's
+   actual residual charge is retained at least0.1. Its first learned FIRE in
+   (344.3,344.9) is also constructed. That FIRE issues the reverse Aport2
+   token, due at F+backward(F); cumulative counts are then A28/B15 and29
+   tokens remain (28 external sources and the single issued wire).
+   The receipt, complete459.9 return epoch, later births and arbitrary-N
+   continuation remain open.
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.
@@ -113,7 +123,11 @@ Run the commands in the [Lean guide](README.md). The generated-evidence check
 covers both N-cell certificates. The axiom audit includes every imported chain
 and certificate theorem. Negative tests reject altered traffic counts and an
 over-budget four-link jitter claim, in addition to the existing endpoint,
-cadence and adaptive-record corruption cases.
+cadence and adaptive-record corruption cases. The 29 paired controls in
+`python scripts/check_hybrid_feedback_entry_negative.py` additionally check
+the constructed weak entry and first reverse FIRE, own memories and exact
+source/wire queues. They do not supply the pending token's receipt or any
+later reciprocal reaching execution.
 
 The original written theorem and its authenticated snapshots are retained
 unchanged. This guide states the current machine-checked coverage separately.

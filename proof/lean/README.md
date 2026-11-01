@@ -1,8 +1,11 @@
 # Lean formalization of selected Kernel R results
 
 This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
-Mathlib v4.35.0. It is a **partial formalization**. Neither the complete hybrid
-execution nor the Python interval implementations have been verified in Lean.
+Mathlib v4.35.0. It is a **partial formalization**. The actual protocol is now
+constructed from A's original birth through B's first reverse-contact FIRE in
+(344.3,344.9), with cumulative **A28/B15** and its issued reverse token still
+pending. The full later hybrid execution and the Python interval
+implementations have not been verified in Lean.
 
 ## Physical execution foundation
 
@@ -215,9 +218,19 @@ issues its Bport1 token; the actual receipt and B FIRE are followed by both
 prepared returns before the next source. Real A arrivals drive the induction.
 The witness reaches288, then waits physically to319.9. It has cumulative
 **A28/B14**, both cells prepared at q=0.1 with RAW absent, own acquired memories
-retained and exactly the32 B external sources still queued. Later reciprocal
-teaching and births still need their global executions; the trace reaching789.9
-remains supplied.
+retained and exactly the32 B external sources still queued.
+`birth_protocol_feedback_weak_entry_exists` now continues this very trace to
+fresh B344: three actual weak Bport2 cycles, four real external deliveries,
+ERROR1.8, no new output/MARK, own memories and28 future sources. A stays at
+exact rest; B retains its actual residual charge at least0.1. The staged
+counts remain A28/B14. `FeedbackWeakEntry.first_fire_exists` constructs B's
+first actual learned FIRE in(344.3,344.9), with latency bounded by its own
+rest reference. It issues the reverse token at F+backward(F), retaining29
+pending tokens and cumulative A28/B15. The original-birth factory is
+`birth_protocol_feedback_first_fire_exists`. Its receipt is still to construct.
+Interval-scoped emitting products permit A's later closed-contact outputs
+without assuming its contact was closed historically. The complete459.9 and
+789.9 reaching executions and later births remain open.
 
 ## Reproduce
 
@@ -267,6 +280,7 @@ python3 scripts/check_hybrid_second_wire_negative.py
 python3 scripts/check_hybrid_receiver_fire_negative.py
 python3 scripts/check_hybrid_coupled_preparation_negative.py
 python3 scripts/check_hybrid_coupled_teaching_negative.py
+python3 scripts/check_hybrid_feedback_entry_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -277,7 +291,10 @@ proofs, project axioms or native-evaluation proofs. The Audit build target uses
 Lake's exact artifact paths. Its scan includes every imported and current
 `KernelR`/`A22` theorem; negative controls cover corruption in both locations.
 Standalone proof controls reuse the same dependency artifacts and compiler
-options.
+options. `check_hybrid_feedback_entry_negative.py` adds 29 paired controls for
+the real B344 weak entry, first residual-dependent B FIRE, issued reverse
+token, own memories, A28/B15 and both interval-scoped emitting products. Each
+positive conclusion is compiled before its altered version must be rejected.
 
 ## Coverage and hypotheses
 

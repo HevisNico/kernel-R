@@ -248,3 +248,6 @@ import KernelR.HybridRightClosedExecutionProduct
 import KernelR.HybridCoupledLearnedCycle
 import KernelR.HybridCoupledLearnedTrain
 import KernelR.HybridFirstCoupledTeaching
+import KernelR.HybridFeedbackWeakEntry
+import KernelR.HybridFeedbackFirstFire
+import KernelR.HybridIntervalClosedExecutionProduct
