@@ -5,6 +5,8 @@ import re
 import subprocess
 import tempfile
 
+from lean_check import lean_check_command
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -92,11 +94,12 @@ example : RationalBox.StrictBefore
                   entry.format(right='entry_charge_radius_inside_local_section_left'), 'unsolved goals'))
     with tempfile.TemporaryDirectory(prefix='lean-negative-', dir=ROOT) as tmp:
         path = Path(tmp) / 'Check.lean'
+        command = lean_check_command(tmp)
         for name, good, bad, diagnostic in cases:
             for should_pass, source in [(True, good), (False, bad)]:
                 path.write_text(source)
                 result = subprocess.run(
-                    ['lake', 'env', 'lean', str(path)], cwd=ROOT,
+                    [*command, str(path)], cwd=ROOT,
                     text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                     timeout=600,
                 )

@@ -1,0 +1,53 @@
+import KernelR.HybridProtectedWindow
+
+/-! Full protected MARK and zero ERROR doses derived from the actual sensor cycle. -/
+namespace KernelR.Hybrid
+open Set
+
+theorem SensorCycle.full_protected_mark_of_invariant {n θ ε route s u i p} {e : @Execution n θ route s u}
+    (cycle : SensorCycle e i p) (hb : PhysicalBox θ ε) (hf : PhysicalInvariant θ s)
+    (hv : RawValid s) (hs : MarkEntry s i)
+    (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q) :
+    e.ledger.mark i p = 1 / 10 ∧ e.ledger.error i p = 0 ∧ u.x i (.z p) = s.x i (.z p) := by
+  let st := cycle.trigger
+  let mk := cycle.phases.markPhase
+  let er := cycle.phases.errorPhase
+  have hw := cycle.protected_window hb hv hs hr ho hno
+  have hm : mk.span.AllStates (fun v => v.main i ≠ .ready) := by
+    have hstates := cycle.mark_states hw.1
+    have hend : mk.beforeExit.time < s.time + 1 / 20 := by
+      rw [← mk.exit.time_unchanged]; exact cycle.mark_ends_early hb
+    refine mk.span.allStates_mono ?_ (mk.span.allStates_and hstates mk.span.allStates_time_bounds)
+    intro v h
+    have hmode := h.1 (by have ht := h.2.2; linarith)
+    rw [hmode]; decide
+  have hc : mk.span.AllFlows (fun {v w} f => ∀ t ∈ Icc v.time w.time, f.path t i .b < 11 / 10) := by
+    refine mk.span.allFlows_mono ?_ (cycle.mark_flows hw.2)
+    intro v w f hf t ht
+    linarith [hf t ht]
+  let pastMark := st.span.append (.cons (.jump st.entry) (.nil _))
+  have hexposed := mk.span.mark_exposed_of_invariant hb (pastMark.physical_invariant hb hf) i p mk.flows hm hc
+  have hfull := mk.span.full_mark_of_open_endpoints i p hexposed st.charge
+    (by simpa only [protectedFloor] using mk.charge)
+  have herror : er.span.AllStates (fun v => v.main i ≠ .ready) := by
+    have hstates := (cycle.error_states hw.1).1
+    have hend : er.beforeExit.time < s.time + 419 / 300 := by
+      rw [← er.exit.time_unchanged]; exact cycle.ready_deadline
+    refine er.span.allStates_mono ?_ (er.span.allStates_and hstates er.span.allStates_time_bounds)
+    intro v h
+    have hmode := h.1 (by have ht := h.2.2; linarith)
+    rw [hmode]; decide
+  exact ⟨(cycle.mark_ledger_eq_phase hv hr (hno p)).trans hfull,
+    cycle.error_zero_of_protected hv hr (hno p) herror⟩
+
+theorem SensorCycle.full_protected_mark {n θ ε route born s u i p} {e : @Execution n θ route s u}
+    (cycle : SensorCycle e i p) (past : Execution θ route born s) (hborn : BirthState born)
+    (hb : PhysicalBox θ ε) (hs : MarkEntry s i)
+    (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q) :
+    e.ledger.mark i p = 1 / 10 ∧ e.ledger.error i p = 0 ∧ u.x i (.z p) = s.x i (.z p) := by
+  exact cycle.full_protected_mark_of_invariant hb (past.physical_invariant hb (hborn.physical_invariant hb))
+    (past.raw_valid hborn.raw_valid) hs hr ho hno
+
+end KernelR.Hybrid

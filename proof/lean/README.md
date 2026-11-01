@@ -1,8 +1,44 @@
 # Lean formalization of selected Kernel R results
 
 This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
-Mathlib v4.35.0. It is a **partial formalization**. Neither the complete hybrid
-execution nor the Python interval implementations have been verified in Lean.
+Mathlib v4.35.0. It is a **partial formalization**. The actual protocol is now
+constructed from A's original birth through B's first reverse-contact FIRE in
+(344.3,344.9), with cumulative **A28/B15** and its issued reverse token still
+pending. The full later hybrid execution and the Python interval
+implementations have not been verified in Lean.
+
+## Physical execution foundation
+
+The [hybrid execution guide](HYBRID_EXECUTION.md) maps the operational equations,
+proof interfaces and remaining obligations. `Hybrid` and `Refinement` retain
+actual coordinates, raw-current origins, pending tokens and emission/dose
+ledgers. Their extensions prove birth-family cap, charge and reserve invariants,
+mode-local ODE solutions, guarded transitions and a uniform finite-prefix
+physical event budget. These invariants alone do not supply future executions.
+
+| Proof layer | Current result | Explicit boundary |
+|---|---|---|
+| Constructed execution | From the original READY A birth through teaching at 319.9 (A28/B14), then B's first reverse FIRE in (344.3,344.9) (A28/B15) | The reverse token is issued but not received; 28 external B sources plus that wire remain pending |
+| Conditional physical protocol | Reciprocal epoch at 459.9 (A38/B27), C teaching at 639.9, complete cadence at 789.9 (A54/B61/C34) | Actual executions reaching the required horizons and genuine staged births are supplied |
+| Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
+| Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
+
+The constructive factories take A's READY `BirthState` with initially READY
+auxiliaries and the exact 32-source queue, B's independent READY `Newborn`,
+independent fixed `PhysicalBox` parameters (±0.3% or ±10%), canonical amplitudes
+and the declared contacts. Delays are sampled at each actual emission and lie
+in [0.3,0.4]; the backward bound is needed for the saturated reverse-FIRE cut.
+There is no supplied reaching execution, recorded case word, desired output
+count or assumed firing date. Every source and wire is consumed by an actual
+arrival; old memories, reserve and unfinished raw tails are carried forward.
+No drift, charge noise or settings-copy operation is asserted by this execution
+construction.
+
+The next obligation is receipt of the issued reverse token and the remaining
+coupled return cycles. Later C/cadence constructions, retained probes, fine
+enclosure soundness and physical every-N refinement remain open. The separate
+[robust coverage guide](ROBUST_COVERAGE.md) describes conditional noisy/drifting
+slow-chain results.
 
 ## Reproduce
 
@@ -11,20 +47,68 @@ Install [elan](https://github.com/leanprover/elan), then from this directory:
 ```sh
 lake exe cache get
 lake build
-lake env lean Audit.lean
+lake build Audit
+python3 scripts/check_audit_negative.py
 python3 scripts/generate_evidence.py --check
 python3 scripts/robust_evidence.py --check
 python3 scripts/check_sources.py
 python3 scripts/check_negative.py
+python3 scripts/check_hybrid_negative.py
+python3 scripts/check_hybrid_analytic_negative.py
+python3 scripts/check_hybrid_event_negative.py
+python3 scripts/check_hybrid_phase_negative.py
+python3 scripts/check_hybrid_pulse_negative.py
+python3 scripts/check_hybrid_return_negative.py
+python3 scripts/check_hybrid_training_negative.py
+python3 scripts/check_hybrid_bootstrap_negative.py
+python3 scripts/check_hybrid_protected_negative.py
+python3 scripts/check_hybrid_source_negative.py
+python3 scripts/check_hybrid_cell_negative.py
+python3 scripts/check_hybrid_local_negative.py
+python3 scripts/check_hybrid_invariant_negative.py
+python3 scripts/check_hybrid_staged_negative.py
+python3 scripts/check_hybrid_boundary_negative.py
+python3 scripts/check_hybrid_calendar_negative.py
+python3 scripts/check_hybrid_routed_negative.py
+python3 scripts/check_hybrid_teaching_negative.py
+python3 scripts/check_hybrid_reciprocal_negative.py
+python3 scripts/check_hybrid_c_introduction_negative.py
+python3 scripts/check_hybrid_cadence_negative.py
+python3 scripts/check_hybrid_cascade_negative.py
+python3 scripts/check_hybrid_existence_negative.py
+python3 scripts/check_hybrid_weak_existence_negative.py
+python3 scripts/check_hybrid_first_fire_negative.py
+python3 scripts/check_hybrid_protected_mark_negative.py
+python3 scripts/check_hybrid_prepared40_negative.py
+python3 scripts/check_hybrid_preparation_existence_negative.py
+python3 scripts/check_hybrid_b_birth_product_negative.py
+python3 scripts/check_hybrid_first_wire_negative.py
+python3 scripts/check_hybrid_first_interleaved_negative.py
+python3 scripts/check_hybrid_second_wire_negative.py
+python3 scripts/check_hybrid_receiver_fire_negative.py
+python3 scripts/check_hybrid_coupled_preparation_negative.py
+python3 scripts/check_hybrid_coupled_teaching_negative.py
+python3 scripts/check_hybrid_feedback_entry_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
 `lake-manifest.json`. The first build downloads Mathlib's compiled dependencies.
 The build checks proof terms; the audit rejects any project theorem using axioms
 other than `propext`, `Classical.choice` and `Quot.sound`. There are no admitted
-proofs, project axioms or native-evaluation proofs.
+proofs, project axioms or native-evaluation proofs. The Audit build target uses
+Lake's exact artifact paths. Its scan includes every imported and current
+`KernelR`/`A22` theorem; negative controls cover corruption in both locations.
+Standalone proof controls reuse the same dependency artifacts and compiler
+options. `check_hybrid_feedback_entry_negative.py` adds 29 paired controls for
+the real B344 weak entry, first residual-dependent B FIRE, issued reverse
+token, own memories, A28/B15 and both interval-scoped emitting products. Each
+positive conclusion is compiled before its altered version must be rejected.
 
 ## Coverage and hypotheses
+
+The table below describes the analytic, abstract and evidence modules. The
+physical `Hybrid*` results above and in the [theorem map](HYBRID_EXECUTION.md)
+provide additional refinements; an abstract module alone does not construct them.
 
 The [robust coverage guide](ROBUST_COVERAGE.md) covers the additional birth,
 noise-dependent latency and arbitrary-depth slow-chain formalization.
@@ -35,7 +119,7 @@ noise-dependent latency and arbitrary-depth slow-chain formalization.
 | `Flow` | Exponential decay solves a single mode; FAST ends at 1/4; SLOW returns at accumulated recovery log(5/2); protected charge inequality | A mode-local result; it does not construct a hybrid execution |
 | `Recovery` | Bounds on the actual real logarithms log(5/2) and log(4), return before 6.990787 and protection throughout the specified dose window | The displayed bounds on recovery, firing latency and accumulated integral |
 | `Calendar` | Routed latency hulls, gaps in [7.5,8.5], disjoint pulses, causal delay, quiescence and preservation of intervals under fixed latency | The latency and duration enclosures |
-| `Energy` | Integrating-factor barrier; reserve stays in [50,100] on a smooth interval with work in [0,500]; explicit constant-work comparison bounds | The derivative and work bounds must hold; composition across hybrid event boundaries is not proved |
+| `Energy` | Integrating-factor barrier; reserve stays in [50,100] on a smooth interval with work in [0,500]; explicit constant-work comparison bounds | The derivative and work bounds must hold; the separate `HybridWork` module derives the work bound and composes the birth-family reserve invariant across hybrid events |
 | `Protocol` | Cycle counts 13/10 for local feedback and 38/27 for the composed words, dose updates and logical composition | The words are supplied abstractions; producing those words from the hybrid equations is not proved |
 | `Cadence` | Four pulse cases, including MARK followed by full ERROR; integral of the exponential MARK profile; post-MARK return equation and monotonicity; two extra MARK doses and four total ERROR doses; retained wire jitter after shared-latency cancellation | Physical guards, clipping inactivity, the validity of the phase decomposition and the interval enclosures remain separate obligations |
 | `CadenceRecorded/*` | Per-input cumulative dose counters for both 95-case traces, teaching counts 16/14, fast counts 20/18/16, route input/output counts and totals A=54/B=61/C=34 composed with the earlier cycle words | Case labels and recorded counters are inputs; the hybrid equations are not proved to produce these traces |
@@ -90,7 +174,8 @@ The new analytic lemma integrates the exponential MARK profile to obtain
 `(b + 0.1) * u - J`, with
 `J = 0.1 * tau + (0.1 - 0.4 * log(5/4)) / Lm`. The return identity uses that
 deficit; it does not approximate MARK as an instantaneous jump in recovery.
-The required physical phase ordering remains a guard obligation.
+The abstract `Cadence` lemma requires the physical phase ordering as a premise;
+the `Hybrid*` local cases and conditional cascade derive their own guards.
 
 Shared firing latencies can cancel between dates, but fresh per-pulse wire
 delays cannot. The new calendar lemma retains `d₂ - d₁` and proves the
@@ -123,21 +208,23 @@ local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Define the hybrid state, continuous flows, guards, resets and delayed events
-   in Lean, including simultaneous-event conventions.
-2. Prove soundness of the interval arithmetic and the exp/log enclosures used by
-   the certificate checker, or derive the necessary enclosures directly in Lean.
-3. Connect the flow semantics and bounds to the declared cycle words, cap
-   inactivity, energy invariant and birth-to-section transition.
-4. Instantiate the composition rule to obtain the complete reciprocal theorem.
-5. For pedagogy, separately formalize the observation/readout/training interface
+1. Continue the constructed reverse FIRE through its actual receipt and the
+   reciprocal epoch at 459.9, then construct C's birth/teaching and the cadence
+   through 789.9. Preserve global queues, own memories and port availability.
+2. Prove the remaining real enclosure memberships, retained probe responses,
+   causal cuts and protocol extension/saturation obligations. Exact comparisons
+   of stored endpoints do not establish these facts.
+3. Derive the physical leaf and relay contracts and instantiate the checked
+   packet induction for every finite chain.
+4. For pedagogy, separately formalize the observation/readout/training interface
    and connect numerical records to that semantics.
 
 The existing [local theorem](../reciprocal_learning/THEOREM.md),
 [entry theorem](../reciprocal_entry/THEOREM.md) and
-[cadence theorem](../reciprocal_cadence/THEOREM.md) therefore remain computer-assisted
-written arguments with independent arithmetic replay. This project strengthens
-selected parts without upgrading their overall status to fully formalized.
+[cadence theorem](../reciprocal_cadence/THEOREM.md) remain computer-assisted
+written arguments with independent arithmetic replay. The current partial
+formalization and its exact boundaries are detailed in the
+[hybrid guide](HYBRID_EXECUTION.md).
 
 ## Attribution and license
 

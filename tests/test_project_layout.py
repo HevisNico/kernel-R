@@ -15,6 +15,8 @@ class ProjectLayout(unittest.TestCase):
         for folder in ['experiments/reciprocal','proof','results']:
             paths.extend((ROOT/folder).rglob('*.md'))
         for path in paths:
+            # Lake materializes third-party docs outside the maintained source set.
+            if '.lake' in path.relative_to(ROOT).parts:continue
             for target in re.findall(r'\]\(([^)]+)\)',path.read_text()):
                 if re.match(r'\w+://|#|mailto:',target):continue
                 target=target.split('#')[0]
