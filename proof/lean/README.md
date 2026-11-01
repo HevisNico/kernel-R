@@ -127,6 +127,17 @@ This remains conditional on the reaching executions; global existence/progress,
 probes/cuts, remaining fine enclosures and the physical every-N refinement
 remain open.
 
+The first source-driven existence theorem is now constructive.
+`birth_protocol_first_mark_exists` takes any READY member of A's birth family,
+its physical fabrication box and the original thirty-two-source queue. It
+constructs the actual source-0 delivery and a positive-duration flow to the
+first MARK, between 0.01 and 0.025. This prefix is saturated at that endpoint,
+has no output, retains all thirty-one later source tokens, preserves gains
+and recovery, and satisfies the physical invariant and raw validity. The
+energy trajectory and all integral flow equations are constructed explicitly.
+No reaching execution or threshold date is a premise. This does not yet
+construct the remainder of the first auxiliary cycle or the full protocol.
+
 ## Reproduce
 
 Install [elan](https://github.com/leanprover/elan), then from this directory:
@@ -162,6 +173,7 @@ python3 scripts/check_hybrid_reciprocal_negative.py
 python3 scripts/check_hybrid_c_introduction_negative.py
 python3 scripts/check_hybrid_cadence_negative.py
 python3 scripts/check_hybrid_cascade_negative.py
+python3 scripts/check_hybrid_existence_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

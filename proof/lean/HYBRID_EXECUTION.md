@@ -1,9 +1,10 @@
 # Physical execution semantics and analytic refinement
 
 The complete protocol-to-abstraction theorem remains open. The modules below
-prove physical flow and invariant results needed for that theorem. They do not
-yet derive all four main-cell pulse cases or the full training calendars from
-complete executions. They now derive an isolated silent input's absence of
+prove physical flow and invariant results needed for that theorem. The
+complete conditional three-cell prefix is derived below; its reaching traces
+are still supplied. Constructive source-driven existence now reaches the
+first actual MARK from the original A birth queue. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
 section the learned-input case now returns and preserves all memories. Sensor
@@ -53,7 +54,64 @@ execution. `birth_resting_complete_exists` exhibits a complete
 positive-duration silent execution from a nominal READY state and proves that
 this state belongs to `BirthState`, with the prescribed nominal log-gains and
 an empty source queue. This is one concrete birth-family witness, not existence
-for every initial state or for the training protocols; those remain unproved.
+for every initial state or for the complete training protocols. The
+source-driven construction below covers every READY A birth through its
+first actual MARK; subsequent continuation remains open.
+
+## Constructive first-source existence
+
+`birth_protocol_first_mark_exists` has no incoming `Execution` premise. Its
+inputs are A's `BirthState`, its `PhysicalBox`, initially READY auxiliaries,
+and the exact queue
+`sourceTrain 0 0 0 8 16 ++ sourceTrain 0 0 160 8 16`.
+
+It constructs a real `Jump.arrive` for the token at zero, an explicit positive
+`Flow`, and a real `Jump.mark` at the first sensor threshold. The terminal date
+lies strictly between 0.01 and 0.025. `CompleteThrough` holds at that date:
+all instantaneous events due at this endpoint have been discharged. There are
+no emissions. The final queue is definitionally exactly the fifteen sources
+at 8..120 followed by the sixteen at 160..280, hence thirty-one tokens.
+All log-gains and recovery retain the own birth values. `PhysicalInvariant`
+and `RawValid` hold, including reserve in [50,100]. The active raw origin
+survives MARK; neither the pulse nor the main charge is reset.
+
+The construction separates these obligations:
+
+- `HybridQuietFlowExistence` constructs zero-current READY relaxation for
+  arbitrary initial coordinates, memories and reserve. Queues may contain
+  future sources; the flow cannot pass their earliest deadline. Strictly
+  future sources give a saturated horizon. Every READY birth member is covered.
+- `HybridSourceProgress` extracts an actual earliest queued token and constructs
+  an eligible arrival, removing one occurrence. Finite simultaneous batches
+  are executable when their raw slots are free and pairwise distinct. Remaining
+  occurrences retain their multiplicity, and the first protocol successor has
+  its exact thirty-one-token queue.
+- `HybridScalarFirstCrossing` constructs the first crossing of a continuous
+  scalar response by compactness and the intermediate value theorem. Strict
+  preguards hold before that root; no monotonicity or observed event is assumed.
+  The physical sensor response yields a root in (0.01,0.025).
+- `HybridBirthPulseGain` derives the own birth-gain bound and the first main
+  response's absence of firing directly from the declared birth family.
+- `HybridReadyFlowExistence` constructs every coordinate and the exact energy
+  response to one fresh pulse. Its energy work includes both the main input
+  drive and the auxiliary input work. The integral equations, guards, raw
+  support and pending urgency are proved, rather than supplied as a trajectory.
+- `HybridGuardNoJump` derives terminal saturation from strict mode guards,
+  strictly future raw expiries and strictly future delivery dates.
+- `HybridFirstInputMark` discharges the two active analytic preguards using
+  physical bounds and the first-crossing theorem, then composes the real moves.
+
+The generic input constructor is limited to an all-READY span before raw
+expiry. Its guard bounds and queue deadlines are explicit; the birth-level
+factory discharges them from the actual initial source queue. General progress
+cannot follow from queue causality alone: simultaneous arrivals to the same
+occupied raw slot can deadlock. Port availability must therefore be derived
+from the constructed protocol schedule. No global priority is imposed on
+compatible simultaneous events.
+
+This is genuine non-vacuity for a nonempty prefix of the written training
+protocol. It does not yet construct MARK/SILENT/ERROR continuation, the first
+complete weak cycle, later births, the trace reaching 789.9 or every-N progress.
 
 ## Checked implications
 
@@ -1069,3 +1127,9 @@ contract and reject a missing C source, premature final endpoint, weakened
 wire bound, altered cumulative54/61/34 or new-block16/18/20 counts, wrong own
 recovery/gain, cross-cell inherited C memory, a nonempty terminal queue,
 missing additional ERROR/MARK and an altered final resting charge.
+
+Constructive-existence controls compile the original birth/source factory
+without any incoming execution. They reject missing initial sources, altered
+first-crossing bounds, an incorrect MARK charge, invented gain/recovery doses,
+extra deliveries or outputs, erased raw origins, lost future tokens, a reset
+reserve, non-strict delivery deadlines for saturation and omitted input work.

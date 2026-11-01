@@ -38,7 +38,10 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    with the leaf/relay protocols, including their source queues and contact gates.
    Prove protocol-specific existence/progress, port availability and terminal
    saturation. The semantics, physical bounds and finite-prefix event budget
-   are already checked; they do not alone construct these executions.
+   are already checked; they do not alone construct these executions. A genuine
+   source-driven prefix is now constructed from every READY A birth with the
+   original thirty-two-source queue, through its first MARK in (0.01,0.025),
+   retaining thirty-one future tokens. Its later continuation remains open.
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.

@@ -158,3 +158,10 @@ import KernelR.HybridCadenceAPhase
 import KernelR.HybridCadenceWireCalendar
 import KernelR.HybridCadenceCascade
 import KernelR.HybridCadenceEntry
+import KernelR.HybridQuietFlowExistence
+import KernelR.HybridSourceProgress
+import KernelR.HybridScalarFirstCrossing
+import KernelR.HybridBirthPulseGain
+import KernelR.HybridGuardNoJump
+import KernelR.HybridReadyFlowExistence
+import KernelR.HybridFirstInputMark
