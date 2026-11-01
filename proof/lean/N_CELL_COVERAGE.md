@@ -52,8 +52,10 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    cadence initiation now reaches the actual fourth C input at 652, retaining
    its residual charge and all later sources. The local strong, MARK-only,
    combined MARK/ERROR and high-gain learned cases are proved from current
-   physical bounds. Their complete cascade assembly and arbitrary later
-   introductions remain to be connected physically.
+   physical bounds. The actual cadence cascade is now assembled through 789.9:
+   C20/B18/A16, cumulative A54/B61/C34, own acquired memories and an empty
+   final queue, conditionally on the supplied reaching executions. Arbitrary
+   later introductions and physical every-N refinement remain open.
 4. Proofs of the leaf refinement and `RelayLaw` from those semantics. In
    particular, no omitted or extra emissions, the full protected doses, the
    residual-raw-tail bound and the first-crossing latency bounds must be derived.

@@ -145,3 +145,16 @@ import KernelR.HybridCadenceRestRoot
 import KernelR.HybridCadenceStrongPulse
 import KernelR.HybridCadenceHighTrain
 import KernelR.HybridCadenceMarkOnly
+import KernelR.HybridHighGainCalendar
+import KernelR.HybridCadenceHighTiming
+import KernelR.HybridSparseLearnedPulse
+import KernelR.HybridCadenceSparsePrefix
+import KernelR.HybridCadenceRelayPhase
+import KernelR.HybridCadenceCPhase
+import KernelR.HybridCadenceForwardGeometry
+import KernelR.HybridCadenceReturnGeometry
+import KernelR.HybridCadenceBPhase
+import KernelR.HybridCadenceAPhase
+import KernelR.HybridCadenceWireCalendar
+import KernelR.HybridCadenceCascade
+import KernelR.HybridCadenceEntry

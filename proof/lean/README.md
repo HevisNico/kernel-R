@@ -108,9 +108,24 @@ residue. The MARK clock includes its finite exponential ramp. High-gain learned
 inputs settle before 3.8 with one output and unchanged memories. A direct real
 enclosure puts the three-dose rest latency in (0.65,0.66), without certificate
 membership premises. These are local cases under explicit current-state/gap
-bounds. Their assembly into the complete C20/B18/A16 cascade remains open,
-as do fine enclosure membership, probes, global existence/progress and the
-complete execution-to-abstraction theorem.
+bounds. They are now assembled into the complete physical C-to-B-to-A cadence:
+C emits 20 times, its actual wired outputs yield B's 18 emissions, and B's
+actual return outputs yield A's 16. Sparse inputs use a proved seven-unit
+settling horizon; each dense transient is selected at its real delivery cut.
+The first residual high-gain firing stays distinct from the later resting
+reference, and each wire delay is evaluated at its own actual emission time.
+
+`StagedExecution.reciprocal_cadence_entry` starts from the original A birth
+queue, B's own source queue, C's own twenty-five sources and the supplied
+reaching traces/births. It derives cumulative A=54/B=61/C=34 through 789.9,
+all memories from each cell's own birth, recovery plus 0.3, READY at exact
+resting charge, absent raw inputs and an empty final queue. The active gains
+are each cell's own birth gain multiplied by exp(2.4), with other acquired
+port memories preserved. Physical caps and reserve in [50,100] propagate.
+No desired case word, output count, received calendar or dose is supplied.
+This remains conditional on the reaching executions; global existence/progress,
+probes/cuts, remaining fine enclosures and the physical every-N refinement
+remain open.
 
 ## Reproduce
 
@@ -146,6 +161,7 @@ python3 scripts/check_hybrid_teaching_negative.py
 python3 scripts/check_hybrid_reciprocal_negative.py
 python3 scripts/check_hybrid_c_introduction_negative.py
 python3 scripts/check_hybrid_cadence_negative.py
+python3 scripts/check_hybrid_cascade_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

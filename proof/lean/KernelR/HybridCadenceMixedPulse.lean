@@ -93,6 +93,7 @@ structure CadenceMixedPulse {n θ route s u} (e : @Execution n θ route s u)
   recovery_gain : u.x i .b = s.x i .b + 1 / 10
   ready : u.main i = .ready
   charge : 1 / 10 ≤ u.x i .q ∧ u.x i .q ≤ 1 / 2
+  charge_cadence : u.x i .q ≤ 8 / 25
   auxiliary : ∀ q, u.aux i q = .ready ∧ RestBand (u.x i (.m q))
   raw_finished : ∀ q, u.raw i q = none
 
@@ -170,15 +171,15 @@ theorem ShortMarkPulse.mixed_case_of_return {n θ ε route s u i p} {e : @Execut
       _ = (cycle.markHead.append mk.rest).emissionTimes i :=
         congrArg (fun actual => actual.emissionTimes i) cycle.markHead_reconstruct
       _ = [] := by rw [Execution.emissionTimes_append,hheadEmission,hrestEmission]; rfl
-  have hdecay : Real.exp (-(1 / 2 : ℝ) * (u.time - tail.departure.afterEnd.time)) ≤ 2 / 5 := by
+  have hdecay : Real.exp (-(1 / 2 : ℝ) * (u.time - tail.departure.afterEnd.time)) ≤ 1 / 4 := by
     have hd : tail.departure.afterEnd.time = s.time + 1 := by
       rw [tail.departure.exit.time_unchanged,tail.departure.date]
-    have he : (5 / 2 : ℝ) ≤ Real.exp 1 := by
-      have h := Real.quadratic_le_exp_of_nonneg (by norm_num : (0 : ℝ) ≤ 1)
-      norm_num at h
-      exact h
+    have he : (4 : ℝ) ≤ Real.exp (7 / 5) := by
+      have h := Real.sum_le_exp_of_nonneg (by norm_num : (0 : ℝ) ≤ 7 / 5) 6
+      norm_num [Finset.sum_range_succ] at h
+      linarith
     calc
-      _ ≤ Real.exp (-(1 : ℝ)) := Real.exp_le_exp.mpr (by rw [hd]; linarith)
+      _ ≤ Real.exp (-(7 / 5 : ℝ)) := Real.exp_le_exp.mpr (by rw [hd]; linarith)
       _ ≤ _ := by
         rw [Real.exp_neg,inv_eq_one_div]
         apply (div_le_iff₀ (Real.exp_pos _)).mpr
@@ -191,9 +192,14 @@ theorem ShortMarkPulse.mixed_case_of_return {n θ ε route s u i p} {e : @Execut
       linarith [tail.charge_at_end.1])
     rw [tail.charge_decay]
     linarith [tail.charge_at_end.2]
+  have hqc : u.x i .q ≤ 8 / 25 := by
+    have h := mul_le_mul_of_nonneg_left hdecay (show 0 ≤ tail.departure.afterEnd.x i .q - 1 / 10 by
+      linarith [tail.charge_at_end.1])
+    rw [tail.charge_decay]
+    linarith [tail.charge_at_end.2]
   refine ⟨⟨pulse,ret,hemissions,herrorDose.1,?_,herrorDose.2,
     fun q hq => (hother q hq).2,pulse.recovery_gain,
-    r.rest.allStates_final tail.ready_states,⟨hqlow,hqupper⟩,?_,tail.raw_finished⟩⟩
+    r.rest.allStates_final tail.ready_states,⟨hqlow,hqupper⟩,hqc,?_,tail.raw_finished⟩⟩
   · intro q hq
     have h := e.gain_balance i q
     rw [(hother q hq).2] at h
