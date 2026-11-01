@@ -240,3 +240,11 @@ import KernelR.HybridProtectedInputCycle
 import KernelR.HybridProtectedInputShortCycle
 import KernelR.HybridLearnedSenderReturnAtNext
 import KernelR.HybridFirstCoupledPreparedPair
+
+import KernelR.HybridShortLearnedSchedule
+import KernelR.HybridShortPreparedReturn
+import KernelR.HybridShortLearnedCycle
+import KernelR.HybridRightClosedExecutionProduct
+import KernelR.HybridCoupledLearnedCycle
+import KernelR.HybridCoupledLearnedTrain
+import KernelR.HybridFirstCoupledTeaching

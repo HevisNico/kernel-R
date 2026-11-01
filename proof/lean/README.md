@@ -208,8 +208,15 @@ protected MARK and return, weaves it with A's true return and delivers A184.
 Both cells are prepared at184 with q=0.1; B's own recovery has gained0.1,
 its gains are unchanged, and44 external sources remain. The global B doses
 on this extension are ERROR0/MARK0.1. The exact post-birth trace contains
-four outputs and seven deliveries. The remaining concurrent teaching train
-and later births still need their global executions; the trace reaching789.9
+four outputs and seven deliveries. `birth_protocol_first_coupled_teaching_exists`
+now constructs the remaining thirteen actual coupled cycles, including the
+active source184 and the twelve future sources192..280. Each real A FIRE
+issues its Bport1 token; the actual receipt and B FIRE are followed by both
+prepared returns before the next source. Real A arrivals drive the induction.
+The witness reaches288, then waits physically to319.9. It has cumulative
+**A28/B14**, both cells prepared at q=0.1 with RAW absent, own acquired memories
+retained and exactly the32 B external sources still queued. Later reciprocal
+teaching and births still need their global executions; the trace reaching789.9
 remains supplied.
 
 ## Reproduce
@@ -259,6 +266,7 @@ python3 scripts/check_hybrid_first_interleaved_negative.py
 python3 scripts/check_hybrid_second_wire_negative.py
 python3 scripts/check_hybrid_receiver_fire_negative.py
 python3 scripts/check_hybrid_coupled_preparation_negative.py
+python3 scripts/check_hybrid_coupled_teaching_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

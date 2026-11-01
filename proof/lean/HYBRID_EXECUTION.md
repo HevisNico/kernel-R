@@ -678,9 +678,72 @@ then A atF3. Its seven deliveries are A160, Bport1 atH1, A168, Bport1 atH2,
 A176, Bport1 atH3 and A184. These calendars, counts, the remaining queue and
 CompleteThrough184 are conclusions of the original-birth factory.
 
-The remaining concurrent teaching train and subsequent births still need
-their global executions. The full789.9 and every-N execution-existence
-goals remain open.
+## Constructed complete first coupled teaching epoch
+
+`HybridShortLearnedSchedule` bounds a real learned response root by0.7,
+using its carried READY charge and own gain in[1.8,2.2]. The bound comes from
+the response equation, not from an assumed latency. The prepared SLOW return
+then reaches its actual reopen before source+6.8.
+`HybridShortLearnedCycle` constructs the full port-generic learned cycle
+through source+6.9, with one actual output, no ERROR or MARK, preserved own
+memories and a prepared endpoint at q=0.1 with RAW absent.
+
+`HybridRightClosedExecutionProduct` weaves an actual neutral A path with
+an actual B execution that may emit. Every B FIRE is lifted by a genuine
+global FIRE. A closed B contact makes its route empty, but its emission
+remains in the ledger. This transport does not classify FIRE as queue-neutral.
+The exact global queue is retained and the original flow paths are cut and
+resumed at their real dates.
+
+`coupled_learned_cycle_exists` takes a current two-cell prepared section,
+charges exactly0.1, A's own gain in[1.8,2], B's own port1 gain in[1.8,2.2],
+fresh Aport0 RAW and an arbitrary global queue whose tokens are due at least
+eight units later. The source clock is in[184,280]. It constructs:
+- A's real learned FIRE and the Bport1 token issued by that FIRE.
+- A's actual FAST prefix and the real receipt at H=FA+forward(FA), restoring
+  the original external queue after consuming the issued occurrence.
+- B's real short learned cycle, followed by a genuine quiet wait to source+8.
+  Since FA<source+0.7 and the fresh wire delay is at most0.4, H+6.9<source+8.
+- A's actual retained FAST/SLOW return to source+8, woven with B's emitting
+  path under the closed reverse contact.
+
+The result has exactly two actual emissions, A then B, and exactly one actual
+Bport1 delivery. Both cells are prepared at q=0.1, RAW is absent, own gains
+and recovery are unchanged and the original global queue is retained.
+Terminal saturation is asserted only with a strictly future queue. A source
+due exactly at source+8 remains an actual arrival to be performed by the caller.
+
+`HybridCoupledLearnedTrain` recurses over those already queued external A
+sources. A count of n means n future sources after the fresh active input,
+so it constructs n+1 real cycles. The base case still constructs one cycle.
+Each successor first constructs the cycle, consumes the actual next A token
+at the common endpoint, then recurses from that new fresh RAW state.
+Counts, received wires and the final prepared section are conclusions.
+Each wire date is tied to an actual A emission and its own sampled delay.
+ERROR and MARK are zero on this learned-train extension.
+
+`birth_protocol_first_coupled_teaching_exists` applies this constructor to
+the exhibited original-birth section184 with twelve future A sources192..280.
+Its thirteen actual cycles reach288, with only the32 B external sources left.
+A real quiet flow then reaches319.9 without an emission or delivery.
+Both cells are prepared at q=0.1, all RAW slots are absent, physical invariants
+and raw validity hold, and CompleteThrough319.9 is proved.
+
+The post-B-birth execution has A16/B14 actual outputs; the initial constructed
+A preparation contributes twelve more, giving cumulative **A28/B14**.
+All sixteen A second-train deliveries160..280 are derived from the real trace.
+The remaining queue is exactly Bport2's two sixteen-source trains320..440 and
+480..600. A retains its own birth port0 gain+1.8 and recovery+0.1; B retains
+its own newborn port1 gain+0.6 and recovery+0.1. Other own gains are unchanged.
+
+Only the original A birth assumptions, independent two-cell physical box,
+arbitrary READY B newborn and forward-delay bounds are supplied. No reaching
+execution, received calendar, pulse word, output count or dose is a premise.
+No backward-delay bound is needed for this prefix: the reverse contact is
+closed throughout its B firings.
+
+Later reciprocal teaching and births still need their global executions.
+The full789.9 and every-N execution-existence goals remain open.
 
 ## Checked implications
 
