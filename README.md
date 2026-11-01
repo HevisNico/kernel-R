@@ -10,19 +10,18 @@ A22 network engines and historical proof archive stay in the
 ## Physical Lean proof status
 
 The [Lean formalization](proof/lean/README.md) constructs an actual execution
-from A's READY birth through the complete reciprocal epoch at **459.9**,
-with cumulative **A38/B27**. Both cells are prepared at q=0.1, RAW is absent,
-and the exact sixteen Bport2 sources480..600 remain. A retains its own birth
-log-gains +1.8 on ports0 and2; B retains its own newborn log-gains +0.6 on
-port1 and +1.8 on port2. Both recoveries are their own birth values +0.1.
-Actual FIRE jumps issue the wire tokens, and actual arrivals consume them.
-Parameters are fixed, independently perturbed within the stated fabrication
-boxes, with canonical pulses and bounded wire delays.
+from A's READY birth through C's teaching epoch at **639.9**, with cumulative
+**A38/B43/C14**. B and C have independent genuine births at160 and480.
+All three cells are prepared at q=0.1, RAW is absent, and the exact25 Cport0
+sources640..736 remain. A and B retain their acquired own memories; C's own
+newborn port1 log-gain has gained0.6 and recovery0.1, while its other gains
+are unchanged. Actual FIRE jumps issue the wire tokens and actual arrivals
+consume them. Parameters are fixed, independently perturbed within the stated
+fabrication boxes, with canonical pulses and bounded wire delays.
 
-C's birth at480 and teaching through639.9 (**A38/B43/C14**), followed by the
-cadence through789.9 (**A54/B61/C34**), remain checked **conditionally on
-supplied later executions and births**. Constructing those continuations and
-an end-to-end physical Lean proof for every finite N remain open. See the
+The cadence through789.9 (**A54/B61/C34**) remains checked **conditionally
+on supplied later executions**. Constructing that continuation and an end-to-end
+physical Lean proof for every finite N remain open. See the
 [checkpoint and theorem map](proof/lean/HYBRID_EXECUTION.md).
 
 [Draft PR #12](https://github.com/HevisNico/kernel-R/pull/12) separately develops

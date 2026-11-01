@@ -2,12 +2,12 @@
 
 This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
 Mathlib v4.35.0. It is a **partial formalization**. The actual protocol is now
-constructed from A's original birth through **459.9**, including all actual
-B-to-A teaching sources, wire receipts and guarded returns. Cumulative counts
-are **A38/B27**, with exactly **16** later Bport2 sources480..600. Both cells
-are prepared at q=0.1 with RAW absent and their own acquired memories retained.
-C's later birth/teaching and cadence execution remain conditional; the Python
-interval implementations have not been verified in Lean.
+constructed from A's original birth through **639.9**, including independent
+B/C births at160/480, actual teaching sources, wire receipts and guarded returns.
+Cumulative counts are **A38/B43/C14**, with exactly **25** later Cport0
+sources640..736. All three cells are prepared at q=0.1 with RAW absent and
+own acquired memories retained. The later cadence execution remains conditional;
+the Python interval implementations have not been verified in Lean.
 
 ## Physical execution foundation
 
@@ -20,13 +20,13 @@ physical event budget. These invariants alone do not supply future executions.
 
 | Proof layer | Current result | Explicit boundary |
 |---|---|---|
-| Constructed execution | From the original READY A birth through first teaching at319.9 and the complete reciprocal epoch at459.9; A38/B27 | Both cells prepared/q=0.1, RAW absent; exact sixteen B480..600 sources and own memories retained |
-| Conditional physical protocol | C teaching at639.9 (A38/B43/C14), complete cadence at789.9 (A54/B61/C34) | The later actual executions and genuine C birth are supplied; the prefix through459.9 is now constructed |
+| Constructed execution | From the original READY A birth through the reciprocal epoch at459.9 and C teaching at639.9; A38/B43/C14 | Three cells prepared/q=0.1, RAW absent; exact25 C640..736 sources and own memories retained |
+| Conditional physical protocol | Complete cadence at789.9 (A54/B61/C34) | The later actual execution is supplied; both genuine births and the prefix through639.9 are constructed |
 | Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
 
 The constructive factories take A's READY `BirthState` with initially READY
-auxiliaries and the exact 32-source queue, B's independent READY `Newborn`,
+auxiliaries and the exact 32-source queue, B's and C's independent READY `Newborn`s,
 independent fixed `PhysicalBox` parameters (±0.3% or ±10%), canonical amplitudes
 and the declared contacts. Delays are sampled at each actual emission and lie
 in [0.3,0.4]; the backward bound supplies the actual reverse receipt.
@@ -54,12 +54,24 @@ At459.9 A's own port0/port2 log-gains have each gained1.8, B's own port1/port2
 log-gains have gained0.6/1.8, and both own birth recoveries have gained0.1.
 Other gains are unchanged. The only pending tokens are B480..600.
 
-The next obligations are C's actual birth at480, its teaching through639.9
-and the period-four cadence through789.9. Their conditional analyses already
-derive the later counts and memories from supplied executions. Retained probes,
-fine enclosure soundness and physical every-N refinement remain open. The separate
-[robust coverage guide](ROBUST_COVERAGE.md) describes conditional noisy/drifting
-slow-chain results.
+`birth_protocol_c_teaching_exists` in
+[HybridBirthCTeaching](KernelR/HybridBirthCTeaching.lean) returns
+`ConstructedCTeaching` with the staged original-birth trace through639.9.
+C's genuine480 birth retains A/B and adds its independent newborn state.
+The actual first weak receipt is cut at488 without a charge reset. At496,
+C's first learned response retains its low-recovery SLOW path until the next actual wire;
+its protected MARK derives recovery+0.1 and the prepared504 section.
+Thirteen actual B-to-C learned cycles finish at608, followed by a real quiet
+wait to639.9. A stays physically quiet from459.9 and keeps its own memories.
+C's own port1 log-gain gains0.6, its own recovery gains0.1, and its ports0/2
+are unchanged. All earlier A/B memories remain. The final queue is exactly25
+Cport0 sources640..736, with `CompleteThrough639.9`.
+
+The next construction is the period-four cadence through789.9. Its conditional
+analysis already derives later counts and memories from a supplied execution.
+Retained probes, fine enclosure soundness and physical every-N refinement remain
+open. The separate [robust coverage guide](ROBUST_COVERAGE.md) describes
+conditional noisy/drifting slow-chain results.
 
 ## Reproduce
 
@@ -112,6 +124,7 @@ python3 scripts/check_hybrid_coupled_teaching_negative.py
 python3 scripts/check_hybrid_feedback_entry_negative.py
 python3 scripts/check_hybrid_reverse_receipt_negative.py
 python3 scripts/check_hybrid_reverse_epoch_negative.py
+python3 scripts/check_hybrid_c_teaching_existence_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -133,12 +146,15 @@ A28/B15 and27 sources. The 40 additional paired controls in
 `check_hybrid_reverse_epoch_negative.py` cover the subsequent real receipts,
 weak cuts, learned cycles, source induction and original-birth459.9 factory.
 All 40 valid conclusions compile and their altered versions are rejected.
-The complete build passes 9,387 jobs; its global audit checks 23,423 project
-theorems with only the three allowed logical axioms. Source checks pass for 334
-Lean files, including the five unchanged upstream modules; generated evidence,
-all 16 robust certificates and 12 project tests also pass. CI includes 596 paired
-controls in total. Fresh CI status is reported on the PR separately from these
-local results.
+The 50 new pairs in `check_hybrid_c_teaching_existence_negative.py` pass for
+the actual C birth, retained weak/SLOW paths, protected MARK, real three-cell
+execution, own memories, A38/B43/C14 and exact 25-source queue. Every valid
+conclusion compiles and every altered conclusion is rejected.
+The complete build passes 9,407 jobs; the global audit checks 23,998 project
+theorems using only the three allowed logical axioms. Source identities pass
+for 354 Lean files and five unchanged upstream modules. Generated evidence,
+all 16 robust certificates and 12 project tests pass. CI includes 646 paired
+controls in total; fresh CI status is reported separately on the PR.
 
 ## Coverage and hypotheses
 
@@ -244,9 +260,8 @@ local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Continue the constructed459.9 endpoint through C's birth at480 and actual
-   teaching to639.9, then construct the period-four cadence to789.9. Their
-   conditional analyses are already checked. Preserve global queues, own
+1. Continue the constructed639.9 endpoint through the period-four cadence
+   to789.9. Its conditional analysis is already checked. Preserve global queues, own
    memories, actual wire provenance and port availability.
 2. Prove the remaining real enclosure memberships, retained probe responses,
    causal cuts and protocol extension/saturation obligations. Exact comparisons
