@@ -4,7 +4,7 @@ The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. The
 complete conditional three-cell prefix is derived below; its reaching traces
 are still supplied. Constructive source-driven existence now reaches the
-protected MARK at input 32 from the original A birth queue. They now derive an isolated silent input's absence of
+prepared source40 entry from the original A birth queue. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
 section the learned-input case now returns and preserves all memories. Sensor
@@ -57,8 +57,8 @@ an empty source queue. This is one concrete birth-family witness, not existence
 for every initial state or for the complete training protocols. The
 source-driven construction below covers every READY A birth through its
 first three weak inputs and the first actual output in (24.3,24.9).
-Its FAST/SLOW continuation now reaches the protected MARK at 32; completing
-that protected input and the preparation train remains open.
+Its FAST/SLOW continuation and the protected input now return to READY and
+consume source40. The remaining preparation train remains open.
 
 ## Constructive first-source existence
 
@@ -293,9 +293,48 @@ At the endpoint main is still SLOW, q is in[.136,.16], auxiliary0 is SILENT at.8
 and raw retains its original source32 origin. All27 future tokens are retained.
 `CompleteThrough` holds: main/aux guards are strict, raw expiry33 is future and
 pending sources are all at least40. Physical invariants and raw validity hold.
-The remaining auxiliary cycle, SLOW reopening, prepared entry40, preparation
-train, later births/concurrent cells, full789.9 trace and every-N existence
-remain open. No READY state is substituted at 32 or after its short MARK.
+The following construction completes the auxiliary cycle, SLOW reopening and
+prepared entry40. The remaining preparation train, later births/concurrent
+cells, full789.9 trace and every-N existence remain open. No READY state is
+substituted at 32 or after its short MARK.
+
+## Constructed protected return and prepared source40
+
+`birth_protocol_prepared40_exists` has only the original BirthState,
+PhysicalBox, initially READY auxiliaries and full thirty-two-source queue as
+premises. It extends the constructed protected MARK through genuine guarded
+returns, a quiet waiting flow and the actual sixth delivery at40.
+
+`HybridSlowAuxLeg` retains the current charge clock q0*exp(-b*elapsed).
+The carried q0 is at least0.136 and the own acquired b is at most0.18001.
+Through the remaining auxiliary duration at most41/30, the charge stays
+strictly above0.1025 and hence above the SLOW return guard. Its sensor clocks,
+energy, gains and recovery use the actual current coordinates.
+
+`HybridProtectedAuxReturn` constructs SILENT, ERROR and auxReady jumps,
+including all three possible orders of RAW expiry33 against ERROR entry.
+The auxiliary return occurs strictly between33.11 and33.417, with raw absent,
+trained sensor at0.025, all auxiliaries READY and main still SLOW. Protected
+ERROR changes no gain. Queue, gains and recovery are preserved.
+
+`HybridSlowReopenExistence` constructs the raw-free SLOW flow up to its own
+root log(q/0.1)/b. This duration is positive and less than4; the real reopen
+jump occurs before38 at charge exactly0.1. The quiet waiting flow preserves
+this exact charge until the actual source40 head delivery.
+
+`HybridBirthPrepared40` composes these physical executions from birth. At40,
+main and auxiliaries are READY, the prepared recovery band holds, q=0.1 and
+RAW has fresh origin40. Exactly six sources0,8,16,24,32,40 were delivered and
+exactly one main output occurred at the first FIRE. The ledger gives ERROR1.8
+and MARK0.1; own birth gain+1.8 and own birth recovery+0.1 are retained.
+Exactly26 future sources remain: ten at48..120 and sixteen at160..280.
+PhysicalInvariant, RawValid and CompleteThrough at40 hold. The raw-free
+reopen state and the fresh-source endpoint are distinct actual snapshots;
+no raw-free assertion is made at the source40 endpoint.
+
+The remaining learned preparation inputs and subsequent births/network flows
+are not yet constructed. The full789.9 and every-N existence claims remain
+open.
 
 ## Checked implications
 
@@ -1341,3 +1380,10 @@ missing MARK or extra ERROR, copied nominal recovery, premature READY after
 MARK, wrong SILENT floor, reset raw origin, lost future tokens, missing fifth
 delivery, a second output, constant-b main charge during changing recovery
 and omitted protected MARK energy work.
+
+Prepared40 controls compile the full birth factory without a continuation.
+They reject missing initial sources, wrong endpoint/saturation clocks,
+premature main/aux modes, wrong reopen charge, stale RAW32, lost future tokens,
+wrong sixth delivery, invented output or ERROR, missing MARK, copied nominal
+recovery, altered suffix events, gain learning under SLOW protection and a
+reopen clock that discards the current cell's own recovery.

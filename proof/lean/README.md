@@ -161,8 +161,13 @@ integrates b(t), rather than using a constant or instantaneous recovery jump.
 `birth_protocol_protected_mark_exists` reaches the SILENT entry after MARK at 32:
 ERROR 1.8, MARK 0.1, own recovery birth + 0.1, one output, five actual source
 arrivals and exactly 27 future tokens. The main is still SLOW and raw origin32
-is retained. Completing this protected input, the preparation train and later
-births remains open; the trace reaching 789.9 is still supplied.
+is retained. The protected auxiliary return, actual SLOW reopening before 38,
+quiet wait and source40 delivery are now also constructed.
+`birth_protocol_prepared40_exists` gives a prepared READY state at 40 with
+q=0.1, fresh RAW40, six actual deliveries, one emission and exactly 26 future
+sources. Own memories remain birth gain+1.8 and birth recovery+0.1, with
+ERROR 1.8 and MARK 0.1. The remaining preparation train and later births
+remain open; the trace reaching 789.9 is still supplied.
 
 ## Reproduce
 
@@ -203,6 +208,7 @@ python3 scripts/check_hybrid_existence_negative.py
 python3 scripts/check_hybrid_weak_existence_negative.py
 python3 scripts/check_hybrid_first_fire_negative.py
 python3 scripts/check_hybrid_protected_mark_negative.py
+python3 scripts/check_hybrid_prepared40_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

@@ -188,3 +188,8 @@ import KernelR.HybridFirstSlowSource
 import KernelR.HybridSlowProtectedMarkFlowExistence
 import KernelR.HybridSlowInputMarkExistence
 import KernelR.HybridBirthProtectedMark
+
+import KernelR.HybridSlowAuxLeg
+import KernelR.HybridProtectedAuxReturn
+import KernelR.HybridSlowReopenExistence
+import KernelR.HybridBirthPrepared40
