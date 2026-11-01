@@ -7,6 +7,15 @@ constructed from A's original birth through B's first reverse-contact FIRE in
 pending. The full later hybrid execution and the Python interval
 implementations have not been verified in Lean.
 
+## Repeatable learned one-cell operation
+
+The [one-cell extension](INDEFINITE_OPERATION.md) constructs a physical
+`PulseContract` with one emission per input and settling duration `7.5`, then
+compatible responding prefixes and complete executions at every finite horizon.
+It uses an exact-rest learned domain, fixed parameters, canonical amplitudes and
+empty routing. Connecting the birth/training constructors to this domain,
+network routing and universal refinement remain open.
+
 ## Physical execution foundation
 
 The [hybrid execution guide](HYBRID_EXECUTION.md) maps the operational equations,
@@ -19,6 +28,7 @@ physical event budget. These invariants alone do not supply future executions.
 | Proof layer | Current result | Explicit boundary |
 |---|---|---|
 | Constructed execution | From the original READY A birth through teaching at 319.9 (A28/B14), then B's first reverse FIRE in (344.3,344.9) (A28/B15) | The reverse token is issued but not received; 28 external B sources plus that wire remain pending |
+| Learned one-cell continuation | Constructed complete cycles and compatible finite-horizon executions for input spacing >=7.5 | Exact-rest learned domain and empty routing; the birth-to-domain connection and universal refinement remain open |
 | Conditional physical protocol | Reciprocal epoch at 459.9 (A38/B27), C teaching at 639.9, complete cadence at 789.9 (A54/B61/C34) | Actual executions reaching the required horizons and genuine staged births are supplied |
 | Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |

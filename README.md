@@ -21,9 +21,11 @@ supplied reaching executions and births**. Constructing that continuation and
 an end-to-end physical Lean proof for every finite N remain open. See the
 [checkpoint and theorem map](proof/lean/HYBRID_EXECUTION.md).
 
-[Draft PR #12](https://github.com/HevisNico/kernel-R/pull/12) separately develops
-repeatable learned one-cell cycles and compatible finite-horizon continuations,
-with fixed parameters and empty routing.
+The [one-cell continuation proof](proof/lean/INDEFINITE_OPERATION.md) constructs
+repeatable learned cycles and compatible complete executions at every finite
+horizon, for input spacing at least 7.5. It starts from an exact-rest learned
+domain with fixed parameters and empty routing; its connection to the birth
+constructors and network refinement remains open.
 
 ## Start here
 
