@@ -182,8 +182,12 @@ FIRE issues one Bport1 token, and B receives it at the actual delayed date
 in(160.7,161.3). The queue goes47→48→47, B keeps its own newborn memories
 and narrow charge band, and saturation includes simultaneous A jumps.
 A product of two active executions with no emissions/arrivals is also
-constructed. The continuation after this first receipt and the trace
-reaching789.9 remain open.
+constructed. `birth_protocol_first_interleaved_pair_exists` now weaves A's
+return and B's first weak response through168, then consumes the actual A168
+source. A remains prepared with q=0.1 and fresh RAW168. B is READY with
+ERROR0.6, MARK0, own gain+0.6, own recovery unchanged and raw absent;
+its charge is the real carried value. Exactly46 future external sources
+remain. Later teaching inputs and the trace reaching789.9 remain open.
 
 ## Reproduce
 
@@ -228,6 +232,7 @@ python3 scripts/check_hybrid_prepared40_negative.py
 python3 scripts/check_hybrid_preparation_existence_negative.py
 python3 scripts/check_hybrid_b_birth_product_negative.py
 python3 scripts/check_hybrid_first_wire_negative.py
+python3 scripts/check_hybrid_first_interleaved_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

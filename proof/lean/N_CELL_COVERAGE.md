@@ -57,8 +57,10 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    queue-neutral jump products are proved. The first concurrent prefix now
    constructs A's real FIRE and its first actual Bport1 wire delivery,
    preserving47 future sources and B's own newborn memories. Products of
-   two active event-free local traces are proved; continuation after the
-   first receipt and later births remain open.
+   two active event-free local traces are proved. Their first actual weave
+   now reaches168 and consumes A168: B's real ERROR0.6 is derived, A's memories
+   and B's own recovery are preserved, and46 future sources remain. Further
+   teaching inputs and later births remain open.
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.

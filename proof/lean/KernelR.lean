@@ -210,3 +210,11 @@ import KernelR.HybridTwoCellFirstFire
 import KernelR.HybridQuietWireArrival
 import KernelR.HybridFirstWiredArrival
 import KernelR.HybridNeutralExecutionProduct
+
+import KernelR.HybridNewbornWeakCycle
+import KernelR.HybridMidGainSchedule
+import KernelR.HybridMidLearnedFire
+import KernelR.HybridMidLearnedFastEnd
+import KernelR.HybridFirstReceiverWeak
+import KernelR.HybridFirstSenderReturn
+import KernelR.HybridFirstInterleavedPair

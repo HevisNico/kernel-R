@@ -4,7 +4,7 @@ The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. The
 complete conditional three-cell prefix is derived below; its reaching traces
 are still supplied. Constructive source-driven existence now reaches the
-the first real A-to-B contact delivery from the original A birth queue. They now derive an isolated silent input's absence of
+the first interleaved A/B response through168 from the original A birth queue. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
 section the learned-input case now returns and preserves all memories. Sensor
@@ -475,9 +475,69 @@ physical; only emissions and deliveries are excluded by this helper.
 The helper permits a delivery due at the final clock and does not claim
 terminal saturation on its own.
 
-The first B learning cycle, remaining teaching inputs, later births and
-complete protocol existence still need their actual concurrent executions.
-The full789.9 and every-N execution-existence results remain open.
+The following construction extends this first B learning input through a
+real interleaved prefix at168. Remaining teaching inputs, later births,
+full789.9 and every-N execution existence remain open.
+
+## Constructed first interleaved learning response through168
+
+`birth_protocol_first_interleaved_pair_exists` starts from the same original
+A birth assumptions and constructs a staged execution to168, including the
+next real A source. Both cells may be active during this construction.
+No supplied reaching trace, output word, ERROR dose or endpoint reset is
+used as an input.
+
+`HybridNewbornWeakCycle` constructs the first weak input from a narrow
+current charge band and actual gain at most4/3, including B's own nominal
+fast port near1.2. It constructs every MARK/SILENT/ERROR phase, RAW expiry,
+auxiliary return and quiet suffix through source+7.5. Its future-token bound
+is source+7.75, which fits the later variable wire gaps. The returned
+canonical `WeakInputCycle` carries its actual ERROR0.6 outcome and all
+remaining source occurrences.
+
+`HybridFirstReceiverWeak` instantiates this construction at B's real first
+wire receipt H. Its current coordinates, own gain/recovery, narrow charge
+band and fresh port1 RAW all come from that receipt. It retains a real
+maximal prefix at168 and the remaining local execution. Since H+7.5 is
+later than168, no conclusion at the eventual7.5 endpoint is transported
+backwards to this cut.
+
+Instead, the actual trace at168 has no emissions or arrivals, so B's main
+remains READY. Its genuine sensor-cycle deadline H+419/300 is already before
+168. The complete sensor cycle, own physical headroom and gain balance then
+derive ERROR0.6 and own port1 gain+0.6 directly at168. MARK is zero and own
+recovery stays fixed. Auxiliary READY/rest and RAW absence are likewise
+proved on this prefix. No artificial upper charge0.14 is claimed at168.
+
+`HybridFirstSenderReturn` resumes A from the exact state at H using the
+retained next flow and real remaining FAST execution. It constructs SLOW
+reopening and the quiet section167.5, then a real waiting flow to168.
+A's own memories are preserved, q is exactly0.1 and raw is absent. A's
+source168 remains pending until its actual delivery.
+
+`HybridFirstInterleavedPair` uses the active execution product to weave
+these two real continuations on common clocks H→168. Its global queue is
+exactly the47 external sources. The product permits B's actual ERROR
+learning; absence of emissions/deliveries does not mean constant gains.
+A real arrival then consumes A168, starts fresh RAW168 and leaves46 future
+sources: fourteen A sources176..280 and both sixteen-source Bport2 trains.
+Physical invariants and raw validity hold. `CompleteThrough168` follows from
+A's prepared guards, B's actual next-flow guards and the remaining queue.
+
+At168 A is prepared and B's main/auxiliaries are READY, but B still has its
+own low birth recovery. B's current charge is retained; it is not reset to
+0.1 or declared in the prepared section. B's next protected learning and
+later responses remain to be constructed globally.
+
+The next-response tools are also proved. `HybridMidGainSchedule` derives
+B's own learned gain in[1.8,2.2] after one ERROR dose and proves that the
+current READY response remains below1 through0.4. `HybridMidLearnedFire`
+constructs the actual port-generic learned firing with this true2.2 bound
+and future tokens at least7.75 away. `HybridMidLearnedFastEnd` constructs
+its real FAST exit at FIRE+1, including all orders of RAW expiry and the
+trained port's own independently chosen rates. It preserves gains, recovery
+and every future token. These tools do not by themselves construct the
+remaining network teaching epoch, the full789.9 trace or every-N existence.
 
 ## Checked implications
 
@@ -1549,3 +1609,9 @@ wire tokens, lost external sources, fixed delays substituted for the actual
 delay function, emission time substituted for raw origin, copied B memories,
 discarded newborn charge perturbations, altered sender endpoints and a
 nonpositive next flow at a claimed saturated cut.
+
+Interleaved-response controls compile the original birth-to168 factory. They
+reject wrong endpoint/saturation/token counts, an unconsumed A168 source,
+invented B outputs, reset A charge/raw, learning copied to A, missing or
+doubled B ERROR, fictitious B MARK/recovery, wrong returned modes/raw,
+a false learned-gain cap2 and an unjustified firing bound after0.5.
