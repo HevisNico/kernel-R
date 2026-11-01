@@ -51,8 +51,11 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    are now also constructed: READY, q=0.1, own memories retained, six actual
    deliveries and 26 future tokens. The complete initial sixteen-source train
    is now constructed through128: twelve outputs, ERROR1.8/MARK0.1, READY,
-   q=0.1, raw absent and all sixteen second-train tokens retained. Later births
-   and concurrent network executions remain open.
+   q=0.1, raw absent and all sixteen second-train tokens retained. A genuine B
+   birth at160 and the actual A160 delivery are also constructed, preserving
+   both own states and47 future sources. Synchronized two-cell flow and
+   queue-neutral jump products are proved; the concurrent continuation and
+   later births remain open.
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.

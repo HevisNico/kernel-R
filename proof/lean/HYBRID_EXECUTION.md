@@ -4,7 +4,7 @@ The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. The
 complete conditional three-cell prefix is derived below; its reaching traces
 are still supplied. Constructive source-driven existence now reaches the
-complete first-train preparation at128 from the original A birth queue. They now derive an isolated silent input's absence of
+the genuine B birth and A160 arrival from the original A birth queue. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
 section the learned-input case now returns and preserves all memories. Sensor
@@ -377,6 +377,49 @@ invariants and raw validity hold, and `CompleteThrough` holds at128.
 All sixteen second-train sources160,168,...,280 remain queued. Actual
 later births, simultaneous active cells and global progress are still to be
 constructed; this does not establish the full789.9 or every-N theorem.
+
+## Constructed B birth and two-cell transport
+
+`birth_protocol_b_birth_complete_exists` starts from the original A
+BirthState, READY auxiliaries and full thirty-two-source queue. Its physical
+box covers independently chosen old and new device parameters. B is an
+arbitrary `Newborn` in its own READY birth family, not a copy of A or a
+single nominal witness. Forward and reverse contact functions are supplied;
+no contact emission is executed at this boundary.
+
+`HybridConstructedBBirth` first builds the real quiet flow128→160 while
+retaining A's source due at160. It then executes a genuine `BirthStep`,
+introducing B with exactly its external port2 trains320..440 and480..600.
+Existing A coordinates, memories, raw state and every remaining source are
+lifted unchanged. A real arrival then consumes A's original source160.
+Choosing birth before this arrival is one legal witness, not an event
+priority imposed on the semantics.
+
+At the resulting endpoint160, A is prepared with q=0.1 and fresh RAW160;
+B has its own perturbed coordinates and no raw input. Both main/auxiliary
+mode families are READY. The queue contains exactly47 future tokens: A's
+fifteen sources168..280 and B's two sixteen-source port2 trains. Physical
+invariants, raw validity and pending futurity hold. `CompleteThrough` is
+proved after the A delivery, not at the unsaturated pre-birth boundary.
+The record supplies an actual `StagedExecution` all the way from A's birth.
+
+`HybridTwoCellFlowProduct` proves cell-locality of the complete physical
+field, including work, energy and MARK activity. Two genuine one-cell flows
+on the same initial/final clocks form a genuine two-cell flow. Their raw
+origins and guards are preserved. A single explicit global queue remains
+fixed; its pending urgency is checked against the common endpoint. Local
+source queues are never inserted into that global queue.
+
+`HybridTwoCellJumpProduct` transports actual guard and raw-expiry jumps to
+either cell while preserving the other cell and the global queue. Its
+`QueueNeutral` class explicitly excludes FIRE and arrival, including a FIRE
+whose particular route is empty. Those events still need their actual routed
+insertions or head-token consumption.
+
+These products are construction tools. A scheduler interleaving the cells'
+real moves and each issued delivery is still needed; no positive-duration
+concurrent network continuation after160 is claimed here. The complete
+789.9 and every-N execution-existence goals remain open.
 
 ## Checked implications
 
@@ -1436,3 +1479,8 @@ remaining source counts, wrong horizon/saturation/calendar, stale raw,
 wrong total outputs/doses, copied birth memories, wrong main mode, double
 counting the current raw, discarded later queues and altered learned return
 or FAST clocks.
+
+B-birth/product controls compile the original birth-to160 factory. They reject
+lost A/B sources, wrong B source port, copied newborn coordinates, modified A
+memories, stale raw origins, wrong boundary deliveries or saturation clocks,
+discarded global queues and cross-cell energy/RAW transport.

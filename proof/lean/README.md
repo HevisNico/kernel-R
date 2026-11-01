@@ -170,9 +170,14 @@ ERROR 1.8 and MARK 0.1. The eleven learned inputs from40 through120 and the
 quiet suffix to128 are now also constructed.
 `birth_protocol_preparation_exists` gives the whole first sixteen-source
 train from birth: twelve actual outputs, ERROR1.8/MARK0.1, all READY,
-q=0.1, raw absent and all sixteen sources160..280 retained. The second train,
-later births and concurrent network flows remain open; the trace reaching
-789.9 is still supplied.
+q=0.1, raw absent and all sixteen sources160..280 retained.
+`birth_protocol_b_birth_complete_exists` now extends this execution to a
+real B birth at160 and the actual A160 delivery. A retains its own memories;
+B has its own arbitrary READY newborn coordinates and independent parameters.
+Exactly47 future sources remain: fifteen A sources168..280 and both sixteen-
+source Bport2 trains320..440 and480..600. Two-cell flow and queue-neutral
+jump products are proved, but the concurrent continuation after160 and the
+trace reaching789.9 remain open.
 
 ## Reproduce
 
@@ -215,6 +220,7 @@ python3 scripts/check_hybrid_first_fire_negative.py
 python3 scripts/check_hybrid_protected_mark_negative.py
 python3 scripts/check_hybrid_prepared40_negative.py
 python3 scripts/check_hybrid_preparation_existence_negative.py
+python3 scripts/check_hybrid_b_birth_product_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

@@ -199,3 +199,7 @@ import KernelR.HybridPreparedSlowReturn
 import KernelR.HybridPreparedLearnedCycle
 import KernelR.HybridPreparedLearnedTrainExistence
 import KernelR.HybridBirthPreparationExists
+
+import KernelR.HybridTwoCellFlowProduct
+import KernelR.HybridTwoCellJumpProduct
+import KernelR.HybridConstructedBBirth
