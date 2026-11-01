@@ -168,3 +168,12 @@ jobs:
       - name: Reject altered first physical cadence wave, retained paths and original-birth counts
         working-directory: proof/lean
         run: python scripts/check_hybrid_cadence_first_wave_negative.py
+      - name: Reject altered global C656 and C660 arrivals, own MARK memory and birth counts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_cadence_first_mark_return_negative.py
+      - name: Reject altered local second strong and mixed cadence sources, RAW and doses
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_cadence_second_stage_negative.py
+      - name: Reject altered constructive high-gain cadence FIRE and protected completion
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_cadence_high_existence_negative.py

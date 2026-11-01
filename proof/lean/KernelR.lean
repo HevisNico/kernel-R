@@ -329,3 +329,15 @@ import KernelR.HybridNeutralHeadExecutionProduct
 import KernelR.HybridCadenceFirstRelayWire
 import KernelR.HybridCadenceFirstAFire
 import KernelR.HybridBirthCadenceFirstWave
+import KernelR.HybridCadenceFirstMarkSource
+import KernelR.HybridCadenceFirstMarkReturn
+import KernelR.HybridBirthCadenceFirstMarkReturn
+import KernelR.HybridCadenceSecondStrongSlowSpan
+import KernelR.HybridCadenceSecondStrongResponse
+import KernelR.HybridCadenceMixedPrefix
+import KernelR.HybridCadenceMixedReopen
+import KernelR.HybridReadySilentErrorStart
+import KernelR.HybridCadenceMixedResponse
+import KernelR.HybridCadenceMixedNextSource
+import KernelR.HybridCadenceHighFireExistence
+import KernelR.HybridCadenceHighCompletion

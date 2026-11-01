@@ -10,21 +10,20 @@ A22 network engines and historical proof archive stay in the
 ## Physical Lean proof status
 
 The [Lean formalization](proof/lean/README.md) constructs an actual execution
-from A's READY birth through the first cadence wave **C→B→A**, ending at A's
-actual FIRE **F_A in (653.8,655.1)** with cumulative **A39/B44/C15**.
-B and C have independent genuine births at160 and480. Actual FIREs issue
-both wire tokens and actual arrivals consume them. A is FAST at q=1; B/C
-retain their actual cuts, modes, raw states, energy paths and continuations.
-Exactly21 Cport0 sources656..736 remain. Own memories are unchanged since the
-first C-to-B receipt: Cport0 has gained1.8 and no new MARK has occurred.
-The earlier639.9 checkpoint retains three prepared cells, RAW absent and25
-C sources. Parameters are fixed independent fabrication-box members, with
-canonical pulses and bounded wire delays.
+from A's READY birth through C's first protected cadence MARK return at
+**660**, with cumulative **A39/B44/C15**. Both independent births at160/480
+and the first genuine C→B→A wave remain in the witness. The actual C656 input
+adds MARK0.1, and the actual C660 source is consumed: C is READY at q=0.1
+with fresh RAW660, its own newborn recovery+0.2 and own port0 log-gain+1.8.
+A/B retain their actual cuts, modes, raw states, energy and continuations.
+Exactly 19 Cport0 sources664..736 remain. The earlier639.9 checkpoint retains
+three prepared cells, RAW absent and25 C sources. Parameters are fixed
+independent fabrication-box members, with canonical pulses and bounded delays.
 
-The global source656 handoff and remaining cadence through789.9
-(**A54/B61/C34**) still require construction. The complete cadence analysis is
-checked **conditionally on supplied later executions**. An end-to-end physical
-Lean proof for every finite N remains open. See the
+The globally routed responses toward664/668 and the remaining cadence through
+789.9 (**A54/B61/C34**) still require construction. The complete cadence
+analysis is checked **conditionally on supplied later executions**. An
+end-to-end physical Lean proof for every finite N remains open. See the
 [checkpoint and theorem map](proof/lean/HYBRID_EXECUTION.md).
 
 The [one-cell continuation proof](proof/lean/INDEFINITE_OPERATION.md) constructs

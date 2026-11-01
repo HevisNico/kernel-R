@@ -36,10 +36,11 @@ reserve may differ between rounds and are never reset.
 The physical foundation's `PreparedSection` allows residual main charge and a
 narrower recovery band. Its `Execution.learned_pulse` analyses a supplied,
 birth-reachable isolated-input execution. The original READY-birth construction
-now reaches the [first C→B→A cadence wave](HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
-after the fully prepared639.9 endpoint. Its terminal A FIRE retains the real
-B/C cuts and all21 future C source tokens; it is a separate network prefix,
-not a learned-domain return of all three cells.
+now reaches [C's protected MARK return at660](HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
+after the fully prepared639.9 endpoint and first C→B→A wave. C is READY at
+q=0.1 with fresh RAW660 and19 future C sources; A/B retain their actual cuts.
+This network prefix is separate from an isolated learned-domain return of
+all three cells.
 
 [HybridBirthLearnedRest](KernelR/HybridBirthLearnedRest.lean) proves
 `ConstructedCTeaching.a_learned_rest` and `b_learned_rest` for the Aport2/Bport2
@@ -57,6 +58,15 @@ outside the imported domain, so this bridge does not cover that port. Broader
 birth families, network routing and universal refinement remain open. Fixed
 reference latency uses exact main rest; it does not extend to the positive
 residuals covered by `first_firing_le_rest_reference`.
+
+The constructed global C660 extension has a different recovery state:
+C's protected C656 MARK derives its own newborn recovery+0.2, near0.28.
+It retains A/B's actual paths and consumes C660, leaving19 later C sources.
+This does not change the bridge above, which concerns the actual639.9
+Aport2/Bport2 projections and imported recovery domain[0.17,0.2]. C660's
+recovery is outside that domain. The separate local C664/668, high-gain FIRE
+and high-completion constructors do not supply new isolated contracts for
+every C state or a global indefinite network theorem.
 
 ## Proof map
 
@@ -109,13 +119,15 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
 `lake build` includes all modules and the global `Audit` target. Only `propext`,
 `Classical.choice` and `Quot.sound` are allowed. Controls instantiate the full
 return, the contract and complete periodic executions at every finite horizon.
-The first-wave checkpoint passed the complete pinned build (9,440 jobs) and
-global audit (24,948 project theorems). Source identities cover387 Lean files
-and five unchanged upstream modules. Generated evidence, all16 robust
-certificates and12 project tests pass. The43 new first-wave paired controls
-pass: each valid conclusion compiles and every altered conclusion is rejected
-with a Lean diagnostic. The preceding22 first-strong and40 first-wire paired
-controls also passed. CI configures751 paired controls; this inventory does
-not assert a local rerun of every suite. Fresh CI status is reported on the PR.
+The C660 checkpoint passed the complete pinned build (9,452 jobs) and global
+audit (25,342 project theorems). Source identities cover399 Lean files and
+five unchanged upstream modules. Generated evidence, all16 robust certificates
+and12 project tests pass. All73 new paired controls pass:24 global C656/C660,
+25 local second-stage and24 high-response pairs. Each valid conclusion compiles
+and every altered conclusion is rejected with a Lean diagnostic. The preceding
+62 first-cadence-wire and43 first-wave pairs also passed. CI configures824
+paired controls; this inventory does not assert a local rerun of every suite.
+Fresh CI status is reported on the PR.
+
 These isolated future contracts remain distinct from the actual C→B→A network
 construction and do not establish network routing or universal refinement.
