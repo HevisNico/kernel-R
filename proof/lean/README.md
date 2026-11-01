@@ -9,228 +9,36 @@ implementations have not been verified in Lean.
 
 ## Physical execution foundation
 
-The [hybrid execution notes](HYBRID_EXECUTION.md) describe the operational
-semantics and exact ledger balances in `Hybrid` and `Refinement`. These modules
-derive memory/queue balances, mode-local ODE solutions and observed guard
-endpoints from physical flows and jumps. Their extensions prove birth-family
-cap, charge and reserve invariants, including work <=500 and positive energy
-throughout reachable flows. `HybridEvents`, `HybridAuxEvents` and
-`HybridEventBudget` derive emission chronology and a uniform physical jump budget
-for every finite prefix before a bounded horizon, with initial delivery tokens
-and bounded routing fanout counted explicitly. The phase-selection and sensor
-modules now extract actual protected phases and the complete auxiliary cycle
-of a received pulse, with directly proved real timing bounds. Variable-gain
-READY comparisons retain every active raw tail. An isolated low-gain input now
-has no actual emissions, a total ERROR dose of 3/5 and unchanged recovery. A
-learned input emits exactly once, with its actual firing extracted in the real
-(3/10,9/10) bracket.
-From the declared prepared section this learned-input case now returns before
-6.990787, preserves all gains and recovery, and restores READY at exact resting
-charge. Its actual firing equation retains the initial residual charge.
-A broader silent case now covers the nominal fast gain and low birth recovery,
-preserving READY charge/sensor bands before the next input. The learned case
-also covers actual gains in [1.8,2.4]. The first strong low-recovery input
-remains SLOW at the next input; its following protected input supplies MARK 1/10
-and restores the prepared section without emissions or gain changes.
+The [hybrid execution guide](HYBRID_EXECUTION.md) maps the operational equations,
+proof interfaces and remaining obligations. `Hybrid` and `Refinement` retain
+actual coordinates, raw-current origins, pending tokens and emission/dose
+ledgers. Their extensions prove birth-family cap, charge and reserve invariants,
+mode-local ODE solutions, guarded transitions and a uniform finite-prefix
+physical event budget. These invariants alone do not supply future executions.
 
-The first complete source phase is now derived from a READY birth: with the
-initial queue 0,8,...,120 on a low port, empty routing and an actual execution
-complete through any T>=128 (including 159.9), it reaches the prepared section
-with exactly 12 emissions, total receiving ERROR 1.8 and MARK 0.1. Source-token
-conservation selects every actual arrival. The proof derives three silent
-inputs, the first strong input, the protected input and the learned remainder.
-It does not assume their case word or counts. A receiving-cell refinement also retains other cells’ arrivals and derives
-prepared-train counts for arbitrary input gaps of at least 7.5. Cell-specific
-source conservation permits outgoing routes and future tokens at other cells.
-Prepared cases and their variable-gap trains can now be proved directly from
-the current physical region and raw-origin validity, at arbitrary starting
-times. The earlier birth-reachable statements are retained as corollaries.
-A current-state physical invariant now also propagates gain/recovery caps and
-reserve in [50,100]. It derives positive ERROR/MARK exposure, so the silent,
-first-strong and protected-input cases can be reused from current bounds.
-An explicit birth event now appends a fresh READY cell at the current date,
-retaining existing cells and all their pending tokens. Its independent new
-parameters and source queue are explicit; physical bounds and memory balances
-compose across the two execution phases.
-The first physical phase is now also derived with both source trains already
-in the initial queue: a genuine execution cut at 128 retains the remaining
-trajectory and future tokens. An actual endpoint at 160 is still prepared with
-12 emissions, ERROR 1.8 and MARK 0.1, whether the source due at 160 is pending or
-already delivered. This preparation transfers across a birth at that date.
-A separated prepared train starting at exact resting charge now also has its
-actual emission calendar: every input date plus one unique real response-root
-latency in (0.3,0.9), derived from its preserved physical gain. This retains
-other-cell traffic and does not assume a latency box.
-Gated-contact conservation now derives actual wire inputs from those physical
-emissions, retaining future external sources and other-cell traffic. Once A's
-input at 160 is active with its fifteen successors pending, the A-to-B contact
-gives exactly sixteen B arrivals before 281.3 and period-eight gaps in [7.9,8.1]
-with independent wire jitter. This is now connected to both source/birth orders
-at 160 and B's complete response. The concrete forward [160,310) and reverse
-[320,470) contacts give a conditional physical theorem at 319.9: A has 28 total
-emissions, B has 14, and both are prepared at exact resting charge with their
-own derived learning and recovery. No received calendar, case word or output
-count is assumed. The phase executions and birth remain premises.
-The B-to-A return is now connected too: B's direct sixteen sources yield three
-silent inputs and thirteen outputs; their actual delayed arrivals yield three
-silent A inputs and ten outputs. At 459.9 the cumulative counts are A=38/B=27,
-with prepared resting states, raw validity, physical reserve and each cell's
-own derived memories. The first strong output retains its residual-dependent
-latency; only later prepared outputs share the rest latency. B's next train at
-480..600 remains in its initial birth queue throughout the entry proof.
-The physical prefix now continues through C's genuine birth at 480 and its
-teaching endpoint at 639.9. The future B source train is conserved through the
-return, and both old cells stay prepared up to 480. Whether source 480 is still
-pending or already delivered, birth preserves B's coordinates and actual
-remaining queue. B's sixteen prepared outputs give C sixteen real wire inputs
-on its own fast port; C emits fourteen times and gains ERROR 0.6 and MARK 0.1.
-A remains quiescent with unchanged memories. C's gains and recovery are measured
-from its own newborn coordinates, with independent fabrication parameters.
-The composed `CEntry` theorem derives cumulative A=38/B=43/C=14 from A's original
-birth, given the actual executions and both birth events. At 639.9 all cells
-are prepared at exact resting charge without raw current; A/B queues are empty
-and C retains exactly its external birth sources. A corollary retains all
-twenty-five period-four inputs 640,644,...,736 on C port 0 in that same queue.
-It does not yet classify their fast responses.
-The cadence contacts C-to-B-to-A and C's twenty-five period-four source inputs
-are now instantiated too. From the actual C-entry state, source conservation
-and receiving-cell cuts derive the three weak C inputs and reach the fresh
-fourth input at 652. Their ERROR is 1.8 and MARK is zero. The real carried
-charge lies in [0.1,0.3]; it is not reset to rest. A/B remain idle and their
-queues empty while all twenty-one later C sources 656..736 remain pending.
-The supplied complete execution still reaches 789.9; this prelude theorem
-only identifies its prefix through 652.
+| Proof layer | Current result | Explicit boundary |
+|---|---|---|
+| Constructed execution | From the original READY A birth through teaching at 319.9 (A28/B14), then B's first reverse FIRE in (344.3,344.9) (A28/B15) | The reverse token is issued but not received; 28 external B sources plus that wire remain pending |
+| Conditional physical protocol | Reciprocal epoch at 459.9 (A38/B27), C teaching at 639.9, complete cadence at 789.9 (A54/B61/C34) | Actual executions reaching the required horizons and genuine staged births are supplied |
+| Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
+| Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
 
-The local period-four pulse cases are now derived directly from current
-physical states: the first strong input, protected MARK-only input, second
-strong input, mixed MARK-then-ERROR input, and final high-gain learned train.
-In the mixed case the real SLOW return lies between 0.5 and 0.99 after input;
-the remaining raw current is integrated, produces no extra output, and gives
-the full ERROR 0.6 after the full MARK 0.1. Its final charge retains its actual
-residue. The MARK clock includes its finite exponential ramp. High-gain learned
-inputs settle before 3.8 with one output and unchanged memories. A direct real
-enclosure puts the three-dose rest latency in (0.65,0.66), without certificate
-membership premises. These are local cases under explicit current-state/gap
-bounds. They are now assembled into the complete physical C-to-B-to-A cadence:
-C emits 20 times, its actual wired outputs yield B's 18 emissions, and B's
-actual return outputs yield A's 16. Sparse inputs use a proved seven-unit
-settling horizon; each dense transient is selected at its real delivery cut.
-The first residual high-gain firing stays distinct from the later resting
-reference, and each wire delay is evaluated at its own actual emission time.
+The constructive factories take A's READY `BirthState` with initially READY
+auxiliaries and the exact 32-source queue, B's independent READY `Newborn`,
+independent fixed `PhysicalBox` parameters (±0.3% or ±10%), canonical amplitudes
+and the declared contacts. Delays are sampled at each actual emission and lie
+in [0.3,0.4]; the backward bound is needed for the saturated reverse-FIRE cut.
+There is no supplied reaching execution, recorded case word, desired output
+count or assumed firing date. Every source and wire is consumed by an actual
+arrival; old memories, reserve and unfinished raw tails are carried forward.
+No drift, charge noise or settings-copy operation is asserted by this execution
+construction.
 
-`StagedExecution.reciprocal_cadence_entry` starts from the original A birth
-queue, B's own source queue, C's own twenty-five sources and the supplied
-reaching traces/births. It derives cumulative A=54/B=61/C=34 through 789.9,
-all memories from each cell's own birth, recovery plus 0.3, READY at exact
-resting charge, absent raw inputs and an empty final queue. The active gains
-are each cell's own birth gain multiplied by exp(2.4), with other acquired
-port memories preserved. Physical caps and reserve in [50,100] propagate.
-No desired case word, output count, received calendar or dose is supplied.
-This remains conditional on the reaching executions; global existence/progress,
-probes/cuts, remaining fine enclosures and the physical every-N refinement
-remain open.
-
-The first source-driven existence theorem is now constructive.
-`birth_protocol_first_mark_exists` takes any READY member of A's birth family,
-its physical fabrication box and the original thirty-two-source queue. It
-constructs the actual source-0 delivery and a positive-duration flow to the
-first MARK, between 0.01 and 0.025. This prefix is saturated at that endpoint,
-has no output, retains all thirty-one later source tokens, preserves gains
-and recovery, and satisfies the physical invariant and raw validity. The
-energy trajectory and all integral flow equations are constructed explicitly.
-No reaching execution or threshold date is a premise.
-
-`birth_protocol_first_weak_cycle_exists` now extends this to the complete first
-weak input and quiet horizon 7.5. It constructs MARK, SILENT, ERROR, raw expiry
-and the final READY state, including all three possible orders around the
-ERROR/raw-expiry boundary. The actual birth execution has one source delivery,
-no output, ERROR 0.6, MARK zero and all thirty-one future sources intact. Gains
-and recovery are measured from that same birth; the real residual main charge
-is retained. Both fabrication boxes are covered. The proof constructs every
-Flow/Jump before applying the earlier silent-input outcome theorem. The construction now continues through the weak inputs at 8 and16, their
-actual waits and the fresh input at 24. `birth_protocol_weak_prefix_exists`
-constructs that source 24 entry with four delivered tokens, ERROR 1.8 and exactly
-twenty-eight future source tokens. Each later weak input uses READY charge
-up to 0.14 and its own learned gain, without reusing the narrow birth band.
-`birth_protocol_first_fire_exists` then constructs one actual output in
-(24.3,24.9), with main FAST at charge1 and its original raw origin24 retained.
-All newly routed tokens are appended exactly; the closed pre-birth contact
-also gives a saturated endpoint after the first firing. No execution, firing
-date or output count is assumed. The first FAST exit and the actual protected MARK at input 32 are now also
-constructed. FAST ends at its real firing time plus 1 with q=.25; the main
-then remains SLOW at 32 with q in (0.14,0.16). A real source32 arrival and its
-sensor threshold initiate the recovery-changing MARK flow. The main charge
-integrates b(t), rather than using a constant or instantaneous recovery jump.
-`birth_protocol_protected_mark_exists` reaches the SILENT entry after MARK at 32:
-ERROR 1.8, MARK 0.1, own recovery birth + 0.1, one output, five actual source
-arrivals and exactly 27 future tokens. The main is still SLOW and raw origin32
-is retained. The protected auxiliary return, actual SLOW reopening before 38,
-quiet wait and source40 delivery are now also constructed.
-`birth_protocol_prepared40_exists` gives a prepared READY state at 40 with
-q=0.1, fresh RAW40, six actual deliveries, one emission and exactly 26 future
-sources. Own memories remain birth gain+1.8 and birth recovery+0.1, with
-ERROR 1.8 and MARK 0.1. The eleven learned inputs from40 through120 and the
-quiet suffix to128 are now also constructed.
-`birth_protocol_preparation_exists` gives the whole first sixteen-source
-train from birth: twelve actual outputs, ERROR1.8/MARK0.1, all READY,
-q=0.1, raw absent and all sixteen sources160..280 retained.
-`birth_protocol_b_birth_complete_exists` now extends this execution to a
-real B birth at160 and the actual A160 delivery. A retains its own memories;
-B has its own arbitrary READY newborn coordinates and independent parameters.
-Exactly47 future sources remain: fifteen A sources168..280 and both sixteen-
-source Bport2 trains320..440 and480..600. Two-cell flow and queue-neutral
-jump products are proved. `birth_protocol_first_wired_arrival_exists` now
-constructs the first concurrent prefix: A fires in(160.4,160.9), that real
-FIRE issues one Bport1 token, and B receives it at the actual delayed date
-in(160.7,161.3). The queue goes47→48→47, B keeps its own newborn memories
-and narrow charge band, and saturation includes simultaneous A jumps.
-A product of two active executions with no emissions/arrivals is also
-constructed. `birth_protocol_first_interleaved_pair_exists` now weaves A's
-return and B's first weak response through168, then consumes the actual A168
-source. A remains prepared with q=0.1 and fresh RAW168. B is READY with
-ERROR0.6, MARK0, own gain+0.6, own recovery unchanged and raw absent;
-its charge is the real carried value. Exactly46 future external sources
-remain. `birth_protocol_second_wired_arrival_exists` now constructs the
-next actual A FIRE and Bport1 receipt. Equality of A's own response roots
-proves F2=F1+8; the two fresh delays then give a received gap in[7.9,8.1].
-B's READY charge band at this next input comes from its real weak return,
-with own learned gain in[1.8,2.2], own low recovery and fresh RAW. The queue
-follows46→47→46. `birth_protocol_first_receiver_fire_exists` now constructs
-B's first actual output from that learned entry, alongside A's real return.
-B fires in(169.1,170.2); its reverse contact is closed, so the output exists
-while the queue stays46. `birth_protocol_first_receiver_fast_end_exists`
-continues through B's real FAST exit at FIRE+1: main SLOW, q=0.25,
-auxiliaries READY and RAW absent. Its own low recovery and learned gains
-are retained. `birth_protocol_first_post_receiver_pair_exists` now resumes
-both true paths to176 and consumes A176, retaining B in SLOW and45 sources.
-`birth_protocol_third_wired_arrival_exists` constructs the next real A FIRE,
-issues its token and delivers it to B with q in(0.14,0.16), own low recovery
-and fresh RAW. The actual received gap remains[7.9,8.1].
-`birth_protocol_first_coupled_prepared_pair_exists` then constructs B's
-protected MARK and return, weaves it with A's true return and delivers A184.
-Both cells are prepared at184 with q=0.1; B's own recovery has gained0.1,
-its gains are unchanged, and44 external sources remain. The global B doses
-on this extension are ERROR0/MARK0.1. The exact post-birth trace contains
-four outputs and seven deliveries. `birth_protocol_first_coupled_teaching_exists`
-now constructs the remaining thirteen actual coupled cycles, including the
-active source184 and the twelve future sources192..280. Each real A FIRE
-issues its Bport1 token; the actual receipt and B FIRE are followed by both
-prepared returns before the next source. Real A arrivals drive the induction.
-The witness reaches288, then waits physically to319.9. It has cumulative
-**A28/B14**, both cells prepared at q=0.1 with RAW absent, own acquired memories
-retained and exactly the32 B external sources still queued.
-`birth_protocol_feedback_weak_entry_exists` now continues this very trace to
-fresh B344: three actual weak Bport2 cycles, four real external deliveries,
-ERROR1.8, no new output/MARK, own memories and28 future sources. A stays at
-exact rest; B retains its actual residual charge at least0.1. The staged
-counts remain A28/B14. `FeedbackWeakEntry.first_fire_exists` constructs B's
-first actual learned FIRE in(344.3,344.9), with latency bounded by its own
-rest reference. It issues the reverse token at F+backward(F), retaining29
-pending tokens and cumulative A28/B15. The original-birth factory is
-`birth_protocol_feedback_first_fire_exists`. Its receipt is still to construct.
-Interval-scoped emitting products permit A's later closed-contact outputs
-without assuming its contact was closed historically. The complete459.9 and
-789.9 reaching executions and later births remain open.
+The next obligation is receipt of the issued reverse token and the remaining
+coupled return cycles. Later C/cadence constructions, retained probes, fine
+enclosure soundness and physical every-N refinement remain open. The separate
+[robust coverage guide](ROBUST_COVERAGE.md) describes conditional noisy/drifting
+slow-chain results.
 
 ## Reproduce
 
@@ -298,6 +106,10 @@ positive conclusion is compiled before its altered version must be rejected.
 
 ## Coverage and hypotheses
 
+The table below describes the analytic, abstract and evidence modules. The
+physical `Hybrid*` results above and in the [theorem map](HYBRID_EXECUTION.md)
+provide additional refinements; an abstract module alone does not construct them.
+
 The [robust coverage guide](ROBUST_COVERAGE.md) covers the additional birth,
 noise-dependent latency and arbitrary-depth slow-chain formalization.
 
@@ -362,7 +174,8 @@ The new analytic lemma integrates the exponential MARK profile to obtain
 `(b + 0.1) * u - J`, with
 `J = 0.1 * tau + (0.1 - 0.4 * log(5/4)) / Lm`. The return identity uses that
 deficit; it does not approximate MARK as an instantaneous jump in recovery.
-The required physical phase ordering remains a guard obligation.
+The abstract `Cadence` lemma requires the physical phase ordering as a premise;
+the `Hybrid*` local cases and conditional cascade derive their own guards.
 
 Shared firing latencies can cancel between dates, but fresh per-pulse wire
 delays cannot. The new calendar lemma retains `d₂ - d₁` and proves the
@@ -395,22 +208,23 @@ local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Instantiate and review the fixed-population and staged-birth semantics for
-   the supplied protocols, including routing, simultaneous events and progress.
-2. Prove soundness of the interval arithmetic and the exp/log enclosures used by
-   the certificate checker, or derive the necessary enclosures directly in Lean.
-3. Derive the actual pulse cases, strict cap inactivity and birth-to-section
-   transition. The common birth-family energy/cap invariants are now proved,
-   but do not establish the protocol chronology.
-4. Instantiate the composition rule to obtain the complete reciprocal theorem.
-5. For pedagogy, separately formalize the observation/readout/training interface
+1. Continue the constructed reverse FIRE through its actual receipt and the
+   reciprocal epoch at 459.9, then construct C's birth/teaching and the cadence
+   through 789.9. Preserve global queues, own memories and port availability.
+2. Prove the remaining real enclosure memberships, retained probe responses,
+   causal cuts and protocol extension/saturation obligations. Exact comparisons
+   of stored endpoints do not establish these facts.
+3. Derive the physical leaf and relay contracts and instantiate the checked
+   packet induction for every finite chain.
+4. For pedagogy, separately formalize the observation/readout/training interface
    and connect numerical records to that semantics.
 
 The existing [local theorem](../reciprocal_learning/THEOREM.md),
 [entry theorem](../reciprocal_entry/THEOREM.md) and
-[cadence theorem](../reciprocal_cadence/THEOREM.md) therefore remain computer-assisted
-written arguments with independent arithmetic replay. This project strengthens
-selected parts without upgrading their overall status to fully formalized.
+[cadence theorem](../reciprocal_cadence/THEOREM.md) remain computer-assisted
+written arguments with independent arithmetic replay. The current partial
+formalization and its exact boundaries are detailed in the
+[hybrid guide](HYBRID_EXECUTION.md).
 
 ## Attribution and license
 

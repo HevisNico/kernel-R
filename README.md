@@ -7,6 +7,24 @@ teaching experiments, and their new local computer-assisted proofs. The older
 A22 network engines and historical proof archive stay in the
 [upstream repository](https://github.com/HevisNico/a22-going-further).
 
+## Physical Lean proof status
+
+The [Lean formalization](proof/lean/README.md) constructs an actual execution
+from A's READY birth through the first complete A-to-B teaching epoch at 319.9
+(**A28/B14**), then B's first reverse-contact firing in **(344.3,344.9)**
+(**A28/B15**). Its reverse token is issued and still pending; its receipt is
+the next construction step. Parameters are fixed, independently perturbed
+within the stated fabrication boxes, with canonical pulses and bounded wire delays.
+
+The later three-cell analysis through 789.9 is checked **conditionally on
+supplied reaching executions and births**. Constructing that continuation and
+an end-to-end physical Lean proof for every finite N remain open. See the
+[checkpoint and theorem map](proof/lean/HYBRID_EXECUTION.md).
+
+[Draft PR #12](https://github.com/HevisNico/kernel-R/pull/12) separately develops
+repeatable learned one-cell cycles and compatible finite-horizon continuations,
+with fixed parameters and empty routing.
+
 ## Start here
 
 - [N-cell composition theorem](proof/reciprocal_composition/THEOREM.md): every finite chain, with source-length and path-jitter budgets.
@@ -15,7 +33,7 @@ A22 network engines and historical proof archive stay in the
 - [Cadence cascade proof](proof/reciprocal_cadence/THEOREM.md): C's faster cadence reaches A through B, from birth through time 789.9.
 - [Birth-to-feedback proof](proof/reciprocal_entry/THEOREM.md): pulses-only initialization through time 459.9.
 - [Prepared-section theorem](proof/reciprocal_learning/THEOREM.md): the local A-learns-from-B effect.
-- [Lean proof project](proof/lean/README.md): checked mathematical lemmas, exact certificate endpoint obligations and finite adaptive-policy replay, with explicit coverage limits.
+- [Lean proof project](proof/lean/README.md): constructed physical executions, conditional protocol theorems, certificate endpoint checks and finite adaptive-policy replay, with explicit coverage limits.
 - [Reciprocal prototype](experiments/reciprocal/README.md): cells remain alive and learn back from their students.
 - [Learned teaching choice](experiments/reciprocal/pedagogy/README.md) and [within-lesson adaptation](experiments/reciprocal/adaptive/README.md).
 - [Complete English prototype ZIP](downloads/R_Reciprocal_Prototype.zip): runnable code, recordings, reports and proofs in titled folders.
@@ -55,14 +73,13 @@ the settings-copy variant, open recurrence after 800 or adaptive pedagogy. The n
 theorems combine written hybrid-flow arguments with checked interval obligations;
 they are not complete Lean formalizations or independently peer-reviewed mathematics.
 
-The [Lean project](proof/lean/README.md) now formalizes selected parts: charge
-balance and dose identities, mode-local decay and recovery, calendar arithmetic,
-abstract cycle counts, copying and stopping-policy properties. The C→B→A
-extension adds the combined MARK/ERROR case, the integrated MARK recovery formula,
-per-input dose-counter replay and explicit treatment of wire jitter. Lean checks
-2,240 exact rational endpoint obligations from all six published certificates,
-the two 95-case cadence traces and the recorded adaptive scores. Proving that the complete hybrid execution
-satisfies those abstractions and enclosures remains separate work.
+The [Lean project](proof/lean/README.md) proves physical flow, reserve and memory
+invariants, the constructed prefix described above, and later conditional
+protocol results. It also checks exact rational certificate endpoints and
+recorded cadence/adaptive counters. These evidence checks do not establish
+membership of the actual trajectories in every recorded interval. The complete
+physical continuation, retained probes and physical leaf/relay refinement for
+the finite-chain theorem remain separate obligations.
 
 The [N-cell extension](results/reciprocal_composition/README.md) uses a closed
 packet contract and a written induction, supported by 81 N-independent local

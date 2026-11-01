@@ -37,75 +37,22 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
 
 ## What is still required for the full physical theorem
 
-1. Instantiate the existing hybrid execution semantics and staged-birth extension
-   with the leaf/relay protocols, including their source queues and contact gates.
-   Prove protocol-specific existence/progress, port availability and terminal
-   saturation. The semantics, physical bounds and finite-prefix event budget
-   are already checked; they do not alone construct these executions. A genuine
-   source-driven prefix is now constructed from every READY A birth with the
-   original thirty-two-source queue, through its complete first weak cycle and
-   quiet horizon 7.5. It gives ERROR 0.6, no MARK or output, READY and exactly
-   thirty-one future tokens. The next two weak inputs and fresh source at 24 are
-   now also constructed, followed by one actual first output in (24.3,24.9),
-   retaining twenty-eight future sources plus all routed tokens. With the
-   actual closed contact, the first FAST exit, SLOW arrival at 32 and full
-   protected MARK are also constructed: one output, ERROR 1.8, MARK 0.1 and 27
-   future sources. The remaining auxiliary/SLOW return and source40 delivery
-   are now also constructed: READY, q=0.1, own memories retained, six actual
-   deliveries and 26 future tokens. The complete initial sixteen-source train
-   is now constructed through128: twelve outputs, ERROR1.8/MARK0.1, READY,
-   q=0.1, raw absent and all sixteen second-train tokens retained. A genuine B
-   birth at160 and the actual A160 delivery are also constructed, preserving
-   both own states and47 future sources. Synchronized two-cell flow and
-   queue-neutral jump products are proved. The first concurrent prefix now
-   constructs A's real FIRE and its first actual Bport1 wire delivery,
-   preserving47 future sources and B's own newborn memories. Products of
-   two active event-free local traces are proved. Their first actual weave
-   now reaches168 and consumes A168: B's real ERROR0.6 is derived, A's memories
-   and B's own recovery are preserved, and46 future sources remain. Further
-   teaching inputs and later births remain open. The second actual A FIRE
-   and Bport1 receipt are also constructed, with F2=F1+8 derived from the
-   own response roots and received gap[7.9,8.1] from fresh delays. B's true
-   READY learned entry and46 future tokens are retained. The first real B
-   output is now constructed in(169.1,170.2), while A follows its actual
-   retained return. The reverse contact is closed, but B's singleton output
-   is retained and the queue stays46. Its genuine FAST exit at FIRE+1 is also
-   constructed: B SLOW with q=0.25, auxiliaries READY, RAW absent, own gain
-   and low recovery retained. A176 and the third actual A-to-B token are
-   also constructed, preserving B's actual SLOW charge and own memories.
-   The protected B input and both returns now reach the common prepared
-   section184: both q=0.1, global ERRORB0/MARKB0.1, fresh A184 RAW, no B RAW,
-   and44 external sources. Four actual post-birth outputs and seven deliveries
-   are derived. The remaining thirteen coupled learned cycles are also
-   constructed, with each wire issued and consumed by real global events.
-   The trace reaches288, then waits physically to319.9: cumulative A28/B14,
-   both prepared at q=0.1, RAW absent, own acquired memories retained and the
-   complete32-source B queue preserved. Its real reciprocal weak continuation
-   now reaches fresh B344: three Bport2 weak cycles, four external deliveries,
-   own log-gain2+1.8, no new output/MARK and exactly28 future B sources. B's
-   actual residual charge is retained at least0.1. Its first learned FIRE in
-   (344.3,344.9) is also constructed. That FIRE issues the reverse Aport2
-   token, due at F+backward(F); cumulative counts are then A28/B15 and29
-   tokens remain (28 external sources and the single issued wire).
-   The receipt, complete459.9 return epoch, later births and arbitrary-N
-   continuation remain open.
+1. Instantiate the hybrid semantics with physical leaf/relay protocols, source
+   queues and contact gates, proving existence, port availability and terminal
+   saturation. The constructed READY birth prefix currently reaches the first
+   reverse FIRE in (344.3,344.9): A28/B15 and exactly 29 pending tokens
+   (28 future B sources plus its issued reverse wire). That wire's receipt and
+   the subsequent reciprocal/C/cadence constructions remain open. See the
+   [current checkpoint and factory map](HYBRID_EXECUTION.md#constructed-protocol-checkpoint).
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.
-3. Complete preparation reachability for the leaf/relay protocols, including
-   port permutations and later staged introductions. The first low-port phase,
-   the complete conditional A38/B43/C14 prefix across births at 160 and 480,
-   prepared-input returns and physical reserve invariance are checked in the
-   [hybrid guide](HYBRID_EXECUTION.md).
-   The B-to-C teaching transition through 639.9 now preserves A/B memories,
-   derives C's own preparation and retains its future source queue. Period-four
-   cadence initiation now reaches the actual fourth C input at 652, retaining
-   its residual charge and all later sources. The local strong, MARK-only,
-   combined MARK/ERROR and high-gain learned cases are proved from current
-   physical bounds. The actual cadence cascade is now assembled through 789.9:
-   C20/B18/A16, cumulative A54/B61/C34, own acquired memories and an empty
-   final queue, conditionally on the supplied reaching executions. Arbitrary
-   later introductions and physical every-N refinement remain open.
+3. Complete preparation reachability for arbitrary leaf/relay introductions
+   and port permutations. The physical analysis through 639.9 (A38/B43/C14)
+   and the complete cadence through 789.9 (A54/B61/C34) already derive own
+   memories, exact traffic and the final empty queue **conditionally on
+   supplied reaching executions and births**. Those conditional results do not
+   construct later introductions or an arbitrary-N execution.
 4. Proofs of the leaf refinement and `RelayLaw` from those semantics. In
    particular, no omitted or extra emissions, the full protected doses, the
    residual-raw-tail bound and the first-crossing latency bounds must be derived.
