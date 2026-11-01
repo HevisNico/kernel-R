@@ -4,7 +4,7 @@ The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. The
 complete conditional three-cell prefix is derived below; its reaching traces
 are still supplied. Constructive source-driven existence now reaches the
-first actual MARK from the original A birth queue. They now derive an isolated silent input's absence of
+complete first weak cycle from the original A birth queue. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
 section the learned-input case now returns and preserves all memories. Sensor
@@ -56,7 +56,8 @@ this state belongs to `BirthState`, with the prescribed nominal log-gains and
 an empty source queue. This is one concrete birth-family witness, not existence
 for every initial state or for the complete training protocols. The
 source-driven construction below covers every READY A birth through its
-first actual MARK; subsequent continuation remains open.
+complete first weak input and the quiet horizon 7.5; subsequent source
+iteration remains open.
 
 ## Constructive first-source existence
 
@@ -109,9 +110,70 @@ occupied raw slot can deadlock. Port availability must therefore be derived
 from the constructed protocol schedule. No global priority is imposed on
 compatible simultaneous events.
 
-This is genuine non-vacuity for a nonempty prefix of the written training
-protocol. It does not yet construct MARK/SILENT/ERROR continuation, the first
-complete weak cycle, later births, the trace reaching 789.9 or every-N progress.
+This gives non-vacuity for the first MARK of the written training protocol.
+The next construction extends it through the complete first weak cycle.
+
+## Constructed complete first weak cycle
+
+`birth_protocol_first_weak_cycle_exists` assumes only the original A birth,
+its physical fabrication box, initially READY auxiliaries and the exact
+thirty-two-source queue. It constructs a `BirthFirstWeakCycle`; no execution,
+threshold date, case word or desired dose is an input.
+
+The object's actual `execution` starts at that birth, delivers exactly source at 0,
+and reaches time 7.5 with `CompleteThrough`. There is no output. Its actual
+ERROR ledger is 0.6 on port 0, all MARK ledgers are zero, port 0's own birth
+log-gain increases by 0.6, the other birth gains and recovery are unchanged,
+and all main/auxiliary modes are READY. Raw is absent. The queue is exactly
+`sourceTrain 0 0 8 8 15 ++ sourceTrain 0 0 160 8 16`, retaining all thirty-one
+future tokens. `PhysicalInvariant` and `RawValid` hold. Main charge follows its
+real pulse response and subsequent relaxation; no exact resting reset is made.
+
+`HybridFirstInputSilent` extends the constructed first MARK through its real
+exponential decay and SILENT entry before 0.05. `HybridFirstCycleSchedule`
+derives ERROR entry in (0.99,1.23) and complete auxiliary return after 1 and
+before 419/300 directly from the physical rate boxes.
+
+`HybridFirstInputError` constructs SILENT continuation in all three cases:
+ERROR starts before raw expiry at 1, at the same date, or after it. A SILENT flow
+is split at expiry when necessary, the real `Jump.rawEnd` removes only the raw
+tag, and the actual sensor charge continues across that cut. At a simultaneous
+expiry/ERROR boundary both orders are legal; the constructed witness chooses
+one without imposing a priority on the semantics. Queue, charge, energy and
+own memories are preserved at every instantaneous transition.
+
+`HybridErrorTailFlowExistence` constructs ERROR with optional old raw and an
+arbitrary current sensor charge in (0.025,0.1]. It uses an integrating-factor
+convolution for main charge and energy, including the changing gain in the
+remaining raw current. The energy cost includes auxiliary drain, ERROR learning
+and actual input drive. Positive reserve and open headroom are proved from
+initial physical bounds; they are not supplied as a trajectory. The formulas
+also cover coincident exponential rates without division by their difference.
+An integral flow may end exactly at raw expiry; the field equality on the open
+interval suffices, and a separate real rawEnd is still required.
+
+`HybridErrorCompletion` constructs the whole remaining ERROR phase and its
+auxiliary READY jump. For early ERROR it first constructs the raw-bearing part,
+executes rawEnd at 1, then starts the no-raw suffix from its actual intermediate
+sensor charge and gain. The cut preserves both the original completion date
+and the budget `z + 8*(m-0.025)`. Its remaining dose is `8*(m-0.025)`, so the
+suffix does not incorrectly restart a full 0.6 dose. The first-cycle schedule
+proves completion strictly after raw expiry; this is an explicit caller proof.
+
+`HybridBirthFirstWeakCycle` composes these moves and constructs a quiet suffix
+to 7.5. Only then does the existing `Execution.silent_pulse` theorem classify
+that already constructed execution and derive its doses, READY coordinates
+and memories. No existence assumption is hidden in this reuse. Saturation is
+claimed at 7.5, strictly before the pending source at 8; it is not claimed at 8
+without delivering that source.
+
+Both physical fabrication boxes and every READY member of A's perturbed birth
+family are covered. Routing is arbitrary here because the constructed weak
+prefix never fires. This is the first complete weak input, not yet the three
+weak inputs, first firing, preparation train, later births or trace reaching
+789.9. In particular, source at 8 must retain the real residual charge; its main
+charge cannot simply reuse the original narrow birth band. Physical every-N
+existence/progress remains open.
 
 ## Checked implications
 
@@ -883,7 +945,7 @@ the desired cascade counts.
 `HybridCadenceCPhase` selects the actual C inputs at652,656,660,664 and668
 from the prelude continuation. The physical first strong, MARK-only, second
 strong and mixed cases feed the eighteen remaining learned responses. The
-complete C phase has twenty emissions, ERROR2.4 and MARK0.2 on port0, with
+complete C phase has twenty emissions, ERROR2.4 and MARK0.2 on port 0, with
 all other gains preserved. Its own resting references are used only after
 exact returns to rest; the two first residual latencies remain separate.
 
@@ -916,7 +978,7 @@ from the source queues, fresh births and supplied executions:
 | Cadence ERROR on active port | 0.6 | 0.6 | 2.4 |
 | Cadence MARK on active port | 0.2 | 0.2 | 0.2 |
 | Active log-gain from own birth | Port2: +2.4 | Port2: +2.4 | Port0: +2.4 |
-| Other acquired memory | Port0: +1.8; port1 preserved | Port1: +0.6; port0 preserved | Port1: +0.6; port2 preserved |
+| Other acquired memory | Port0: +1.8; port1 preserved | Port1: +0.6; port 0 preserved | Port1: +0.6; port2 preserved |
 | Recovery from own birth | +0.3 | +0.3 | +0.3 |
 | Terminal state | READY, q=0.1, auxiliaries in rest bands, no raw | Same | Same |
 
@@ -1133,3 +1195,11 @@ without any incoming execution. They reject missing initial sources, altered
 first-crossing bounds, an incorrect MARK charge, invented gain/recovery doses,
 extra deliveries or outputs, erased raw origins, lost future tokens, a reset
 reserve, non-strict delivery deadlines for saturation and omitted input work.
+
+Complete-weak-existence controls compile the full original birth/source
+factory without an incoming execution, for every declared fabrication choice.
+They reject a missing source, a premature or unsaturated endpoint, a wrong
+source token, invented output, double ERROR, protected MARK during READY,
+wrong own memories/recovery, lost future trains, retained raw, incorrect
+terminal modes, a full-dose restart after an intermediate cut, a shifted ERROR
+completion date and omitted ERROR energy work.

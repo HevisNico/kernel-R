@@ -135,8 +135,18 @@ first MARK, between 0.01 and 0.025. This prefix is saturated at that endpoint,
 has no output, retains all thirty-one later source tokens, preserves gains
 and recovery, and satisfies the physical invariant and raw validity. The
 energy trajectory and all integral flow equations are constructed explicitly.
-No reaching execution or threshold date is a premise. This does not yet
-construct the remainder of the first auxiliary cycle or the full protocol.
+No reaching execution or threshold date is a premise.
+
+`birth_protocol_first_weak_cycle_exists` now extends this to the complete first
+weak input and quiet horizon 7.5. It constructs MARK, SILENT, ERROR, raw expiry
+and the final READY state, including all three possible orders around the
+ERROR/raw-expiry boundary. The actual birth execution has one source delivery,
+no output, ERROR 0.6, MARK zero and all thirty-one future sources intact. Gains
+and recovery are measured from that same birth; the real residual main charge
+is retained. Both fabrication boxes are covered. The proof constructs every
+Flow/Jump before applying the earlier silent-input outcome theorem. Repeating
+this construction through subsequent sources, the first firing and later
+births remains open; the trace reaching 789.9 is still supplied.
 
 ## Reproduce
 
@@ -174,6 +184,7 @@ python3 scripts/check_hybrid_c_introduction_negative.py
 python3 scripts/check_hybrid_cadence_negative.py
 python3 scripts/check_hybrid_cascade_negative.py
 python3 scripts/check_hybrid_existence_negative.py
+python3 scripts/check_hybrid_weak_existence_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

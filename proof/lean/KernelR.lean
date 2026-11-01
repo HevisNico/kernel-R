@@ -165,3 +165,11 @@ import KernelR.HybridBirthPulseGain
 import KernelR.HybridGuardNoJump
 import KernelR.HybridReadyFlowExistence
 import KernelR.HybridFirstInputMark
+import KernelR.HybridReadyProtectedFlowExistence
+import KernelR.HybridRawExpiryProgress
+import KernelR.HybridFirstCycleSchedule
+import KernelR.HybridFirstInputSilent
+import KernelR.HybridErrorTailFlowExistence
+import KernelR.HybridFirstInputError
+import KernelR.HybridErrorCompletion
+import KernelR.HybridBirthFirstWeakCycle
