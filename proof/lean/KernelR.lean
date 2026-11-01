@@ -180,3 +180,11 @@ import KernelR.HybridWeakInputCycleExistence
 import KernelR.HybridBirthWeakPrefix
 import KernelR.HybridFirstLearnedFireExistence
 import KernelR.HybridBirthFirstFire
+import KernelR.HybridProtectedMainFlowExistence
+import KernelR.HybridFirstFireSchedule
+import KernelR.HybridFastAuxLeg
+import KernelR.HybridBirthFirstFastEnd
+import KernelR.HybridFirstSlowSource
+import KernelR.HybridSlowProtectedMarkFlowExistence
+import KernelR.HybridSlowInputMarkExistence
+import KernelR.HybridBirthProtectedMark

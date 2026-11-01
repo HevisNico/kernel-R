@@ -44,8 +44,11 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    quiet horizon 7.5. It gives ERROR 0.6, no MARK or output, READY and exactly
    thirty-one future tokens. The next two weak inputs and fresh source at 24 are
    now also constructed, followed by one actual first output in (24.3,24.9),
-   retaining twenty-eight future sources plus all routed tokens. FAST/SLOW
-   continuation, the remaining preparation train and later births remain open.
+   retaining twenty-eight future sources plus all routed tokens. With the
+   actual closed contact, the first FAST exit, SLOW arrival at 32 and full
+   protected MARK are also constructed: one output, ERROR 1.8, MARK 0.1 and 27
+   future sources. The protected input's remaining auxiliary/SLOW return,
+   preparation train and later births remain open.
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.

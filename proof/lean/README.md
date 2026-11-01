@@ -146,15 +146,23 @@ and recovery are measured from that same birth; the real residual main charge
 is retained. Both fabrication boxes are covered. The proof constructs every
 Flow/Jump before applying the earlier silent-input outcome theorem. The construction now continues through the weak inputs at 8 and16, their
 actual waits and the fresh input at 24. `birth_protocol_weak_prefix_exists`
-constructs that source 24 entry with four delivered tokens, ERROR1.8 and exactly
+constructs that source 24 entry with four delivered tokens, ERROR 1.8 and exactly
 twenty-eight future source tokens. Each later weak input uses READY charge
 up to 0.14 and its own learned gain, without reusing the narrow birth band.
 `birth_protocol_first_fire_exists` then constructs one actual output in
 (24.3,24.9), with main FAST at charge1 and its original raw origin24 retained.
 All newly routed tokens are appended exactly; the closed pre-birth contact
 also gives a saturated endpoint after the first firing. No execution, firing
-date or output count is assumed. FAST/SLOW continuation, the preparation train
-and later births remain open; the trace reaching 789.9 is still supplied.
+date or output count is assumed. The first FAST exit and the actual protected MARK at input 32 are now also
+constructed. FAST ends at its real firing time plus 1 with q=.25; the main
+then remains SLOW at 32 with q in (0.14,0.16). A real source32 arrival and its
+sensor threshold initiate the recovery-changing MARK flow. The main charge
+integrates b(t), rather than using a constant or instantaneous recovery jump.
+`birth_protocol_protected_mark_exists` reaches the SILENT entry after MARK at 32:
+ERROR 1.8, MARK 0.1, own recovery birth + 0.1, one output, five actual source
+arrivals and exactly 27 future tokens. The main is still SLOW and raw origin32
+is retained. Completing this protected input, the preparation train and later
+births remains open; the trace reaching 789.9 is still supplied.
 
 ## Reproduce
 
@@ -194,6 +202,7 @@ python3 scripts/check_hybrid_cascade_negative.py
 python3 scripts/check_hybrid_existence_negative.py
 python3 scripts/check_hybrid_weak_existence_negative.py
 python3 scripts/check_hybrid_first_fire_negative.py
+python3 scripts/check_hybrid_protected_mark_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

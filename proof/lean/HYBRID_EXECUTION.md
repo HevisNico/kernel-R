@@ -4,7 +4,7 @@ The complete protocol-to-abstraction theorem remains open. The modules below
 prove physical flow and invariant results needed for that theorem. The
 complete conditional three-cell prefix is derived below; its reaching traces
 are still supplied. Constructive source-driven existence now reaches the
-first actual main firing from the original A birth queue. They now derive an isolated silent input's absence of
+protected MARK at input 32 from the original A birth queue. They now derive an isolated silent input's absence of
 emissions and total ERROR dose, and extract the first firing of an isolated
 learned input and its exact single-emission count. From the declared prepared
 section the learned-input case now returns and preserves all memories. Sensor
@@ -57,7 +57,8 @@ an empty source queue. This is one concrete birth-family witness, not existence
 for every initial state or for the complete training protocols. The
 source-driven construction below covers every READY A birth through its
 first three weak inputs and the first actual output in (24.3,24.9).
-The later FAST/SLOW and preparation continuation remains open.
+Its FAST/SLOW continuation now reaches the protected MARK at 32; completing
+that protected input and the preparation train remains open.
 
 ## Constructive first-source existence
 
@@ -171,7 +172,7 @@ Both physical fabrication boxes and every READY member of A's perturbed birth
 family are covered. Routing is arbitrary here because the constructed weak
 prefix never fires. The next section extends the first weak input through the other two weak
 inputs and the first actual firing. Preparation, later births and the trace
-reaching789.9 remain to be constructed. In particular, source at 8 must retain the real residual charge; its main
+reaching 789.9 remain to be constructed. In particular, source at 8 must retain the real residual charge; its main
 charge cannot simply reuse the original narrow birth band. Physical every-N
 existence/progress remains open.
 
@@ -234,11 +235,67 @@ not claim saturation for an immediately due routed delivery without executing
 that arrival. `PhysicalInvariant` and `RawValid` hold at the firing state.
 
 The state after FIRE is FAST with raw still active and the trained auxiliary
-still SILENT. FAST end, the later SLOW path, the protected input at 32 and the
-remaining preparation train must still be constructed. After a later birth,
+still SILENT. The next construction reaches the actual FAST exit and the
+protected MARK at 32. Completing its later return and preparation train remains
+open. After a later birth,
 other cells may already be active: the all-READY single-input constructors
 alone do not yet supply those concurrent network flows. Global existence,
 the trace reaching 789.9 and the physical every-N result remain open.
+
+## Constructed FAST exit and protected MARK at 32
+
+`birth_protocol_protected_mark_exists` assumes only the original one-cell
+READY birth, its physical fabrication box, initially READY auxiliaries and
+exact thirty-two-source queue. The contact is closed before B's birth.
+It constructs the actual first output, FAST exit, SLOW arrival at 32 and the
+full protected MARK, without an incoming execution, case word, expected dose
+or event date. Both fabrication boxes and all READY birth perturbations hold.
+
+`HybridProtectedMainFlowExistence` constructs FAST/SLOW with auxiliary
+READY/SILENT/ERROR. Current gain and recovery remain fixed: ERROR learning
+is closed while the main is protected, and there is no active MARK in these
+pieces. Energy includes the true main work and auxiliary input/drain. Old RAW
+origins are retained, expiry may be a flow endpoint and a real rawEnd is still
+required. Coincident exponential rates are covered.
+
+`HybridFirstFireSchedule` derives the sharper first FIRE bound after24.4:
+READY charge up to.14 and learned gain up to2 stay below1 through.4. This
+orders the auxiliary return strictly before FAST end. `HybridFastAuxLeg` and
+`HybridBirthFirstFastEnd` construct the real SILENT/ERROR/READY phases across
+raw expiry25 in all three boundary orders. The last FAST flow reaches q=.25
+at actual FIRE+1, followed by the real fastEnd jump into SLOW. Nothing resets
+q to.1 or changes the own birth recovery.
+
+`HybridFirstSlowSource` transports q=.25 by its own recovery near.08 to32,
+then consumes the real head source. The main is still SLOW, with q strictly
+in (0.14,0.16); its trained auxiliary is READY at.025. Source32 is delivery five,
+and the queue retains exactly eleven sources40..120 plus sixteen160..280.
+
+`HybridSlowInputMarkExistence` constructs the first real sensor threshold,
+SLOW/READY flow and MARK jump. `HybridSlowProtectedMarkFlowExistence` then
+constructs m(t)=m0*exp(-lm*elapsed), b(t)=b0+(m0-m(t))/2 and q using the integral
+of this changing b. The true energy work is 1.1+1.5*lm*m(t), including MARK
+activity. Positive power and open recovery headroom are proved analytically
+from the current physical coordinates. Full MARK ends at m=.8 with b increased
+by.1; its real SILENT jump preserves all coordinates. No instantaneous recovery
+jump is substituted into the main ODE.
+
+`HybridBirthProtectedMark` composes the moves from birth to a real endpoint
+in(32.01,32.05). The actual execution has five deliveries0,8,16,24,32, one
+emission at the earlier first FIRE, ERROR 1.8 and MARK 0.1. Own z00 remains birth
+plus1.8, own b becomes perturbed birth plus.1 rather than nominal.18. The MARK
+ledger follows from the actual recovery balance and per-port MARK sum; other
+ports have zero MARK because their real input calendars are empty. The small
+proof-only source cast aligns definitionally equal snapshot names and preserves
+ledger/deliveries; it introduces no path or coordinate change.
+
+At the endpoint main is still SLOW, q is in[.136,.16], auxiliary0 is SILENT at.8,
+and raw retains its original source32 origin. All27 future tokens are retained.
+`CompleteThrough` holds: main/aux guards are strict, raw expiry33 is future and
+pending sources are all at least40. Physical invariants and raw validity hold.
+The remaining auxiliary cycle, SLOW reopening, prepared entry40, preparation
+train, later births/concurrent cells, full789.9 trace and every-N existence
+remain open. No READY state is substituted at 32 or after its short MARK.
 
 ## Checked implications
 
@@ -318,7 +375,7 @@ the trace reaching 789.9 and the physical every-N result remain open.
 | `HybridEntryRouter` / `HybridStagedTeaching` | Instantiate forward/reverse contacts and derive cumulative A28/B14 plus prepared memories across B's actual birth | READY A birth, given staged executions at 160/319.9, B sources due from320 and bounded independent wire delays; no existence/progress claim |
 | `HybridTeachingQueueClosure` | At319.9 A has no pending source and B retains exactly its future external birth queue | Actual queue conservation, routing windows and causal terminal future queue; no supplied output count |
 | `HybridResidualLatency` / `HybridResidualPreparedCalendar` | Positive READY residual cannot delay the actual first firing; later outputs share the same-gain rest-root latency | Initial q>=0.1, prepared gain/section and actual separated input calendar |
-| `HybridPreparedLearningTrain` | Three actual low-gain silent inputs give ERROR1.8/MARK0, then a prepared learned train emits once per input | Current prepared section, nominal low gain, real receiving-cell dates with minimum gap 7.5 and final quiet horizon |
+| `HybridPreparedLearningTrain` | Three actual low-gain silent inputs give ERROR 1.8/MARK0, then a prepared learned train emits once per input | Current prepared section, nominal low gain, real receiving-cell dates with minimum gap 7.5 and final quiet horizon |
 | `HybridFeedbackSender` / `HybridFeedbackInitialSource` | Select direct B sources 320..440 and derive thirteen actual B outputs, retaining the first residual latency and later source tokens | B's actual initial queue, current prepared nominal return port and no incoming B route |
 | `HybridFeedbackCalendar` / `HybridFeedbackReceiver` | Derive thirteen actual A return arrivals with fresh delays, then three silent inputs and ten learned outputs | Real B output calendar, initially empty A queue and concrete return contact; current prepared A bounds |
 | `HybridFeedbackEpoch` / `HybridReciprocalEntry` | Physical A38/B27 and derived port gains/recovery at 459.9, with terminal preparation, raw validity and reserve | Given staged teaching and continuing executions, fresh birth160, exact source queues/contact windows; no global existence/progress claim |
@@ -327,7 +384,7 @@ the trace reaching 789.9 and the physical every-N result remain open.
 | `HybridSourceActivation` / `HybridCIntroductionBoundary` | Old cells remain prepared through 480; the source due at birth is either pending or already fresh | Actual reciprocal prefix and exact remaining B sources; no event-priority assumption |
 | `HybridCTeachingRouter` / `HybridCIntroductionActivePhase` / `HybridCIntroductionBoundaryPhase` | Actual B16/C14 and quiet A across both legal birth/source orders | B-to-C port-1 contact [480,630), current bounds and C's own READY birth data |
 | `HybridCIntroductionQueueClosure` / `HybridStagedCIntroduction` / `HybridCEntry` | Physical cumulative A38/B43/C14 at 639.9; own memories and future C source queue retained | Actual executions and births supplied, independent device parameters and wire delays; continuation is composed below, existence remains open |
-| `HybridCadenceRouter` / `HybridCadenceQuiet` / `HybridCadencePrelude` | Actual C-to-B-to-A contacts; three weak C cases through fresh source652 with ERROR1.8, quiet A/B and twenty-one future C tokens | Actual execution reaching789.9, initial prepared states and C's declared twenty-five sources; no complete cadence count claim |
+| `HybridCadenceRouter` / `HybridCadenceQuiet` / `HybridCadencePrelude` | Actual C-to-B-to-A contacts; three weak C cases through fresh source652 with ERROR 1.8, quiet A/B and twenty-one future C tokens | Actual execution reaching 789.9, initial prepared states and C's declared twenty-five sources; no complete cadence count claim |
 | `HybridCadenceSilent` / `HybridCadenceWeakStages` / `HybridCadenceWeakWarmup` | Real four-period weak inputs with charge caps 0.1→0.15→0.2→0.3 | Current physical invariants and actual receiving-cell cuts; no reset or inherited period-eight cap |
 | `HybridHighGainTrigger` / `HybridHighGainReturn` / `HybridCadenceHighTrain` | Real firing at high gain and residual charge; one output per 3.8-separated learned input with unchanged memories | Explicit current charge/gain/recovery bands and no additional receiving-cell arrivals within each pulse segment |
 | `HybridMarkRecoveryIntegral` / `HybridSlowMarkWindow` / `HybridSlowMarkReturn` | Finite real MARK ramp, exact SLOW clock, and selected return before ERROR from current bounds | Physical cap/protection and current SLOW charge; global trace existence remains supplied |
@@ -952,7 +1009,7 @@ inputs 640,644,...,736 from its preserved birth queue. The two wire delays
 remain independent functions of their own actual emission dates.
 
 `CadencePrelude` reaches the fresh source at 652 from those actual inputs.
-The first three physical weak cases give ERROR1.8, MARK0 and no C output.
+The first three physical weak cases give ERROR 1.8, MARK0 and no C output.
 The main charge is retained quantitatively: the four-unit relaxation bounds
 are 0.1→0.15→0.2→0.3. The source at 652 is already delivered, so four tokens
 have been consumed but only three ERROR cycles completed. All twenty-one
@@ -1276,3 +1333,11 @@ lost future sources, erased fourth raw, a premature FAST state, discarded
 relaxation, weakened weak-gain bounds, a horizon detached from its origin,
 wrong firing bounds, missing output, wrong main mode/charge, lost issued tokens,
 a reset raw origin, an invented fourth ERROR and an extra recovery dose.
+
+Protected-MARK controls compile the full birth-to-MARK at 32 factory without an
+incoming execution. They reject altered FAST duration/mode/quarter charge,
+unexpired old raw, fictitious READY at 32, misplaced recovery learning,
+missing MARK or extra ERROR, copied nominal recovery, premature READY after
+MARK, wrong SILENT floor, reset raw origin, lost future tokens, missing fifth
+delivery, a second output, constant-b main charge during changing recovery
+and omitted protected MARK energy work.
