@@ -56,7 +56,7 @@ python scripts/check_sources.py
 python scripts/generate_evidence.py --check
 python scripts/robust_evidence.py --check
 lake build
-lake env lean Audit.lean
+lake build Audit
 python scripts/check_negative.py
 ```
 

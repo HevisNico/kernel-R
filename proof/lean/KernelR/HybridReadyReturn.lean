@@ -84,12 +84,12 @@ structure ReadyReturn {n θ route s u} (e : @Execution n θ route s u) (i : Fin 
 
 /-- The physical SLOW comparison and the actual FAST exit supply a READY
 return before the next 7.5-gap input. Recovery may increase during the trace. -/
-theorem MainTrigger.ready_return {n θ ε route born s u i} {e : @Execution n θ route s u}
-    (tr : MainTrigger e i) (past : Execution θ route born s) (hborn : BirthState born)
+theorem MainTrigger.ready_return_of_valid {n θ ε route s u i} {e : @Execution n θ route s u}
+    (tr : MainTrigger e i) (hv : RawValid s)
     (hb : PhysicalBox θ ε) (hb₀ : 17999 / 100000 ≤ s.x i .b)
     (p : Port) (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
     (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (ReadyReturn e i) := by
-  have hrstate := e.raw_expired_states i s.time (past.raw_valid hborn.raw_valid)
+  have hrstate := e.raw_expired_states i s.time hv
     (fun q => by
       by_cases hq : q = p
       · subst q; exact Or.inr hr
@@ -129,6 +129,13 @@ theorem MainTrigger.ready_return {n θ ε route born s u i} {e : @Execution n θ
     calc
       e = tr.span.append (.cons (.jump tr.entry) tr.rest) := tr.reconstruct
       _ = _ := by rw [hefast,heslow]; simp only [head,Execution.append_assoc,Execution.append]
+
+theorem MainTrigger.ready_return {n θ ε route born s u i} {e : @Execution n θ route s u}
+    (tr : MainTrigger e i) (past : Execution θ route born s) (hborn : BirthState born)
+    (hb : PhysicalBox θ ε) (hb₀ : 17999 / 100000 ≤ s.x i .b)
+    (p : Port) (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (ReadyReturn e i) := by
+  exact tr.ready_return_of_valid (past.raw_valid hborn.raw_valid) hb hb₀ p hr ho hno ht
 
 theorem ReadyReturn.final_ready {n θ route s u i} {e : @Execution n θ route s u}
     (ret : ReadyReturn e i) (hno : ∀ p, NoArrivalAt e i p) :

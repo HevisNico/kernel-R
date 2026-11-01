@@ -74,9 +74,9 @@ theorem Execution.nominal_silent_input {n θ ε route s u} (e : @Execution n θ 
   exact e.ready_of_upper_drive i hm (4 / 3) hdrive
     (fun t ht => readyPulse_nominal_silent hq le_rfl ht)
 
-theorem SensorCycle.error_dose_of_headroom {n θ ε route born s u i p}
+theorem SensorCycle.error_dose_of_invariant {n θ ε route s u i p}
     {e : @Execution n θ route s u} (cycle : SensorCycle e i p)
-    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+    (hb : PhysicalBox θ ε) (hf : PhysicalInvariant θ s)
     (hm : e.AllStates (fun v => v.main i = .ready))
     (hh : s.x i (.z p) + 3 / 5 < Real.log ((θ i).cap p)) :
     cycle.phases.errorPhase.span.ledger.error i p = 3 / 5 ∧
@@ -85,7 +85,7 @@ theorem SensorCycle.error_dose_of_headroom {n θ ε route born s u i p}
   let mk := cycle.phases.markPhase
   let si := cycle.phases.silentPhase
   let er := cycle.phases.errorPhase
-  let pastMark := past.append (tr.span.append (.cons (.jump tr.entry) (.nil _)))
+  let pastMark := tr.span.append (.cons (.jump tr.entry) (.nil _))
   let pastSilent := pastMark.append (mk.span.append (.cons (.jump mk.exit) (.nil _)))
   let pastError := pastSilent.append (si.span.append (.cons (.jump si.exit) (.nil _)))
   have hmain := er.span.allStates_main_flows i .ready (cycle.error_states hm).1
@@ -93,13 +93,39 @@ theorem SensorCycle.error_dose_of_headroom {n θ ε route born s u i p}
     rw [cycle.error_initial_gain,si.after_charge]
     norm_num only [protectedFloor]
     linarith
-  have ho := er.span.error_exposed_of_headroom pastError hborn hb i p er.flows hmain hh'
+  have ho := er.span.error_exposed_of_invariant hb (pastError.physical_invariant hb hf) i p er.flows hmain hh'
   have hd := er.span.full_error_of_open_endpoints i p ho
     (by change si.afterExit.x i (.m p) = 1 / 10; simpa only [protectedFloor] using si.after_charge)
     (by simpa only [protectedFloor] using er.charge)
   refine ⟨hd,?_⟩
   change er.afterExit.x i (.z p) = _
   rw [er.exit.physical_continuous,er.span.gain_balance i p,hd,cycle.error_initial_gain]
+
+theorem SensorCycle.error_dose_of_headroom {n θ ε route born s u i p}
+    {e : @Execution n θ route s u} (cycle : SensorCycle e i p)
+    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+    (hm : e.AllStates (fun v => v.main i = .ready))
+    (hh : s.x i (.z p) + 3 / 5 < Real.log ((θ i).cap p)) :
+    cycle.phases.errorPhase.span.ledger.error i p = 3 / 5 ∧
+      cycle.phases.errorPhase.afterExit.x i (.z p) = s.x i (.z p) + 3 / 5 := by
+  exact cycle.error_dose_of_invariant hb (past.physical_invariant hb (hborn.physical_invariant hb)) hm hh
+
+theorem SensorCycle.total_error_of_invariant {n θ ε route s u i p}
+    {e : @Execution n θ route s u} (cycle : SensorCycle e i p)
+    (hb : PhysicalBox θ ε) (hf : PhysicalInvariant θ s) (hv : RawValid s)
+    (hm : e.AllStates (fun v => v.main i = .ready))
+    (hh : s.x i (.z p) + 3 / 5 < Real.log ((θ i).cap p))
+    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p) :
+    e.ledger.error i p = 3 / 5 ∧ u.x i (.z p) = s.x i (.z p) + 3 / 5 := by
+  let er := cycle.phases.errorPhase
+  have hd := cycle.error_dose_of_invariant hb hf hm hh
+  have hready := cycle.error_rest_ready hv hr hno
+  have hgain := (er.rest.gain_constant_aux i p .ready (by decide)
+    (er.rest.allStates_aux_flows i p .ready hready)).1
+  have hu : u.x i (.z p) = s.x i (.z p) + 3 / 5 := hgain.trans hd.2
+  refine ⟨?_,hu⟩
+  have h := e.gain_balance i p
+  linarith
 
 theorem SensorCycle.total_error_of_headroom {n θ ε route born s u i p}
     {e : @Execution n θ route s u} (cycle : SensorCycle e i p)
@@ -108,15 +134,8 @@ theorem SensorCycle.total_error_of_headroom {n θ ε route born s u i p}
     (hh : s.x i (.z p) + 3 / 5 < Real.log ((θ i).cap p))
     (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p) :
     e.ledger.error i p = 3 / 5 ∧ u.x i (.z p) = s.x i (.z p) + 3 / 5 := by
-  let er := cycle.phases.errorPhase
-  have hd := cycle.error_dose_of_headroom past hborn hb hm hh
-  have hready := cycle.error_rest_ready (past.raw_valid hborn.raw_valid) hr hno
-  have hgain := (er.rest.gain_constant_aux i p .ready (by decide)
-    (er.rest.allStates_aux_flows i p .ready hready)).1
-  have hu : u.x i (.z p) = s.x i (.z p) + 3 / 5 := hgain.trans hd.2
-  refine ⟨?_,hu⟩
-  have h := e.gain_balance i p
-  linarith
+  exact cycle.total_error_of_invariant hb (past.physical_invariant hb (hborn.physical_invariant hb))
+    (past.raw_valid hborn.raw_valid) hm hh hr hno
 
 theorem Execution.nominal_silent_dose {n θ ε route born s u} (e : @Execution n θ route s u)
     (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)

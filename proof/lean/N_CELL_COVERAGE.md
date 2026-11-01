@@ -4,6 +4,9 @@ This extension formalizes the compositional part of the
 [finite-chain argument](../reciprocal_composition/THEOREM.md).
 It does **not** turn the entire physical theorem into an unconditional Lean theorem.
 The distinction is explicit in theorem signatures, not hidden in project axioms.
+The separately constructed birth prefix currently ends at B's first reverse
+FIRE in (344.3,344.9): cumulative A28/B15, with its actual reverse token
+issued but not yet delivered.
 
 ## Checked composition
 
@@ -22,7 +25,9 @@ The distinction is explicit in theorem signatures, not hidden in project axioms.
 | Same-gain root ordering | `same_gain_ready_comparison`, `first_crossing_no_later` | Residual charge cannot delay the first crossing when comparing the same realized gain |
 | Local certificate endpoints | `Certificates.Composition003`, `Composition010` | All 162 strict comparisons and validity of all 352 rational enclosures in the two committed certificates |
 
-The finite signal interface records an exact event count, so its refinement\ncontract excludes both missing and additional emissions. The packet representation\nincludes bounded padding phases beyond the finite packet.
+The finite signal interface records an exact event count, so its refinement
+contract excludes both missing and additional emissions. The packet representation
+includes bounded padding phases beyond the finite packet.
 Only indices below m+L represent actual events. This lets retained phase errors be
 selected without adding a physical independence or retiming assumption.
 
@@ -32,13 +37,22 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
 
 ## What is still required for the full physical theorem
 
-1. A complete hybrid execution semantics for R: continuous state, guards,
-   simultaneous events, delayed canonical pulses, caps and reserve gating.
+1. Instantiate the hybrid semantics with physical leaf/relay protocols, source
+   queues and contact gates, proving existence, port availability and terminal
+   saturation. The constructed READY birth prefix currently reaches the first
+   reverse FIRE in (344.3,344.9): A28/B15 and exactly 29 pending tokens
+   (28 future B sources plus its issued reverse wire). That wire's receipt and
+   the subsequent reciprocal/C/cadence constructions remain open. See the
+   [current checkpoint and factory map](HYBRID_EXECUTION.md#constructed-protocol-checkpoint).
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.
-3. Preparation reachability, including port permutation, exact return to rest
-   and reserve invariance across all event boundaries, for each allowed device.
+3. Complete preparation reachability for arbitrary leaf/relay introductions
+   and port permutations. The physical analysis through 639.9 (A38/B43/C14)
+   and the complete cadence through 789.9 (A54/B61/C34) already derive own
+   memories, exact traffic and the final empty queue **conditionally on
+   supplied reaching executions and births**. Those conditional results do not
+   construct later introductions or an arbitrary-N execution.
 4. Proofs of the leaf refinement and `RelayLaw` from those semantics. In
    particular, no omitted or extra emissions, the full protected doses, the
    residual-raw-tail bound and the first-crossing latency bounds must be derived.
@@ -56,7 +70,11 @@ Run the commands in the [Lean guide](README.md). The generated-evidence check
 covers both N-cell certificates. The axiom audit includes every imported chain
 and certificate theorem. Negative tests reject altered traffic counts and an
 over-budget four-link jitter claim, in addition to the existing endpoint,
-cadence and adaptive-record corruption cases.
+cadence and adaptive-record corruption cases. The 29 paired controls in
+`python scripts/check_hybrid_feedback_entry_negative.py` additionally check
+the constructed weak entry and first reverse FIRE, own memories and exact
+source/wire queues. They do not supply the pending token's receipt or any
+later reciprocal reaching execution.
 
 The original written theorem and its authenticated snapshots are retained
 unchanged. This guide states the current machine-checked coverage separately.

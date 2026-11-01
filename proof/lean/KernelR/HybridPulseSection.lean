@@ -61,18 +61,17 @@ structure LearnedPulse {n θ route s u} (e : @Execution n θ route s u) (i : Fin
 
 /-- An actual isolated learned-pulse case with return and preserved memories.
 It neither supplies a case word nor asserts birth-to-section reachability. -/
-theorem MainTrigger.prepared_case {n θ ε route born s u i} {e : @Execution n θ route s u}
+theorem MainTrigger.prepared_case_of_valid {n θ ε route s u i} {e : @Execution n θ route s u}
     (tr : MainTrigger e i)
-    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+    (hb : PhysicalBox θ ε) (hi : UpperRegion s) (hv : RawValid s)
     (p : Port) (hs : PreparedSection s i)
     (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
     (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (LearnedPulse e i) := by
-  have hi := past.upper_region hb hborn.upper_region
-  have hv := past.raw_valid hborn.raw_valid
   obtain ⟨cycle⟩ := e.sensor_cycle hb hi i p (hs.auxiliary p).1 hr (hs.auxiliary p).2 (by linarith)
-  obtain ⟨ret⟩ := tr.ready_return past hborn hb hs.recovery.1 p hr ho hno ht
+  obtain ⟨ret⟩ := tr.ready_return_of_valid hv hb hs.recovery.1 p hr ho hno ht
   have hu := ret.final_ready hno
-  have hzero := cycle.total_error_zero_of_trigger tr past hborn hr (hno p)
+  have hzero := cycle.error_zero_of_protected hv hr (hno p)
+    (cycle.error_protected_by_trigger tr (by linarith [hs.recovery.2]))
   have hbfinal := e.learned_recovery_unchanged cycle tr hb hv hr hno ho
     (fun q _ => ⟨(hs.auxiliary q).1,(hs.auxiliary q).2.2⟩)
   have hother : ∀ q, q ≠ p →
@@ -95,7 +94,7 @@ theorem MainTrigger.prepared_case {n θ ε route born s u i} {e : @Execution n �
       by_cases hq : q = p
       · subst q; exact Or.inr hr
       · exact Or.inl (ho q hq)) hno
-  refine ⟨⟨tr,ret,tr.only_emission past hborn p hr ho hno,?_,hmark,hgain,hbfinal,?_,hu.2,?_⟩⟩
+  refine ⟨⟨tr,ret,tr.only_emission_of_valid hv p hr ho hno,?_,hmark,hgain,hbfinal,?_,hu.2,?_⟩⟩
   · intro q
     have h := e.gain_balance i q
     rw [hgain q] at h
@@ -107,6 +106,15 @@ theorem MainTrigger.prepared_case {n θ ε route born s u i} {e : @Execution n �
       exact ⟨htarget.1,by rw [htarget.2]; norm_num [RestBand]⟩
     · exact (hother q hq).1
   · exact e.allStates_final hraw (by linarith)
+
+theorem MainTrigger.prepared_case {n θ ε route born s u i} {e : @Execution n θ route s u}
+    (tr : MainTrigger e i)
+    (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
+    (p : Port) (hs : PreparedSection s i)
+    (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (LearnedPulse e i) := by
+  exact tr.prepared_case_of_valid hb (past.upper_region hb hborn.upper_region)
+    (past.raw_valid hborn.raw_valid) p hs hr ho hno ht
 
 theorem Execution.learned_pulse {n θ ε route born s u} (e : @Execution n θ route s u)
     (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)

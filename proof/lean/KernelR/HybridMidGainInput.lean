@@ -70,14 +70,22 @@ theorem Execution.mid_gain_input_trigger {n θ ε route s u} (e : @Execution n �
       by rw [entry.time_unchanged]; exact hearly,
       by rw [entry.time_unchanged]; exact hlate⟩⟩
 
+theorem Execution.learned_mid_pulse_of_valid {n θ ε route s u} (e : @Execution n θ route s u)
+    (hb : PhysicalBox θ ε) (hi : UpperRegion s) (hv : RawValid s)
+    (i : Fin n) (p : Port) (hs : PreparedSection s i)
+    (hz : 9 / 5 ≤ Real.exp (s.x i (.z p)) ∧ Real.exp (s.x i (.z p)) ≤ 12 / 5)
+    (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (LearnedPulse e i) := by
+  obtain ⟨tr⟩ := e.mid_gain_input_trigger hb hi i p hs.ready hs.charge hz (hs.auxiliary p).1 hr (hs.auxiliary p).2 ho hno (by linarith)
+  exact tr.prepared_case_of_valid hb hi hv p hs hr ho hno ht
+
 theorem Execution.learned_mid_pulse {n θ ε route born s u} (e : @Execution n θ route s u)
     (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
     (i : Fin n) (p : Port) (hs : PreparedSection s i)
     (hz : 9 / 5 ≤ Real.exp (s.x i (.z p)) ∧ Real.exp (s.x i (.z p)) ≤ 12 / 5)
     (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
     (hno : ∀ q, NoArrivalAt e i q) (ht : s.time + 15 / 2 ≤ u.time) : Nonempty (LearnedPulse e i) := by
-  have hi := past.upper_region hb hborn.upper_region
-  obtain ⟨tr⟩ := e.mid_gain_input_trigger hb hi i p hs.ready hs.charge hz (hs.auxiliary p).1 hr (hs.auxiliary p).2 ho hno (by linarith)
-  exact tr.prepared_case past hborn hb p hs hr ho hno ht
+  exact e.learned_mid_pulse_of_valid hb (past.upper_region hb hborn.upper_region)
+    (past.raw_valid hborn.raw_valid) i p hs hz hr ho hno ht
 
 end KernelR.Hybrid

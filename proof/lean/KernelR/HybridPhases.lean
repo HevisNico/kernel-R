@@ -1,4 +1,4 @@
-import KernelR.HybridClipping
+import KernelR.HybridPhysicalInvariant
 import KernelR.HybridEvents
 
 /-! Select actual first mode departures from executions. Protected phases are
@@ -223,19 +223,7 @@ theorem Execution.error_exposed_of_headroom {n θ ε route born s u}
     (ha : e.AuxFlows i p .error) (hm : e.MainFlows i .ready)
     (hh : s.x i (.z p) + 8 * (s.x i (.m p) - 1 / 40) < Real.log ((θ i).cap p)) :
     e.ErrorExposed i p := by
-  induction e with
-  | nil => trivial
-  | @cons s v u step rest ih =>
-    have progressed : Execution θ route born v := past.append (.cons step (.nil v))
-    cases step with
-    | flow f =>
-      refine ⟨f.error_open_of_reachable past hborn hb i p ha.1 hm.1
-        (f.error_cap_open_of_headroom hb i p ha.1 hh), ?_⟩
-      apply ih progressed ha.2 hm.2
-      have h := f.error_gain_budget hb i p ha.1
-      linarith
-    | jump j =>
-      apply ih progressed ha hm
-      simpa only [j.physical_continuous] using hh
+  exact e.error_exposed_of_invariant hb
+    (past.physical_invariant hb (hborn.physical_invariant hb)) i p ha hm hh
 
 end KernelR.Hybrid

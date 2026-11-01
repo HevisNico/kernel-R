@@ -34,8 +34,11 @@ reserve may differ between rounds and are never reset.
 
 The physical foundation's `PreparedSection` allows residual main charge and a
 narrower recovery band. Its `Execution.learned_pulse` analyses a supplied,
-birth-reachable isolated-input execution. This extension instead constructs
-executions from `LearnedRest`. Fixed reference latency here uses exact main
+birth-reachable isolated-input execution. The main branch also constructs the
+birth-to-teaching prefix and first reverse FIRE described in the
+[physical checkpoint](HYBRID_EXECUTION.md#constructed-protocol-checkpoint).
+This extension constructs repeatable executions from `LearnedRest`; a formal
+bridge from those birth/training endpoints to this exact domain is still needed. Fixed reference latency here uses exact main
 rest; it does not extend to the positive residuals covered by
 `first_firing_le_rest_reference` in the physical foundation.
 
@@ -78,7 +81,7 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
 
 ## Remaining work
 
-- Birth-to-preparation and full training calendars reaching this learned domain.
+- Connect the existing birth/training constructions to this exact learned domain.
 - Finite-chain routing, wire delays and a sufficient network settling duration.
 - Universal refinement across all admissible complete executions.
 - Operational drift, noise and amplitude histories.

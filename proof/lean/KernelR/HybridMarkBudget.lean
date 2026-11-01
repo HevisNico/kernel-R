@@ -13,11 +13,12 @@ theorem Execution.mark_split {n θ route s u v w} (e : @Execution n θ route s u
       congrArg (fun actual => actual.ledger.mark i p) he
     _ = _ := by simp [mark_append,ledger,Move.ledger,Ledger.add,exit.mark_zero]
 
-/-- One autonomous sensor cycle can add at most one full MARK charge, even
-before the main-mode and actuator-gate chronology has been established. -/
-theorem SensorCycle.mark_budget {n θ ε route s u i p} {e : @Execution n θ route s u}
-    (cycle : SensorCycle e i p) (hb : PhysicalBox θ ε) (hv : RawValid s)
-    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p) : e.ledger.mark i p ≤ 1 / 10 := by
+/-- The actual sensor decomposition places the entire MARK ledger in its
+selected MARK phase, including all zero-time interleavings. -/
+theorem SensorCycle.mark_ledger_eq_phase {n θ route s u i p} {e : @Execution n θ route s u}
+    (cycle : SensorCycle e i p) (hv : RawValid s)
+    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p) :
+    e.ledger.mark i p = cycle.phases.markPhase.span.ledger.mark i p := by
   let st := cycle.trigger
   let mk := cycle.phases.markPhase
   let si := cycle.phases.silentPhase
@@ -31,8 +32,16 @@ theorem SensorCycle.mark_budget {n θ ε route s u i p} {e : @Execution n θ rou
     (er.span.mark_zero_aux i p .error (by decide) er.flows)
   have htail := er.rest.mark_zero_aux i p .ready (by decide)
     (er.rest.allStates_aux_flows i p .ready (cycle.error_rest_ready hv hr hno))
-  have hbound := mk.span.mark_charge_upper hb i p mk.flows
-  rw [st.charge,mk.charge] at hbound
+  linarith
+
+/-- One autonomous sensor cycle can add at most one full MARK charge, even
+before the main-mode and actuator-gate chronology has been established. -/
+theorem SensorCycle.mark_budget {n θ ε route s u i p} {e : @Execution n θ route s u}
+    (cycle : SensorCycle e i p) (hb : PhysicalBox θ ε) (hv : RawValid s)
+    (hr : s.raw i p = some s.time) (hno : NoArrivalAt e i p) : e.ledger.mark i p ≤ 1 / 10 := by
+  rw [cycle.mark_ledger_eq_phase hv hr hno]
+  have hbound := cycle.phases.markPhase.span.mark_charge_upper hb i p cycle.phases.markPhase.flows
+  rw [cycle.trigger.charge,cycle.phases.markPhase.charge] at hbound
   norm_num only [protectedFloor] at hbound
   linarith
 
@@ -95,19 +104,26 @@ theorem SensorCycle.mark_flows {n θ route s u i p} {e : @Execution n θ route s
   rw [cycle.phases.markPhase.reconstruct,Execution.allFlows_append] at hrest
   exact hrest.1
 
+theorem Execution.mark_exposed_of_invariant {n θ ε route s u} (e : @Execution n θ route s u)
+    (hb : PhysicalBox θ ε) (hs : PhysicalInvariant θ s) (i : Fin n) (p : Port)
+    (ha : e.AuxFlows i p .mark) (hm : e.AllStates (fun v => v.main i ≠ .ready))
+    (hcap : e.AllFlows (fun {v w} f => ∀ t ∈ Icc v.time w.time, f.path t i .b < 11 / 10)) :
+    e.MarkExposed i p := by
+  induction e with
+  | nil => trivial
+  | @cons s v u move rest ih =>
+    have hnext := (.cons move (.nil _) : Execution θ route s v).physical_invariant hb hs
+    cases move with
+    | flow f => exact ⟨f.mark_open_of_invariant hb hs i p ha.1 hm.1 hcap.1,ih hnext ha.2 hm.2 hcap.2⟩
+    | jump j => exact ih hnext ha hm.2 hcap
+
 theorem Execution.mark_exposed_of_upper {n θ ε route born s u} (e : @Execution n θ route s u)
     (past : Execution θ route born s) (hborn : BirthState born) (hb : PhysicalBox θ ε)
     (i : Fin n) (p : Port) (ha : e.AuxFlows i p .mark)
     (hm : e.AllStates (fun v => v.main i ≠ .ready))
     (hc : e.AllFlows (fun {v w} f => ∀ t ∈ Icc v.time w.time, f.path t i .b < 11 / 10)) :
     e.MarkExposed i p := by
-  induction e with
-  | nil => trivial
-  | @cons s v u move rest ih =>
-    let progressed := past.append (.cons move (.nil _))
-    cases move with
-    | flow f =>
-      exact ⟨f.mark_open_of_reachable past hborn hb i p ha.1 hm.1 hc.1,ih progressed ha.2 hm.2 hc.2⟩
-    | jump j => exact ih progressed ha hm.2 hc
+  exact e.mark_exposed_of_invariant hb
+    (past.physical_invariant hb (hborn.physical_invariant hb)) i p ha hm hc
 
 end KernelR.Hybrid

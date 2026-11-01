@@ -165,11 +165,11 @@ theorem Execution.fast_tail_no_emissions {n θ route s u} (e : @Execution n θ r
       (segment.no_emissions_if_not_ready i (segment.allStates_mono (fun v hv => by rw [hv]; decide) hstates))
       (exit.no_emissions_if_not_ready i (by rw [hv]; decide)) hquiet
 
-theorem MainTrigger.only_emission {n θ route born s u i} {e : @Execution n θ route s u}
-    (tr : MainTrigger e i) (past : Execution θ route born s) (hborn : BirthState born)
+theorem MainTrigger.only_emission_of_valid {n θ route s u i} {e : @Execution n θ route s u}
+    (tr : MainTrigger e i) (hv : RawValid s)
     (p : Port) (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
     (hno : ∀ q, NoArrivalAt e i q) : e.emissionTimes i = [tr.beforeFire.time] := by
-  have hraw := e.raw_expired_states i s.time (past.raw_valid hborn.raw_valid)
+  have hraw := e.raw_expired_states i s.time hv
     (fun q => by
       by_cases hq : q = p
       · subst q; exact Or.inr hr
@@ -183,6 +183,12 @@ theorem MainTrigger.only_emission {n θ route born s u i} {e : @Execution n θ r
   have hquiet := tr.rest.fast_tail_no_emissions i s.time tr.fast_after tr.charge
     (by linarith [tr.early]) hraw.2.2 hnoRest
   rw [tr.emission_times,hquiet]
+
+theorem MainTrigger.only_emission {n θ route born s u i} {e : @Execution n θ route s u}
+    (tr : MainTrigger e i) (past : Execution θ route born s) (hborn : BirthState born)
+    (p : Port) (hr : s.raw i p = some s.time) (ho : ∀ q, q ≠ p → s.raw i q = none)
+    (hno : ∀ q, NoArrivalAt e i q) : e.emissionTimes i = [tr.beforeFire.time] := by
+  exact tr.only_emission_of_valid (past.raw_valid hborn.raw_valid) p hr ho hno
 
 /-- A learned isolated input emits exactly once. The first guard and the whole
 remaining trace, including incomplete protected phases, determine the count. -/
