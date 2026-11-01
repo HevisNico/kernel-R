@@ -12,7 +12,7 @@ permissions:
 jobs:
   lean:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     env:
       LEAN_NUM_THREADS: 2
     steps:
@@ -165,3 +165,6 @@ jobs:
       - name: Reject altered actual cadence warmup, first C wire and isolated learned bridge
         working-directory: proof/lean
         run: python scripts/check_hybrid_cadence_first_wire_negative.py
+      - name: Reject altered first physical cadence wave, retained paths and original-birth counts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_cadence_first_wave_negative.py

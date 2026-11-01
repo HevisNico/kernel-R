@@ -2,14 +2,15 @@
 
 This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
 Mathlib v4.35.0. It is a **partial formalization**. The actual protocol is now
-constructed from A's original birth through the first cadence wire receipt
-at **H in (652.7,653.3)**, including independent B/C births at160/480.
-Cumulative counts are **A38/B43/C15**, with exactly **21** Cport0 sources656..736
-remaining. A and B are prepared at q=0.1; A has no RAW and B has fresh port2
-RAW at H. C retains its real FAST cut and unfinished physical path. The earlier
-639.9 checkpoint has all three cells prepared at rest with RAW absent and25
-C640..736 sources. The full later cadence remains conditional; Python interval
-implementations have not been verified in Lean.
+constructed from A's original birth through the first cadence wave **C→B→A**,
+ending at A's actual FIRE **F_A in (653.8,655.1)**. Both independent B/C births
+at160/480 are retained. Cumulative counts are **A39/B44/C15**, with exactly
+**21** Cport0 sources656..736 pending. A is FAST at q=1; B/C retain actual cuts
+and unfinished physical paths. No all-cells-prepared or all-RAW-absent endpoint
+is asserted. Own memories remain as at the first C-to-B receipt, including
+Cport0+1.8 and no new MARK. The historical639.9 checkpoint has all three cells
+prepared at rest, RAW absent and25 C640..736 sources. The full later cadence
+remains conditional; Python interval implementations have not been verified in Lean.
 
 ## Repeatable learned one-cell operation
 
@@ -34,8 +35,8 @@ physical event budget. These invariants alone do not supply future executions.
 
 | Proof layer | Current result | Explicit boundary |
 |---|---|---|
-| Constructed execution | From the original READY A birth through C teaching639.9 and the first cadence wire at H in(652.7,653.3); A38/B43/C15 | A/B prepared at q=0.1; Bport2 RAW fresh, C actual FAST cut retained; exact21 C656..736 sources |
-| Conditional physical protocol | Complete cadence at789.9 (A54/B61/C34) | The later actual execution is supplied; both genuine births and the first C-to-B cadence receipt are constructed |
+| Constructed execution | Original READY birth through the first C→B→A wave; A FIRE in(653.8,655.1), cumulative A39/B44/C15 | A FAST/q=1, B/C actual cuts and continuations retained; exact21 C656..736 sources |
+| Conditional physical protocol | Complete cadence at789.9 (A54/B61/C34) | The later actual execution is supplied; both genuine births and the first C→B→A cadence wave are constructed |
 | Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing/new future queues; broader birth domains, network routing and universal refinement remain open |
 | Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
@@ -93,12 +94,23 @@ C's same FAST flow is cut at H with its remaining execution retained; raw expiry
 may lie on either side of that cut. All other gains and every recovery remain
 as at639.9. The endpoint is `CompleteThrough` with exactly21 C656..736 sources.
 
-The next construction is B's actual response and its relay to A, followed by
-the remaining period-four cadence through789.9. The conditional analysis already
-derives later counts and memories from a supplied execution. Retained probes,
-fine enclosure soundness and physical every-N refinement remain open. The
-[robust coverage guide](ROBUST_COVERAGE.md) describes conditional noisy/drifting
-slow-chain results.
+`birth_protocol_cadence_first_wave_exists` in
+[HybridBirthCadenceFirstWave](KernelR/HybridBirthCadenceFirstWave.lean) returns
+`ConstructedCadenceFirstWave`. B's actual response issues its Aport2 token;
+the actual A receipt is in(653.4,654.4). A's learned response then constructs
+its actual FIRE before655.1, retaining the same B/C paths at that date.
+The cumulative counts are A39/B44/C15 and the queue remains exactly21 C
+sources656..736. Every gain and recovery is unchanged from the first C-to-B
+receipt. A is FAST with q=1, while B/C remain at their actual physical cuts;
+this firing checkpoint retains the unfinished B/C paths.
+
+The next construction is the global source656 handoff and subsequent
+period-four cadence through789.9. A local SLOW MARK-only constructor is
+available separately; it does not yet supply that global656 handoff.
+The conditional cadence analysis already derives later counts and memories
+from a supplied execution. Retained probes, fine enclosure soundness and
+physical every-N refinement remain open. The [robust coverage guide](ROBUST_COVERAGE.md)
+describes conditional noisy/drifting slow-chain results.
 
 ## Reproduce
 
@@ -154,6 +166,7 @@ python3 scripts/check_hybrid_reverse_epoch_negative.py
 python3 scripts/check_hybrid_c_teaching_existence_negative.py
 python3 scripts/check_hybrid_cadence_first_strong_negative.py
 python3 scripts/check_hybrid_cadence_first_wire_negative.py
+python3 scripts/check_hybrid_cadence_first_wave_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -179,13 +192,15 @@ The 50 new pairs in `check_hybrid_c_teaching_existence_negative.py` pass for
 the actual C birth, retained weak/SLOW paths, protected MARK, real three-cell
 execution, own memories, A38/B43/C14 and exact 25-source queue. Every valid
 conclusion compiles and every altered conclusion is rejected.
-The first-cadence-wire checkpoint passed the full pinned build (9,434 jobs)
-and global axiom audit (24,743 project theorems). Source identities cover381 Lean
-files and five unchanged upstream modules. Generated evidence, all16 robust
-certificates and12 project tests pass. The22 first-strong and40 first-wire paired
-controls also pass: each valid conclusion compiles and every altered conclusion
-is rejected with a Lean diagnostic. These bring the configured CI total to708;
-that inventory is not a claim of a local rerun of every suite.
+The first-wave checkpoint passed the complete pinned build (9,440 jobs) and
+global audit (24,948 project theorems). Source identities cover387 Lean files
+and five unchanged upstream modules. Generated evidence, all16 robust
+certificates and12 project tests pass. The43 new first-wave paired controls
+pass: each valid conclusion compiles and every altered conclusion is rejected
+with a Lean diagnostic. The preceding22 first-strong and40 first-wire paired
+controls also passed. CI configures751 paired controls; this inventory does
+not assert a local rerun of every suite. Fresh CI status is reported on the PR.
+
 
 ## Coverage and hypotheses
 
@@ -291,8 +306,8 @@ local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Continue the constructed first C-to-B cadence receipt through B's actual
-   response, the relay to A and the remaining cadence to789.9. Its conditional
+1. Continue the constructed first C→B→A wave through the global source656
+   handoff and the remaining cadence to789.9. Its conditional
    analysis is already checked. Preserve global queues, own
    memories, actual wire provenance and port availability.
 2. Prove the remaining real enclosure memberships, retained probe responses,

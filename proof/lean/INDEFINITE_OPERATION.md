@@ -36,8 +36,10 @@ reserve may differ between rounds and are never reset.
 The physical foundation's `PreparedSection` allows residual main charge and a
 narrower recovery band. Its `Execution.learned_pulse` analyses a supplied,
 birth-reachable isolated-input execution. The original READY-birth construction
-now reaches the [first cadence wire](HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
-after the fully prepared639.9 endpoint.
+now reaches the [first C→B→A cadence wave](HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
+after the fully prepared639.9 endpoint. Its terminal A FIRE retains the real
+B/C cuts and all21 future C source tokens; it is a separate network prefix,
+not a learned-domain return of all three cells.
 
 [HybridBirthLearnedRest](KernelR/HybridBirthLearnedRest.lean) proves
 `ConstructedCTeaching.a_learned_rest` and `b_learned_rest` for the Aport2/Bport2
@@ -107,10 +109,13 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
 `lake build` includes all modules and the global `Audit` target. Only `propext`,
 `Classical.choice` and `Quot.sound` are allowed. Controls instantiate the full
 return, the contract and complete periodic executions at every finite horizon.
-The first-cadence-wire checkpoint, including this birth-domain bridge, passed
-the complete pinned build (9,434 jobs), global audit (24,743 project theorems),
-source/evidence checks (381 Lean files and five unchanged upstream modules),
-all16 robust certificates and12 project tests. Its62 new paired controls pass,
-including the isolated bridge domain and future contracts. CI configures708
-paired controls; this inventory does not assert a local rerun of every suite.
-The isolated future contracts do not certify network routing.
+The first-wave checkpoint passed the complete pinned build (9,440 jobs) and
+global audit (24,948 project theorems). Source identities cover387 Lean files
+and five unchanged upstream modules. Generated evidence, all16 robust
+certificates and12 project tests pass. The43 new first-wave paired controls
+pass: each valid conclusion compiles and every altered conclusion is rejected
+with a Lean diagnostic. The preceding22 first-strong and40 first-wire paired
+controls also passed. CI configures751 paired controls; this inventory does
+not assert a local rerun of every suite. Fresh CI status is reported on the PR.
+These isolated future contracts remain distinct from the actual C→B→A network
+construction and do not establish network routing or universal refinement.

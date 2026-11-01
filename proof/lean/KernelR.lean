@@ -323,3 +323,9 @@ import KernelR.HybridNeutralFutureFrame
 import KernelR.HybridCadenceFirstWire
 import KernelR.HybridBirthCadenceFirstWire
 import KernelR.HybridBirthLearnedRest
+import KernelR.HybridCadenceStrongSlowSpan
+import KernelR.HybridCadenceMarkOnlyExistence
+import KernelR.HybridNeutralHeadExecutionProduct
+import KernelR.HybridCadenceFirstRelayWire
+import KernelR.HybridCadenceFirstAFire
+import KernelR.HybridBirthCadenceFirstWave
