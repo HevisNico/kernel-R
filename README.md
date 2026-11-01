@@ -7,6 +7,18 @@ teaching experiments, and their new local computer-assisted proofs. The older
 A22 network engines and historical proof archive stay in the
 [upstream repository](https://github.com/HevisNico/a22-going-further).
 
+## Active development: physical Lean proofs
+
+We are extending the Lean formalization to constructed physical executions from
+birth, including learning, staged births, routed pulses and concurrent cells.
+
+- [Draft PR #7](https://github.com/HevisNico/kernel-R/pull/7) constructs the first complete A-to-B teaching epoch through time 319.9, deriving A28/B14 and both cells' prepared states from the original birth and protocol assumptions.
+- [Draft PR #12](https://github.com/HevisNico/kernel-R/pull/12) constructs repeatable learned one-cell cycles and compatible finite-horizon continuations, with fixed parameters and empty routing.
+
+These developments are under review on their respective branches. An end-to-end
+physical Lean proof for every finite N remains open. Follow the PRs for current
+checkpoints, exact assumptions and validation.
+
 ## Start here
 
 - [N-cell composition theorem](proof/reciprocal_composition/THEOREM.md): every finite chain, with source-length and path-jitter budgets.
