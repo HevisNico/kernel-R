@@ -228,3 +228,15 @@ import KernelR.HybridSecondWiredArrival
 import KernelR.HybridFirstReceiverFire
 import KernelR.HybridFirstReceiverFastEnd
 import KernelR.HybridConstructedReceiverFire
+
+import KernelR.HybridVariableGapSlowSource
+import KernelR.HybridLowRecoverySlowSpan
+import KernelR.HybridLowRecoverySlowContinuation
+import KernelR.HybridFirstPostReceiverPair
+import KernelR.HybridThirdSenderFire
+import KernelR.HybridThirdWiredArrival
+import KernelR.HybridPortSlowAux
+import KernelR.HybridProtectedInputCycle
+import KernelR.HybridProtectedInputShortCycle
+import KernelR.HybridLearnedSenderReturnAtNext
+import KernelR.HybridFirstCoupledPreparedPair

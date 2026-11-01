@@ -68,8 +68,13 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    retained return. The reverse contact is closed, but B's singleton output
    is retained and the queue stays46. Its genuine FAST exit at FIRE+1 is also
    constructed: B SLOW with q=0.25, auxiliaries READY, RAW absent, own gain
-   and low recovery retained. The protected third input and later teaching
-   continuation remain open.
+   and low recovery retained. A176 and the third actual A-to-B token are
+   also constructed, preserving B's actual SLOW charge and own memories.
+   The protected B input and both returns now reach the common prepared
+   section184: both q=0.1, global ERRORB0/MARKB0.1, fresh A184 RAW, no B RAW,
+   and44 external sources. Four actual post-birth outputs and seven deliveries
+   are derived. The remaining concurrent teaching train and later births
+   remain open.
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.

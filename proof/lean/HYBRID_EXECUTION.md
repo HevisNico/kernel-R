@@ -618,9 +618,69 @@ birth execution and genuine B birth. Its exact post-birth output list is
 A168 and Bport1 at H2. `CompleteThrough` holds at the real FIRE and FAST
 exit. These counts and calendars are conclusions of the constructed traces.
 
-B's later protected input, the rest of the teaching epoch and subsequent
-births still need their global executions. The full789.9 and every-N
-execution-existence goals remain open.
+## Constructed third contact and common prepared section184
+
+`birth_protocol_first_post_receiver_pair_exists` resumes the actual A
+return and B's actual low-recovery SLOW trajectory to176. A reopens at
+q=0.1 and waits; B retains its own charge clock from its first FAST exit.
+A real arrival consumes the existing A176 source, leaving45 external
+tokens: thirteen A sources184..280 and the unchanged thirty-two B sources.
+B is still SLOW at176; only q>0.1 and q≤0.25 are asserted there.
+
+`HybridLowRecoverySlowSpan` builds a neutral SLOW continuation without
+adding or delivering a contact token. `HybridLowRecoverySlowContinuation`
+extends its actual endpoint, including the current energy and auxiliary
+coordinates, and proves concatenation with the earlier span. The stronger
+q in(0.14,0.16) estimate is used only for a date7.9..8.1 after the preceding
+received input. The variable-gap local-source module supplies these scalar
+guards; no queued local candidate is substituted for the global wire.
+
+`HybridThirdSenderFire` constructs the real source176 response of A while
+B follows a true SLOW tail. The same own root equation gives F3=F2+8.
+A genuine global FIRE appends exactly one Bport1 token, so45 becomes46.
+`birth_protocol_third_wired_arrival_exists` cuts A's actual FAST path at
+H3=F3+forward(F3), extends B's current SLOW span to that date, weaves the
+two real prefixes and consumes the appended token with a real arrival.
+The queue returns to45. The fresh independent delays imply
+H3−H2 in[7.9,8.1]; H3 lies in(176.7,177.3). B is SLOW at q in(0.14,0.16),
+with its own low recovery, learned gain and fresh RAW originH3. A retains
+the exact state and next-flow witness at its maximal cut. Raw validity,
+physical invariants and terminal saturation hold at this receipt.
+
+`HybridProtectedInputShortCycle` constructs the protected port1 response
+from that actual B entry. Its MARK adds0.1 to B's own recovery; ERROR is
+zero and gains remain fixed. The real sensor phases include RAW expiry,
+then a SLOW flow reaches its own logarithmic root and takes an actual reopen
+jump before source+65/12. A real quiet continuation reaches source+6.5 with
+PreparedSection, q=0.1, all auxiliaries READY and RAW absent. This date is
+strictly before184 for the actual H3. No READY property is inferred backward
+from a later endpoint.
+
+`HybridLearnedSenderReturnAtNext` resumes A's real retained FAST suffix,
+constructs its prepared SLOW return and waits until the next eight-gap source.
+`birth_protocol_first_coupled_prepared_pair_exists` weaves that actual A
+path to184 with B's protected cycle and genuine quiet wait to184, then
+consumes the already queued A184 occurrence. It starts from only the original
+A birth assumptions, independent physical fabrication box, arbitrary READY
+B newborn and forward-delay bounds.
+
+At184 both cells satisfy PreparedSection and have charge exactly0.1. A has
+fresh RAW184; all B RAW slots are absent. Both cells retain their own gains;
+B's own newborn recovery has gained0.1 and A's recovery is unchanged.
+Exactly44 external sources remain: twelve A sources192..280 and both
+sixteen-source Bport2 trains. On the actual global extension from H3,
+B's ERROR is0 on every port, its MARK is0.1 on port1 and0 elsewhere;
+no output occurs and the only delivery is A184. The global balances prove
+these doses after the physical traces have been constructed.
+
+The exact post-birth output list through184 is A atF1, A atF2, B atFB,
+then A atF3. Its seven deliveries are A160, Bport1 atH1, A168, Bport1 atH2,
+A176, Bport1 atH3 and A184. These calendars, counts, the remaining queue and
+CompleteThrough184 are conclusions of the original-birth factory.
+
+The remaining concurrent teaching train and subsequent births still need
+their global executions. The full789.9 and every-N execution-existence
+goals remain open.
 
 ## Checked implications
 

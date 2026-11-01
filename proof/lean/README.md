@@ -198,8 +198,19 @@ B fires in(169.1,170.2); its reverse contact is closed, so the output exists
 while the queue stays46. `birth_protocol_first_receiver_fast_end_exists`
 continues through B's real FAST exit at FIRE+1: main SLOW, q=0.25,
 auxiliaries READY and RAW absent. Its own low recovery and learned gains
-are retained. The protected third input and later teaching continuation
-still need their global executions; the trace reaching789.9 remains supplied.
+are retained. `birth_protocol_first_post_receiver_pair_exists` now resumes
+both true paths to176 and consumes A176, retaining B in SLOW and45 sources.
+`birth_protocol_third_wired_arrival_exists` constructs the next real A FIRE,
+issues its token and delivers it to B with q in(0.14,0.16), own low recovery
+and fresh RAW. The actual received gap remains[7.9,8.1].
+`birth_protocol_first_coupled_prepared_pair_exists` then constructs B's
+protected MARK and return, weaves it with A's true return and delivers A184.
+Both cells are prepared at184 with q=0.1; B's own recovery has gained0.1,
+its gains are unchanged, and44 external sources remain. The global B doses
+on this extension are ERROR0/MARK0.1. The exact post-birth trace contains
+four outputs and seven deliveries. The remaining concurrent teaching train
+and later births still need their global executions; the trace reaching789.9
+remains supplied.
 
 ## Reproduce
 
@@ -247,6 +258,7 @@ python3 scripts/check_hybrid_first_wire_negative.py
 python3 scripts/check_hybrid_first_interleaved_negative.py
 python3 scripts/check_hybrid_second_wire_negative.py
 python3 scripts/check_hybrid_receiver_fire_negative.py
+python3 scripts/check_hybrid_coupled_preparation_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
