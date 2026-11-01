@@ -1214,9 +1214,9 @@ and every altered conclusion is rejected. The 50 new pairs in
 `check_hybrid_c_teaching_existence_negative.py` also pass for C's real birth,
 weak and retained SLOW paths, protected MARK, true three-cell execution,
 own memories, cumulative A38/B43/C14 and exact 25-source queue.
-The complete build passes 9,407 jobs and the global audit checks 23,998 project
+The complete build passes 9,422 jobs and the global audit checks 24,523 project
 theorems, allowing only `propext`, `Classical.choice` and `Quot.sound`. Source
-identities pass for 354 Lean files and five unchanged upstream modules;
+identities pass for 369 Lean files and five unchanged upstream modules;
 generated evidence, all 16 robust certificates and 12 project tests pass.
 CI includes 646 paired controls in total. Fresh CI status is reported separately
 on the PR; the additions introduce no admitted proofs or project axioms.

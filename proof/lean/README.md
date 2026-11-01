@@ -9,6 +9,15 @@ sources640..736. All three cells are prepared at q=0.1 with RAW absent and
 own acquired memories retained. The later cadence execution remains conditional;
 the Python interval implementations have not been verified in Lean.
 
+## Repeatable learned one-cell operation
+
+The [one-cell extension](INDEFINITE_OPERATION.md) constructs a physical
+`PulseContract` with one emission per input and settling duration `7.5`, then
+compatible responding prefixes and complete executions at every finite horizon.
+It uses an exact-rest learned domain, fixed parameters, canonical amplitudes and
+empty routing. Connecting the birth/training constructors to this domain,
+network routing and universal refinement remain open.
+
 ## Physical execution foundation
 
 The [hybrid execution guide](HYBRID_EXECUTION.md) maps the operational equations,
@@ -22,6 +31,7 @@ physical event budget. These invariants alone do not supply future executions.
 |---|---|---|
 | Constructed execution | From the original READY A birth through the reciprocal epoch at459.9 and C teaching at639.9; A38/B43/C14 | Three cells prepared/q=0.1, RAW absent; exact25 C640..736 sources and own memories retained |
 | Conditional physical protocol | Complete cadence at789.9 (A54/B61/C34) | The later actual execution is supplied; both genuine births and the prefix through639.9 are constructed |
+| Learned one-cell continuation | Constructed complete cycles and compatible finite-horizon executions for input spacing >=7.5 | Exact-rest learned domain and empty routing; the birth-to-domain connection and universal refinement remain open |
 | Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
 
@@ -150,9 +160,9 @@ The 50 new pairs in `check_hybrid_c_teaching_existence_negative.py` pass for
 the actual C birth, retained weak/SLOW paths, protected MARK, real three-cell
 execution, own memories, A38/B43/C14 and exact 25-source queue. Every valid
 conclusion compiles and every altered conclusion is rejected.
-The complete build passes 9,407 jobs; the global audit checks 23,998 project
+The complete build passes 9,422 jobs; the global audit checks 24,523 project
 theorems using only the three allowed logical axioms. Source identities pass
-for 354 Lean files and five unchanged upstream modules. Generated evidence,
+for 369 Lean files and five unchanged upstream modules. Generated evidence,
 all 16 robust certificates and 12 project tests pass. CI includes 646 paired
 controls in total; fresh CI status is reported separately on the PR.
 

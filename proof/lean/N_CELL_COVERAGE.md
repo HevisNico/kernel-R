@@ -90,9 +90,9 @@ sources and wires, retained own memories and A38/B27: all valid conclusions
 compile and all altered claims are rejected. The 50 new pairs in
 `python scripts/check_hybrid_c_teaching_existence_negative.py` pass for the
 actual C birth/teaching, three-cell execution, own memories and A38/B43/C14.
-The complete build passes 9,407 jobs; the audit checks 23,998 project theorems
+The complete build passes 9,422 jobs; the audit checks 24,523 project theorems
 with only `propext`, `Classical.choice` and `Quot.sound`. Source identities
-(354 Lean files, five unchanged upstream modules), generated evidence, all
+(369 Lean files, five unchanged upstream modules), generated evidence, all
 16 robust certificates and 12 project tests pass. CI includes 646 paired controls
 in total; fresh CI is reported separately on the PR. No physical leaf/relay
 premise is replaced by a project axiom.
