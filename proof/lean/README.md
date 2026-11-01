@@ -58,9 +58,14 @@ A separated prepared train starting at exact resting charge now also has its
 actual emission calendar: every input date plus one unique real response-root
 latency in (0.3,0.9), derived from its preserved physical gain. This retains
 other-cell traffic and does not assume a latency box.
-The later routed calendars, post-birth source classification, combined pulse
-case, fine real enclosures, progress and complete execution-to-abstraction
-theorem remain open.
+Gated-contact conservation now derives actual wire inputs from those physical
+emissions, retaining future external sources and other-cell traffic. Once A's
+input at 160 is active with its fifteen successors pending, the A-to-B contact
+gives exactly sixteen B arrivals before 281.3 and period-eight gaps in [7.9,8.1]
+with independent wire jitter. The full connection from both birth-boundary
+alternatives and B's pulse/output classification still remain open.
+The later routed phases, combined pulse case, fine real enclosures, progress
+and complete execution-to-abstraction theorem remain open.
 
 ## Reproduce
 
@@ -91,6 +96,7 @@ python3 scripts/check_hybrid_invariant_negative.py
 python3 scripts/check_hybrid_staged_negative.py
 python3 scripts/check_hybrid_boundary_negative.py
 python3 scripts/check_hybrid_calendar_negative.py
+python3 scripts/check_hybrid_routed_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

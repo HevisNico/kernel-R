@@ -22,7 +22,9 @@ The distinction is explicit in theorem signatures, not hidden in project axioms.
 | Same-gain root ordering | `same_gain_ready_comparison`, `first_crossing_no_later` | Residual charge cannot delay the first crossing when comparing the same realized gain |
 | Local certificate endpoints | `Certificates.Composition003`, `Composition010` | All 162 strict comparisons and validity of all 352 rational enclosures in the two committed certificates |
 
-The finite signal interface records an exact event count, so its refinement\ncontract excludes both missing and additional emissions. The packet representation\nincludes bounded padding phases beyond the finite packet.
+The finite signal interface records an exact event count, so its refinement
+contract excludes both missing and additional emissions. The packet representation
+includes bounded padding phases beyond the finite packet.
 Only indices below m+L represent actual events. This lets retained phase errors be
 selected without adding a physical independence or retiming assumption.
 
@@ -32,13 +34,18 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
 
 ## What is still required for the full physical theorem
 
-1. A complete hybrid execution semantics for R: continuous state, guards,
-   simultaneous events, delayed canonical pulses, caps and reserve gating.
+1. Instantiate the existing hybrid execution semantics and staged-birth extension
+   with the leaf/relay protocols, including their source queues and contact gates.
+   Prove protocol-specific existence/progress, port availability and terminal
+   saturation. The semantics, physical bounds and finite-prefix event budget
+   are already checked; they do not alone construct these executions.
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
    physical quantities lie between those endpoints.
-3. Preparation reachability, including port permutation, exact return to rest
-   and reserve invariance across all event boundaries, for each allowed device.
+3. Complete preparation reachability for the leaf/relay protocols, including
+   port permutations and later staged introductions. The first low-port phase,
+   its transfer across a birth at 160, prepared-input returns and physical
+   reserve invariance are checked in the [hybrid guide](HYBRID_EXECUTION.md).
 4. Proofs of the leaf refinement and `RelayLaw` from those semantics. In
    particular, no omitted or extra emissions, the full protected doses, the
    residual-raw-tail bound and the first-crossing latency bounds must be derived.

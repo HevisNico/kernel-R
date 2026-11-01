@@ -121,6 +121,10 @@ for every initial state or for the training protocols; those remain unproved.
 | `HybridBoundaryIdle` | A prepared cell at exact resting charge stays prepared through input-free time and terminal-date deliveries; zero-time guards exclude spurious departures or emissions | Actual execution and arrivals only at its terminal date |
 | `HybridBirthPreparation` | With both 16-token source trains already queued, derive preparation at 128, twelve emissions and exact doses through 160, then transfer the prepared state and acquired memories across a birth at 160 | Actual executions, READY receiving auxiliaries, empty pre-birth routing and the birth date are supplied; post-birth calendars and existence remain open |
 | `HybridPreparedCalendar` | Derive a unique real rest-started firing latency in (0.3,0.9), identify actual learned-output dates and translate an entire separated input calendar by that one latency | Exact initial q=0.1, strong-gain and current-invariant bounds, actual receiving-cell calendar and return horizon; fresh wire jitter remains separate |
+| `HybridCellDueSources` | Exact strictly past receiving-cell source prefix and retained later queue, with other-cell traffic present | Filtered initial queue, no incoming route at actual emissions, future terminal queue and strict source-date separation |
+| `HybridRoutedInputs` | Actual receiving-cell deliveries equal the ordered issued wire tokens while future external sources remain pending | Issued tokens strictly before the endpoint, external sources strictly after it and a future terminal queue |
+| `HybridContact` | Causal half-open gated wire with fanout at most one; actual routed tokens extracted from actual sending emissions | The target projection of routing at actual emissions is fixed to the declared contact |
+| `HybridPreparedContact` | Derive actual wire inputs from a prepared sender's queue and ODE; specialize to sixteen B arrivals with fresh jitter and dates in (160.6,281.3) | A input 160 is already active; fifteen pending successors, current bounds, no return route to A and B sources at 320 or later; B output classification and staged-boundary queue connection remain open |
 
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
@@ -502,6 +506,51 @@ bounds, separated inputs with gaps at least 7.5, and the final quiet horizon
 remain premises. Fresh per-pulse wire delays still need their own bounds; this
 result does not make routed input dates periodic or instantiate the A-to-B queue.
 
+
+## Actual routed calendars and gated contacts
+
+`HybridCellDueSources` extends strict-past source conservation to one receiving
+cell. Its initial filtered queue may be any permutation of a past prefix and
+later tokens. If actual routes do not target that cell, pending urgency and
+chronology determine the exact delivered prefix at a shared port. The terminal
+filtered queue retains every later token with multiplicity. All other cells'
+queues, arrivals and routed traffic remain in the execution.
+
+`HybridRoutedInputs` supplies the complementary case: the receiving cell's
+external sources are all strictly later than the terminal date, while every
+routed token to that cell is strictly past. The actual deliveries then permute
+exactly the actual issued tokens to that cell. A future terminal queue is
+sufficient; no `CompleteThrough` or arrival calendar is assumed. Chronological
+one-port issued tokens fix the full ordered delivery list. Strictness matters:
+a routed token due exactly at the terminal date may still be pending.
+
+A `Contact` fixes source, target, receiving port, a half-open firing gate and a
+per-emission delay function. Its router is causal for nonnegative delays and has
+fanout at most one. `issuedTo_contact` extracts its tokens from actual sending
+emissions. Its routing premise fixes only the receiving-cell projection and
+only at actual emissions; other destinations remain unrestricted.
+
+`prepared_contact_calendar_of_valid` combines the physical common-latency
+calendar with token conservation. The sender's input port and the contact's
+receiving port are separate data. Prepared return, gate containment and fresh
+wire delays in [0.3,0.4] imply that every emitted token is received in order by
+the terminal date. Other-cell traffic and later external sources are retained.
+
+For the declared A-to-B contact, `teaching_contact_sources` starts at 160 with
+A's input already active, exact prepared resting charge and its fifteen pending
+successors 168,176,...,280. The reverse contact is closed to A throughout this
+trace, the A-to-B firing gate is [160,310), B's external sources are due at 320
+or later, and the actual execution ends at 319.9. It derives exactly sixteen
+B deliveries from the source queue and ODE, without assuming A's outputs or B's
+arrival list. Their dates are 160+8k+latency+delay(160+8k+latency), strictly
+between 160.6 and 281.3. Successive dates have gaps in [7.9,8.1]: the common
+latency cancels while both fresh wire delays remain.
+
+The initial active input, pending A queue and current physical bounds in this
+specialization still need their full connection to both staged-birth boundary
+alternatives. B's pulse cases and fourteen outputs are not asserted by this
+calendar theorem. Protocol-specific execution existence remains open.
+
 ## Physical event budget
 
 For a network of n cells born at zero, let Q be the length of its actual initial
@@ -597,6 +646,7 @@ python scripts/check_hybrid_invariant_negative.py
 python scripts/check_hybrid_staged_negative.py
 python scripts/check_hybrid_boundary_negative.py
 python scripts/check_hybrid_calendar_negative.py
+python scripts/check_hybrid_routed_negative.py
 ```
 
 Every negative check first compiles its positive control. Existing physical
@@ -653,3 +703,10 @@ threshold, a shifted supposedly unique root, omission of the actual input
 origin or initially active input, and replacement of exact resting charge by
 the broader prepared band. A real root for gain 2 is constructed independently
 of any assumed execution.
+
+Routed controls reject changing the contact's half-open endpoints, erasing
+fresh wire jitter, using the receiving cell's emissions as the sender, mixing
+sender and receiver ports, deleting other-cell traffic or future pending
+queues, forcing delivery at the terminal date, changing the derived sixteen
+B deliveries, and replacing the proved coarse date bracket by a sharper
+unproved certificate bound. A causal contact with fanout one is constructed.
