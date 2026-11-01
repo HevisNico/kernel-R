@@ -224,3 +224,7 @@ import KernelR.HybridSameGainLatency
 import KernelR.HybridReceiverQuietReady
 import KernelR.HybridSecondSenderFire
 import KernelR.HybridSecondWiredArrival
+
+import KernelR.HybridFirstReceiverFire
+import KernelR.HybridFirstReceiverFastEnd
+import KernelR.HybridConstructedReceiverFire

@@ -192,8 +192,14 @@ next actual A FIRE and Bport1 receipt. Equality of A's own response roots
 proves F2=F1+8; the two fresh delays then give a received gap in[7.9,8.1].
 B's READY charge band at this next input comes from its real weak return,
 with own learned gain in[1.8,2.2], own low recovery and fresh RAW. The queue
-follows46→47→46. B's first strong response and later teaching inputs still
-need their global executions; the trace reaching789.9 remains supplied.
+follows46→47→46. `birth_protocol_first_receiver_fire_exists` now constructs
+B's first actual output from that learned entry, alongside A's real return.
+B fires in(169.1,170.2); its reverse contact is closed, so the output exists
+while the queue stays46. `birth_protocol_first_receiver_fast_end_exists`
+continues through B's real FAST exit at FIRE+1: main SLOW, q=0.25,
+auxiliaries READY and RAW absent. Its own low recovery and learned gains
+are retained. The protected third input and later teaching continuation
+still need their global executions; the trace reaching789.9 remains supplied.
 
 ## Reproduce
 
@@ -240,6 +246,7 @@ python3 scripts/check_hybrid_b_birth_product_negative.py
 python3 scripts/check_hybrid_first_wire_negative.py
 python3 scripts/check_hybrid_first_interleaved_negative.py
 python3 scripts/check_hybrid_second_wire_negative.py
+python3 scripts/check_hybrid_receiver_fire_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and

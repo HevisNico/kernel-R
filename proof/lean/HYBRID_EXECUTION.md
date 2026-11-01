@@ -581,10 +581,46 @@ emits once from A and delivers exactly this one wire token. Physical
 invariants, raw validity and `CompleteThrough` after receipt hold, including
 coincidences with A guards or RAW expiry.
 
-This is the actual learned entry for B's first strong response. That
-response, its later protected input, the rest of the teaching epoch and
-subsequent births still need their global executions. The full789.9 and
-every-N execution-existence goals remain open.
+## Constructed first B output and FAST exit
+
+`birth_protocol_first_receiver_fire_exists` starts from the same original
+A birth assumptions, independent two-cell physical box, arbitrary READY B
+newborn and forward-delay bounds. It constructs B's first real FIRE from
+the second actual wire receipt. No reaching execution, desired output count
+or firing date is supplied.
+
+`HybridFirstReceiverFire` projects B's actual learned entry with its current
+READY charge, own gain in[1.8,2.2], own low recovery and fresh RAW origin H2.
+The port1 learned controller constructs its first threshold root. A resumes
+its exact retained FAST continuation and prepared SLOW return; a maximal
+prefix at B's firing date is woven with B's pre-FIRE execution. The global
+queue stays the actual46 external sources throughout this span.
+
+A genuine global `Jump.fire` at cell1 produces B's singleton emission.
+Its date FB lies in(169.1,170.2), strictly between H2+0.4 and H2+0.9. The
+reverse contact is closed before320, so this FIRE appends no wire token.
+It remains an output event; it is never treated as a queue-neutral jump.
+B is FAST at q=1, its active auxiliary is SILENT above0.1 and its RAW origin
+is still H2. A retains the exact modes, charge and RAW at its real cut,
+without a READY assumption. Physical invariants, raw validity and saturation
+follow from B's strict post-FIRE guards and A's next actual flow.
+
+`HybridFirstReceiverFastEnd` then constructs B's real FAST and auxiliary
+continuation alongside another maximal prefix of A's retained return.
+It reaches FB+1 in(170.1,171.2), with B SLOW at q=0.25, all auxiliaries READY
+in their rest bands and RAW absent. The H2 tag has actually expired; it is
+not restarted. Both cells' gains and recovery, all46 sources and physical
+invariants are retained. No further emission or delivery occurs.
+
+`HybridConstructedReceiverFire` composes both witnesses with the original
+birth execution and genuine B birth. Its exact post-birth output list is
+`[(0,F1),(0,F2),(1,FB)]`; the exact delivery list is A160, Bport1 at H1,
+A168 and Bport1 at H2. `CompleteThrough` holds at the real FIRE and FAST
+exit. These counts and calendars are conclusions of the constructed traces.
+
+B's later protected input, the rest of the teaching epoch and subsequent
+births still need their global executions. The full789.9 and every-N
+execution-existence goals remain open.
 
 ## Checked implications
 
