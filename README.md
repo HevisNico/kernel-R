@@ -10,17 +10,18 @@ A22 network engines and historical proof archive stay in the
 ## Physical Lean proof status
 
 The [Lean formalization](proof/lean/README.md) constructs an actual execution
-from A's READY birth through the first complete A-to-B teaching epoch at 319.9
-(**A28/B14**), then the first real B-to-A receipt and interleaved source
-handoff at **352** (**A28/B15**, **27 future sources**). A's own birth port2
-log-gain has gained0.6; B's own newborn port2 log-gain has gained1.8. A's
-true weak-response cut and continuation are retained, while B is prepared
-at q=0.1 with fresh RAW352. The next construction step is B's response to
-that source and its second reverse wire/receipt. Parameters are fixed, independently perturbed
-within the stated fabrication boxes, with canonical pulses and bounded wire delays.
+from A's READY birth through the complete reciprocal epoch at **459.9**,
+with cumulative **A38/B27**. Both cells are prepared at q=0.1, RAW is absent,
+and the exact sixteen Bport2 sources480..600 remain. A retains its own birth
+log-gains +1.8 on ports0 and2; B retains its own newborn log-gains +0.6 on
+port1 and +1.8 on port2. Both recoveries are their own birth values +0.1.
+Actual FIRE jumps issue the wire tokens, and actual arrivals consume them.
+Parameters are fixed, independently perturbed within the stated fabrication
+boxes, with canonical pulses and bounded wire delays.
 
-The later three-cell analysis through 789.9 is checked **conditionally on
-supplied reaching executions and births**. Constructing that continuation and
+C's birth at480 and teaching through639.9 (**A38/B43/C14**), followed by the
+cadence through789.9 (**A54/B61/C34**), remain checked **conditionally on
+supplied later executions and births**. Constructing those continuations and
 an end-to-end physical Lean proof for every finite N remain open. See the
 [checkpoint and theorem map](proof/lean/HYBRID_EXECUTION.md).
 

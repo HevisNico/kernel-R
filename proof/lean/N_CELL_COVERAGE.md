@@ -4,11 +4,12 @@ This extension formalizes the compositional part of the
 [finite-chain argument](../reciprocal_composition/THEOREM.md).
 It does **not** turn the entire physical theorem into an unconditional Lean theorem.
 The distinction is explicit in theorem signatures, not hidden in project axioms.
-The separately constructed birth prefix currently reaches352: cumulative
-A28/B15, the first reverse wire actually received, the next B352 source
-actually delivered and exactly27 later external sources retained. A's true
-weak-response cut and continuation are kept; B is prepared at exact rest
-with fresh RAW352.
+The separately constructed birth prefix now reaches459.9: cumulative
+A38/B27, both cells prepared at exact rest with RAW absent, and exactly the
+sixteen Bport2 sources480..600 retained. Own gains and recoveries follow from
+the constructed sources, FIRE jumps, delayed receipts and guarded returns.
+This finite prefix does not supply the physical leaf/relay contracts for
+arbitrary introductions or every finite N.
 
 ## Checked composition
 
@@ -41,15 +42,14 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
 
 1. Instantiate the hybrid semantics with physical leaf/relay protocols, source
    queues and contact gates, proving existence, port availability and terminal
-   saturation. The constructed READY birth prefix now reaches352 after the
-   first actual reverse receipt and B352 source delivery: A28/B15 and27
-   sources (B360..440, B480..600). It derives own Aport2 log-gain+0.6 and
-   own independent B newborn port2 log-gain+1.8. A's main and auxiliaries
-   are READY, with rest-band sensors, no RAW and actual charge at least0.1;
-   its exact cut and continuation to H+7.5 are retained without assuming
-   an A PreparedSection or charge reset. B is prepared/q=0.1 with fresh
-   RAW352. The next B FIRE/second reverse receipt and complete459.9,
-   later C/cadence and arbitrary-N constructions remain open. See the
+   saturation. The constructed READY birth prefix reaches459.9 with A38/B27
+   and the exact sixteen B480..600 sources. Both cells are prepared/q=0.1,
+   RAW is absent, A's own port0/port2 log-gains have each gained1.8 and B's
+   own port1/port2 log-gains have gained0.6/1.8. Both own birth recoveries
+   have gained0.1; other gains are retained. The intermediate352 weak cut
+   and its real continuation remain part of the witness, without a charge
+   reset. C's actual birth/teaching, the cadence and arbitrary-N constructions
+   remain open. See the
    [current checkpoint and factory map](HYBRID_EXECUTION.md#constructed-protocol-checkpoint).
 2. Sound enclosure membership for the actual exp/log expressions and trajectories.
    The generated Lean files prove exact endpoint comparisons, not that the
@@ -58,7 +58,7 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    and port permutations. The physical analysis through 639.9 (A38/B43/C14)
    and the complete cadence through 789.9 (A54/B61/C34) already derive own
    memories, exact traffic and the final empty queue **conditionally on
-   supplied reaching executions and births**. Those conditional results do not
+   supplied later executions and C's birth**. Those conditional results do not
    construct later introductions or an arbitrary-N execution.
 4. Proofs of the leaf refinement and `RelayLaw` from those semantics. In
    particular, no omitted or extra emissions, the full protected doses, the
@@ -83,8 +83,14 @@ the constructed weak entry and first reverse FIRE, own memories and exact
 source/wire queues. The 40 additional paired controls in
 `python scripts/check_hybrid_reverse_receipt_negative.py` pass for the
 actual first receipt and352 handoff, own memories, exact queues and
-A28/B15. They leave the second reverse receipt and any complete459.9
-reaching execution open.
+A28/B15. The 40 subsequent pairs in `python scripts/check_hybrid_reverse_epoch_negative.py`
+cover the constructed reciprocal epoch through459.9, its actual
+sources and wires, retained own memories and A38/B27: all valid conclusions
+compile and all altered claims are rejected. The complete build passes 9,387
+jobs and the audit checks 23,423 project theorems with only the three allowed
+logical axioms. Source identities (334 Lean files, five unchanged upstream
+modules), generated evidence, all 16 robust certificates and 12 project tests pass.
+CI includes 596 paired controls in total; fresh CI is reported separately on the PR.
 
 The original written theorem and its authenticated snapshots are retained
 unchanged. This guide states the current machine-checked coverage separately.

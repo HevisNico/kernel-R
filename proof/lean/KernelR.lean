@@ -262,3 +262,16 @@ import KernelR.HybridFeedbackSenderReturn
 import KernelR.HybridFirstReverseInterleavedPair
 import KernelR.HybridFirstReverseInterleavedMemory
 import KernelR.HybridBirthFirstReverseInterleavedPair
+import KernelR.HybridPortWeakCut
+import KernelR.HybridReverseCoupledLearnedCycle
+import KernelR.HybridReverseCoupledLearnedTrain
+import KernelR.HybridReverseLatencyGeometry
+import KernelR.HybridReverseSourceWire
+import KernelR.HybridReverseWeakStep
+import KernelR.HybridFirstReverseNextWire
+import KernelR.HybridReverseWeakNextWire
+import KernelR.HybridReverseLearnedReturn
+import KernelR.HybridReverseLearnedEpoch
+import KernelR.HybridReverseEntryCompletion
+import KernelR.HybridReverseTeachingCompletion
+import KernelR.HybridBirthReverseTeaching
