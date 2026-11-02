@@ -10,7 +10,7 @@ Its cadence emits A16/B18/C20. All cells finish READY/q=0.1 with RAW absent and
 an empty global queue; own active gains A2/B2/C0 are birth+2.4 and own recoveries
 birth+0.3. Other teaching gains are preserved. This constructs one declared
 three-cell birth/source family; physical refinement for every finite N remains
-open, and work pauses after this N=3 publication.
+open. Its construction is now in progress; see the [finite-chain proof ledger](EVERY_N_PLAN.md).
 
 `birth_protocol_complete_cadence_exists` returns
 `ConstructedBirthCadenceProtocol`, retaining both genuine births and the
@@ -129,8 +129,9 @@ The public [headline](KernelR/Headline.lean) groups the existence, actual termin
 state/counts and own learned-memory theorems. The global
 [README](../../README.md) records its exact signatures and `#print axioms` outputs;
 the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
-to their operational definitions. N=3 is finalized; every-N obligations remain
-paused pending the user's explicit go-ahead.
+to their operational definitions. N=3 is finalized; the user has authorized the every-N work tracked in
+[EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
+those of the N=3 commit; subsequent finite-chain checkpoints have their own audit.
 
 Only `propext`, `Classical.choice` and `Quot.sound` are allowed; no physical
 leaf/relay premise is replaced by a project axiom.

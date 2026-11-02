@@ -169,9 +169,10 @@ The public [headline](KernelR/Headline.lean) groups the existence, actual termin
 state/counts and own learned-memory theorems. The global
 [README](../../README.md) records its exact signatures and `#print axioms` outputs;
 the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
-to their operational definitions. N=3 is finalized; every-N obligations remain
-paused pending the user's explicit go-ahead.
+to their operational definitions. N=3 is finalized; the user has authorized the every-N work tracked in
+[EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
+those of the N=3 commit; subsequent finite-chain checkpoints have their own audit.
 
 These isolated future contracts remain distinct from the actual C→B→A network
 construction and do not establish indefinite network operation or universal
-refinement. Work pauses after publication of the finite N=3 checkpoint.
+refinement. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).

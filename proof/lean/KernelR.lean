@@ -378,3 +378,16 @@ import KernelR.HybridLocalFutureFrame
 import KernelR.HybridPreparedFirstSource
 import KernelR.HybridShortLearnedNextSource
 import KernelR.HybridTeachingCadenceRouter
+import KernelR.HybridCadenceFirstStrongBudgetSpan
+import KernelR.HybridCadenceSecondStrongBudgetSpan
+import KernelR.HybridCadenceFullBudgetReturns
+import KernelR.HybridCadenceLeafFirstMarkK
+import KernelR.HybridCadenceSignalRefinement
+import KernelR.HybridCadenceWeakWarmupK
+import KernelR.HybridFiniteCadencePacketGaps
+import KernelR.HybridFiniteCausalChain
+import KernelR.HybridFiniteChainLeafPreparation
+import KernelR.HybridIndependentFiniteFamily
+import KernelR.HybridIndependentHeadProduct
+import KernelR.HybridLocalCadenceTailK
+import KernelR.HybridLocalSourceRestriction

@@ -193,7 +193,7 @@ The headline's `#print axioms` output is:
 These are Lean's standard logical axioms, not added physical hypotheses. The
 global audit restricts project theorem dependencies to this list. See the
 [complete reproduction commands](proof/lean/README.md#reproduce) and
-[workflow](.github/workflows/lean.yml). Source/evidence checks cover 436 Lean
+[workflow](.github/workflows/lean.yml). The verified N=3 baseline source/evidence checks cover 436 Lean
 source files, all 16 robust certificates and 12 project tests. All 226 new paired
 controls pass; the configured inventory is 1103 pairs, without asserting that
 every historical suite has been rerun locally. The complete export passes

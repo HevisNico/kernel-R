@@ -17,7 +17,7 @@ received calendar or output count is supplied. The earlier660 global prefix
 and C-only789.9 witness remain available. Fixed independent fabrication
 parameters, canonical pulses and bounded delays retain their declared scope;
 physical every-N, fine robustness, probes/copies and universal refinement remain
-open. Work pauses after this N=3 publication.
+open. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
 
 ## Physical definitions
 
@@ -446,7 +446,7 @@ The declared physical N=3 cadence is constructed. The general trace-based
 analytic APIs below still accept executions, while the concrete factory now
 supplies one for this birth/source family. Physical every-N refinement, finer
 operational robustness, retained probes/settings copies and universal
-refinement remain open. Work pauses after this N=3 checkpoint.
+refinement remain open. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
 
 ## Checked implications
 
@@ -1432,8 +1432,9 @@ The public [headline](KernelR/Headline.lean) groups the existence, actual termin
 state/counts and own learned-memory theorems. The global
 [README](../../README.md) records its exact signatures and `#print axioms` outputs;
 the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
-to their operational definitions. N=3 is finalized; every-N obligations remain
-paused pending the user's explicit go-ahead.
+to their operational definitions. N=3 is finalized; the user has authorized the every-N work tracked in
+[EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
+those of the N=3 commit; subsequent finite-chain checkpoints have their own audit.
 
 Only `propext`, `Classical.choice` and `Quot.sound` are allowed. Fresh CI status
 is reported separately on the PR.

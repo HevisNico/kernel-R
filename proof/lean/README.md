@@ -15,7 +15,7 @@ The earlier global660 and autonomous-C789.9 witnesses remain useful components.
 The new construction weaves C's real leaf packet with physical B and A receiver
 executions, issuing rather than preloading the wire tokens. Physical every-N
 refinement and universal refinement remain open; Python interval implementations
-have not been verified in Lean. Work pauses after publication of this N=3 result.
+have not been verified in Lean. The next finite-chain construction is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
 
 ## Repeatable learned one-cell operation
 
@@ -166,7 +166,7 @@ The active ports are A2/B2/C0, each gaining2.4 from its own birth, with recovery
 B1+0.6 and C1+0.6. Earlier residual charges, raw tails and energy paths are
 carried through actual executions rather than reset. Fine enclosure soundness,
 retained probes/settings copies, physical every-N refinement and universal
-refinement remain open. Work pauses after this N=3 publication.
+refinement remain open. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
 
 ## Reproduce
 
@@ -291,8 +291,9 @@ The public [headline](KernelR/Headline.lean) groups the existence, actual termin
 state/counts and own learned-memory theorems. The global
 [README](../../README.md) records its exact signatures and `#print axioms` outputs;
 the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
-to their operational definitions. N=3 is finalized; every-N obligations remain
-paused pending the user's explicit go-ahead.
+to their operational definitions. N=3 is finalized; the user has authorized the every-N work tracked in
+[EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
+those of the N=3 commit; subsequent finite-chain checkpoints have their own audit.
 
 
 ## Coverage and hypotheses
