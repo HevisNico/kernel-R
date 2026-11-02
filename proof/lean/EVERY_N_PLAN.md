@@ -1,12 +1,63 @@
 # Physical finite-chain proof: construction and checkpoints
 
 This continues the completed three-cell result in [PR #14](https://github.com/HevisNico/kernel-R/pull/14).
-The every-N work authorized on 2026-11-02 has its own branch,
-`proof/physical-finite-chain`, and [draft PR #15](https://github.com/HevisNico/kernel-R/pull/15).
+The existential every-N construction is published on `proof/physical-finite-chain`
+in [draft PR #15](https://github.com/HevisNico/kernel-R/pull/15), at head
+`46c5672e0a5909d153c8130102cff5f25f276487`. The newly proved universal-complete
+extension is published as a **draft PR** on `proof/universal-execution`,
+stacked on that proof branch at the user’s explicit request. The `main` README
+was updated separately by README-only PR #16 (merge
+`4e914909be0b2bb4bae1a71e8146351d8896115b`), without merging the new proof modules.
 The original staged A/B/C protocol remains a separate completed result:
 A54/B61/C34 at789.9, with B/C born at160/480. The scalable protocol below
 uses independently chosen cells all born at0; its source program and traffic
 counts belong to that different construction.
+
+## Every complete finite execution of the fixed program
+
+[UniversalChainHeadline](KernelR/UniversalChainHeadline.lean) now exports
+`every_finite_chain_every_complete_execution`, `terminal_state_and_counts`
+and `prescribed_errors_on_every_complete_execution`. The exact indexed order is
+
+> For every admissible positive finite N, K, independent fixed fabrication and
+> birth data, and bounded prescribed error family, there exist fixed native
+> delay functions and a constructed complete witness, such that **every finite
+> execution from the same initial state under that fixed router, complete at
+> the declared T**, has the claimed physical endpoint, memories, counts and
+> prescribed errors at its own actual fast-phase sending FIREs.
+
+Existence is retained, so the universal class is nonempty. `CompleteThrough e T`
+requires terminal date T, no enabled terminal jump and no token due by T still
+pending. It is a condition on a supplied finite operational execution, not a
+proof that a stopped prefix must progress, a maximal infinite run reaches T,
+or Zeno behavior is impossible.
+
+The generic [physical uniqueness theorem](KernelR/HybridUniversalExecution.lean)
+proves this observational comparison for any fixed finite network, parameter
+family and router, with `PhysicalBox` and initial `PhysicalInvariant`:
+complete executions through the same T have equal time, physical coordinates,
+main/auxiliary modes and RAW state, pending queues related by permutation, and
+**exactly equal ordered per-cell FIRE-date lists**. The global emission list is
+compared up to permutation, allowing legal simultaneous interleavings. Neither
+flow subdivision nor the syntactic order of independent instantaneous moves
+is made unique. No event-priority, target calendar or determinism premise is
+added to the protocol theorem.
+
+[HybridUniversalBirthCadenceChain](KernelR/HybridUniversalBirthCadenceChain.lean)
+transfers these observations to the already constructed common-birth program.
+For every competing complete trace, fast dates are its own full per-cell FIRE
+list after `drop (finiteChainPreparationCount n i)`: **14 preparation FIREs at
+the leaf, 12 at a relay**. The error index is zero-based on this suffix; wire j
+still leaves physical cell `n-j`. The same chosen fixed native functions
+realize the prescribed errors on every such trace. This does not move the
+native-function choice outside the prescribed-error quantifier or assert
+that every arbitrary router realizes a specified error sequence.
+
+The three public headline axiom profiles contain only `propext`,
+`Classical.choice` and `Quot.sound`. The [validation ledger](EVERY_N_PLAN.md)
+records the successful complete frozen-source build and global audit.
+The new draft is published on `proof/universal-execution` after the user’s
+explicit instruction; it is not merged automatically.
 
 ## Constructed family and exact quantifiers
 
@@ -42,13 +93,17 @@ ordered sender ledger. Wire j leaves physical cell `n-j`, represented by
 Preparation FIREs are excluded from this index, so the12 relay/14 leaf
 preparation counts do not shift it. Every delay lies in[0.3,0.4].
 
-The earlier `birth_cadence_chain_exists` native-function API remains available:
+The native universal factory `universal_birth_cadence_chain_exists` returns a
+complete witness together with its `AllComplete` guarantee for every admissible
+caller-supplied native delay family. The earlier
+`birth_cadence_chain_exists` native-function API remains available:
 it takes δ_j(t) with the same global bounds as caller inputs. The indexed
 factory now closes the prescribed-sequence realization obligation by building
 the chosen physical stage successively and preserving each actual sender
 ledger through subsequent weaves. It retains that same chosen stage in the
-birth wrapper; no uniqueness theorem or replacement by an unrelated existence
-witness is used.
+birth wrapper. That existential construction itself does not invoke uniqueness;
+the new universal layer subsequently compares every complete trace to its
+already constructed witness.
 
 The returned witness constructs the physical preparation and fast executions
 under **one fixed gated router**, retaining their concatenated ledgers,
@@ -83,7 +138,9 @@ cell i has depth `N-1-i`.
 | Terminal state and counts | `HybridCadenceChainEnvelope`, `HybridCadenceChainCounts`, `ConstructedBirthCadenceChain` | Actual finite horizon, own memories, per-cell and cumulative traffic |
 | Indexed per-emission errors | `HybridIndexedPreparedCadenceChain`, `HybridIndexedBirthCadenceChain`, `IndexedChainHeadline` | Arbitrary bounded prescribed sequences; generated fixed native functions realize every error on the final fast sender ledger; whole birth-to-terminal invariants retained |
 | Probes, cuts and settings copies | Written results and finite evidence | Retained physical semantics and proofs remain open |
-| Universal/operational extension | Constructive existence for the declared family | Every-admissible-execution refinement and operational drift/noise/amplitude histories remain open |
+| Every complete finite execution | `HybridFlowUniqueness`, `HybridJumpLocalDiamond`, `HybridJumpStripping`, `HybridExecutionUniqueness`, `HybridUniversalExecution`, `HybridUniversalBirthCadenceChain`, `UniversalChainHeadline` | Physical endpoint and exact per-cell FIRE lists at fixed T under the same router; no imposed jump priority |
+| Universal preparation extraction | `HybridUniversalChainPreparation` | Actual arbitrary-network prefixes through128 yield each relay/leaf preparation from source queues, with other-cell interleavings retained |
+| Progress and operational extensions | Separate obligations | Stopped-prefix progress, maximal/infinite runs, non-Zeno, drift/noise/amplitude histories and retained probes/copies are not supplied |
 
 This closes constructive physical existence for the new common-birth family;
 it does not establish all six conclusions of the written finite-chain theorem.
@@ -93,7 +150,31 @@ from the new construction.
 
 ## Validation and checkpoint discipline
 
-The final prescribed-error construction passes the complete frozen-source
+The complete frozen-source universal checkpoint passes **9,557 build jobs**
+and the global axiom audit of **27,741 project theorems**. Source checks cover
+**504 Lean files**, with all five inherited upstream modules unchanged.
+Generated evidence matches, **16 robust certificates** replay, and **12
+project tests** pass. The three public `UniversalChainHeadline` declarations,
+the native universal factory and the generic complete-execution comparison
+use only `propext`, `Classical.choice` and `Quot.sound`.
+
+All **20 new universal paired controls pass**: the valid conclusions compile
+first and each altered conclusion is independently rejected with a Lean
+diagnostic. The confirmed finite-chain inventory is **218 passing pairs**;
+CI configures **1,321 pairs**, plus axiom-audit corruption controls. These totals
+do not claim a fresh rerun of every historical suite. The frozen proof tree
+is `5dab922f4adb45ff42f53377dcc784b689a27d43`. Verified code commit:
+`eeff210df7a2c6297d532c10203312ded3c0bbf9`. Its Lean/workflow/control sources match
+the frozen export exactly; only its Markdown documentation differs. The
+following documentation/formatting commit records this identifier and removes one trailing space
+in the universal preparation source, without changing any Lean statement or
+proof. The branch is published as a draft PR by explicit user instruction;
+fresh CI is recorded separately and is not presumed successful.
+
+### Prescribed-error existence: historical validated checkpoint
+
+
+The earlier prescribed-error existence construction passed the complete frozen-source
 export: **9,543 build jobs**, **27,587 audited project theorems**, **490 Lean
 sources**, generated-evidence checks, **16 robust certificates** and **12
 project tests**. All three public indexed headline theorems depend only on
@@ -132,7 +213,7 @@ labeled green.
 That checkpoint's [native finite-chain headline](KernelR/FiniteChainHeadline.lean) groups
 existence from independent births, terminal memories/state and actual counts.
 Its three `#print axioms` outputs contain exactly the three permitted logical
-axioms. The [global README](../../README.md) exposes their exact signatures.
+axioms. The [native headline source](KernelR/FiniteChainHeadline.lean) retains those exact signatures.
 
 ### First exported checkpoint: historical validated baseline
 
@@ -150,4 +231,6 @@ Only `propext`, `Classical.choice` and `Quot.sound` are allowed by the audit.
 Each exported checkpoint must record exact build/audit results and its remaining
 quantified premises. The N=3 baseline remains separately completed. A pause
 stops new work; the branch, validated commits and this ledger provide the
-restart point. No merge is performed automatically.
+restart point. No push, PR publication or merge is performed without the user’s
+explicit instruction. The [prepared PR description](UNIVERSAL_EXECUTION_PR.md)
+records the new draft PR; it is not merged automatically.

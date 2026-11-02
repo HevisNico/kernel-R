@@ -2,9 +2,17 @@
 
 The [written finite-chain argument](../reciprocal_composition/THEOREM.md) now
 has a constructed physical common-birth family for every positive finite N,
-as well as its earlier abstract induction. This is constructive existence
-for the declared preparation/source/delay family; the full written theorem,
-including retained probes/copies and universal refinement, remains open.
+as well as its earlier abstract induction. The new universal-complete layer now
+also proves the terminal physical outcome and actual per-cell FIRE dates for
+**every complete finite execution** of the same fixed program through its
+terminal T. The full written theorem, retained probes/copies, operational
+perturbations and infinite/maximal-run progress remain separate obligations.
+
+See [UniversalChainHeadline](KernelR/UniversalChainHeadline.lean) and the
+[exact quantifiers and validation ledger](EVERY_N_PLAN.md). The indexed order
+is **∀ admissible data/errors, ∃ fixed native functions and a complete witness,
+∀ finite executions complete at T under that same router**. This is not a
+universal assertion about stopped prefixes or indefinite network runs.
 
 `every_finite_chain_exists` in
 [IndexedChainHeadline](KernelR/IndexedChainHeadline.lean), backed by
@@ -24,6 +32,12 @@ fast execution's actual ordered sender ledger. Sender j is physical cell
 `n-j`; error indices start at0 in `chain.fastExecution`, excluding preparation
 FIREs. The actual indexed stage is retained through the birth wrapper.
 The earlier `birth_cadence_chain_exists` API takes native functions as inputs.
+The new `ConstructedBirthCadenceChain.all_complete` comparison applies to its
+fixed router as well. `HybridUniversalExecution` proves the needed physical
+uniqueness, including capped actuator gates, and legal jump confluence; it is
+not an added caller premise. At an arbitrary complete trace, FAST errors are
+indexed after dropping its own12/14 preparation FIREs from the full list.
+
 The [construction ledger](EVERY_N_PLAN.md) records both APIs and validation.
 
 At `T=160+4*(K-1)+1.1*(N-1)+8`, all cells are READY/q=0.1 with no RAW and an
@@ -74,6 +88,7 @@ indefinitely repeatable network contract.
 | Constructed physical N=3 | `HybridLocalCadenceReceiver`, `HybridConstructedCadenceBC`, `HybridConstructedCadenceCascade`, `HybridBirthCadenceCascade`, `HybridBirthCadenceProtocol` | Actual leaf, B/A receivers and causal weave; A54/B61/C34 at789.9; separate from the new common-birth every-N family |
 | Constructed common-birth every-N | `HybridFiniteChainFamilyPreparation`, `HybridPreparedCadenceChainConstruction`, `HybridBirthCadenceChain` | Actual birth preparation, variable-K leaf, full-budget physical receivers and causal weave; terminal own memories and cumulative counts |
 | Prescribed-error whole-chain realization | `HybridIndexedPreparedCadenceChain`, `HybridIndexedBirthCadenceChain`, `IndexedChainHeadline` | Generated fixed native functions match every prescribed error on final fast sender FIREs; actual birth, router, memory and count invariants retained |
+| Every complete physical trace | `HybridUniversalExecution`, `HybridUniversalBirthCadenceChain`, `UniversalChainHeadline` | Every finite trace complete through fixed T, under the same initial state/router; physical endpoint equality, exact ordered per-cell FIRE lists and prescribed FAST errors |
 | Physical packet closure | `HybridLocalCadenceBudgetReceiver`, `HybridCadencePacketRelay` | Cumulative jitter≤0.15; directly proved high latencies[0.16,0.26], first≤rest, exact actual output packet |
 | Universal induction | `Chain.Induction.compose_every_finite_chain`, `root_contract` | Every positive finite N; validates every intermediate tail and cumulative jitter budget |
 | Actual stream interface | `Chain.Refinement.realized_chain` | Composes explicit routed streams, given a leaf refinement and local `RelayLaw` proofs |
@@ -105,9 +120,10 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    if using that API. The new physical construction instead uses the proved
    broad-latency `relayCadence` closure and does not assume this law.
 4. Formalize retained frozen probes, cuts/settings copies and their physical
-   preservation semantics; establish universal refinement across every
-   admissible execution and operational drift/noise/amplitude histories.
-   Neither finite existence result proves these conclusions.
+   preservation semantics and operational drift/noise/amplitude histories.
+   Universal refinement for the declared finite-complete class is now proved;
+   progress of stopped prefixes, maximal/infinite runs and non-Zeno behavior
+   remain distinct from that result.
 
 Existing `Doses`, `Flow`, `Recovery`, `Energy` and `Cadence` lemmas support
 these obligations but do not already discharge all of them. The older abstract

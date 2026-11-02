@@ -18,8 +18,10 @@ It now realizes arbitrary bounded prescribed per-emission wire errors.
 Its actual causal assembly uses one fixed gated router and has no prepared-state,
 reaching-execution, calendar or local-law premise. See
 [the every-N construction below](#constructed-common-birth-chain-for-every-finite-n).
-Universal refinement, retained probes/copies, operational noise/drift and full
-written-theorem coverage remain open; Python interval implementations have not
+Every complete finite execution of the fixed common-birth program now has the
+same physical endpoint and exact per-cell FIRE dates. Retained probes/copies,
+operational noise/drift, infinite/maximal-run progress and full written-theorem
+coverage remain open; Python interval implementations have not
 been verified in Lean.
 
 ## Repeatable learned one-cell operation
@@ -31,8 +33,9 @@ compatible responding prefixes and complete executions at every finite horizon.
 coordinate projections of the actual639.9 state. It preserves each cell's own
 memory and supplies isolated contracts with empty routing and new future source
 queues. These analysis projections do not physically erase the global C queue.
-Cport1's gain is outside this domain; arbitrary-network and universal
-refinement remain open.
+Cport1's gain is outside this domain; arbitrary-network indefinite contracts
+remain open. The separate finite-complete uniqueness theorem does not extend
+this domain or construct an infinite run.
 
 ## Physical execution foundation
 
@@ -45,10 +48,10 @@ physical event budget. These invariants alone do not supply future executions.
 
 | Proof layer | Current result | Explicit boundary |
 |---|---|---|
-| Constructed three-cell protocol | Original READY birth through789.9; cumulative A54/B61/C34 and cadence A16/B18/C20 | Declared birth family, source queues, fixed fabrication parameters and bounded delays; distinct from the common-birth every-N protocol; no universal-refinement result |
+| Constructed three-cell protocol | Original READY birth through789.9; cumulative A54/B61/C34 and cadence A16/B18/C20 | Declared birth family, source queues, fixed fabrication parameters and bounded delays; distinct from the common-birth every-N protocol; universal guarantees across its staged-birth operations remain separate |
 | Autonomous C and concrete leaf packet | Actual projected prefix639.9→660 plus local continuation to789.9; ledger-derived P(3,17,0) | Retained as a component of the constructed global C→B→A weave |
 | Conditional physical analysis | General trace-based cadence laws, doses, counts and terminal identities | These analytic APIs retain execution premises; the separate concrete factory now supplies the N=3 execution |
-| Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing/new future queues; broader birth domains, indefinite network operation and universal refinement remain open |
+| Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing/new future queues; broader birth domains, indefinite network operation and maximal/infinite-run progress remain open |
 | Constructed finite chain | Independent common births, preparation, variable-K physical leaf/receivers and causal assembly for every finite N; prescribed per-emission errors with cumulative jitter≤0.15 | Declared source/port family; native functions are constructed and realize errors on the actual final fast ledger; broader written conclusions remain open |
 | Abstract finite-chain API | Induction, packet timing, jitter budgets and resource algebra | The older `Chain.Refinement.realized_chain` still takes leaf and narrow `RelayLaw` premises; the new construction uses broad physical closure |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
@@ -172,7 +175,7 @@ The active ports are A2/B2/C0, each gaining2.4 from its own birth, with recovery
 B1+0.6 and C1+0.6. Earlier residual charges, raw tails and energy paths are
 carried through actual executions rather than reset. Fine enclosure soundness,
 retained probes/settings copies, operational
-perturbations and universal refinement remain open. The separate common-birth
+perturbations and staged-birth universal guarantees remain separate obligations. The separate common-birth
 finite-chain construction and its validation are tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
 
 ## Constructed common-birth chain for every finite N
@@ -227,9 +230,56 @@ stage satisfy both global native bounds and the requested per-emission values.
 
 See the [finite-chain coverage guide](N_CELL_COVERAGE.md) and
 [construction/validation ledger](EVERY_N_PLAN.md). Retained probes,
-cuts/settings copies, universal refinement and operational drift/noise/amplitude
-histories remain open; the new existence family does not establish all six
+cuts/settings copies and operational drift/noise/amplitude histories remain
+open. The new universal-complete layer below closes comparison of every
+complete finite execution of the fixed program; it does not establish all six
 conclusions of the written finite-chain theorem.
+
+## Every complete finite execution of the fixed program
+
+[UniversalChainHeadline](KernelR/UniversalChainHeadline.lean) now exports
+`every_finite_chain_every_complete_execution`, `terminal_state_and_counts`
+and `prescribed_errors_on_every_complete_execution`. The exact indexed order is
+
+> For every admissible positive finite N, K, independent fixed fabrication and
+> birth data, and bounded prescribed error family, there exist fixed native
+> delay functions and a constructed complete witness, such that **every finite
+> execution from the same initial state under that fixed router, complete at
+> the declared T**, has the claimed physical endpoint, memories, counts and
+> prescribed errors at its own actual fast-phase sending FIREs.
+
+Existence is retained, so the universal class is nonempty. `CompleteThrough e T`
+requires terminal date T, no enabled terminal jump and no token due by T still
+pending. It is a condition on a supplied finite operational execution, not a
+proof that a stopped prefix must progress, a maximal infinite run reaches T,
+or Zeno behavior is impossible.
+
+The generic [physical uniqueness theorem](KernelR/HybridUniversalExecution.lean)
+proves this observational comparison for any fixed finite network, parameter
+family and router, with `PhysicalBox` and initial `PhysicalInvariant`:
+complete executions through the same T have equal time, physical coordinates,
+main/auxiliary modes and RAW state, pending queues related by permutation, and
+**exactly equal ordered per-cell FIRE-date lists**. The global emission list is
+compared up to permutation, allowing legal simultaneous interleavings. Neither
+flow subdivision nor the syntactic order of independent instantaneous moves
+is made unique. No event-priority, target calendar or determinism premise is
+added to the protocol theorem.
+
+[HybridUniversalBirthCadenceChain](KernelR/HybridUniversalBirthCadenceChain.lean)
+transfers these observations to the already constructed common-birth program.
+For every competing complete trace, fast dates are its own full per-cell FIRE
+list after `drop (finiteChainPreparationCount n i)`: **14 preparation FIREs at
+the leaf, 12 at a relay**. The error index is zero-based on this suffix; wire j
+still leaves physical cell `n-j`. The same chosen fixed native functions
+realize the prescribed errors on every such trace. This does not move the
+native-function choice outside the prescribed-error quantifier or assert
+that every arbitrary router realizes a specified error sequence.
+
+The three public headline axiom profiles contain only `propext`,
+`Classical.choice` and `Quot.sound`. The [validation ledger](EVERY_N_PLAN.md)
+records the successful complete frozen-source build and global audit.
+The new draft is published on `proof/universal-execution` after the user’s
+explicit instruction; it is not merged automatically.
 
 ## Reproduce
 
@@ -240,6 +290,7 @@ lake exe cache get
 lake build
 lake build Audit
 lake build KernelR.IndexedChainHeadline
+lake build KernelR.UniversalChainHeadline
 python3 scripts/check_audit_negative.py
 python3 scripts/generate_evidence.py --check
 python3 scripts/robust_evidence.py --check
@@ -309,6 +360,7 @@ python3 scripts/check_hybrid_cadence_full_budget_negative.py
 python3 scripts/check_hybrid_cadence_budget_receiver_negative.py
 python3 scripts/check_hybrid_port_wire_transport_negative.py
 python3 scripts/check_hybrid_indexed_chain_negative.py
+python3 scripts/check_hybrid_universal_execution_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -481,7 +533,7 @@ older signature or soundness of every stored certificate enclosure.
    statement requires it. Arbitrary bounded prescribed per-emission error
    sequences now have a complete physical birth-to-terminal realization.
 2. Prove the remaining real enclosure memberships, retained probe responses,
-   settings-copy semantics and universal refinement across admissible executions.
+   settings-copy semantics and progress beyond the finite-complete class.
    Stored endpoint comparisons do not establish these facts.
 3. Extend robustness to operational drift/noise/amplitude histories in the
    physical semantics, beyond the conditional analytic coverage.
