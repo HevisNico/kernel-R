@@ -1,20 +1,33 @@
 # Lean formalization of selected Kernel R results
 
 This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
-Mathlib v4.35.0. It is a **partial formalization**. The actual protocol is now
-constructed from A's original birth through B's first reverse-contact FIRE in
-(344.3,344.9), with cumulative **A28/B15** and its issued reverse token still
-pending. The full later hybrid execution and the Python interval
-implementations have not been verified in Lean.
+Mathlib v4.35.0. It is a **partial formalization**. The physical three-cell
+protocol is now constructed from A's original READY birth through **789.9**,
+with cumulative **A54/B61/C34** and cadence counts **A16/B18/C20**. Both
+independent births at160/480, own physical memories, actual source deliveries
+and routed FIRE-to-arrival chains are retained. All three cells finish READY
+at q=0.1, with RAW absent and an empty global queue. Each active log-gain is
+its own birth value+2.4 and each recovery its own birth value+0.3; other gains
+retain their639.9 teaching values. No later reaching execution, received
+calendar or desired output count is a factory premise.
+
+The earlier global660 and autonomous-C789.9 witnesses remain useful components.
+The new construction weaves C's real leaf packet with physical B and A receiver
+executions, issuing rather than preloading the wire tokens. Physical every-N
+refinement and universal refinement remain open; Python interval implementations
+have not been verified in Lean. Work pauses after publication of this N=3 result.
 
 ## Repeatable learned one-cell operation
 
 The [one-cell extension](INDEFINITE_OPERATION.md) constructs a physical
-`PulseContract` with one emission per input and settling duration `7.5`, then
+`PulseContract` with one emission per input and settling duration7.5, then
 compatible responding prefixes and complete executions at every finite horizon.
-It uses an exact-rest learned domain, fixed parameters, canonical amplitudes and
-empty routing. Connecting the birth/training constructors to this domain,
-network routing and universal refinement remain open.
+`HybridBirthLearnedRest` now derives its exact-rest domain for Aport2/Bport2
+coordinate projections of the actual639.9 state. It preserves each cell's own
+memory and supplies isolated contracts with empty routing and new future source
+queues. These analysis projections do not physically erase the global C queue.
+Cport1's gain is outside this domain; arbitrary-network and universal
+refinement remain open.
 
 ## Physical execution foundation
 
@@ -27,28 +40,133 @@ physical event budget. These invariants alone do not supply future executions.
 
 | Proof layer | Current result | Explicit boundary |
 |---|---|---|
-| Constructed execution | From the original READY A birth through teaching at 319.9 (A28/B14), then B's first reverse FIRE in (344.3,344.9) (A28/B15) | The reverse token is issued but not received; 28 external B sources plus that wire remain pending |
-| Learned one-cell continuation | Constructed complete cycles and compatible finite-horizon executions for input spacing >=7.5 | Exact-rest learned domain and empty routing; the birth-to-domain connection and universal refinement remain open |
-| Conditional physical protocol | Reciprocal epoch at 459.9 (A38/B27), C teaching at 639.9, complete cadence at 789.9 (A54/B61/C34) | Actual executions reaching the required horizons and genuine staged births are supplied |
+| Constructed three-cell protocol | Original READY birth through789.9; cumulative A54/B61/C34 and cadence A16/B18/C20 | Declared birth family, source queues, fixed fabrication parameters and bounded delays; no arbitrary-N or universal-refinement result |
+| Autonomous C and concrete leaf packet | Actual projected prefix639.9→660 plus local continuation to789.9; ledger-derived P(3,17,0) | Retained as a component of the constructed global C→B→A weave |
+| Conditional physical analysis | General trace-based cadence laws, doses, counts and terminal identities | These analytic APIs retain execution premises; the separate concrete factory now supplies the N=3 execution |
+| Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing/new future queues; broader birth domains, indefinite network operation and universal refinement remain open |
 | Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
 
 The constructive factories take A's READY `BirthState` with initially READY
-auxiliaries and the exact 32-source queue, B's independent READY `Newborn`,
+auxiliaries and the exact 32-source queue, B's and C's independent READY `Newborn`s,
 independent fixed `PhysicalBox` parameters (±0.3% or ±10%), canonical amplitudes
 and the declared contacts. Delays are sampled at each actual emission and lie
-in [0.3,0.4]; the backward bound is needed for the saturated reverse-FIRE cut.
+in [0.3,0.4]; the backward bound supplies the actual reverse receipt.
 There is no supplied reaching execution, recorded case word, desired output
 count or assumed firing date. Every source and wire is consumed by an actual
 arrival; old memories, reserve and unfinished raw tails are carried forward.
 No drift, charge noise or settings-copy operation is asserted by this execution
 construction.
 
-The next obligation is receipt of the issued reverse token and the remaining
-coupled return cycles. Later C/cadence constructions, retained probes, fine
-enclosure soundness and physical every-N refinement remain open. The separate
-[robust coverage guide](ROBUST_COVERAGE.md) describes conditional noisy/drifting
-slow-chain results.
+At352, A is main READY with auxiliaries in their READY rest bands, no RAW
+and its actual charge at least0.1. Its exact cut and continuation to H+7.5
+are retained; no A `PreparedSection` or charge reset is assumed. A's own
+birth port2 log-gain has gained0.6, while B's own independent newborn port2
+log-gain has gained1.8. Other gains and both recoveries are preserved; on
+the receipt-to352 suffix ERROR is zero elsewhere and total recovery is zero.
+The [checkpoint/factory map](HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
+retains this352 checkpoint and describes the subsequent complete construction.
+
+`birth_protocol_reverse_teaching_exists` in
+[HybridBirthReverseTeaching](KernelR/HybridBirthReverseTeaching.lean) returns a
+`ConstructedReverseTeaching` containing the original staged birth-to459.9 trace. A's three real weak reverse inputs derive
+ERROR1.8; its first learned response keeps the carried charge. Nine further
+coupled cycles for B376..440 return both cells before the final quiet wait.
+At459.9 A's own port0/port2 log-gains have each gained1.8, B's own port1/port2
+log-gains have gained0.6/1.8, and both own birth recoveries have gained0.1.
+Other gains are unchanged. The only pending tokens are B480..600.
+
+`birth_protocol_c_teaching_exists` in
+[HybridBirthCTeaching](KernelR/HybridBirthCTeaching.lean) returns
+`ConstructedCTeaching` with the staged original-birth trace through639.9.
+C's genuine480 birth retains A/B and adds its independent newborn state.
+The actual first weak receipt is cut at488 without a charge reset. At496,
+C's first learned response retains its low-recovery SLOW path until the next actual wire;
+its protected MARK derives recovery+0.1 and the prepared504 section.
+Thirteen actual B-to-C learned cycles finish at608, followed by a real quiet
+wait to639.9. A stays physically quiet from459.9 and keeps its own memories.
+C's own port1 log-gain gains0.6, its own recovery gains0.1, and its ports0/2
+are unchanged. All earlier A/B memories remain. The final queue is exactly25
+Cport0 sources640..736, with `CompleteThrough639.9`.
+
+`birth_protocol_cadence_first_wire_exists` in
+[HybridBirthCadenceFirstWire](KernelR/HybridBirthCadenceFirstWire.lean) returns
+`ConstructedCadenceFirstWire` from the original birth assumptions. Three real
+period-four weak C inputs640/644/648 derive own Cport0 ERROR1.8 without MARK,
+then source652 arrives with the actual carried charge in[0.1,0.3]. A strict
+response margin through0.4 constructs the first C FIRE in652+(0.4,0.9).
+That FIRE issues the actual Bport2 token, consumed at H=F+delay(F).
+C's same FAST flow is cut at H with its remaining execution retained; raw expiry
+may lie on either side of that cut. All other gains and every recovery remain
+as at639.9. The endpoint is `CompleteThrough` with exactly 21 C656..736 sources.
+
+`birth_protocol_cadence_first_wave_exists` in
+[HybridBirthCadenceFirstWave](KernelR/HybridBirthCadenceFirstWave.lean) returns
+`ConstructedCadenceFirstWave`. B's actual response issues its Aport2 token;
+the actual A receipt is in(653.4,654.4). A's learned response then constructs
+its actual FIRE before655.1, retaining the same B/C paths at that date.
+The cumulative counts are A39/B44/C15 and the queue remains exactly 21 C
+sources656..736. Every gain and recovery is unchanged from the first C-to-B
+receipt. A is FAST with q=1, while B/C remain at their actual physical cuts;
+this firing checkpoint retains the unfinished B/C paths.
+
+`birth_protocol_cadence_first_mark_return_exists` in
+[HybridBirthCadenceFirstMarkReturn](KernelR/HybridBirthCadenceFirstMarkReturn.lean)
+returns `ConstructedCadenceFirstMarkReturn`. `HybridCadenceFirstMarkSource`
+resumes the same A/B/C paths and consumes the true C656 source. The protected
+MARK-only response adds recovery0.1 without an emission or ERROR, returns C to
+READY at q=0.1 and consumes C660. The endpoint has unchanged A39/B44/C15,
+exactly 19 C664..736 sources, C's own newborn recovery+0.2 and own port0
+log-gain+1.8. A/B remain at their actual cuts, preserving every own gain and
+recovery. `CompleteThrough660` includes the source due at that endpoint.
+
+`ConstructedCadenceFirstMarkReturn.local_c_full_exists hb` in
+[HybridBirthCadenceLocalC](KernelR/HybridBirthCadenceLocalC.lean) returns
+`ConstructedCadenceLocalC c`. Its prefix is the autonomous projection of the
+same actual global639.9→660 execution, with C's source queue retained. C has no
+incoming routed contact, so this projection preserves its actual coordinates,
+energy, RAW events, ERROR/MARK integrals and emission dates. The local tail
+continues the actual660 state through the second strong response, mixed
+MARK/ERROR response, high-gain train and final quiet flow to789.9. All 25 sources
+are consumed, the ledger has exactly 20 cadence emissions, and `CompleteThrough`
+holds at789.9. C's own newborn port0 log-gain has gained2.4 and recovery0.3;
+its other gains retain the teaching values.
+
+[HybridConstructedCadenceLeafPacket](KernelR/HybridConstructedCadenceLeafPacket.lean)
+derives `leafPacket : Packet 3 17 0` from those 20 real emission dates.
+`receivedLeafPacket` samples each bounded delay at its actual FIRE time and
+produces `Packet 3 17 (1/20)`. `leafTokens` labels the corresponding Bport2
+wire tokens; it does not insert them into a global queue or prove their later
+receipt. An explicit future global execution with the same C calendar and
+contact routing can use `issued_leaf_tokens` to identify its actual issuance.
+
+`birth_protocol_complete_cadence_exists` in
+[HybridBirthCadenceProtocol](KernelR/HybridBirthCadenceProtocol.lean) returns
+`ConstructedBirthCadenceProtocol` from the original birth hypotheses, independent B/C
+newborns, the three-cell physical box and five independently bounded delay
+functions. `HybridConstructedCadenceBC` constructs B's 18-output response to
+C's real packet, and `HybridConstructedCadenceCascade` constructs A's 16-output
+response to B's packet. Causal queue weaving starts with only the 25 external
+C sources at639.9; the future wire inputs used by the isolated receiver proofs
+are matched to real FIRE issuance and actual global arrivals. The terminal
+witness has A54/B61/C34, physical bounds, RAW validity, all READY/q=0.1, an
+empty global queue and `CompleteThrough789.9`.
+
+The final witness retains both genuine births. Its `betweenBirths` execution
+joins the actual two-cell phase after B's birth at160 through C's birth at480.
+Its `staged.after` executes C teaching and cadence under the single fixed gated
+`teachingCadenceRouter`: B→C is open on[480,630), C→B and B→A on[640,780).
+Retargeting preserves the actual states, complete ledger and delivered token
+occurrences. The cumulative54/61/34 conclusions refer to this staged execution.
+`birth_protocol_cadence_cascade_exists` remains available for the component
+cascade witness.
+
+The active ports are A2/B2/C0, each gaining2.4 from its own birth, with recovery
++0.3 in each cell. Other gains remain at their639.9 values, including A0+1.8,
+B1+0.6 and C1+0.6. Earlier residual charges, raw tails and energy paths are
+carried through actual executions rather than reset. Fine enclosure soundness,
+retained probes/settings copies, physical every-N refinement and universal
+refinement remain open. Work pauses after this N=3 publication.
 
 ## Reproduce
 
@@ -99,6 +217,28 @@ python3 scripts/check_hybrid_receiver_fire_negative.py
 python3 scripts/check_hybrid_coupled_preparation_negative.py
 python3 scripts/check_hybrid_coupled_teaching_negative.py
 python3 scripts/check_hybrid_feedback_entry_negative.py
+python3 scripts/check_hybrid_reverse_receipt_negative.py
+python3 scripts/check_hybrid_reverse_epoch_negative.py
+python3 scripts/check_hybrid_c_teaching_existence_negative.py
+python3 scripts/check_hybrid_cadence_first_strong_negative.py
+python3 scripts/check_hybrid_cadence_first_wire_negative.py
+python3 scripts/check_hybrid_cadence_first_wave_negative.py
+python3 scripts/check_hybrid_cadence_first_mark_return_negative.py
+python3 scripts/check_hybrid_cadence_second_stage_negative.py
+python3 scripts/check_hybrid_cadence_high_existence_negative.py
+python3 scripts/check_hybrid_local_cadence_tail_negative.py
+python3 scripts/check_hybrid_constructed_leaf_negative.py
+python3 scripts/check_hybrid_local_future_frame_negative.py
+python3 scripts/check_hybrid_learned_source_prefix_negative.py
+python3 scripts/check_hybrid_cadence_jitter_span_negative.py
+python3 scripts/check_hybrid_cadence_mark_only_jitter_negative.py
+python3 scripts/check_hybrid_cadence_strong_jitter_source_negative.py
+python3 scripts/check_hybrid_high_jitter_negative.py
+python3 scripts/check_hybrid_cadence_mixed_jitter_negative.py
+python3 scripts/check_hybrid_causal_weave_negative.py
+python3 scripts/check_hybrid_cadence_receiver_negative.py
+python3 scripts/check_hybrid_cadence_cascade_existence_negative.py
+python3 scripts/check_hybrid_router_transport_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -113,6 +253,47 @@ options. `check_hybrid_feedback_entry_negative.py` adds 29 paired controls for
 the real B344 weak entry, first residual-dependent B FIRE, issued reverse
 token, own memories, A28/B15 and both interval-scoped emitting products. Each
 positive conclusion is compiled before its altered version must be rejected.
+The 40 paired controls in `check_hybrid_reverse_receipt_negative.py` also pass
+for the actual reverse receipt and352 handoff, real sender clocks and RAW
+expiry, retained weak continuation, own memories, exact source/wire queues,
+A28/B15 and27 sources. The 40 additional paired controls in
+`check_hybrid_reverse_epoch_negative.py` cover the subsequent real receipts,
+weak cuts, learned cycles, source induction and original-birth459.9 factory.
+All 40 valid conclusions compile and their altered versions are rejected.
+The 50 new pairs in `check_hybrid_c_teaching_existence_negative.py` pass for
+the actual C birth, retained weak/SLOW paths, protected MARK, real three-cell
+execution, own memories, A38/B43/C14 and exact 25-source queue. Every valid
+conclusion compiles and every altered conclusion is rejected.
+The preceding autonomous-C/leaf-packet checkpoint passed the complete pinned
+build (9,458 jobs) and global audit (25,538 project theorems), with 405 Lean
+source files and five unchanged upstream modules. Generated evidence, all 16
+robust certificates and 12 project tests passed. Its 53 additional paired
+controls passed: 25 local-C-tail, 20 constructed-leaf/projection and eight
+actual high-return-prefix checks. The high suite had 32 passing pairs, and
+that checkpoint configured 877 controls.
+
+The complete N=3 export passes the pinned build (**9,489 jobs**) and global
+axiom audit (**26,317 project theorems**), allowing only `propext`,
+`Classical.choice` and `Quot.sound`. Source checks cover **436 Lean files** and
+five unchanged upstream modules; generated evidence, all **16 robust
+certificates** and **12 project tests** pass. All new proof modules compile
+with the default heartbeat limit.
+
+All **226 new paired controls pass**: 48 cascade/birth/protocol, 30 receiver/BC,
+34 strong-jitter source, 22 learned-source prefix, 18 causal weave, 17 high-jitter,
+14 jitter span, 12 MARK-only, 12 mixed, 12 router transport and 7 future-frame.
+Each valid conclusion compiles before its altered conclusion is rejected with
+a Lean diagnostic. CI configures **1,103 paired controls**, plus axiom-audit
+corruption checks; this inventory does not assert a fresh local rerun of every
+older suite. Fresh CI status and the verified commit are reported on the PR.
+
+The public [headline](KernelR/Headline.lean) groups the existence, actual terminal
+state/counts and own learned-memory theorems. The global
+[README](../../README.md) records its exact signatures and `#print axioms` outputs;
+the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
+to their operational definitions. N=3 is finalized; every-N obligations remain
+paused pending the user's explicit go-ahead.
+
 
 ## Coverage and hypotheses
 
@@ -185,7 +366,7 @@ The new analytic lemma integrates the exponential MARK profile to obtain
 `J = 0.1 * tau + (0.1 - 0.4 * log(5/4)) / Lm`. The return identity uses that
 deficit; it does not approximate MARK as an instantaneous jump in recovery.
 The abstract `Cadence` lemma requires the physical phase ordering as a premise;
-the `Hybrid*` local cases and conditional cascade derive their own guards.
+the `Hybrid*` local cases and cadence constructors derive their own guards.
 
 Shared firing latencies can cancel between dates, but fresh per-pulse wire
 delays cannot. The new calendar lemma retains `d₂ - d₁` and proves the
@@ -211,21 +392,23 @@ finite depth, nonuniform jitter budgets, natural emission/traffic counts, dose
 words, conditional cut propagation and terminal-time bounds. Both N-cell
 certificates add 162 exact endpoint comparisons and 352 interval-validity checks.
 
-The physical leaf and relay refinements remain explicit premises. The extension
+The concrete autonomous C leaf now has its actual emission-packet refinement;
+physical leaf contracts for other introductions and arbitrary-depth relay
+refinements remain explicit premises. The extension
 does not claim a complete formal proof of the R hybrid trajectories or interval
 enclosure soundness. In particular, the finite-chain theorem is conditional on
 local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Continue the constructed reverse FIRE through its actual receipt and the
-   reciprocal epoch at 459.9, then construct C's birth/teaching and the cadence
-   through 789.9. Preserve global queues, own memories and port availability.
+1. Establish physical leaf/relay preparation and routed composition for every
+   finite N; the declared N=3 cadence is now constructed. No further N-cell work
+   is part of the current publication checkpoint.
 2. Prove the remaining real enclosure memberships, retained probe responses,
-   causal cuts and protocol extension/saturation obligations. Exact comparisons
-   of stored endpoints do not establish these facts.
-3. Derive the physical leaf and relay contracts and instantiate the checked
-   packet induction for every finite chain.
+   settings-copy semantics and universal refinement across admissible executions.
+   Stored endpoint comparisons do not establish these facts.
+3. Extend robustness to operational drift/noise/amplitude histories in the
+   physical semantics, beyond the conditional analytic coverage.
 4. For pedagogy, separately formalize the observation/readout/training interface
    and connect numerical records to that semantics.
 
