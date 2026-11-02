@@ -333,7 +333,7 @@ an initial queue containing the declared sixteen sources and genuinely later
 sources. This is universal over the actual one-cell execution. -/
 theorem Execution.birth_fast_train_at128_future {θ ε born u}
     (e : @Execution 1 θ (fun _ _ => []) born u)
-    (hborn : BirthState born) (hb : PhysicalBox θ ε) 
+    (hborn : BirthState born) (hb : PhysicalBox θ ε)
     (ha : ∀ q, born.aux 0 q=.ready) (later : List (Delivery 1))
     (hq : born.pending=sourceTrain 0 (1 : Port) 0 8 16++later)
     (hlater : ∀ d∈later, (128:ℝ)<d.due) (hdate : u.time=128) :

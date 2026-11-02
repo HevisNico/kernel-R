@@ -174,14 +174,14 @@ priority, `CellLaw`, output calendar or target phase is a caller premise.
 The project pins **Lean 4.35.0** and **Mathlib v4.35.0**, with Mathlib commit
 `56a005855ea17e0b0958f73ec801ae140b0a1679` in
 [lake-manifest.json](proof/lean/lake-manifest.json).
-The universal extension is prepared locally on `proof/universal-execution`;
-no new remote commit or PR is published. The preceding indexed-existence
+The universal extension is published for review in a draft PR on
+`proof/universal-execution`, stacked on the proof branch of PR #15. The preceding indexed-existence
 checkpoint is [550fc9509c8390a07fdb0cec02170a72cbc3071c](https://github.com/HevisNico/kernel-R/commit/550fc9509c8390a07fdb0cec02170a72cbc3071c),
 reviewed in [PR #15](https://github.com/HevisNico/kernel-R/pull/15).
-To check the local universal sources, from the repository root with Lean installed:
+To check the verified universal sources, from the repository root with Lean installed:
 
 ```sh
-git checkout f0e9576af9746c59dbf51c4dba76a58b7419ddcd
+git checkout eeff210df7a2c6297d532c10203312ded3c0bbf9
 cd proof/lean
 lake exe cache get
 lake build KernelR.UniversalChainHeadline
@@ -214,9 +214,9 @@ generated evidence, **16 robust certificates**, **12 project tests** and
 **20 new paired controls**. All public profiles use only the three permitted
 logical axioms. The configured inventory is **1,321 pairs**, including
 **218 finite-chain pairs**; this is not a fresh rerun of every older suite.
-The verified local source commit is `f0e9576af9746c59dbf51c4dba76a58b7419ddcd`; the
+The verified source commit is `eeff210df7a2c6297d532c10203312ded3c0bbf9`; the
 [validation ledger](proof/lean/EVERY_N_PLAN.md) records its frozen-source checks.
-No new remote CI is claimed.
+Fresh draft-PR CI retains its actual status until completion.
 The [full reproduction commands](proof/lean/README.md#reproduce) include source,
 evidence and paired corruption controls; the workflow badge reports actual CI.
 

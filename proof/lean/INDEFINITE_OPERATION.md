@@ -112,7 +112,7 @@ from the same initial source state under the same fixed router. For prescribed
 errors, the order is ∀ data/errors ∃ fixed native functions ∀ complete traces;
 FAST indices drop the actual12/14 preparation FIREs. This does not imply
 infinite-run progress or non-Zeno behavior. See the
-[validation ledger](EVERY_N_PLAN.md) for this local, unpublished checkpoint.
+[validation ledger](EVERY_N_PLAN.md) for this verified draft checkpoint.
 
 ## Proof map
 

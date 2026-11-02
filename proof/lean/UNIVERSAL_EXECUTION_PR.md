@@ -1,7 +1,7 @@
 # Prove every complete finite execution of the physical finite-chain program
 
-Local PR draft only. Nothing in this milestone has been pushed or published.
-Prepared branch: `proof/universal-execution`; review base:
+Draft PR, published for review by explicit user instruction.
+Branch: `proof/universal-execution`; review base:
 `proof/physical-finite-chain` at `46c5672e0a5909d153c8130102cff5f25f276487`
 (the proof head of #15). Main has the separate README-only #16 merge
 `4e914909be0b2bb4bae1a71e8146351d8896115b`; this draft does not merge #15.
@@ -88,10 +88,10 @@ and **20 new paired controls** pass. The confirmed finite-chain inventory is
 This inventory does not claim a fresh local rerun of every historical suite.
 
 The [validation ledger](EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
-records the frozen proof tree and verified local code commit
-`f0e9576af9746c59dbf51c4dba76a58b7419ddcd`. A subsequent local commit records the
-identifier and removes one trailing source-space, with no proof change. All work
-remains local; no new remote CI run is claimed. The indexed-existence figures
+records the frozen proof tree and verified code commit
+`eeff210df7a2c6297d532c10203312ded3c0bbf9`. A subsequent documentation/formatting commit records the
+identifier and removes one trailing source-space, with no proof change.
+Fresh CI status is recorded separately; no pending run is called successful. The indexed-existence figures
 9,543 /27,587 /490 /198 /1,301 remain a historical checkpoint.
 
 Reproduction from `proof/lean`:

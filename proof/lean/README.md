@@ -277,9 +277,9 @@ that every arbitrary router realizes a specified error sequence.
 
 The three public headline axiom profiles contain only `propext`,
 `Classical.choice` and `Quot.sound`. The [validation ledger](EVERY_N_PLAN.md)
-separates their successful local builds from the complete checkpoint audit.
-The new work is local on `proof/universal-execution`; no push or new PR is
-performed without the user's explicit publication instruction.
+records the successful complete frozen-source build and global audit.
+The new draft is published on `proof/universal-execution` after the user’s
+explicit instruction; it is not merged automatically.
 
 ## Reproduce
 

@@ -4,8 +4,8 @@ This continues the completed three-cell result in [PR #14](https://github.com/He
 The existential every-N construction is published on `proof/physical-finite-chain`
 in [draft PR #15](https://github.com/HevisNico/kernel-R/pull/15), at head
 `46c5672e0a5909d153c8130102cff5f25f276487`. The newly proved universal-complete
-extension is prepared **locally only** on `proof/universal-execution`, based
-on that proof branch; no new PR or push is authorized yet. The `main` README
+extension is published as a **draft PR** on `proof/universal-execution`,
+stacked on that proof branch at the user’s explicit request. The `main` README
 was updated separately by README-only PR #16 (merge
 `4e914909be0b2bb4bae1a71e8146351d8896115b`), without merging the new proof modules.
 The original staged A/B/C protocol remains a separate completed result:
@@ -55,9 +55,9 @@ that every arbitrary router realizes a specified error sequence.
 
 The three public headline axiom profiles contain only `propext`,
 `Classical.choice` and `Quot.sound`. The [validation ledger](EVERY_N_PLAN.md)
-separates their successful local builds from the complete checkpoint audit.
-The new work is local on `proof/universal-execution`; no push or new PR is
-performed without the user's explicit publication instruction.
+records the successful complete frozen-source build and global audit.
+The new draft is published on `proof/universal-execution` after the user’s
+explicit instruction; it is not merged automatically.
 
 ## Constructed family and exact quantifiers
 
@@ -163,12 +163,13 @@ first and each altered conclusion is independently rejected with a Lean
 diagnostic. The confirmed finite-chain inventory is **218 passing pairs**;
 CI configures **1,321 pairs**, plus axiom-audit corruption controls. These totals
 do not claim a fresh rerun of every historical suite. The frozen proof tree
-is `5dab922f4adb45ff42f53377dcc784b689a27d43`. Verified local code commit:
-`f0e9576af9746c59dbf51c4dba76a58b7419ddcd`. Its Lean/workflow/control sources match
+is `5dab922f4adb45ff42f53377dcc784b689a27d43`. Verified code commit:
+`eeff210df7a2c6297d532c10203312ded3c0bbf9`. Its Lean/workflow/control sources match
 the frozen export exactly; only its Markdown documentation differs. The
-following local commit records this identifier and removes one trailing space
+following documentation/formatting commit records this identifier and removes one trailing space
 in the universal preparation source, without changing any Lean statement or
-proof. No new remote commit, PR or CI run is published.
+proof. The branch is published as a draft PR by explicit user instruction;
+fresh CI is recorded separately and is not presumed successful.
 
 ### Prescribed-error existence: historical validated checkpoint
 
@@ -232,4 +233,4 @@ quantified premises. The N=3 baseline remains separately completed. A pause
 stops new work; the branch, validated commits and this ledger provide the
 restart point. No push, PR publication or merge is performed without the user’s
 explicit instruction. The [prepared PR description](UNIVERSAL_EXECUTION_PR.md)
-is a local review artifact, not an opened pull request.
+records the new draft PR; it is not merged automatically.
