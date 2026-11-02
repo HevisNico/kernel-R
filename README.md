@@ -1,6 +1,7 @@
 # kernel-R
 
 [![Lean proof checks](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml/badge.svg)](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml)
+
 **Archived release v0.2.0 — DOI:** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
 
 **Lean verifies pulse-driven learning and cadence transmission from birth for
