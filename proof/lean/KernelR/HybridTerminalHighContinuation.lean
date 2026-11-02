@@ -1,6 +1,7 @@
 import KernelR.HybridUniversalBirthCadenceChain
 import KernelR.HybridLocalCadenceHighBudgetTrain
 import KernelR.HybridUniversalExecution
+import KernelR.HybridFuture
 
 /-! Isolated high-gain continuations from actual finite-chain endpoints.
 
