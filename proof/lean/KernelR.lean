@@ -426,3 +426,9 @@ import KernelR.HybridPreparedCadenceChainConstruction
 import KernelR.HybridPreparedCadenceChainDomain
 import KernelR.HybridRawFullTailNoFire
 import KernelR.HybridReadySilentFullErrorStart
+import KernelR.HybridCadenceStageTransport
+import KernelR.HybridPreparedCadencePrefixTransport
+import KernelR.HybridStrongCadenceChainStep
+import KernelR.HybridIndexedPreparedCadenceChain
+import KernelR.HybridIndexedBirthCadenceChain
+import KernelR.IndexedChainHeadline

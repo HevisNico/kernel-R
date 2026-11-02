@@ -96,9 +96,13 @@ preparation and a variable-K fast phase for every positive finite N under one
 fixed gated router. At its finite terminal horizon, every cell is READY/q=0.1
 with no RAW or pending tokens, active log-gain own birth+2.4 and recovery own
 birth+0.3. These gains and recoveries exceed the imported `LearnedRest` domain;
-no indefinite network contract follows from these finite endpoints. Native
-bounded delay functions, cumulative jitter≤0.15 and actual routed issuance
-belong to that finite construction, independently of the isolated theorem here.
+no indefinite network contract follows from these finite endpoints.
+[IndexedChainHeadline](KernelR/IndexedChainHeadline.lean) now realizes arbitrary
+prescribed per-emission errors with cumulative jitter≤0.15 by constructing
+fixed native delay functions and the actual whole-chain execution. Its error
+indices count only final fast-phase sender FIREs, excluding preparation; the
+older caller-supplied native-function API remains available. These finite
+routed witnesses are independent of the isolated theorem here.
 
 ## Proof map
 

@@ -10,9 +10,10 @@ counts belong to that different construction.
 
 ## Constructed family and exact quantifiers
 
-[HybridBirthCadenceChain](KernelR/HybridBirthCadenceChain.lean) proves
-`birth_cadence_chain_exists`, returning `ConstructedBirthCadenceChain` for
-every positive finite N. Lean uses `n=N-1`, cells `Fin (n+1)`, physical root0
+[IndexedChainHeadline](KernelR/IndexedChainHeadline.lean) exposes
+`every_finite_chain_exists`, backed by `indexed_birth_cadence_chain_exists` in
+[HybridIndexedBirthCadenceChain](KernelR/HybridIndexedBirthCadenceChain.lean).
+It returns `ConstructedIndexedBirthCadenceChain` for every positive finite N. Lean uses `n=N-1`, cells `Fin (n+1)`, physical root0
 and leaf `Fin.last n`. There is no tested maximum N.
 
 Caller inputs are independent `BirthState`s with all auxiliaries initially
@@ -27,11 +28,27 @@ on `[160,T+1)` for the fast phase, with
 `T = 160 + 4*(K-1) + 1.1*(N-1) + 8`.
 
 For each link j<N-1, a fixed centre d_j and nonnegative budget σ_j satisfy
-`0.3+σ_j ≤ d_j ≤ 0.4-σ_j`. The native wire inputs are functions δ_j(t),
-universally bounded by `-σ_j ≤ δ_j(t)-d_j ≤ σ_j` at every time t.
-The cumulative budget is `sum_{j<N-1} σ_j ≤ 0.15`; errors are sampled at
-actual FIRE times, without an independence assumption. Every actual delay
-therefore lies in[0.3,0.4].
+`0.3+σ_j ≤ d_j ≤ 0.4-σ_j`. The caller prescribes an arbitrary error sequence
+`error : ℕ → ℕ → ℝ`, with `-σ_j ≤ error j k ≤ σ_j` for every k and every
+actual link j. The cumulative budget is `sum_{j<N-1} σ_j ≤ 0.15`; no
+probabilistic independence is assumed.
+
+The factory constructs fixed native delay functions δ_j(t), globally bounded
+by `-σ_j ≤ δ_j(t)-d_j ≤ σ_j` at every time t, and the actual whole-chain
+execution using those functions. For every kth fast-phase FIRE on wire j,
+it proves `δ_j(F_jk)=d_j+error j k` on the **final global fast execution's**
+ordered sender ledger. Wire j leaves physical cell `n-j`, represented by
+`indexedCadenceSender n j`; its error index starts at0 in `chain.fastExecution`.
+Preparation FIREs are excluded from this index, so the12 relay/14 leaf
+preparation counts do not shift it. Every delay lies in[0.3,0.4].
+
+The earlier `birth_cadence_chain_exists` native-function API remains available:
+it takes δ_j(t) with the same global bounds as caller inputs. The indexed
+factory now closes the prescribed-sequence realization obligation by building
+the chosen physical stage successively and preserving each actual sender
+ledger through subsequent weaves. It retains that same chosen stage in the
+birth wrapper; no uniqueness theorem or replacement by an unrelated existence
+witness is used.
 
 The returned witness constructs the physical preparation and fast executions
 under **one fixed gated router**, retaining their concatenated ledgers,
@@ -64,7 +81,7 @@ cell i has depth `N-1-i`.
 | Finite causal assembly | `HybridPreparedCadenceChainConstruction`, `HybridFiniteCausalChain` | Each new receiver is physically constructed and causally woven; no local-law premise |
 | Common router from birth | `HybridBirthCadenceChain` | Preparation retargeting preserves ledgers/deliveries because contacts are closed at its actual FIREs |
 | Terminal state and counts | `HybridCadenceChainEnvelope`, `HybridCadenceChainCounts`, `ConstructedBirthCadenceChain` | Actual finite horizon, own memories, per-cell and cumulative traffic |
-| Indexed per-emission errors | `HybridIndexedWireDelay` | Converts a supplied duplicate-free emission ledger to a bounded delay function; a whole-chain factory quantified over arbitrary error sequences is still required |
+| Indexed per-emission errors | `HybridIndexedPreparedCadenceChain`, `HybridIndexedBirthCadenceChain`, `IndexedChainHeadline` | Arbitrary bounded prescribed sequences; generated fixed native functions realize every error on the final fast sender ledger; whole birth-to-terminal invariants retained |
 | Probes, cuts and settings copies | Written results and finite evidence | Retained physical semantics and proofs remain open |
 | Universal/operational extension | Constructive existence for the declared family | Every-admissible-execution refinement and operational drift/noise/amplitude histories remain open |
 
@@ -76,16 +93,33 @@ from the new construction.
 
 ## Validation and checkpoint discipline
 
-The completed native-function construction passes the pinned complete export:
+The final prescribed-error construction passes the complete frozen-source
+export: **9,543 build jobs**, **27,587 audited project theorems**, **490 Lean
+sources**, generated-evidence checks, **16 robust certificates** and **12
+project tests**. All three public indexed headline theorems depend only on
+`propext`, `Classical.choice` and `Quot.sound`. No admitted proof or added
+project axiom is accepted. The exact verified source commit is recorded in
+[PR #15](https://github.com/HevisNico/kernel-R/pull/15).
+
+The20 new indexed paired controls pass, bringing the confirmed finite-chain
+inventory to **198 passing pairs** and the configured CI inventory to
+**1,301 paired controls**, plus axiom-audit corruption checks. These totals
+do not assert a fresh local rerun of every historical suite. The indexed
+controls include actual final fast sender indices, prescribed delay values
+and retained whole-execution terminal/count conclusions.
+
+### Native-function construction: historical validated checkpoint
+
+The completed native-function construction passed the pinned complete export:
 **9,537 build jobs**, **27,515 audited project theorems**, **484 Lean sources**
 and five unchanged inherited modules. Generated evidence, all **16 robust
 certificates** and **12 project tests** pass. The audit allows only `propext`,
 `Classical.choice` and `Quot.sound`.
 
-All **178 finite-chain paired controls pass**:48 first-checkpoint,40 preparation,
+At that checkpoint, all **178 finite-chain paired controls passed**:48 first-checkpoint,40 preparation,
 15 full-budget,19 receiver,20 port/index and36 global-construction contracts.
 Each valid conclusion compiles before its altered conclusion is individually
-rejected with a Lean diagnostic. CI configures **1,281 paired controls**, plus
+rejected with a Lean diagnostic. CI configured **1,281 paired controls**, plus
 axiom-audit corruption checks; this inventory does not claim a fresh local
 rerun of every historical suite. Verified code commit:
 [2c50e42e4ba02bd77c20dfd2612a587dfda4c224](https://github.com/HevisNico/kernel-R/commit/2c50e42e4ba02bd77c20dfd2612a587dfda4c224).
@@ -93,7 +127,7 @@ A following documentation-only commit records that identifier; proof sources
 are unchanged. Fresh CI status is recorded in PR #15; in-progress CI is not
 labeled green.
 
-The public [finite-chain headline](KernelR/FiniteChainHeadline.lean) groups
+That checkpoint's [native finite-chain headline](KernelR/FiniteChainHeadline.lean) groups
 existence from independent births, terminal memories/state and actual counts.
 Its three `#print axioms` outputs contain exactly the three permitted logical
 axioms. The [global README](../../README.md) exposes their exact signatures.

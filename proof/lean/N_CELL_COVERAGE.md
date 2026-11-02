@@ -6,15 +6,25 @@ as well as its earlier abstract induction. This is constructive existence
 for the declared preparation/source/delay family; the full written theorem,
 including retained probes/copies and universal refinement, remains open.
 
-`birth_cadence_chain_exists` in
-[HybridBirthCadenceChain](KernelR/HybridBirthCadenceChain.lean) starts from
-independent READY births at0 with independent fixed fabrication parameters.
+`every_finite_chain_exists` in
+[IndexedChainHeadline](KernelR/IndexedChainHeadline.lean), backed by
+`indexed_birth_cadence_chain_exists` in
+[HybridIndexedBirthCadenceChain](KernelR/HybridIndexedBirthCadenceChain.lean),
+starts from independent READY births at0 with independent fixed fabrication parameters.
 Sixteen period-eight inputs prepare each relay on port2 and the leaf on port1;
 K period-four inputs drive leaf port0 from160, with `K ≥ 4*N+12`.
 A single fixed gated router covers preparation and cadence. The factory has
-no prepared-state, reaching-execution, received-calendar, output-count or
-`CellLaw` premise. The [construction ledger](EVERY_N_PLAN.md) gives its exact
-native delay-function quantifiers and validation status.
+no prepared-state, reaching-execution, received-calendar, output-count,
+native-delay-function or `CellLaw` premise. For each link j<N-1, the caller
+prescribes `error j k` for every emission index k with `|error j k| ≤ σ_j`,
+fixed centre `0.3+σ_j ≤ d_j ≤ 0.4-σ_j`, nonnegative σ_j and cumulative
+`sum σ_j ≤ 0.15`. The factory constructs fixed native δ_j(t), bounded within
+σ_j of d_j for every time, and proves `δ_j(F_jk)=d_j+error j k` on the final
+fast execution's actual ordered sender ledger. Sender j is physical cell
+`n-j`; error indices start at0 in `chain.fastExecution`, excluding preparation
+FIREs. The actual indexed stage is retained through the birth wrapper.
+The earlier `birth_cadence_chain_exists` API takes native functions as inputs.
+The [construction ledger](EVERY_N_PLAN.md) records both APIs and validation.
 
 At `T=160+4*(K-1)+1.1*(N-1)+8`, all cells are READY/q=0.1 with no RAW and an
 empty pending queue; `CompleteThrough`, physical bounds and raw validity
@@ -63,6 +73,7 @@ indefinitely repeatable network contract.
 | Constructed physical C leaf | `HybridBirthCadenceLocalC`, `HybridConstructedCadenceLeafPacket` | Actual autonomous C639.9→789.9 ledger refines P(3,17,0); bounded-delay labels refine P(3,17,1/20), used by the constructed causal C→B→A weave |
 | Constructed physical N=3 | `HybridLocalCadenceReceiver`, `HybridConstructedCadenceBC`, `HybridConstructedCadenceCascade`, `HybridBirthCadenceCascade`, `HybridBirthCadenceProtocol` | Actual leaf, B/A receivers and causal weave; A54/B61/C34 at789.9; separate from the new common-birth every-N family |
 | Constructed common-birth every-N | `HybridFiniteChainFamilyPreparation`, `HybridPreparedCadenceChainConstruction`, `HybridBirthCadenceChain` | Actual birth preparation, variable-K leaf, full-budget physical receivers and causal weave; terminal own memories and cumulative counts |
+| Prescribed-error whole-chain realization | `HybridIndexedPreparedCadenceChain`, `HybridIndexedBirthCadenceChain`, `IndexedChainHeadline` | Generated fixed native functions match every prescribed error on final fast sender FIREs; actual birth, router, memory and count invariants retained |
 | Physical packet closure | `HybridLocalCadenceBudgetReceiver`, `HybridCadencePacketRelay` | Cumulative jitter≤0.15; directly proved high latencies[0.16,0.26], first≤rest, exact actual output packet |
 | Universal induction | `Chain.Induction.compose_every_finite_chain`, `root_contract` | Every positive finite N; validates every intermediate tail and cumulative jitter budget |
 | Actual stream interface | `Chain.Refinement.realized_chain` | Composes explicit routed streams, given a leaf refinement and local `RelayLaw` proofs |
@@ -93,11 +104,7 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
 3. Supply the older `Chain.Refinement.RelayLaw` with its narrower timing bounds
    if using that API. The new physical construction instead uses the proved
    broad-latency `relayCadence` closure and does not assume this law.
-4. Upgrade arbitrary per-emission error-sequence inputs to a complete global
-   factory. `HybridIndexedWireDelay` currently realizes errors along a supplied
-   actual ledger; the birth factory natively quantifies over bounded functions
-   δ_j(t), fixed centres and cumulative σ_j≤0.15.
-5. Formalize retained frozen probes, cuts/settings copies and their physical
+4. Formalize retained frozen probes, cuts/settings copies and their physical
    preservation semantics; establish universal refinement across every
    admissible execution and operational drift/noise/amplitude histories.
    Neither finite existence result proves these conclusions.

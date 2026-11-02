@@ -25,10 +25,11 @@ open. The common-birth finite-chain construction and validation are tracked in
 
 ## Constructed common-birth chain for every finite N
 
-[HybridBirthCadenceChain](KernelR/HybridBirthCadenceChain.lean) proves
-`birth_cadence_chain_exists`, constructing `ConstructedBirthCadenceChain`
-for every positive finite N (`n=N-1` in Lean). This is a separate protocol
-from the completed staged A/B/C construction. Each independently
+[IndexedChainHeadline](KernelR/IndexedChainHeadline.lean) exposes
+`every_finite_chain_exists`, backed by `indexed_birth_cadence_chain_exists` in
+[HybridIndexedBirthCadenceChain](KernelR/HybridIndexedBirthCadenceChain.lean).
+It constructs `ConstructedIndexedBirthCadenceChain` for every positive finite N
+(`n=N-1` in Lean). This is a separate protocol from the completed staged A/B/C construction. Each independently
 chosen cell is born at0;16 period-eight preparation inputs drive leaf port1
 and relay port2. The leaf's K period-four port0 inputs start at160, with
 `K ≥ 4*N+12`, and are already retained in the original global source queue.
@@ -38,13 +39,23 @@ and open on `[160,T+1)` for the fast phase, where
 
 The factory takes independent `BirthState`s, all auxiliaries initially READY,
 fixed independent `PhysicalBox` parameters (±0.3% or ±10%), canonical pulses
-and the exact preparation queues. For every link j<N-1 it takes a delay
-function δ_j(t), fixed centre d_j and nonnegative σ_j, with
-`0.3+σ_j ≤ d_j ≤ 0.4-σ_j`, `|δ_j(t)-d_j| ≤ σ_j` for every t, and cumulative
-`sum σ_j ≤ 0.15`. Actual FIRE dates select the delays. No prepared state,
-reaching execution, received calendar, output count or `CellLaw` is a caller
-premise. Preparation retargeting retains its actual ledger and deliveries;
-the physical receivers and causal weave issue and consume genuine wires.
+and the exact preparation queues. For every link j<N-1 it takes a fixed centre
+d_j, nonnegative σ_j and an arbitrary prescribed sequence `error j k`, with
+`0.3+σ_j ≤ d_j ≤ 0.4-σ_j`, `|error j k| ≤ σ_j` for every k, and cumulative
+`sum σ_j ≤ 0.15`. Native delay functions are constructed with global bounds
+`|δ_j(t)-d_j| ≤ σ_j` for every t, and with
+`δ_j(F_jk)=d_j+error j k` at each actual kth fast-phase sender FIRE in the
+final global execution. Wire j leaves physical cell `n-j`
+(`indexedCadenceSender n j`); its index starts at0 in `chain.fastExecution`,
+excluding the12/14 preparation FIREs.
+
+No prepared state, reaching execution, received calendar, output count, native
+delay function or `CellLaw` is a caller premise. The chosen indexed stage and
+its exact ordered sender ledgers are preserved through later physical weaves
+and retained in the birth wrapper. Preparation retargeting retains its actual
+ledger and deliveries; genuine wires are issued and consumed under the one
+fixed router. The earlier `birth_cadence_chain_exists` API remains available
+for caller-supplied native functions with the same global bounds.
 
 At T all cells are READY/q=0.1 with RAW absent and an empty global queue.
 `CompleteThrough`, reserve/cap bounds and raw validity are conclusions.
@@ -57,10 +68,10 @@ run root0 to leaf n, reversing the depth index: `j=n-i.val`.
 
 The full-budget receiver derives high latencies in[0.16,0.26] with first≤rest;
 `Packet.relayCadence` proves the closure used in construction. This does not
-supply the older, narrower `Chain.Refinement.RelayLaw`. The native factory's
-quantifier is over bounded delay functions. `HybridIndexedWireDelay` realizes
-indexed errors along a supplied actual ledger; arbitrary per-emission error
-sequences still need a whole-chain realization factory.
+supply the older, narrower `Chain.Refinement.RelayLaw`. The new indexed
+factory closes the prescribed-sequence realization obligation for the whole
+birth-to-terminal execution; its generated delay functions and retained actual
+stage satisfy both global native bounds and the requested per-emission values.
 
 See the [finite-chain coverage guide](N_CELL_COVERAGE.md) and
 [construction/validation ledger](EVERY_N_PLAN.md). Retained probes,
@@ -1414,9 +1425,9 @@ an explicit premise of that older API and is not assumed by the new factory.
 ## Remaining obligations for the complete theorem
 
 1. Extend beyond the declared common-birth/source/port family where required
-   by the full written theorem, and construct a whole-chain witness from arbitrary
-   per-emission error sequences. Native bounded delay functions are covered;
-   indexed errors along a supplied actual ledger are a separate helper.
+   by the full written theorem. Arbitrary bounded prescribed per-emission errors
+   now have a whole-chain birth-to-terminal realization with generated fixed
+   native delay functions and exact final fast sender ledgers.
 2. Establish sound real enclosure membership for remaining stored certificate
    bounds. Exact endpoint comparisons alone remain insufficient.
 3. Formalize retained frozen-probe responses, later cuts/settings copies and

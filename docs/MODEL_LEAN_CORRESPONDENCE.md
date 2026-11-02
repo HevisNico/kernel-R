@@ -23,7 +23,7 @@ Write a=ln4, κ=1/2, r=1/10, rₘ=1/40, and gₚ=exp(zₚ).
 | Events and causal wiring | Jumps preserve time and physical coordinates. FIRE appends routed tokens; arrival removes one actual due occurrence on a free port | `setMain`, `setAux`, `setRaw`, `Jump`, `Delivery`, `Router`, `CausalRouter`; `Execution` composes actual flows and jumps without a fixed simultaneous-event priority |
 | Births and terminal completion | A starts in the declared birth family; later births add independent READY coordinates and sources. Completion discharges enabled jumps and every token due at the horizon | `BirthState` plus the headline's READY-auxiliary/source premises; [HybridStagedBirth](../proof/lean/KernelR/HybridStagedBirth.lean): `Newborn`, `BirthStep`, `StagedExecution`; `CompleteThrough` |
 
-The [finite-chain headline](../proof/lean/KernelR/FiniteChainHeadline.lean)
+The [finite-chain headline](../proof/lean/KernelR/IndexedChainHeadline.lean)
 constructs the common-birth directed-chain protocol for every positive finite
 N, K≥4N+12, independent fixed parameter/birth choices and bounded native delay
 functions with cumulative phase budget≤0.15. All cells are born at0, prepare
@@ -37,7 +37,6 @@ routing law covers both preparation and cadence; it is defined by
 The earlier [three-cell headline](../proof/lean/KernelR/Headline.lean) retains
 its separate staged0/160/480 births, horizon789.9 and A54/B61/C34. Its exact
 source schedules and contacts are protocol data. Neither theorem quantifies
-over every admissible execution. Whole-chain realization of arbitrary
-prescribed per-emission error sequences, operational drift/noise, frozen
+over every admissible execution. Operational drift/noise, frozen
 probes/settings copies, numerical observations and the archived A22 network
 retain their separate [coverage boundaries](../proof/lean/N_CELL_COVERAGE.md).

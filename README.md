@@ -5,8 +5,13 @@
 **Lean now constructs a pulse-driven learning-and-cadence protocol for every
 positive finite directed chain.**
 
+> **For every positive finite N, admissible K, independent fixed fabrication
+> and READY birth data, and every prescribed bounded per-emission error
+> sequence, there exist fixed native routing functions and a complete physical
+> execution realizing those errors on the actual sending FIREs.**
+
 For N independently born cells, fixed independent fabrication parameters and
-bounded native wire-delay functions, the declared preparation and K-input
+arbitrary bounded per-emission wire-error sequences, the declared preparation and K-input
 program reaches a complete resting endpoint. Every cell is READY at q=0.1,
 with no RAW current and no pending token. Active log-gains and recoveries are
 derived from each cell's own birth values; no reaching execution or output
@@ -43,12 +48,6 @@ reserve/cap invariants and actual raw-current origins are retained throughout.
 Physical cell indices run root-first in Lean; the depth index in the table
 runs leaf-first.
 
-The exact quantifier order is:
-
-> **For every positive finite N, admissible K, independent fixed fabrication
-> and READY birth data, and admissible native real-time delay functions,
-> there exists a complete physical execution of the declared protocol.**
-
 The15 fabrication parameters per cell are chosen independently in either the
 ±0.3% or ±10% box and are **fixed in time**. Births have q=0.1±10⁻⁵,
 b=0.08±10⁻⁵, energy in[50,100], each auxiliary READY with m=0.025±10⁻⁵,
@@ -58,18 +57,22 @@ ports and contact windows are supplied protocol data.
 
 For each link, a fixed centre d and budget σ satisfy
 `0≤σ≤0.05` and `0.3+σ≤d≤0.4-σ`; the path sum is at most0.15.
-The theorem quantifies over **functions δ(t)** satisfying
-`-σ≤δ(t)-d≤σ` at every real time. It samples δ at each actual sending FIRE,
-so every wire delay is in[0.3,0.4]. No independence or cancellation of errors
-is assumed. The generic full-budget physical receiver now constructs its
-output packet and exact count from these actual inputs.
+For every prescribed sequence e_j(k) in[-σ_j,σ_j], the theorem constructs
+native functions δ_j(t) bounded at **every real time**, and proves
+`δ_j(F_j,k)=d_j+e_j(k)` on the actual kth fast-phase sender FIRE in the final
+global execution. Wire j leaves physical cell N−1−j. Indices are zero-based
+and exclude the12/14 preparation FIREs. Every wire delay lies in[0.3,0.4].
+No statistical independence, cancellation, native delay function, reaching
+execution or output calendar is supplied by the caller. The earlier
+[native-function theorem](proof/lean/KernelR/FiniteChainHeadline.lean) remains
+available as a separate API.
 
-**Limits near the result:** this is constructive existence for the declared
-finite directed-chain program and bounded native delay functions. It is not
-universal refinement of every admissible execution. A full birth-to-terminal
-factory for arbitrary *prescribed per-emission error sequences* remains a
-separate realization obligation; the indexed-delay helper alone does not
-supply it. Frozen probes, cuts/settings copies and indefinitely operating
+**Limits near the result:** this proves existence for the declared finite
+chain and source program, for every admissible birth/fabrication/error choice.
+The routing functions and execution are witnesses after those choices are
+fixed; it does not assert one function uniform across different families,
+an online synthesis algorithm or universal refinement of every execution.
+Frozen probes, cuts/settings copies and indefinitely operating
 networks retain their own obligations. Operational noise/drift research and
 simulated observations have separate scopes. See the
 [proof ledger](proof/lean/EVERY_N_PLAN.md) and
@@ -98,14 +101,14 @@ not premises or conclusions of the Lean result.
 
 ## Lean headline: signatures, axioms and reproduction
 
-[**FiniteChainHeadline.lean**](proof/lean/KernelR/FiniteChainHeadline.lean)
-groups three checked statements in `KernelR.Hybrid.FiniteChainHeadline`:
+[**IndexedChainHeadline.lean**](proof/lean/KernelR/IndexedChainHeadline.lean)
+groups three checked statements in `KernelR.Hybrid.IndexedChainHeadline`:
 
 | Declaration | Checked conclusion |
 |---|---|
 | `every_finite_chain_exists` | Actual birth-to-T witness for every N=n+1, with the exact hypotheses below |
-| `terminal_state_and_memories` | Complete resting coordinates, no RAW/tokens, own active log-gain+12/5 and recovery+3/10 |
-| `actual_counts` | Actual fast per-cell/root/total counts and cumulative birth-to-T ledger |
+| `terminal_state_and_counts` | Resting state, actual fast/full traffic, own active log-gain+12/5 and recovery+3/10 |
+| `prescribed_errors_on_actual_fires` | Global bounds at all real times and exact prescribed errors at final actual fast sender FIREs |
 
 <details>
 <summary>Exact Lean signatures</summary>
@@ -115,42 +118,44 @@ Proof bodies are omitted. `finiteChainPreparationPort` selects leaf port1 and
 relay port2; `cadenceActivePort` selects leaf port0 and relay port2.
 
 ```lean
-namespace KernelR.Hybrid.FiniteChainHeadline
+namespace KernelR.Hybrid.IndexedChainHeadline
 
 theorem every_finite_chain_exists {n θ bornCells K ε}
     (hborn : ∀ i : Fin (n+1), BirthState (bornCells i))
     (hb : @PhysicalBox (n+1) θ ε) (ha : ∀ i q, (bornCells i).aux 0 q=.ready)
     (hqueue : ∀ i, (bornCells i).pending=sourceTrain 0 (finiteChainPreparationPort n i) 0 8 16)
-    (sigma centre : ℕ → ℝ) (delay : ℕ → ℝ → ℝ)
+    (sigma centre : ℕ→ℝ) (error : ℕ→ℕ→ℝ)
     (hK : 4*(n+1)+12≤K) (hsigma : ∀ j, 0≤sigma j)
     (hbudget : KernelR.Chain.pathJitter sigma n≤3/20)
     (hcentre : ∀ j, j<n → (3/10:ℝ)+sigma j≤centre j ∧ centre j≤2/5-sigma j)
-    (herror : ∀ j, j<n → ∀ time, -sigma j≤delay j time-centre j ∧ delay j time-centre j≤sigma j) :
-    Nonempty (ConstructedBirthCadenceChain θ bornCells K sigma centre delay (cadenceChainTerminal n K))
+    (herror : ∀ j, j<n → ∀ i, -sigma j≤error j i ∧ error j i≤sigma j) :
+    Nonempty (ConstructedIndexedBirthCadenceChain θ bornCells K sigma centre error (cadenceChainTerminal n K))
 
-variable {n θ bornCells K sigma centre delay T}
-  (c : @ConstructedBirthCadenceChain n θ bornCells K sigma centre delay T)
+variable {n θ bornCells K sigma centre error T}
+  (c : @ConstructedIndexedBirthCadenceChain n θ bornCells K sigma centre error T)
 
-theorem terminal_state_and_memories :
-    c.final.time=T ∧ (∀ i, ReadyCoordinates c.final i) ∧
-    (∀ i, c.final.x i .q=1/10) ∧ (∀ i p, c.final.raw i p=none) ∧
-    c.final.pending=[] ∧
-    (∀ i, c.final.x i (.z (cadenceActivePort n i))=
+theorem terminal_state_and_counts (hK : 4*(n+1)+12≤K) :
+    c.chain.final.time=T ∧ (∀ i, ReadyCoordinates c.chain.final i) ∧
+    (∀ i, c.chain.final.x i .q=1/10) ∧ (∀ i p, c.chain.final.raw i p=none) ∧
+    c.chain.final.pending=[] ∧
+    (∀ i, c.chain.final.x i (.z (cadenceActivePort n i))=
       (bornCells i).x 0 (.z (cadenceActivePort n i))+12/5) ∧
-    (∀ i, c.final.x i .b=(bornCells i).x 0 .b+3/10)
+    (∀ i, c.chain.final.x i .b=(bornCells i).x 0 .b+3/10) ∧
+    (∀ i, (c.chain.fastExecution.emissionTimes i).length=K-5-2*(n-i.val)) ∧
+    c.chain.fastExecution.ledger.emissions.length=(n+1)*(K-(n+1)-4) ∧
+    c.chain.execution.ledger.emissions.length=(n+1)*(K-(n+1)+8)+2
 
-theorem actual_counts (hK : 4*(n+1)+12≤K) :
-    (∀ i, (c.fastExecution.emissionTimes i).length=K-5-2*(n-i.val)) ∧
-    (c.fastExecution.emissionTimes 0).length=K-2*(n+1)-3 ∧
-    c.fastExecution.ledger.emissions.length=(n+1)*(K-(n+1)-4) ∧
-    (∀ i, (c.execution.emissionTimes i).length=
-      finiteChainPreparationCount n i+(K-5-2*(n-i.val))) ∧
-    c.execution.ledger.emissions.length=(n+1)*(K-(n+1)+8)+2
+theorem prescribed_errors_on_actual_fires :
+    (∀ j, j<n → ∀ time, -sigma j≤c.delay j time-centre j ∧ c.delay j time-centre j≤sigma j) ∧
+    (∀ (j : ℕ) (hj : j<n) (i : ℕ)
+      (hi : i<(c.chain.fastExecution.emissionTimes (indexedCadenceSender n j hj)).length),
+      c.delay j (c.chain.fastExecution.emissionTimes (indexedCadenceSender n j hj))[i]=
+        centre j+error j i)
 
-end KernelR.Hybrid.FiniteChainHeadline
+end KernelR.Hybrid.IndexedChainHeadline
 ```
 
-`ConstructedBirthCadenceChain` retains the actual preparation, fast execution,
+`ConstructedIndexedBirthCadenceChain.chain` retains the actual preparation, fast execution,
 source/parameter equalities, issued and delivered occurrences, and their
 concatenation under one router. The count fields refer to actual FIRE ledgers.
 
@@ -159,16 +164,16 @@ concatenation under one router. The count fields refer to actual FIRE ledgers.
 The project pins **Lean 4.35.0** and **Mathlib v4.35.0**, with Mathlib commit
 `56a005855ea17e0b0958f73ec801ae140b0a1679` in
 [lake-manifest.json](proof/lean/lake-manifest.json).
-Verified native finite-chain code commit:
-[2c50e42e4ba02bd77c20dfd2612a587dfda4c224](https://github.com/HevisNico/kernel-R/commit/2c50e42e4ba02bd77c20dfd2612a587dfda4c224).
-The subsequent documentation-only commit records this identifier and changes
-no proof sources. From the repository root, with Lean installed:
+The checked prescribed-error finite-chain source is recorded in the
+[PR #15 validation table](https://github.com/HevisNico/kernel-R/pull/15).
+Its proof modules are being reviewed in PR #15; the `main` README also presents
+this result while those proof sources await merge.
+From the repository root, with Lean installed:
 
 ```sh
-git checkout 2c50e42e4ba02bd77c20dfd2612a587dfda4c224
 cd proof/lean
 lake exe cache get
-lake build KernelR.FiniteChainHeadline
+lake build KernelR.IndexedChainHeadline
 lake build
 lake build Audit
 ```
@@ -176,24 +181,25 @@ lake build Audit
 The three `#print axioms` outputs are:
 
 ```text
-'KernelR.Hybrid.FiniteChainHeadline.every_finite_chain_exists' depends on axioms: [propext,
+'KernelR.Hybrid.IndexedChainHeadline.every_finite_chain_exists' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
-'KernelR.Hybrid.FiniteChainHeadline.terminal_state_and_memories' depends on axioms: [propext,
+'KernelR.Hybrid.IndexedChainHeadline.terminal_state_and_counts' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
-'KernelR.Hybrid.FiniteChainHeadline.actual_counts' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KernelR.Hybrid.IndexedChainHeadline.prescribed_errors_on_actual_fires' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
 ```
 
 These are Lean's standard logical foundations. The source check rejects
 admitted proofs and added project axioms; the global audit checks every
-imported/current project theorem against this list. The complete export passes
-**9,537 build jobs**, **27,515 audited theorems**, **484 Lean source checks**,
-**16 robust certificates**, **12 project tests** and **178 new paired controls**.
-The five inherited sources are unchanged. CI configures1,281 paired controls;
-this inventory does not claim a new local rerun of every older suite. The
-[validation ledger](proof/lean/EVERY_N_PLAN.md) distinguishes checked commits
-from fresh CI runs still in progress.
+imported/current project theorem against this list. The final indexed-error
+checkpoint passed **9,543 build jobs**, an audit of **27,587 project theorems**,
+source checks over **490 Lean files**, generated evidence, **16 robust
+certificates** and **12 project tests**. The [validation ledger](proof/lean/EVERY_N_PLAN.md)
+records **198 passing finite-chain pairs** and **1,301 configured pairs**,
+without claiming a fresh local rerun of every older suite.
 The [full reproduction commands](proof/lean/README.md#reproduce) include source,
 evidence and paired corruption controls; the workflow badge reports actual CI.
 
@@ -268,9 +274,9 @@ The [Lean project](proof/lean/README.md) proves physical flow, reserve and memor
 invariants, the common-birth finite-chain construction above, the earlier
 staged N=3 protocol, and generic conditional results. It also checks exact rational certificate endpoints and
 recorded cadence/adaptive counters. These evidence checks do not establish
-membership of the actual trajectories in every recorded interval. The native-function chain factory is now constructed. Prescribed indexed-error
-realization, retained probes and indefinite network continuation remain separate
-obligations.
+membership of the actual trajectories in every recorded interval. Both the native-function chain factory and prescribed indexed-error realization
+are constructed. Retained probes and indefinite network continuation remain
+separate obligations.
 
 The [N-cell extension](results/reciprocal_composition/README.md) uses a closed
 packet contract and a written induction, supported by 81 N-independent local
