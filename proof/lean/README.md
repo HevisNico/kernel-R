@@ -371,6 +371,15 @@ other than `propext`, `Classical.choice` and `Quot.sound`. There are no admitted
 proofs, project axioms or native-evaluation proofs. The Audit build target uses
 Lake's exact artifact paths. Its scan includes every imported and current
 `KernelR`/`A22` theorem; negative controls cover corruption in both locations.
+
+Paired proof controls check that a valid proof script compiles and that a
+specified mutation of its statement or assumptions is rejected with a Lean
+diagnostic. Rejection means that the supplied script does not prove the mutated
+statement; it is not, by itself, a proof of that statement's negation. These
+controls test proof interfaces and guard against regressions. Mathematical
+assurance comes from the accepted proof terms, their exact hypotheses and the
+axiom audit, not from the number of rejected mutations.
+
 Standalone proof controls reuse the same dependency artifacts and compiler
 options. `check_hybrid_feedback_entry_negative.py` adds 29 paired controls for
 the real B344 weak entry, first residual-dependent B FIRE, issued reverse
@@ -422,6 +431,32 @@ common-birth every-N construction is tracked in
 those of the N=3 commit; current finite-chain validation and checkpoint
 history are recorded there.
 
+
+### Rebuild project proofs without a restored project cache
+
+A successful incremental build may replay diagnostics from cached artifacts;
+it does not necessarily recompile every project module. For an independent
+source rebuild, use a fresh checkout and replace `COMMIT_SHA` below with the
+full commit being audited. The destination must not already exist.
+
+```sh
+git clone https://github.com/HevisNico/kernel-R.git kernel-R-clean
+cd kernel-R-clean
+git checkout --detach COMMIT_SHA
+git rev-parse HEAD
+cd proof/lean
+lake exe cache get
+lake build
+lake build Audit
+python3 scripts/check_audit_negative.py
+```
+
+Do not copy or restore the project's `.lake/build` directory into this checkout.
+`lake exe cache get` fetches dependency artifacts; the commands above rebuild
+the project's proofs, not the Lean toolchain or all third-party dependencies
+from source. Record the commit, `lean --version`, build log and axiom-audit
+output, and distinguish this run from a cached CI replay. Then run the source,
+evidence and paired controls listed above for the full validation suite.
 
 ## Coverage and hypotheses
 
