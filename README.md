@@ -167,9 +167,14 @@ The project pins **Lean 4.35.0** and **Mathlib v4.35.0** in
 [lean-toolchain](proof/lean/lean-toolchain),
 [lakefile.toml](proof/lean/lakefile.toml) and
 [lake-manifest.json](proof/lean/lake-manifest.json). Mathlib is locked to commit
-`56a005855ea17e0b0958f73ec801ae140b0a1679`. With Lean installed:
+`56a005855ea17e0b0958f73ec801ae140b0a1679`.
+The verified code commit is
+[c7b66bba9065debde10fe9a9bd4134b256396330](https://github.com/HevisNico/kernel-R/commit/c7b66bba9065debde10fe9a9bd4134b256396330);
+the subsequent README-only commit records this identifier and changes no code.
+With Lean installed, from the repository root:
 
 ```sh
+git checkout c7b66bba9065debde10fe9a9bd4134b256396330
 cd proof/lean
 lake exe cache get
 lake build KernelR.Headline
