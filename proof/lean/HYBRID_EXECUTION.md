@@ -1,30 +1,23 @@
 # Physical execution semantics and analytic refinement
 
-The complete protocol-to-abstraction theorem remains open. The modules below
-prove physical flow and invariant results needed for that theorem. The
-complete conditional cadence prefix is derived below; its later reaching
-trace is still supplied. Constructive source-driven existence now reaches
-C's first protected cadence MARK return at 660 from A's original birth,
-with cumulative A39/B44/C15 and independent B/C births at160/480. C is READY
-at q=0.1 with fresh RAW660, own newborn recovery+0.2 and own port0 log-gain+1.8.
-A/B retain their actual cuts, modes, raw states, energy and continuations.
-Exactly 19 Cport0 sources664..736 remain. The first cadence wave and both actual
-wire receipts are retained. The earlier639.9 checkpoint has three prepared
-cells, RAW absent and25 C640..736 sources.
-The earlier352 checkpoint and its retained weak continuation are described
-below as part of this construction. The modules also derive an isolated
-silent input's absence of emissions and total
-ERROR dose, and extract the first firing of an isolated
-learned input and its exact single-emission count. From the declared prepared
-section the learned-input case now returns and preserves all memories. Sensor
-triggering and the protected auxiliary cycle are also extracted from actual
-executions.
+The complete protocol-to-abstraction theorem for every finite N remains open.
+The declared three-cell cadence is now constructively realized from A's READY
+birth through789.9, including independent B/C births at160/480. Cumulative
+counts are A54/B61/C34; the cadence contributes A16/B18/C20. All three cells
+finish READY at q=0.1, with RAW absent and no pending tokens, physical reserve
+and cap bounds, and `CompleteThrough789.9`. Active log-gains A2/B2/C0 are their
+own birth values+2.4, and every recovery is its own birth value+0.3. Other
+teaching gains are preserved.
 
-A separate autonomous-C execution now reaches789.9 from the actual639.9
-state, using the projected global prefix through660 and a constructed local
-tail. Its 20 cadence emissions and all 25 C source arrivals are real local
-jumps. This supplies a concrete leaf packet, while the global network frontier
-remains660; later global issuance, B/A responses and wire receipts remain open.
+The construction uses C's actual autonomous leaf ledger, physical B and A
+receivers and causal queue weaving. At639.9 the global source queue contains
+only the 25 external C tokens; later wires are issued by genuine FIRE jumps
+and consumed by genuine arrivals. Neither a later reaching execution nor a
+received calendar or output count is supplied. The earlier660 global prefix
+and C-only789.9 witness remain available. Fixed independent fabrication
+parameters, canonical pulses and bounded delays retain their declared scope;
+physical every-N, fine robustness, probes/copies and universal refinement remain
+open. Work pauses after this N=3 publication.
 
 ## Physical definitions
 
@@ -75,15 +68,13 @@ with initially READY auxiliaries and the exact protocol queue.
 
 ## Constructed protocol checkpoint
 
-The current original-birth factory is
-[`birth_protocol_cadence_first_mark_return_exists`](KernelR/HybridBirthCadenceFirstMarkReturn.lean).
-It returns `ConstructedCadenceFirstMarkReturn`, retaining the actual original
-births, teaching, first cadence wave, C656 protected MARK and C660 arrival.
-It takes A's original READY birth/source family, independent READY B/C newborns,
-fixed independent fabrication parameters and bounded actual wire delays.
-No reaching execution, received calendar, prescribed dose/count or firing date
-is supplied. Earlier factories, including the first-wave FIRE checkpoint and
-fully prepared639.9 endpoint, remain available independently.
+The current original-birth protocol factory is
+[`birth_protocol_complete_cadence_exists`](KernelR/HybridBirthCadenceProtocol.lean).
+It returns `ConstructedBirthCadenceProtocol`, retaining both actual births,
+the two-cell phase between them and a complete three-cell phase480→789.9. Its premises are A's READY birth/source family, independent READY B/C newborns, fixed independent physical
+parameters and five bounded delay functions. There is no reaching execution,
+received calendar, prescribed dose/count or assumed firing date. Earlier
+factories remain available independently.
 
 | Constructed checkpoint | Derived state and traffic | Public factory / source |
 |---|---|---|
@@ -108,6 +99,7 @@ fully prepared639.9 endpoint, remain available independently.
 | First cadence wave, F_A in(653.8,655.1) | Actual A FIRE; cumulative A39/B44/C15; A FAST/q=1, B/C actual cuts and continuations, exact21 C656..736 sources | `birth_protocol_cadence_first_wave_exists` in [HybridBirthCadenceFirstWave](KernelR/HybridBirthCadenceFirstWave.lean) |
 | First protected source, 656 | Actual C656 arrival; C remains SLOW with its true charge, A/B actual cuts and20 future C sources | `first_cadence_mark_source_exists` in [HybridCadenceFirstMarkSource](KernelR/HybridCadenceFirstMarkSource.lean) |
 | First protected MARK return, 660 | A39/B44/C15; C READY/q=0.1/RAW660, own recovery+0.2 and port0 log-gain+1.8; A/B retained cuts and19 C664..736 sources | `birth_protocol_cadence_first_mark_return_exists` in [HybridBirthCadenceFirstMarkReturn](KernelR/HybridBirthCadenceFirstMarkReturn.lean) |
+| Complete three-cell cadence, 789.9 | Cumulative A54/B61/C34; cadence A16/B18/C20; all READY/q=0.1, RAW absent, global queue empty; own active gains+2.4 and recoveries+0.3 | `birth_protocol_complete_cadence_exists` in [HybridBirthCadenceProtocol](KernelR/HybridBirthCadenceProtocol.lean) |
 
 At 319.9 A retains its own birth port0 log-gain+1.8 and recovery+0.1;
 B retains its own newborn port1 log-gain+0.6 and recovery+0.1. All other gains
@@ -417,14 +409,44 @@ prefixes at every finite future horizon with newly supplied isolated sources.
 The empty analysis queues do not physically remove any global C source token;
 this is domain membership of projections, not a network continuation theorem.
 
+### Constructed global C→B→A cascade
+
+`HybridConstructedCadenceBC` consumes the ledger-derived C packet
+P(3,17,1/20) with a physical B receiver. B emits exactly18 signals, whose real
+ledger yields P(5,13,1/20). The next bounded wire gives A's packet
+P(5,13,1/10), and its physical receiver emits exactly16 signals.
+`HybridCausalHeadQueue`, `HybridCausalHeadJump`, `HybridCausalHeadExecution`,
+`HybridCausalHeadBalance`, `HybridCausalHeadComplete` and `HybridCausalHeadSignals`
+weave these isolated witnesses into genuine routed executions. The global
+initial queue contains only C's 25 external source occurrences, and each
+receiving token is issued by its sender's actual FIRE. The isolated receiver
+queues are matched by conservation; they are not preloaded global wire tokens.
+
+`HybridConstructedCadenceCascade` returns the complete global639.9→789.9 trace
+with cadence counts A16/B18/C20, all READY/q=0.1, RAW absent, physical/raw
+invariants, an empty global queue and `CompleteThrough789.9`.
+`HybridBirthCadenceCascade` connects this to the original births and derives
+cumulative A54/B61/C34. Active own gains A2/B2/C0 each gain2.4 and own recoveries
+each gain0.3; other gains preserve their639.9 values.
+
+`HybridEmissionRouterTransport` retargets an actual trace when the routed token
+lists agree at each real FIRE, preserving both endpoints, complete ledger and
+deliveries. `HybridTeachingCadenceRouter` combines the B→C teaching gate
+[480,630) and C→B/B→A cadence gates[640,780) in one fixed three-cell router.
+`HybridBirthCadenceProtocol` retains the same actual C birth and joins the
+teaching/cadence phases as its `staged.after` under that fixed law. Its
+`betweenBirths` joins the true two-cell execution after B160 to C480, while
+the earlier A phase and B birth remain in the retained original staged witness.
+The protocol's cumulative54/61/34 theorems count this actual staged execution,
+with the ledger and delivered occurrences preserved by retargeting.
+
 ### Current boundary
 
-The C-only continuation and its concrete leaf packet are now constructed
-through789.9. Weaving its later FIREs and token labels into the actual global
-B/A executions after660 remains to be done. The full network cadence through
-789.9, targeting A54/B61/C34, still takes a later actual execution as a premise.
-Fine enclosure membership, retained probes/copies and physical every-N
-refinement remain separate obligations.
+The declared physical N=3 cadence is constructed. The general trace-based
+analytic APIs below still accept executions, while the concrete factory now
+supplies one for this birth/source family. Physical every-N refinement, finer
+operational robustness, retained probes/settings copies and universal
+refinement remain open. Work pauses after this N=3 checkpoint.
 
 ## Checked implications
 
@@ -531,19 +553,23 @@ refinement remain separate obligations.
 | `HybridGuardedPortSourceWire` / `HybridCSecondWire` / `HybridPortFirstLearnedCut` / `HybridCFirstLearnedBoundary` | Construct C's first learned response and retain its true SLOW path at496 | The next contact uses that same physical path and exact queue |
 | `HybridLowRecoverySlowSpanExtension` / `HybridPortSlowWire` / `HybridPortProtectedReturn` / `HybridCPreparedPair` | Extend the real SLOW flow, consume the next wire, derive protected MARK0.1 and common prepared504 | No state clamp, injected recovery or assumed prepared newborn |
 | `HybridPortCoupledLearnedCycle` / `HybridPortCoupledLearnedTrain` / `HybridCLearnedEpoch` | Construct13 arbitrary-port learned cycles504..600, prepared608 and quiet639.9, preserving own memories and actual wire provenance | Fixed physical parameters, sender gain[1.8,2], receiver gain[1.8,2.2], bounded actual delays and explicit contact windows |
-| `HybridCTeachingPair` / `HybridBirthCTeaching` | Construct original birth-to639.9 with both genuine births, A38/B43/C14, own memories, exact25 pending C sources and CompleteThrough | Later cadence existence and arbitrary-N physical refinement remain open |
+| `HybridCTeachingPair` / `HybridBirthCTeaching` | Construct original birth-to639.9 with both genuine births, A38/B43/C14, own memories, exact25 pending C sources and CompleteThrough | Later cadence is constructed separately; arbitrary-N physical refinement remains open |
 | `HybridQuietHeadNeutralProduct` / `HybridConstructedCadenceStart` / `HybridCadenceWeakStepExistence` / `HybridConstructedCadenceWeakWarmup` / `HybridBirthCadenceWeakWarmup` | Construct actual C640/644/648 weak responses and fresh652 under open global routing, with quiet A/B, ERROR1.8 and21 future sources | Actual non-emitting paths, independent own memories and carried charge; no global route-closure premise |
 | `HybridCadenceResidualRootBounds` / `HybridResponseMarginInput` / `HybridCadenceFirstStrongFireExistence` | Derive strict first-FIRE margin through0.4 from residual q≤0.3, then construct F in652+(0.4,0.9) | Actual three-dose gain[1.8,1.9]; no assumed firing date |
 | `HybridNeutralFutureFrame` / `HybridCadenceFirstWire` / `HybridBirthCadenceFirstWire` | Construct the genuine C FIRE, retain its same FAST cut, consume the exact C-to-B token and derive A38/B43/C15 with21 future C sources | Historical receipt H in(652.7,653.3), B prepared/fresh RAW and C actual FAST; extended by the first-wave construction above |
 | `HybridCadenceStrongSlowSpan` / `HybridCadenceFirstRelayWire` | Continue the same C path, construct B's actual FIRE and consume the Aport2 relay wire at H_A in(653.4,654.4) | B actual FAST cut, C actual path and both retained continuations; no preloaded A wire |
 | `HybridNeutralHeadExecutionProduct` / `HybridCadenceFirstAFire` / `HybridBirthCadenceFirstWave` | Construct A's actual FIRE and original birth-to-first-wave A39/B44/C15, with21 C sources and CompleteThrough | Historical A FAST/q=1 and B/C actual cuts; extended through the C660 return above |
 | `HybridCadenceMarkOnlyExistence` | Construct a local protected SLOW MARK-only response and actual guarded return, retaining charge/recovery/energy clocks | Current physical section and isolated canonical input; instantiated at the actual C656 source by the global constructor above |
-| `HybridCadenceFirstMarkSource` / `HybridCadenceFirstMarkReturn` / `HybridBirthCadenceFirstMarkReturn` | Construct the actual C656 protected source, MARK0.1, READY return and C660 arrival from the original births; A39/B44/C15 and19 future C sources | C READY/q=0.1/RAW660, own recovery+0.2; A/B actual cuts retained, no global664/668 continuation asserted |
+| `HybridCadenceFirstMarkSource` / `HybridCadenceFirstMarkReturn` / `HybridBirthCadenceFirstMarkReturn` | Construct the actual C656 protected source, MARK0.1, READY return and C660 arrival from the original births; A39/B44/C15 and19 future C sources | C READY/q=0.1/RAW660, own recovery+0.2; A/B actual cuts retained; historical witness alongside the complete N=3 factory |
 | `HybridCadenceSecondStrongSlowSpan` / `HybridCadenceSecondStrongResponse` | Construct a local second strong pulse, SLOW carry and next actual source at period4 with unchanged memories | Exact-rest source and own recovery near0.28; later routed network responses remain separate |
-| `HybridCadenceMixedPrefix` / `HybridCadenceMixedReopen` / `HybridReadySilentErrorStart` / `HybridCadenceMixedResponse` / `HybridCadenceMixedNextSource` | Construct local protected MARK, real reopening, remaining-RAW ERROR and next source with recovery+0.1/gain+0.6 | Actual SLOW entry/charge bands and future queue; no supplied reaching trace, but no global668 network construction |
-| `HybridAutonomousCellProjection` / `HybridBirthCadenceLocalCTail` / `HybridBirthCadenceLocalC` | Project actual C639.9→660 and construct its local tail to789.9; 20 cadence emissions, cumulative C34, all25 sources consumed | C-only execution; later global A/B paths and wire receipts are not supplied |
+| `HybridCadenceMixedPrefix` / `HybridCadenceMixedReopen` / `HybridReadySilentErrorStart` / `HybridCadenceMixedResponse` / `HybridCadenceMixedNextSource` | Construct local protected MARK, real reopening, remaining-RAW ERROR and next source with recovery+0.1/gain+0.6 | Actual SLOW entry/charge bands and future queue; No supplied reaching trace; local component instantiated by the complete N=3 cascade |
+| `HybridAutonomousCellProjection` / `HybridBirthCadenceLocalCTail` / `HybridBirthCadenceLocalC` | Project actual C639.9→660 and construct its local tail to789.9; 20 cadence emissions, cumulative C34, all25 sources consumed | C-only component, now woven with actual B/A executions in the global cascade |
 | `HybridLocalCadenceHighTrain` / `HybridLocalCadenceTail` / `HybridConstructedCadenceLeafPacket` | Actual high train and terminal C return; ledger-derived P(3,17,0) and bounded-delay labels P(3,17,1/20) | Token labels acquire global issuance only under the explicit same-calendar/routing hypotheses |
 | `HybridCadenceHighFireExistence` / `HybridCadenceHighCompletion` | Construct high-gain FIRE in(0.16,0.26) and its actual protected completion across FAST exit | Own four-dose gain/current-state hypotheses and isolated future queue; no universal network continuation |
+| `HybridLocalCadenceReceiver` / `HybridLocalCadenceReceiverPacket` / `HybridConstructedCadenceBC` | Physical B response to C packet;18 outputs and actual B packet | Concrete cadence domains and bounded packet jitter |
+| `HybridCausalHeadQueue` / `HybridCausalHeadJump` / `HybridCausalHeadExecution` / `HybridCausalHeadBalance` / `HybridCausalHeadComplete` / `HybridCausalHeadSignals` | Genuine routed causal weaving with exact queue balance, emissions, deliveries and terminal completion | Sender/receiver traces and actual contact correspondence are retained |
+| `HybridConstructedCadenceCascade` / `HybridBirthCadenceCascade` | Construct complete three-cell cadence789.9 from original birth premises, A54/B61/C34 and empty queue | Declared N=3 family; every-N and universal refinement remain open |
+| `HybridEmissionRouterTransport` / `HybridTeachingCadenceRouter` / `HybridBirthCadenceProtocol` | Preserve actual ledger/deliveries under router retargeting; join teaching and cadence under one fixed gated router and retain both births through789.9 | Same physical source/birth family; no settings-copy, drift or arbitrary-N claim |
 | `HybridBirthLearnedRest` | Derive Aport2/Bport2 learned-domain membership and isolated one-cell future contracts from the639.9 endpoint | Empty analysis queues do not erase the global queue; Cport1 and network routing are outside this bridge |
 | `HybridCadenceRouter` / `HybridCadenceQuiet` / `HybridCadencePrelude` | Actual C-to-B-to-A contacts; three weak C cases through fresh source652 with ERROR 1.8, quiet A/B and twenty-one future C tokens | Actual execution reaching 789.9, initial prepared states and C's declared twenty-five sources; no complete cadence count claim |
 | `HybridCadenceSilent` / `HybridCadenceWeakStages` / `HybridCadenceWeakWarmup` | Real four-period weak inputs with charge caps 0.1→0.15→0.2→0.3 | Current physical invariants and actual receiving-cell cuts; no reset or inherited period-eight cap |
@@ -555,7 +581,7 @@ refinement remain separate obligations.
 | `HybridSparseLearnedPulse` / `HybridCadenceSparsePrefix` / `HybridCadenceRelayPhase` | Seven-unit sparse settling, real dense transient cuts and generic relay counts/calendars | Physical incoming dates and gap bounds, discharged by the actual contact geometry |
 | `HybridCadenceCPhase` / `HybridCadenceForwardGeometry` / `HybridCadenceReturnGeometry` | C20 with its exact physical output calendar; independent-jitter receiving geometry for B/A | True phase witnesses and separate own-gain latency references |
 | `HybridCadenceWireCalendar` / `HybridCadenceBPhase` / `HybridCadenceAPhase` | Actual C outputs determine B20 inputs/B18 outputs, then A18 inputs/A16 outputs | Empty initial A/B queues and concrete contacts; no supplied B/A output count or received calendar |
-| `HybridCadenceCascade` / `HybridCadenceEntry` | Cumulative A54/B61/C34, own memories/recovery, all cells at rest with no raw and an empty queue at789.9 | Original source programs, physical birth family, actual traces/births and independently bounded wire functions; existence/progress still not constructed |
+| `HybridCadenceCascade` / `HybridCadenceEntry` | Cumulative A54/B61/C34, own memories/recovery, all cells at rest with no raw and an empty queue at789.9 | Generic trace-based interface with physical birth/source data and bounded delays; concrete N=3 existence is constructed separately |
 
 
 The real coarse bounds used for work are a in (1,1.4), C<=5, Lm<=14, Ls<=3,
@@ -860,8 +886,8 @@ retaining the legal boundary-source alternatives. The complete A-to-B epoch is
 now connected below, followed by the physical B-to-A return epoch. These
 analytic interfaces take a one-birth execution; the original-birth factories
 now construct the two-cell prefix through459.9 and add the genuine C birth
-and teaching through639.9, followed by the first cadence wave and C660
-protected MARK return. The complete later cadence execution remains to be constructed.
+and teaching through639.9, followed by the complete constructed N=3 cadence
+through789.9. Both actual births and the fixed three-cell routing law are retained.
 
 
 ## Preparation at the actual birth boundary
@@ -1038,9 +1064,8 @@ This is a conditional physical protocol theorem. The two executions, birth at
 B's exact source list for the return phase is not fixed by this teaching-only
 statement. The reciprocal-entry theorem below fixes it and covers459.9.
 The C/cadence analyses retain conditional signatures; separate factories now
-construct the specific prefix through639.9, the first cadence wave and C660
-protected MARK return. The remaining cadence construction,
-probes, remaining enclosure membership and full-chain physical refinement remain open.
+construct the specific birth-to789.9 N=3 protocol. Probes, remaining
+enclosure membership and arbitrary-chain physical refinement remain open.
 Parameters are fixed members of the stated fabrication boxes, with canonical
 pulse amplitudes; noise and drift require their separate extensions.
 
@@ -1103,7 +1128,8 @@ over actual executions reaching160,319.9 and459.9 with the genuine B birth
 at160. `birth_protocol_reverse_teaching_exists` now constructs this complete
 prefix from the original birth assumptions. A's initial auxiliaries remain
 READY; this is not an ERROR-born generalization. The later C introduction
-and cadence APIs below still require their actual executions and C birth.
+and cadence analytic APIs below still accept executions and a C birth; the
+separate concrete factories supply these for the declared N=3 protocol.
 Probes, remaining fine enclosures, general extension/progress and physical
 every-N refinement remain open. Fixed fabrication parameters and canonical pulse
 amplitudes remain the scope; noise and drift need separate extensions.
@@ -1188,8 +1214,9 @@ physical theorem and each cell's own birth data.
 The standalone prelude needs only an upper bound on C's initial low gain. Its
 fourth input is described as fresh, not assumed to fire. The lower nominal
 gain at that entry comes from C's own birth when composing the next pulse.
-The actual complete cadence execution through 789.9 remains a premise; the
-prelude does not prove its later output counts or construct its existence.
+This standalone analytic prelude accepts a later cadence execution and does
+not by itself prove its output counts. The separate constructive factories
+above now supply the declared three-cell execution through789.9.
 
 The following local pulse cases are proved from physical state inequalities,
 guarded phases and actual isolated receiving-cell spans:
@@ -1273,17 +1300,16 @@ by736 and every routed token is due before780.4, strictly before789.9.
 Causal `PendingFuture` excludes any such token remaining at the endpoint.
 Gain/recovery caps, reserve in[50,100] and raw validity also propagate.
 
-This is a complete conditional three-cell protocol prefix, not a construction
-of global existence/progress. The composed analytic API takes actual traces
-through160,319.9,459.9,480,639.9 and789.9 with births at160/480. The new factory
-constructs both genuine births, the639.9 endpoint, the first cadence wave and
-C660 protected MARK return; the remaining cadence trace is still to be constructed. A starts with READY
-auxiliaries, an explicit subfamily of `BirthState`. Fabrication parameters
-are fixed independent box members; initial coordinate perturbations and
-bounded fresh wire delays are retained. There is no probabilistic
-independence assertion, additive dynamic noise, drift or device fault model.
-Frozen probes, later cuts/copies and physical refinement for arbitrary N
-remain distinct obligations.
+This analytic interface remains conditional on actual traces through160,
+319.9,459.9,480,639.9 and789.9. Separately, the constructive factory now supplies
+the declared three-cell cadence and both genuine births, deriving the same
+counts and own-memory endpoint from the initial source/birth data. A starts
+with READY auxiliaries, an explicit subfamily of `BirthState`. Fabrication
+parameters are fixed independent box members; initial coordinate perturbations
+and bounded fresh wire delays are retained. No probabilistic independence,
+operational drift, dynamic noise or device fault model is asserted. Frozen
+probes, cuts/copies, universal refinement and physical arbitrary-N composition
+remain separate obligations.
 
 ## Physical event budget
 
@@ -1332,30 +1358,22 @@ remain to be constructed.
 
 ## Remaining obligations for the complete theorem
 
-1. Weave the constructed autonomous C continuation after660 with the actual
-   B/A responses and routed issuance/receipt paths to789.9. The conditional
-   analysis already derives A54/B61/C34. Construct the later
-   traces while retaining every own memory, global queue and actual wire token.
-2. Prove the main/auxiliary interactions in each actual pulse case, including
-   combined MARK/ERROR, strict cap inactivity and absence of extra firings.
-   The isolated silent input and its total dose are proved with variable-gain
-   raw-tail overlap. The prepared learned-input case now has an exact single
-   emission, zero ERROR/MARK doses, preserved memories and an actual READY
-   return. Local combined MARK/ERROR cases are also checked; their occurrence
-   in fully constructed later protocol executions remains to be established.
-3. Establish sound real enclosure membership for the remaining root, calendar,
-   recovery and residual-tail expressions in the certificates. Exact comparisons
-   of stored endpoints alone remain insufficient.
-4. Prove protocol-specific execution existence, extension/progress and terminal
-   saturation for all compatible event orders. Instantiate the checked uniform
-   finite-prefix event budget with the concrete source queue and routing fanout.
-5. Lift the resulting physical case theorem through preparation, the cadence
-   cascade, retained probes and the packet induction for every finite chain.
+1. Derive arbitrary physical leaf/relay introductions, port availability and
+   routed composition for every finite chain. The declared N=3 case is now
+   constructively realized; no further N-cell development is included here.
+2. Establish sound real enclosure membership for remaining stored certificate
+   bounds. Exact endpoint comparisons alone remain insufficient.
+3. Formalize retained frozen-probe responses, later cuts/settings copies and
+   their physical preservation semantics.
+4. Establish universal refinement and progress/saturation for every compatible
+   event order, beyond constructive existence of the supplied physical witness.
+5. Instantiate operational drift, charge noise and amplitude variation in the
+   physical semantics; the existing robust analyses remain conditional.
 
 Certificates, manifests, recordings and the pinned prototype ZIP retain their
-existing identities and scope. No complete physical theorem is asserted.
-The constructive factories do not assume a recorded pulse-case word, and
-finite counter replay is not a proof of the underlying trajectory. The partial-dose calculation is not a reachable training counterexample.
+existing identities and scope. The N=3 factories do not assume a recorded
+pulse-case word, and finite counter replay does not prove trajectories.
+The partial-dose calculation is not a reachable training counterexample.
 
 ## Validation
 
@@ -1387,16 +1405,35 @@ and every altered conclusion is rejected. The 50 new pairs in
 `check_hybrid_c_teaching_existence_negative.py` also pass for C's real birth,
 weak and retained SLOW paths, protected MARK, true three-cell execution,
 own memories, cumulative A38/B43/C14 and exact 25-source queue.
-The autonomous-C/leaf-packet checkpoint passed the complete pinned build
-(9,458 jobs) and global audit (25,538 project theorems). Source identities
-cover405 Lean files and five unchanged upstream modules. Generated evidence,
-all16 robust certificates and12 project tests pass. Its53 additional paired
-controls pass:25 local-C-tail,20 constructed-leaf/projection and8 new actual
-high-return-prefix checks. The complete high suite now has32 passing pairs.
-Each valid conclusion compiles and every altered conclusion is rejected with
-a Lean diagnostic. Earlier C660/first-wire/first-wave controls passed at their
-checkpoints. CI configures877 paired controls; this inventory does not assert
-a local rerun of every suite. Fresh CI status is reported on the PR.
+The preceding autonomous-C/leaf-packet checkpoint passed the complete pinned
+build (9,458 jobs) and global audit (25,538 project theorems), with 405 Lean
+source files and five unchanged upstream modules. Generated evidence, all 16
+robust certificates and 12 project tests passed. Its 53 additional paired
+controls passed: 25 local-C-tail, 20 constructed-leaf/projection and eight
+actual high-return-prefix checks. The high suite had 32 passing pairs, and
+that checkpoint configured 877 controls.
+
+The complete N=3 export passes the pinned build (**9,489 jobs**) and global
+axiom audit (**26,317 project theorems**), allowing only `propext`,
+`Classical.choice` and `Quot.sound`. Source checks cover **436 Lean files** and
+five unchanged upstream modules; generated evidence, all **16 robust
+certificates** and **12 project tests** pass. All new proof modules compile
+with the default heartbeat limit.
+
+All **226 new paired controls pass**: 48 cascade/birth/protocol, 30 receiver/BC,
+34 strong-jitter source, 22 learned-source prefix, 18 causal weave, 17 high-jitter,
+14 jitter span, 12 MARK-only, 12 mixed, 12 router transport and 7 future-frame.
+Each valid conclusion compiles before its altered conclusion is rejected with
+a Lean diagnostic. CI configures **1,103 paired controls**, plus axiom-audit
+corruption checks; this inventory does not assert a fresh local rerun of every
+older suite. Fresh CI status and the verified commit are reported on the PR.
+
+The public [headline](KernelR/Headline.lean) groups the existence, actual terminal
+state/counts and own learned-memory theorems. The global
+[README](../../README.md) records its exact signatures and `#print axioms` outputs;
+the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
+to their operational definitions. N=3 is finalized; every-N obligations remain
+paused pending the user's explicit go-ahead.
 
 Only `propext`, `Classical.choice` and `Quot.sound` are allowed. Fresh CI status
 is reported separately on the PR.

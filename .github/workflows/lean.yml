@@ -12,7 +12,7 @@ permissions:
 jobs:
   lean:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       LEAN_NUM_THREADS: 2
     steps:
@@ -183,3 +183,36 @@ jobs:
       - name: Reject altered exact autonomous projection, constructed C packet and real wire labels
         working-directory: proof/lean
         run: python scripts/check_hybrid_constructed_leaf_negative.py
+      - name: Reject altered cadence cascade existence contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_cadence_cascade_existence_negative.py
+      - name: Reject altered cadence jitter span contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_cadence_jitter_span_negative.py
+      - name: Reject altered cadence mark only jitter contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_cadence_mark_only_jitter_negative.py
+      - name: Reject altered cadence mixed jitter contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_cadence_mixed_jitter_negative.py
+      - name: Reject altered cadence receiver contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_cadence_receiver_negative.py
+      - name: Reject altered cadence strong jitter source contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_cadence_strong_jitter_source_negative.py
+      - name: Reject altered causal weave contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_causal_weave_negative.py
+      - name: Reject altered high jitter contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_high_jitter_negative.py
+      - name: Reject altered learned source prefix contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_learned_source_prefix_negative.py
+      - name: Reject altered local future frame contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_local_future_frame_negative.py
+      - name: Reject altered router transport contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_router_transport_negative.py

@@ -1,23 +1,21 @@
 # Lean formalization of selected Kernel R results
 
 This project checks mathematical lemmas and finite evidence with Lean 4.35.0 and
-Mathlib v4.35.0. It is a **partial formalization**. The actual protocol is now
-constructed from A's original birth through C's first protected cadence MARK
-return at **660**, with cumulative **A39/B44/C15** and exactly **19** Cport0
-sources664..736 pending. Both independent births at160/480 and the first
-C→B→A wave are retained. C is READY at q=0.1 with fresh RAW660, own newborn
-recovery+0.2 and own port0 log-gain+1.8. A/B retain their actual cuts, modes,
-raw states, energy and continuations; no common prepared endpoint is imposed.
-The historical639.9 checkpoint has three prepared cells, RAW absent and25 C
-sources. The remaining global cadence is conditional; Python interval
-implementations have not been verified in Lean.
+Mathlib v4.35.0. It is a **partial formalization**. The physical three-cell
+protocol is now constructed from A's original READY birth through **789.9**,
+with cumulative **A54/B61/C34** and cadence counts **A16/B18/C20**. Both
+independent births at160/480, own physical memories, actual source deliveries
+and routed FIRE-to-arrival chains are retained. All three cells finish READY
+at q=0.1, with RAW absent and an empty global queue. Each active log-gain is
+its own birth value+2.4 and each recovery its own birth value+0.3; other gains
+retain their639.9 teaching values. No later reaching execution, received
+calendar or desired output count is a factory premise.
 
-The separate autonomous-C result constructs C's full 639.9→789.9 execution
-from that actual global prefix: 20 cadence emissions, all 25 C640..736 arrivals,
-and a READY/q=0.1 endpoint with no RAW or pending tokens. C's cumulative count
-including its 14 teaching emissions is 34. A/B are not advanced beyond660 by
-this local result. The derived leaf packet and its delayed token labels are
-available without assuming the later global relay execution.
+The earlier global660 and autonomous-C789.9 witnesses remain useful components.
+The new construction weaves C's real leaf packet with physical B and A receiver
+executions, issuing rather than preloading the wire tokens. Physical every-N
+refinement and universal refinement remain open; Python interval implementations
+have not been verified in Lean. Work pauses after publication of this N=3 result.
 
 ## Repeatable learned one-cell operation
 
@@ -28,8 +26,8 @@ compatible responding prefixes and complete executions at every finite horizon.
 coordinate projections of the actual639.9 state. It preserves each cell's own
 memory and supplies isolated contracts with empty routing and new future source
 queues. These analysis projections do not physically erase the global C queue.
-Cport1's gain is outside this domain; network routing and universal refinement
-remain open.
+Cport1's gain is outside this domain; arbitrary-network and universal
+refinement remain open.
 
 ## Physical execution foundation
 
@@ -42,10 +40,10 @@ physical event budget. These invariants alone do not supply future executions.
 
 | Proof layer | Current result | Explicit boundary |
 |---|---|---|
-| Constructed execution | Original READY birth through the first C→B→A wave and C protected MARK return at660; A39/B44/C15 | C READY/q=0.1/RAW660, own recovery+0.2; A/B actual cuts retained; exact19 C664..736 sources |
-| Autonomous C and concrete leaf packet | Actual projected prefix639.9→660 plus constructed local continuation to789.9; 20 cadence emissions, cumulative C34, empty local queue | P(3,17,0) comes from the real ledger; delayed P(3,17,0.05) labels do not construct later global wire arrivals or A/B responses |
-| Conditional physical protocol | Complete cadence at789.9 (A54/B61/C34) | The later actual execution is supplied; both genuine births, the first cadence wave and C660 MARK return are constructed |
-| Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing/new future queues; broader birth domains, network routing and universal refinement remain open |
+| Constructed three-cell protocol | Original READY birth through789.9; cumulative A54/B61/C34 and cadence A16/B18/C20 | Declared birth family, source queues, fixed fabrication parameters and bounded delays; no arbitrary-N or universal-refinement result |
+| Autonomous C and concrete leaf packet | Actual projected prefix639.9→660 plus local continuation to789.9; ledger-derived P(3,17,0) | Retained as a component of the constructed global C→B→A weave |
+| Conditional physical analysis | General trace-based cadence laws, doses, counts and terminal identities | These analytic APIs retain execution premises; the separate concrete factory now supplies the N=3 execution |
+| Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing/new future queues; broader birth domains, indefinite network operation and universal refinement remain open |
 | Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
 
@@ -142,12 +140,33 @@ wire tokens; it does not insert them into a global queue or prove their later
 receipt. An explicit future global execution with the same C calendar and
 contact routing can use `issued_leaf_tokens` to identify its actual issuance.
 
-The next network construction is the globally routed C660 response and later
-relay handoffs toward789.9 (A54/B61/C34). The autonomous C result does not advance
-A/B or construct that global endpoint. Retained probes, fine enclosure
-soundness and physical every-N refinement remain open. The
-[robust coverage guide](ROBUST_COVERAGE.md) describes conditional noisy/drifting
-slow-chain results.
+`birth_protocol_complete_cadence_exists` in
+[HybridBirthCadenceProtocol](KernelR/HybridBirthCadenceProtocol.lean) returns
+`ConstructedBirthCadenceProtocol` from the original birth hypotheses, independent B/C
+newborns, the three-cell physical box and five independently bounded delay
+functions. `HybridConstructedCadenceBC` constructs B's 18-output response to
+C's real packet, and `HybridConstructedCadenceCascade` constructs A's 16-output
+response to B's packet. Causal queue weaving starts with only the 25 external
+C sources at639.9; the future wire inputs used by the isolated receiver proofs
+are matched to real FIRE issuance and actual global arrivals. The terminal
+witness has A54/B61/C34, physical bounds, RAW validity, all READY/q=0.1, an
+empty global queue and `CompleteThrough789.9`.
+
+The final witness retains both genuine births. Its `betweenBirths` execution
+joins the actual two-cell phase after B's birth at160 through C's birth at480.
+Its `staged.after` executes C teaching and cadence under the single fixed gated
+`teachingCadenceRouter`: B→C is open on[480,630), C→B and B→A on[640,780).
+Retargeting preserves the actual states, complete ledger and delivered token
+occurrences. The cumulative54/61/34 conclusions refer to this staged execution.
+`birth_protocol_cadence_cascade_exists` remains available for the component
+cascade witness.
+
+The active ports are A2/B2/C0, each gaining2.4 from its own birth, with recovery
++0.3 in each cell. Other gains remain at their639.9 values, including A0+1.8,
+B1+0.6 and C1+0.6. Earlier residual charges, raw tails and energy paths are
+carried through actual executions rather than reset. Fine enclosure soundness,
+retained probes/settings copies, physical every-N refinement and universal
+refinement remain open. Work pauses after this N=3 publication.
 
 ## Reproduce
 
@@ -209,6 +228,17 @@ python3 scripts/check_hybrid_cadence_second_stage_negative.py
 python3 scripts/check_hybrid_cadence_high_existence_negative.py
 python3 scripts/check_hybrid_local_cadence_tail_negative.py
 python3 scripts/check_hybrid_constructed_leaf_negative.py
+python3 scripts/check_hybrid_local_future_frame_negative.py
+python3 scripts/check_hybrid_learned_source_prefix_negative.py
+python3 scripts/check_hybrid_cadence_jitter_span_negative.py
+python3 scripts/check_hybrid_cadence_mark_only_jitter_negative.py
+python3 scripts/check_hybrid_cadence_strong_jitter_source_negative.py
+python3 scripts/check_hybrid_high_jitter_negative.py
+python3 scripts/check_hybrid_cadence_mixed_jitter_negative.py
+python3 scripts/check_hybrid_causal_weave_negative.py
+python3 scripts/check_hybrid_cadence_receiver_negative.py
+python3 scripts/check_hybrid_cadence_cascade_existence_negative.py
+python3 scripts/check_hybrid_router_transport_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -234,16 +264,35 @@ The 50 new pairs in `check_hybrid_c_teaching_existence_negative.py` pass for
 the actual C birth, retained weak/SLOW paths, protected MARK, real three-cell
 execution, own memories, A38/B43/C14 and exact 25-source queue. Every valid
 conclusion compiles and every altered conclusion is rejected.
-The autonomous-C/leaf-packet checkpoint passed the complete pinned build
-(9,458 jobs) and global audit (25,538 project theorems). Source identities
-cover405 Lean files and five unchanged upstream modules. Generated evidence,
-all16 robust certificates and12 project tests pass. Its53 additional paired
-controls pass:25 local-C-tail,20 constructed-leaf/projection and8 new actual
-high-return-prefix checks. The complete high suite now has32 passing pairs.
-Each valid conclusion compiles and every altered conclusion is rejected with
-a Lean diagnostic. Earlier C660/first-wire/first-wave controls passed at their
-checkpoints. CI configures877 paired controls; this inventory does not assert
-a local rerun of every suite. Fresh CI status is reported on the PR.
+The preceding autonomous-C/leaf-packet checkpoint passed the complete pinned
+build (9,458 jobs) and global audit (25,538 project theorems), with 405 Lean
+source files and five unchanged upstream modules. Generated evidence, all 16
+robust certificates and 12 project tests passed. Its 53 additional paired
+controls passed: 25 local-C-tail, 20 constructed-leaf/projection and eight
+actual high-return-prefix checks. The high suite had 32 passing pairs, and
+that checkpoint configured 877 controls.
+
+The complete N=3 export passes the pinned build (**9,489 jobs**) and global
+axiom audit (**26,317 project theorems**), allowing only `propext`,
+`Classical.choice` and `Quot.sound`. Source checks cover **436 Lean files** and
+five unchanged upstream modules; generated evidence, all **16 robust
+certificates** and **12 project tests** pass. All new proof modules compile
+with the default heartbeat limit.
+
+All **226 new paired controls pass**: 48 cascade/birth/protocol, 30 receiver/BC,
+34 strong-jitter source, 22 learned-source prefix, 18 causal weave, 17 high-jitter,
+14 jitter span, 12 MARK-only, 12 mixed, 12 router transport and 7 future-frame.
+Each valid conclusion compiles before its altered conclusion is rejected with
+a Lean diagnostic. CI configures **1,103 paired controls**, plus axiom-audit
+corruption checks; this inventory does not assert a fresh local rerun of every
+older suite. Fresh CI status and the verified commit are reported on the PR.
+
+The public [headline](KernelR/Headline.lean) groups the existence, actual terminal
+state/counts and own learned-memory theorems. The global
+[README](../../README.md) records its exact signatures and `#print axioms` outputs;
+the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
+to their operational definitions. N=3 is finalized; every-N obligations remain
+paused pending the user's explicit go-ahead.
 
 
 ## Coverage and hypotheses
@@ -317,7 +366,7 @@ The new analytic lemma integrates the exponential MARK profile to obtain
 `J = 0.1 * tau + (0.1 - 0.4 * log(5/4)) / Lm`. The return identity uses that
 deficit; it does not approximate MARK as an instantaneous jump in recovery.
 The abstract `Cadence` lemma requires the physical phase ordering as a premise;
-the `Hybrid*` local cases and conditional cascade derive their own guards.
+the `Hybrid*` local cases and cadence constructors derive their own guards.
 
 Shared firing latencies can cancel between dates, but fresh per-pulse wire
 delays cannot. The new calendar lemma retains `d₂ - d₁` and proves the
@@ -344,23 +393,22 @@ words, conditional cut propagation and terminal-time bounds. Both N-cell
 certificates add 162 exact endpoint comparisons and 352 interval-validity checks.
 
 The concrete autonomous C leaf now has its actual emission-packet refinement;
-physical leaf contracts for other introductions and relay refinements remain
-explicit premises. The extension
+physical leaf contracts for other introductions and arbitrary-depth relay
+refinements remain explicit premises. The extension
 does not claim a complete formal proof of the R hybrid trajectories or interval
 enclosure soundness. In particular, the finite-chain theorem is conditional on
 local contracts, while its induction and resource algebra are proved in Lean.
 
 ## What remains to close the complete proof
 
-1. Weave the constructed autonomous C continuation after660 with actual B/A
-   responses and routed token issuance/receipts through789.9. Its conditional
-   analysis is already checked. Preserve global queues, own
-   memories, actual wire provenance and port availability.
+1. Establish physical leaf/relay preparation and routed composition for every
+   finite N; the declared N=3 cadence is now constructed. No further N-cell work
+   is part of the current publication checkpoint.
 2. Prove the remaining real enclosure memberships, retained probe responses,
-   causal cuts and protocol extension/saturation obligations. Exact comparisons
-   of stored endpoints do not establish these facts.
-3. Derive the physical leaf and relay contracts and instantiate the checked
-   packet induction for every finite chain.
+   settings-copy semantics and universal refinement across admissible executions.
+   Stored endpoint comparisons do not establish these facts.
+3. Extend robustness to operational drift/noise/amplitude histories in the
+   physical semantics, beyond the conditional analytic coverage.
 4. For pedagogy, separately formalize the observation/readout/training interface
    and connect numerical records to that semantics.
 

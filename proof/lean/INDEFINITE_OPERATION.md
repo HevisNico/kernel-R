@@ -7,8 +7,8 @@ in `[50,100]`; sensor charges and energy evolve through their actual ODEs.
 
 The resulting guarantee is constructive existence of compatible responding
 continuations. A separate bridge now derives this domain for Aport2/Bport2
-coordinate projections of the constructed639.9 state. Finite-chain routing and
-universal refinement of every admissible execution remain open.
+coordinate projections of the constructed639.9 state. The finite N=3 cadence
+is constructed separately; indefinite network operation and universal refinement of every admissible execution remain open.
 
 ## Main results
 
@@ -36,11 +36,10 @@ reserve may differ between rounds and are never reset.
 The physical foundation's `PreparedSection` allows residual main charge and a
 narrower recovery band. Its `Execution.learned_pulse` analyses a supplied,
 birth-reachable isolated-input execution. The original READY-birth construction
-now reaches [C's protected MARK return at660](HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
-after the fully prepared639.9 endpoint and first C→B→A wave. C is READY at
-q=0.1 with fresh RAW660 and19 future C sources; A/B retain their actual cuts.
-This network prefix is separate from an isolated learned-domain return of
-all three cells.
+now reaches [the complete N=3 cadence at789.9](HYBRID_EXECUTION.md#constructed-protocol-checkpoint),
+with cumulative A54/B61/C34, all cells READY/q=0.1, no RAW and an empty global
+queue. That finite network witness does not supply an indefinite network
+continuation or learned-domain membership for its higher-gain endpoint.
 
 [HybridBirthLearnedRest](KernelR/HybridBirthLearnedRest.lean) proves
 `ConstructedCTeaching.a_learned_rest` and `b_learned_rest` for the Aport2/Bport2
@@ -55,8 +54,8 @@ The projections' empty analysis queues are not physical operations on the
 global state: its25 C640..736 tokens remain. Each isolated continuation uses a
 new future source queue and empty routing. Cport1's learned gain near2.18 is
 outside the imported domain, so this bridge does not cover that port. Broader
-birth families, network routing and universal refinement remain open. Fixed
-reference latency uses exact main rest; it does not extend to the positive
+birth families, arbitrary-network operation and universal refinement remain
+open. Fixed reference latency uses exact main rest; it does not extend to the positive
 residuals covered by `first_firing_le_rest_reference`.
 
 The constructed global C660 extension has a different recovery state:
@@ -74,12 +73,21 @@ emits 20 cadence signals (cumulative C34 including teaching). At789.9 C is
 READY/q=0.1 with no RAW or pending tokens, own newborn port0 log-gain+2.4 and
 recovery+0.3; other gains retain their teaching values. Its real ledger derives
 P(3,17,0), and bounded delays sampled at FIRE give P(3,17,1/20) token labels.
-These labels do not construct global arrivals or advance A/B beyond660.
+The standalone labels do not construct arrivals. The separate
+`HybridConstructedCadenceBC` and `HybridConstructedCadenceCascade` now weave
+them into actual global B/A responses with cadence counts18/16. The original
+birth wrapper derives A54/B61/C34 at789.9, with all READY/q=0.1, RAW absent,
+an empty queue and own active gains/recoveries+2.4/+0.3.
+
+The final public wrapper `birth_protocol_complete_cadence_exists` retains both
+births and combines C teaching/cadence under one fixed gated three-cell router,
+with unchanged physical ledgers and delivered occurrences. This closes the
+finite N=3 protocol, including its actual routed queues.
 
 This finite cadence construction does not instantiate `LearnedRest` for its
 higher gain/recovery endpoint or provide indefinite contracts for every C
-state. The isolated learned-domain theorem above and the global network
-continuation remain separate results.
+state. The isolated learned-domain theorem above and the finite global N=3
+cadence are separate results; indefinite network operation remains open.
 
 ## Proof map
 
@@ -123,8 +131,9 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
 ## Remaining work
 
 - Extend the projected Aport2/Bport2 bridge beyond the declared READY-birth
-  subfamily and establish physically routed network continuations.
-- Finite-chain routing, wire delays and a sufficient network settling duration.
+  subfamily and derive indefinitely repeatable network continuations.
+- Extend the constructed finite N=3 routing to arbitrary finite chains and
+  establish a sufficient indefinitely repeatable network settling duration.
 - Universal refinement across all admissible complete executions.
 - Operational drift, noise and amplitude histories.
 
@@ -133,16 +142,36 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
 `lake build` includes all modules and the global `Audit` target. Only `propext`,
 `Classical.choice` and `Quot.sound` are allowed. Controls instantiate the full
 return, the contract and complete periodic executions at every finite horizon.
-The autonomous-C/leaf-packet checkpoint passed the complete pinned build
-(9,458 jobs) and global audit (25,538 project theorems). Source identities
-cover405 Lean files and five unchanged upstream modules. Generated evidence,
-all16 robust certificates and12 project tests pass. Its53 additional paired
-controls pass:25 local-C-tail,20 constructed-leaf/projection and8 new actual
-high-return-prefix checks. The complete high suite now has32 passing pairs.
-Each valid conclusion compiles and every altered conclusion is rejected with
-a Lean diagnostic. Earlier C660/first-wire/first-wave controls passed at their
-checkpoints. CI configures877 paired controls; this inventory does not assert
-a local rerun of every suite. Fresh CI status is reported on the PR.
+The preceding autonomous-C/leaf-packet checkpoint passed the complete pinned
+build (9,458 jobs) and global audit (25,538 project theorems), with 405 Lean
+source files and five unchanged upstream modules. Generated evidence, all 16
+robust certificates and 12 project tests passed. Its 53 additional paired
+controls passed: 25 local-C-tail, 20 constructed-leaf/projection and eight
+actual high-return-prefix checks. The high suite had 32 passing pairs, and
+that checkpoint configured 877 controls.
+
+The complete N=3 export passes the pinned build (**9,489 jobs**) and global
+axiom audit (**26,317 project theorems**), allowing only `propext`,
+`Classical.choice` and `Quot.sound`. Source checks cover **436 Lean files** and
+five unchanged upstream modules; generated evidence, all **16 robust
+certificates** and **12 project tests** pass. All new proof modules compile
+with the default heartbeat limit.
+
+All **226 new paired controls pass**: 48 cascade/birth/protocol, 30 receiver/BC,
+34 strong-jitter source, 22 learned-source prefix, 18 causal weave, 17 high-jitter,
+14 jitter span, 12 MARK-only, 12 mixed, 12 router transport and 7 future-frame.
+Each valid conclusion compiles before its altered conclusion is rejected with
+a Lean diagnostic. CI configures **1,103 paired controls**, plus axiom-audit
+corruption checks; this inventory does not assert a fresh local rerun of every
+older suite. Fresh CI status and the verified commit are reported on the PR.
+
+The public [headline](KernelR/Headline.lean) groups the existence, actual terminal
+state/counts and own learned-memory theorems. The global
+[README](../../README.md) records its exact signatures and `#print axioms` outputs;
+the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
+to their operational definitions. N=3 is finalized; every-N obligations remain
+paused pending the user's explicit go-ahead.
 
 These isolated future contracts remain distinct from the actual C→B→A network
-construction and do not establish network routing or universal refinement.
+construction and do not establish indefinite network operation or universal
+refinement. Work pauses after publication of the finite N=3 checkpoint.
