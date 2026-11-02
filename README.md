@@ -64,7 +64,7 @@ global execution. Wire j leaves physical cell N−1−j. Indices are zero-based
 and exclude the12/14 preparation FIREs. Every wire delay lies in[0.3,0.4].
 No statistical independence, cancellation, native delay function, reaching
 execution or output calendar is supplied by the caller. The earlier
-[native-function theorem](proof/lean/KernelR/FiniteChainHeadline.lean) remains
+[native-function theorem](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/KernelR/FiniteChainHeadline.lean) remains
 available as a separate API.
 
 **Limits near the result:** this proves existence for the declared finite
@@ -75,14 +75,14 @@ an online synthesis algorithm or universal refinement of every execution.
 Frozen probes, cuts/settings copies and indefinitely operating
 networks retain their own obligations. Operational noise/drift research and
 simulated observations have separate scopes. See the
-[proof ledger](proof/lean/EVERY_N_PLAN.md) and
-[coverage map](proof/lean/N_CELL_COVERAGE.md).
+[proof ledger](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/EVERY_N_PLAN.md) and
+[coverage map](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/N_CELL_COVERAGE.md).
 
 The earlier **staged three-cell protocol** remains proved from A's original
 birth and independent B/C births at160/480 through **789.9**, with
 **A54/B61/C34**, all READY/q=0.1, no RAW and no pending tokens. Its
-[original headline](proof/lean/KernelR/Headline.lean) and
-[checkpoint map](proof/lean/HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
+[original headline](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/KernelR/Headline.lean) and
+[checkpoint map](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
 remain available. The new common-time birth program has different preparation
 and traffic; its N=3 instance is not the old staged protocol.
 
@@ -91,8 +91,8 @@ activity increases an input's log-gain while the main cell is READY; protected
 MARK activity increases recovery while admission is closed. Gain changes the
 response to future inputs; recovery changes the actual SLOW-to-READY return.
 The constructed protocol uses both to acquire and transmit cadence. The
-[kernel equations](kernel/README.md) and
-[model correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md) give their exact gates.
+[kernel equations](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/kernel/README.md) and
+[model correspondence](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/docs/MODEL_LEAN_CORRESPONDENCE.md) give their exact gates.
 
 This work draws inspiration from Nicolas Breuillaud's
 [*The Reset Operator: A Structural Constraint on Recursivity*](https://ssrn.com/abstract=6964960).
@@ -101,7 +101,7 @@ not premises or conclusions of the Lean result.
 
 ## Lean headline: signatures, axioms and reproduction
 
-[**IndexedChainHeadline.lean**](proof/lean/KernelR/IndexedChainHeadline.lean)
+[**IndexedChainHeadline.lean**](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/KernelR/IndexedChainHeadline.lean)
 groups three checked statements in `KernelR.Hybrid.IndexedChainHeadline`:
 
 | Declaration | Checked conclusion |
@@ -163,14 +163,16 @@ concatenation under one router. The count fields refer to actual FIRE ledgers.
 
 The project pins **Lean 4.35.0** and **Mathlib v4.35.0**, with Mathlib commit
 `56a005855ea17e0b0958f73ec801ae140b0a1679` in
-[lake-manifest.json](proof/lean/lake-manifest.json).
-The checked prescribed-error finite-chain source is recorded in the
-[PR #15 validation table](https://github.com/HevisNico/kernel-R/pull/15).
+[lake-manifest.json](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/lake-manifest.json).
+Verified prescribed-error finite-chain source: [550fc9509c8390a07fdb0cec02170a72cbc3071c](https://github.com/HevisNico/kernel-R/commit/550fc9509c8390a07fdb0cec02170a72cbc3071c).
+The [PR #15 validation table](https://github.com/HevisNico/kernel-R/pull/15)
+records the checks for that source tree.
 Its proof modules are being reviewed in PR #15; the `main` README also presents
 this result while those proof sources await merge.
 From the repository root, with Lean installed:
 
 ```sh
+git checkout 550fc9509c8390a07fdb0cec02170a72cbc3071c
 cd proof/lean
 lake exe cache get
 lake build KernelR.IndexedChainHeadline
@@ -197,10 +199,10 @@ admitted proofs and added project axioms; the global audit checks every
 imported/current project theorem against this list. The final indexed-error
 checkpoint passed **9,543 build jobs**, an audit of **27,587 project theorems**,
 source checks over **490 Lean files**, generated evidence, **16 robust
-certificates** and **12 project tests**. The [validation ledger](proof/lean/EVERY_N_PLAN.md)
+certificates** and **12 project tests**. The [validation ledger](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/EVERY_N_PLAN.md)
 records **198 passing finite-chain pairs** and **1,301 configured pairs**,
 without claiming a fresh local rerun of every older suite.
-The [full reproduction commands](proof/lean/README.md#reproduce) include source,
+The [full reproduction commands](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/README.md#reproduce) include source,
 evidence and paired corruption controls; the workflow badge reports actual CI.
 
 This work is done with two AI assistants, **Claude** (Anthropic) and **ChatGPT** (OpenAI), under the direction of Nicolas Breuillaud.
@@ -212,11 +214,11 @@ claim made in the repository.
 
 ## Model ↔ Lean: equations, events and assumptions
 
-The [**one-page correspondence**](docs/MODEL_LEAN_CORRESPONDENCE.md) maps main
+The [**one-page correspondence**](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/docs/MODEL_LEAN_CORRESPONDENCE.md) maps main
 and auxiliary charges, gain/recovery learning, energy/work, pulses, thresholds,
 jumps, caps, fixed parameters and birth families to actual Lean definitions.
-The [kernel guide](kernel/README.md) explains the cell; the
-[archived model](model/full_model_reference.md) preserves its original network
+The [kernel guide](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/kernel/README.md) explains the cell; the
+[archived model](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/model/full_model_reference.md) preserves its original network
 context. A22 topology and simulations remain supporting material below.
 
 <details>
@@ -224,16 +226,16 @@ context. A22 topology and simulations remain supporting material below.
 
 ### Guides and experiments
 
-- [N-cell composition theorem](proof/reciprocal_composition/THEOREM.md): every finite chain, with source-length and path-jitter budgets.
-- [Robust slow chains](research/robust/README.md): drift, bounded charge noise and pulse-amplitude variation, from birth; Lean scope in [robust coverage](proof/lean/ROBUST_COVERAGE.md).
-- [R kernel definition](kernel/README.md) and [original model](model/full_model_reference.md).
-- [Cadence cascade proof](proof/reciprocal_cadence/THEOREM.md): C's faster cadence reaches A through B, from birth through time 789.9.
-- [Birth-to-feedback proof](proof/reciprocal_entry/THEOREM.md): pulses-only initialization through time 459.9.
-- [Prepared-section theorem](proof/reciprocal_learning/THEOREM.md): the local A-learns-from-B effect.
-- [Lean proof project](proof/lean/README.md): constructed physical executions, conditional protocol theorems, certificate endpoint checks and finite adaptive-policy replay, with explicit coverage limits.
-- [Reciprocal prototype](experiments/reciprocal/README.md): cells remain alive and learn back from their students.
-- [Learned teaching choice](experiments/reciprocal/pedagogy/README.md) and [within-lesson adaptation](experiments/reciprocal/adaptive/README.md).
-- [Complete English prototype ZIP](downloads/R_Reciprocal_Prototype.zip): runnable code, recordings, reports and proofs in titled folders.
+- [N-cell composition theorem](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/reciprocal_composition/THEOREM.md): every finite chain, with source-length and path-jitter budgets.
+- [Robust slow chains](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/research/robust/README.md): drift, bounded charge noise and pulse-amplitude variation, from birth; Lean scope in [robust coverage](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/ROBUST_COVERAGE.md).
+- [R kernel definition](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/kernel/README.md) and [original model](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/model/full_model_reference.md).
+- [Cadence cascade proof](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/reciprocal_cadence/THEOREM.md): C's faster cadence reaches A through B, from birth through time 789.9.
+- [Birth-to-feedback proof](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/reciprocal_entry/THEOREM.md): pulses-only initialization through time 459.9.
+- [Prepared-section theorem](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/reciprocal_learning/THEOREM.md): the local A-learns-from-B effect.
+- [Lean proof project](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/README.md): constructed physical executions, conditional protocol theorems, certificate endpoint checks and finite adaptive-policy replay, with explicit coverage limits.
+- [Reciprocal prototype](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/experiments/reciprocal/README.md): cells remain alive and learn back from their students.
+- [Learned teaching choice](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/experiments/reciprocal/pedagogy/README.md) and [within-lesson adaptation](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/experiments/reciprocal/adaptive/README.md).
+- [Complete English prototype ZIP](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/downloads/R_Reciprocal_Prototype.zip): runnable code, recordings, reports and proofs in titled folders.
 
 Extract the ZIP and open `12_Certified_N_Cell_Composition/RESULTS.html` for the latest
 proof, or `03_Visualization/OPEN_IN_BROWSER.html` for the recorded three-cell
@@ -251,7 +253,7 @@ network. The viewer replays simulations rather than solving the equations.
 | Entry and composed theorem | The declared READY birth family reaches that section; pulses-only protocol through time 459.9. |
 | Cadence cascade theorem | From birth through 789.9, on 45-parameter boxes: C->B->A; b gains 0.2 in each cell's fast stage; A's frozen period-4 probe improves 4/8 to 8/8. |
 | N-cell composition theorem | Every finite directed chain, 15*N independent physical parameters: K>=4*N+12 and summed link-jitter budgets <=0.15. Fixed link delays allow arbitrary depth. |
-| Robust slow chains (research) | Prepared or birth-entered slow chains under measurable drift inside ±0.3% or ±10%, charge noise \|w\|<=nu and received-amplitude factor in [1-alpha,1+alpha]: K>=3*N+1, T>=7.5+2*sum(delta_i+sigma_i). Eight certified (epsilon,nu,alpha) points, and closed ranges such as every nu in [0,0.002] ([ranges](research/robust/ranges/README.md)); delta=0 without noise or amplitude variation. Written proofs and integer-replayed certificates; the Lean chain induction is conditional on each cell's `CellLaw` and covers timing and counts only. |
+| Robust slow chains (research) | Prepared or birth-entered slow chains under measurable drift inside ±0.3% or ±10%, charge noise \|w\|<=nu and received-amplitude factor in [1-alpha,1+alpha]: K>=3*N+1, T>=7.5+2*sum(delta_i+sigma_i). Eight certified (epsilon,nu,alpha) points, and closed ranges such as every nu in [0,0.002] ([ranges](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/research/robust/ranges/README.md)); delta=0 without noise or amplitude variation. Written proofs and integer-replayed certificates; the Lean chain induction is conditional on each cell's `CellLaw` and covers timing and counts only. |
 
 The composed proof starts with b near 0.08, establishes one protected full MARK
 in each cell, and reaches b near 0.18 at time 319.9. It then proves
@@ -262,7 +264,7 @@ parameters of A and B independently.
 The cadence extension reaches 789.9, including C's introduction, 20/18/16 fast
 emissions in C/B/A and two full recovery MARK doses in each. It covers all 45
 per-port physical parameters independently, with per-pulse wire jitter in [0.3,0.4].
-The [cadence results](results/reciprocal_cadence/README.md) include retained probes
+The [cadence results](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/results/reciprocal_cadence/README.md) include retained probes
 and causal cuts: without either reverse link, A remains at 4/8.
 
 These ±10% prefix results do not certify the older entire A22 network at ±10%,
@@ -270,7 +272,7 @@ the settings-copy variant, open recurrence after 800 or adaptive pedagogy. The w
 theorems combine hybrid-flow arguments with checked interval obligations;
 they are not complete Lean formalizations or independently peer-reviewed mathematics.
 
-The [Lean project](proof/lean/README.md) proves physical flow, reserve and memory
+The [Lean project](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/README.md) proves physical flow, reserve and memory
 invariants, the common-birth finite-chain construction above, the earlier
 staged N=3 protocol, and generic conditional results. It also checks exact rational certificate endpoints and
 recorded cadence/adaptive counters. These evidence checks do not establish
@@ -278,7 +280,7 @@ membership of the actual trajectories in every recorded interval. Both the nativ
 are constructed. Retained probes and indefinite network continuation remain
 separate obligations.
 
-The [N-cell extension](results/reciprocal_composition/README.md) uses a closed
+The [N-cell extension](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/results/reciprocal_composition/README.md) uses a closed
 packet contract and a written induction, supported by 81 N-independent local
 inequalities and 12 exact polynomial identities. Physical tolerances stay at
 ±10% as N grows. Source length and time grow linearly; fast-block traffic is
@@ -337,7 +339,7 @@ NumPy 2.3.5 and SciPy 1.17.0 are pinned. Use a new output directory for each run
 The individual experiment guides provide further teaching and adaptation commands.
 New adaptive plans lock both simulation engines and the numerical runtime;
 legacy two-file plans are rejected by the updated validators. See the
-[adaptive reproduction notes](experiments/reciprocal/adaptive/README.md#reproduce).
+[adaptive reproduction notes](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/experiments/reciprocal/adaptive/README.md#reproduce).
 The bundled adaptive records have been recomputed on the original seeds with
 that complete manifest. All 127 experiment checks and continuous teacher replay
 pass; legacy adaptive development and aborted-run records have been removed.
@@ -374,24 +376,24 @@ packet protocol of the N-cell composition theorem. Their status is that of the o
 written theorems: hybrid arguments written by hand, finite inequalities replayed in
 independent integer arithmetic, and, in Lean, the chain induction and the certificate
 endpoints. Proving each cell's `CellLaw` from the hybrid execution is the open step
-([plan](proof/lean/CELLLAW_PLAN.md)).
+([plan](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/proof/lean/CELLLAW_PLAN.md)).
 
 ### Reference boundary and limitations
 
-The [kernel guide](kernel/README.md) describes R as a cell and links the current
+The [kernel guide](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/kernel/README.md) describes R as a cell and links the current
 three-cell and chain protocols. The `model/` snapshots and
-[archived A22 kernel guide](kernel/reference/A22_KERNEL_README.txt) preserve the
+[archived A22 kernel guide](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/kernel/reference/A22_KERNEL_README.txt) preserve the
 original reference context. `kernel/KERNEL_SHA256SUMS` identifies upstream engine
-files; those engines are not vendored here. See [provenance](docs/PROVENANCE.md).
+files; those engines are not vendored here. See [provenance](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/docs/PROVENANCE.md).
 
 General pedagogy, semantic memory, new waveform invention and chip energy/area
 benefits remain unproved. Observation bins, feedback coding, lesson primitives
 and copying rules are supplied components unless explicitly learned in a test.
 R's monotone parameters impose saturation and forgetting limits. The
-[proposed invention protocol](experiments/reciprocal/adaptive/INVENTION_PROTOCOL.md)
+[proposed invention protocol](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/experiments/reciprocal/adaptive/INVENTION_PROTOCOL.md)
 is a future experiment, not a completed result.
 
 </details>
 
-Source code is [MIT](LICENSE). Documents, proofs, data, certificates and other
-non-code material are CC BY 4.0 under [LICENSE-docs.md](LICENSE-docs.md).
+Source code is [MIT](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/LICENSE). Documents, proofs, data, certificates and other
+non-code material are CC BY 4.0 under [LICENSE-docs.md](https://github.com/HevisNico/kernel-R/blob/550fc9509c8390a07fdb0cec02170a72cbc3071c/LICENSE-docs.md).

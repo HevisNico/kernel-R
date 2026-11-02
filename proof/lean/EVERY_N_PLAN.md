@@ -98,8 +98,10 @@ export: **9,543 build jobs**, **27,587 audited project theorems**, **490 Lean
 sources**, generated-evidence checks, **16 robust certificates** and **12
 project tests**. All three public indexed headline theorems depend only on
 `propext`, `Classical.choice` and `Quot.sound`. No admitted proof or added
-project axiom is accepted. The exact verified source commit is recorded in
-[PR #15](https://github.com/HevisNico/kernel-R/pull/15).
+project axiom is accepted. Verified indexed code commit:
+[550fc9509c8390a07fdb0cec02170a72cbc3071c](https://github.com/HevisNico/kernel-R/commit/550fc9509c8390a07fdb0cec02170a72cbc3071c).
+The following documentation-only commit records this identifier; the Lean,
+workflow and control-script sources are unchanged from the verified code tree.
 
 The20 new indexed paired controls pass, bringing the confirmed finite-chain
 inventory to **198 passing pairs** and the configured CI inventory to
