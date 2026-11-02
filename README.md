@@ -2,223 +2,214 @@
 
 [![Lean proof checks](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml/badge.svg)](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml)
 
-Lean now constructs a complete pulse-driven learning-and-cadence protocol
-for three cells.
+**Lean now constructs a pulse-driven learning-and-cadence protocol for every
+positive finite directed chain.**
 
-Starting from A's original READY birth, with independent B/C births at 160/480,
-the construction reaches **789.9** with cumulative **A54/B61/C34**. All three
-cells finish READY at q=0.1, with no RAW current and an empty global queue.
+For N independently born cells, fixed independent fabrication parameters and
+bounded native wire-delay functions, the declared preparation and K-input
+program reaches a complete resting endpoint. Every cell is READY at q=0.1,
+with no RAW current and no pending token. Active log-gains and recoveries are
+derived from each cell's own birth values; no reaching execution or output
+calendar is supplied. The precise scope is stated below.
 
-1. [Result: a constructed three-cell learning protocol](#result-a-constructed-three-cell-learning-protocol)
-2. [Lean headline: the exact theorem and how to check it](#lean-headline-the-exact-theorem-and-how-to-check-it)
+1. [Result: every finite chain, with explicit scope](#result-every-finite-chain-with-explicit-scope)
+2. [Lean headline: signatures, axioms and reproduction](#lean-headline-signatures-axioms-and-reproduction)
 3. [Model ↔ Lean: equations, events and assumptions](#model--lean-equations-events-and-assumptions)
 
-## Result: a constructed three-cell learning protocol
+## Result: every finite chain, with explicit scope
 
-R is a pulse-driven hybrid cell with local gain and recovery memory. This
-repository develops its physical equations, experiments and Lean proofs,
-drawing inspiration from Nicolas Breuillaud's
-[*The Reset Operator: A Structural Constraint on Recursivity*](https://ssrn.com/abstract=6964960).
-The earlier engines and proof archive remain in the
-[upstream A22 repository](https://github.com/HevisNico/a22-going-further).
-The reference credits the model's inspiration; its broader claims are not
-premises or conclusions of the Lean theorem below.
+All N cells are born at time0 in independently chosen READY states. Routes
+are closed during16 direct period-eight preparation inputs per cell: the
+leaf receives them on port1, each relay on port2. The leaf then receives
+K period-four port0 sources from160, with **K≥4N+12**. These future sources
+are present in the global queue from birth. Each source and wire is consumed
+by an actual arrival; each routed token is issued by an actual FIRE.
+Preparation and cadence share **one fixed gated router**, opening at160.
 
-Three cells can change their response through pulses alone: ERROR activity
-increases an input's gain while the main cell is READY; protected MARK
-activity increases recovery, which controls the return from SLOW to READY.
-The constructed protocol uses these two local mechanisms to teach C from B,
-then propagate C's faster cadence back through B to A. Source schedules and
-contacts are declared parts of this protocol.
-
-The actual FIRE counts and terminal coordinates are:
-
-| At 789.9 | A | B | C |
-|---|---|---|---|
-| Cumulative emissions from each cell's own birth | **54** | **61** | **34** |
-| Emissions in the final cadence block | 16 | 18 | 20 |
-| Active learned port | 2 | 2 | 0 |
-| Active log-gain relative to its own birth | +2.4 | +2.4 | +2.4 |
-| Recovery relative to its own birth | +0.3 | +0.3 | +0.3 |
-| Terminal main state | READY, q=0.1 | READY, q=0.1 | READY, q=0.1 |
-
-All auxiliaries are READY in their rest bands, every RAW current has ended,
-and the global pending queue is empty. Other gains preserve their teaching
-memories, including Aport0+1.8, Bport1+0.6 and Cport1+0.6. Energy follows the
-actual ODE and remains within [50,100]. Actual FIRE jumps issue wire tokens;
-actual arrivals consume them. No reaching execution, receiving calendar,
-output count or settings-copy operation is supplied to the existence theorem.
-
-The statement has the quantifier order
-
-> **For every admissible choice of fixed parameters, birth data and bounded
-> delay functions, there exists a constructed physical execution with these
-> properties.**
-
-The assumptions include A's READY `BirthState` with all auxiliaries READY,
-the exact declared source queues, independent READY B/C `Newborn` states,
-canonical width-one pulses and per-cell/per-port parameters fixed in time in either
-the ±0.3% or ±10% fabrication box. Each of five delay functions is bounded
-in [0.3,0.4] and sampled at its actual sending FIRE. No equality of parameters
-or delay functions between cells is required.
-
-The birth coordinates satisfy q=0.1±10⁻⁵, b=0.08±10⁻⁵, energy in [50,100],
-and each log-gain lies within10⁻⁵ of log(0.3), log(1.2), log(0.3) on ports0/1/2.
-All auxiliaries start READY with m=0.025±10⁻⁵ and no active RAW. These are
-independent birth ranges, not copied learned states.
-
-The declared contacts use the sending FIRE date F to select these windows:
-
-| Contact | Target port | Sending window | Delay function |
-|---|---|---|---|
-| A→B teaching | B1 | 160≤F<310 | `forward` |
-| B→A feedback | A2 | 320≤F<470 | `backward` |
-| B→C teaching | C1 | 480≤F<630 | `delay` |
-| C→B cadence | B2 | 640≤F<780 | `cascadeForward` |
-| B→A cadence | A2 | 640≤F<780 | `cascadeBackward` |
-
-The external source programs are Aport0 at0,8,…,120 and160,168,…,280;
-Bport2 at320,328,…,440 and480,488,…,600; and Cport0 at640,644,…,736.
-The B/C source tokens enter with their genuine births. Routed receiving dates
-are derived from actual emissions and the delay functions.
-
-**Scope:** this is the declared **three-cell protocol through 789.9**, with
-fixed fabrication parameters and bounded delays. It proves existence of a
-witness; it does not assert the same result for every admissible execution.
-Physical every-N refinement, indefinitely operating networks, operational
-noise/drift, retained frozen probes and settings-copy semantics remain open.
-Separate robust analyses and numerical simulations retain their stated scope;
-simulation output is not the Lean proof. See the
-[full proof boundary](proof/lean/HYBRID_EXECUTION.md) and
-[N-cell coverage](proof/lean/N_CELL_COVERAGE.md).
-
-## Lean headline: the exact theorem and how to check it
-
-The short public entry point is
-[**KernelR/Headline.lean**](proof/lean/KernelR/Headline.lean), in namespace
-`KernelR.Hybrid.Headline`:
-
-| Declaration | Checked statement |
+| Derived quantity | Result |
 |---|---|
-| `three_cell_protocol_exists` | From the birth/source, fixed fabrication-box and five bounded-delay hypotheses, returns `Nonempty (ConstructedBirthCadenceProtocol ...)` |
-| `terminal_state_and_counts` | For that witness: time 789.9, all READY/q=0.1, no RAW, empty queue and exact cumulative A54/B61/C34 |
-| `learned_memories` | For that witness: own active log-gains+12/5 and own recoveries+3/10 |
+| Terminal time T | `160 + 4*(K-1) + (11/10)*(N-1) + 8` |
+| Fast emissions at depth j, leaf j=0 | `K-5-2*j` |
+| Root fast emissions | `K-2*N-3` |
+| Total fast emissions | `N*(K-N-4)` |
+| Total preparation emissions | `12*N+2` |
+| Entire birth-to-T emission ledger | `N*(K-N+8)+2` |
+| Each active log-gain, leaf port0 / relays port2 | Own birth value +2.4 |
+| Each recovery | Own birth value +0.3 |
+| Endpoint | All READY/q=0.1, RAW absent, empty global queue |
+
+Other gains retain their physical preparation memories. The energy ODE,
+reserve/cap invariants and actual raw-current origins are retained throughout.
+Physical cell indices run root-first in Lean; the depth index in the table
+runs leaf-first.
+
+The exact quantifier order is:
+
+> **For every positive finite N, admissible K, independent fixed fabrication
+> and READY birth data, and admissible native real-time delay functions,
+> there exists a complete physical execution of the declared protocol.**
+
+The15 fabrication parameters per cell are chosen independently in either the
+±0.3% or ±10% box and are **fixed in time**. Births have q=0.1±10⁻⁵,
+b=0.08±10⁻⁵, energy in[50,100], each auxiliary READY with m=0.025±10⁻⁵,
+no RAW, and log-gains within10⁻⁵ of log(0.3), log(1.2), log(0.3) on ports0/1/2.
+Pulses have the declared canonical width-one exponential shape. Sources,
+ports and contact windows are supplied protocol data.
+
+For each link, a fixed centre d and budget σ satisfy
+`0≤σ≤0.05` and `0.3+σ≤d≤0.4-σ`; the path sum is at most0.15.
+The theorem quantifies over **functions δ(t)** satisfying
+`-σ≤δ(t)-d≤σ` at every real time. It samples δ at each actual sending FIRE,
+so every wire delay is in[0.3,0.4]. No independence or cancellation of errors
+is assumed. The generic full-budget physical receiver now constructs its
+output packet and exact count from these actual inputs.
+
+**Limits near the result:** this is constructive existence for the declared
+finite directed-chain program and bounded native delay functions. It is not
+universal refinement of every admissible execution. A full birth-to-terminal
+factory for arbitrary *prescribed per-emission error sequences* remains a
+separate realization obligation; the indexed-delay helper alone does not
+supply it. Frozen probes, cuts/settings copies and indefinitely operating
+networks retain their own obligations. Operational noise/drift research and
+simulated observations have separate scopes. See the
+[proof ledger](proof/lean/EVERY_N_PLAN.md) and
+[coverage map](proof/lean/N_CELL_COVERAGE.md).
+
+The earlier **staged three-cell protocol** remains proved from A's original
+birth and independent B/C births at160/480 through **789.9**, with
+**A54/B61/C34**, all READY/q=0.1, no RAW and no pending tokens. Its
+[original headline](proof/lean/KernelR/Headline.lean) and
+[checkpoint map](proof/lean/HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
+remain available. The new common-time birth program has different preparation
+and traffic; its N=3 instance is not the old staged protocol.
+
+R's structural mechanism is two memories with complementary gates: ERROR
+activity increases an input's log-gain while the main cell is READY; protected
+MARK activity increases recovery while admission is closed. Gain changes the
+response to future inputs; recovery changes the actual SLOW-to-READY return.
+The constructed protocol uses both to acquire and transmit cadence. The
+[kernel equations](kernel/README.md) and
+[model correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md) give their exact gates.
+
+This work draws inspiration from Nicolas Breuillaud's
+[*The Reset Operator: A Structural Constraint on Recursivity*](https://ssrn.com/abstract=6964960).
+This credits the theoretical inspiration; the paper's broader claims are
+not premises or conclusions of the Lean result.
+
+## Lean headline: signatures, axioms and reproduction
+
+[**FiniteChainHeadline.lean**](proof/lean/KernelR/FiniteChainHeadline.lean)
+groups three checked statements in `KernelR.Hybrid.FiniteChainHeadline`:
+
+| Declaration | Checked conclusion |
+|---|---|
+| `every_finite_chain_exists` | Actual birth-to-T witness for every N=n+1, with the exact hypotheses below |
+| `terminal_state_and_memories` | Complete resting coordinates, no RAW/tokens, own active log-gain+12/5 and recovery+3/10 |
+| `actual_counts` | Actual fast per-cell/root/total counts and cumulative birth-to-T ledger |
 
 <details>
 <summary>Exact Lean signatures</summary>
 
-These declaration headers are copied from `KernelR/Headline.lean`; proof bodies
-are omitted. The variable declaration supplies the shared witness to the last
-two statements.
+N is represented by n+1; physical index0 is the root and `Fin.last n` the leaf.
+Proof bodies are omitted. `finiteChainPreparationPort` selects leaf port1 and
+relay port2; `cadenceActivePort` selects leaf port0 and relay port2.
 
 ```lean
-namespace KernelR.Hybrid.Headline
+namespace KernelR.Hybrid.FiniteChainHeadline
 
-theorem three_cell_protocol_exists {θ born freshB freshC ε}
-    (hborn : @BirthState 1 born)
-    (hb : @PhysicalBox 3 (extendParameters (extendParameters θ freshB) freshC) ε)
-    (ha : ∀ q, born.aux 0 q = .ready)
-    (hqueue : born.pending = sourceTrain 0 0 0 8 16 ++ sourceTrain 0 0 160 8 16)
-    (newbornB newbornC : Newborn) (forward backward delay cascadeForward cascadeBackward : ℝ → ℝ)
-    (hforward : ∀ time, (3 / 10 : ℝ) ≤ forward time ∧ forward time ≤ 2 / 5)
-    (hback : ∀ time, (3 / 10 : ℝ) ≤ backward time ∧ backward time ≤ 2 / 5)
-    (hdelay : ∀ time, (3 / 10 : ℝ) ≤ delay time ∧ delay time ≤ 2 / 5)
-    (hcascadeForward : ∀ time, (3 / 10 : ℝ) ≤ cascadeForward time ∧ cascadeForward time ≤ 2 / 5)
-    (hcascadeBackward : ∀ time, (3 / 10 : ℝ) ≤ cascadeBackward time ∧ cascadeBackward time ≤ 2 / 5) :
-    Nonempty (ConstructedBirthCadenceProtocol θ born freshB freshC newbornB newbornC
-      forward backward delay cascadeForward cascadeBackward)
+theorem every_finite_chain_exists {n θ bornCells K ε}
+    (hborn : ∀ i : Fin (n+1), BirthState (bornCells i))
+    (hb : @PhysicalBox (n+1) θ ε) (ha : ∀ i q, (bornCells i).aux 0 q=.ready)
+    (hqueue : ∀ i, (bornCells i).pending=sourceTrain 0 (finiteChainPreparationPort n i) 0 8 16)
+    (sigma centre : ℕ → ℝ) (delay : ℕ → ℝ → ℝ)
+    (hK : 4*(n+1)+12≤K) (hsigma : ∀ j, 0≤sigma j)
+    (hbudget : KernelR.Chain.pathJitter sigma n≤3/20)
+    (hcentre : ∀ j, j<n → (3/10:ℝ)+sigma j≤centre j ∧ centre j≤2/5-sigma j)
+    (herror : ∀ j, j<n → ∀ time, -sigma j≤delay j time-centre j ∧ delay j time-centre j≤sigma j) :
+    Nonempty (ConstructedBirthCadenceChain θ bornCells K sigma centre delay (cadenceChainTerminal n K))
 
-variable {θ born freshB freshC newbornB newbornC forward backward delay cascadeForward cascadeBackward}
-  (c : ConstructedBirthCadenceProtocol θ born freshB freshC newbornB newbornC
-    forward backward delay cascadeForward cascadeBackward)
+variable {n θ bornCells K sigma centre delay T}
+  (c : @ConstructedBirthCadenceChain n θ bornCells K sigma centre delay T)
 
-theorem terminal_state_and_counts :
-    c.final.time = (7899 : ℝ) / 10 ∧
-    (∀ i : Fin 3, ReadyCoordinates c.final i) ∧
-    (∀ i : Fin 3, c.final.x i .q = 1 / 10) ∧
-    (∀ (i : Fin 3) (p : Port), c.final.raw i p = none) ∧
-    c.final.pending = [] ∧ aCount c = 54 ∧ bCount c = 61 ∧ cCount c = 34
+theorem terminal_state_and_memories :
+    c.final.time=T ∧ (∀ i, ReadyCoordinates c.final i) ∧
+    (∀ i, c.final.x i .q=1/10) ∧ (∀ i p, c.final.raw i p=none) ∧
+    c.final.pending=[] ∧
+    (∀ i, c.final.x i (.z (cadenceActivePort n i))=
+      (bornCells i).x 0 (.z (cadenceActivePort n i))+12/5) ∧
+    (∀ i, c.final.x i .b=(bornCells i).x 0 .b+3/10)
 
-theorem learned_memories :
-    c.final.x 0 (.z 2) = born.x 0 (.z 2) + 12 / 5 ∧
-    c.final.x 1 (.z 2) = newbornB.x (.z 2) + 12 / 5 ∧
-    c.final.x 2 (.z 0) = newbornC.x (.z 0) + 12 / 5 ∧
-    c.final.x 0 .b = born.x 0 .b + 3 / 10 ∧
-    c.final.x 1 .b = newbornB.x .b + 3 / 10 ∧
-    c.final.x 2 .b = newbornC.x .b + 3 / 10
+theorem actual_counts (hK : 4*(n+1)+12≤K) :
+    (∀ i, (c.fastExecution.emissionTimes i).length=K-5-2*(n-i.val)) ∧
+    (c.fastExecution.emissionTimes 0).length=K-2*(n+1)-3 ∧
+    c.fastExecution.ledger.emissions.length=(n+1)*(K-(n+1)-4) ∧
+    (∀ i, (c.execution.emissionTimes i).length=
+      finiteChainPreparationCount n i+(K-5-2*(n-i.val))) ∧
+    c.execution.ledger.emissions.length=(n+1)*(K-(n+1)+8)+2
 
-end KernelR.Hybrid.Headline
+end KernelR.Hybrid.FiniteChainHeadline
 ```
 
-`aCount`, `bCount` and `cCount` are defined in that source from actual
-`emissionTimes` FIRE lists, concatenated/counting the appropriate phases across
-both births. They are not supplied output counters.
+`ConstructedBirthCadenceChain` retains the actual preparation, fast execution,
+source/parameter equalities, issued and delivered occurrences, and their
+concatenation under one router. The count fields refer to actual FIRE ledgers.
 
 </details>
 
-The witness retains both genuine births and the actual intervening executions.
-After C's birth, teaching and cadence use one fixed gated three-cell router;
-retargeting preserves the complete physical ledger and delivered occurrences.
-The [protocol implementation](proof/lean/KernelR/HybridBirthCadenceProtocol.lean)
-and [checkpoint map](proof/lean/HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
-expose the construction behind the headline.
-
-The project pins **Lean 4.35.0** and **Mathlib v4.35.0** in
-[lean-toolchain](proof/lean/lean-toolchain),
-[lakefile.toml](proof/lean/lakefile.toml) and
-[lake-manifest.json](proof/lean/lake-manifest.json). Mathlib is locked to commit
-`56a005855ea17e0b0958f73ec801ae140b0a1679`.
-The verified code commit is
-[c7b66bba9065debde10fe9a9bd4134b256396330](https://github.com/HevisNico/kernel-R/commit/c7b66bba9065debde10fe9a9bd4134b256396330);
-the subsequent README-only commit records this identifier and changes no code.
-With Lean installed, from the repository root:
+The project pins **Lean 4.35.0** and **Mathlib v4.35.0**, with Mathlib commit
+`56a005855ea17e0b0958f73ec801ae140b0a1679` in
+[lake-manifest.json](proof/lean/lake-manifest.json).
+The exact checked native finite-chain commit is recorded in the
+[PR #15 validation table](https://github.com/HevisNico/kernel-R/pull/15).
+From the repository root, with Lean installed:
 
 ```sh
-git checkout c7b66bba9065debde10fe9a9bd4134b256396330
 cd proof/lean
 lake exe cache get
-lake build KernelR.Headline
+lake build KernelR.FiniteChainHeadline
 lake build
 lake build Audit
 ```
 
-The headline's `#print axioms` output is:
+The three `#print axioms` outputs are:
 
 ```text
-'KernelR.Hybrid.Headline.three_cell_protocol_exists' depends on axioms: [propext, Classical.choice, Quot.sound]
-'KernelR.Hybrid.Headline.terminal_state_and_counts' depends on axioms: [propext, Classical.choice, Quot.sound]
-'KernelR.Hybrid.Headline.learned_memories' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KernelR.Hybrid.FiniteChainHeadline.every_finite_chain_exists' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KernelR.Hybrid.FiniteChainHeadline.terminal_state_and_memories' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KernelR.Hybrid.FiniteChainHeadline.actual_counts' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
-These are Lean's standard logical axioms, not added physical hypotheses. The
-global audit restricts project theorem dependencies to this list. See the
-[complete reproduction commands](proof/lean/README.md#reproduce) and
-[workflow](.github/workflows/lean.yml). The verified N=3 baseline source/evidence checks cover 436 Lean
-source files, all 16 robust certificates and 12 project tests. All 226 new paired
-controls pass; the configured inventory is 1103 pairs, without asserting that
-every historical suite has been rerun locally. The complete export passes
-**9,489 build jobs** and the global audit of **26,317 project theorems**.
-The five inherited modules are unchanged; source checks reject admitted proofs
-and added project axioms. The workflow badge links to actual runs; fresh PR
-checks retain their actual status until they finish.
+These are Lean's standard logical foundations. The source check rejects
+admitted proofs and added project axioms; the global audit checks every
+imported/current project theorem against this list. The complete export passes
+**9,537 build jobs**, **27,515 audited theorems**, **484 Lean source checks**,
+**16 robust certificates**, **12 project tests** and **178 new paired controls**.
+The five inherited sources are unchanged. CI configures1,281 paired controls;
+this inventory does not claim a new local rerun of every older suite. The
+[validation ledger](proof/lean/EVERY_N_PLAN.md) distinguishes checked commits
+from fresh CI runs still in progress.
+The [full reproduction commands](proof/lean/README.md#reproduce) include source,
+evidence and paired corruption controls; the workflow badge reports actual CI.
 
 This work is done with two AI assistants, **Claude** (Anthropic) and **ChatGPT** (OpenAI), under the direction of Nicolas Breuillaud.
 
-AI assistance concerns the preparation of models, code, proofs and documentation.
-Lean checks the resulting proof terms against their definitions and hypotheses;
-that check is separate from the assistance used to write them. It does not
-validate the physical assumptions as an experimental model or establish every
-claim made elsewhere in this repository.
+AI assists construction of models, code, proofs and documentation. Lean checks
+the resulting proof terms against their definitions and hypotheses. That check
+does not experimentally validate the physical assumptions or establish every
+claim made in the repository.
 
 ## Model ↔ Lean: equations, events and assumptions
 
-The one-page [**model-to-Lean correspondence**](docs/MODEL_LEAN_CORRESPONDENCE.md)
-maps the pulse shape, READY/FAST/SLOW equations, auxiliary cycle, plasticity,
-energy, caps, threshold guards, delivery queues, births and completion to their
-exact Lean definitions. Start there to inspect what the proof actually models.
-The [kernel guide](kernel/README.md) explains the cell, while the
-[archived model](model/full_model_reference.md) retains its original network
-context; the archived 18-layer topology is not an assumption of the N=3 theorem.
+The [**one-page correspondence**](docs/MODEL_LEAN_CORRESPONDENCE.md) maps main
+and auxiliary charges, gain/recovery learning, energy/work, pulses, thresholds,
+jumps, caps, fixed parameters and birth families to actual Lean definitions.
+The [kernel guide](kernel/README.md) explains the cell; the
+[archived model](model/full_model_reference.md) preserves its original network
+context. A22 topology and simulations remain supporting material below.
 
 <details>
 <summary>Supporting results, experiments, reproduction and provenance</summary>
@@ -272,12 +263,12 @@ theorems combine hybrid-flow arguments with checked interval obligations;
 they are not complete Lean formalizations or independently peer-reviewed mathematics.
 
 The [Lean project](proof/lean/README.md) proves physical flow, reserve and memory
-invariants, the constructed N=3 protocol described above, and generic
-conditional protocol results. It also checks exact rational certificate endpoints and
+invariants, the common-birth finite-chain construction above, the earlier
+staged N=3 protocol, and generic conditional results. It also checks exact rational certificate endpoints and
 recorded cadence/adaptive counters. These evidence checks do not establish
-membership of the actual trajectories in every recorded interval. The complete
-physical refinement for arbitrary finite chains, retained probes and
-indefinite network continuation remain separate obligations.
+membership of the actual trajectories in every recorded interval. The native-function chain factory is now constructed. Prescribed indexed-error
+realization, retained probes and indefinite network continuation remain separate
+obligations.
 
 The [N-cell extension](results/reciprocal_composition/README.md) uses a closed
 packet contract and a written induction, supported by 81 N-independent local

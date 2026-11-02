@@ -1,74 +1,114 @@
-# Physical finite-chain proof: obligations and checkpoints
+# Physical finite-chain proof: construction and checkpoints
 
-This is the continuation of the validated three-cell result in PR #14.
-The user authorized work on the every-N obligations on 2026-11-02.
-The new work has its own branch and draft PR; it does not alter the N=3 PR.
+This continues the completed three-cell result in [PR #14](https://github.com/HevisNico/kernel-R/pull/14).
+The every-N work authorized on 2026-11-02 has its own branch,
+`proof/physical-finite-chain`, and [draft PR #15](https://github.com/HevisNico/kernel-R/pull/15).
+The original staged A/B/C protocol remains a separate completed result:
+A54/B61/C34 at789.9, with B/C born at160/480. The scalable protocol below
+uses independently chosen cells all born at0; its source program and traffic
+counts belong to that different construction.
 
-## Target and quantifiers
+## Constructed family and exact quantifiers
 
-The target is the physical construction underlying the
-[written finite-chain theorem](../reciprocal_composition/THEOREM.md): every
-positive finite N, independently chosen fixed fabrication parameters at each
-cell/port, declared common READY birth families, and explicit per-emission
-wire errors obeying a cumulative budget. We aim to construct actual hybrid
-executions. A theorem about every admissible execution is a separate obligation.
+[HybridBirthCadenceChain](KernelR/HybridBirthCadenceChain.lean) proves
+`birth_cadence_chain_exists`, returning `ConstructedBirthCadenceChain` for
+every positive finite N. Lean uses `n=N-1`, cells `Fin (n+1)`, physical root0
+and leaf `Fin.last n`. There is no tested maximum N.
 
-The scalable preparation is its own protocol: all cells are born at time0;
-16 direct period-eight inputs prepare each relay on port2 and the leaf on
-port1, with routes closed. The fast phase starts at160 and supplies K inputs
-to the leaf on port0, with K >= 4*N+12. This is not a retiming of the staged
-A/B/C birth protocol. No settings copy or physical state reset is allowed.
+Caller inputs are independent `BirthState`s with all auxiliaries initially
+READY, independent fixed `PhysicalBox` parameters in either declared
+fabrication family (±0.3% or ±10%), canonical pulse amplitudes, and exact
+source queues. Each cell receives16 period-eight preparation inputs from0:
+the leaf on port1 and all relays on port2. The leaf's K period-four port0
+inputs, starting at160, are already in the global birth queue; `K ≥ 4*N+12`.
+Preparation reaches159.9. The fixed contacts are closed before160 and open
+on `[160,T+1)` for the fast phase, with
+
+`T = 160 + 4*(K-1) + 1.1*(N-1) + 8`.
+
+For each link j<N-1, a fixed centre d_j and nonnegative budget σ_j satisfy
+`0.3+σ_j ≤ d_j ≤ 0.4-σ_j`. The native wire inputs are functions δ_j(t),
+universally bounded by `-σ_j ≤ δ_j(t)-d_j ≤ σ_j` at every time t.
+The cumulative budget is `sum_{j<N-1} σ_j ≤ 0.15`; errors are sampled at
+actual FIRE times, without an independence assumption. Every actual delay
+therefore lies in[0.3,0.4].
+
+The returned witness constructs the physical preparation and fast executions
+under **one fixed gated router**, retaining their concatenated ledgers,
+delivered occurrences and actual energy paths. No prepared state, reaching
+execution, received calendar, desired output count or local `CellLaw` is a
+factory premise. Receiver analysis queues are matched to real FIRE issuance
+and arrivals; future wire tokens are not external birth sources.
+
+## Derived conclusions
+
+At T every cell is READY with q=0.1, no RAW and an empty pending queue; the
+execution is `CompleteThrough T`, with the physical reserve/cap invariant and
+raw validity. The active log-gain (leaf port0, relay port2) is its **own** birth
+value+2.4 and recovery is its own birth value+0.3. Other gains retain the
+values established by the actual preparation.
+
+At leaf-to-root depth j=0,...,N-1, fast traffic is `K-5-2*j`, totaling
+`N*(K-N-4)`. Preparation emits14 at the leaf and12 at each relay, totaling
+`12*N+2`. The actual concatenated ledger therefore contains
+`N*(K-N+8)+2` emissions. Physical root-first indices reverse the depth index:
+cell i has depth `N-1-i`.
 
 ## Proof ledger
 
-| Obligation | Available result | Work required |
+| Obligation | Constructed result | Boundary |
 |---|---|---|
-| Packet algebra | Arbitrary finite-N induction, counts and resource identities already compile | Connect it to actual physical execution witnesses |
-| Receiver, budget0.10 | Actual generic LocalCadenceReceiver, exact ledger-derived outputPacket | Expose its finite Signal and dependent compositions without assuming an output calendar |
-| Receiver, full budget0.15 | Width-one separation is supported abstractly | Reprove actual first/second strong charge bands and mixed response; current bands are not valid on the larger domain |
-| Relay timing interface | Physical high latencies in[0.16,0.26] and first<=rest; packet closure already proved | Keep this directly proved interface distinct from the older narrower RelayLaw bounds |
-| Variable-length leaf | Actual25-input C leaf and arbitrary high-response train | Generalize the three weak inputs, strong/MARK prefix and remaining train to arbitrary K |
-| Finite global causality | Generic one-head prepend weaver with exact traces/energy/queues | Iterate it over actual preceding executions; initial fast queue contains only external leaf sources |
-| Birth preparation | Physical one-cell and port-generic local components | Construct each declared16-input preparation from its own birth, then parallelize under closed routing |
-| Terminal state/memories | True READY returns, reserve and own-memory bounds | Uniform finite-N horizon and count/memory conclusions for the assembled execution |
-| Probes/cuts | Written results and finite evidence | Explicit frozen-copy/cut semantics and physical proofs |
+| Independent birth preparation | `HybridFiniteChainRelayPreparation`, `HybridFiniteChainLeafPreparation`, `HybridFiniteChainFamilyPreparation` | Declared common-time READY births and exact16-input queues |
+| Variable-K physical leaf | `HybridBirthCadenceLeafK`, `HybridConstructedCadenceLeafK` | Actual weak/strong/MARK/mixed/high phases and exact ledger packet |
+| Full cumulative jitter0.15 | `HybridLocalCadenceBudgetReceiver` and `HybridCadencePacketRelay` | High latencies[0.16,0.26] and first≤rest are directly proved; the older narrower `Chain.Refinement.RelayLaw` is not supplied |
+| Finite causal assembly | `HybridPreparedCadenceChainConstruction`, `HybridFiniteCausalChain` | Each new receiver is physically constructed and causally woven; no local-law premise |
+| Common router from birth | `HybridBirthCadenceChain` | Preparation retargeting preserves ledgers/deliveries because contacts are closed at its actual FIREs |
+| Terminal state and counts | `HybridCadenceChainEnvelope`, `HybridCadenceChainCounts`, `ConstructedBirthCadenceChain` | Actual finite horizon, own memories, per-cell and cumulative traffic |
+| Indexed per-emission errors | `HybridIndexedWireDelay` | Converts a supplied duplicate-free emission ledger to a bounded delay function; a whole-chain factory quantified over arbitrary error sequences is still required |
+| Probes, cuts and settings copies | Written results and finite evidence | Retained physical semantics and proofs remain open |
+| Universal/operational extension | Constructive existence for the declared family | Every-admissible-execution refinement and operational drift/noise/amplitude histories remain open |
 
-## Why the larger jitter budget needs a new proof
+This closes constructive physical existence for the new common-birth family;
+it does not establish all six conclusions of the written finite-chain theorem.
+Broader introductions, ports or source programs retain their own obligations.
+The [coverage guide](N_CELL_COVERAGE.md) separates the older conditional API
+from the new construction.
 
-A packet at J<=0.15 allows dense gaps[3.7,4.3] and the first transition gap
-[3.7,4.4]. The N=3 receiver uses[3.8,4.2] and[3.8,4.3]. In particular its
-second-strong band[0.122,0.14] cannot simply be reused: the nominal SLOW charge
-at the new gap extremes lies outside that band. New inequalities must retain
-the actual charge and energy clocks, not strengthen an assumption silently.
+## Validation and checkpoint discipline
 
-## Checkpoint discipline
+The completed native-function construction passes the pinned complete export:
+**9,537 build jobs**, **27,515 audited project theorems**, **484 Lean sources**
+and five unchanged inherited modules. Generated evidence, all **16 robust
+certificates** and **12 project tests** pass. The audit allows only `propext`,
+`Classical.choice` and `Quot.sound`.
 
-Each substantial checkpoint records its exact source commit, build/audit
-results, newly passed positive/negative controls, and remaining quantified
-premises in the new PR. Uncompiled work is never described as a checked result.
-The N=3 headline and its verified code commit remain the completed baseline.
-A pause request stops new work; the current branch, validated commits and this
-ledger provide a restart point. No merge is performed automatically.
+All **178 finite-chain paired controls pass**:48 first-checkpoint,40 preparation,
+15 full-budget,19 receiver,20 port/index and36 global-construction contracts.
+Each valid conclusion compiles before its altered conclusion is individually
+rejected with a Lean diagnostic. CI configures **1,281 paired controls**, plus
+axiom-audit corruption checks; this inventory does not claim a fresh local
+rerun of every historical suite. The exact checked native-function commit and
+fresh CI run status are recorded in PR #15; in-progress CI is not labeled green.
 
-## First exported checkpoint: validated
+The public [finite-chain headline](KernelR/FiniteChainHeadline.lean) groups
+existence from independent births, terminal memories/state and actual counts.
+Its three `#print axioms` outputs contain exactly the three permitted logical
+axioms. The [global README](../../README.md) exposes their exact signatures.
 
-Thirteen new modules provide: the actual16-input leaf preparation from birth
-(14 FIREs, own gain/recovery changes and a true quiet endpoint159.9); an
-independent finite-family product; a finite causal-chain induction; exact
-receiver signals and their dependent packet composition; variable-K weak and
-first-MARK prefixes and the generic cadence suffix; full-budget packet gap
-bounds and the two true strong SLOW spans; and source-program restriction
-preserving the physical path. All thirteen modules pass with the default heartbeat limit.
-The complete exported-tree build passes **9,502 jobs** and the global audit
-passes **26,659 project theorems**, allowing only `propext`, `Classical.choice`
-and `Quot.sound`. Source checks cover **449 Lean files**, with five inherited
-modules unchanged. Generated evidence, all **16 robust certificates**, **12
-project tests** and **48 new paired controls** pass. CI configures **1,151 paired
-controls**, plus axiom-audit corruption checks; this inventory does not assert
-a fresh local rerun of every historical suite. The PR records the exact
-validated commit and the actual CI status.
+### First exported checkpoint: historical validated baseline
 
-This is not the completed birth-to-cadence theorem for everyN. The finite-chain
-and signal compositions still have explicit local physical construction
-premises. The generic complete LeafK, low-port relay preparation, expanded
-mixed/high receiver and their final assembly remain work in progress.
+Commit `21cf9821af0f90ada4301b9791ed8492f936d934` published the first13 modules.
+Its complete exported-tree build passed **9,502 jobs**, its global audit
+passed **26,659 project theorems**, and source checks covered **449 Lean
+files**, with five inherited modules unchanged. Generated evidence, all
+**16 robust certificates**, **12 project tests** and **48 new paired
+controls** passed. CI configured **1,151 paired controls**, plus axiom-audit
+corruption checks; that inventory does not claim a fresh local rerun of every
+historical suite. These figures describe that commit, before the completed
+common-birth construction.
+
+Only `propext`, `Classical.choice` and `Quot.sound` are allowed by the audit.
+Each exported checkpoint must record exact build/audit results and its remaining
+quantified premises. The N=3 baseline remains separately completed. A pause
+stops new work; the branch, validated commits and this ledger provide the
+restart point. No merge is performed automatically.

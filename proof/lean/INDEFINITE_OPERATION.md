@@ -8,7 +8,9 @@ in `[50,100]`; sensor charges and energy evolve through their actual ODEs.
 The resulting guarantee is constructive existence of compatible responding
 continuations. A separate bridge now derives this domain for Aport2/Bport2
 coordinate projections of the constructed639.9 state. The finite N=3 cadence
-is constructed separately; indefinite network operation and universal refinement of every admissible execution remain open.
+and the separate common-birth every-N family
+are constructed separately; indefinite network operation and universal refinement
+of every admissible execution remain open.
 
 ## Main results
 
@@ -54,8 +56,8 @@ The projections' empty analysis queues are not physical operations on the
 global state: its25 C640..736 tokens remain. Each isolated continuation uses a
 new future source queue and empty routing. Cport1's learned gain near2.18 is
 outside the imported domain, so this bridge does not cover that port. Broader
-birth families, arbitrary-network operation and universal refinement remain
-open. Fixed reference latency uses exact main rest; it does not extend to the positive
+birth families, indefinitely repeatable network operation and universal
+refinement remain open. Fixed reference latency uses exact main rest; it does not extend to the positive
 residuals covered by `first_firing_le_rest_reference`.
 
 The constructed global C660 extension has a different recovery state:
@@ -77,7 +79,7 @@ The standalone labels do not construct arrivals. The separate
 `HybridConstructedCadenceBC` and `HybridConstructedCadenceCascade` now weave
 them into actual global B/A responses with cadence counts18/16. The original
 birth wrapper derives A54/B61/C34 at789.9, with all READY/q=0.1, RAW absent,
-an empty queue and own active gains/recoveries+2.4/+0.3.
+an empty queue and own active log-gains/recoveries+2.4/+0.3.
 
 The final public wrapper `birth_protocol_complete_cadence_exists` retains both
 births and combines C teaching/cadence under one fixed gated three-cell router,
@@ -88,6 +90,15 @@ This finite cadence construction does not instantiate `LearnedRest` for its
 higher gain/recovery endpoint or provide indefinite contracts for every C
 state. The isolated learned-domain theorem above and the finite global N=3
 cadence are separate results; indefinite network operation remains open.
+
+The separate [common-birth finite-chain factory](EVERY_N_PLAN.md) now constructs
+preparation and a variable-K fast phase for every positive finite N under one
+fixed gated router. At its finite terminal horizon, every cell is READY/q=0.1
+with no RAW or pending tokens, active log-gain own birth+2.4 and recovery own
+birth+0.3. These gains and recoveries exceed the imported `LearnedRest` domain;
+no indefinite network contract follows from these finite endpoints. Native
+bounded delay functions, cumulative jitter≤0.15 and actual routed issuance
+belong to that finite construction, independently of the isolated theorem here.
 
 ## Proof map
 
@@ -132,8 +143,10 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
 
 - Extend the projected Aport2/Bport2 bridge beyond the declared READY-birth
   subfamily and derive indefinitely repeatable network continuations.
-- Extend the constructed finite N=3 routing to arbitrary finite chains and
-  establish a sufficient indefinitely repeatable network settling duration.
+- Derive an indefinitely repeatable network contract and sufficient settling
+  duration from actual network endpoints. Finite common-birth routing is already
+  constructed for every positive finite N, but its higher memories are outside
+  the imported isolated learned domain.
 - Universal refinement across all admissible complete executions.
 - Operational drift, noise and amplitude histories.
 
@@ -150,14 +163,16 @@ controls passed: 25 local-C-tail, 20 constructed-leaf/projection and eight
 actual high-return-prefix checks. The high suite had 32 passing pairs, and
 that checkpoint configured 877 controls.
 
-The complete N=3 export passes the pinned build (**9,489 jobs**) and global
+The completed N=3 historical export passed the pinned build (**9,489 jobs**)
+and global
 axiom audit (**26,317 project theorems**), allowing only `propext`,
 `Classical.choice` and `Quot.sound`. Source checks cover **436 Lean files** and
 five unchanged upstream modules; generated evidence, all **16 robust
 certificates** and **12 project tests** pass. All new proof modules compile
 with the default heartbeat limit.
 
-All **226 new paired controls pass**: 48 cascade/birth/protocol, 30 receiver/BC,
+At that N=3 checkpoint, all **226 new paired controls passed**:48
+cascade/birth/protocol,30 receiver/BC,
 34 strong-jitter source, 22 learned-source prefix, 18 causal weave, 17 high-jitter,
 14 jitter span, 12 MARK-only, 12 mixed, 12 router transport and 7 future-frame.
 Each valid conclusion compiles before its altered conclusion is rejected with
@@ -169,10 +184,12 @@ The public [headline](KernelR/Headline.lean) groups the existence, actual termin
 state/counts and own learned-memory theorems. The global
 [README](../../README.md) records its exact signatures and `#print axioms` outputs;
 the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
-to their operational definitions. N=3 is finalized; the user has authorized the every-N work tracked in
+to their operational definitions. N=3 remains finalized; the distinct
+common-birth every-N construction is tracked in
 [EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
-those of the N=3 commit; subsequent finite-chain checkpoints have their own audit.
+those of the N=3 commit; current finite-chain validation and checkpoint
+history are recorded there.
 
-These isolated future contracts remain distinct from the actual C→B→A network
-construction and do not establish indefinite network operation or universal
+These isolated future contracts remain distinct from both finite network
+constructions and do not establish indefinite network operation or universal
 refinement. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).

@@ -1,16 +1,34 @@
 # N-cell Lean coverage and remaining refinement obligations
 
-This extension formalizes the compositional part of the
-[finite-chain argument](../reciprocal_composition/THEOREM.md).
-It does **not** turn the entire physical theorem into an unconditional Lean theorem.
-The distinction is explicit in theorem signatures, not hidden in project axioms.
-The declared N=3 physical cadence is now constructed from A's READY birth
-through789.9, with independent B/C births at160/480 and cumulative A54/B61/C34.
-Its cadence emits A16/B18/C20. All cells finish READY/q=0.1 with RAW absent and
-an empty global queue; own active gains A2/B2/C0 are birth+2.4 and own recoveries
-birth+0.3. Other teaching gains are preserved. This constructs one declared
-three-cell birth/source family; physical refinement for every finite N remains
-open. Its construction is now in progress; see the [finite-chain proof ledger](EVERY_N_PLAN.md).
+The [written finite-chain argument](../reciprocal_composition/THEOREM.md) now
+has a constructed physical common-birth family for every positive finite N,
+as well as its earlier abstract induction. This is constructive existence
+for the declared preparation/source/delay family; the full written theorem,
+including retained probes/copies and universal refinement, remains open.
+
+`birth_cadence_chain_exists` in
+[HybridBirthCadenceChain](KernelR/HybridBirthCadenceChain.lean) starts from
+independent READY births at0 with independent fixed fabrication parameters.
+Sixteen period-eight inputs prepare each relay on port2 and the leaf on port1;
+K period-four inputs drive leaf port0 from160, with `K ≥ 4*N+12`.
+A single fixed gated router covers preparation and cadence. The factory has
+no prepared-state, reaching-execution, received-calendar, output-count or
+`CellLaw` premise. The [construction ledger](EVERY_N_PLAN.md) gives its exact
+native delay-function quantifiers and validation status.
+
+At `T=160+4*(K-1)+1.1*(N-1)+8`, all cells are READY/q=0.1 with no RAW and an
+empty pending queue; `CompleteThrough`, physical bounds and raw validity
+are derived. Each active log-gain is its own birth value+2.4, and recovery is its
+own birth value+0.3. At leaf-to-root depth j, fast emissions are `K-5-2*j`,
+totaling `N*(K-N-4)`. Preparation contributes `12*N+2` actual FIREs; cumulative
+traffic is `N*(K-N+8)+2`. Lean uses `n=N-1`, root0 and leaf `Fin.last n`, so
+physical cell i has depth `n-i.val`.
+
+The original N=3 staged A/B/C protocol is separately completed at789.9,
+with independent B/C births at160/480 and cumulative A54/B61/C34. Its cadence
+emits A16/B18/C20; all finish READY/q=0.1 with no RAW or pending tokens,
+active log-gains A2/B2/C0 equal to own birth+2.4 and recovery own birth+0.3.
+Its source/birth program differs from the scalable common-birth protocol.
 
 `birth_protocol_complete_cadence_exists` returns
 `ConstructedBirthCadenceProtocol`, retaining both genuine births and the
@@ -29,9 +47,10 @@ C-only789.9 endpoint remain historical witnesses.
 
 `HybridBirthLearnedRest` separately bridges Aport2/Bport2 projections of639.9
 to isolated learned one-cell contracts with settling7.5. Its empty analysis
-queues do not physically remove global tokens. Neither that bridge nor the
-finite N=3 construction supplies universal physical contracts for arbitrary
-introductions, port permutations or chain length.
+queues do not physically remove global tokens. Neither that bridge nor either
+finite construction supplies universal
+physical contracts for arbitrary introductions or port permutations, or an
+indefinitely repeatable network contract.
 
 ## Checked composition
 
@@ -42,7 +61,9 @@ introductions, port permutations or chain length.
 | Relay closure | `Packet.relay`, `relay_actual_prefix`, `relay_actual_second_fire`, `relay_actual_first_high`, `relay_actual_regular_tail` | Constructs P(m+2,L-4,J), preserves retained errors and proves exact correspondence to the declared emitted input indices |
 | Leaf packet | `leafPacket` | Constructs P(3,K-8,0) from the declared leaf firing dates and latency bounds |
 | Constructed physical C leaf | `HybridBirthCadenceLocalC`, `HybridConstructedCadenceLeafPacket` | Actual autonomous C639.9→789.9 ledger refines P(3,17,0); bounded-delay labels refine P(3,17,1/20), used by the constructed causal C→B→A weave |
-| Constructed physical N=3 | `HybridLocalCadenceReceiver`, `HybridConstructedCadenceBC`, `HybridConstructedCadenceCascade`, `HybridBirthCadenceCascade`, `HybridBirthCadenceProtocol` | Actual leaf, B/A receivers and causal weave; A54/B61/C34 at789.9; every-N physical specialization remains open |
+| Constructed physical N=3 | `HybridLocalCadenceReceiver`, `HybridConstructedCadenceBC`, `HybridConstructedCadenceCascade`, `HybridBirthCadenceCascade`, `HybridBirthCadenceProtocol` | Actual leaf, B/A receivers and causal weave; A54/B61/C34 at789.9; separate from the new common-birth every-N family |
+| Constructed common-birth every-N | `HybridFiniteChainFamilyPreparation`, `HybridPreparedCadenceChainConstruction`, `HybridBirthCadenceChain` | Actual birth preparation, variable-K leaf, full-budget physical receivers and causal weave; terminal own memories and cumulative counts |
+| Physical packet closure | `HybridLocalCadenceBudgetReceiver`, `HybridCadencePacketRelay` | Cumulative jitter≤0.15; directly proved high latencies[0.16,0.26], first≤rest, exact actual output packet |
 | Universal induction | `Chain.Induction.compose_every_finite_chain`, `root_contract` | Every positive finite N; validates every intermediate tail and cumulative jitter budget |
 | Actual stream interface | `Chain.Refinement.realized_chain` | Composes explicit routed streams, given a leaf refinement and local `RelayLaw` proofs |
 | Resource algebra | `Chain.Algebra`, `traffic_closed_form`, `traffic_at_minimum` | Twelve integer identities, natural-number counts, root tail, root emissions and quadratic total traffic |
@@ -64,25 +85,29 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
 
 ## What is still required for the full physical theorem
 
-1. Generalize the concrete N=3 construction to arbitrary leaf/relay
-   introductions, source queues, contact gates and port permutations. Derive
-   physical preparation, availability and terminal saturation for every finite
-   chain rather than assuming its local contracts.
-2. Prove sound enclosure membership for the remaining exp/log expressions and
+1. Extend beyond the declared common-birth preparation, source and port
+   family where required by the full written statement. The new family already
+   constructs arbitrary finite chain length without local-law premises.
+2. Prove sound enclosure membership for remaining exp/log expressions and
    trajectories. Generated endpoint comparisons alone do not supply it.
-3. Extend the concrete C leaf and B/A receiver witnesses to the generic
-   `RelayLaw` required at arbitrary depth, including exact event counts,
-   protected doses, raw tails and latency bounds for each new introduction.
-4. Formalize retained frozen probes, cuts/settings copies and their physical
-   preservation semantics.
-5. Establish universal refinement across every admissible execution and finer
-   operational robustness. Constructive existence for this fixed N=3 family
-   does not quantify over every event ordering or operational perturbation.
+3. Supply the older `Chain.Refinement.RelayLaw` with its narrower timing bounds
+   if using that API. The new physical construction instead uses the proved
+   broad-latency `relayCadence` closure and does not assume this law.
+4. Upgrade arbitrary per-emission error-sequence inputs to a complete global
+   factory. `HybridIndexedWireDelay` currently realizes errors along a supplied
+   actual ledger; the birth factory natively quantifies over bounded functions
+   δ_j(t), fixed centres and cumulative σ_j≤0.15.
+5. Formalize retained frozen probes, cuts/settings copies and their physical
+   preservation semantics; establish universal refinement across every
+   admissible execution and operational drift/noise/amplitude histories.
+   Neither finite existence result proves these conclusions.
 
 Existing `Doses`, `Flow`, `Recovery`, `Energy` and `Cadence` lemmas support
-these obligations but do not already discharge all of them. The local contracts
-are ordinary quantified premises: callers cannot obtain a physical theorem
-without supplying them. There are no admitted proofs or new axioms.
+these obligations but do not already discharge all of them. The older abstract
+local contracts remain ordinary quantified premises.
+The new common-birth factory supplies its physical leaf and receivers through
+construction instead of requiring those contracts from callers. There are no
+admitted proofs or new axioms.
 
 ## Reproduction and falsification
 
@@ -110,14 +135,16 @@ controls passed: 25 local-C-tail, 20 constructed-leaf/projection and eight
 actual high-return-prefix checks. The high suite had 32 passing pairs, and
 that checkpoint configured 877 controls.
 
-The complete N=3 export passes the pinned build (**9,489 jobs**) and global
+The completed N=3 historical export passed the pinned build (**9,489 jobs**)
+and global
 axiom audit (**26,317 project theorems**), allowing only `propext`,
 `Classical.choice` and `Quot.sound`. Source checks cover **436 Lean files** and
 five unchanged upstream modules; generated evidence, all **16 robust
 certificates** and **12 project tests** pass. All new proof modules compile
 with the default heartbeat limit.
 
-All **226 new paired controls pass**: 48 cascade/birth/protocol, 30 receiver/BC,
+At that N=3 checkpoint, all **226 new paired controls passed**:48
+cascade/birth/protocol,30 receiver/BC,
 34 strong-jitter source, 22 learned-source prefix, 18 causal weave, 17 high-jitter,
 14 jitter span, 12 MARK-only, 12 mixed, 12 router transport and 7 future-frame.
 Each valid conclusion compiles before its altered conclusion is rejected with
@@ -129,9 +156,11 @@ The public [headline](KernelR/Headline.lean) groups the existence, actual termin
 state/counts and own learned-memory theorems. The global
 [README](../../README.md) records its exact signatures and `#print axioms` outputs;
 the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
-to their operational definitions. N=3 is finalized; the user has authorized the every-N work tracked in
+to their operational definitions. N=3 remains finalized; the distinct
+common-birth every-N construction is tracked in
 [EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
-those of the N=3 commit; subsequent finite-chain checkpoints have their own audit.
+those of the N=3 commit; current finite-chain validation and checkpoint
+history are recorded there.
 
 Only `propext`, `Classical.choice` and `Quot.sound` are allowed; no physical
 leaf/relay premise is replaced by a project axiom.

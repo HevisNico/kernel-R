@@ -12,10 +12,14 @@ retain their639.9 teaching values. No later reaching execution, received
 calendar or desired output count is a factory premise.
 
 The earlier global660 and autonomous-C789.9 witnesses remain useful components.
-The new construction weaves C's real leaf packet with physical B and A receiver
-executions, issuing rather than preloading the wire tokens. Physical every-N
-refinement and universal refinement remain open; Python interval implementations
-have not been verified in Lean. The next finite-chain construction is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
+A separate physical common-birth family is now constructed for every positive
+finite N, including its16-input per-cell preparation and variable-K fast phase.
+Its actual causal assembly uses one fixed gated router and has no prepared-state,
+reaching-execution, calendar or local-law premise. See
+[the every-N construction below](#constructed-common-birth-chain-for-every-finite-n).
+Universal refinement, retained probes/copies, operational noise/drift and full
+written-theorem coverage remain open; Python interval implementations have not
+been verified in Lean.
 
 ## Repeatable learned one-cell operation
 
@@ -40,11 +44,12 @@ physical event budget. These invariants alone do not supply future executions.
 
 | Proof layer | Current result | Explicit boundary |
 |---|---|---|
-| Constructed three-cell protocol | Original READY birth through789.9; cumulative A54/B61/C34 and cadence A16/B18/C20 | Declared birth family, source queues, fixed fabrication parameters and bounded delays; no arbitrary-N or universal-refinement result |
+| Constructed three-cell protocol | Original READY birth through789.9; cumulative A54/B61/C34 and cadence A16/B18/C20 | Declared birth family, source queues, fixed fabrication parameters and bounded delays; distinct from the common-birth every-N protocol; no universal-refinement result |
 | Autonomous C and concrete leaf packet | Actual projected prefix639.9→660 plus local continuation to789.9; ledger-derived P(3,17,0) | Retained as a component of the constructed global C→B→A weave |
 | Conditional physical analysis | General trace-based cadence laws, doses, counts and terminal identities | These analytic APIs retain execution premises; the separate concrete factory now supplies the N=3 execution |
 | Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing/new future queues; broader birth domains, indefinite network operation and universal refinement remain open |
-| Finite-chain composition | Induction, packet timing, jitter budgets and resource algebra for every finite N | Physical leaf refinement and each local `RelayLaw` remain premises |
+| Constructed finite chain | Independent common births, preparation, variable-K physical leaf/receivers and causal assembly for every finite N; cumulative jitter≤0.15 | Declared source/port family and bounded delay functions; broader written conclusions remain open |
+| Abstract finite-chain API | Induction, packet timing, jitter budgets and resource algebra | The older `Chain.Refinement.realized_chain` still takes leaf and narrow `RelayLaw` premises; the new construction uses broad physical closure |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
 
 The constructive factories take A's READY `BirthState` with initially READY
@@ -165,8 +170,54 @@ The active ports are A2/B2/C0, each gaining2.4 from its own birth, with recovery
 +0.3 in each cell. Other gains remain at their639.9 values, including A0+1.8,
 B1+0.6 and C1+0.6. Earlier residual charges, raw tails and energy paths are
 carried through actual executions rather than reset. Fine enclosure soundness,
-retained probes/settings copies, physical every-N refinement and universal
-refinement remain open. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
+retained probes/settings copies, operational
+perturbations and universal refinement remain open. The separate common-birth
+finite-chain construction and its validation are tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
+
+## Constructed common-birth chain for every finite N
+
+[HybridBirthCadenceChain](KernelR/HybridBirthCadenceChain.lean) proves
+`birth_cadence_chain_exists`, constructing `ConstructedBirthCadenceChain`
+for every positive finite N (`n=N-1` in Lean). This is a separate protocol
+from the completed staged A/B/C construction above. Each independently
+chosen cell is born at0;16 period-eight preparation inputs drive leaf port1
+and relay port2. The leaf's K period-four port0 inputs start at160, with
+`K ≥ 4*N+12`, and are already retained in the original global source queue.
+Preparation reaches159.9. One fixed router has contacts closed before160
+and open on `[160,T+1)` for the fast phase, where
+`T=160+4*(K-1)+1.1*(N-1)+8`.
+
+The factory takes independent `BirthState`s, all auxiliaries initially READY,
+fixed independent `PhysicalBox` parameters (±0.3% or ±10%), canonical pulses
+and the exact preparation queues. For every link j<N-1 it takes a delay
+function δ_j(t), fixed centre d_j and nonnegative σ_j, with
+`0.3+σ_j ≤ d_j ≤ 0.4-σ_j`, `|δ_j(t)-d_j| ≤ σ_j` for every t, and cumulative
+`sum σ_j ≤ 0.15`. Actual FIRE dates select the delays. No prepared state,
+reaching execution, received calendar, output count or `CellLaw` is a caller
+premise. Preparation retargeting retains its actual ledger and deliveries;
+the physical receivers and causal weave issue and consume genuine wires.
+
+At T all cells are READY/q=0.1 with RAW absent and an empty global queue.
+`CompleteThrough`, reserve/cap bounds and raw validity are conclusions.
+Active log-gain is its own birth value+2.4 (leaf port0, relay port2), and recovery
+is its own birth value+0.3. Other gains retain their actual preparation values.
+At leaf-to-root depth j, fast traffic is `K-5-2*j`, totaling `N*(K-N-4)`.
+Preparation contributes14 leaf FIREs and12 per relay, totaling `12*N+2`;
+the actual full ledger contains `N*(K-N+8)+2` emissions. Physical indices
+run root0 to leaf n, reversing the depth index: `j=n-i.val`.
+
+The full-budget receiver derives high latencies in[0.16,0.26] with first≤rest;
+`Packet.relayCadence` proves the closure used in construction. This does not
+supply the older, narrower `Chain.Refinement.RelayLaw`. The native factory's
+quantifier is over bounded delay functions. `HybridIndexedWireDelay` realizes
+indexed errors along a supplied actual ledger; arbitrary per-emission error
+sequences still need a whole-chain realization factory.
+
+See the [finite-chain coverage guide](N_CELL_COVERAGE.md) and
+[construction/validation ledger](EVERY_N_PLAN.md). Retained probes,
+cuts/settings copies, universal refinement and operational drift/noise/amplitude
+histories remain open; the new existence family does not establish all six
+conclusions of the written finite-chain theorem.
 
 ## Reproduce
 
@@ -239,6 +290,11 @@ python3 scripts/check_hybrid_causal_weave_negative.py
 python3 scripts/check_hybrid_cadence_receiver_negative.py
 python3 scripts/check_hybrid_cadence_cascade_existence_negative.py
 python3 scripts/check_hybrid_router_transport_negative.py
+python3 scripts/check_hybrid_finite_chain_negative.py
+python3 scripts/check_hybrid_finite_preparation_negative.py
+python3 scripts/check_hybrid_cadence_full_budget_negative.py
+python3 scripts/check_hybrid_cadence_budget_receiver_negative.py
+python3 scripts/check_hybrid_port_wire_transport_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -272,14 +328,16 @@ controls passed: 25 local-C-tail, 20 constructed-leaf/projection and eight
 actual high-return-prefix checks. The high suite had 32 passing pairs, and
 that checkpoint configured 877 controls.
 
-The complete N=3 export passes the pinned build (**9,489 jobs**) and global
+The completed N=3 historical export passed the pinned build (**9,489 jobs**)
+and global
 axiom audit (**26,317 project theorems**), allowing only `propext`,
 `Classical.choice` and `Quot.sound`. Source checks cover **436 Lean files** and
 five unchanged upstream modules; generated evidence, all **16 robust
 certificates** and **12 project tests** pass. All new proof modules compile
 with the default heartbeat limit.
 
-All **226 new paired controls pass**: 48 cascade/birth/protocol, 30 receiver/BC,
+At that N=3 checkpoint, all **226 new paired controls passed**:48
+cascade/birth/protocol,30 receiver/BC,
 34 strong-jitter source, 22 learned-source prefix, 18 causal weave, 17 high-jitter,
 14 jitter span, 12 MARK-only, 12 mixed, 12 router transport and 7 future-frame.
 Each valid conclusion compiles before its altered conclusion is rejected with
@@ -291,9 +349,11 @@ The public [headline](KernelR/Headline.lean) groups the existence, actual termin
 state/counts and own learned-memory theorems. The global
 [README](../../README.md) records its exact signatures and `#print axioms` outputs;
 the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
-to their operational definitions. N=3 is finalized; the user has authorized the every-N work tracked in
+to their operational definitions. N=3 remains finalized; the distinct
+common-birth every-N construction is tracked in
 [EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
-those of the N=3 commit; subsequent finite-chain checkpoints have their own audit.
+those of the N=3 commit; current finite-chain validation and checkpoint
+history are recorded there.
 
 
 ## Coverage and hypotheses
@@ -393,18 +453,20 @@ finite depth, nonuniform jitter budgets, natural emission/traffic counts, dose
 words, conditional cut propagation and terminal-time bounds. Both N-cell
 certificates add 162 exact endpoint comparisons and 352 interval-validity checks.
 
-The concrete autonomous C leaf now has its actual emission-packet refinement;
-physical leaf contracts for other introductions and arbitrary-depth relay
-refinements remain explicit premises. The extension
-does not claim a complete formal proof of the R hybrid trajectories or interval
-enclosure soundness. In particular, the finite-chain theorem is conditional on
-local contracts, while its induction and resource algebra are proved in Lean.
+The separate common-birth physical construction now supplies preparation,
+leaf packets, full-budget receivers and actual causal composition for every
+finite N. `HybridPreparedCadenceChainConstruction` invokes these factories
+inside the packet induction. The older `Chain.Refinement.realized_chain`
+retains its explicit leaf and narrower `RelayLaw` premises. The new construction
+uses the directly proved broad physical closure; it does not discharge that
+older signature or soundness of every stored certificate enclosure.
 
 ## What remains to close the complete proof
 
-1. Establish physical leaf/relay preparation and routed composition for every
-   finite N; the declared N=3 cadence is now constructed. No further N-cell work
-   is part of the current publication checkpoint.
+1. Extend the declared common-birth/source/port family where the full written
+   statement requires it, and construct a global witness directly from arbitrary
+   per-emission error sequences. Native bounded delay functions are already
+   covered; indexed-ledger realization alone does not provide that factory.
 2. Prove the remaining real enclosure memberships, retained probe responses,
    settings-copy semantics and universal refinement across admissible executions.
    Stored endpoint comparisons do not establish these facts.
