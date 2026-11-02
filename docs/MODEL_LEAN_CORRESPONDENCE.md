@@ -23,20 +23,37 @@ Write a=ln4, κ=1/2, r=1/10, rₘ=1/40, and gₚ=exp(zₚ).
 | Events and causal wiring | Jumps preserve time and physical coordinates. FIRE appends routed tokens; arrival removes one actual due occurrence on a free port | `setMain`, `setAux`, `setRaw`, `Jump`, `Delivery`, `Router`, `CausalRouter`; `Execution` composes actual flows and jumps without a fixed simultaneous-event priority |
 | Births and terminal completion | A starts in the declared birth family; later births add independent READY coordinates and sources. Completion discharges enabled jumps and every token due at the horizon | `BirthState` plus the headline's READY-auxiliary/source premises; [HybridStagedBirth](../proof/lean/KernelR/HybridStagedBirth.lean): `Newborn`, `BirthStep`, `StagedExecution`; `CompleteThrough` |
 
-The [finite-chain headline](../proof/lean/KernelR/IndexedChainHeadline.lean)
+The [universal finite-chain headline](../proof/lean/KernelR/UniversalChainHeadline.lean)
 constructs the common-birth directed-chain protocol for every positive finite
-N, K≥4N+12, independent fixed parameter/birth choices and bounded native delay
-functions with cumulative phase budget≤0.15. All cells are born at0, prepare
-with16 period-eight inputs, and the leaf receives its K port0 inputs from160.
-The full source program is already present at birth. At
-T=160+4(K−1)+1.1(N−1)+8 every cell is READY/q=0.1, with no RAW or pending token,
-active log-gain own birth+2.4 and recovery own birth+0.3. The native fixed
-routing law covers both preparation and cadence; it is defined by
-[`finiteChainPreparedData`](../proof/lean/KernelR/HybridFiniteChainPreparedData.lean).
+N, K≥4N+12, independent fixed parameter/birth choices and arbitrary prescribed
+per-emission wire errors with cumulative budget≤0.15. It constructs fixed
+native delay functions bounded at every real time. All cells are born at 0,
+prepare with 16 period-eight inputs, and the leaf receives K port0 sources
+from 160. The full source program is already present at birth.
+
+At T=160+4(K−1)+1.1(N−1)+8, **every complete finite execution** from those
+same birth data with that fixed router is READY/q=0.1, with no RAW or pending
+token, active log-gain own birth+2.4, recovery own birth+0.3, and the same
+ordered actual FIRE dates per cell. The factory constructs a complete witness,
+so the universal class is nonempty. The fixed router covers preparation and
+cadence; [`finiteChainPreparedData`](../proof/lean/KernelR/HybridFiniteChainPreparedData.lean)
+defines its declared sources and contacts.
+
+| Universal comparison step | Lean proof |
+|---|---|
+| Same physical integral flow, including cap contacts | [HybridFlowUniqueness](../proof/lean/KernelR/HybridFlowUniqueness.lean): `Flow.path_unique`, using scalar integral barriers |
+| All nine simultaneous jump types commute observationally | [HybridJumpLocalDiamond](../proof/lean/KernelR/HybridJumpLocalDiamond.lean): `Jump.local_diamond`, modulo pending-list permutation |
+| Every complete finite trace has the same physical endpoint and FIRE dates per cell | [HybridUniversalExecution](../proof/lean/KernelR/HybridUniversalExecution.lean): `Execution.observational_unique`, `Execution.emissionTimes_unique` |
+| Prescribed errors on every actual fast sender list | [HybridUniversalBirthCadenceChain](../proof/lean/KernelR/HybridUniversalBirthCadenceChain.lean): `all_complete_errors`, after dropping 14 leaf /12 relay preparation FIREs |
+
+`CompleteThrough e T` requires the terminal date T, no enabled terminal jump,
+and every pending token strictly future. The comparison quantifies over
+finite traces in that class. It does not claim that a stopped prefix has
+already completed, or establish infinite/maximal-run progress or non-Zeno
+extension. It does not equate flow subdivisions or the global ordering of
+simultaneous independent events.
 
 The earlier [three-cell headline](../proof/lean/KernelR/Headline.lean) retains
-its separate staged0/160/480 births, horizon789.9 and A54/B61/C34. Its exact
-source schedules and contacts are protocol data. Neither theorem quantifies
-over every admissible execution. Operational drift/noise, frozen
-probes/settings copies, numerical observations and the archived A22 network
+its distinct staged 0/160/480 births, horizon 789.9 and A54/B61/C34. Operational
+drift/noise, frozen probes/settings copies, numerical observations and A22
 retain their separate [coverage boundaries](../proof/lean/N_CELL_COVERAGE.md).

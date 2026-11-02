@@ -432,3 +432,17 @@ import KernelR.HybridStrongCadenceChainStep
 import KernelR.HybridIndexedPreparedCadenceChain
 import KernelR.HybridIndexedBirthCadenceChain
 import KernelR.IndexedChainHeadline
+import KernelR.HybridExecutionUniqueness
+import KernelR.HybridFlowUniqueness
+import KernelR.HybridJumpConfluence
+import KernelR.HybridJumpDepartures
+import KernelR.HybridJumpLocalDiamond
+import KernelR.HybridJumpStripping
+import KernelR.HybridObservationalTransport
+import KernelR.HybridRawJumpConfluence
+import KernelR.HybridSnapshotObservational
+import KernelR.HybridUniversalBirthCadenceChain
+import KernelR.HybridUniversalChainPreparation
+import KernelR.HybridUniversalExecution
+import KernelR.HybridUrgentMoves
+import KernelR.UniversalChainHeadline
