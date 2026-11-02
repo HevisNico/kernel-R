@@ -159,11 +159,13 @@ concatenation under one router. The count fields refer to actual FIRE ledgers.
 The project pins **Lean 4.35.0** and **Mathlib v4.35.0**, with Mathlib commit
 `56a005855ea17e0b0958f73ec801ae140b0a1679` in
 [lake-manifest.json](proof/lean/lake-manifest.json).
-The exact checked native finite-chain commit is recorded in the
-[PR #15 validation table](https://github.com/HevisNico/kernel-R/pull/15).
-From the repository root, with Lean installed:
+Verified native finite-chain code commit:
+[2c50e42e4ba02bd77c20dfd2612a587dfda4c224](https://github.com/HevisNico/kernel-R/commit/2c50e42e4ba02bd77c20dfd2612a587dfda4c224).
+The subsequent documentation-only commit records this identifier and changes
+no proof sources. From the repository root, with Lean installed:
 
 ```sh
+git checkout 2c50e42e4ba02bd77c20dfd2612a587dfda4c224
 cd proof/lean
 lake exe cache get
 lake build KernelR.FiniteChainHeadline

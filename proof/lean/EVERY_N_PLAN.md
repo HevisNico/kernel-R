@@ -87,8 +87,11 @@ All **178 finite-chain paired controls pass**:48 first-checkpoint,40 preparation
 Each valid conclusion compiles before its altered conclusion is individually
 rejected with a Lean diagnostic. CI configures **1,281 paired controls**, plus
 axiom-audit corruption checks; this inventory does not claim a fresh local
-rerun of every historical suite. The exact checked native-function commit and
-fresh CI run status are recorded in PR #15; in-progress CI is not labeled green.
+rerun of every historical suite. Verified code commit:
+[2c50e42e4ba02bd77c20dfd2612a587dfda4c224](https://github.com/HevisNico/kernel-R/commit/2c50e42e4ba02bd77c20dfd2612a587dfda4c224).
+A following documentation-only commit records that identifier; proof sources
+are unchanged. Fresh CI status is recorded in PR #15; in-progress CI is not
+labeled green.
 
 The public [finite-chain headline](KernelR/FiniteChainHeadline.lean) groups
 existence from independent births, terminal memories/state and actual counts.
