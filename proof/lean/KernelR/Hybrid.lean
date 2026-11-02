@@ -3,8 +3,10 @@ import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Tactic
 
 /-! Pulses-only operational semantics. No pulse-case words or dose counters occur
-in the admissibility relation. Existence for the certified protocol is not yet
-proved. Time-zero jump interleavings have no prescribed priority. -/
+in the admissibility relation. Protocol existence is constructed in downstream
+modules, including `HybridBirthCadenceChain`; `HybridUniversalBirthCadenceChain`
+extends it to every complete finite execution of the fixed chain protocol.
+Time-zero jump interleavings have no prescribed priority. -/
 namespace KernelR.Hybrid
 open MeasureTheory
 attribute [local instance] Classical.propDecidable

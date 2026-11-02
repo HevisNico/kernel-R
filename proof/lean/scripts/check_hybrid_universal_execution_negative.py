@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Paired controls for every complete physical execution, without a witness premise."""
+"""Paired controls for every complete physical execution, without a witness premise.
+
+A rejected mutation shows that the supplied proof script does not establish the
+altered statement. It does not independently prove that statement's negation.
+"""
 from pathlib import Path
 import subprocess
 import tempfile
@@ -164,7 +168,7 @@ def main():
         print(f'All {len(controls)} positive universal complete-execution contracts accepted.', flush=True)
         for name, _, bad in controls:
             check(bad, False, name)
-            print(f'{name}: physical conclusion accepted; altered claim rejected.', flush=True)
+            print(f'{name}: original proof accepted; mutated proof script rejected.', flush=True)
         print(f'{len(controls)} paired universal complete-execution controls passed.', flush=True)
 
 
