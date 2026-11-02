@@ -23,16 +23,20 @@ Write a=ln4, κ=1/2, r=1/10, rₘ=1/40, and gₚ=exp(zₚ).
 | Events and causal wiring | Jumps preserve time and physical coordinates. FIRE appends routed tokens; arrival removes one actual due occurrence on a free port | `setMain`, `setAux`, `setRaw`, `Jump`, `Delivery`, `Router`, `CausalRouter`; `Execution` composes actual flows and jumps without a fixed simultaneous-event priority |
 | Births and terminal completion | A starts in the declared birth family; later births add independent READY coordinates and sources. Completion discharges enabled jumps and every token due at the horizon | `BirthState` plus the headline's READY-auxiliary/source premises; [HybridStagedBirth](../proof/lean/KernelR/HybridStagedBirth.lean): `Newborn`, `BirthStep`, `StagedExecution`; `CompleteThrough` |
 
-The [headline](../proof/lean/KernelR/Headline.lean) constructs the declared
-three-cell protocol through789.9 for every admissible fixed parameter/birth
-choice and five bounded delay functions. It supplies an execution witness,
-not a theorem about every admissible execution. Its exact source schedules and
-contact gates are protocol data, rather than learned settings. The fixed
-three-cell teaching/cadence law is
-[`teachingCadenceRouter`](../proof/lean/KernelR/HybridTeachingCadenceRouter.lean).
+The [finite-chain headline](../proof/lean/KernelR/IndexedChainHeadline.lean)
+constructs the common-birth directed-chain protocol for every positive finite
+N, K≥4N+12, independent fixed parameter/birth choices and bounded native delay
+functions with cumulative phase budget≤0.15. All cells are born at0, prepare
+with16 period-eight inputs, and the leaf receives its K port0 inputs from160.
+The full source program is already present at birth. At
+T=160+4(K−1)+1.1(N−1)+8 every cell is READY/q=0.1, with no RAW or pending token,
+active log-gain own birth+2.4 and recovery own birth+0.3. The native fixed
+routing law covers both preparation and cadence; it is defined by
+[`finiteChainPreparedData`](../proof/lean/KernelR/HybridFiniteChainPreparedData.lean).
 
-The current result derives A54/B61/C34, terminal READY/q=0.1, no RAW, an empty
-queue and own learned memories. Numerical simulations, the archived A22
-network, operational drift/noise, frozen probes/settings copies and physical
-every-N or universal refinement have their separate
-[coverage boundaries](../proof/lean/HYBRID_EXECUTION.md).
+The earlier [three-cell headline](../proof/lean/KernelR/Headline.lean) retains
+its separate staged0/160/480 births, horizon789.9 and A54/B61/C34. Its exact
+source schedules and contacts are protocol data. Neither theorem quantifies
+over every admissible execution. Operational drift/noise, frozen
+probes/settings copies, numerical observations and the archived A22 network
+retain their separate [coverage boundaries](../proof/lean/N_CELL_COVERAGE.md).
