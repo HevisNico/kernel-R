@@ -446,3 +446,6 @@ import KernelR.HybridUniversalChainPreparation
 import KernelR.HybridUniversalExecution
 import KernelR.HybridUrgentMoves
 import KernelR.UniversalChainHeadline
+import KernelR.LearnedUniversal
+import KernelR.HybridTerminalHighContinuation
+import KernelR.HybridTwoCellHighContinuation
