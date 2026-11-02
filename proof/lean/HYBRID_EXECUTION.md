@@ -1,8 +1,9 @@
 # Physical execution semantics and analytic refinement
 
 A physical common-birth construction now covers every positive finite N;
-retained probes/copies, universal refinement and the full written theorem remain
-open. The [construction section](#constructed-common-birth-chain-for-every-finite-n)
+every finite complete execution of its fixed program now has the same
+physical endpoint and exact per-cell FIRE dates. Retained probes/copies,
+infinite/maximal-run progress and the full written theorem remain open. The [construction section](#constructed-common-birth-chain-for-every-finite-n)
 records its precise family and quantifiers.
 The declared three-cell cadence is now constructively realized from A's READY
 birth through789.9, including independent B/C births at160/480. Cumulative
@@ -19,8 +20,8 @@ and consumed by genuine arrivals. Neither a later reaching execution nor a
 received calendar or output count is supplied. The earlier660 global prefix
 and C-only789.9 witness remain available. Fixed independent fabrication
 parameters, canonical pulses and bounded delays retain their declared scope;
-fine operational robustness, probes/copies and universal refinement remain
-open. The common-birth finite-chain construction and validation are tracked in
+fine operational robustness, probes/copies and universal guarantees through
+the separate staged-birth operations remain distinct obligations. The common-birth finite-chain construction and validation are tracked in
 [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
 
 ## Constructed common-birth chain for every finite N
@@ -75,9 +76,57 @@ stage satisfy both global native bounds and the requested per-emission values.
 
 See the [finite-chain coverage guide](N_CELL_COVERAGE.md) and
 [construction/validation ledger](EVERY_N_PLAN.md). Retained probes,
-cuts/settings copies, universal refinement and operational drift/noise/amplitude
-histories remain open; the new existence family does not establish all six
-conclusions of the written finite-chain theorem.
+cuts/settings copies and operational drift/noise/amplitude histories remain
+open. The universal-complete layer below compares every finite execution of the
+fixed common-birth program complete at T, without claiming all six conclusions
+of the written finite-chain theorem.
+
+## Every complete finite execution of the fixed program
+
+[UniversalChainHeadline](KernelR/UniversalChainHeadline.lean) now exports
+`every_finite_chain_every_complete_execution`, `terminal_state_and_counts`
+and `prescribed_errors_on_every_complete_execution`. The exact indexed order is
+
+> For every admissible positive finite N, K, independent fixed fabrication and
+> birth data, and bounded prescribed error family, there exist fixed native
+> delay functions and a constructed complete witness, such that **every finite
+> execution from the same initial state under that fixed router, complete at
+> the declared T**, has the claimed physical endpoint, memories, counts and
+> prescribed errors at its own actual fast-phase sending FIREs.
+
+Existence is retained, so the universal class is nonempty. `CompleteThrough e T`
+requires terminal date T, no enabled terminal jump and no token due by T still
+pending. It is a condition on a supplied finite operational execution, not a
+proof that a stopped prefix must progress, a maximal infinite run reaches T,
+or Zeno behavior is impossible.
+
+The generic [physical uniqueness theorem](KernelR/HybridUniversalExecution.lean)
+proves this observational comparison for any fixed finite network, parameter
+family and router, with `PhysicalBox` and initial `PhysicalInvariant`:
+complete executions through the same T have equal time, physical coordinates,
+main/auxiliary modes and RAW state, pending queues related by permutation, and
+**exactly equal ordered per-cell FIRE-date lists**. The global emission list is
+compared up to permutation, allowing legal simultaneous interleavings. Neither
+flow subdivision nor the syntactic order of independent instantaneous moves
+is made unique. No event-priority, target calendar or determinism premise is
+added to the protocol theorem.
+
+[HybridUniversalBirthCadenceChain](KernelR/HybridUniversalBirthCadenceChain.lean)
+transfers these observations to the already constructed common-birth program.
+For every competing complete trace, fast dates are its own full per-cell FIRE
+list after `drop (finiteChainPreparationCount n i)`: **14 preparation FIREs at
+the leaf, 12 at a relay**. The error index is zero-based on this suffix; wire j
+still leaves physical cell `n-j`. The same chosen fixed native functions
+realize the prescribed errors on every such trace. This does not move the
+native-function choice outside the prescribed-error quantifier or assert
+that every arbitrary router realizes a specified error sequence.
+
+The three public headline axiom profiles contain only `propext`,
+`Classical.choice` and `Quot.sound`. The [validation ledger](EVERY_N_PLAN.md)
+records the successful complete frozen-source build and global audit.
+The reviewed universal proof modules are included in this checkout. The
+[release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md) records the
+remaining integration checks and publication steps.
 
 ## Physical definitions
 
@@ -504,14 +553,20 @@ with the ledger and delivered occurrences preserved by retargeting.
 
 The declared physical N=3 cadence is constructed. The general trace-based
 analytic APIs below still accept executions, while the concrete factory now
-supplies one for this birth/source family. Physical every-N refinement, finer
-operational robustness, retained probes/settings copies and universal
-refinement remain open. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
+supplies one for this birth/source family. The common-birth every-N program now
+also has universal physical outcomes for the fixed finite-complete class.
+Finer operational robustness, retained probes/settings copies and progress
+of maximal/infinite runs remain separate obligations. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
 
 ## Checked implications
 
 | Module | Consequence proved from the operational equations | Boundary |
 |---|---|---|
+| `HybridFlowUniqueness` | Physical integral paths agree on every overlapping flow interval, including capped gain/recovery gates and actual energy | Fixed parameter family, common starting snapshot, physical invariant |
+| `HybridJumpLocalDiamond`, `HybridJumpStripping` | Enabled instantaneous jumps commute or coincide observationally, and can be stripped from a competing complete finite execution | Pending-list order may differ; no imposed priority |
+| `HybridUniversalExecution` | Complete finite executions through the same T have equal physical observations and exact ordered per-cell FIRE lists | Same fixed router and initial state, `PhysicalBox` and initial `PhysicalInvariant`; no maximal/infinite-run progress claim |
+| `HybridUniversalBirthCadenceChain`, `UniversalChainHeadline` | Transfer terminal state, own memories, actual counts and prescribed errors to every complete finite trace of the constructed common-birth program | Indexed order ∀ data/errors ∃ fixed router/witness ∀ complete traces; preparation FIREs excluded from FAST indices |
+| `HybridUniversalChainPreparation` | Derive relay/leaf preparation at actual128 prefixes of arbitrary larger-network executions from source queues | Contacts closed through128, exact source family and physical box; other-cell interleavings retained |
 | `Refinement` | Exact per-port ERROR and MARK integrals; telescoped gain/recovery balances; recovery equals the sum of all MARK contributions; queue conservation; actual emissions | Quantifies over finite admissible executions |
 | `HybridFlow` | Scalar ODE uniqueness derived from integral equations; FAST and protected-auxiliary exponential solutions; SLOW uses the integral of actual varying recovery | Observed mode spans must still be selected from the execution |
 | `HybridFlow` | Exponential solutions compose across legal zero-time interleavings; observed jumps supply phase endpoints; FAST duration is 1; MARK/SILENT/ERROR durations use actual rates; SLOW returns at accumulated recovery log(5/2) | Does not establish the supplied protocol's ordering of these phases |
@@ -628,7 +683,7 @@ refinement remain open. The authorized finite-chain work is tracked in [EVERY_N_
 | `HybridCadenceHighFireExistence` / `HybridCadenceHighCompletion` | Construct high-gain FIRE in(0.16,0.26) and its actual protected completion across FAST exit | Own four-dose gain/current-state hypotheses and isolated future queue; no universal network continuation |
 | `HybridLocalCadenceReceiver` / `HybridLocalCadenceReceiverPacket` / `HybridConstructedCadenceBC` | Physical B response to C packet;18 outputs and actual B packet | Concrete cadence domains and bounded packet jitter |
 | `HybridCausalHeadQueue` / `HybridCausalHeadJump` / `HybridCausalHeadExecution` / `HybridCausalHeadBalance` / `HybridCausalHeadComplete` / `HybridCausalHeadSignals` | Genuine routed causal weaving with exact queue balance, emissions, deliveries and terminal completion | Sender/receiver traces and actual contact correspondence are retained |
-| `HybridConstructedCadenceCascade` / `HybridBirthCadenceCascade` | Construct complete three-cell cadence789.9 from original birth premises, A54/B61/C34 and empty queue | Declared staged N=3 family; distinct common-birth every-N construction above; universal refinement remains open |
+| `HybridConstructedCadenceCascade` / `HybridBirthCadenceCascade` | Construct complete three-cell cadence789.9 from original birth premises, A54/B61/C34 and empty queue | Declared staged N=3 family; distinct common-birth every-N construction above; universal guarantees across staged-birth operations remain separate |
 | `HybridEmissionRouterTransport` / `HybridTeachingCadenceRouter` / `HybridBirthCadenceProtocol` | Preserve actual ledger/deliveries under router retargeting; join teaching and cadence under one fixed gated router and retain both births through789.9 | Same physical source/birth family; no settings-copy, drift or arbitrary-N claim |
 | `HybridBirthLearnedRest` | Derive Aport2/Bport2 learned-domain membership and isolated one-cell future contracts from the639.9 endpoint | Empty analysis queues do not erase the global queue; Cport1 and network routing are outside this bridge |
 | `HybridCadenceRouter` / `HybridCadenceQuiet` / `HybridCadencePrelude` | Actual C-to-B-to-A contacts; three weak C cases through fresh source652 with ERROR 1.8, quiet A/B and twenty-one future C tokens | Actual execution reaching 789.9, initial prepared states and C's declared twenty-five sources; no complete cadence count claim |
@@ -1371,7 +1426,7 @@ with READY auxiliaries, an explicit subfamily of `BirthState`. Fabrication
 parameters are fixed independent box members; initial coordinate perturbations
 and bounded fresh wire delays are retained. No probabilistic independence,
 operational drift, dynamic noise or device fault model is asserted. Frozen
-probes, cuts/copies and universal refinement remain separate obligations.
+probes, cuts/copies and maximal/infinite-run progress remain separate obligations.
 The distinct common-birth arbitrary-N composition is now constructed above.
 
 ## Physical event budget
@@ -1432,8 +1487,10 @@ an explicit premise of that older API and is not assumed by the new factory.
    bounds. Exact endpoint comparisons alone remain insufficient.
 3. Formalize retained frozen-probe responses, later cuts/settings copies and
    their physical preservation semantics.
-4. Establish universal refinement and progress/saturation for every compatible
-   event order, beyond constructive existence of the supplied physical witness.
+4. Establish progress/saturation beyond the finite-complete class, including
+   stopped prefixes, maximal/infinite runs and non-Zeno behavior. Legal event
+   orders within complete finite executions now have proved observational
+   uniqueness and exact per-cell FIRE dates.
 5. Instantiate operational drift, charge noise and amplitude variation in the
    physical semantics; the existing robust analyses remain conditional.
 

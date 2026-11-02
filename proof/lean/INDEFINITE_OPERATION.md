@@ -8,9 +8,10 @@ in `[50,100]`; sensor charges and energy evolve through their actual ODEs.
 The resulting guarantee is constructive existence of compatible responding
 continuations. A separate bridge now derives this domain for Aport2/Bport2
 coordinate projections of the constructed639.9 state. The finite N=3 cadence
-and the separate common-birth every-N family
-are constructed separately; indefinite network operation and universal refinement
-of every admissible execution remain open.
+and the common-birth every-N family are separate constructions. Every complete finite execution of the fixed
+common-birth program is now compared observationally with its constructed
+witness; indefinite network operation and maximal/infinite-run progress remain
+open.
 
 ## Main results
 
@@ -56,8 +57,8 @@ The projections' empty analysis queues are not physical operations on the
 global state: its25 C640..736 tokens remain. Each isolated continuation uses a
 new future source queue and empty routing. Cport1's learned gain near2.18 is
 outside the imported domain, so this bridge does not cover that port. Broader
-birth families, indefinitely repeatable network operation and universal
-refinement remain open. Fixed reference latency uses exact main rest; it does not extend to the positive
+birth families, indefinitely repeatable network operation and infinite/maximal
+progress remain open. Fixed reference latency uses exact main rest; it does not extend to the positive
 residuals covered by `first_firing_le_rest_reference`.
 
 The constructed global C660 extension has a different recovery state:
@@ -103,6 +104,15 @@ fixed native delay functions and the actual whole-chain execution. Its error
 indices count only final fast-phase sender FIREs, excluding preparation; the
 older caller-supplied native-function API remains available. These finite
 routed witnesses are independent of the isolated theorem here.
+
+The new [universal finite-complete theorem](KernelR/UniversalChainHeadline.lean)
+retains the constructed witness and proves its physical endpoint and actual
+per-cell FIRE lists for every other execution complete through the same T,
+from the same initial source state under the same fixed router. For prescribed
+errors, the order is ∀ data/errors ∃ fixed native functions ∀ complete traces;
+FAST indices drop the actual12/14 preparation FIREs. This does not imply
+infinite-run progress or non-Zeno behavior. See the
+[validation ledger](EVERY_N_PLAN.md) for the verified universal checkpoint.
 
 ## Proof map
 
@@ -151,7 +161,10 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
   duration from actual network endpoints. Finite common-birth routing is already
   constructed for every positive finite N, but its higher memories are outside
   the imported isolated learned domain.
-- Universal refinement across all admissible complete executions.
+- Progress of stopped prefixes, maximal/infinite runs and non-Zeno behavior.
+  Finite executions already complete through the same horizon under the same
+  fixed router now have proved observational uniqueness; that comparison does
+  not construct or force indefinite continuation.
 - Operational drift, noise and amplitude histories.
 
 ## Validation
@@ -195,5 +208,6 @@ those of the N=3 commit; current finite-chain validation and checkpoint
 history are recorded there.
 
 These isolated future contracts remain distinct from both finite network
-constructions and do not establish indefinite network operation or universal
-refinement. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
+constructions and do not establish indefinite network operation or progress
+of arbitrary maximal runs. The separate [universal finite-complete headline](KernelR/UniversalChainHeadline.lean)
+compares completed finite executions without enlarging these continuation domains. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
