@@ -17,6 +17,7 @@ IRREGULAR_SCHEDULE = """example : FutureSchedule (15/2) where
     intro k
     dsimp
     push_cast
+    have hk : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg k
     nlinarith
 """
 

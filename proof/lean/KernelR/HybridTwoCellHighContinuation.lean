@@ -132,15 +132,8 @@ theorem two_cell_high_continuation_exists {θ ε s delay first later terminal}
   let Q := (first::later).map (fun t => (⟨1,0,t⟩ : Delivery 2))
   have hHeadQueue : headSource.pending=leaf.execution.headInputQueue contacts := by
     rw [Execution.headInputQueue_indexedContact,leaf.calendar]
-    simp only [headSource,isolatedHighSource,withFuture,hhead.pending,List.append_nil,
-      List.map_cons,List.map_map,Function.comp_def,Snapshot.autonomousView]
-    congr 1
-    · congr 1; dsimp [shift,latency]; ring
-    · apply List.map_congr_left
-      intro t ht
-      congr 1
-      dsimp [shift,latency]
-      ring
+    simp [headSource,isolatedHighSource,withFuture,Snapshot.autonomousView,hs.pending,
+      cellQueue,List.map_map,Function.comp_def,shift,latency,add_assoc]
   have hQ : leafSource.pending.map Delivery.succ=Q := by
     simp [leafSource,isolatedHighSource,withFuture,hleaf.pending,Q,List.map_map,
       Function.comp_def,Delivery.succ]
@@ -159,7 +152,9 @@ theorem two_cell_high_continuation_exists {θ ε s delay first later terminal}
   have hParams : prependParameters (fun _ : Fin 1 => θ 0) (fun _ : Fin 1 => θ 1)=θ := by
     funext i
     fin_cases i <;> rfl
-  let execution := (weave.execution.cast_source hSource.symm).cast_parameters hParams
+  let execution : Execution θ (twoCellHighRouter delay) (twoCellHighSource s first later)
+      (leaf.final.prependQueued head.final weave.pending) :=
+    (weave.execution.cast_source hSource.symm).cast_parameters hParams
   have hLedger : execution.ledger=weave.execution.ledger :=
     ((weave.execution.cast_source hSource.symm).cast_parameters_ledger hParams).trans
       (weave.execution.cast_source_ledger hSource.symm)
@@ -299,7 +294,7 @@ theorem ConstructedBirthCadenceChain.connected_two_cell_high_from_birth_exists
           (withFuture c.source ((first::later).map (fun t => (⟨1,0,t⟩ : Delivery 2)))) r.final,
         CompleteThrough run terminal ∧
           run.ledger=c.execution.ledger.add r.execution.ledger := by
-  obtain ⟨prefix,hPrefix,_,_⟩ := c.extended_two_cell_prefix_exists wire
+  obtain ⟨oldRun,hPrefix,_,_⟩ := c.extended_two_cell_prefix_exists wire
   obtain ⟨r,after,hAfter,_,hComplete⟩ :=
     c.connected_two_cell_high_continuation_exists hb wire hw first later terminal hfirst hSchedule
   let future := (first::later).map (fun t => (⟨1,0,t⟩ : Delivery 2))
@@ -310,13 +305,13 @@ theorem ConstructedBirthCadenceChain.connected_two_cell_high_from_birth_exists
     rcases List.mem_cons.mp ht with h | h
     · subst time; exact hfirst.le
     · linarith [hSchedule.source_lower time h]
-  let before := prefix.withFuture future hfuture
+  let before := oldRun.withFuture future hfuture
   let run := before.append after
   refine ⟨r,run,by simpa only [CompleteThrough] using hComplete,?_⟩
   change (before.append after).ledger=_
   rw [Execution.append_ledger]
-  change (prefix.withFuture future hfuture).ledger.add after.ledger=_
-  rw [prefix.withFuture_ledger,hPrefix,hAfter]
+  change (oldRun.withFuture future hfuture).ledger.add after.ledger=_
+  rw [oldRun.withFuture_ledger,hPrefix,hAfter]
 
 #print axioms two_cell_high_continuation_exists
 #print axioms ConstructedBirthCadenceChain.connected_two_cell_high_continuation_exists
