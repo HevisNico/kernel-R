@@ -13,7 +13,12 @@ run_cmd do
   -- ModuleData.constNames contains every imported constant name. Inspecting
   -- names first avoids materializing all of Mathlib's ConstantInfo entries.
   -- Include stage 2 as well, so declarations added in this file are audited.
-  let inScope := fun name => (`KernelR).isPrefixOf name || (`A22).isPrefixOf name
+  -- Private declarations have internal names `_private.<module>.0.<user name>`.
+  -- Filter on the user name, but audit the original internal declaration below.
+  -- Otherwise an unused private theorem could escape the dependency audit.
+  let inScope := fun name =>
+    let userName := privateToUserName name
+    (`KernelR).isPrefixOf userName || (`A22).isPrefixOf userName
   let mut candidates : NameSet := {}
   for data in env.header.moduleData do
     for name in data.constNames do
@@ -23,6 +28,8 @@ run_cmd do
   for name in candidates.toArray do
     let some info := env.constants.find? name
       | throwError "Missing declaration {name} in axiom audit"
+    if info.isAxiom then
+      throwError "Unexpected axiom {name} (project declaration)"
     if info.isTheorem then
       let axioms ← collectAxioms name
       for ax in axioms do

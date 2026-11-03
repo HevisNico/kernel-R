@@ -369,8 +369,15 @@ The toolchain and dependency commits are pinned in `lean-toolchain` and
 The build checks proof terms; the audit rejects any project theorem using axioms
 other than `propext`, `Classical.choice` and `Quot.sound`. There are no admitted
 proofs, project axioms or native-evaluation proofs. The Audit build target uses
-Lake's exact artifact paths. Its scan includes every imported and current
-`KernelR`/`A22` theorem; negative controls cover corruption in both locations.
+Lake's exact artifact paths. Its scan includes imported and current theorems
+whose user names are in `KernelR` or `A22`, including private declarations after
+removing Lean's internal private-name prefix. The audit checks their original
+internal declarations, even when no public theorem uses them. Positive controls
+check public/private counts; negative controls cover unused private proofs with
+an admitted proof or forbidden axiom, in both namespaces and both locations.
+Direct project axiom declarations are also rejected, even when unused.
+Historical audit counts retain their original scope; the widened scan can
+report a larger count without changing any mathematical theorem.
 
 Paired proof controls check that a valid proof script compiles and that a
 specified mutation of its statement or assumptions is rejected with a Lean

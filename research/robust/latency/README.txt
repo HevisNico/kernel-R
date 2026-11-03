@@ -37,8 +37,8 @@ From the package root:
   python -B latency/tests.py -v
   python -B latency/verify.py latency/certificates/eps0.1_nu0.002_alpha0.json
   python -B latency/chain.py latency/certificates/eps0.1_nu0.002_alpha0.json --n 32 --k 104 --period 8
-  python -B latency/validate.py
-  python -B latency/validate.py --verify-record
+  python -B latency/validate.py --out ../../audit_runs/robust-latency
+  python -B latency/validate.py --verify-record --out ../../audit_runs/robust-latency
 
 The numerical campaign starts every cell from birth, then runs at the tighter
 periods. It checks local doses/modes/probes plus the reference-latency radius
@@ -49,3 +49,7 @@ verification. No Lean work or GitHub write is part of this deliverable.
 The phase-budget theorem is parametric in certified radii. Stored numerical
 certificates cover the eight listed parameter points; no unchecked interpolation
 between points is asserted. A new point requires a fresh birth and latency replay.
+
+Historical trace availability and authenticated restoration are documented in
+../RECORDINGS.md. Fresh campaigns require a new --out directory; archived reports
+are preserved and are not evidence that later source edits were rerun.

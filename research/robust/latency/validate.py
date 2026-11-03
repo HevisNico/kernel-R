@@ -10,6 +10,8 @@ from birth.validate import audit_birth,sources as birth_sources
 from validate import check,environment
 from latency.chain import contract
 
+from campaign_io import main, publish_run, verify_record
+
 
 def sources():
     d={'../birth/'+k:v for k,v in birth_sources().items()}
@@ -58,8 +60,8 @@ def audit_latency(r,delta,sigma):
     return rows
 
 
-def run():
-    out=HERE/'evidence';out.mkdir(exist_ok=True);start=time.monotonic()
+def _run(out):
+    start=time.monotonic()
     points=[(e,n,a) for e in ('0.003','0.1') for n,a in (('0','0'),('0.002','0'),('0','0.09'),('0.0015','0.05'))]
     cases=[(4,*p,'switching','0',None) for p in points]
     cases += [(8,'0.1','0.002','0','switching','.05',None),
@@ -94,11 +96,11 @@ def run():
     print(json.dumps({k:v for k,v in report.items() if k not in ('source_sha256','cases','refinement')}))
 
 
+def run(out):
+    with publish_run(out, campaign='latency',
+                     verify=lambda p: verify_record(p, HERE, sources(), environment())) as staged:
+        _run(staged)
+
+
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--verify-record',action='store_true');a=p.parse_args()
-    if a.verify_record:
-        r=json.loads((HERE/'evidence/validation.json').read_text());check(r['source_sha256']==sources(),'source mismatch')
-        check(r['environment']==environment(),'runtime mismatch')
-        check(r['trace_sha256']==hashlib.sha256((HERE/'evidence/traces.jsonl.gz').read_bytes()).hexdigest(),'trace mismatch')
-        print('PASS: latency source/runtime/trace correspondence (not a rerun)')
-    else:run()
+    main(run, HERE, sources, environment)

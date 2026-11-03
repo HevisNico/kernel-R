@@ -175,9 +175,12 @@ of the Lean proofs or the standard-library certificate replay.
 ### Where the robust results live
 
 The robust results are in `research/robust/`, not in `certify/`, `proof/` and `results/`.
-They originate in a tested offline package. The numerical sources, certificates and
-traces retain their identities; the current guide and its documented provenance
-updates adapt that snapshot to this repository. Their protocol is a different, slow-input chain: it is not the fast period-4
+They originate in a tested offline package. The original certificates and historical
+numerical records retain their identities. The maintained validators publish new
+campaigns to fresh output directories. The [record restoration and verification
+guide](../research/robust/RECORDINGS.md) lists the available historical traces,
+their pinned source commit and the safe rerun commands.
+Their protocol is a different, slow-input chain: it is not the fast period-4
 packet protocol of the N-cell composition theorem. Their status is that of the other
 written theorems: hybrid arguments written by hand, finite inequalities replayed in
 independent integer arithmetic, and, in Lean, the chain induction and the certificate
