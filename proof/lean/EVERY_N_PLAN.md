@@ -143,7 +143,10 @@ cell i has depth `N-1-i`.
 | Probes, cuts and settings copies | Written results and finite evidence | Retained physical semantics and proofs remain open |
 | Every complete finite execution | `HybridFlowUniqueness`, `HybridJumpLocalDiamond`, `HybridJumpStripping`, `HybridExecutionUniqueness`, `HybridUniversalExecution`, `HybridUniversalBirthCadenceChain`, `UniversalChainHeadline` | Physical endpoint and exact per-cell FIRE lists at fixed T under the same router; no imposed jump priority |
 | Universal preparation extraction | `HybridUniversalChainPreparation` | Actual arbitrary-network prefixes through128 yield each relay/leaf preparation from source queues, with other-cell interleavings retained |
-| Progress and operational extensions | Separate obligations | Stopped-prefix progress, maximal/infinite runs, non-Zeno, drift/noise/amplitude histories and retained probes/copies are not supplied |
+| Finite continuation | [HybridChainProgress](KernelR/HybridChainProgress.lean) | Every legal finite prefix of the fixed finite-source program extends to a complete execution at any horizon at or after its endpoint |
+| Physical-event non-Zeno | [HybridNonZeno](KernelR/HybridNonZeno.lean) | Under the birth, physical-box and bounded-fanout hypotheses, infinitely many physical jumps force time divergence. The constructed chain supplies the fanout bound. |
+| Maximal infinite-run progress | [HybridMaximalProgress](KernelR/HybridMaximalProgress.lean) and [proof guide](PROGRESS.md#semantic-extension-at-a-finite-flow-limit) | Infinite presentations maximal under extension at a flow limit progress beyond every finite horizon of the fixed finite-source program. Time can advance by quiet flow after source exhaustion. |
+| Operational perturbations | Separate obligations | Drift, noise and amplitude histories remain open |
 
 This closes constructive physical existence for the new common-birth family;
 it does not establish all six conclusions of the written finite-chain theorem.

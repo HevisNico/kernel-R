@@ -82,10 +82,15 @@ simultaneous event orders and flow subdivisions give the same physical
 endpoint and exact ordered per-cell FIRE lists. The global simultaneous event
 list and pending-list presentation may differ by permutation.
 
-This is a theorem about executions complete through T. It does not establish
-that every stopped prefix extends to T, or maximal/infinite-run progress or
-a non-Zeno extension theorem. In the indexed corollary, delay functions are
-constructed after the input/error family is fixed. The native-delay theorem
+This comparison assumes completeness through T. For the same fixed finite-source
+program, the [progress theorems](../proof/lean/PROGRESS.md) extend every legal
+finite prefix to any horizon at or after its endpoint, rule out infinitely
+many physical jumps in bounded time, and prove time divergence for infinite
+presentations maximal under extension at a flow limit. After source exhaustion,
+time can progress by quiet flow.
+
+In the indexed corollary, delay functions are constructed after the input/error
+family is fixed. The native-delay theorem
 instead accepts the delay functions fixed in advance. Neither formulation
 asserts an online synthesis algorithm, continuity or one function uniform
 across different families. Frozen
