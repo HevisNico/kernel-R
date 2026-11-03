@@ -4,6 +4,7 @@ import copy
 import importlib.util
 import math
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -24,6 +25,36 @@ def device(gain=.3):
 
 
 class FinalBoundaries(unittest.TestCase):
+    def test_both_carry_guards_survive_optimized_python(self):
+        code = '''import copy, importlib.util, sys
+from pathlib import Path
+import numpy as np
+source = Path(sys.argv[1])
+sys.path[:0] = [str(source), str(source / 'adaptive')]
+import engine, model
+spec = importlib.util.spec_from_file_location('pedagogy_run', source / 'pedagogy/run.py')
+pedagogy = importlib.util.module_from_spec(spec); spec.loader.exec_module(pedagogy)
+dev = engine.Device([engine.NOMINAL.tolist() for _ in range(3)], .1, [.025]*3,
+                    np.log([.3]*3).tolist(), .18, [0]*3)
+quiet = engine.simulate([[],[],[]], dev, 0., mode='fixed')
+active = engine.simulate([[0.],[],[]], dev, 0., mode='fixed')
+for carry in (model.carry, pedagogy.carry):
+    carry(dev, quiet)
+    for field, value in (('main_mode', 1), ('aux_modes', [3,0,0]),
+                         ('raw_active', active['final_state']['raw_active'])):
+        invalid = copy.deepcopy(quiet); invalid['final_state'][field] = value
+        try:
+            carry(dev, invalid)
+        except ValueError:
+            continue
+        raise RuntimeError('carry silently discarded active state: ' + field)
+'''
+        for flags in ([], ['-O']):
+            with self.subTest(flags=flags):
+                result = subprocess.run([sys.executable, *flags, '-c', code, str(SOURCE)],
+                                        text=True, capture_output=True, timeout=120)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def run_cell(self, end, arrivals=None, dev=None):
         return engine.simulate(arrivals or [[0.], [], []], dev or device(), end,
                                mode='fixed', checkpoints=[end])

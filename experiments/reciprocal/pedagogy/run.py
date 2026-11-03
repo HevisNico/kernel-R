@@ -36,7 +36,8 @@ def learner(split,rep,family,index):
 def carry(device,result):
     """Carry physical state through quiet stage boundaries, without resetting it."""
     s=result['final_state']
-    assert s['main_mode']==0 and s['aux_modes']==[0,0,0] and not any(s['raw_active'])
+    if s['main_mode']!=0 or s['aux_modes']!=[0,0,0] or any(s['raw_active']):
+        raise ValueError('carry requires a READY main cell, READY auxiliaries and no active RAW current')
     return Device(device.params,s['q'],s['aux_charge'],np.log(s['gain']).tolist(),s['b'],s['aux_modes'])
 
 

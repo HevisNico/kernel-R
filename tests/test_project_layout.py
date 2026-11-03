@@ -11,12 +11,16 @@ class ProjectLayout(unittest.TestCase):
             for name,want in manifest['files'].items():
                 with self.subTest(path=name):self.assertEqual(hashlib.sha256((ROOT/name).read_bytes()).hexdigest(),want)
     def test_maintained_project_markdown_links_resolve(self):
-        paths=[ROOT/'README.md',ROOT/'docs/PROVENANCE.md']
-        for folder in ['experiments/reciprocal','proof','results']:
+        paths=[ROOT/'README.md']
+        for folder in ['experiments/reciprocal','proof','results','model','kernel','docs','research']:
             paths.extend((ROOT/folder).rglob('*.md'))
         for path in paths:
             # Lake materializes third-party docs outside the maintained source set.
             if '.lake' in path.relative_to(ROOT).parts:continue
+            # Frozen authenticated A22 source: its six upstream-only references
+            # are mapped to pinned URLs in model/README.md. Identity is checked
+            # by test_proof_source_manifests_match; do not rewrite the snapshot.
+            if path==ROOT/'model/CURRENT_SPEC.md':continue
             for target in re.findall(r'\]\(([^)]+)\)',path.read_text()):
                 if re.match(r'\w+://|#|mailto:',target):continue
                 target=target.split('#')[0]

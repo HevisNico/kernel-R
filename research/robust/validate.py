@@ -7,6 +7,7 @@ import scipy
 from chain import contract, schedule
 from simulate_events import History, SCENARIOS, initial_state, run_chain, simulate
 from verify import verify
+from campaign_io import main, publish_run, verify_record
 HERE=Path(__file__).resolve().parent
 TOL=3e-8
 
@@ -104,8 +105,8 @@ def environment():
     return dict(python=platform.python_version(),numpy=np.__version__,scipy=scipy.__version__)
 
 
-def run(quick=False):
-    start=time.monotonic(); out=HERE/'evidence'; out.mkdir(exist_ok=True)
+def _run(out, quick=False):
+    start=time.monotonic()
     points=[(e,n,a) for e in ('0.003','0.1') for n,a in (('0','0'),('0.002','0'),('0','0.09'),('0.0015','0.05'))]
     for p in points: verify(certificate_path(*p),emit=False)
     cases=[(2,16,*p,h,7) for p in points for h in SCENARIOS]
@@ -146,13 +147,11 @@ def run(quick=False):
     print(json.dumps({k:v for k,v in report.items() if k not in ('cases','refinement','source_sha256')}))
 
 
+def run(out, quick=False):
+    with publish_run(out, campaign='local',
+                     verify=lambda p: verify_record(p, HERE, source_manifest(), environment()), quick=quick) as staged:
+        _run(staged, quick)
+
+
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--quick',action='store_true');parser.add_argument('--verify-record',action='store_true')
-    args=parser.parse_args()
-    if args.verify_record:
-        r=json.loads((HERE/'evidence/validation.json').read_text())
-        check(r['source_sha256']==source_manifest(),'source manifest mismatch')
-        check(r['environment']==environment(),'runtime versions differ')
-        check(r['trace_sha256']==hashlib.sha256((HERE/'evidence/traces.jsonl.gz').read_bytes()).hexdigest(),'trace mismatch')
-        print('PASS: record source, runtime and trace hashes match (not a rerun)')
-    else: run(args.quick)
+    main(run, HERE, source_manifest, environment, supports_quick=True)

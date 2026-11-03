@@ -21,8 +21,8 @@ at 159.9 test the section, and frozen probes test retained port-2 learning.
 From the package root:
   python -B birth/tests.py -v
   python -B birth/verify.py birth/certificates/eps0.1_nu0.002_alpha0.json
-  python -B birth/validate.py
-  python -B birth/validate.py --verify-record
+  python -B birth/validate.py --out ../../audit_runs/robust-birth
+  python -B birth/validate.py --verify-record --out ../../audit_runs/robust-birth
 
 Reports, traces and unit logs are in evidence/. The original entry theorem was
 consulted as a reference and is saved under reference/; this preparation protocol
@@ -30,3 +30,7 @@ is different from its A-teaches-B calendar. It requires externally accessible
 preparation inputs for every cell. Entry from only a single network source and
 birth states with residual ERROR phases remain outside the claim. No Lean work
 or GitHub write is part of this deliverable.
+
+Historical trace availability and authenticated restoration are documented in
+../RECORDINGS.md. Fresh campaigns require a new --out directory; archived reports
+are preserved and are not evidence that later source edits were rerun.

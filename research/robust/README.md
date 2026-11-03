@@ -44,12 +44,13 @@ cd research/robust
 python -B -m unittest tests test_regressions -v
 python -B verify.py results/eps0.1/nu0.002_alpha0.json
 python -B chain.py results/eps0.1/nu0.0015_alpha0.05.json --n 32 --k 104
-python -B validate.py                 # full numerical campaign, traces and refinement
-python -B validate.py --verify-record # source/runtime/trace correspondence only
+python -B validate.py --out ../../audit_runs/robust-local # fresh full campaign
+python -B validate.py --verify-record --out ../../audit_runs/robust-local # not a rerun
 ```
 
-`python -B validate.py --quick` is a two-case development smoke test. It writes
-its own report with `quick=true`; it is not the full campaign.
+`python -B validate.py --quick --out ../../audit_runs/robust-smoke` is a two-case
+development smoke test. Every run requires a fresh output directory; quick runs
+cannot replace full runs. See [record restoration and safe runs](RECORDINGS.md).
 
 The full campaign has 53 chain cases: all eight local points under four history
 families, depth cases N=1,3,4,8,16, and an oscillatory N=32 case. Histories include
@@ -77,14 +78,16 @@ certificate interval by this tolerance. The maximum such distance is recorded.
 Sampled extrema are not certified continuous extrema. Successful simulations
 cover only their recorded histories and do not establish the universal theorem.
 
-The report is evidence/validation.json; full state/event traces are in
- evidence/traces.jsonl.gz. The report locks code, written proof, certificates,
-Python/NumPy/SciPy versions and trace bytes. Source mismatch is a refusal.
+New reports, traces and manifests are published together to the explicit `--out`
+directory only after the complete campaign passes. Interrupted attempts leave
+prior publications intact and get a separate FAILED attempt report.
 
-Documentation-only updates are recorded in the validation reports' separate
-`documentation_revision` metadata. Their source maps match the current README;
-the archived delivery README preserves the exact as-run text and hash. Such a
-documentation refresh does not rerun or change the numerical campaign.
+The committed `evidence/validation.json` is historical. The local and periodic
+traces can be restored from a hash-pinned release asset; birth and latency traces
+are not in that asset. [RECORDINGS.md](RECORDINGS.md) documents the available data,
+the historical source commit and verification commands. The stored
+`documentation_revision` describes an earlier README-only refresh; it does not
+claim that later validator changes were used in those historical runs.
 
 ## Review fixes
 
