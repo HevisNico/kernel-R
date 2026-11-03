@@ -51,6 +51,9 @@ jobs:
       - name: Reject altered physical event budgets and delivery chronology
         working-directory: proof/lean
         run: python scripts/check_hybrid_event_negative.py
+      - name: Reject unsupported infinite-progress claims
+        working-directory: proof/lean
+        run: python scripts/check_progress_negative.py
       - name: Reject altered sensor phases, clipped doses and input provenance
         working-directory: proof/lean
         run: python scripts/check_hybrid_phase_negative.py

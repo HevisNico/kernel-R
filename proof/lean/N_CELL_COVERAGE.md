@@ -5,8 +5,10 @@ has a constructed physical common-birth family for every positive finite N,
 as well as its earlier abstract induction. The new universal-complete layer now
 also proves the terminal physical outcome and actual per-cell FIRE dates for
 **every complete finite execution** of the same fixed program through its
-terminal T. The full written theorem, retained probes/copies, operational
-perturbations and infinite/maximal-run progress remain separate obligations.
+terminal T. The [progress theorems](PROGRESS.md) separately cover stopped
+prefixes and semantically maximal infinite runs of that finite-source program.
+The full written theorem, retained probes/copies and operational perturbations
+remain separate obligations.
 
 See [UniversalChainHeadline](KernelR/UniversalChainHeadline.lean) and the
 [exact quantifiers and validation ledger](EVERY_N_PLAN.md). The indexed order
@@ -121,9 +123,9 @@ No theorem restricts N to a tested maximum, and none assumes identical devices.
    broad-latency `relayCadence` closure and does not assume this law.
 4. Formalize retained frozen probes, cuts/settings copies and their physical
    preservation semantics and operational drift/noise/amplitude histories.
-   Universal refinement for the declared finite-complete class is now proved;
-   progress of stopped prefixes, maximal/infinite runs and non-Zeno behavior
-   remain distinct from that result.
+   Universal refinement for the declared finite-complete class and
+   [progress for the fixed finite-source program](PROGRESS.md) are proved.
+   Indefinitely repeatable responding operation remains open.
 
 Existing `Doses`, `Flow`, `Recovery`, `Energy` and `Cadence` lemmas support
 these obligations but do not already discharge all of them. The older abstract

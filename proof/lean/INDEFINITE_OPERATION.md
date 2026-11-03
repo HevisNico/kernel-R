@@ -9,9 +9,10 @@ The resulting guarantee is constructive existence of compatible responding
 continuations. A separate bridge now derives this domain for Aport2/Bport2
 coordinate projections of the constructed639.9 state. The finite N=3 cadence
 and the common-birth every-N family are separate constructions. Every complete finite execution of the fixed
-common-birth program is now compared observationally with its constructed
-witness; indefinite network operation and maximal/infinite-run progress remain
-open.
+common-birth program is compared observationally with its constructed witness.
+[Maximal-run progress](PROGRESS.md) for that finite-source program allows quiet
+flow after exhaustion. Indefinitely repeatable responding network operation
+remains open.
 
 ## Main results
 
@@ -57,9 +58,9 @@ The projections' empty analysis queues are not physical operations on the
 global state: its25 C640..736 tokens remain. Each isolated continuation uses a
 new future source queue and empty routing. Cport1's learned gain near2.18 is
 outside the imported domain, so this bridge does not cover that port. Broader
-birth families, indefinitely repeatable network operation and infinite/maximal
-progress remain open. Fixed reference latency uses exact main rest; it does not extend to the positive
-residuals covered by `first_firing_le_rest_reference`.
+birth families and indefinitely repeatable network operation remain open.
+Fixed reference latency uses exact main rest, while
+`first_firing_le_rest_reference` covers positive residuals.
 
 The constructed global C660 extension has a different recovery state:
 C's protected C656 MARK derives its own newborn recovery+0.2, near0.28.
@@ -161,10 +162,6 @@ source-injection jump is assumed, including at exact cycle-boundary inputs.
   duration from actual network endpoints. Finite common-birth routing is already
   constructed for every positive finite N, but its higher memories are outside
   the imported isolated learned domain.
-- Progress of stopped prefixes, maximal/infinite runs and non-Zeno behavior.
-  Finite executions already complete through the same horizon under the same
-  fixed router now have proved observational uniqueness; that comparison does
-  not construct or force indefinite continuation.
 - Operational drift, noise and amplitude histories.
 
 ## Validation

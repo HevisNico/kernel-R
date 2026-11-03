@@ -446,3 +446,10 @@ import KernelR.HybridUniversalChainPreparation
 import KernelR.HybridUniversalExecution
 import KernelR.HybridUrgentMoves
 import KernelR.UniversalChainHeadline
+import KernelR.HybridFiniteProgress
+import KernelR.HybridChainProgress
+import KernelR.HybridNonZeno
+import KernelR.HybridBoundedRun
+import KernelR.HybridInfiniteExtension
+import KernelR.HybridMaximalProgress
+import KernelR.HybridProgressControls
