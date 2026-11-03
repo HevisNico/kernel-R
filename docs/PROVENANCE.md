@@ -119,8 +119,10 @@ The [physical theorem](../proof/lean/KernelR/HybridUniversalBirthCadenceChain.le
 formal scope. The [Lean guide](../proof/lean/README.md) documents rebuilding
 and auditing the proof terms and retained evidence layers.
 
-These results do not establish progress of every stopped prefix, infinite or
-maximal-run progress, a non-Zeno extension, arbitrary cyclic networks, or
-experimental validity of a physical device. They do not turn the historical
-adaptive simulations, recorded outcomes, settings-copy variants or full A22
-campaign into physical Lean theorems. Independent peer review is not claimed.
+The [progress proof](../proof/lean/PROGRESS.md) extends finite prefixes and
+proves time divergence for semantically maximal runs of the constructed
+finite-source chain. Its non-Zeno bound concerns physical jumps under the
+event-budget hypotheses. Arbitrary cyclic networks, experimental validation,
+settings-copy variants and the full A22 campaign remain outside this scope.
+The historical adaptive simulations and recorded outcomes retain their
+separate evidence status. Independent peer review is not claimed.

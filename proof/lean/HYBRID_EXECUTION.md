@@ -2,9 +2,12 @@
 
 A physical common-birth construction now covers every positive finite N;
 every finite complete execution of its fixed program now has the same
-physical endpoint and exact per-cell FIRE dates. Retained probes/copies,
-infinite/maximal-run progress and the full written theorem remain open. The [construction section](#constructed-common-birth-chain-for-every-finite-n)
-records its precise family and quantifiers.
+physical endpoint and exact per-cell FIRE dates. The
+[progress theorems](PROGRESS.md) cover finite continuation and maximal
+infinite-run progress for this fixed finite-source chain. The
+[construction section](#constructed-common-birth-chain-for-every-finite-n)
+records its precise family and quantifiers. Retained probes/copies and the
+full written theorem remain open.
 The declared three-cell cadence is now constructively realized from A's READY
 birth through789.9, including independent B/C births at160/480. Cumulative
 counts are A54/B61/C34; the cadence contributes A16/B18/C20. All three cells
@@ -555,13 +558,15 @@ The declared physical N=3 cadence is constructed. The general trace-based
 analytic APIs below still accept executions, while the concrete factory now
 supplies one for this birth/source family. The common-birth every-N program now
 also has universal physical outcomes for the fixed finite-complete class.
-Finer operational robustness, retained probes/settings copies and progress
-of maximal/infinite runs remain separate obligations. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
+The common-birth program also has [finite and maximal-run progress](PROGRESS.md).
+Finer operational robustness, retained probes and settings copies remain open.
+The finite-chain construction is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
 
 ## Checked implications
 
 | Module | Consequence proved from the operational equations | Boundary |
 |---|---|---|
+| [HybridMaximalProgress](KernelR/HybridMaximalProgress.lean) | A bounded infinite presentation extends through its final flow limit with exact path agreement. Every semantically maximal run of the constructed chain progresses past each finite horizon. | Fixed finite-source chain in the physical parameter box. |
 | `HybridFlowUniqueness` | Physical integral paths agree on every overlapping flow interval, including capped gain/recovery gates and actual energy | Fixed parameter family, common starting snapshot, physical invariant |
 | `HybridJumpLocalDiamond`, `HybridJumpStripping` | Enabled instantaneous jumps commute or coincide observationally, and can be stripped from a competing complete finite execution | Pending-list order may differ; no imposed priority |
 | `HybridUniversalExecution` | Complete finite executions through the same T have equal physical observations and exact ordered per-cell FIRE lists | Same fixed router and initial state, `PhysicalBox` and initial `PhysicalInvariant`; no maximal/infinite-run progress claim |
@@ -1487,10 +1492,10 @@ an explicit premise of that older API and is not assumed by the new factory.
    bounds. Exact endpoint comparisons alone remain insufficient.
 3. Formalize retained frozen-probe responses, later cuts/settings copies and
    their physical preservation semantics.
-4. Establish progress/saturation beyond the finite-complete class, including
-   stopped prefixes, maximal/infinite runs and non-Zeno behavior. Legal event
-   orders within complete finite executions now have proved observational
-   uniqueness and exact per-cell FIRE dates.
+4. Extend progress beyond the fixed finite-source program. For that program,
+   [finite continuation and maximal-run progress](PROGRESS.md) are proved.
+   Indefinitely responding network operation under continuing inputs remains
+   open.
 5. Instantiate operational drift, charge noise and amplitude variation in the
    physical semantics; the existing robust analyses remain conditional.
 

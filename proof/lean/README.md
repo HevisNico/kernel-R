@@ -19,10 +19,12 @@ Its actual causal assembly uses one fixed gated router and has no prepared-state
 reaching-execution, calendar or local-law premise. See
 [the every-N construction below](#constructed-common-birth-chain-for-every-finite-n).
 Every complete finite execution of the fixed common-birth program now has the
-same physical endpoint and exact per-cell FIRE dates. Retained probes/copies,
-operational noise/drift, infinite/maximal-run progress and full written-theorem
-coverage remain open; Python interval implementations have not
-been verified in Lean.
+same physical endpoint and exact per-cell FIRE dates. The
+[progress theorems](PROGRESS.md) extend legal prefixes of that program and
+prove time divergence of semantically maximal infinite presentations.
+Retained probes/copies, operational noise/drift and full written-theorem
+coverage remain open. The Python interval implementations have not been
+verified in Lean.
 
 ## Repeatable learned one-cell operation
 
@@ -51,7 +53,8 @@ physical event budget. These invariants alone do not supply future executions.
 | Constructed three-cell protocol | Original READY birth through789.9; cumulative A54/B61/C34 and cadence A16/B18/C20 | Declared birth family, source queues, fixed fabrication parameters and bounded delays; distinct from the common-birth every-N protocol; universal guarantees across its staged-birth operations remain separate |
 | Autonomous C and concrete leaf packet | Actual projected prefix639.9→660 plus local continuation to789.9; ledger-derived P(3,17,0) | Retained as a component of the constructed global C→B→A weave |
 | Conditional physical analysis | General trace-based cadence laws, doses, counts and terminal identities | These analytic APIs retain execution premises; the separate concrete factory now supplies the N=3 execution |
-| Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing/new future queues; broader birth domains, indefinite network operation and maximal/infinite-run progress remain open |
+| Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing and new future queues. Indefinitely repeatable network operation remains open. |
+| [Finite and maximal-run progress](PROGRESS.md) | Later complete horizons from each finite prefix and unbounded time for semantically maximal infinite presentations | Constructed finite-source chain in the physical parameter box. Evolution after source exhaustion can be quiet. |
 | Constructed finite chain | Independent common births, preparation, variable-K physical leaf/receivers and causal assembly for every finite N; prescribed per-emission errors with cumulative jitter≤0.15 | Declared source/port family; native functions are constructed and realize errors on the actual final fast ledger; broader written conclusions remain open |
 | Abstract finite-chain API | Induction, packet timing, jitter budgets and resource algebra | The older `Chain.Refinement.realized_chain` still takes leaf and narrow `RelayLaw` premises; the new construction uses broad physical closure |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |

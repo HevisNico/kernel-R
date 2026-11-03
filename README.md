@@ -65,9 +65,12 @@ the native-delay theorem above takes the functions as inputs.
 
 The universal comparison covers finite executions satisfying `CompleteThrough e T`:
 they reach T, have no enabled terminal jump and leave no token due by T pending.
-The constructed witness makes this class nonempty. Progress of every stopped
-prefix, infinite/maximal-run progress and non-Zeno extension remain separate
-obligations. Global simultaneous-event order and flow subdivisions may differ.
+The constructed witness makes this class nonempty. Global simultaneous-event
+order and flow subdivisions may differ. For the same fixed program, the
+[progress theorems](proof/lean/PROGRESS.md) extend legal finite prefixes to
+later horizons and prove time divergence for infinite presentations maximal
+under extension at a flow limit. Physical jumps cannot accumulate in bounded
+time under the event-budget hypotheses.
 
 The theorem covers the declared finite directed-chain protocol. General cyclic
 networks, operational noise/drift, retained probes and settings-copy variants
