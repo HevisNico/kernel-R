@@ -1,5 +1,4 @@
 import KernelR.HybridResponseBounds
-import FirstCrossing
 
 /-! Strict upward crossings of the uncut scalar pulse responses. The proof
 uses their damped derivative equation and a strictly higher later value.
@@ -17,13 +16,31 @@ private theorem derivative_pos_of_later_value {f d forcing : ℝ → ℝ}
     0 < d contact := by
   by_contra not_positive
   have initial : d contact ≤ 0 := le_of_not_gt not_positive
+  have scaledDerivative (t : ℝ) : HasDerivAt
+      (fun x => Real.exp (rate * x) * d x)
+      (-(decay * forcing t) * Real.exp (rate * t)) t := by
+    have exponential := (((hasDerivAt_id t).const_mul rate).exp)
+    exact (exponential.mul (hd t)).congr_deriv (by dsimp; ring)
+  have scaledDecreasing : AntitoneOn (fun t => Real.exp (rate * t) * d t)
+      (Ici contact) := by
+    apply antitoneOn_of_hasDerivWithinAt_nonpos (convex_Ici contact)
+      (fun t _ => (scaledDerivative t).continuousAt.continuousWithinAt)
+      (fun t _ => (scaledDerivative t).hasDerivWithinAt)
+    intro t _
+    exact mul_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr (mul_nonneg hdecay (hforcing t)))
+      (Real.exp_pos _).le
+  have nonpositive {t : ℝ} (afterContact : contact ≤ t) : d t ≤ 0 := by
+    have bound := (scaledDecreasing (mem_Ici.mpr le_rfl) (mem_Ici.mpr afterContact)
+      afterContact).trans
+      (mul_nonpos_of_nonneg_of_nonpos (Real.exp_pos _).le initial)
+    by_contra positive
+    exact (not_lt_of_ge bound) (mul_pos (Real.exp_pos _) (lt_of_not_ge positive))
   have decreasing : AntitoneOn f (Icc contact deadline) := by
     apply antitoneOn_of_hasDerivWithinAt_nonpos (convex_Icc contact deadline)
       (fun t _ => (hf t).continuousAt.continuousWithinAt)
       (fun t _ => (hf t).hasDerivWithinAt)
     intro t ht
-    exact A22.Crossing.deriv_stays_nonpos hdecay hd hforcing initial
-      (interior_subset ht : t ∈ Icc contact deadline).1
+    exact nonpositive (interior_subset ht : t ∈ Icc contact deadline).1
   exact (not_lt_of_ge (decreasing ⟨le_rfl, later.le⟩ ⟨later.le, le_rfl⟩ later.le)) above
 
 /-- A main pulse response has positive slope at every point preceding a
