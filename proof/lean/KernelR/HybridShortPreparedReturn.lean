@@ -1,5 +1,6 @@
 import KernelR.HybridPreparedSlowReturn
 import KernelR.HybridShortLearnedSchedule
+import KernelR.HybridContactTransversality
 
 /-! Construct a prepared SLOW return and quiet endpoint at 6.9 after the source. -/
 namespace KernelR.Hybrid
@@ -8,6 +9,7 @@ open Set
 structure ShortPreparedReturn (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) (source : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = source + 69 / 10
   prepared : ∀ j, PreparedSection final j
   ready : ∀ j, ReadyCoordinates final j
@@ -134,6 +136,7 @@ theorem short_prepared_return_exists {θ ε route} (hb : @PhysicalBox 1 θ ε) (
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by simp [e, head, wait, Execution.ContactsTransversal, Jump.ContactTransversal]
     date := rfl
     prepared := ?_
     ready := hfinalReady

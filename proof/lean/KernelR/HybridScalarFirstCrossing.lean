@@ -1,4 +1,5 @@
 import KernelR.HybridSensor
+import KernelR.HybridPulseTransversality
 /-! Construct the first physical scalar crossing, independently of any Execution. -/
 namespace KernelR.Hybrid
 open Set
@@ -72,6 +73,23 @@ theorem auxPulse_first_sensor_crossing {initial amplitude start : ℝ}
   have h := hprior (t - start) ⟨by linarith [ht.1],by linarith [ht.2]⟩
   simpa only [show start + (t - start) = t by ring] using h
 
+/-- The sensor contact is transverse for the same rest band and gain bounds.
+The pulse derivative equation turns the strict deadline into a positive slope. -/
+theorem auxPulse_first_sensor_crossing_transversal {initial amplitude start : ℝ}
+    (hl : 1 / 40 - 1 / 100000 ≤ initial) (hu : initial ≤ 1 / 40 + 1 / 100000)
+    (ha : 31 ≤ amplitude) (hb : amplitude ≤ 60) :
+    ∃ latency : ℝ, 1 / 100 < latency ∧ latency < 1 / 40 ∧
+      auxPulse initial amplitude start (start + latency) = 1 ∧
+      (∀ t ∈ Ico start (start + latency), auxPulse initial amplitude start t < 1) ∧
+      0 < deriv (auxPulse initial amplitude start) (start + latency) := by
+  obtain ⟨latency, early, deadline, root, prior⟩ :=
+    auxPulse_first_sensor_crossing hl hu ha hb (start := start)
+  refine ⟨latency, early, deadline, root, prior, ?_⟩
+  apply auxPulse_transversal_of_later_value (by linarith : 0 ≤ amplitude)
+    (show start + latency < start + 1 / 40 by linarith)
+  rw [root]
+  exact auxPulse_above_at_deadline hl ha
+
 /-- Every own physical input gain in the fabrication box supports the cutoff;
 no threshold root or execution is assumed as input. -/
 theorem PhysicalBox.first_sensor_crossing {n θ ε} (hb : @PhysicalBox n θ ε)
@@ -81,5 +99,20 @@ theorem PhysicalBox.first_sensor_crossing {n θ ε} (hb : @PhysicalBox n θ ε)
       auxPulse initial ((θ i).inputGain p) start (start + latency) = 1 ∧
       ∀ t ∈ Ico start (start + latency), auxPulse initial ((θ i).inputGain p) start t < 1 :=
   auxPulse_first_sensor_crossing hl hu (hb.input_gain_lower i p) (hb.coarse_upper i p).2.2.2.2
+
+/-- The fabrication box also supplies the transverse sensor contact. -/
+theorem PhysicalBox.first_sensor_crossing_transversal {n θ ε}
+    (hb : @PhysicalBox n θ ε) (i : Fin n) (p : Port) {initial start : ℝ}
+    (hl : 1 / 40 - 1 / 100000 ≤ initial) (hu : initial ≤ 1 / 40 + 1 / 100000) :
+    ∃ latency : ℝ, 1 / 100 < latency ∧ latency < 1 / 40 ∧
+      auxPulse initial ((θ i).inputGain p) start (start + latency) = 1 ∧
+      (∀ t ∈ Ico start (start + latency),
+        auxPulse initial ((θ i).inputGain p) start t < 1) ∧
+      0 < deriv (auxPulse initial ((θ i).inputGain p) start) (start + latency) :=
+  auxPulse_first_sensor_crossing_transversal hl hu
+    (hb.input_gain_lower i p) (hb.coarse_upper i p).2.2.2.2
+
+#print axioms auxPulse_first_sensor_crossing_transversal
+#print axioms PhysicalBox.first_sensor_crossing_transversal
 
 end KernelR.Hybrid

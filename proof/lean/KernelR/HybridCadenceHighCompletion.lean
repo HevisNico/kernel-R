@@ -1,4 +1,5 @@
 import KernelR.HybridCadenceHighFireExistence
+import KernelR.HybridContactTransversality
 import KernelR.HybridPrefixBeforeFlow
 import KernelR.HybridPrefixStableMemory
 import KernelR.HybridSlowReopenExistence
@@ -17,6 +18,7 @@ structure CadenceProtectedAuxPhase (θ : Fin 1 → Parameters) (route : Router 1
     (s : Snapshot 1) (p : Port) (mode : AuxMode) (origin T F P initial B : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = T
   main_mode : final.main 0 = if T < F + 1 then .fast else .slow
   main_clock : final.x 0 .q = cadenceProtectedCharge B F T
@@ -89,6 +91,7 @@ private theorem cadence_slow_aux_phase_exists {θ ε route} (hb : PhysicalBox θ
   have hraw : ¬T < origin + 1 := by linarith
   refine ⟨{
     final := final, execution := .cons (.flow flow) (.nil _), date := rfl
+    contacts_transversal := by trivial
     main_mode := by simpa only [final,protectedMainEnd,hfast,ite_false] using hm
     main_clock := ?_, aux_mode := ha, aux_other := hao, sensor_clock := ?_
     other_below := ?_, raw_mode := by simpa only [final,protectedMainEnd,hraw,ite_false] using hr 0 p
@@ -108,10 +111,12 @@ noncomputable def CadenceProtectedAuxPhase.prepend {θ route s v p mode origin T
     (e : Execution θ route s v) (hp : v.pending = s.pending)
     (hg : ∀ j q, v.x j (.z q) = s.x j (.z q))
     (hb : ∀ j, v.x j .b = s.x j .b)
-    (he : e.ledger.emissions = []) (hd : e.deliveries = []) :
+    (he : e.ledger.emissions = []) (hd : e.deliveries = [])
+    (ht : e.ContactsTransversal) :
     CadenceProtectedAuxPhase θ route s p mode origin T F P initial B where
   final := r.final
   execution := e.append r.execution
+  contacts_transversal := (e.contactsTransversal_append r.execution).mpr ⟨ht, r.contacts_transversal⟩
   date := r.date
   main_mode := r.main_mode
   main_clock := r.main_clock
@@ -155,6 +160,7 @@ theorem cadence_protected_aux_phase_exists {θ ε route} (hb : PhysicalBox θ ε
         hmode hT hm ha hao hr ho horigin hx hqfast hs hP hstop.le hi hphase hp
       exact ⟨{
         final := r.final, execution := r.execution, date := ht
+        contacts_transversal := r.contacts_transversal
         main_mode := by simpa only [hstop,ite_true] using r.main_fast
         main_clock := by simpa only [ht,cadenceProtectedCharge,hstop,ite_true] using r.main_clock
         aux_mode := r.aux_mode, aux_other := r.aux_other
@@ -199,6 +205,8 @@ theorem cadence_protected_aux_phase_exists {θ ε route} (hb : PhysicalBox θ ε
         have hraw : ¬T < origin + 1 := by linarith
         exact ⟨{
           final := after, execution := prefixRun, date := haftertime.trans heq.symm
+          contacts_transversal := by
+            simpa [prefixRun, Execution.ContactsTransversal, Jump.ContactTransversal] using r.contacts_transversal
           main_mode := by simp [after,setMain,hfast]
           main_clock := by simp [cadenceProtectedCharge,heq,hafterq]
           aux_mode := r.aux_mode, aux_other := r.aux_other
@@ -214,7 +222,8 @@ theorem cadence_protected_aux_phase_exists {θ ε route} (hb : PhysicalBox θ ε
           (by simpa only [after,setMain,ht] using r.sensor_clock) hafterb hB hFsource
           (by rw [haftertime]) hF (by rw [haftertime]; linarith) hi hphase
           (fun d hd => by rw [hqP] at hd; exact hp d hd)
-        exact ⟨slow.prepend prefixRun hqP hgP hrP heP hdP⟩
+        exact ⟨slow.prepend prefixRun hqP hgP hrP heP hdP (by
+          simpa [prefixRun, Execution.ContactsTransversal, Jump.ContactTransversal] using r.contacts_transversal)⟩
   · rw [ite_eq_right hstart] at hm
     have hqslow : s.x 0 .q = (1 / 4 : ℝ) * Real.exp (-B * (s.time - (F + 1))) := by
       simpa only [cadenceProtectedCharge,hstart,ite_false] using hq
@@ -233,6 +242,7 @@ structure CadenceHighSlowSection (θ : Fin 1 → Parameters) (route : Router 1)
     (s : Snapshot 1) (F B : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = max s.time (F + 1)
   main_slow : final.main 0 = .slow
   charge_clock : final.x 0 .q = (1 / 4 : ℝ) * Real.exp (-B * (final.time - (F + 1)))
@@ -283,6 +293,7 @@ private theorem cadence_high_slow_section_exists {θ route} (s : Snapshot 1) (F 
     refine ⟨{
       final := final
       execution := .cons (.flow flow) (.cons (.jump (.fastEnd before 0 hmfast hthreshold)) (.nil _))
+      contacts_transversal := by trivial
       date := (max_eq_right htime.le).symm
       main_slow := by simp [final,setMain]
       charge_clock := by change before.x 0 .q = _; rw [hthreshold]; simp [final,setMain,before,protectedMainEnd]
@@ -298,6 +309,7 @@ private theorem cadence_high_slow_section_exists {θ route} (s : Snapshot 1) (F 
     · simpa [final,setMain,before,protectedMainEnd,protectedMainValues,hq0,RestBand] using hb
   · exact ⟨{
       final := s, execution := .nil _, date := (max_eq_left (le_of_not_gt htime)).symm
+      contacts_transversal := by trivial
       main_slow := by simpa only [htime,ite_false] using hm
       charge_clock := by simpa only [cadenceProtectedCharge,htime,ite_false] using hq
       auxiliary := ha, rest := hs, raw_none := hr, pending := rfl
@@ -308,6 +320,7 @@ structure CadenceHighReadyReturn (θ : Fin 1 → Parameters) (route : Router 1)
     (s : Snapshot 1) (source : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = source + 4
   ready : ∀ j, ReadyCoordinates final j
   charge : final.x 0 .q = 1 / 10
@@ -319,6 +332,7 @@ structure CadenceHighReadyReturn (θ : Fin 1 → Parameters) (route : Router 1)
   deliveries : execution.deliveries = []
   returnState : Snapshot 1
   head : Execution θ route s returnState
+  head_transversal : head.ContactsTransversal
   rest : Execution θ route returnState final
   reconstruct : execution = head.append rest
   return_date : returnState.time = s.time + slowReopenDuration s 0
@@ -410,9 +424,11 @@ private theorem cadence_high_ready_return_exists {θ route} (s : Snapshot 1) (so
   let final := quietAt reopened (source + 4)
   refine ⟨{
     final := final, execution := head.append rest, date := rfl
+    contacts_transversal := by simp [head, rest, Execution.ContactsTransversal, Jump.ContactTransversal]
     ready := fun j => quietAt_ready_coordinates reopened j (hready j) hwait.le
     charge := ?_, raw_none := hr, pending := rfl, gains := fun _ _ => rfl, recovery := fun _ => rfl
     emissions := rfl, deliveries := rfl, returnState := reopened, head := head, rest := rest
+    head_transversal := by trivial
     reconstruct := rfl, return_date := rfl, return_deadline := hdeadline
     return_ready := hready, return_charge := hthreshold, return_raw_none := hr
     return_pending := rfl, return_gains := fun _ _ => rfl, return_recovery := fun _ => rfl
@@ -426,6 +442,7 @@ structure CadenceHighCompletion {θ : Fin 1 → Parameters} {s : Snapshot 1} {p 
     (fire : CadenceHighFire θ (fun _ _ => []) s 0 p) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) fire.final final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = s.time + 4
   ready : ∀ j, ReadyCoordinates final j
   charge : final.x 0 .q = 1 / 10
@@ -439,6 +456,7 @@ structure CadenceHighCompletion {θ : Fin 1 → Parameters} {s : Snapshot 1} {p 
   raw_valid : RawValid final
   slowSection : Snapshot 1
   toSlow : Execution θ (fun _ _ => []) fire.final slowSection
+  toSlow_transversal : toSlow.ContactsTransversal
   toSlow_pending : slowSection.pending = fire.final.pending
   toSlow_gains : ∀ j q, slowSection.x j (.z q) = fire.final.x j (.z q)
   toSlow_recovery : ∀ j, slowSection.x j .b = fire.final.x j .b
@@ -607,11 +625,17 @@ theorem CadenceHighFire.high_completion_exists {θ ε} {s : Snapshot 1} {p : Por
   let execution := toSlow.append returned.execution
   refine ⟨{
     final := returned.final, execution := execution, date := returned.date, ready := returned.ready
+    contacts_transversal := by
+      simp [execution, toSlow, toReady, toError, Execution.ContactsTransversal, Jump.ContactTransversal,
+        silent.contacts_transversal, err.contacts_transversal, slow.contacts_transversal, returned.contacts_transversal]
     charge := returned.charge, raw_none := returned.raw_none
     pending := ?_, gains := ?_, recovery := ?_, emissions := ?_, deliveries := ?_
     physical := execution.physical_invariant hb fire.physical
     raw_valid := execution.raw_valid fire.raw_valid
     slowSection := slow.final, toSlow := toSlow
+    toSlow_transversal := by
+      simp [toSlow, toReady, toError, Execution.ContactsTransversal, Jump.ContactTransversal,
+        silent.contacts_transversal, err.contacts_transversal, slow.contacts_transversal]
     toSlow_pending := slow.pending.trans (err.pending.trans silent.pending)
     toSlow_gains := fun j q => (slow.gains j q).trans ((err.gains j q).trans (silent.gains j q))
     toSlow_recovery := fun j => (slow.recovery j).trans ((err.recovery j).trans (silent.recovery j))
@@ -644,6 +668,10 @@ variable {θ : Fin 1 → Parameters} {s : Snapshot 1} {p : Port}
 /-- The actual protected prefix ends after its guarded logarithmic reopen. -/
 noncomputable def returnExecution : Execution θ (fun _ _ => []) fire.final c.returned.returnState :=
   c.toSlow.append c.returned.head
+
+theorem return_contacts_transversal : c.returnExecution.ContactsTransversal := by
+  exact (c.toSlow.contactsTransversal_append c.returned.head).mpr
+    ⟨c.toSlow_transversal, c.returned.head_transversal⟩
 
 theorem return_ready : ∀ j, ReadyCoordinates c.returned.returnState j := c.returned.return_ready
 
@@ -697,6 +725,10 @@ theorem complete_if_strict_future (hp : ∀ d ∈ c.final.pending, c.final.time 
 noncomputable def fromCut {H : ℝ} (cut : c.execution.BeforeFlowCut H) :
     Execution θ (fun _ _ => []) cut.state c.final :=
   .cons (.flow cut.flow) cut.rest
+
+theorem fromCut_contacts_transversal {H : ℝ} (cut : c.execution.BeforeFlowCut H) :
+    (c.fromCut cut).ContactsTransversal :=
+  cut.rest_contacts_transversal c.contacts_transversal
 
 theorem fromCut_emissions {H : ℝ} (cut : c.execution.BeforeFlowCut H) :
     (c.fromCut cut).ledger.emissions = [] := by

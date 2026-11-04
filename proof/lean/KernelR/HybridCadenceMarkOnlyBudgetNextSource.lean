@@ -1,3 +1,4 @@
+import KernelR.HybridContactTransversalityFrame
 import KernelR.HybridCadenceMarkOnlyJitterNextSource
 import KernelR.HybridCadenceFullBudgetReturns
 
@@ -76,7 +77,14 @@ theorem cadence_mark_only_full_budget_next_source_exists {θ ε} (hb : PhysicalB
   have heOffline : offline.ledger.emissions = [] := by rw [Execution.emissions_append,hePrefix]; rfl
   have hdOffline : offline.deliveries = [] := by rw [Execution.deliveries_append,hdPrefix]; rfl
   let future : List (Delivery 1) := ⟨0,p,H⟩ :: later
-  obtain ⟨framed0,hFrame,hFrameDel⟩ := offline.appendFuture_emptyRoute future
+  have prefixContacts : returnPrefix.ContactsTransversal := by
+    have certificate := m.contacts_transversal
+    rw [hReconstruct, Execution.contactsTransversal_append] at certificate
+    exact certificate.1
+  have offlineContacts : offline.ContactsTransversal := by
+    simp [offline, quiet, Execution.ContactsTransversal, prefixContacts]
+  obtain ⟨framed0,hFrame,hFrameDel,hFrameContacts⟩ :=
+    offline.appendFuture_emptyRoute_transversal future
     (by intro d hd; rcases List.mem_cons.mp hd with he | hd
         · subst d; exact le_rfl
         · exact (hLater d hd).le)
@@ -161,6 +169,12 @@ theorem cadence_mark_only_full_budget_next_source_exists {θ ε} (hb : PhysicalB
     offline := offline, offline_reconstruct := rfl, before := before, before_state := rfl
     framed := framed, framed_ledger := hFramedLedger, final := final, final_state := rfl
     arrival := arrival, execution := trace, reconstruct := rfl, date := rfl, values := rfl
+    contacts_transversal := by
+      simp only [trace, Execution.contactsTransversal_append]
+      refine ⟨?_, ?_⟩
+      · exact (framed0.contactsTransversal_cast_source hSource).mpr
+          (hFrameContacts.mpr offlineContacts)
+      · simp [arrival, Execution.ContactsTransversal, Jump.ContactTransversal]
     ready := hReady, charge := hCharge, raw_active := hRaw, raw_other := hOther, pending := rfl
     gains := hGains, recovery_gain := hRecovery, recovery_band := ?_
     emissions := heTrace, deliveries := hdTrace, error_zero := hError, mark_target := hMark

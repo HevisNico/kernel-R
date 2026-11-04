@@ -110,6 +110,7 @@ structure FirstInputError {n θ s i p} {f : @FirstInputMark n θ s i p}
     (route : Router n) (g : FirstInputSilent f) where
   beforeError : Snapshot n
   span : Execution θ route g.final beforeError
+  span_contacts_transversal : span.ContactsTransversal
   span_deliveries : span.deliveries = []
   span_emissions : span.ledger.emissions = []
   date : beforeError.time = g.errorDate
@@ -133,6 +134,12 @@ noncomputable def FirstInputError.final {n θ s i p route} {f : @FirstInputMark 
 noncomputable def FirstInputError.execution {n θ s i p route} {f : @FirstInputMark n θ s i p}
     {g : FirstInputSilent f} (h : FirstInputError route g) : Execution θ route g.final h.final :=
   h.span.append (.cons (.jump (.error _ i p h.silent_before h.sensor_before)) (.nil _))
+
+@[simp] theorem FirstInputError.contacts_transversal {n θ s i p route}
+    {f : @FirstInputMark n θ s i p} {g : FirstInputSilent f}
+    (h : FirstInputError route g) : h.execution.ContactsTransversal := by
+  simpa [FirstInputError.execution, Execution.ContactsTransversal, Jump.ContactTransversal]
+    using h.span_contacts_transversal
 
 theorem FirstInputError.error_date_exact {n θ s i p route} {f : @FirstInputMark n θ s i p}
     {g : FirstInputSilent f} (h : FirstInputError route g) : h.final.time = g.final.time + Real.log 8 / (θ i).ls p := h.date
@@ -201,6 +208,7 @@ theorem FirstInputSilent.first_error_exists {n θ ε s i p} {f : @FirstInputMark
     · exact ⟨{
         beforeError := before
         span := .cons (.flow leg.flow) (.nil _)
+        span_contacts_transversal := by trivial
         span_deliveries := rfl
         span_emissions := rfl
         date := rfl
@@ -223,6 +231,7 @@ theorem FirstInputSilent.first_error_exists {n θ ε s i p} {f : @FirstInputMark
       refine ⟨{
         beforeError := expired
         span := .cons (.flow leg.flow) (.cons (.jump expiry) (.nil _))
+        span_contacts_transversal := by trivial
         span_deliveries := rfl
         span_emissions := rfl
         date := rfl
@@ -293,6 +302,7 @@ theorem FirstInputSilent.first_error_exists {n θ ε s i p} {f : @FirstInputMark
     exact ⟨{
       beforeError := before
       span := .cons (.flow first.flow) (.cons (.jump expiry) (.cons (.flow last.flow) (.nil _)))
+      span_contacts_transversal := by trivial
       span_deliveries := rfl
       span_emissions := rfl
       date := rfl

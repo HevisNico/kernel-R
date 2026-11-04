@@ -10,7 +10,9 @@ structure LocalCadenceHighTrain (θ : Fin 1 → Parameters) (source : Snapshot 1
   first : CadenceHighFire θ (fun _ _ => []) source 0 0
   final : Snapshot 1
   afterFirst : Execution θ (fun _ _ => []) first.final final
+  afterFirst_transversal : afterFirst.ContactsTransversal
   execution : Execution θ (fun _ _ => []) source final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = first.execution.append afterFirst
   date : final.time = source.time + 4 * ((count : ℝ) + 1)
   ready : ∀ j, ReadyCoordinates final j
@@ -63,6 +65,8 @@ theorem local_cadence_high_train_exists {θ ε} (hb : PhysicalBox θ ε) (source
       simpa using hLater d hd)
     refine ⟨{
       first := fire, final := done.final, afterFirst := done.execution, execution := execution, reconstruct := rfl
+      afterFirst_transversal := done.contacts_transversal
+      contacts_transversal := by simp [execution, done.contacts_transversal]
       date := by simpa using done.date
       ready := done.ready, charge := done.charge, raw_none := done.raw_none
       pending := by rw [done.pending,fire.pending,List.append_nil,hPending]
@@ -140,6 +144,12 @@ theorem local_cadence_high_train_exists {θ ε} (hb : PhysicalBox θ ε) (source
       ring
     refine ⟨{
       first := fire, final := rest.final, afterFirst := afterFirst, execution := execution, reconstruct := rfl
+      afterFirst_transversal := by
+        simp [afterFirst, entry, arrival, Execution.ContactsTransversal, Jump.ContactTransversal,
+          done.contacts_transversal, rest.contacts_transversal]
+      contacts_transversal := by
+        simp [execution, afterFirst, entry, arrival, Execution.ContactsTransversal, Jump.ContactTransversal,
+          done.contacts_transversal, rest.contacts_transversal]
       date := by rw [rest.date,hDate]; push_cast; ring
       ready := rest.ready, charge := rest.charge, raw_none := rest.raw_none, pending := rest.pending
       gains := fun j q => (rest.gains j q).trans (hGains j q)

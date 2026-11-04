@@ -60,6 +60,7 @@ theorem strong_step_exists {j m L : ℕ} {J : ℝ} (hj : j<n) (hL : 5≤L)
     (domain.source_physical (j+1) (by omega)) (domain.source_raw_valid (j+1) (by omega))
   refine ⟨{
     stage:=extension.next,packet:=receiver.outputPacket
+    contacts_transversal:=extension.contacts_transversal old.contacts_transversal receiver.contacts_transversal
     calendar:=extension.head_times.trans receiver.output_packet_calendar
     envelope:=?_,counts:=?_,gain_target:=?_,gain_other:=?_,recovery:=?_
   },?_⟩

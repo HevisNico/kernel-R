@@ -3,8 +3,9 @@
 Historical description of [PR #17](https://github.com/HevisNico/kernel-R/pull/17),
 which was merged into `proof/physical-finite-chain`. The publication and base
 status below describe that review checkpoint. The proof modules are included
-in this checkout; current publication steps are in the
-[release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md).
+in this checkout. The [release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md)
+retains the historical v0.2.0 publication scope; later developments and local
+validation are in the [current ledger](EVERY_N_PLAN.md).
 
 Draft PR, published for review by explicit user instruction.
 Branch: `proof/universal-execution`; review base:

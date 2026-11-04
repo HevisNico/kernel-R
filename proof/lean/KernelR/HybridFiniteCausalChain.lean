@@ -1,6 +1,7 @@
 import KernelR.HybridCausalHeadSignals
 import KernelR.HybridPhysicalInvariant
 import KernelR.HybridInputs
+import KernelR.HybridContactTransversalityFrame
 
 /-! Inductive finite feed-forward construction on a common physical horizon.
 
@@ -100,6 +101,8 @@ structure FiniteCausalChainStage (d : FiniteCausalChainData) (T : ℝ) (n : ℕ)
   cells : (i : Fin (n+1)) → Σ source, FiniteCausalCell (d.parameters n i) source T
   emission_times : ∀ i, execution.emissionTimes i=(cells i).2.execution.emissionTimes 0
   cell_values : ∀ i, final.x i=(cells i).2.final.x 0
+  contacts_transversal : (∀ i, (cells i).2.execution.ContactsTransversal) →
+    execution.ContactsTransversal
 
 namespace FiniteCausalChainStage
 variable {d : FiniteCausalChainData} {T : ℝ} {n : ℕ}
@@ -143,6 +146,11 @@ theorem extend_exists (stage : FiniteCausalChainStage d T n)
     pending:=weave.pending_empty stage.pending head.pending
     physical:=execution.physical_invariant hb hf,raw_valid:=execution.raw_valid hv
     cells:=cells,emission_times:=?_,cell_values:=?_
+    contacts_transversal:=by
+      intro localContacts
+      apply (weave.execution.contactsTransversal_cast_source hsource.symm).2
+      exact weave.contacts_transversal
+        (stage.contacts_transversal (fun i => localContacts i.succ)) (localContacts 0)
   }⟩
   · simpa only [CompleteThrough,FiniteCausalChainData.route] using weave.complete stage.complete head.complete
   · intro i
@@ -189,6 +197,7 @@ theorem finite_causal_chain_exists (d : FiniteCausalChainData) (T : ℝ) {ε}
       physical:=leaf.execution.physical_invariant (hb 0) (hf 0)
       raw_valid:=leaf.execution.raw_valid (hv 0)
       cells:=fun _ => ⟨d.leafSource,leaf⟩,emission_times:=?_,cell_values:=?_
+      contacts_transversal:=fun localContacts => localContacts 0
     }⟩
     · intro i; fin_cases i; exact leaf.ready
     · intro i; fin_cases i; exact leaf.charge

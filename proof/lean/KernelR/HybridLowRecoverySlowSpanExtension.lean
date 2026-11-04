@@ -60,6 +60,8 @@ theorem LowRecoverySlowSpan.flow_continuation_exists {θ ε} {s : Snapshot 1} {p
   let d : LowRecoverySlowSpan fast T2 := {
     final := final
     execution := e
+    contacts_transversal := (Execution.contactsTransversal_append _ _).mpr
+      ⟨c.contacts_transversal, True.intro⟩
     date := rfl
     main_slow := c.main_slow
     auxiliary := c.auxiliary

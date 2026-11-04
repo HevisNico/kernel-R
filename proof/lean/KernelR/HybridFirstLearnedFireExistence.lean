@@ -1,6 +1,7 @@
 import KernelR.HybridFirstInputError
 import KernelR.HybridFiring
 import KernelR.HybridSilentReturn
+import KernelR.HybridContactTransversality
 
 /-! Construct an actual first learned firing, including its earlier sensor
 MARK/SILENT guards, without an input execution or firing date. -/
@@ -17,7 +18,7 @@ theorem first_learned_mark_exists {n θ ε} (s : Snapshot n) (hb : @PhysicalBox 
     (hs : 1 / 40 - 1 / 100000 ≤ s.x i (.m p) ∧ s.x i (.m p) ≤ 1 / 40 + 1 / 100000)
     (hp : ∀ d ∈ s.pending, s.time + 1 / 40 ≤ d.due) :
     Nonempty (FirstInputMark θ s i p) := by
-  obtain ⟨latency,hearly,hdeadline,hroot,hprior⟩ := hb.first_sensor_crossing i p hs.1 hs.2
+  obtain ⟨latency,hearly,hdeadline,hroot,hprior,hslope⟩ := hb.first_sensor_crossing_transversal i p hs.1 hs.2
   have htime : s.time < s.time + latency := by linarith
   have hraw : s.time + latency < s.time + 1 := by linarith
   have hmain : ∀ t, s.time ≤ t → t ≤ s.time + 3 / 10 →
@@ -34,6 +35,7 @@ theorem first_learned_mark_exists {n θ ε} (s : Snapshot n) (hb : @PhysicalBox 
     flow := readyInputFlow s i p htime hraw hm ha hr ho hq hx
       (fun t ht => hmain t ht.1 (by linarith [ht.2])) hprior (fun d hd => by linarith [hp d hd])
     threshold := hroot
+    scalar_slope := hslope
     main_below := ?_
     aux_below := ?_
     pending_future := fun d hd => by linarith [hp d hd]
@@ -160,6 +162,24 @@ theorem readyPulse_first_learned_crossing {initial amplitude start : ℝ}
   have h := hprior (t - start) ⟨by linarith [ht.1],by linarith [ht.2]⟩
   simpa only [show start + (t - start) = t by ring] using h
 
+/-- This main contact has positive derivative under the same response bounds. -/
+theorem readyPulse_first_learned_crossing_transversal {initial amplitude start : ℝ}
+    (hq : 1 / 10 - 1 / 100000 ≤ initial ∧ initial ≤ 7 / 50)
+    (hg : 9 / 5 ≤ amplitude ∧ amplitude ≤ 2) :
+    ∃ latency : ℝ, 3 / 10 < latency ∧ latency < 9 / 10 ∧
+      readyPulse initial amplitude start (start + latency) = 1 ∧
+      (∀ t ∈ Ico start (start + latency), readyPulse initial amplitude start t < 1) ∧
+      0 < deriv (readyPulse initial amplitude start) (start + latency) := by
+  obtain ⟨latency, early, deadline, root, prior⟩ :=
+    readyPulse_first_learned_crossing hq hg (start := start)
+  refine ⟨latency, early, deadline, root, prior, ?_⟩
+  apply readyPulse_transversal_of_later_value (by linarith [hg.1] : 0 ≤ amplitude)
+    (show start + latency < start + 9 / 10 by linarith)
+  rw [root]
+  exact readyPulse_emission_by_deadline hq.1 hg.1
+
+#print axioms readyPulse_first_learned_crossing_transversal
+
 noncomputable def FirstInputSilent.learnedFireBefore {n θ s i p} {f : @FirstInputMark n θ s i p}
     (g : FirstInputSilent f) (latency : ℝ) : Snapshot n :=
   readyProtectedEnd θ g.final i p .silent (some s.time) (s.time + latency)
@@ -169,6 +189,26 @@ noncomputable def FirstInputSilent.learnedFireFinal {n θ s i p} {f : @FirstInpu
   { (setMain (g.learnedFireBefore latency) i .fast) with
     pending := (g.learnedFireBefore latency).pending ++ route i (s.time + latency) }
 
+/-- At the actual incoming FIRE snapshot, the READY field equals the derivative
+of the original single-pulse response. The retained pulse is strictly unexpired. -/
+theorem FirstInputSilent.learnedFire_field_eq_deriv {n θ s i p}
+    {f : @FirstInputMark n θ s i p} (g : FirstInputSilent f) (latency : ℝ)
+    (positive : 0 ≤ latency) (beforeExpiry : latency < 1) :
+    field θ (g.learnedFireBefore latency) (g.learnedFireBefore latency).x
+      (g.learnedFireBefore latency).time i .q =
+      deriv (readyPulse (s.x i .q) (Real.exp (s.x i (.z p))) s.time)
+        (s.time + latency) := by
+  rw [ready_single_pulse_field (g.learnedFireBefore latency) i p s.time
+    (g.main_ready i) g.raw_active
+    (fun q hq => g.raw_other i q (Or.inr hq))
+    ⟨by change s.time ≤ s.time + latency; linarith,
+      by change s.time + latency < s.time + 1; linarith⟩]
+  rw [(readyPulse_derivative (s.x i .q) (Real.exp (s.x i (.z p))) s.time
+    (s.time + latency)).deriv]
+  simp only [FirstInputSilent.learnedFireBefore, readyProtectedEnd, readyProtectedValues,
+    protectedRawAmplitude, ite_true]
+  rw [g.response_restart, g.gain_preserved]
+
 structure FirstLearnedFire {n} (θ : Fin n → Parameters) (route : Router n)
     (s : Snapshot n) (i : Fin n) (p : Port) where
   firstMark : FirstInputMark θ s i p
@@ -177,6 +217,8 @@ structure FirstLearnedFire {n} (θ : Fin n → Parameters) (route : Router n)
   early : 3 / 10 < latency
   deadline : latency < 9 / 10
   response_root : readyPulse (s.x i .q) (Real.exp (s.x i (.z p))) s.time (s.time + latency) = 1
+  scalar_slope : 0 < deriv (readyPulse (s.x i .q) (Real.exp (s.x i (.z p))) s.time)
+    (s.time + latency)
   flow : Flow θ firstSilent.final (firstSilent.learnedFireBefore latency)
   threshold : (firstSilent.learnedFireBefore latency).x i .q = 1
   sensor_above_floor : 1 / 10 < (firstSilent.learnedFireBefore latency).x i (.m p)
@@ -190,6 +232,26 @@ noncomputable def FirstLearnedFire.execution {n θ route s i p} (c : @FirstLearn
     Execution θ route s c.final :=
   (c.firstSilent.execution route).append (.cons (.flow c.flow)
     (.cons (.jump (.fire _ i (c.firstSilent.main_ready i) c.threshold)) (.nil _)))
+
+/-- This positivity statement is at the hybrid jump itself, before the
+main mode changes to FAST. -/
+theorem FirstLearnedFire.contact_field_positive {n θ route s i p}
+    (c : @FirstLearnedFire n θ route s i p) :
+    0 < field θ (c.firstSilent.learnedFireBefore c.latency)
+      (c.firstSilent.learnedFireBefore c.latency).x
+      (c.firstSilent.learnedFireBefore c.latency).time i .q := by
+  rw [c.firstSilent.learnedFire_field_eq_deriv c.latency
+    (by linarith [c.early]) (by linarith [c.deadline])]
+  exact c.scalar_slope
+
+/-- Both the prior MARK and the FIRE satisfy their positive READY fields. -/
+@[simp] theorem FirstLearnedFire.contacts_transversal {n θ route s i p}
+    (c : @FirstLearnedFire n θ route s i p) : (c.execution).ContactsTransversal := by
+  rw [FirstLearnedFire.execution, Execution.contactsTransversal_append]
+  exact ⟨c.firstSilent.contacts_transversal route, c.contact_field_positive, True.intro⟩
+
+#print axioms FirstInputSilent.learnedFire_field_eq_deriv
+#print axioms FirstLearnedFire.contacts_transversal
 
 theorem FirstLearnedFire.date {n θ route s i p} (c : @FirstLearnedFire n θ route s i p) :
     c.final.time = s.time + c.latency := rfl
@@ -255,7 +317,7 @@ theorem first_learned_fire_exists {n θ ε route} (s : Snapshot n) (hb : @Physic
   obtain ⟨f⟩ := first_learned_mark_exists s hb i p hm ha hr ho hq0 hx0 (hs i).charge.2 hg.2
     ((hs i).auxiliary p).2 (fun d hd => by linarith [hp d hd])
   obtain ⟨g⟩ := f.first_learned_silent_exists hb (hs i).charge.2 hg.2 (fun d hd => by linarith [hp d hd])
-  obtain ⟨latency,hearly,hdeadline,hroot,hprior⟩ := readyPulse_first_learned_crossing (hs i).charge hg
+  obtain ⟨latency,hearly,hdeadline,hroot,hprior,hslope⟩ := readyPulse_first_learned_crossing_transversal (hs i).charge hg
   let T := s.time + latency
   have hT : g.final.time < T := by rw [g.date]; dsimp [T]; linarith [g.deadline]
   have hstart : s.time ≤ g.final.time := by
@@ -306,6 +368,7 @@ theorem first_learned_fire_exists {n θ ε route} (s : Snapshot n) (hb : @Physic
     early := hearly
     deadline := hdeadline
     response_root := hroot
+    scalar_slope := hslope
     flow := flow
     threshold := hthreshold
     sensor_above_floor := ?_

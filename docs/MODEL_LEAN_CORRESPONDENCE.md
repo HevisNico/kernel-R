@@ -19,9 +19,98 @@ Write a=ln4, κ=1/2, r=1/10, rₘ=1/40, and gₚ=exp(zₚ).
 | Recovery learning | b′=½ΣₚLₘₚmₚ when auxiliary MARK, main not READY, E>0 and b<11/10; otherwise each contribution0 | `markAct`; `field` at `.b` |
 | Energy and work | E′=10(100−E)−W; W sums main work, auxiliary admission/drains and actual learning actuations | `work`; `field` at `.energy`; [HybridWork](../proof/lean/KernelR/HybridWork.lean), `Execution.reserve_birth_invariant`, proves reserve bounds under physical birth/parameter hypotheses |
 | Caps and actual doses | Gain/recovery actuation vanishes at its cap; full ERROR adds0.6 and protected MARK adds0.1 only when their gates remain open | `errorAct`, `markAct`; [HybridInvariants](../proof/lean/KernelR/HybridInvariants.lean) cap barriers; [Refinement](../proof/lean/KernelR/Refinement.lean) actual integral ledgers and gain/recovery balances |
-| Continuous evolution and first sections | Integral ODE on every flow prefix; strict interior guards prevent passing the first threshold in an old mode | `Flow.integral_eq`, `.guards`, `BeforeGuards`; `.raw_support` and `.pending_urgent` prevent flowing past raw expiry or a due token |
+| Continuous evolution and first contacts | Integral ODE on every flow prefix; strict interior guards prevent an old-mode flow from passing its first threshold contact | `Flow.integral_eq`, `.guards`, `BeforeGuards`; `.raw_support` and `.pending_urgent` prevent flowing past raw expiry or a due token |
 | Events and causal wiring | Jumps preserve time and physical coordinates. FIRE appends routed tokens; arrival removes one actual due occurrence on a free port | `setMain`, `setAux`, `setRaw`, `Jump`, `Delivery`, `Router`, `CausalRouter`; `Execution` composes actual flows and jumps without a fixed simultaneous-event priority |
 | Births and terminal completion | A starts in the declared birth family; later births add independent READY coordinates and sources. Completion discharges enabled jumps and every token due at the horizon | `BirthState` plus the headline's READY-auxiliary/source premises; [HybridStagedBirth](../proof/lean/KernelR/HybridStagedBirth.lean): `Newborn`, `BirthStep`, `StagedExecution`; `CompleteThrough` |
+
+## Threshold contacts and upward crossings
+
+The [written model](../kernel/README.md#main-unit) specifies first upward
+crossings for FIRE and MARK. The native operational definitions `Jump.fire`
+and `Jump.mark` enable jumps at threshold equality, while `Flow.guards`
+requires strict preguards. The distinction is now resolved for the constructed
+finite-chain protocol by a separate geometric semantics and a proved
+correspondence; the definitions of the physical kernel are unchanged.
+
+[HybridCrossingExecution](../proof/lean/KernelR/HybridCrossingExecution.lean)
+defines `CrossingExecution` using the same integral ODE, parameters, modes,
+raw pulses, queue and physical jump updates. Its underlying `WeakFlow` permits
+READY charges to touch one without firing. A FIRE or MARK requires both:
+
+- `CrossingLeft`: a genuine interval in the recorded execution history on
+  which the charge approaches the contact strictly from below;
+- `CrossingRight`: an incoming-mode ODE continuation of the contact cell whose
+  charge is strictly above one on a right neighborhood of the contact.
+
+The right continuation solves the equations of **all coordinates of that
+cell**, including gains, recovery and energy. It is counterfactual after the
+contact: threshold guards and other pending events do not truncate it.
+Crossing is defined geometrically, without assuming a positive derivative.
+A tangent touch followed by a return below the threshold does not meet the
+right-crossing condition. `CrossingCompleteThrough` resolves precisely the
+jumps enabled by both historical and right-crossing conditions, including
+those at the horizon; it does not assume saturation of every equality guard.
+
+The proof proceeds through the following independently checked bridges:
+
+| Bridge | Formal result |
+|---|---|
+| Scalar response contacts have positive slopes | [HybridPulseTransversality](../proof/lean/KernelR/HybridPulseTransversality.lean) and the five `_transversal` response lemmas |
+| Actual incoming FIRE/MARK fields are positive throughout the constructed witness | [HybridContactTransversality](../proof/lean/KernelR/HybridContactTransversality.lean), `ConstructedBirthCadenceChain.contacts_transversal` |
+| Full local ODE continuations exist, including active actuators and closed caps | [HybridCellOrbitExistence](../proof/lean/KernelR/HybridCellOrbitExistence.lean), `PhysicalInvariant.cell_orbit` |
+| Weak and native integral paths agree | [HybridWeakFlowStrictification](../proof/lean/KernelR/HybridWeakFlowStrictification.lean), `Flow.path_unique_weak` |
+| Every competing weak prefix of this protocol is a native history with the exact same paths and jumps | [HybridWeakNativeRefinement](../proof/lean/KernelR/HybridWeakNativeRefinement.lean), `WeakExecution.toNative_of_transverse_completion` |
+| Geometrically complete model histories refine to complete native histories | [HybridCrossingCorrespondence](../proof/lean/KernelR/HybridCrossingCorrespondence.lean), `CrossingExecution.toNative_complete` |
+
+The scalar positive-slope argument uses the damped derivative equation and a
+strictly higher later response value. The deadlines 9/10, 13/50 and 1/40 lie
+strictly before raw expiry at pulse age 1. The scalar formula after contact is
+a READY continuation, rather than the actual post-jump trajectory. The field
+bridge retains the true raw origin and gain and uses a contact strictly before
+expiry. The full-cell germ construction separately handles raw starts and
+expirations at its initial date by the pulse's right-hand behavior.
+
+The converse does not follow from endpoint uniqueness alone. The proof uses
+strictly delayed routing, queue urgency, simultaneous-jump diamonds and
+transverse completions to derive strict guards for each competing weak flow.
+Strict delay is derived from the protocol's existing wire hypotheses. No
+contact certificate, reaching trace, output calendar or stronger terminal
+saturation is an input from the competing model execution.
+
+[`CrossingChainHeadline.every_finite_chain_every_crossing_execution`](../proof/lean/KernelR/CrossingChainHeadline.lean)
+constructs a genuine crossing witness and transfers the physical endpoint,
+ordered per-cell FIRE dates, exact counts and prescribed wire errors to every
+geometrically complete model execution. Its birth, box, source and budget
+hypotheses are the original finite-chain hypotheses. Conversely, every complete
+native outcome has a crossing representative with the same physical endpoint
+and ordered FIRE lists; simultaneous-event presentations can differ.
+
+[HybridCrossingProgress](../proof/lean/KernelR/HybridCrossingProgress.lean)
+also gives exact native refinement of every finite weak prefix at any date
+and a genuine crossing continuation to any later finite horizon, preserving
+the original history. The maximal infinite-run theorems retain their native
+`InfiniteExecution` interface. The correspondence is scoped to this protocol;
+it does not identify first contact with upward crossing for arbitrary
+unrelated initial states or parameter choices.
+
+### Descending guards
+
+The remaining mode transitions keep urgent equality guards: FAST ends at
+q=1/4, SLOW reopens at q=1/10, and MARK→SILENT→ERROR→READY occurs at
+mₚ=4/5, 1/10 and 1/40. These are unambiguous downward crossings in the physical
+family: q′=−a q in FAST with a=ln4>0, q′=−b(t)q in SLOW with
+b(t)≥b_birth≥2/25−1/100000=0.07999>0, and mₚ′=−L_mode,p mₚ with positive
+rates in each non-READY auxiliary mode. All these thresholds are positive, so
+the incoming derivative is strictly negative there. The recovery lower bound
+includes the birth tolerance; monotonicity and its preservation are proved by
+`Execution.recovery_nondecreasing` and `Execution.recovery_birth_bounds` in
+[HybridInvariants](../proof/lean/KernelR/HybridInvariants.lean). Thus retaining
+strict preguards and urgent equality for these descending sections introduces
+no tangent-touch ambiguity under these hypotheses. `WeakBeforeGuards` changes
+only the upper READY guards. The [review guide](../REVIEW.md) identifies the
+separate human obligation to validate the crossing convention against the model.
+
+## Constructed finite-chain result
 
 The [universal finite-chain headline](../proof/lean/KernelR/UniversalChainHeadline.lean)
 constructs the common-birth directed-chain protocol for every positive finite
@@ -48,10 +137,15 @@ defines its declared sources and contacts.
 
 `CompleteThrough e T` requires the terminal date T, no enabled terminal jump,
 and every pending token strictly future. The comparison quantifies over
-finite traces in that class. It does not claim that a stopped prefix has
-already completed, or establish infinite/maximal-run progress or non-Zeno
-extension. It does not equate flow subdivisions or the global ordering of
-simultaneous independent events.
+finite traces in that class. The [progress theorems](../proof/lean/PROGRESS.md)
+additionally extend every legal finite prefix of the same fixed finite-source
+program to a complete execution at any horizon at or after its endpoint.
+The physical-event non-Zeno bound rules out infinitely many physical jumps
+in bounded time under birth, physical-box and bounded-fanout hypotheses.
+Every infinite presentation of that program maximal under extension at a
+flow limit progresses beyond every finite horizon. Time can advance by quiet
+flow after source exhaustion. Flow subdivisions and the global ordering of
+simultaneous independent events may differ.
 
 The earlier [three-cell headline](../proof/lean/KernelR/Headline.lean) retains
 its distinct staged 0/160/480 births, horizon 789.9 and A54/B61/C34. Operational

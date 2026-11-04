@@ -18,6 +18,13 @@ private theorem indexed_birth_chain_cast_deliveries {k θ θ' route s s' u}
     (e : @Execution k θ route s u) (hp : θ=θ') (hs : s'=s) :
     (indexed_birth_chain_cast e hp hs).deliveries=e.deliveries := by cases hp; cases hs; rfl
 
+private theorem indexed_birth_chain_cast_contacts {k θ θ' route s s' u}
+    (e : @Execution k θ route s u) (hp : θ=θ') (hs : s'=s) :
+    (indexed_birth_chain_cast e hp hs).ContactsTransversal ↔ e.ContactsTransversal := by
+  cases hp
+  cases hs
+  rfl
+
 private theorem indexed_birth_chain_append_ledger {k θ route s u v}
     (e : @Execution k θ route s u) (f : Execution θ route u v) :
     (e.append f).ledger=e.ledger.add f.ledger := by
@@ -74,7 +81,8 @@ theorem indexed_birth_cadence_chain_exists {n θ bornCells K ε}
     have ht := (preparation.execution.emission_time_bounds event he).2
     rw [preparation.date] at ht
     exact (finite_chain_route_before_open hclosed event.1 (by linarith)).symm
-  obtain ⟨preparedExecution,hPrepLedger,hPrepDelivered⟩ := preparation.execution.retarget_router (d.route n) hRouteMatches
+  obtain ⟨preparedExecution,hPrepLedger,hPrepDelivered,hPrepContacts⟩ :=
+    preparation.execution.retarget_router_transversal (d.route n) hRouteMatches
   let execution := preparedExecution.append fastExecution
   have hLedger : execution.ledger=preparation.execution.ledger.add fast.stage.execution.ledger := by
     change (preparedExecution.append fastExecution).ledger=_
@@ -122,6 +130,10 @@ theorem indexed_birth_cadence_chain_exists {n θ bornCells K ε}
       preparation_ledger:=hPrepLedger,preparation_deliveries:=hPrepDelivered
       fastExecution:=fastExecution,fast_ledger:=hFastLedger,fast_deliveries:=hFastDelivered
       execution:=execution,reconstruct:=rfl,ledger:=hLedger,deliveries:=hDelivered,emission_times:=hTimes
+      contacts_transversal:=by
+        apply (Execution.contactsTransversal_append preparedExecution fastExecution).mpr
+        exact ⟨hPrepContacts.mpr preparation.contacts_transversal,
+          (indexed_birth_chain_cast_contacts _ hp hs).mpr fast.contacts_transversal⟩
       date:=fast.stage.complete.1,ready:=fast.stage.ready,charge:=fast.stage.charge,raw_none:=fast.stage.raw_none
       pending:=fast.stage.pending,gain_target:=hOwnGain,gain_other:=?_,recovery:=hRecovery
       fast_count:=?_,cumulative_count:=?_,total_emission_count:=?_,physical:=hPhysical

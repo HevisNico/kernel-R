@@ -1,4 +1,5 @@
 import KernelR.HybridSlowAuxLeg
+import KernelR.HybridContactTransversality
 import KernelR.HybridBirthFirstFastEnd
 
 namespace KernelR.Hybrid
@@ -68,6 +69,7 @@ structure PortSlowAuxTrace (θ : Fin 1 → Parameters) (route : Router 1) (s : S
     (mode : AuxMode) (B Q S P initial : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   main_slow : final.main 0 = .slow
   aux_mode : final.aux 0 p = mode
   aux_other : ∀ j q, j ≠ 0 ∨ q ≠ p → final.aux j q = .ready
@@ -89,6 +91,7 @@ noncomputable def PortSlowAuxTrace.ofLeg {θ route s p mode origin T B Q S P ini
     PortSlowAuxTrace θ route s p mode B Q S P initial where
   final := protectedMainEnd θ s 0 p .slow mode origin T
   execution := .cons (.flow leg.flow) (.nil _)
+  contacts_transversal := trivial
   main_slow := hm
   aux_mode := ha
   aux_other := hao
@@ -108,6 +111,9 @@ noncomputable def PortSlowAuxTrace.expire {θ route s p mode B Q S P initial}
     PortSlowAuxTrace θ route s p mode B Q S P initial where
   final := setRaw r.final 0 p none
   execution := r.execution.append (rawExpiryExecution r.final 0 p origin hr ht)
+  contacts_transversal := by
+    simp [Execution.ContactsTransversal, Jump.ContactTransversal, rawExpiryExecution,
+      rawExpiryJump, r.contacts_transversal]
   main_slow := r.main_slow
   aux_mode := r.aux_mode
   aux_other := r.aux_other
@@ -127,6 +133,7 @@ noncomputable def PortSlowAuxTrace.append {θ route s p mode B Q S P initial}
     PortSlowAuxTrace θ route s p mode B Q S P initial where
   final := v.final
   execution := r.execution.append v.execution
+  contacts_transversal := by simpa using And.intro r.contacts_transversal v.contacts_transversal
   main_slow := v.main_slow
   aux_mode := v.aux_mode
   aux_other := v.aux_other
@@ -191,6 +198,7 @@ theorem port_slow_aux_phase_exists {θ ε route} (hb : PhysicalBox θ ε) (s : S
 structure PortProtectedAuxReturn (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) (p : Port) (origin : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   time_bounds : origin + 111 / 100 < final.time ∧ final.time < origin + 17 / 12
   main_slow : final.main 0 = .slow
   auxiliary : ∀ j q, final.aux j q = .ready
@@ -312,6 +320,9 @@ theorem port_protected_aux_return_exists {θ ε route} (hb : PhysicalBox θ ε) 
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by
+      simp [e, es, Execution.ContactsTransversal, Jump.ContactTransversal,
+        silent.contacts_transversal, err.contacts_transversal]
     time_bounds := by change origin + 111 / 100 < err.final.time ∧ err.final.time < origin + 17 / 12; rw [hedate]; exact hTr
     main_slow := err.main_slow
     auxiliary := hfinalReady

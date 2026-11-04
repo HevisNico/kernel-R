@@ -7,6 +7,7 @@ namespace KernelR.Hybrid
 structure PreparedLearnedCycle (θ : Fin 1 → Parameters) (s : Snapshot 1) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = s.time + 15 / 2
   ready : ∀ j, ReadyCoordinates final j
   prepared : ∀ j, PreparedSection final j
@@ -61,6 +62,8 @@ theorem prepared_learned_cycle_exists {θ ε} (hb : PhysicalBox θ ε) (s : Snap
   refine ⟨{
     final := ret.final
     execution := trace
+    contacts_transversal := by
+      simp [trace, fire.contacts_transversal, fast.contacts_transversal, ret.contacts_transversal]
     date := ret.date
     ready := ret.ready
     prepared := ret.prepared

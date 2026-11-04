@@ -2,6 +2,15 @@
 
 ## Statement and scope
 
+These results use the first-contact operational definitions in `Hybrid.lean`.
+The [threshold correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+records the proved correspondence with geometric upward crossings for the
+constructed protocol. [HybridCrossingProgress](KernelR/HybridCrossingProgress.lean)
+refines every finite weak/model prefix to native moves at any finite date
+and extends every crossing prefix to any later finite horizon while preserving
+its history. The infinite maximal-run results below retain their explicit
+native `InfiniteExecution` interface.
+
 For the existing constructed finite-chain protocol, strengthen the interface
 from observations of already-complete competing executions to continuation
 of **every finite competing execution**. Keep the original initial state,

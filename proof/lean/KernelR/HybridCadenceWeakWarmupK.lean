@@ -15,6 +15,7 @@ structure ConstructedCadenceWeakWarmupK (θ : Fin 1 → Parameters) (route : Rou
   third : CadenceWeakResponse θ route sourceSecond.final p 2
   sourceThird : CadenceWeakNextSource third (sourceTrain 0 p (s.time + 16) 4 (K - 4))
   execution : Execution θ route s sourceThird.final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = sourceFirst.execution.append
     (sourceSecond.execution.append sourceThird.execution)
   date_first : sourceFirst.final.time = s.time + 4
@@ -174,6 +175,8 @@ theorem constructed_cadence_weak_warmup_k_exists {θ ε route}
     exact trace.mark_zero_ready 0 q (trace.allStates_main_flows 0 .ready hm)
   refine ⟨{
     first := first, sourceFirst := a, second := second, sourceSecond := b, third := third, sourceThird := c
+    contacts_transversal := by
+      simp [trace, a.contacts_transversal, b.contacts_transversal, c.contacts_transversal]
     execution := trace, reconstruct := rfl, date_first := hta, date_second := htb, date := htc
     coordinates := hCoords, charge_lower := hLower, gain_target := hGain, gain_other := hOther
     recovery := hRec, raw_active := c.raw_active, raw_other := c.raw_other, pending := c.pending

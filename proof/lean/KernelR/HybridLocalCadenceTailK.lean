@@ -50,6 +50,7 @@ structure LocalCadenceTailK (θ : Fin 1 → Parameters) (source : Snapshot 1)
   wait : Execution θ (fun _ _ => []) high.final final
   final_state : final = quietAt high.final terminal
   execution : Execution θ (fun _ _ => []) source final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = second.execution.append
     (sourceHigh.execution.append (high.execution.append wait))
   date : final.time = terminal
@@ -174,6 +175,9 @@ theorem local_cadence_tail_k_exists {θ ε} (hb : PhysicalBox θ ε)
     source_high_date := hInputDate, high_date := high.date
     final := quietAt high.final terminal, wait := wait, final_state := rfl
     execution := execution, reconstruct := rfl, date := rfl
+    contacts_transversal := by
+      simp [execution, wait, Execution.ContactsTransversal,
+        second.contacts_transversal, input.contacts_transversal, high.contacts_transversal]
     ready := fun j => quietAt_ready_coordinates high.final j (high.ready j) hWait.le
     charge := ?_, raw_none := high.raw_none, pending := high.pending
     gain_target := ?_, gain_other := ?_, recovery_gain := ?_

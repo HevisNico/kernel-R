@@ -11,6 +11,7 @@ structure BirthPrepared40 (θ : Fin 1 → Parameters) (born : Snapshot 1) where
   mark : BirthProtectedMark θ born
   final : Snapshot 1
   suffix : Execution θ (fun _ _ => []) mark.final final
+  suffix_contacts_transversal : suffix.ContactsTransversal
   date : final.time = 40
   ready : ∀ j, ReadyCoordinates final j
   charge : final.x 0 .q = 1 / 10
@@ -26,6 +27,11 @@ structure BirthPrepared40 (θ : Fin 1 → Parameters) (born : Snapshot 1) where
 
 noncomputable def BirthPrepared40.execution {θ born} (c : BirthPrepared40 θ born) :
     Execution θ (fun _ _ => []) born c.final := c.mark.execution.append c.suffix
+
+@[simp] theorem BirthPrepared40.contacts_transversal {θ born}
+    (c : BirthPrepared40 θ born) : c.execution.ContactsTransversal := by
+  rw [BirthPrepared40.execution, Execution.contactsTransversal_append]
+  exact ⟨c.mark.contacts_transversal, c.suffix_contacts_transversal⟩
 
 theorem BirthPrepared40.gain_target {θ born} (c : BirthPrepared40 θ born) :
     c.final.x 0 (.z 0) = born.x 0 (.z 0) + 9 / 5 := by
@@ -159,6 +165,8 @@ theorem BirthProtectedMark.prepared40_exists {θ ε born}
     mark := c
     final := arrival.final
     suffix := suffix
+    suffix_contacts_transversal := by
+      simp [suffix, aux.contacts_transversal, ret.contacts_transversal, arrival.contacts_transversal]
     date := arrival.date
     ready := arrival.ready
     charge := ?_

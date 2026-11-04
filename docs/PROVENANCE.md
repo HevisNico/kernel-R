@@ -1,6 +1,6 @@
 # Focused research provenance
 
-**Status reviewed: 3 November 2026.** The certificate and recorded-outcome
+**Status reviewed: 4 November 2026.** The certificate and recorded-outcome
 stages below describe the historical work of 30–31 October 2026. They do not
 describe the scope of the constructed physical Lean theorems published in
 `v0.2.0` on 2 November 2026; that later stage is documented separately below.
@@ -126,3 +126,19 @@ event-budget hypotheses. Arbitrary cyclic networks, experimental validation,
 settings-copy variants and the full A22 campaign remain outside this scope.
 The historical adaptive simulations and recorded outcomes retain their
 separate evidence status. Independent peer review is not claimed.
+
+## Geometric correspondence — local validation, 4 November 2026
+
+The [crossing headline](../proof/lean/KernelR/CrossingChainHeadline.lean) extends
+the common-birth finite-chain result to genuine geometric upward crossings,
+with the original birth, physical-box, source, delay and budget hypotheses.
+Complete model histories refine exactly to complete native paths and jumps;
+endpoints, ordered per-cell FIRE lists, counts and prescribed errors transfer.
+The native-to-model converse supplies an observationally equal crossing
+representative. Every finite weak prefix refines exactly, and every finite model
+history extends to any later finite horizon while retaining its history.
+Infinite/maximal-run results retain their native `InfiniteExecution` interface.
+
+The [validation ledger](../proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
+records the fresh local build and audit. This later source development does not
+change the v0.2.0 archive, DOI, published PDF or historical checkpoint counts.

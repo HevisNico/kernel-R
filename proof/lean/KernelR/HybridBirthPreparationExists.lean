@@ -10,6 +10,7 @@ structure ConstructedBirthPreparation (θ : Fin 1 → Parameters) (born : Snapsh
   at40 : BirthPrepared40 θ born
   final : Snapshot 1
   suffix : Execution θ (fun _ _ => []) at40.final final
+  suffix_contacts_transversal : suffix.ContactsTransversal
   date : final.time = 128
   ready : ∀ j, ReadyCoordinates final j
   charge : final.x 0 .q = 1 / 10
@@ -23,6 +24,11 @@ structure ConstructedBirthPreparation (θ : Fin 1 → Parameters) (born : Snapsh
 noncomputable def ConstructedBirthPreparation.execution {θ born}
     (c : ConstructedBirthPreparation θ born) : Execution θ (fun _ _ => []) born c.final :=
   c.at40.execution.append c.suffix
+
+theorem ConstructedBirthPreparation.contacts_transversal {θ born}
+    (c : ConstructedBirthPreparation θ born) : c.execution.ContactsTransversal := by
+  rw [ConstructedBirthPreparation.execution, Execution.contactsTransversal_append]
+  exact ⟨c.at40.contacts_transversal, c.suffix_contacts_transversal⟩
 
 theorem ConstructedBirthPreparation.deliveries {θ born} (c : ConstructedBirthPreparation θ born) :
     c.execution.deliveries = sourceTrain 0 0 0 8 16 := by
@@ -90,6 +96,9 @@ theorem BirthPrepared40.preparation_exists {θ ε born} (c : BirthPrepared40 θ 
     at40 := c
     final := quietAt train.final 128
     suffix := suffix
+    suffix_contacts_transversal := by
+      exact (Execution.contactsTransversal_append train.execution quiet).mpr
+        ⟨train.contacts_transversal, trivial⟩
     date := rfl
     ready := fun j => quietAt_ready_coordinates train.final j (train.ready j) htime.le
     charge := ?_

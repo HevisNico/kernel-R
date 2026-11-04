@@ -10,6 +10,15 @@ prefixes and semantically maximal infinite runs of that finite-source program.
 The full written theorem, retained probes/copies and operational perturbations
 remain separate obligations.
 
+The [geometric correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+also covers every geometrically complete model execution of this protocol:
+it refines to a complete native execution with the exact same paths and jumps,
+so physical endpoints, ordered per-cell FIRE lists, counts and prescribed errors
+transfer. Conversely, a complete native outcome has a crossing representative
+with the same observations and FIRE lists. This does not identify every native
+simultaneous-event linearization with a crossing history. Birth, fabrication,
+source, delay and budget hypotheses are unchanged.
+
 See [UniversalChainHeadline](KernelR/UniversalChainHeadline.lean) and the
 [exact quantifiers and validation ledger](EVERY_N_PLAN.md). The indexed order
 is **∀ admissible data/errors, ∃ fixed native functions and a complete witness,
@@ -90,7 +99,9 @@ indefinitely repeatable network contract.
 | Constructed physical N=3 | `HybridLocalCadenceReceiver`, `HybridConstructedCadenceBC`, `HybridConstructedCadenceCascade`, `HybridBirthCadenceCascade`, `HybridBirthCadenceProtocol` | Actual leaf, B/A receivers and causal weave; A54/B61/C34 at789.9; separate from the new common-birth every-N family |
 | Constructed common-birth every-N | `HybridFiniteChainFamilyPreparation`, `HybridPreparedCadenceChainConstruction`, `HybridBirthCadenceChain` | Actual birth preparation, variable-K leaf, full-budget physical receivers and causal weave; terminal own memories and cumulative counts |
 | Prescribed-error whole-chain realization | `HybridIndexedPreparedCadenceChain`, `HybridIndexedBirthCadenceChain`, `IndexedChainHeadline` | Generated fixed native functions match every prescribed error on final fast sender FIREs; actual birth, router, memory and count invariants retained |
-| Every complete physical trace | `HybridUniversalExecution`, `HybridUniversalBirthCadenceChain`, `UniversalChainHeadline` | Every finite trace complete through fixed T, under the same initial state/router; physical endpoint equality, exact ordered per-cell FIRE lists and prescribed FAST errors |
+| Every complete physical trace | `HybridUniversalExecution`, `HybridUniversalBirthCadenceChain`, `UniversalChainHeadline` | Every finite native trace complete through fixed T, under the same initial state/router; physical endpoint equality, exact ordered per-cell FIRE lists and prescribed FAST errors |
+| Geometric model correspondence | `HybridCrossingExecution`, `HybridCellOrbitExistence`, `HybridWeakNativeRefinement`, `HybridCrossingCorrespondence`, `CrossingChainHeadline` | Actual historical left approach and full-cell right ODE germ; exact model-to-native refinement, with native-to-model observational representatives |
+| Every finite weak/model prefix | `HybridCrossingProgress` | Exact native refinement at every finite date and history-preserving crossing extension to every later finite horizon; infinite/maximal-run theorems retain the native interface |
 | Physical packet closure | `HybridLocalCadenceBudgetReceiver`, `HybridCadencePacketRelay` | Cumulative jitter≤0.15; directly proved high latencies[0.16,0.26], first≤rest, exact actual output packet |
 | Universal induction | `Chain.Induction.compose_every_finite_chain`, `root_contract` | Every positive finite N; validates every intermediate tail and cumulative jitter budget |
 | Actual stream interface | `Chain.Refinement.realized_chain` | Composes explicit routed streams, given a leaf refinement and local `RelayLaw` proofs |
@@ -178,9 +189,10 @@ corruption checks; this inventory does not assert a fresh local rerun of every
 older suite. Fresh CI status and the verified commit are reported on the PR.
 
 The public [headline](KernelR/Headline.lean) groups the existence, actual terminal
-state/counts and own learned-memory theorems. The global
-[README](../../README.md) records its exact signatures and `#print axioms` outputs;
-the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
+state/counts and own learned-memory theorems and retains their exact signatures
+and `#print axioms` commands. The [repository overview](../../README.md) states
+the current finite-chain scope; the
+[model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
 [EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain

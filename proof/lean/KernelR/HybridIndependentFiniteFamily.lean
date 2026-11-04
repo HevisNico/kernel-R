@@ -56,6 +56,7 @@ structure IndependentFiniteFamily {n : ℕ} (θ : Fin (n+1) → Parameters)
     (runs : (i : Fin (n+1)) → FiniteCausalCell (θ i) (sources i) T) where
   final : Snapshot (n+1)
   execution : Execution θ (fun _ _ => []) (independentFamilySource sources) final
+  contacts_transversal : (∀ i, (runs i).execution.ContactsTransversal) → execution.ContactsTransversal
   complete : CompleteThrough execution T
   pending : final.pending=[]
   ready : ∀ i, ReadyCoordinates final i
@@ -101,6 +102,18 @@ private theorem independent_family_router_complete {n θ route route' s u T}
     (e : @Execution n θ route s u) (hr : route=route') (hc : CompleteThrough e T) :
     CompleteThrough (independent_family_cast_router e hr) T := by cases hr; exact hc
 
+private theorem independent_family_parameters_transversal {n θ θ' route s u}
+    (e : @Execution n θ route s u) (hp : θ=θ') (positive : e.ContactsTransversal) :
+    (independent_family_cast_parameters e hp).ContactsTransversal := by
+  cases hp
+  exact positive
+
+private theorem independent_family_router_transversal {n θ route route' s u}
+    (e : @Execution n θ route s u) (hr : route=route') (positive : e.ContactsTransversal) :
+    (independent_family_cast_router e hr).ContactsTransversal := by
+  cases hr
+  exact positive
+
 /-- Combine independently constructed physical preparations at a common clock
 and horizon. This induction permits actual input arrivals and FIREs in every
 cell. Physical premises concern only the already-constructed local endpoints. -/
@@ -119,6 +132,7 @@ theorem independent_finite_family_exists (n : ℕ)
     have hdel : execution.deliveries=(runs 0).execution.deliveries := independent_family_parameters_deliveries (runs 0).execution hp
     refine ⟨{
       final:=(runs 0).final,execution:=execution,complete:=?_,pending:=(runs 0).pending
+      contacts_transversal:=fun all => independent_family_parameters_transversal (runs 0).execution hp (all 0)
       ready:=?_,charge:=?_,raw_none:=?_,physical:=?_,raw_valid:=hv 0
       final_values:=?_,final_main:=?_,final_aux:=?_,final_raw:=?_,emission_times:=?_
       emission_count:=?_,delivery_count:=?_
@@ -163,6 +177,9 @@ theorem independent_finite_family_exists (n : ℕ)
       simpa only [CompleteThrough] using product.complete tail.complete (runs 0).complete
     refine ⟨{
       final:=tail.final.prependQueued (runs 0).final product.pending,execution:=execution
+      contacts_transversal:=fun all => independent_family_router_transversal e0 hr
+        (independent_family_parameters_transversal product.execution hp
+          (product.contacts_transversal (tail.contacts_transversal (fun i => all i.succ)) (all 0)))
       complete:=independent_family_router_complete e0 hr hcomplete
       pending:=product.pending_empty tail.pending (runs 0).pending
       ready:=product.ready tail.ready (runs 0).ready,charge:=?_,raw_none:=?_

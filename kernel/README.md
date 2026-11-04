@@ -159,9 +159,17 @@ automatically included in the current READY birth theorems.
 - Verification programs refuse unresolved roots or exhausted budgets; these are not success cases.
 
 These model conventions and checked interval obligations do not by themselves
-close the complete hybrid-execution-to-abstraction proof. The
-[Lean coverage guide](../proof/lean/README.md) states the established lemmas and
-remaining correspondence obligations.
+close the complete hybrid-execution-to-abstraction proof. For the constructed
+common-birth finite-chain protocol, the
+[geometric correspondence](../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+is proved: model FIRE/MARK use the actual left history and a full-cell right
+ODE germ, and every complete model history refines exactly to a complete native
+history. The native-to-model converse preserves observations and ordered FIRE
+lists. Every finite model prefix also has a history-preserving continuation to
+any later finite horizon. These results retain the declared fixed ±0.3%/±10%
+fabrication boxes, sources and delays; they do not assert the same correspondence
+for arbitrary networks. The [Lean coverage guide](../proof/lean/README.md)
+states the remaining obligations.
 
 ## Upstream provenance
 

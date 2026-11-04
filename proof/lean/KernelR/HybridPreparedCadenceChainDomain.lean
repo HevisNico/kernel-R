@@ -80,6 +80,7 @@ theorem base_exists : Nonempty (ConstructedCadenceChainStage d K
     ready:=leaf.ready, charge:=by intro i; fin_cases i; exact leaf.charge
     raw_none:=leaf.raw_none, pending:=leaf.pending, physical:=leaf.physical, raw_valid:=leaf.raw_valid
     cells:=fun _ => ⟨d.leafSource,leaf.finiteCell⟩
+    contacts_transversal:=fun _ => leaf.contacts_transversal
     emission_times:=by
       intro i
       have hi : i=0 := by fin_cases i; rfl
@@ -89,6 +90,7 @@ theorem base_exists : Nonempty (ConstructedCadenceChainStage d K
   }
   refine ⟨{
     stage:=stage, packet:=leaf.packet, calendar:=leaf.packet_calendar
+    contacts_transversal:=leaf.contacts_transversal
     envelope:=?_, counts:=?_, gain_target:=?_, gain_other:=?_, recovery:=?_
   }⟩
   · constructor

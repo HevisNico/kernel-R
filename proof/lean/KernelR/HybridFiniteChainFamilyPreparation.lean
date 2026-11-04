@@ -2,6 +2,7 @@ import KernelR.HybridFiniteChainRelayPreparation
 import KernelR.HybridFiniteChainLeafPreparation
 import KernelR.HybridIndependentFiniteFamily
 import KernelR.HybridLocalFutureFrame
+import KernelR.HybridContactTransversalityFrame
 
 /-! Common-birth preparation of a finite independent family. Each relay is
 trained at its own port two, and the last cell at its own nominal fast port
@@ -20,6 +21,7 @@ def finiteChainPreparationCount (n : ℕ) (i : Fin (n+1)) : ℕ := if i=Fin.last
 structure FiniteChainPreparationCell (parameter : Parameters) (born : Snapshot 1)
     (port : Port) (dose : ℝ) (count : ℕ) where
   run : FiniteCausalCell parameter born (1599/10)
+  contacts_transversal : run.execution.ContactsTransversal
   prepared : PreparedSection run.final 0
   gain_target : run.final.x 0 (.z port)=born.x 0 (.z port)+dose
   gain_other : ∀ q, q≠port → run.final.x 0 (.z q)=born.x 0 (.z q)
@@ -70,6 +72,7 @@ structure FiniteChainFamilyPreparation {n : ℕ} (θ : Fin (n+1) → Parameters)
   final : Snapshot (n+1)
   final_state : final=appendPending family.final (sourceTrain (Fin.last n) 0 160 4 K)
   execution : Execution θ (fun _ _ => []) (familyPreparationBornSource bornCells K) final
+  contacts_transversal : execution.ContactsTransversal
   ledger : execution.ledger=family.execution.ledger
   deliveries : execution.deliveries=family.execution.deliveries
   date : final.time=1599/10
@@ -115,6 +118,7 @@ theorem finite_chain_family_preparation_exists {n θ bornCells K ε}
           raw_none:=leaf.raw_none 0
           pending:=leaf.pending
         }
+        contacts_transversal:=leaf.contacts_transversal
         prepared:=leaf.prepared,gain_target:=?_,gain_other:=?_,recovery:=leaf.recovery
         emission_count:=?_,deliveries:=?_,physical:=leaf.physical,raw_valid:=leaf.raw_valid
       }⟩
@@ -135,6 +139,7 @@ theorem finite_chain_family_preparation_exists {n θ bornCells K ε}
           raw_none:=relay.raw_none 0
           pending:=relay.pending
         }
+        contacts_transversal:=relay.contacts_transversal
         prepared:=relay.prepared,gain_target:=?_,gain_other:=?_,recovery:=relay.recovery
         emission_count:=?_,deliveries:=?_,physical:=relay.physical,raw_valid:=relay.raw_valid
       }⟩
@@ -151,7 +156,7 @@ theorem finite_chain_family_preparation_exists {n θ bornCells K ε}
     obtain ⟨k,rfl⟩ := List.mem_ofFn.mp hd
     change (1599/10:ℝ)<160+4*(k.val:ℝ)
     nlinarith [Nat.cast_nonneg (α:=ℝ) k.val]
-  obtain ⟨execution,hLedger,hDelivered⟩ := family.execution.appendFuture_emptyRoute future
+  obtain ⟨execution,hLedger,hDelivered,hTransversal⟩ := family.execution.appendFuture_emptyRoute_transversal future
     (fun d hd => by rw [family.date]; exact (hfuture d hd).le)
   let final := appendPending family.final future
   have hPrepared : ∀ i, PreparedSection final i := by
@@ -182,6 +187,7 @@ theorem finite_chain_family_preparation_exists {n θ bornCells K ε}
     exact family.emission_times i
   refine ⟨{
     initial_birth:=hborn,locals:=locals,family:=family,source_birth:=hSourceBirth,final:=final,final_state:=rfl,execution:=execution
+    contacts_transversal:=hTransversal.mpr (family.contacts_transversal (fun i => (locals i).contacts_transversal))
     ledger:=hLedger,deliveries:=hDelivered,date:=family.date,prepared:=hPrepared,charge:=family.charge
     raw_none:=family.raw_none,pending:=hPending,gain_target:=?_,gain_other:=?_,recovery:=?_
     emission_times:=hTimes,emission_count_per_cell:=?_,physical:=⟨family.physical.region,family.physical.gain_cap,family.physical.recovery_cap,family.physical.reserve⟩,

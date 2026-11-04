@@ -9,6 +9,7 @@ structure WeakInputCycle {n} (θ : Fin n → Parameters) (route : Router n)
     (s : Snapshot n) (i : Fin n) (p : Port) where
   final : Snapshot n
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   pulse : SilentPulse execution i p
   date : final.time = s.time + 15 / 2
   complete : CompleteThrough execution (s.time + 15 / 2)
@@ -102,6 +103,10 @@ theorem weak_input_cycle_exists {n θ ε route} (s : Snapshot n) (hb : @Physical
   refine ⟨{
     final := quietAt c.final (s.time + 15 / 2)
     execution := trace
+    contacts_transversal := by
+      simp [trace, preparedTrace, quiet, FirstInputSilent.continuation,
+        Execution.ContactsTransversal, Jump.ContactTransversal,
+        f.contacts_transversal, h.contacts_transversal, c.contacts_transversal]
     pulse := pulse
     date := rfl
     complete := hsaturated

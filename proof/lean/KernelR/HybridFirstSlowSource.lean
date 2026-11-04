@@ -11,6 +11,7 @@ noncomputable def firstSlowSourceFinal (θ : Fin 1 → Parameters) (s : Snapshot
 
 structure FirstSlowSource (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) where
   execution : Execution θ route s (firstSlowSourceFinal θ s)
+  contacts_transversal : execution.ContactsTransversal
   main_slow : (firstSlowSourceFinal θ s).main 0 = .slow
   aux_ready : ∀ j p, (firstSlowSourceFinal θ s).aux j p = .ready
   gain_preserved : ∀ p, (firstSlowSourceFinal θ s).x 0 (.z p) = s.x 0 (.z p)
@@ -65,6 +66,7 @@ theorem first_slow_source_exists {θ ε route} (hbox : PhysicalBox θ ε) (s : S
     .cons (.flow flow) (.cons (.jump (.arrive v ⟨0,0,32⟩ [] _ hhead rfl (hr 0 0))) (.nil _))
   refine ⟨{
     execution := e
+    contacts_transversal := by trivial
     main_slow := hm
     aux_ready := ha
     gain_preserved := fun _ => rfl

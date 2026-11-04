@@ -10,6 +10,7 @@ structure SlowAuxTrace (θ : Fin 1 → Parameters) (route : Router 1) (s : Snaps
     (mode : AuxMode) (B Q S P initial : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   main_slow : final.main 0 = .slow
   aux_mode : final.aux 0 0 = mode
   aux_other : ∀ j q, j ≠ 0 ∨ q ≠ 0 → final.aux j q = .ready
@@ -31,6 +32,7 @@ noncomputable def SlowAuxTrace.ofLeg {θ route s mode origin T B Q S P initial}
     SlowAuxTrace θ route s mode B Q S P initial where
   final := protectedMainEnd θ s 0 0 .slow mode origin T
   execution := .cons (.flow leg.flow) (.nil _)
+  contacts_transversal := by trivial
   main_slow := hm
   aux_mode := ha
   aux_other := hao
@@ -50,6 +52,9 @@ noncomputable def SlowAuxTrace.expire {θ route s mode B Q S P initial}
     SlowAuxTrace θ route s mode B Q S P initial where
   final := setRaw r.final 0 0 none
   execution := r.execution.append (rawExpiryExecution r.final 0 0 origin hr ht)
+  contacts_transversal := by
+    simpa [rawExpiryExecution, rawExpiryJump, Execution.ContactsTransversal,
+      Jump.ContactTransversal] using r.contacts_transversal
   main_slow := r.main_slow
   aux_mode := r.aux_mode
   aux_other := r.aux_other
@@ -69,6 +74,8 @@ noncomputable def SlowAuxTrace.append {θ route s mode B Q S P initial}
     SlowAuxTrace θ route s mode B Q S P initial where
   final := v.final
   execution := r.execution.append v.execution
+  contacts_transversal := by
+    simpa using And.intro r.contacts_transversal v.contacts_transversal
   main_slow := v.main_slow
   aux_mode := v.aux_mode
   aux_other := v.aux_other
@@ -133,6 +140,7 @@ theorem slow_aux_phase_exists {θ ε route} (hb : PhysicalBox θ ε) (s : Snapsh
 structure ProtectedAuxReturn (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) (p : Port) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   time_bounds : 3311 / 100 < final.time ∧ final.time < 401 / 12
   main_slow : final.main 0 = .slow
   auxiliary : ∀ j q, final.aux j q = .ready
@@ -252,6 +260,9 @@ theorem protected_aux_return_exists {θ ε route} (hb : PhysicalBox θ ε) (s : 
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by
+      simpa [e, es, Execution.ContactsTransversal, Jump.ContactTransversal]
+        using And.intro silent.contacts_transversal err.contacts_transversal
     time_bounds := by change 3311 / 100 < err.final.time ∧ err.final.time < 401 / 12; rw [hedate]; exact hTr
     main_slow := err.main_slow
     auxiliary := hfinalReady

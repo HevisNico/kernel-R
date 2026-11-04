@@ -29,6 +29,7 @@ structure BirthWeakPrefix (θ : Fin 1 → Parameters) (route : Router 1) (born :
   sources : born.pending = sourceTrain 0 0 0 8 16 ++ sourceTrain 0 0 160 8 16
   final : Snapshot 1
   execution : Execution θ route born final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = 24
   complete : CompleteThrough execution 24
   ready : ∀ j, ReadyCoordinates final j
@@ -101,6 +102,9 @@ theorem birth_protocol_weak_prefix_exists {θ ε route born}
     sources := hqueue
     final := a24.final
     execution := e
+    contacts_transversal := by
+      simp [e, c0.contacts_transversal, c1.contacts_transversal, c2.contacts_transversal,
+        a8.contacts_transversal, a16.contacts_transversal, a24.contacts_transversal]
     date := a24.date
     complete := hcomplete
     ready := a24.ready

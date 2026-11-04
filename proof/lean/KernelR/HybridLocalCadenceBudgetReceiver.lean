@@ -32,6 +32,7 @@ structure LocalCadenceBudgetReceiver (θ : Fin 1 → Parameters) (s : Snapshot 1
   high : LocalCadenceHighJitterTrain θ mixed.final p
     (cadenceDates packet.actual (m + 4) (L - 4)) terminal
   execution : Execution θ (fun _ _ => []) s high.final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = firstSource.execution.append (learnedPrefix.execution.append
     (firstStrong.execution.append (markOnly.execution.append
       (secondStrong.execution.append (mixed.execution.append high.execution)))))
@@ -163,6 +164,10 @@ theorem local_cadence_budget_receiver_exists {θ ε m L J} (hb : PhysicalBox θ 
     execution := first.execution.append (prefixResponse.execution.append
       (strong.execution.append (mark.execution.append (second.execution.append (mixed.execution.append high.execution)))))
     reconstruct := rfl
+    contacts_transversal := by
+      simp [first.contacts_transversal, prefixResponse.contacts_transversal,
+        strong.contacts_transversal, mark.contacts_transversal,
+        second.contacts_transversal, mixed.contacts_transversal, high.contacts_transversal]
   }⟩
 
 namespace LocalCadenceBudgetReceiver

@@ -1,4 +1,5 @@
 import KernelR.HybridCausalHeadBalance
+import KernelR.HybridCausalTransversality
 
 /-! Constructive feed-forward weaving. Local head calendars are proof data
 derived from actual tail FIREs. The resulting execution issues each wire only
@@ -58,11 +59,16 @@ structure CausalHeadResult {n} (θ : Fin n → Parameters) (θH : Fin 1 → Para
   trace : CausalTraceBalance execution.ledger.emissions execution.deliveries
     tailEvents tailDeliveries headEvents headDeliveries
 
-abbrev CausalHeadWeave {n θ θH route s u a b}
+/-- The concrete weave also preserves contact transversality whenever both
+supplied local histories have it. The original existential construction
+continues to accept arbitrary legal local histories. -/
+structure CausalHeadWeave {n θ θH route s u a b}
     (tail : @Execution n θ route s u) (head : @Execution 1 θH (fun _ _ => []) a b)
-    (Q : List (Delivery (n + 1))) (contacts : HeadRoutes n) :=
-  CausalHeadResult θ θH route s u a b Q contacts
-    tail.ledger.emissions tail.deliveries head.ledger.emissions head.deliveries
+    (Q : List (Delivery (n + 1))) (contacts : HeadRoutes n)
+    extends CausalHeadResult θ θH route s u a b Q contacts
+      tail.ledger.emissions tail.deliveries head.ledger.emissions head.deliveries where
+  contacts_transversal : tail.ContactsTransversal → head.ContactsTransversal →
+    execution.ContactsTransversal
 
 theorem CausalHeadWeave.prepend_tail_jump {n θ θH route s v u a b}
     (j : @Jump n route s v) (rest : Execution θ route v u)
@@ -74,13 +80,19 @@ theorem CausalHeadWeave.prepend_tail_jump {n θ θH route s v u a b}
     (hrest : Nonempty (CausalHeadWeave rest head Qnext contacts)) :
     Nonempty (CausalHeadWeave (.cons (.jump j) rest) head Q contacts) := by
   obtain ⟨w⟩ := hrest
-  refine ⟨⟨w.pending,.cons (.jump g) w.execution,w.terminal,?_⟩⟩
-  simpa only [Execution.ledger,Move.ledger,Ledger.add,Execution.deliveries,Move.deliveries,
-    he,hd] using w.trace.prepend_tail j.ledger.emissions j.deliveries
+  refine ⟨{
+    pending := w.pending, execution := .cons (.jump g) w.execution
+    terminal := w.terminal, trace := ?_, contacts_transversal := ?_
+  }⟩
+  · simpa only [Execution.ledger,Move.ledger,Ledger.add,Execution.deliveries,Move.deliveries,
+      he,hd] using w.trace.prepend_tail j.ledger.emissions j.deliveries
+  · intro ht hh
+    exact ⟨j.prependQueued_tail_contactTransversal ht.1 a Q Qnext contacts g,
+      w.contacts_transversal ht.2 hh⟩
 
 theorem CausalHeadWeave.prepend_head_jump {n θ θH route s u a v b}
     (tail : @Execution n θ route s u) (j : Jump (fun _ _ => []) a v)
-    (rest : Execution θH (fun _ _ => []) v b)
+    (rest : Execution θH (fun _ _ => []) v b) (hclock : s.time = a.time)
     (Q Qnext : List (Delivery (n + 1))) (contacts : HeadRoutes n)
     (g : Jump (prependRouted route contacts) (s.prependQueued a Q) (s.prependQueued v Qnext))
     (he : g.ledger.emissions = j.ledger.emissions.map (fun ev => ((0 : Fin (n + 1)),ev.2)))
@@ -88,9 +100,15 @@ theorem CausalHeadWeave.prepend_head_jump {n θ θH route s u a v b}
     (hrest : Nonempty (CausalHeadWeave tail rest Qnext contacts)) :
     Nonempty (CausalHeadWeave tail (.cons (.jump j) rest) Q contacts) := by
   obtain ⟨w⟩ := hrest
-  refine ⟨⟨w.pending,.cons (.jump g) w.execution,w.terminal,?_⟩⟩
-  simpa only [Execution.ledger,Move.ledger,Ledger.add,Execution.deliveries,Move.deliveries,
-    he,hd] using w.trace.prepend_head j.ledger.emissions j.deliveries
+  refine ⟨{
+    pending := w.pending, execution := .cons (.jump g) w.execution
+    terminal := w.terminal, trace := ?_, contacts_transversal := ?_
+  }⟩
+  · simpa only [Execution.ledger,Move.ledger,Ledger.add,Execution.deliveries,Move.deliveries,
+      he,hd] using w.trace.prepend_head j.ledger.emissions j.deliveries
+  · intro ht hh
+    exact ⟨j.prependQueued_head_contactTransversal hh.1 s hclock Q Qnext contacts g,
+      w.contacts_transversal ht hh.2⟩
 
 theorem CausalHeadWeave.prepend_flow {n θ θH route s v u a c b}
     (tail : @Execution n θ route s u) (head : @Execution 1 θH (fun _ _ => []) a b)
@@ -101,14 +119,21 @@ theorem CausalHeadWeave.prepend_flow {n θ θH route s v u a c b}
     (hdt : tailRest.deliveries = tail.deliveries)
     (heh : headRest.ledger.emissions = head.ledger.emissions)
     (hdh : headRest.deliveries = head.deliveries)
+    (htail : tail.ContactsTransversal → tailRest.ContactsTransversal)
+    (hhead : head.ContactsTransversal → headRest.ContactsTransversal)
     (hrest : Nonempty (CausalHeadWeave tailRest headRest Q contacts)) :
     Nonempty (CausalHeadWeave tail head Q contacts) := by
   obtain ⟨w⟩ := hrest
-  refine ⟨⟨w.pending,.cons (.flow flow) w.execution,w.terminal,?_⟩⟩
-  change CausalTraceBalance w.execution.ledger.emissions w.execution.deliveries
-    tail.ledger.emissions tail.deliveries head.ledger.emissions head.deliveries
-  rw [← het,← hdt,← heh,← hdh]
-  exact w.trace
+  refine ⟨{
+    pending := w.pending, execution := .cons (.flow flow) w.execution
+    terminal := w.terminal, trace := ?_, contacts_transversal := ?_
+  }⟩
+  · change CausalTraceBalance w.execution.ledger.emissions w.execution.deliveries
+      tail.ledger.emissions tail.deliveries head.ledger.emissions head.deliveries
+    rw [← het,← hdt,← heh,← hdh]
+    exact w.trace
+  · intro ht hh
+    exact w.contacts_transversal (htail ht) (hhead hh)
 
 /-- One strictly smaller pair of local paths, together with a genuine prefix
 that lifts any completed product of those remaining paths. -/
@@ -171,7 +196,7 @@ theorem Execution.causal_head_jump_step {n θ θH route s u a vH b N}
     jH (fun _ _ => rfl) Q Qnext contacts g heG hdG hbalance
   exact CausalHeadStep.pack eT restH (by simp only [Execution.moveCount] at hsize ⊢; omega)
     (hstart.trans jH.time_unchanged.symm) Qnext hnext
-    (fun result => CausalHeadWeave.prepend_head_jump eT jH restH Q Qnext contacts g heG hdG result)
+    (fun result => CausalHeadWeave.prepend_head_jump eT jH restH hstart Q Qnext contacts g heG hdG result)
 
 theorem Execution.causal_flow_short_step {n θ θH route s vT u a vH b N}
     (fT : @Flow n θ s vT) (restT : Execution θ route vT u)
@@ -194,7 +219,8 @@ theorem Execution.causal_flow_short_step {n θ θH route s vT u a vH b N}
       (.cons (.flow fH) restH) restT remainingH Q contacts combined
       (Execution.causal_flow_emissions fT restT).symm (Execution.causal_flow_deliveries fT restT).symm
       ((Execution.causal_flow_emissions suffixH restH).trans (Execution.causal_flow_emissions fH restH).symm)
-      ((Execution.causal_flow_deliveries suffixH restH).trans (Execution.causal_flow_deliveries fH restH).symm) result)
+      ((Execution.causal_flow_deliveries suffixH restH).trans (Execution.causal_flow_deliveries fH restH).symm)
+      (fun h => h) (fun h => h) result)
 
 theorem Execution.causal_flow_equal_step {n θ θH route s vT u a vH b N}
     (fT : @Flow n θ s vT) (restT : Execution θ route vT u)
@@ -213,7 +239,8 @@ theorem Execution.causal_flow_equal_step {n θ θH route s vT u a vH b N}
     hequal Q hnext (fun result => CausalHeadWeave.prepend_flow (.cons (.flow fT) restT)
       (.cons (.flow fH) restH) restT restH Q contacts combined
       (Execution.causal_flow_emissions fT restT).symm (Execution.causal_flow_deliveries fT restT).symm
-      (Execution.causal_flow_emissions fH restH).symm (Execution.causal_flow_deliveries fH restH).symm result)
+      (Execution.causal_flow_emissions fH restH).symm (Execution.causal_flow_deliveries fH restH).symm
+      (fun h => h) (fun h => h) result)
 
 theorem Execution.causal_flow_long_step {n θ θH route s vT u a vH b N}
     (fT : @Flow n θ s vT) (restT : Execution θ route vT u)
@@ -236,7 +263,8 @@ theorem Execution.causal_flow_long_step {n θ θH route s vT u a vH b N}
       (.cons (.flow fH) restH) remainingT restH Q contacts combined
       ((Execution.causal_flow_emissions suffixT restT).trans (Execution.causal_flow_emissions fT restT).symm)
       ((Execution.causal_flow_deliveries suffixT restT).trans (Execution.causal_flow_deliveries fT restT).symm)
-      (Execution.causal_flow_emissions fH restH).symm (Execution.causal_flow_deliveries fH restH).symm result)
+      (Execution.causal_flow_emissions fH restH).symm (Execution.causal_flow_deliveries fH restH).symm
+      (fun h => h) (fun h => h) result)
 
 theorem Execution.causal_flow_step {n θ θH route s vT u a vH b N}
     (fT : @Flow n θ s vT) (restT : Execution θ route vT u)
@@ -287,7 +315,10 @@ theorem Execution.prepend_causal_zero {n θ θH route s u a b}
   | nil =>
     cases head with
     | nil =>
-      refine ⟨⟨Q,.nil _,?_,?_⟩⟩
+      refine ⟨{
+        pending := Q, execution := .nil _, terminal := ?_, trace := ?_
+        contacts_transversal := fun _ _ => True.intro
+      }⟩
       · simpa only [HeadQueueBalance,Execution.futureHeadWires,Execution.ledger,Ledger.zero,
           List.flatMap_nil,Multiset.coe_nil,add_zero] using hbalance
       · constructor <;> rfl

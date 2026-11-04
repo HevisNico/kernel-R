@@ -6,6 +6,7 @@ open Set
 structure LearnedFastEnd {θ : Fin 1 → Parameters} {s : Snapshot 1} (c : FirstLearnedFire θ (fun _ _ => []) s 0 0) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) c.final final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = c.final.time + 1
   main_slow : final.main 0 = .slow
   charge : final.x 0 .q = 1 / 4
@@ -194,6 +195,9 @@ theorem FirstLearnedFire.learned_fast_end_exists {θ ε} {s : Snapshot 1}
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by
+      simpa [e, es, er, finish, Execution.ContactsTransversal, Jump.ContactTransversal]
+        using And.intro silent.contacts_transversal err.contacts_transversal
     date := rfl
     main_slow := by simp [final,setMain]
     charge := hbeforeq

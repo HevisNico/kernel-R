@@ -12,6 +12,12 @@ noncomputable def BirthFirstFire.final {θ route born} (c : BirthFirstFire θ ro
 noncomputable def BirthFirstFire.execution {θ route born} (c : BirthFirstFire θ route born) :
     Execution θ route born c.final := c.weak.execution.append c.fire.execution
 
+@[simp] theorem BirthFirstFire.contacts_transversal {θ route born}
+    (c : BirthFirstFire θ route born) : c.execution.ContactsTransversal := by
+  change (c.weak.execution.append c.fire.execution).ContactsTransversal
+  exact (Execution.contactsTransversal_append _ _).2
+    ⟨c.weak.contacts_transversal, c.fire.contacts_transversal⟩
+
 theorem birth_protocol_first_fire_exists {θ ε route born}
     (hborn : @BirthState 1 born) (hb : PhysicalBox θ ε)
     (ha : ∀ p, born.aux 0 p = .ready)

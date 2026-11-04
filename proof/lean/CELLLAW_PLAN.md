@@ -1,9 +1,17 @@
 # Plan: deriving `CellLaw` from the hybrid execution
 
-Status: proposal. Nothing here is proved yet. `CellLaw` (in `KernelR/Robust/Induction.lean`)
+Status: proposal for the robust slow-chain `CellLaw` interface. The derivation
+proposed here remains open. `CellLaw` (in `KernelR/Robust/Induction.lean`)
 is the only physical hypothesis of the robust chain induction. This note splits its
 derivation into three local lemmas, so that the hybrid semantics is needed in two places
 only and the third step is a finite induction.
+
+The separate common-birth period-four protocol already has constructed physical
+receivers and a [geometric crossing correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings),
+including exact refinement and continuation of every finite weak/model prefix.
+Those results use fixed fabrication parameters and canonical amplitudes; they
+do not instantiate the drift/noise/amplitude histories or the `CellLaw` latency
+interface proposed below. See [robust coverage](ROBUST_COVERAGE.md).
 
 ## Shape of the hypotheses
 

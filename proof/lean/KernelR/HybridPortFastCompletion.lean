@@ -10,6 +10,7 @@ structure PortFastCompletion (θ : Fin 1 → Parameters) (route : Router 1)
     (s : Snapshot 1) (p : Port) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = s.time + 1
   main_slow : final.main 0 = .slow
   charge : final.x 0 .q = 1 / 4
@@ -179,6 +180,9 @@ theorem port_fast_completion_exists {θ ε route} (hb : PhysicalBox θ ε)
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by
+      simp [e, es, er, finish, Execution.ContactsTransversal, Jump.ContactTransversal,
+        silent.contacts_transversal, err.contacts_transversal]
     date := rfl
     main_slow := by simp [final,setMain]
     charge := hbeforeq

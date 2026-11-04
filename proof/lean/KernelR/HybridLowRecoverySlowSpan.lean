@@ -9,6 +9,7 @@ structure LowRecoverySlowSpan {θ : Fin 1 → Parameters} {s : Snapshot 1} {p : 
     {f : FirstLearnedFire θ (fun _ _ => []) s 0 p} (fast : MidLearnedFastEnd f) (T : ℝ) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) fast.final final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = T
   main_slow : final.main 0 = .slow
   auxiliary : ∀ j q, final.aux j q = .ready
@@ -59,6 +60,7 @@ theorem FirstLearnedFire.low_recovery_slow_span_exists {θ ε} {s : Snapshot 1} 
   · refine ⟨{
       final := fast.final
       execution := .nil _
+      contacts_transversal := trivial
       date := heq.symm
       main_slow := fast.main_slow
       auxiliary := fast.auxiliary
@@ -106,6 +108,7 @@ theorem FirstLearnedFire.low_recovery_slow_span_exists {θ ε} {s : Snapshot 1} 
     refine ⟨{
       final := final
       execution := e
+      contacts_transversal := trivial
       date := rfl
       main_slow := fast.main_slow
       auxiliary := fast.auxiliary

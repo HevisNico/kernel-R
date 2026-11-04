@@ -48,6 +48,32 @@ theorem readyPulse_cadence_high_first_crossing {initial amplitude start : ℝ}
   have h := hprior (time - start) ⟨by linarith [ht.1],by linarith [ht.2]⟩
   simpa only [show start + (time - start) = time by ring] using h
 
+/-- The high-gain contact is transverse with the actual residual charge. -/
+theorem readyPulse_cadence_high_first_crossing_transversal {initial amplitude start : ℝ}
+    (hq : 1 / 10 ≤ initial ∧ initial ≤ 8 / 25)
+    (hg : 16 / 5 ≤ amplitude ∧ amplitude ≤ 7 / 2) :
+    ∃ latency : ℝ, 4 / 25 < latency ∧ latency < 13 / 50 ∧
+      readyPulse initial amplitude start (start + latency) = 1 ∧
+      (∀ t ∈ Ico start (start + latency), readyPulse initial amplitude start t < 1) ∧
+      0 < deriv (readyPulse initial amplitude start) (start + latency) := by
+  obtain ⟨latency, early, deadline, root, prior⟩ :=
+    readyPulse_cadence_high_first_crossing hq hg (start := start)
+  have above : 1 < readyPulse initial amplitude start (start + 13 / 50) := by
+    have higher := readyPulse_mono_initial (amplitude := amplitude) (start := start)
+      (t := start + 13 / 50) hq.1
+    have atRest := readyPulse_high_rest_at_twenty_six hg.1
+    have shift : readyPulse (1 / 10) amplitude start (start + 13 / 50) =
+        readyPulse (1 / 10) amplitude 0 (13 / 50) := by
+      simp only [readyPulse, add_sub_cancel_left, sub_zero]
+    rw [shift] at higher
+    exact atRest.trans_le higher
+  refine ⟨latency, early, deadline, root, prior, ?_⟩
+  apply readyPulse_transversal_of_later_value (by linarith [hg.1] : 0 ≤ amplitude)
+    (show start + latency < start + 13 / 50 by linarith)
+  rwa [root]
+
+#print axioms readyPulse_cadence_high_first_crossing_transversal
+
 structure CadenceHighFire {n} (θ : Fin n → Parameters) (route : Router n)
     (s : Snapshot n) (i : Fin n) (p : Port) where
   firstMark : FirstInputMark θ s i p
@@ -56,6 +82,8 @@ structure CadenceHighFire {n} (θ : Fin n → Parameters) (route : Router n)
   early : 4 / 25 < latency
   deadline : latency < 13 / 50
   response_root : readyPulse (s.x i .q) (Real.exp (s.x i (.z p))) s.time (s.time + latency) = 1
+  scalar_slope : 0 < deriv (readyPulse (s.x i .q) (Real.exp (s.x i (.z p))) s.time)
+    (s.time + latency)
   flow : Flow θ firstSilent.final (firstSilent.learnedFireBefore latency)
   threshold : (firstSilent.learnedFireBefore latency).x i .q = 1
   sensor_above_floor : 1 / 10 < (firstSilent.learnedFireBefore latency).x i (.m p)
@@ -69,6 +97,23 @@ noncomputable def CadenceHighFire.execution {n θ route s i p} (c : @CadenceHigh
     Execution θ route s c.final :=
   (c.firstSilent.execution route).append (.cons (.flow c.flow)
     (.cons (.jump (.fire _ i (c.firstSilent.main_ready i) c.threshold)) (.nil _)))
+
+/-- The high-gain FIRE is transverse in the actual hybrid pre-jump state. -/
+theorem CadenceHighFire.contact_field_positive {n θ route s i p}
+    (c : @CadenceHighFire n θ route s i p) :
+    0 < field θ (c.firstSilent.learnedFireBefore c.latency)
+      (c.firstSilent.learnedFireBefore c.latency).x
+      (c.firstSilent.learnedFireBefore c.latency).time i .q := by
+  rw [c.firstSilent.learnedFire_field_eq_deriv c.latency
+    (by linarith [c.early]) (by linarith [c.deadline])]
+  exact c.scalar_slope
+
+@[simp] theorem CadenceHighFire.contacts_transversal {n θ route s i p}
+    (c : @CadenceHighFire n θ route s i p) : (c.execution).ContactsTransversal := by
+  rw [CadenceHighFire.execution, Execution.contactsTransversal_append]
+  exact ⟨c.firstSilent.contacts_transversal route, c.contact_field_positive, True.intro⟩
+
+#print axioms CadenceHighFire.contacts_transversal
 
 theorem CadenceHighFire.date {n θ route s i p} (c : @CadenceHighFire n θ route s i p) :
     c.final.time = s.time + c.latency := rfl
@@ -144,7 +189,7 @@ theorem cadence_high_fire_exists {θ ε}
     hmain (hs.auxiliary p).2 (fun d hd => by linarith [hp d hd])
   obtain ⟨g⟩ := f.first_silent_of_response_margin_until_exists hb hmain
     (fun d hd => by linarith [hp d hd])
-  obtain ⟨latency,hearly,hdeadline,hroot,hprior⟩ := readyPulse_cadence_high_first_crossing ⟨hq,hs.charge.2⟩ hg
+  obtain ⟨latency,hearly,hdeadline,hroot,hprior,hslope⟩ := readyPulse_cadence_high_first_crossing_transversal ⟨hq,hs.charge.2⟩ hg
   let T := s.time + latency
   have hT : g.final.time < T := by rw [g.date]; dsimp [T]; linarith [g.deadline]
   have hstart : s.time ≤ g.final.time := by
@@ -190,7 +235,7 @@ theorem cadence_high_fire_exists {θ ε}
     (.cons (.flow flow) (.cons (.jump (.fire endBefore 0 (g.main_ready 0) hthreshold)) (.nil _)))
   refine ⟨{
     firstMark := f, firstSilent := g, latency := latency
-    early := by linarith, deadline := hdeadline, response_root := hroot
+    early := by linarith, deadline := hdeadline, response_root := hroot, scalar_slope := hslope
     flow := flow, threshold := hthreshold, sensor_above_floor := ?_
     physical := execution.physical_invariant hb hf, raw_valid := execution.raw_valid hv
   }⟩

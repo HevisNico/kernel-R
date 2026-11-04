@@ -5,8 +5,9 @@
 **Archived release v0.2.0 — DOI:** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
 
 **R cells learn through pulses and transmit a cadence along every finite
-directed chain, under the declared protocol. Lean verifies the model's
-physical construction and its complete-execution guarantees.**
+directed chain, under the declared protocol. Lean verifies the physical
+construction and complete-execution guarantees, with a proved geometric
+upward-crossing correspondence for the finite-chain protocol.**
 
 Each cell has two memories with complementary gates: input sensitivity
 (gain) and recovery. The protocol changes both through the cell's own
@@ -15,17 +16,26 @@ dynamics, then transmits a cadence through the chain.
 Three entry points:
 
 1. [Detailed result, hypotheses and verification](docs/UNIVERSAL_FINITE_CHAIN.md).
-2. [Lean theorem for fixed native delays](proof/lean/KernelR/HybridUniversalBirthCadenceChain.lean) and [indexed-error headline](proof/lean/KernelR/UniversalChainHeadline.lean).
+2. [Geometric upward-crossing theorem](proof/lean/KernelR/CrossingChainHeadline.lean),
+   `CrossingChainHeadline.every_finite_chain_every_crossing_execution`, followed
+   by the [native first-contact construction](proof/lean/KernelR/HybridUniversalBirthCadenceChain.lean)
+   and [native indexed-error theorem](proof/lean/KernelR/UniversalChainHeadline.lean)
+   used in its proof.
 3. [Model ↔ Lean: equations and operational semantics](docs/MODEL_LEAN_CORRESPONDENCE.md).
+
+For review, start with the [semantic review guide](REVIEW.md): fidelity of
+`CrossingExecution` to the written model is the first human review obligation.
 
 ## Result: every finite chain, with explicit scope
 
 > For every positive finite N, admissible source length K, independent fixed
 > fabrication parameters and READY birth data, and every admissible family of
 > bounded native wire-delay functions fixed in advance, the declared fixed
-> chain router admits a complete physical execution. Every finite execution
-> from those same birth data, complete through the same horizon under that
-> fixed router, has the same physical endpoint and ordered FIRE dates per cell.
+> chain router admits a complete physical execution in both semantics. Every
+> finite execution in the model's upward-crossing semantics (and in the native
+> first-contact semantics), from those same birth data and complete through
+> the same horizon under that fixed router, has the same physical endpoint
+> and ordered FIRE dates per cell.
 
 The construction starts with all cells born at time zero and retains actual
 continuous trajectories, pulse origins, deliveries and memory updates.
@@ -63,10 +73,18 @@ the native-delay theorem above takes the functions as inputs.
 
 ## Limits
 
-The universal comparison covers finite executions satisfying `CompleteThrough e T`:
-they reach T, have no enabled terminal jump and leave no token due by T pending.
-The constructed witness makes this class nonempty. Global simultaneous-event
-order and flow subdivisions may differ. For the same fixed program, the
+The native event guards use first threshold contact. A separate geometric
+semantics requires an actual approach from below and an incoming-mode ODE
+continuation above the threshold. Their correspondence is proved for the
+constructed finite-chain protocol, including every complete competing model
+execution, without adding protocol hypotheses. See the
+[threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings).
+
+The model comparison covers finite crossing executions satisfying
+`CrossingCompleteThrough model T`. The native proof uses `CompleteThrough e T`.
+Both reach T, resolve the terminal jumps enabled by their respective semantics
+and leave no token due by T pending. Constructed witnesses supply both classes.
+Global simultaneous-event order and flow subdivisions may differ. For the same fixed program, the
 [progress theorems](proof/lean/PROGRESS.md) extend legal finite prefixes to
 later horizons and prove time divergence for infinite presentations maximal
 under extension at a flow limit. Physical jumps cannot accumulate in bounded
@@ -87,14 +105,18 @@ From the repository root, with Lean installed:
 git rev-parse HEAD
 cd proof/lean
 lake exe cache get
+lake build KernelR.CrossingChainHeadline
 lake build
 lake build Audit
 ```
 
-The frozen universal proof checkpoint completed **9,557 build jobs** and an
-audit of **27,741 project theorem declarations**, permitting only `propext`,
+For the current geometric-crossing revision, the
+[validation ledger](proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
+records a fresh local build of **9,592 jobs** and a global audit of
+**28,970 project theorem declarations**, permitting only `propext`,
 `Classical.choice` and `Quot.sound`, with no admitted proofs or added project
-axioms. These counts belong to the recorded checkpoint, not every later run.
+axioms. These are recorded local validation results. The archived v0.2.0
+universal proof checkpoint recorded **9,557 jobs** and **27,741 declarations**.
 
 [Exact Lean signatures, axiom outputs and checkpoint evidence](docs/UNIVERSAL_FINITE_CHAIN.md#lean-headline-signatures-axioms-and-reproduction) ·
 [Fresh-checkout rebuild and full controls](proof/lean/README.md#rebuild-project-proofs-without-a-restored-project-cache).
@@ -125,3 +147,4 @@ claim made in the repository.
 
 Source code is [MIT](LICENSE). Documents, proofs, data, certificates and other
 non-code material are CC BY 4.0 under [LICENSE-docs.md](LICENSE-docs.md).
+
