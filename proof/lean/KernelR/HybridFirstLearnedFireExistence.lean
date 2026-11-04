@@ -160,6 +160,24 @@ theorem readyPulse_first_learned_crossing {initial amplitude start : ℝ}
   have h := hprior (t - start) ⟨by linarith [ht.1],by linarith [ht.2]⟩
   simpa only [show start + (t - start) = t by ring] using h
 
+/-- This main contact has positive derivative under the same response bounds. -/
+theorem readyPulse_first_learned_crossing_transversal {initial amplitude start : ℝ}
+    (hq : 1 / 10 - 1 / 100000 ≤ initial ∧ initial ≤ 7 / 50)
+    (hg : 9 / 5 ≤ amplitude ∧ amplitude ≤ 2) :
+    ∃ latency : ℝ, 3 / 10 < latency ∧ latency < 9 / 10 ∧
+      readyPulse initial amplitude start (start + latency) = 1 ∧
+      (∀ t ∈ Ico start (start + latency), readyPulse initial amplitude start t < 1) ∧
+      0 < deriv (readyPulse initial amplitude start) (start + latency) := by
+  obtain ⟨latency, early, deadline, root, prior⟩ :=
+    readyPulse_first_learned_crossing hq hg (start := start)
+  refine ⟨latency, early, deadline, root, prior, ?_⟩
+  apply readyPulse_transversal_of_later_value (by linarith [hg.1] : 0 ≤ amplitude)
+    (show start + latency < start + 9 / 10 by linarith)
+  rw [root]
+  exact readyPulse_emission_by_deadline hq.1 hg.1
+
+#print axioms readyPulse_first_learned_crossing_transversal
+
 noncomputable def FirstInputSilent.learnedFireBefore {n θ s i p} {f : @FirstInputMark n θ s i p}
     (g : FirstInputSilent f) (latency : ℝ) : Snapshot n :=
   readyProtectedEnd θ g.final i p .silent (some s.time) (s.time + latency)

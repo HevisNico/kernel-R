@@ -5,8 +5,8 @@
 **Archived release v0.2.0 — DOI:** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
 
 **R cells learn through pulses and transmit a cadence along every finite
-directed chain, under the declared protocol. Lean verifies the model's
-physical construction and its complete-execution guarantees.**
+directed chain, under the declared protocol. Lean verifies the physical
+construction and complete-execution guarantees in its first-contact semantics.**
 
 Each cell has two memories with complementary gates: input sensitivity
 (gain) and recovery. The protocol changes both through the cell's own
@@ -62,6 +62,12 @@ the native-delay theorem above takes the functions as inputs.
 [Exact birth, parameter, delay and source hypotheses](docs/UNIVERSAL_FINITE_CHAIN.md#result-every-finite-chain-with-explicit-scope).
 
 ## Limits
+
+The formal event guards use first threshold contact. Positive contact slopes
+are proved for the five scalar pulse-response families. Their propagation to
+the constructed network witness and the full correspondence with the written
+upward-crossing convention remain open. See the
+[threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings).
 
 The universal comparison covers finite executions satisfying `CompleteThrough e T`:
 they reach T, have no enabled terminal jump and leave no token due by T pending.

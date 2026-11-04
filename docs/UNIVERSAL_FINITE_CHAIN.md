@@ -82,6 +82,11 @@ simultaneous event orders and flow subdivisions give the same physical
 endpoint and exact ordered per-cell FIRE lists. The global simultaneous event
 list and pending-list presentation may differ by permutation.
 
+The execution definitions use first threshold contact. The
+[threshold correspondence](MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+states the scalar transversality results and the remaining network-level
+argument relating these definitions to the written upward-crossing convention.
+
 This comparison assumes completeness through T. For the same fixed finite-source
 program, the [progress theorems](../proof/lean/PROGRESS.md) extend every legal
 finite prefix to any horizon at or after its endpoint, rule out infinitely

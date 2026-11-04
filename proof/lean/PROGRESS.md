@@ -2,6 +2,11 @@
 
 ## Statement and scope
 
+These results use the first-contact operational definitions in `Hybrid.lean`.
+The [threshold correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+records the scalar transversality proofs and the remaining propagation to
+the network witness under the written upward-crossing convention.
+
 For the existing constructed finite-chain protocol, strengthen the interface
 from observations of already-complete competing executions to continuation
 of **every finite competing execution**. Keep the original initial state,

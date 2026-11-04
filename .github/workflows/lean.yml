@@ -54,6 +54,9 @@ jobs:
       - name: Reject unsupported infinite-progress claims
         working-directory: proof/lean
         run: python scripts/check_progress_negative.py
+      - name: Check transverse scalar contacts and reject false slope claims
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_transversality_negative.py
       - name: Reject altered sensor phases, clipped doses and input provenance
         working-directory: proof/lean
         run: python scripts/check_hybrid_phase_negative.py

@@ -48,6 +48,32 @@ theorem readyPulse_cadence_high_first_crossing {initial amplitude start : ℝ}
   have h := hprior (time - start) ⟨by linarith [ht.1],by linarith [ht.2]⟩
   simpa only [show start + (time - start) = time by ring] using h
 
+/-- The high-gain contact is transverse with the actual residual charge. -/
+theorem readyPulse_cadence_high_first_crossing_transversal {initial amplitude start : ℝ}
+    (hq : 1 / 10 ≤ initial ∧ initial ≤ 8 / 25)
+    (hg : 16 / 5 ≤ amplitude ∧ amplitude ≤ 7 / 2) :
+    ∃ latency : ℝ, 4 / 25 < latency ∧ latency < 13 / 50 ∧
+      readyPulse initial amplitude start (start + latency) = 1 ∧
+      (∀ t ∈ Ico start (start + latency), readyPulse initial amplitude start t < 1) ∧
+      0 < deriv (readyPulse initial amplitude start) (start + latency) := by
+  obtain ⟨latency, early, deadline, root, prior⟩ :=
+    readyPulse_cadence_high_first_crossing hq hg (start := start)
+  have above : 1 < readyPulse initial amplitude start (start + 13 / 50) := by
+    have higher := readyPulse_mono_initial (amplitude := amplitude) (start := start)
+      (t := start + 13 / 50) hq.1
+    have atRest := readyPulse_high_rest_at_twenty_six hg.1
+    have shift : readyPulse (1 / 10) amplitude start (start + 13 / 50) =
+        readyPulse (1 / 10) amplitude 0 (13 / 50) := by
+      simp only [readyPulse, add_sub_cancel_left, sub_zero]
+    rw [shift] at higher
+    exact atRest.trans_le higher
+  refine ⟨latency, early, deadline, root, prior, ?_⟩
+  apply readyPulse_transversal_of_later_value (by linarith [hg.1] : 0 ≤ amplitude)
+    (show start + latency < start + 13 / 50 by linarith)
+  rwa [root]
+
+#print axioms readyPulse_cadence_high_first_crossing_transversal
+
 structure CadenceHighFire {n} (θ : Fin n → Parameters) (route : Router n)
     (s : Snapshot n) (i : Fin n) (p : Port) where
   firstMark : FirstInputMark θ s i p

@@ -107,4 +107,22 @@ theorem readyPulse_cadence_residual_first_crossing {initial amplitude start : �
   have h := hprior (time - start) ⟨by linarith [ht.1],by linarith [ht.2]⟩
   simpa only [show start + (time - start) = time by ring] using h
 
+/-- This main contact has positive derivative under the same response bounds. -/
+theorem readyPulse_cadence_residual_first_crossing_transversal {initial amplitude start : ℝ}
+    (hq : 1 / 10 - 1 / 100000 ≤ initial ∧ initial ≤ 3 / 10)
+    (hg : 9 / 5 ≤ amplitude ∧ amplitude ≤ 19 / 10) :
+    ∃ latency : ℝ, 2 / 5 < latency ∧ latency < 9 / 10 ∧
+      readyPulse initial amplitude start (start + latency) = 1 ∧
+      (∀ t ∈ Ico start (start + latency), readyPulse initial amplitude start t < 1) ∧
+      0 < deriv (readyPulse initial amplitude start) (start + latency) := by
+  obtain ⟨latency, early, deadline, root, prior⟩ :=
+    readyPulse_cadence_residual_first_crossing hq hg (start := start)
+  refine ⟨latency, early, deadline, root, prior, ?_⟩
+  apply readyPulse_transversal_of_later_value (by linarith [hg.1] : 0 ≤ amplitude)
+    (show start + latency < start + 9 / 10 by linarith)
+  rw [root]
+  exact readyPulse_emission_by_deadline hq.1 hg.1
+
+#print axioms readyPulse_cadence_residual_first_crossing_transversal
+
 end KernelR.Hybrid

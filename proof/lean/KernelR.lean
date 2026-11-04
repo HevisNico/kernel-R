@@ -453,3 +453,4 @@ import KernelR.HybridBoundedRun
 import KernelR.HybridInfiniteExtension
 import KernelR.HybridMaximalProgress
 import KernelR.HybridProgressControls
+import KernelR.HybridPulseTransversality

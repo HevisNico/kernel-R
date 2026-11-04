@@ -19,9 +19,43 @@ Write a=ln4, κ=1/2, r=1/10, rₘ=1/40, and gₚ=exp(zₚ).
 | Recovery learning | b′=½ΣₚLₘₚmₚ when auxiliary MARK, main not READY, E>0 and b<11/10; otherwise each contribution0 | `markAct`; `field` at `.b` |
 | Energy and work | E′=10(100−E)−W; W sums main work, auxiliary admission/drains and actual learning actuations | `work`; `field` at `.energy`; [HybridWork](../proof/lean/KernelR/HybridWork.lean), `Execution.reserve_birth_invariant`, proves reserve bounds under physical birth/parameter hypotheses |
 | Caps and actual doses | Gain/recovery actuation vanishes at its cap; full ERROR adds0.6 and protected MARK adds0.1 only when their gates remain open | `errorAct`, `markAct`; [HybridInvariants](../proof/lean/KernelR/HybridInvariants.lean) cap barriers; [Refinement](../proof/lean/KernelR/Refinement.lean) actual integral ledgers and gain/recovery balances |
-| Continuous evolution and first sections | Integral ODE on every flow prefix; strict interior guards prevent passing the first threshold in an old mode | `Flow.integral_eq`, `.guards`, `BeforeGuards`; `.raw_support` and `.pending_urgent` prevent flowing past raw expiry or a due token |
+| Continuous evolution and first contacts | Integral ODE on every flow prefix; strict interior guards prevent an old-mode flow from passing its first threshold contact | `Flow.integral_eq`, `.guards`, `BeforeGuards`; `.raw_support` and `.pending_urgent` prevent flowing past raw expiry or a due token |
 | Events and causal wiring | Jumps preserve time and physical coordinates. FIRE appends routed tokens; arrival removes one actual due occurrence on a free port | `setMain`, `setAux`, `setRaw`, `Jump`, `Delivery`, `Router`, `CausalRouter`; `Execution` composes actual flows and jumps without a fixed simultaneous-event priority |
 | Births and terminal completion | A starts in the declared birth family; later births add independent READY coordinates and sources. Completion discharges enabled jumps and every token due at the horizon | `BirthState` plus the headline's READY-auxiliary/source premises; [HybridStagedBirth](../proof/lean/KernelR/HybridStagedBirth.lean): `Newborn`, `BirthStep`, `StagedExecution`; `CompleteThrough` |
+
+## Threshold contacts and upward crossings
+
+The [written model](../kernel/README.md#main-unit) specifies first upward
+crossings for main FIRE and auxiliary MARK. The operational definitions
+`Jump.fire` and `Jump.mark` enable the jump at equality with the threshold,
+and `Flow.guards` imposes a strict preguard. These definitions express first
+contact. A correspondence with strict upward crossing requires a proof that
+the relevant contacts cross the threshold.
+
+[HybridPulseTransversality](../proof/lean/KernelR/HybridPulseTransversality.lean)
+uses the damped derivative equation of the smooth scalar pulse responses to
+prove positive contact slope from a strictly higher later response value.
+The `_transversal` variants of the sensor, learned, mid-learned, residual
+cadence and high-gain cadence contact lemmas retain their existing root
+brackets and preguards and additionally prove a strictly positive derivative
+at the root. These are derivatives of the scalar responses before any hybrid
+mode change or current discontinuity.
+
+| Response family | Strengthened contact lemma |
+|---|---|
+| Auxiliary sensor | [auxPulse_first_sensor_crossing_transversal](../proof/lean/KernelR/HybridScalarFirstCrossing.lean) |
+| Learned main response | [readyPulse_first_learned_crossing_transversal](../proof/lean/KernelR/HybridFirstLearnedFireExistence.lean) |
+| Mid-learned main response | [readyPulse_first_mid_learned_crossing_transversal](../proof/lean/KernelR/HybridMidLearnedFire.lean) |
+| Cadence with residual charge | [readyPulse_cadence_residual_first_crossing_transversal](../proof/lean/KernelR/HybridCadenceResidualRootBounds.lean) |
+| High-gain cadence | [readyPulse_cadence_high_first_crossing_transversal](../proof/lean/KernelR/HybridCadenceHighFireExistence.lean) |
+
+Propagation of these scalar facts to every FIRE and MARK in the constructed
+network witness remains open. The subsequent correspondence argument must
+also relate executions of the written crossing semantics to that witness,
+including simultaneous current changes. The global execution and progress
+theorems currently concern the formal first-contact semantics.
+
+## Constructed finite-chain result
 
 The [universal finite-chain headline](../proof/lean/KernelR/UniversalChainHeadline.lean)
 constructs the common-birth directed-chain protocol for every positive finite
