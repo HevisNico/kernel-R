@@ -237,7 +237,7 @@ project axiom is accepted. Verified indexed code commit:
 The following documentation-only commit records this identifier; the Lean,
 workflow and control-script sources are unchanged from the verified code tree.
 
-The20 new indexed paired controls pass, bringing the confirmed finite-chain
+The 20 new indexed paired controls pass, bringing the confirmed finite-chain
 inventory to **198 passing pairs** and the configured CI inventory to
 **1,301 paired controls**, plus axiom-audit corruption checks. These totals
 do not assert a fresh local rerun of every historical suite. The indexed
