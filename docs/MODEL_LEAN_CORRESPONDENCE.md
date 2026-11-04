@@ -48,10 +48,15 @@ defines its declared sources and contacts.
 
 `CompleteThrough e T` requires the terminal date T, no enabled terminal jump,
 and every pending token strictly future. The comparison quantifies over
-finite traces in that class. It does not claim that a stopped prefix has
-already completed, or establish infinite/maximal-run progress or non-Zeno
-extension. It does not equate flow subdivisions or the global ordering of
-simultaneous independent events.
+finite traces in that class. The [progress theorems](../proof/lean/PROGRESS.md)
+additionally extend every legal finite prefix of the same fixed finite-source
+program to a complete execution at any horizon at or after its endpoint.
+The physical-event non-Zeno bound rules out infinitely many physical jumps
+in bounded time under birth, physical-box and bounded-fanout hypotheses.
+Every infinite presentation of that program maximal under extension at a
+flow limit progresses beyond every finite horizon. Time can advance by quiet
+flow after source exhaustion. Flow subdivisions and the global ordering of
+simultaneous independent events may differ.
 
 The earlier [three-cell headline](../proof/lean/KernelR/Headline.lean) retains
 its distinct staged 0/160/480 births, horizon 789.9 and A54/B61/C34. Operational
