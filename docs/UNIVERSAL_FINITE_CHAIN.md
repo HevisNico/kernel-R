@@ -74,10 +74,11 @@ independence or cancellation of wire errors. The universal
 applies to every admissible supplied delay family; the indexed corollary
 additionally realizes each prescribed bounded error sequence.
 
-**Scope near the result:** the universal theorem concerns every finite
-`Execution` satisfying `CompleteThrough e T`, with the same initial state,
-parameters, source queue and fixed router. The constructed witness proves that
-this class is nonempty. Positive flows cannot bypass an enabled event; legal
+**Scope near the result:** the model theorem concerns every finite
+`CrossingExecution` satisfying `CrossingCompleteThrough model T`, with the same
+initial state, parameters, source queue and fixed router. The native comparison
+uses `Execution` and `CompleteThrough e T`. Constructed witnesses supply both
+classes. Positive flows cannot bypass events enabled by their respective semantics; legal
 simultaneous event orders and flow subdivisions give the same physical
 endpoint and exact ordered per-cell FIRE lists. The global simultaneous event
 list and pending-list presentation may differ by permutation.
@@ -135,7 +136,74 @@ recovery is insufficient remains separate from what is proved here.
 
 ## Lean headline: signatures, axioms and reproduction
 
-The native-delay entry point is
+### Geometric upward-crossing entry point
+
+The model-facing entry point is
+[`CrossingChainHeadline.every_finite_chain_every_crossing_execution`](../proof/lean/KernelR/CrossingChainHeadline.lean)
+in `KernelR.Hybrid.CrossingChainHeadline`. It constructs a complete execution
+in the model's upward-crossing semantics and compares every complete crossing
+execution from the same initial snapshot and fixed router. The theorem below
+takes prescribed bounded per-emission errors and constructs fixed native delay
+functions realizing them.
+
+```lean
+namespace KernelR.Hybrid.CrossingChainHeadline
+
+theorem every_finite_chain_every_crossing_execution {n θ bornCells K ε}
+    (hborn : ∀ i : Fin (n+1), BirthState (bornCells i))
+    (hb : @PhysicalBox (n+1) θ ε) (ha : ∀ i q, (bornCells i).aux 0 q = .ready)
+    (hqueue : ∀ i, (bornCells i).pending = sourceTrain 0 (finiteChainPreparationPort n i) 0 8 16)
+    (sigma centre : ℕ → ℝ) (error : ℕ → ℕ → ℝ)
+    (hK : 4 * (n+1) + 12 ≤ K) (hsigma : ∀ j, 0 ≤ sigma j)
+    (hbudget : KernelR.Chain.pathJitter sigma n ≤ 3/20)
+    (hcentre : ∀ j, j < n → (3/10 : ℝ) + sigma j ≤ centre j ∧ centre j ≤ 2/5 - sigma j)
+    (herror : ∀ j, j < n → ∀ i, -sigma j ≤ error j i ∧ error j i ≤ sigma j) :
+    ∃ chain : ConstructedIndexedBirthCadenceChain θ bornCells K sigma centre error
+        (cadenceChainTerminal n K),
+      (∃ model : CrossingExecution θ chain.chain.router
+          (familyPreparationBornSource bornCells K) chain.chain.final,
+        CrossingCompleteThrough model (cadenceChainTerminal n K)) ∧
+      chain.chain.AllCrossingComplete ∧ chain.AllCrossingCompleteErrors
+
+end KernelR.Hybrid.CrossingChainHeadline
+```
+
+`AllCrossingComplete` quantifies over every `CrossingExecution` satisfying
+`CrossingCompleteThrough model T` and gives the same physical endpoint and
+ordered per-cell FIRE dates. `AllCrossingCompleteErrors` gives the prescribed
+wire errors on those actual FIRE lists. The companion
+`CrossingChainHeadline.terminal_state_and_counts` transfers the terminal
+memories, recovery, FAST counts and total traffic to each model execution.
+
+For delay functions supplied in advance, the native construction below produces
+a `ConstructedBirthCadenceChain`. Its `crossingExecution` and
+`every_crossing_complete` results in
+[HybridCrossingCorrespondence](../proof/lean/KernelR/HybridCrossingCorrespondence.lean)
+supply crossing existence and universal observations for that same fixed delay
+family. This keeps the native-delay and indexed-error quantifier orders explicit.
+
+#### Geometric headline axiom transcript
+
+The source ends with `#print axioms every_finite_chain_every_crossing_execution`
+and `#print axioms terminal_state_and_counts`. A verbatim compiler transcript
+for these two geometric declarations is still to be recorded here. Capture
+their actual output from this revision with the following commands from
+`proof/lean`.
+
+```sh
+lake build KernelR.CrossingChainHeadline
+lake env lean KernelR/CrossingChainHeadline.lean
+```
+
+The [validation ledger](../proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
+records a fresh local build of 9,592 jobs and a global audit of 28,970 project
+theorem declarations for the geometric-crossing revision. That audit permits
+only `propext`, `Classical.choice` and `Quot.sound`. The per-declaration compiler
+transcript above remains a separate item to capture from a real build.
+
+### Native first-contact proof steps
+
+The native-delay proof entry point is
 [`universal_birth_cadence_chain_exists`](../proof/lean/KernelR/HybridUniversalBirthCadenceChain.lean)
 in `KernelR.Hybrid`. Its exact signature makes the delay functions explicit
 inputs, before the existential physical witness:
@@ -239,6 +307,7 @@ To check the integrated sources from the repository root with Lean installed:
 git rev-parse HEAD
 cd proof/lean
 lake exe cache get
+lake build KernelR.CrossingChainHeadline
 lake build KernelR.HybridUniversalBirthCadenceChain
 lake build KernelR.UniversalChainHeadline
 lake build
@@ -246,8 +315,10 @@ lake build Audit
 ```
 
 For the historical frozen checkpoint, first fetch and check out
-`f032e7f4dd07485945459236bd89e72748d6aec7`, then run the same build commands.
-The three indexed headline `#print axioms` outputs are:
+`f032e7f4dd07485945459236bd89e72748d6aec7`, then run its native-module,
+full-project and audit builds. The geometric crossing module belongs to the
+current source revision. The three native indexed headline `#print axioms`
+outputs recorded for the historical checkpoint are:
 
 ```text
 'KernelR.Hybrid.UniversalChainHeadline.every_finite_chain_every_complete_execution' depends on axioms: [propext,
@@ -305,3 +376,4 @@ jumps, caps, fixed parameters and birth families to actual Lean definitions.
 The [kernel guide](../kernel/README.md) explains the cell; the
 [archived model](../model/full_model_reference.md) preserves its original network
 context. A22 topology and simulations remain supporting material below.
+
