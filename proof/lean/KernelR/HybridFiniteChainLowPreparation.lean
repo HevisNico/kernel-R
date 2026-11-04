@@ -1,5 +1,6 @@
 import KernelR.HybridBirthPreparationExists
 import KernelR.HybridLocalSourceRestriction
+import KernelR.HybridContactSourceRestriction
 
 /-! A sixteen-input low-port preparation with an independently selected future
 source program. The existing birth constructor is restricted as an entire
@@ -37,6 +38,7 @@ private theorem low_preparation_initial_filter (born : Snapshot 1)
 structure FiniteChainLowPreparation (θ : Fin 1 → Parameters) (born : Snapshot 1) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) born final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = 1599 / 10
   prepared : PreparedSection final 0
   charge : final.x 0 .q = 1 / 10
@@ -59,9 +61,9 @@ theorem finite_chain_low_preparation_exists {θ ε born}
   have hShadow : BirthState (lowPreparationShadow born) := hborn
   obtain ⟨c,⟨outcome⟩⟩ := birth_protocol_preparation_exists hShadow hb ha rfl
   have hInitial := low_preparation_initial_filter born hqueue
-  have hTransport := c.execution.retainSourcesThrough_emptyRoute 128 c.date.le
+  have hTransport := c.execution.retainSourcesThrough_transversal c.contacts_transversal 128 c.date.le
   rw [hInitial] at hTransport
-  obtain ⟨cut,hLedger,hDelivered⟩ := hTransport
+  obtain ⟨cut,hLedger,hDelivered,hCutTransversal⟩ := hTransport
   let resting := retainSourcesThrough 128 c.final
   have hPending : resting.pending = [] := by
     change c.final.pending.filter _ = []
@@ -95,6 +97,7 @@ theorem finite_chain_low_preparation_exists {θ ε born}
   have hFinalReady := quietAt_ready_coordinates resting 0 (hReady 0) hBefore.le
   refine ⟨{
     final := quietAt resting (1599 / 10), execution := execution, date := rfl
+    contacts_transversal := (Execution.contactsTransversal_append cut wait).mpr ⟨hCutTransversal, trivial⟩
     prepared := ⟨hFinalReady.ready,hFinalReady.charge,outcome.prepared.recovery,hFinalReady.auxiliary⟩
     charge := ?_, raw_none := c.raw_none, pending := hPending
     gain_target := outcome.gain_target, gain_other := outcome.gain_other

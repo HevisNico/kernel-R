@@ -1,3 +1,4 @@
+import KernelR.HybridContactTransversality
 import KernelR.HybridCadenceMarkOnly
 import KernelR.HybridProtectedInputCycle
 
@@ -53,6 +54,7 @@ private theorem cadence_mark_final_charge {θ ε} (hb : @PhysicalBox 1 θ ε)
 structure CadenceMarkPrefix (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) (p : Port) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   main_flows : execution.MainFlows 0 .slow
   early : s.time+1/100<final.time
   deadline : final.time<s.time+1/20
@@ -79,7 +81,8 @@ theorem cadence_mark_prefix_exists {θ ε route} (hb : @PhysicalBox 1 θ ε) (s 
     (ha : ∀ q, s.aux 0 q = .ready ∧ RestBand (s.x 0 (.m q)))
     (hr : s.raw 0 p = some s.time) (ho : ∀ q, q ≠ p → s.raw 0 q = none)
     (hp : ∀ d ∈ s.pending, s.time + 4 ≤ d.due) : Nonempty (CadenceMarkPrefix θ route s p) := by
-  obtain ⟨latency,hearly,hdeadline,hroot,hprior⟩ := hb.first_sensor_crossing 0 p (ha p).2.1 (ha p).2.2
+  obtain ⟨latency,hearly,hdeadline,hroot,hprior,hslope⟩ :=
+    hb.first_sensor_crossing_transversal 0 p (ha p).2.1 (ha p).2.2
   let M := s.time + latency
   let beforeMark := protectedMainEnd θ s 0 p .slow .ready (some s.time) M
   have hM : s.time < M := by dsimp [M]; linarith
@@ -164,10 +167,18 @@ theorem cadence_mark_prefix_exists {θ ε route} (hb : @PhysicalBox 1 θ ε) (s 
   let e : Execution θ route s final := first.append
     (.cons (.flow secondFlow) (.cons (.jump (.silent (slowMarkEnd θ markStart 0 p T) 0 p hmarkmode
       (slowMarkEnd_sensor hb markStart 0 p (by rw [hmarkm]; norm_num)))) (.nil _)))
+  have firstContacts : first.ContactsTransversal := by
+    simp only [first, Execution.ContactsTransversal, Jump.ContactTransversal, and_true]
+    exact firstFlow.aux_contact_field_positive 0 p (ha p).1 hr
+      (by change M < s.time + 1; dsimp [M]; linarith)
+      (by simpa only [protectedMainEnd, M] using hslope)
+  have contacts : e.ContactsTransversal := by
+    simpa [e, Jump.ContactTransversal] using firstContacts
   have hno : ∀ q, NoArrivalAt e 0 q := by simp [NoArrivalAt,e,first,Execution.deliveries_append,Execution.deliveries,Move.deliveries,Jump.deliveries]
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := contacts
     main_flows := by
       simp only [e,first,Execution.append,Execution.MainFlows,Flow.mainIs]
       exact ⟨hm,hmarkmain,trivial⟩
@@ -305,6 +316,7 @@ private theorem cadence_guarded_aux_phase_exists {θ ε route} (hb : PhysicalBox
 structure CadenceMarkAuxReturn (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) (p : Port) (origin : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   time_bounds : origin + 111 / 100 < final.time ∧ final.time < origin + 419 / 300
   main_slow : final.main 0 = .slow
   auxiliary : ∀ j q, final.aux j q = .ready
@@ -430,6 +442,9 @@ theorem cadence_mark_aux_return_exists {θ ε route} (hb : PhysicalBox θ ε) (s
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by
+      simp [e, es, silent.contacts_transversal, err.contacts_transversal,
+        Execution.ContactsTransversal, Jump.ContactTransversal]
     time_bounds := by change origin + 111 / 100 < err.final.time ∧ err.final.time < origin + 419 / 300; rw [hedate]; exact hTr
     main_slow := err.main_slow
     auxiliary := hfinalReady
@@ -482,6 +497,7 @@ structure CadenceMarkOnlyResponse (θ : Fin 1 → Parameters) (route : Router 1)
   auxiliary : CadenceMarkAuxReturn θ route markPrefix.final p s.time
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time=s.time+4
   pulse : CadenceMarkOnlyPulse execution 0 p
   ready : ∀ j, ReadyCoordinates final j
@@ -627,6 +643,9 @@ theorem cadence_mark_only_response_exists {θ ε route} (hb : PhysicalBox θ ε)
   have hWaitEm : wait.ledger.emissions = [] := rfl
   refine ⟨{
     markPrefix := m, auxiliary := a, final := final, execution := e, date := rfl, pulse := pulse
+    contacts_transversal := by
+      simp [e, head, wait, m.contacts_transversal, a.contacts_transversal,
+        Execution.ContactsTransversal, Jump.ContactTransversal]
     ready := hfinalReady, charge := pulse.charge_rest
     raw_none := fun j q => by have hj : j=0 := Subsingleton.elim _ _; subst j; exact pulse.raw_finished q
     gains := fun j q => by have hj : j=0 := Subsingleton.elim _ _; subst j; exact pulse.gain_preserved q
@@ -659,6 +678,7 @@ structure CadenceMarkOnlyNextSource {θ route s p} (c : CadenceMarkOnlyResponse 
     (later : List (Delivery 1)) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time=s.time+4
   values : final.x=c.final.x
   ready : ∀ j, ReadyCoordinates final j
@@ -723,6 +743,9 @@ theorem cadence_mark_only_next_source_exists {θ ε route s p}
       exact hfuture d hd
   exact ⟨{
     final:=final,execution:=trace,date:=c.date,values:=rfl,ready:=hready,charge:=c.charge
+    contacts_transversal := by
+      simp [trace, arrival, c.contacts_transversal, Execution.ContactsTransversal,
+        Jump.ContactTransversal]
     raw_active:=hraw,raw_other:=hother,gains:=c.gains,recovery_gain:=c.recovery_gain,pending:=rfl
     emissions:=by
       simp only [trace,Execution.emissions_append,c.emissions,Execution.ledger,Move.ledger,

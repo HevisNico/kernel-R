@@ -19,6 +19,7 @@ structure CadenceMixedFullResponse (θ : Fin 1 → Parameters) (s : Snapshot 1) 
   final : Snapshot 1
   wait : Execution θ (fun _ _ => []) errorEnd.final final
   execution : Execution θ (fun _ _ => []) s final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = markPrefix.execution.append (reopened.execution.append
     (errorStart.execution.append (errorEnd.execution.append wait)))
   date : final.time = s.time + 37 / 10
@@ -138,6 +139,9 @@ theorem cadence_mixed_full_response_exists {θ ε} (hb : PhysicalBox θ ε) (s :
     (by intro q; simp [NoArrivalAt,hDel]) (by change s.time + 37 / 10 ≤ s.time + 37 / 10; linarith)
   refine ⟨{
     markPrefix := m, reopened := r, errorStart := start, errorEnd := err
+    contacts_transversal := by
+      simp [execution, wait, Execution.ContactsTransversal,
+        m.contacts_transversal, r.contacts_transversal, start.contacts_transversal, err.contacts_transversal]
     final := quietAt err.final (s.time + 37 / 10), wait := wait, execution := execution, reconstruct := rfl
     date := rfl, pulse := pulse
     coordinates := ⟨pulse.ready,⟨by linarith [pulse.charge.1],pulse.charge_cadence⟩,pulse.auxiliary⟩

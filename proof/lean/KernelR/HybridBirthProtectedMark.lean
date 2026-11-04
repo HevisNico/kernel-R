@@ -28,6 +28,16 @@ noncomputable def BirthProtectedMark.execution {θ born} (c : BirthProtectedMark
     Execution θ (fun _ _ => []) born c.final :=
   ((c.first.execution.append c.fast.execution).append c.arrival.execution).append c.markTrace
 
+@[simp] theorem BirthProtectedMark.contacts_transversal {θ born}
+    (c : BirthProtectedMark θ born) : c.execution.ContactsTransversal := by
+  change (((c.first.execution.append c.fast.execution).append c.arrival.execution).append
+    c.mark.execution).ContactsTransversal
+  exact (Execution.contactsTransversal_append _ _).2
+    ⟨(Execution.contactsTransversal_append _ _).2
+      ⟨(Execution.contactsTransversal_append _ _).2
+        ⟨c.first.contacts_transversal, c.fast.contacts_transversal⟩,
+        c.arrival.contacts_transversal⟩, c.mark.contacts_transversal⟩
+
 /-- The actual first main return remains SLOW at source32. That source then
 constructs the protected MARK, using its own unchanged birth recovery. -/
 theorem birth_protocol_protected_mark_exists {θ ε born}

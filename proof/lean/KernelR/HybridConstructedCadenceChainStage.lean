@@ -24,6 +24,7 @@ theorem cadence_active_port_tail (depth : ℕ) (i : Fin (depth+1)) :
 structure ConstructedCadenceChainStage (d : FiniteCausalChainData)
     (K : ℕ) (T : ℝ) (depth m L : ℕ) (J : ℝ) where
   stage : FiniteCausalChainStage d T depth
+  contacts_transversal : stage.execution.ContactsTransversal
   packet : KernelR.Chain.Packet m L J
   calendar : stage.execution.emissionTimes 0=
     List.ofFn (fun i : Fin (m+L) => packet.actual i.val)

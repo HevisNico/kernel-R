@@ -1,5 +1,10 @@
 # Universal finite-chain release preparation
 
+**Historical v0.2.0 release preparation.** The checklist and draft text below
+retain their original release scope and validation counts. They are not the
+publication instructions for the later geometric-crossing development; see the
+[current proof ledger](../proof/lean/EVERY_N_PLAN.md#geometric-crossings-and-finite-prefix-progress).
+
 This is a publication checklist and draft release text. It does not create a
 tag or publish a release. The proposed next version is **v0.2.0**; the existing
 `v0.1.0` remains the earlier robust N-cell composition checkpoint and does not

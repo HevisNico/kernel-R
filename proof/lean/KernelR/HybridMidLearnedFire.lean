@@ -14,7 +14,7 @@ theorem first_mid_learned_mark_exists {n θ ε} (s : Snapshot n) (hb : @Physical
     (hs : 1 / 40 - 1 / 100000 ≤ s.x i (.m p) ∧ s.x i (.m p) ≤ 1 / 40 + 1 / 100000)
     (hp : ∀ d ∈ s.pending, s.time + 1 / 40 ≤ d.due) :
     Nonempty (FirstInputMark θ s i p) := by
-  obtain ⟨latency,hearly,hdeadline,hroot,hprior⟩ := hb.first_sensor_crossing i p hs.1 hs.2
+  obtain ⟨latency,hearly,hdeadline,hroot,hprior,hslope⟩ := hb.first_sensor_crossing_transversal i p hs.1 hs.2
   have htime : s.time < s.time + latency := by linarith
   have hraw : s.time + latency < s.time + 1 := by linarith
   have hmain : ∀ t, s.time ≤ t → t ≤ s.time + 3 / 10 →
@@ -31,6 +31,7 @@ theorem first_mid_learned_mark_exists {n θ ε} (s : Snapshot n) (hb : @Physical
     flow := readyInputFlow s i p htime hraw hm ha hr ho hq hx
       (fun t ht => hmain t ht.1 (by linarith [ht.2])) hprior (fun d hd => by linarith [hp d hd])
     threshold := hroot
+    scalar_slope := hslope
     main_below := ?_
     aux_below := ?_
     pending_future := fun d hd => by linarith [hp d hd]
@@ -189,7 +190,7 @@ theorem first_mid_learned_fire_exists {n θ ε route} (s : Snapshot n) (hb : @Ph
   obtain ⟨f⟩ := first_mid_learned_mark_exists s hb i p hm ha hr ho hq0 hx0 (hs i).charge.2 hg.2
     ((hs i).auxiliary p).2 (fun d hd => by linarith [hp d hd])
   obtain ⟨g⟩ := f.first_mid_learned_silent_exists hb (hs i).charge.2 hg.2 (fun d hd => by linarith [hp d hd])
-  obtain ⟨latency,hearly,hdeadline,hroot,hprior⟩ := readyPulse_first_mid_learned_crossing (hs i).charge hg
+  obtain ⟨latency,hearly,hdeadline,hroot,hprior,hslope⟩ := readyPulse_first_mid_learned_crossing_transversal (hs i).charge hg
   let T := s.time + latency
   have hT : g.final.time < T := by rw [g.date]; dsimp [T]; linarith [g.deadline]
   have hstart : s.time ≤ g.final.time := by
@@ -240,6 +241,7 @@ theorem first_mid_learned_fire_exists {n θ ε route} (s : Snapshot n) (hb : @Ph
     early := hearly
     deadline := hdeadline
     response_root := hroot
+    scalar_slope := hslope
     flow := flow
     threshold := hthreshold
     sensor_above_floor := ?_

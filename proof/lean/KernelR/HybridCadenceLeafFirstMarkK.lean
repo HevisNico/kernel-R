@@ -29,6 +29,7 @@ structure ConstructedCadenceLeafFirstMarkK {θ : Fin 1 → Parameters} {s : Snap
   mark : CadenceMarkOnlyJitterNextSource θ source p (s.time + 20)
     (sourceTrain 0 p (s.time + 24) 4 (K - 6))
   execution : Execution θ (fun _ _ => []) warmup.final mark.final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = strong.append mark.execution
   date : mark.final.time = s.time + 20
   ready : ∀ j, ReadyCoordinates mark.final j
@@ -175,6 +176,10 @@ theorem constructed_cadence_leaf_first_mark_k_exists {θ ε s p K}
     arrival := arrival, strong := strong, strong_reconstruct := rfl
     source_date := hSourceDate, source_values := rfl, source_slow := span.main_slow
     source_charge := span.charge, source_energy := rfl, mark := mark
+    contacts_transversal := by
+      simp [trace, strong, arrival, Execution.ContactsTransversal, Jump.ContactTransversal,
+        fire.contacts_transversal, fast.contacts_transversal, span.contacts_transversal,
+        mark.contacts_transversal]
     execution := trace, reconstruct := rfl, date := mark.date, ready := mark.ready, charge := mark.charge
     raw_active := ?_, raw_other := mark.raw_other, pending := mark.pending, gains := hGain
     gain_target := (hGain p).trans warmup.gain_target

@@ -12,6 +12,7 @@ structure CadenceWeakResponse (θ : Fin 1 → Parameters) (route : Router 1)
     (s : Snapshot 1) (p : Port) (k : Fin 3) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = s.time + 4
   initial_ready : s.main 0 = .ready
   pulse : CadenceSilentPulse execution 0 p (cadenceWeakOutputCap k)
@@ -146,6 +147,10 @@ theorem cadence_weak_response_exists {θ ε route} (hb : PhysicalBox θ ε)
   obtain ⟨pulse⟩ := trace.cadence_weak_stage hb hf hv 0 p k hs hz hr ho hno
     (by change s.time + 4 ≤ s.time + 4; exact le_rfl)
   exact ⟨{
+    contacts_transversal := by
+      simp [trace, preparedTrace, quiet, Execution.ContactsTransversal,
+        f.contacts_transversal, g.continuation_contacts_transversal,
+        h.contacts_transversal, c.contacts_transversal]
     final := quietAt c.final (s.time + 4), execution := trace, date := rfl, initial_ready := hs.ready
     pulse := pulse, pending := c.pending.trans hqueue
     emissions := hemissions, deliveries := hdeliveries
@@ -169,6 +174,7 @@ structure CadenceWeakNextSource {θ route s p k} (c : CadenceWeakResponse θ rou
     (later : List (Delivery 1)) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = s.time + 4
   values : final.x = c.final.x
   coordinates : CadenceReadyCoordinates final 0 (cadenceWeakOutputCap k)
@@ -240,6 +246,8 @@ theorem cadence_weak_next_source_exists {θ ε route s p k}
       rw [← c.date]
       exact hfuture d hd
   exact ⟨{
+    contacts_transversal := by
+      simp [trace, arrival, Execution.ContactsTransversal, Jump.ContactTransversal, c.contacts_transversal]
     final := final, execution := trace, date := c.date, values := rfl, coordinates := hcoords
     gain_target := c.pulse.gain_target, gain_other := c.pulse.gain_other
     recovery := c.pulse.recovery_preserved, raw_active := hraw, raw_other := hother

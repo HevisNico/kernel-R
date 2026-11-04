@@ -17,6 +17,8 @@ structure FiniteCausalExtension {d : FiniteCausalChainData} {T : ℝ} {n : ℕ}
   tail_times : ∀ i, next.execution.emissionTimes i.succ=stage.execution.emissionTimes i
   head_values : next.final.x 0=head.final.x 0
   tail_values : ∀ i, next.final.x i.succ=stage.final.x i
+  contacts_transversal : stage.execution.ContactsTransversal →
+    head.execution.ContactsTransversal → next.execution.ContactsTransversal
 
 /-- Construct the actual next stage with an explicit bridge to both physical
 input traces. This is stronger than a bare existential stage constructor. -/
@@ -63,6 +65,11 @@ theorem finite_causal_extension_exists {d : FiniteCausalChainData} {T : ℝ} {n 
     pending:=weave.pending_empty stage.pending head.pending
     physical:=execution.physical_invariant hb hf,raw_valid:=execution.raw_valid hv
     cells:=cells
+    contacts_transversal:=by
+      intro localContacts
+      apply (weave.execution.contactsTransversal_cast_source hsource.symm).2
+      exact weave.contacts_transversal
+        (stage.contacts_transversal (fun i => localContacts i.succ)) (localContacts 0)
     emission_times:=by
       intro i
       cases i using Fin.cases with
@@ -79,6 +86,10 @@ theorem finite_causal_extension_exists {d : FiniteCausalChainData} {T : ℝ} {n 
     head_times:=(htimes 0).trans weave.head_emission_times
     tail_times:=fun i => (htimes i.succ).trans (weave.tail_emission_times i)
     head_values:=rfl,tail_values:=fun _ => rfl
+    contacts_transversal:=by
+      intro tailContacts headContacts
+      exact (weave.execution.contactsTransversal_cast_source hsource.symm).2
+        (weave.contacts_transversal tailContacts headContacts)
   }⟩
 
 namespace FiniteCausalExtension

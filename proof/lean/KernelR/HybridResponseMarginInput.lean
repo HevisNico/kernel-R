@@ -18,7 +18,8 @@ theorem first_input_mark_of_response_margin_until_exists {n θ ε} (s : Snapshot
     (hs : 1 / 40 - 1 / 100000 ≤ s.x i (.m p) ∧ s.x i (.m p) ≤ 1 / 40 + 1 / 100000)
     (hp : ∀ d ∈ s.pending, s.time + 1 / 40 ≤ d.due) :
     Nonempty (FirstInputMark θ s i p) := by
-  obtain ⟨latency,hearly,hdeadline,hroot,hprior⟩ := hb.first_sensor_crossing i p hs.1 hs.2
+  obtain ⟨latency,hearly,hdeadline,hroot,hprior,hslope⟩ :=
+    hb.first_sensor_crossing_transversal i p hs.1 hs.2
   have htime : s.time < s.time + latency := by linarith
   have hraw : s.time + latency < s.time + 1 := by linarith
   refine ⟨{
@@ -32,6 +33,7 @@ theorem first_input_mark_of_response_margin_until_exists {n θ ε} (s : Snapshot
     flow := readyInputFlow s i p htime hraw hm ha hr ho hq hx
       (fun t ht => hmain t ht.1 (by linarith [ht.2])) hprior (fun d hd => by linarith [hp d hd])
     threshold := hroot
+    scalar_slope := hslope
     main_below := ?_
     aux_below := ?_
     pending_future := fun d hd => by linarith [hp d hd]

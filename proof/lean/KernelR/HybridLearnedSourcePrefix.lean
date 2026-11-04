@@ -38,6 +38,7 @@ structure LearnedSourcePrefix (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : 
     (times : List ℝ) (later : List (Delivery 1)) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = learnedPrefixEnd s.time times
   prepared : PreparedSection final 0
   charge : final.x 0 .q = 1 / 10
@@ -99,7 +100,7 @@ theorem learned_source_prefix_exists {θ ε} (hb : PhysicalBox θ ε) (s : Snaps
           contradiction
       · exact hFuture
     exact ⟨{
-      final := s, execution := execution, date := rfl, prepared := hs, charge := hq
+      final := s, execution := execution, contacts_transversal := trivial, date := rfl, prepared := hs, charge := hq
       raw_active := hr, raw_other := ho, pending := hqueue, gains := fun _ => rfl, recovery := rfl
       calendar := rfl, emission_count := rfl, deliveries := rfl
       physical := hf, raw_valid := hv, complete := hc
@@ -141,7 +142,13 @@ theorem learned_source_prefix_exists {θ ε} (hb : PhysicalBox θ ε) (s : Snaps
       rw [hHead,hFire,step.date,step.gains]
       rfl
     refine ⟨{
-      final := tail.final, execution := execution, date := ?_, prepared := tail.prepared
+      final := tail.final
+      execution := execution
+      contacts_transversal := by
+        simpa only [execution, Execution.contactsTransversal_append] using
+          (And.intro step.contacts_transversal tail.contacts_transversal)
+      date := ?_
+      prepared := tail.prepared
       charge := tail.charge, raw_active := tail.raw_active, raw_other := tail.raw_other
       pending := tail.pending, gains := ?_, recovery := ?_, calendar := hCalendar
       emission_count := ?_, deliveries := ?_, physical := tail.physical, raw_valid := tail.raw_valid

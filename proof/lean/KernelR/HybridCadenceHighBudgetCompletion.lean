@@ -54,6 +54,7 @@ private theorem full_budget_high_slow_section_exists {θ route} (s : Snapshot 1)
     refine ⟨{
       final := final
       execution := .cons (.flow flow) (.cons (.jump (.fastEnd before 0 hmfast hthreshold)) (.nil _))
+      contacts_transversal := by trivial
       date := (max_eq_right htime.le).symm
       main_slow := by simp [final,setMain]
       charge_clock := by change before.x 0 .q = _; rw [hthreshold]; simp [final,setMain,before,protectedMainEnd]
@@ -69,6 +70,7 @@ private theorem full_budget_high_slow_section_exists {θ route} (s : Snapshot 1)
     · simpa [final,setMain,before,protectedMainEnd,protectedMainValues,hq0,RestBand] using hb
   · exact ⟨{
       final := s, execution := .nil _, date := (max_eq_left (le_of_not_gt htime)).symm
+      contacts_transversal := by trivial
       main_slow := by simpa only [htime,ite_false] using hm
       charge_clock := by simpa only [cadenceProtectedCharge,htime,ite_false] using hq
       auxiliary := ha, rest := hs, raw_none := hr, pending := rfl
@@ -158,9 +160,11 @@ private theorem full_budget_high_ready_return_exists {θ route} (s : Snapshot 1)
   let final := quietAt reopened (source + 4)
   refine ⟨{
     final := final, execution := head.append rest, date := rfl
+    contacts_transversal := by simp [head, rest, Execution.ContactsTransversal, Jump.ContactTransversal]
     ready := fun j => quietAt_ready_coordinates reopened j (hready j) hwait.le
     charge := ?_, raw_none := hr, pending := rfl, gains := fun _ _ => rfl, recovery := fun _ => rfl
     emissions := rfl, deliveries := rfl, returnState := reopened, head := head, rest := rest
+    head_transversal := by trivial
     reconstruct := rfl, return_date := rfl, return_deadline := hdeadline
     return_ready := hready, return_charge := hthreshold, return_raw_none := hr
     return_pending := rfl, return_gains := fun _ _ => rfl, return_recovery := fun _ => rfl
@@ -327,11 +331,17 @@ theorem CadenceHighFire.full_budget_completion_exists {θ ε} {s : Snapshot 1} {
   let execution := toSlow.append returned.execution
   refine ⟨{
     final := returned.final, execution := execution, date := returned.date, ready := returned.ready
+    contacts_transversal := by
+      simp [execution, toSlow, toReady, toError, Execution.ContactsTransversal, Jump.ContactTransversal,
+        silent.contacts_transversal, err.contacts_transversal, slow.contacts_transversal, returned.contacts_transversal]
     charge := returned.charge, raw_none := returned.raw_none
     pending := ?_, gains := ?_, recovery := ?_, emissions := ?_, deliveries := ?_
     physical := execution.physical_invariant hb fire.physical
     raw_valid := execution.raw_valid fire.raw_valid
     slowSection := slow.final, toSlow := toSlow
+    toSlow_transversal := by
+      simp [toSlow, toReady, toError, Execution.ContactsTransversal, Jump.ContactTransversal,
+        silent.contacts_transversal, err.contacts_transversal, slow.contacts_transversal]
     toSlow_pending := slow.pending.trans (err.pending.trans silent.pending)
     toSlow_gains := fun j q => (slow.gains j q).trans ((err.gains j q).trans (silent.gains j q))
     toSlow_recovery := fun j => (slow.recovery j).trans ((err.recovery j).trans (silent.recovery j))

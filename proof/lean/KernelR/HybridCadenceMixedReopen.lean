@@ -8,6 +8,7 @@ open Set
 structure CadenceMixedReopen {θ route s p} (m : CadenceMixedPrefix θ route s p) where
   final : Snapshot 1
   execution : Execution θ route m.final final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = m.final.time + slowReopenDuration m.final 0
   window : s.time + 1 / 2 < final.time ∧ final.time < s.time + 99 / 100
   main_ready : final.main 0 = .ready
@@ -111,6 +112,7 @@ theorem cadence_mixed_reopen_exists {θ ε route s p}
   let execution : Execution θ route m.final final :=
     .cons (.flow flow) (.cons (.jump (.reopen before 0 m.main_slow hthreshold)) (.nil _))
   refine ⟨{
+    contacts_transversal := by simp [execution, Execution.ContactsTransversal, Jump.ContactTransversal]
     final := final, execution := execution, date := rfl, window := ⟨hLo,hHi⟩
     main_ready := by simp [final,setMain], charge := hthreshold, aux_silent := m.aux_silent
     sensor_clock := ?_, sensor_above := ?_, auxiliary_other := ?_

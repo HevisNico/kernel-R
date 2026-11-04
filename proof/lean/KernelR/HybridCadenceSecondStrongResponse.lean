@@ -12,6 +12,7 @@ structure CadenceSecondStrongResponse (θ : Fin 1 → Parameters) (s : Snapshot 
   final : Snapshot 1
   arrival : Jump (fun _ _ => []) slow.final final
   execution : Execution θ (fun _ _ => []) s final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = ((fire.execution.append fast.execution).append slow.execution).append
     (.cons (.jump arrival) (.nil _))
   date : final.time = s.time + 4
@@ -114,6 +115,9 @@ theorem cadence_second_strong_response_exists {θ ε}
       exact h
   refine ⟨{
     fire := fire, fast := fast, slow := slow, final := final, arrival := arrival
+    contacts_transversal := by
+      simp [execution, arrival, Execution.ContactsTransversal, Jump.ContactTransversal,
+        fire.contacts_transversal, fast.contacts_transversal, slow.contacts_transversal]
     execution := execution, reconstruct := rfl, date := slow.date, values := rfl
     main_slow := slow.main_slow, auxiliary := slow.auxiliary, rest := slow.rest
     trained_rest := slow.trained_rest, charge := slow.charge, raw_active := hRaw, raw_other := hOther

@@ -1,5 +1,6 @@
 import KernelR.HybridFlowCuts
 import KernelR.HybridGuardNoJump
+import KernelR.HybridContactTransversality
 
 /-! A finite existing execution has a prefix just before a positive flow at
 any strictly interior clock. All zero-time jumps at that clock are consumed. -/
@@ -15,6 +16,7 @@ structure Execution.BeforeFlowCut {n θ route s u} (e : @Execution n θ route s 
   nextState : Snapshot n
   flow : Flow θ state nextState
   rest : Execution θ route nextState u
+  rest_contacts_transversal : e.ContactsTransversal → rest.ContactsTransversal
   deliveries : e.deliveries = cut.deliveries ++ rest.deliveries
   emissions : e.ledger.emissions = cut.ledger.emissions ++ rest.ledger.emissions
 
@@ -37,6 +39,7 @@ theorem Execution.before_flow_cut_exists {n θ route s u} (e : @Execution n θ r
         nextState := r.nextState
         flow := r.flow
         rest := r.rest
+        rest_contacts_transversal := fun positive => r.rest_contacts_transversal positive.2
         deliveries := ?_
         emissions := ?_
       }⟩
@@ -52,6 +55,7 @@ theorem Execution.before_flow_cut_exists {n θ route s u} (e : @Execution n θ r
           nextState := v
           flow := f
           rest := rest
+          rest_contacts_transversal := fun positive => positive
           deliveries := rfl
           emissions := rfl
         }⟩
@@ -65,6 +69,7 @@ theorem Execution.before_flow_cut_exists {n θ route s u} (e : @Execution n θ r
             nextState := v
             flow := f.suffix hpos.le hinside
             rest := rest
+            rest_contacts_transversal := fun positive => positive
             deliveries := rfl
             emissions := rfl
           }⟩
@@ -77,6 +82,7 @@ theorem Execution.before_flow_cut_exists {n θ route s u} (e : @Execution n θ r
             nextState := r.nextState
             flow := r.flow
             rest := r.rest
+            rest_contacts_transversal := fun positive => r.rest_contacts_transversal positive
             deliveries := ?_
             emissions := ?_
           }⟩

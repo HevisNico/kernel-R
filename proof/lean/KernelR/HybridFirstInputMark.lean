@@ -3,6 +3,7 @@ import KernelR.HybridScalarFirstCrossing
 import KernelR.HybridBirthPulseGain
 import KernelR.HybridGuardNoJump
 import KernelR.HybridSourceProgress
+import KernelR.HybridContactTransversality
 
 /-! Construct a nontrivial source-driven execution through its first MARK.
 No execution, event date or desired case is supplied to the construction. -/
@@ -20,6 +21,8 @@ structure FirstInputMark {n} (θ : Fin n → Parameters) (s : Snapshot n)
   raw_other : ∀ j q, j ≠ i ∨ q ≠ p → s.raw j q = none
   flow : Flow θ s (readyInputEnd θ s i p (s.time + latency))
   threshold : auxPulse (s.x i (.m p)) ((θ i).inputGain p) s.time (s.time + latency) = 1
+  scalar_slope : 0 < deriv (auxPulse (s.x i (.m p)) ((θ i).inputGain p) s.time)
+    (s.time + latency)
   main_below : ∀ j, (readyInputEnd θ s i p (s.time + latency)).x j .q < 1
   aux_below : ∀ j q, j ≠ i ∨ q ≠ p →
     (readyInputEnd θ s i p (s.time + latency)).x j (.m q) < 1
@@ -35,6 +38,24 @@ theorem FirstInputMark.sensor_threshold {n θ s i p} (f : @FirstInputMark n θ s
 noncomputable def FirstInputMark.execution {n θ s i p} (f : @FirstInputMark n θ s i p)
     (route : Router n) : Execution θ route s f.final :=
   .cons (.flow f.flow) (.cons (.jump (.mark _ i p (f.aux_ready i p) f.sensor_threshold)) (.nil _))
+
+theorem FirstInputMark.contact_field_eq_deriv {n θ s i p} (f : @FirstInputMark n θ s i p) :
+    field θ (readyInputEnd θ s i p (s.time + f.latency))
+      (readyInputEnd θ s i p (s.time + f.latency)).x (s.time + f.latency) i (.m p) =
+      deriv (auxPulse (s.x i (.m p)) ((θ i).inputGain p) s.time) (s.time + f.latency) := by
+  simpa only [readyInputEnd, sub_self, mul_zero, neg_zero, Real.exp_zero, mul_one] using
+    f.flow.aux_contact_field_eq_deriv i p s.time (f.aux_ready i p) f.raw_active
+      (by change s.time + f.latency < s.time + 1; linarith [f.deadline])
+
+@[simp] theorem FirstInputMark.contacts_transversal {n θ s i p}
+    (f : @FirstInputMark n θ s i p) (route : Router n) :
+    (f.execution route).ContactsTransversal := by
+  simp only [FirstInputMark.execution, Execution.ContactsTransversal, Jump.ContactTransversal,
+    and_true]
+  change 0 < field θ (readyInputEnd θ s i p (s.time + f.latency))
+    (readyInputEnd θ s i p (s.time + f.latency)).x (s.time + f.latency) i (.m p)
+  rw [f.contact_field_eq_deriv]
+  exact f.scalar_slope
 
 theorem FirstInputMark.final_guards {n θ s i p} (f : @FirstInputMark n θ s i p) :
     BeforeGuards f.final f.final.x := by
@@ -88,7 +109,8 @@ theorem first_input_mark_exists {n θ ε} (s : Snapshot n) (hb : @PhysicalBox n 
     (hs : 1 / 40 - 1 / 100000 ≤ s.x i (.m p) ∧ s.x i (.m p) ≤ 1 / 40 + 1 / 100000)
     (hp : ∀ d ∈ s.pending, s.time + 1 / 40 ≤ d.due) :
     Nonempty (FirstInputMark θ s i p) := by
-  obtain ⟨latency,hearly,hdeadline,hroot,hprior⟩ := hb.first_sensor_crossing i p hs.1 hs.2
+  obtain ⟨latency,hearly,hdeadline,hroot,hprior,hslope⟩ :=
+    hb.first_sensor_crossing_transversal i p hs.1 hs.2
   have htime : s.time < s.time + latency := by linarith
   have hraw : s.time + latency < s.time + 1 := by linarith
   have hmain : ∀ t, s.time ≤ t →
@@ -105,6 +127,7 @@ theorem first_input_mark_exists {n θ ε} (s : Snapshot n) (hb : @PhysicalBox n 
     flow := readyInputFlow s i p htime hraw hm ha hr ho hq hx
       (fun t ht => hmain t ht.1) hprior (fun d hd => by linarith [hp d hd])
     threshold := hroot
+    scalar_slope := hslope
     main_below := ?_
     aux_below := ?_
     pending_future := fun d hd => by linarith [hp d hd]

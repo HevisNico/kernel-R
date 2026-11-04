@@ -82,10 +82,14 @@ simultaneous event orders and flow subdivisions give the same physical
 endpoint and exact ordered per-cell FIRE lists. The global simultaneous event
 list and pending-list presentation may differ by permutation.
 
-The execution definitions use first threshold contact. The
+The native execution definitions use first threshold contact. The
 [threshold correspondence](MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
-states the scalar transversality results and the remaining network-level
-argument relating these definitions to the written upward-crossing convention.
+now proves the bridge to geometric upward crossings on this protocol.
+[`CrossingChainHeadline.every_finite_chain_every_crossing_execution`](../proof/lean/KernelR/CrossingChainHeadline.lean)
+constructs a crossing witness and quantifies over every geometrically complete
+model execution under the same static hypotheses. Its exact refinement retains
+all paths and jumps; the endpoint, ordered FIRE dates, learning, counts and
+prescribed wire errors follow from the native results.
 
 This comparison assumes completeness through T. For the same fixed finite-source
 program, the [progress theorems](../proof/lean/PROGRESS.md) extend every legal

@@ -7,6 +7,7 @@ structure PreparedLearnedTrain (θ : Fin 1 → Parameters) (s : Snapshot 1)
     (count : ℕ) (later : List (Delivery 1)) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = s.time + 8 * (count : ℝ) + 15 / 2
   ready : ∀ j, ReadyCoordinates final j
   prepared : ∀ j, PreparedSection final j
@@ -37,6 +38,7 @@ theorem prepared_learned_train_exists {θ ε} (hb : PhysicalBox θ ε) (s : Snap
     exact ⟨{
       final := c.final
       execution := c.execution
+      contacts_transversal := c.contacts_transversal
       date := by simpa using c.date
       ready := c.ready
       prepared := c.prepared
@@ -110,6 +112,8 @@ theorem prepared_learned_train_exists {θ ε} (hb : PhysicalBox θ ε) (s : Snap
     refine ⟨{
       final := t.final
       execution := e
+      contacts_transversal := by
+        simp [e, c.contacts_transversal, a.contacts_transversal, t.contacts_transversal]
       date := t.date.trans hdate
       ready := t.ready
       prepared := t.prepared

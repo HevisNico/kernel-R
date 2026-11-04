@@ -110,6 +110,7 @@ theorem port_first_learned_cut_exists {θS θR ε route source pS cycle pR delay
     state := low.final, cut := low.execution
     isPrefix := by rw [heFull]; exact execution_prefix_append _ _
     date := low.date, nextState := full.final, flow := held, rest := .nil _
+    rest_contacts_transversal := fun _ => True.intro
     deliveries := by rw [full.deliveries,low.deliveries]; rfl
     emissions := by rw [full.emissions,low.emissions]; rfl
   }

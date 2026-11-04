@@ -69,6 +69,7 @@ theorem FirstInputSilent.first_error_exists_of_margin {n θ ε s i p} {f : @Firs
     · exact ⟨{
         beforeError := before
         span := .cons (.flow leg.flow) (.nil _)
+        span_contacts_transversal := by trivial
         span_deliveries := rfl
         span_emissions := rfl
         date := rfl
@@ -91,6 +92,7 @@ theorem FirstInputSilent.first_error_exists_of_margin {n θ ε s i p} {f : @Firs
       refine ⟨{
         beforeError := expired
         span := .cons (.flow leg.flow) (.cons (.jump expiry) (.nil _))
+        span_contacts_transversal := by trivial
         span_deliveries := rfl
         span_emissions := rfl
         date := rfl
@@ -161,6 +163,7 @@ theorem FirstInputSilent.first_error_exists_of_margin {n θ ε s i p} {f : @Firs
     exact ⟨{
       beforeError := before
       span := .cons (.flow first.flow) (.cons (.jump expiry) (.cons (.flow last.flow) (.nil _)))
+      span_contacts_transversal := by trivial
       span_deliveries := rfl
       span_emissions := rfl
       date := rfl

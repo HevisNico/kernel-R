@@ -6,7 +6,8 @@
 
 **R cells learn through pulses and transmit a cadence along every finite
 directed chain, under the declared protocol. Lean verifies the physical
-construction and complete-execution guarantees in its first-contact semantics.**
+construction and complete-execution guarantees, with a proved geometric
+upward-crossing correspondence for the finite-chain protocol.**
 
 Each cell has two memories with complementary gates: input sensitivity
 (gain) and recovery. The protocol changes both through the cell's own
@@ -63,10 +64,11 @@ the native-delay theorem above takes the functions as inputs.
 
 ## Limits
 
-The formal event guards use first threshold contact. Positive contact slopes
-are proved for the five scalar pulse-response families. Their propagation to
-the constructed network witness and the full correspondence with the written
-upward-crossing convention remain open. See the
+The native event guards use first threshold contact. A separate geometric
+semantics requires an actual approach from below and an incoming-mode ODE
+continuation above the threshold. Their correspondence is proved for the
+constructed finite-chain protocol, including every complete competing model
+execution, without adding protocol hypotheses. See the
 [threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings).
 
 The universal comparison covers finite executions satisfying `CompleteThrough e T`:

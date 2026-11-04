@@ -133,11 +133,20 @@ variable {θ : Fin 1 → Parameters} {s : Snapshot 1} {p : Port}
   {fire : FirstLearnedFire θ (fun _ _ => []) s 0 p}
   {fast : PortFastCompletion θ (fun _ _ => []) fire.final p} (span : CadenceSecondStrongSlowSpan fast)
 
+theorem contacts_transversal : span.execution.ContactsTransversal := by
+  rw [span.reconstruct]
+  trivial
+
 /-- Resume the very FAST flow retained by a real wire cut, then append this
 same SLOW flow. The endpoint energy and charge are never reconstructed anew. -/
 noncomputable def fromCut {H : ℝ} (cut : fast.execution.BeforeFlowCut H) :
     Execution θ (fun _ _ => []) cut.state span.final :=
   (Execution.cons (.flow cut.flow) cut.rest).append span.execution
+
+theorem fromCut_contacts_transversal {H : ℝ} (cut : fast.execution.BeforeFlowCut H) :
+    (span.fromCut cut).ContactsTransversal := by
+  simp only [fromCut, Execution.contactsTransversal_append, Execution.ContactsTransversal]
+  exact ⟨cut.rest_contacts_transversal fast.contacts_transversal, span.contacts_transversal⟩
 
 theorem fromCut_emissions {H : ℝ} (cut : fast.execution.BeforeFlowCut H) :
     (span.fromCut cut).ledger.emissions = [] := by

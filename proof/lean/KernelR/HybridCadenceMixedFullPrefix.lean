@@ -1,3 +1,4 @@
+import KernelR.HybridContactTransversality
 import KernelR.HybridCadenceMarkOnly
 import KernelR.HybridProtectedInputCycle
 
@@ -53,6 +54,7 @@ private theorem cadence_mixed_full_final_charge {θ ε} (hb : @PhysicalBox 1 θ 
 structure CadenceMixedFullPrefix (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) (p : Port) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   main_flows : execution.MainFlows 0 .slow
   early : s.time+1/100<final.time
   deadline : final.time<s.time+1/20
@@ -81,7 +83,8 @@ theorem cadence_mixed_full_prefix_exists {θ ε route} (hb : @PhysicalBox 1 θ �
     (ha : ∀ q, s.aux 0 q = .ready ∧ RestBand (s.x 0 (.m q)))
     (hr : s.raw 0 p = some s.time) (ho : ∀ q, q ≠ p → s.raw 0 q = none)
     (hp : ∀ d ∈ s.pending, s.time + 37 / 10 ≤ d.due) : Nonempty (CadenceMixedFullPrefix θ route s p) := by
-  obtain ⟨latency,hearly,hdeadline,hroot,hprior⟩ := hb.first_sensor_crossing 0 p (ha p).2.1 (ha p).2.2
+  obtain ⟨latency,hearly,hdeadline,hroot,hprior,hslope⟩ :=
+    hb.first_sensor_crossing_transversal 0 p (ha p).2.1 (ha p).2.2
   let M := s.time + latency
   let beforeMark := protectedMainEnd θ s 0 p .slow .ready (some s.time) M
   have hM : s.time < M := by dsimp [M]; linarith
@@ -166,10 +169,18 @@ theorem cadence_mixed_full_prefix_exists {θ ε route} (hb : @PhysicalBox 1 θ �
   let e : Execution θ route s final := first.append
     (.cons (.flow secondFlow) (.cons (.jump (.silent (slowMarkEnd θ markStart 0 p T) 0 p hmarkmode
       (slowMarkEnd_sensor hb markStart 0 p (by rw [hmarkm]; norm_num)))) (.nil _)))
+  have firstContacts : first.ContactsTransversal := by
+    simp only [first, Execution.ContactsTransversal, Jump.ContactTransversal, and_true]
+    exact firstFlow.aux_contact_field_positive 0 p (ha p).1 hr
+      (by change M < s.time + 1; dsimp [M]; linarith)
+      (by simpa only [protectedMainEnd, M] using hslope)
+  have contacts : e.ContactsTransversal := by
+    simpa [e, Jump.ContactTransversal] using firstContacts
   have hno : ∀ q, NoArrivalAt e 0 q := by simp [NoArrivalAt,e,first,Execution.deliveries_append,Execution.deliveries,Move.deliveries,Jump.deliveries]
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := contacts
     main_flows := by
       simp only [e,first,Execution.append,Execution.MainFlows,Flow.mainIs]
       exact ⟨hm,hmarkmain,trivial⟩

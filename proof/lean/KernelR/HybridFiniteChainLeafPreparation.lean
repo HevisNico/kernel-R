@@ -59,6 +59,7 @@ structure FiniteChainLeafPreparation (θ : Fin 1 → Parameters) (born : Snapsho
   lastCycle : ShortLearnedCycle θ learnedPrefix.final 1
   waitFlow : Flow θ lastCycle.returned.final (quietAt lastCycle.returned.final (1599/10))
   execution : Execution θ (fun _ _ => []) born (quietAt lastCycle.returned.final (1599/10))
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution =
     ((Execution.cons (.jump firstArrival) weak.execution).append
       (source8.execution.append ((fire.execution.append fast.execution).append
@@ -307,6 +308,15 @@ theorem finite_chain_leaf_preparation_exists {θ ε born}
     firstArrival:=firstArrival,weak:=weak,source8:=source8,fire:=fire,fast:=fast,slow16:=slow
     arrival16:=arrival16,protectedCycle:=protect,source24:=source24,learnedPrefix:=learned,lastCycle:=last
     waitFlow:=waitFlow,execution:=execution,reconstruct:=rfl,source120_date:=hPrefixDate,returned_date:=hLastDate
+    contacts_transversal:=by
+      simp only [execution, early, Execution.contactsTransversal_append]
+      exact ⟨⟨by exact ⟨trivial, weak.contacts_transversal⟩,
+        ⟨source8.contacts_transversal,
+          ⟨⟨fire.contacts_transversal, fast.contacts_transversal⟩,
+            ⟨slow.contacts_transversal,
+              by exact ⟨trivial, (Execution.contactsTransversal_append protect.execution source24.execution).mpr
+                ⟨protect.contacts_transversal, source24.contacts_transversal⟩⟩⟩⟩⟩⟩,
+        ⟨learned.contacts_transversal, ⟨last.contacts_transversal, trivial⟩⟩⟩
     prepared:=hFinalPrepared,charge:=?_,raw_none:=last.raw_none,pending:=hLastPending
     gain_target:=?_,gain_other:=?_,recovery:=hFinalRecovery,calendar:=hCalendar,emission_count:=hCount
     deliveries:=hDeliveries,physical:=execution.physical_invariant hb (hborn.physical_invariant hb)

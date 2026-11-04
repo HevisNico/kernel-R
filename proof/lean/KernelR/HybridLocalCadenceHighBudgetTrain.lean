@@ -52,6 +52,7 @@ theorem local_cadence_high_full_budget_train_exists {θ ε} (hb : PhysicalBox θ
         exact hFuture d hd
     exact ⟨{
       first := r.fire, final := r.final, execution := r.execution, date := r.date
+      contacts_transversal := r.contacts_transversal
       ready := r.ready, charge := r.charge, raw_none := r.raw_none, pending := r.pending
       gains := r.gains, recovery := r.recovery
       emission_count := by rw [hTimes]; rfl
@@ -94,6 +95,8 @@ theorem local_cadence_high_full_budget_train_exists {θ ε} (hb : PhysicalBox θ
       rfl
     exact ⟨{
       first := r.readyAt.fire, final := rest.final, execution := execution, date := rest.date
+      contacts_transversal := by
+        simpa [execution] using And.intro r.contacts_transversal rest.contacts_transversal
       ready := rest.ready, charge := rest.charge, raw_none := rest.raw_none, pending := rest.pending
       gains := fun j q => (rest.gains j q).trans (r.gains j q)
       recovery := fun j => (rest.recovery j).trans (r.recovery j)

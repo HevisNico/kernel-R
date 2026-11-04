@@ -64,6 +64,15 @@ membership of the actual trajectories in every recorded interval. Both finite-ch
 every complete finite execution under their fixed router. Retained probes
 and indefinite network continuation remain separate obligations.
 
+For the common-birth finite-chain protocol, the
+[geometric crossing correspondence](MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+also proves exact refinement of complete model histories to native paths and
+jumps, with the same outcomes, ordered FIRE lists and prescribed errors. Every
+finite weak/model prefix is covered by exact native refinement and every finite
+model history extends to a later finite horizon with its history retained.
+Infinite/maximal-run results retain their native interface. This does not extend
+the experiments' scope or discharge the robust slow-chain `CellLaw` below.
+
 The [N-cell extension](../results/reciprocal_composition/README.md) uses a closed
 packet contract and a written induction, supported by 81 N-independent local
 inequalities and 12 exact polynomial identities. Physical tolerances stay at

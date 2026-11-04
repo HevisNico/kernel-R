@@ -1,3 +1,4 @@
+import KernelR.HybridContactTransversalityFrame
 import KernelR.HybridCadenceMixedFullResponse
 import KernelR.HybridCadenceHighFireExistence
 import KernelR.HybridLocalFutureFrame
@@ -31,6 +32,7 @@ structure CadenceMixedFullJitterNextSource (θ : Fin 1 → Parameters) (s : Snap
   final_state : final = {setRaw before 0 p (some before.time) with pending := later}
   arrival : Jump (fun _ _ => []) before final
   execution : Execution θ (fun _ _ => []) s final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = framed.append (.cons (.jump arrival) (.nil _))
   date : final.time = H
   values : final.x = (quietAt mixed.errorEnd.final H).x
@@ -107,7 +109,11 @@ theorem cadence_mixed_full_jitter_next_source_exists {θ ε} (hb : PhysicalBox �
   obtain ⟨pulse⟩ := offline.cadence_mixed_full_pulse hb hf0 hv 0 p hm hq hB ha hz hr ho
     (by intro q; simp [NoArrivalAt,hdOffline]) hgap
   let future : List (Delivery 1) := ⟨0,p,H⟩ :: later
-  obtain ⟨framed0,hFrame,hFrameDel⟩ := offline.appendFuture_emptyRoute future
+  have hOfflineTransversal : offline.ContactsTransversal := by
+    simp [offline, active, quiet, Execution.ContactsTransversal,
+      m.markPrefix.contacts_transversal, m.reopened.contacts_transversal,
+      m.errorStart.contacts_transversal, m.errorEnd.contacts_transversal]
+  obtain ⟨framed0,hFrame,hFrameDel,hFrameTransversal⟩ := offline.appendFuture_emptyRoute_transversal future
     (by intro d hd; rcases List.mem_cons.mp hd with he | hd
         · subst d; exact le_rfl
         · exact (hLater d hd).le)
@@ -116,6 +122,9 @@ theorem cadence_mixed_full_jitter_next_source_exists {θ ε} (hb : PhysicalBox �
     rw [← hqueue]
   let before := appendPending (quietAt m.errorEnd.final H) future
   let framed : Execution θ (fun _ _ => []) s before := framed0.cast_source hSource
+  have hFramedTransversal : framed.ContactsTransversal := by
+    simpa only [framed, Execution.contactsTransversal_cast_source] using
+      hFrameTransversal.mpr hOfflineTransversal
   have hFramedLedger : framed.ledger = offline.ledger := (framed0.cast_source_ledger hSource).trans hFrame
   have heFramed : framed.ledger.emissions = [] := (congrArg (fun L : Ledger 1 => L.emissions) hFramedLedger).trans heOffline
   have hdFramed : framed.deliveries = [] := (framed0.cast_source_deliveries hSource).trans (hFrameDel.trans hdOffline)
@@ -194,6 +203,8 @@ theorem cadence_mixed_full_jitter_next_source_exists {θ ε} (hb : PhysicalBox �
     offline := offline, offline_reconstruct := rfl, pulse := pulse
     before := before, before_state := rfl, framed := framed, framed_ledger := hFramedLedger
     final := final, final_state := rfl, arrival := arrival, execution := trace, reconstruct := rfl
+    contacts_transversal := by
+      simp [trace, arrival, Execution.ContactsTransversal, Jump.ContactTransversal, hFramedTransversal]
     date := rfl, values := rfl, coordinates := hCoordinates, charge_lower := pulse.charge.1
     raw_active := hRaw, raw_other := hOther, pending := rfl
     gain_target := hGainTarget, gain_other := hGainOther, gain_log := hGainLog

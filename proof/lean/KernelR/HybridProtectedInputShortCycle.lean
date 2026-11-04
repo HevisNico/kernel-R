@@ -7,6 +7,7 @@ open Set
 structure ShortProtectedReturn (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) (source : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = source + 13 / 2
   prepared : ∀ j, PreparedSection final j
   ready : ∀ j, ReadyCoordinates final j
@@ -129,6 +130,7 @@ theorem protected_short_return_exists {θ ε route} (hb : @PhysicalBox 1 θ ε) 
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by simp [e, head, wait, Execution.ContactsTransversal, Jump.ContactTransversal]
     date := rfl
     prepared := ?_
     ready := hfinalReady
@@ -174,6 +176,12 @@ noncomputable def ProtectedInputShortCycle.final {θ route s p} (c : ProtectedIn
 noncomputable def ProtectedInputShortCycle.execution {θ route s p} (c : ProtectedInputShortCycle θ route s p) :
     Execution θ route s c.final :=
   c.markPhase.execution.append (c.auxPhase.execution.append c.returnPhase.execution)
+
+@[simp] theorem ProtectedInputShortCycle.contacts_transversal {θ route s p}
+    (c : ProtectedInputShortCycle θ route s p) : c.execution.ContactsTransversal := by
+  exact (Execution.contactsTransversal_append _ _).mpr
+    ⟨c.markPhase.contacts_transversal, (Execution.contactsTransversal_append _ _).mpr
+      ⟨c.auxPhase.contacts_transversal, c.returnPhase.contacts_transversal⟩⟩
 
 /-- A SLOW input physically adds its own MARK recovery dose, completes the
 protected sensor cycle, reopens at the actual logarithmic root, then waits.

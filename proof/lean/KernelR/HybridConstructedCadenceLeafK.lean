@@ -38,6 +38,7 @@ structure ConstructedCadenceLeafK (θ : Fin 1 → Parameters) (s : Snapshot 1)
   firstMark : ConstructedCadenceLeafFirstMarkK warmup
   tail : LocalCadenceTailK θ firstMark.final p (K - 8) terminal
   execution : Execution θ (fun _ _ => []) s tail.final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = firstSource.execution.append
     (warmup.execution.append (firstMark.execution.append tail.execution))
   warmup_date : warmup.final.time = start + 12
@@ -190,6 +191,13 @@ theorem constructed_cadence_leaf_k_exists {θ ε} (hb : PhysicalBox θ ε)
   refine ⟨{
     budget := hK, firstSource := first, warmup := warm, firstMark := mark, tail := tail
     execution := trace, reconstruct := rfl, warmup_date := hWarmDate, mark_date := hMarkDate
+    contacts_transversal := by
+      apply (first.execution.contactsTransversal_append _).mpr
+      refine ⟨first.contacts_transversal, ?_⟩
+      apply (warm.execution.contactsTransversal_append _).mpr
+      refine ⟨warm.contacts_transversal, ?_⟩
+      exact (mark.execution.contactsTransversal_append tail.execution).mpr
+        ⟨mark.contacts_transversal, tail.contacts_transversal⟩
     first_window := hFirstWindow, second_window := hSecondWindow, high_source_date := hHighDate
     high_first_window := hHighWindow, high_gain_bounds := hHighGain
     date := tail.date, ready := tail.ready, charge := tail.charge, raw_none := tail.raw_none

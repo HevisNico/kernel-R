@@ -8,6 +8,12 @@ infinite-run progress for this fixed finite-source chain. The
 [construction section](#constructed-common-birth-chain-for-every-finite-n)
 records its precise family and quantifiers. Retained probes/copies and the
 full written theorem remain open.
+The [geometric crossing correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+now also transfers the complete finite-chain outcomes to model histories.
+Every finite weak prefix refines exactly to native paths and jumps, and every
+finite crossing prefix extends to any later finite horizon with its history
+retained. Infinite/maximal-run theorems keep their native `InfiniteExecution`
+interface.
 The declared three-cell cadence is now constructively realized from A's READY
 birth through789.9, including independent B/C births at160/480. Cumulative
 counts are A54/B61/C34; the cadence contributes A16/B18/C20. All three cells
@@ -128,10 +134,22 @@ The three public headline axiom profiles contain only `propext`,
 `Classical.choice` and `Quot.sound`. The [validation ledger](EVERY_N_PLAN.md)
 records the successful complete frozen-source build and global audit.
 The reviewed universal proof modules are included in this checkout. The
-[release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md) records the
-remaining integration checks and publication steps.
+[historical release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md)
+records the v0.2.0 integration and publication scope; later local validation is
+recorded in the [current ledger](EVERY_N_PLAN.md#validation-and-checkpoint-discipline).
 
 ## Physical definitions
+
+For FIRE/MARK, the native equality guards below are related to the written
+upward-crossing rule by [HybridCrossingExecution](KernelR/HybridCrossingExecution.lean)
+and [HybridCrossingCorrespondence](KernelR/HybridCrossingCorrespondence.lean).
+Weak READY flows permit equality without a jump; model FIRE/MARK require an
+actual strictly-below historical left interval and a full-cell incoming-mode
+ODE germ above threshold to the right. `CrossingCompleteThrough` excludes
+exactly jumps satisfying both conditions. The protocol derives transversality
+and strict routing, so no new physical caller inputs are added. The converse
+from complete native histories supplies equal observations and ordered FIRE
+lists, not identity of every simultaneous-event presentation.
 
 `KernelR/Hybrid.lean` defines a pulses-only finite network with all q/m/z/b/E
 coordinates, main and three auxiliary modes, raw-current origins and pending
@@ -570,6 +588,9 @@ The finite-chain construction is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
 | `HybridFlowUniqueness` | Physical integral paths agree on every overlapping flow interval, including capped gain/recovery gates and actual energy | Fixed parameter family, common starting snapshot, physical invariant |
 | `HybridJumpLocalDiamond`, `HybridJumpStripping` | Enabled instantaneous jumps commute or coincide observationally, and can be stripped from a competing complete finite execution | Pending-list order may differ; no imposed priority |
 | `HybridUniversalExecution` | Complete finite executions through the same T have equal physical observations and exact ordered per-cell FIRE lists | Same fixed router and initial state, `PhysicalBox` and initial `PhysicalInvariant`; no maximal/infinite-run progress claim |
+| `HybridCrossingExecution` / `HybridCellOrbitExistence` | Model FIRE/MARK use the actual left history and a genuine full-cell right ODE germ, including plasticity, energy and caps | Weak READY guards permit ≤1; terminal crossing completion excludes exactly jumps satisfying both crossing guards |
+| `HybridWeakNativeRefinement` / `HybridCrossingCorrespondence` / `CrossingChainHeadline` | Complete model histories refine to exact native paths/jumps and inherit the finite-chain outcomes; native completions have crossing representatives with equal observations/FIRE lists | Declared common-birth chain, unchanged birth/box/source/delay/budget inputs; no syntactic identity of all simultaneous native linearizations |
+| `HybridCrossingProgress` | Every finite weak prefix refines exactly to native moves; every finite model prefix extends to any later finite horizon while retaining history | Infinite/maximal-run results retain native `InfiniteExecution`; indefinitely responding networks remain separate |
 | `HybridUniversalBirthCadenceChain`, `UniversalChainHeadline` | Transfer terminal state, own memories, actual counts and prescribed errors to every complete finite trace of the constructed common-birth program | Indexed order ∀ data/errors ∃ fixed router/witness ∀ complete traces; preparation FIREs excluded from FAST indices |
 | `HybridUniversalChainPreparation` | Derive relay/leaf preparation at actual128 prefixes of arbitrary larger-network executions from source queues | Contacts closed through128, exact source family and physical box; other-cell interleavings retained |
 | `Refinement` | Exact per-port ERROR and MARK integrals; telescoped gain/recovery balances; recovery equals the sum of all MARK contributions; queue conservation; actual emissions | Quantifies over finite admissible executions |
@@ -1560,9 +1581,10 @@ corruption checks; this inventory does not assert a fresh local rerun of every
 older suite. Fresh CI status and the verified commit are reported on the PR.
 
 The public [headline](KernelR/Headline.lean) groups the existence, actual terminal
-state/counts and own learned-memory theorems. The global
-[README](../../README.md) records its exact signatures and `#print axioms` outputs;
-the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
+state/counts and own learned-memory theorems and retains their exact signatures
+and `#print axioms` commands. The [repository overview](../../README.md) states
+the current finite-chain scope; the
+[model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
 [EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain

@@ -1,6 +1,7 @@
 import KernelR.HybridWeakInputErrorExistence
 import KernelR.HybridPhysicalInvariant
 import KernelR.HybridPulseSection
+import KernelR.HybridContactTransversality
 
 /-! A READY/SILENT state with an old RAW origin reaches its own actual ERROR
 threshold. Expiry before, at or after that threshold is handled by real flows
@@ -12,6 +13,7 @@ structure ReadySilentErrorBoundary (θ : Fin 1 → Parameters) (route : Router 1
     (input : Snapshot 1) (p : Port) (origin P : ℝ) where
   beforeError : Snapshot 1
   span : Execution θ route input beforeError
+  contacts_transversal : span.ContactsTransversal
   date : beforeError.time=P+Real.log 8/(θ 0).ls p
   main_before : ∀ j, beforeError.main j=.ready
   silent_before : beforeError.aux 0 p=.silent
@@ -102,7 +104,7 @@ private theorem ready_silent_error_boundary_exists {θ ε route} (hb : PhysicalB
       simpa [before,readyProtectedEnd,readyProtectedValues,protectedReadyRate] using hend
     by_cases hearly : Te<origin+1
     · exact ⟨{
-        beforeError:=before,span:=.cons (.flow leg.flow) (.nil _),date:=rfl
+        beforeError:=before,span:=.cons (.flow leg.flow) (.nil _),contacts_transversal:=trivial,date:=rfl
         main_before:=hmAll,silent_before:=ha,other_before:=fun q hq => haOther 0 q (Or.inr hq)
         sensor_before:=hthreshold,main_below:=leg.main_below
         aux_below:=fun q hq => leg.aux_below 0 q (Or.inr hq),charge_margin:=leg.charge_margin
@@ -114,6 +116,7 @@ private theorem ready_silent_error_boundary_exists {θ ε route} (hb : PhysicalB
       let expiry := rawExpiryJump (route:=route) before 0 p origin hr heq
       refine ⟨{
         beforeError:=expired,span:=.cons (.flow leg.flow) (.cons (.jump expiry) (.nil _)),date:=rfl
+        contacts_transversal:=by simp [expiry,rawExpiryJump,Execution.ContactsTransversal,Jump.ContactTransversal]
         main_before:=hmAll,silent_before:=ha,other_before:=fun q hq => haOther 0 q (Or.inr hq)
         sensor_before:=hthreshold,main_below:=leg.main_below
         aux_below:=fun q hq => leg.aux_below 0 q (Or.inr hq),charge_margin:=leg.charge_margin
@@ -168,6 +171,7 @@ private theorem ready_silent_error_boundary_exists {θ ε route} (hb : PhysicalB
     let expiry := rawExpiryJump (route:=route) middle 0 p origin hr rfl
     exact ⟨{
       beforeError:=before,span:=.cons (.flow first.flow) (.cons (.jump expiry) (.cons (.flow last.flow) (.nil _)))
+      contacts_transversal:=by simp [expiry,rawExpiryJump,Execution.ContactsTransversal,Jump.ContactTransversal]
       date:=rfl,main_before:=hm',silent_before:=ha',other_before:=fun q hq => hao' 0 q (Or.inr hq)
       sensor_before:=by simpa [before,readyProtectedEnd,readyProtectedValues,protectedReadyRate] using hend'
       main_below:=last.main_below,aux_below:=fun q hq => last.aux_below 0 q (Or.inr hq)
@@ -182,6 +186,7 @@ structure ReadySilentErrorStart (θ : Fin 1 → Parameters) (route : Router 1)
   final : Snapshot 1
   final_state : final=setAux boundary.beforeError 0 p .error
   execution : Execution θ route input final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : HEq execution (boundary.span.append (.cons
     (.jump (.error boundary.beforeError 0 p boundary.silent_before boundary.sensor_before)) (.nil _)))
   date : final.time=P+Real.log 8/(θ 0).ls p
@@ -239,6 +244,7 @@ theorem ready_silent_error_start_exists {θ ε route} (hb : PhysicalBox θ ε)
     · simpa [final,setAux,show ¬b.beforeError.time<origin+1 by linarith] using hr
   exact ⟨{
     boundary:=b,final:=final,final_state:=rfl,execution:=e,reconstruct:=HEq.rfl,date:=b.date
+    contacts_transversal:=by simp [e,entry,Execution.ContactsTransversal,Jump.ContactTransversal,b.contacts_transversal]
     main_ready:=b.main_before,aux_error:=by simp [final,setAux],sensor_charge:=b.sensor_before
     charge_margin:=b.charge_margin,main_below:=b.main_below,auxiliary_other:=hOther
     raw_option:=hraw,raw_other:=b.raw_other,pending:=b.pending,gains:=b.gains,recovery:=b.recovery

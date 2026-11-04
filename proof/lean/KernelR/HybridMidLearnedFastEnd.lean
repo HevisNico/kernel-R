@@ -1,5 +1,6 @@
 import KernelR.HybridLearnedFastEnd
 import KernelR.HybridMidGainSchedule
+import KernelR.HybridContactTransversality
 
 /-! Port-generic FAST completion with own fabrication parameters and raw origin. -/
 namespace KernelR.Hybrid
@@ -80,6 +81,7 @@ structure PortFastAuxTrace (θ : Fin 1 → Parameters) (route : Router 1) (s : S
     (mode : AuxMode) (F P initial : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   main_fast : final.main 0 = .fast
   aux_mode : final.aux 0 p = mode
   aux_other : ∀ j q, j ≠ 0 ∨ q ≠ p → final.aux j q = .ready
@@ -101,6 +103,7 @@ noncomputable def PortFastAuxTrace.ofLeg {θ route s p mode origin T F P initial
     PortFastAuxTrace θ route s p mode F P initial where
   final := protectedMainEnd θ s 0 p .fast mode origin T
   execution := .cons (.flow leg.flow) (.nil _)
+  contacts_transversal := trivial
   main_fast := hm
   aux_mode := ha
   aux_other := hao
@@ -120,6 +123,9 @@ noncomputable def PortFastAuxTrace.expire {θ route s p mode F P initial}
     PortFastAuxTrace θ route s p mode F P initial where
   final := setRaw r.final 0 p none
   execution := r.execution.append (rawExpiryExecution r.final 0 p origin hr ht)
+  contacts_transversal := by
+    simp [Execution.ContactsTransversal, Jump.ContactTransversal, rawExpiryExecution,
+      rawExpiryJump, r.contacts_transversal]
   main_fast := r.main_fast
   aux_mode := r.aux_mode
   aux_other := r.aux_other
@@ -139,6 +145,7 @@ noncomputable def PortFastAuxTrace.append {θ route s p mode F P initial}
     PortFastAuxTrace θ route s p mode F P initial where
   final := v.final
   execution := r.execution.append v.execution
+  contacts_transversal := by simpa using And.intro r.contacts_transversal v.contacts_transversal
   main_fast := v.main_fast
   aux_mode := v.aux_mode
   aux_other := v.aux_other
@@ -202,6 +209,7 @@ theorem port_fast_aux_phase_exists {θ ε route} (hb : PhysicalBox θ ε) (s : S
 structure MidLearnedFastEnd {θ : Fin 1 → Parameters} {s : Snapshot 1} {p : Port} (c : FirstLearnedFire θ (fun _ _ => []) s 0 p) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) c.final final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = c.final.time + 1
   main_slow : final.main 0 = .slow
   charge : final.x 0 .q = 1 / 4
@@ -395,6 +403,9 @@ theorem FirstLearnedFire.mid_learned_fast_end_exists {θ ε} {s : Snapshot 1} {p
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by
+      simp [e, es, er, finish, Execution.ContactsTransversal, Jump.ContactTransversal,
+        silent.contacts_transversal, err.contacts_transversal]
     date := rfl
     main_slow := by simp [final,setMain]
     charge := hbeforeq

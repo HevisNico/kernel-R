@@ -34,7 +34,7 @@ theorem cadence_first_strong_fire_exists {θ ε}
     hmain (hs.auxiliary p).2 (fun d hd => by linarith [hp d hd])
   obtain ⟨g⟩ := f.first_silent_of_response_margin_until_exists hb hmain
     (fun d hd => by linarith [hp d hd])
-  obtain ⟨latency,hearly,hdeadline,hroot,hprior⟩ := readyPulse_cadence_residual_first_crossing hs.charge hg
+  obtain ⟨latency,hearly,hdeadline,hroot,hprior,hslope⟩ := readyPulse_cadence_residual_first_crossing_transversal hs.charge hg
   let T := s.time + latency
   have hT : g.final.time < T := by rw [g.date]; dsimp [T]; linarith [g.deadline]
   have hstart : s.time ≤ g.final.time := by
@@ -80,7 +80,7 @@ theorem cadence_first_strong_fire_exists {θ ε}
     (.cons (.flow flow) (.cons (.jump (.fire endBefore 0 (g.main_ready 0) hthreshold)) (.nil _)))
   refine ⟨{
     firstMark := f, firstSilent := g, latency := latency
-    early := by linarith, deadline := hdeadline, response_root := hroot
+    early := by linarith, deadline := hdeadline, response_root := hroot, scalar_slope := hslope
     flow := flow, threshold := hthreshold, sensor_above_floor := ?_
     physical := execution.physical_invariant hb hf, raw_valid := execution.raw_valid hv
   }⟩

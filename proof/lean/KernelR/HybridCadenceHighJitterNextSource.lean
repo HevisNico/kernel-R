@@ -1,5 +1,6 @@
 import KernelR.HybridCadenceHighCompletion
 import KernelR.HybridLocalFutureFrame
+import KernelR.HybridContactTransversalityFrame
 
 /-! An actual high response can serve an independently jittered next source
 at least3.8 later. The isolated response is constructed with an empty queue;
@@ -23,6 +24,7 @@ structure CadenceHighJitterReadyAt (θ : Fin 1 → Parameters) (s : Snapshot 1)
   final : Snapshot 1
   final_state : final = appendPending (quietAt completion.returned.returnState H) future
   execution : Execution θ (fun _ _ => []) s final
+  contacts_transversal : execution.ContactsTransversal
   framed_ledger : execution.ledger = offline.ledger
   date : final.time = H
   ready : ∀ j, ReadyCoordinates final j
@@ -76,7 +78,10 @@ theorem cadence_high_jitter_ready_at_exists {θ ε} (hb : PhysicalBox θ ε)
   have hOfflineDel : offline.deliveries = [] := by
     rw [Execution.deliveries_append,Execution.deliveries_append,fire.deliveries,hReturnDel]
     rfl
-  obtain ⟨framed0,hLedger,hDel⟩ := offline.appendFuture_emptyRoute future hFuture
+  have hOfflineTransversal : offline.ContactsTransversal := by
+    simp [offline, returnPrefix, quiet, Execution.ContactsTransversal,
+      fire.contacts_transversal, done.toSlow_transversal, done.returned.head_transversal]
+  obtain ⟨framed0,hLedger,hDel,hTransversal⟩ := offline.appendFuture_emptyRoute_transversal future hFuture
   have hSource : s = appendPending s0 future := by
     simp only [s0,cadenceHighLocalState,appendPending,List.nil_append]
     rw [←hqueue]
@@ -100,6 +105,9 @@ theorem cadence_high_jitter_ready_at_exists {θ ε} (hb : PhysicalBox θ ε)
     fire := fire, completion := done, quietFlow := flow, quiet := quiet, quiet_reconstruct := rfl
     offline := offline, offline_reconstruct := rfl, final := final, final_state := rfl
     execution := framed, framed_ledger := hFramedLedger, date := rfl
+    contacts_transversal := by
+      simpa only [framed, Execution.contactsTransversal_cast_source] using
+        hTransversal.mpr hOfflineTransversal
     ready := hReady, charge := hCharge, raw_none := done.return_raw_none
     pending := by change done.returned.returnState.pending ++ future = future; rw [hReturnEmpty,List.nil_append]
     gains := hGains, recovery := hRecovery
@@ -115,6 +123,7 @@ structure CadenceHighJitterNextSource (θ : Fin 1 → Parameters) (s : Snapshot 
   final_state : final = {setRaw readyAt.final 0 p (some H) with pending := later}
   arrival : Jump (fun _ _ => []) readyAt.final final
   execution : Execution θ (fun _ _ => []) s final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = readyAt.execution.append (.cons (.jump arrival) (.nil _))
   date : final.time = H
   ready : ∀ j, ReadyCoordinates final j
@@ -184,6 +193,9 @@ theorem cadence_high_jitter_next_source_exists {θ ε} (hb : PhysicalBox θ ε)
   exact ⟨{
     readyAt := r, final := final, final_state := by dsimp [final]; rw [r.date], arrival := arrival
     execution := execution, reconstruct := rfl, date := r.date
+    contacts_transversal := by
+      simp [execution, arrival, Execution.ContactsTransversal, Jump.ContactTransversal,
+        r.contacts_transversal]
     ready := hReady, charge := r.charge, raw_active := hRaw, raw_other := hOther
     pending := rfl, gains := r.gains, recovery := r.recovery, emissions := hEm, deliveries := hDel
     physical := execution.physical_invariant hb hf, raw_valid := execution.raw_valid hv, complete := hComplete

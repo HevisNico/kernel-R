@@ -1,5 +1,6 @@
 import KernelR.HybridFiniteChainLowPreparation
 import KernelR.HybridPortPermutation
+import KernelR.HybridContactPortTransport
 
 /-! Prepare the relay's own low port two from its own original birth and
 sixteen real direct sources. Port transport retains the complete physical
@@ -27,11 +28,20 @@ private theorem relay_restore_complete {θ θ' : Fin 1 → Parameters} {s s' u T
     (e : Execution θ' (fun _ _ => []) s' u) (hp : θ'=θ) (hs : s=s') (hc : CompleteThrough e T) :
     CompleteThrough (relay_restore_execution e hp hs) T := by cases hp; cases hs; exact hc
 
+private theorem relay_restore_transversal {θ θ' : Fin 1 → Parameters} {s s' u}
+    (e : Execution θ' (fun _ _ => []) s' u) (hp : θ'=θ) (hs : s=s')
+    (positive : e.ContactsTransversal) :
+    (relay_restore_execution e hp hs).ContactsTransversal := by
+  cases hp
+  cases hs
+  exact positive
+
 structure FiniteChainRelayPreparation (θ : Fin 1 → Parameters) (born : Snapshot 1) where
   low : FiniteChainLowPreparation (permuteParameters θ swapLowPorts) (born.permutePorts swapLowPorts)
   final : Snapshot 1
   final_state : final=low.final.permutePorts swapLowPorts.symm
   execution : Execution θ (fun _ _ => []) born final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time=1599/10
   prepared : PreparedSection final 0
   charge : final.x 0 .q=1/10
@@ -73,6 +83,8 @@ theorem finite_chain_relay_preparation_exists {θ ε born}
     simp only [Equiv.symm_symm,swapLowPorts_zero]
   refine ⟨{
     low:=low,final:=low.final.permutePorts swapLowPorts.symm,final_state:=rfl,execution:=execution
+    contacts_transversal:=relay_restore_transversal transported hp hs
+      (low.execution.contactsTransversal_permutePorts swapLowPorts.symm low.contacts_transversal)
     date:=low.date,prepared:=low.prepared.permutePorts swapLowPorts.symm,charge:=low.charge
     raw_none:=?_,pending:=?_,gain_target:=?_,gain_other:=?_,recovery:=low.recovery
     emission_times:=hTimes,emission_count:=(congrArg List.length (hTimes 0)).trans low.emission_count

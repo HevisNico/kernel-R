@@ -50,6 +50,17 @@ noncomputable def FirstInputSilent.execution {n θ s i p} {f : @FirstInputMark n
     (g : FirstInputSilent f) (route : Router n) : Execution θ route s g.final :=
   (f.execution route).append (g.continuation route)
 
+@[simp] theorem FirstInputSilent.continuation_contacts_transversal {n θ s i p}
+    {f : @FirstInputMark n θ s i p} (g : FirstInputSilent f) (route : Router n) :
+    (g.continuation route).ContactsTransversal := by
+  simp [FirstInputSilent.continuation, Execution.ContactsTransversal, Jump.ContactTransversal]
+
+@[simp] theorem FirstInputSilent.contacts_transversal {n θ s i p}
+    {f : @FirstInputMark n θ s i p} (g : FirstInputSilent f) (route : Router n) :
+    (g.execution route).ContactsTransversal := by
+  simp [FirstInputSilent.execution, FirstInputSilent.continuation,
+    Execution.ContactsTransversal, Jump.ContactTransversal]
+
 theorem FirstInputSilent.date {n θ s i p} {f : @FirstInputMark n θ s i p} (g : FirstInputSilent f) :
     g.final.time = f.silentDate := rfl
 

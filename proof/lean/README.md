@@ -20,6 +20,11 @@ reaching-execution, calendar or local-law premise. See
 [the every-N construction below](#constructed-common-birth-chain-for-every-finite-n).
 Every complete finite execution of the fixed common-birth program now has the
 same physical endpoint and exact per-cell FIRE dates. The
+[geometric correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+proves the same outcomes for every complete upward-crossing execution without
+new physical inputs. Every finite weak prefix refines to the exact same native
+paths and jumps, and every finite crossing history extends to any later finite
+horizon with its history retained. The
 [progress theorems](PROGRESS.md) extend legal prefixes of that program and
 prove time divergence of semantically maximal infinite presentations.
 Retained probes/copies, operational noise/drift and full written-theorem
@@ -56,6 +61,7 @@ physical event budget. These invariants alone do not supply future executions.
 | Learned one-cell continuation | Aport2/Bport2 projections at639.9 satisfy the domain; actual cycles and compatible complete finite-horizon executions for spacing >=7.5 | Isolated empty routing and new future queues. Indefinitely repeatable network operation remains open. |
 | [Finite and maximal-run progress](PROGRESS.md) | Later complete horizons from each finite prefix and unbounded time for semantically maximal infinite presentations | Constructed finite-source chain in the physical parameter box. Evolution after source exhaustion can be quiet. |
 | Constructed finite chain | Independent common births, preparation, variable-K physical leaf/receivers and causal assembly for every finite N; prescribed per-emission errors with cumulative jitter≤0.15 | Declared source/port family; native functions are constructed and realize errors on the actual final fast ledger; broader written conclusions remain open |
+| Geometric crossing correspondence | Complete model histories refine exactly to complete native histories; endpoints, ordered FIRE lists, counts and prescribed errors transfer | Same common-birth protocol; the converse supplies an observationally equal crossing representative, not identity of every simultaneous-event presentation |
 | Abstract finite-chain API | Induction, packet timing, jitter budgets and resource algebra | The older `Chain.Refinement.realized_chain` still takes leaf and narrow `RelayLaw` premises; the new construction uses broad physical closure |
 | Certificate/record replay | Exact rational endpoints and finite recorded counters | Not trajectory enclosure soundness or a generalization theorem |
 
@@ -278,12 +284,31 @@ realize the prescribed errors on every such trace. This does not move the
 native-function choice outside the prescribed-error quantifier or assert
 that every arbitrary router realizes a specified error sequence.
 
+[CrossingChainHeadline](KernelR/CrossingChainHeadline.lean) exports
+`every_finite_chain_every_crossing_execution` and `terminal_state_and_counts`
+for the same birth, box, source, delay and error-budget data. `WeakFlow` permits
+READY charge ≤1, including contacts without firing. FIRE/MARK in
+`CrossingExecution` require a strictly-below left interval in the actual recorded
+history and a genuine full-cell incoming-mode ODE germ above threshold to the
+right. `CrossingCompleteThrough` excludes exactly jumps satisfying both guards;
+it does not assume native terminal saturation. Transversality and strict
+routing are derived from the constructed protocol. The
+[correspondence map](../../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+states the exact refinement and converse boundaries.
+
+[HybridCrossingProgress](KernelR/HybridCrossingProgress.lean) proves
+`weak_prefix_native` at every finite date and `extend_crossing_execution` to
+every horizon at or after the prefix endpoint, retaining the exact history.
+Infinite maximal-run and non-Zeno results keep their native `InfiniteExecution`
+interface; no crossing-infinite theorem is asserted.
+
 The three public headline axiom profiles contain only `propext`,
 `Classical.choice` and `Quot.sound`. The [validation ledger](EVERY_N_PLAN.md)
 records the successful complete frozen-source build and global audit.
 The reviewed universal proof modules are included in this checkout. The
-[release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md) records the
-remaining integration checks and publication steps.
+[historical release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md)
+records the v0.2.0 integration and publication scope; later local validation is
+recorded in the [current ledger](EVERY_N_PLAN.md#validation-and-checkpoint-discipline).
 
 ## Reproduce
 
@@ -365,6 +390,9 @@ python3 scripts/check_hybrid_cadence_budget_receiver_negative.py
 python3 scripts/check_hybrid_port_wire_transport_negative.py
 python3 scripts/check_hybrid_indexed_chain_negative.py
 python3 scripts/check_hybrid_universal_execution_negative.py
+python3 scripts/check_hybrid_transversality_negative.py
+python3 scripts/check_hybrid_contact_transversality_negative.py
+python3 scripts/check_hybrid_crossing_negative.py
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -432,9 +460,10 @@ corruption checks; this inventory does not assert a fresh local rerun of every
 older suite. Fresh CI status and the verified commit are reported on the PR.
 
 The public [headline](KernelR/Headline.lean) groups the existence, actual terminal
-state/counts and own learned-memory theorems. The global
-[README](../../README.md) records its exact signatures and `#print axioms` outputs;
-the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
+state/counts and own learned-memory theorems and retains their exact signatures
+and `#print axioms` commands. The [repository overview](../../README.md) states
+the current finite-chain scope; the
+[model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
 [EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
@@ -578,8 +607,10 @@ older signature or soundness of every stored certificate enclosure.
 1. Extend the declared common-birth/source/port family where the full written
    statement requires it. Arbitrary bounded prescribed per-emission error
    sequences now have a complete physical birth-to-terminal realization.
-2. Prove the remaining real enclosure memberships, retained probe responses,
-   settings-copy semantics and progress beyond the finite-complete class.
+2. Prove the remaining real enclosure memberships, retained probe responses
+   and settings-copy semantics. Finite-prefix continuation is proved for the
+   declared finite-source program, including its crossing histories; indefinitely
+   repeatable responding network operation remains open.
    Stored endpoint comparisons do not establish these facts.
 3. Extend robustness to operational drift/noise/amplitude histories in the
    physical semantics, beyond the conditional analytic coverage.

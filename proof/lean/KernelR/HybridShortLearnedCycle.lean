@@ -13,6 +13,7 @@ structure ShortLearnedCycle (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Po
   returned : ShortPreparedReturn θ (fun _ _ => []) fast.final s.time
   execution : Execution θ (fun _ _ => []) s returned.final
   reconstruct : execution = (fire.execution.append fast.execution).append returned.execution
+  contacts_transversal : execution.ContactsTransversal
   date : returned.final.time = s.time + 69 / 10
   ready : ∀ j, ReadyCoordinates returned.final j
   prepared : ∀ j, PreparedSection returned.final j
@@ -106,6 +107,8 @@ theorem short_learned_cycle_exists {θ ε} (hb : PhysicalBox θ ε) (s : Snapsho
     returned := ret
     execution := trace
     reconstruct := rfl
+    contacts_transversal := by
+      simp [trace, fire.contacts_transversal, fast.contacts_transversal, ret.contacts_transversal]
     date := ret.date
     ready := ret.ready
     prepared := ret.prepared

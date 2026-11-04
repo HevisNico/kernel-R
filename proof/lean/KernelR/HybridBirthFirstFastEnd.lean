@@ -10,6 +10,7 @@ structure FastAuxTrace (θ : Fin 1 → Parameters) (route : Router 1) (s : Snaps
     (mode : AuxMode) (F P initial : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   main_fast : final.main 0 = .fast
   aux_mode : final.aux 0 0 = mode
   aux_other : ∀ j q, j ≠ 0 ∨ q ≠ 0 → final.aux j q = .ready
@@ -31,6 +32,7 @@ noncomputable def FastAuxTrace.ofLeg {θ route s mode origin T F P initial}
     FastAuxTrace θ route s mode F P initial where
   final := protectedMainEnd θ s 0 0 .fast mode origin T
   execution := .cons (.flow leg.flow) (.nil _)
+  contacts_transversal := by trivial
   main_fast := hm
   aux_mode := ha
   aux_other := hao
@@ -50,6 +52,9 @@ noncomputable def FastAuxTrace.expire {θ route s mode F P initial}
     FastAuxTrace θ route s mode F P initial where
   final := setRaw r.final 0 0 none
   execution := r.execution.append (rawExpiryExecution r.final 0 0 origin hr ht)
+  contacts_transversal := by
+    simpa [rawExpiryExecution, rawExpiryJump, Execution.ContactsTransversal,
+      Jump.ContactTransversal] using r.contacts_transversal
   main_fast := r.main_fast
   aux_mode := r.aux_mode
   aux_other := r.aux_other
@@ -69,6 +74,8 @@ noncomputable def FastAuxTrace.append {θ route s mode F P initial}
     FastAuxTrace θ route s mode F P initial where
   final := v.final
   execution := r.execution.append v.execution
+  contacts_transversal := by
+    simpa using And.intro r.contacts_transversal v.contacts_transversal
   main_fast := v.main_fast
   aux_mode := v.aux_mode
   aux_other := v.aux_other
@@ -132,6 +139,7 @@ theorem fast_aux_phase_exists {θ ε route} (hb : PhysicalBox θ ε) (s : Snapsh
 structure BirthFirstFastEnd {θ born} (c : BirthFirstFire θ (fun _ _ => []) born) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) c.final final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = c.final.time + 1
   main_slow : final.main 0 = .slow
   charge : final.x 0 .q = 1 / 4
@@ -319,6 +327,9 @@ theorem BirthFirstFire.first_fast_end_exists {θ ε born}
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by
+      simpa [e, es, er, finish, Execution.ContactsTransversal, Jump.ContactTransversal]
+        using And.intro silent.contacts_transversal err.contacts_transversal
     date := rfl
     main_slow := by simp [final,setMain]
     charge := hbeforeq

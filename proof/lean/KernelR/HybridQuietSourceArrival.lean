@@ -2,6 +2,7 @@ import KernelR.HybridQuietFlowExistence
 import KernelR.HybridSilentReturn
 import KernelR.HybridPhysicalInvariant
 import KernelR.HybridGuardNoJump
+import KernelR.HybridContactTransversality
 /-! Construct quiet waiting and the next exact head delivery, retaining residues and queue order. -/
 namespace KernelR.Hybrid
 open Set
@@ -33,6 +34,7 @@ structure QuietSourceArrival {n} (θ : Fin n → Parameters) (route : Router n)
     (s : Snapshot n) (d : Delivery n) (later : List (Delivery n)) where
   final : Snapshot n
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = d.due
   deliveries : execution.deliveries = [d]
   pending : final.pending = later
@@ -70,6 +72,7 @@ theorem quiet_source_arrival_exists {n θ ε route} (hb : @PhysicalBox n θ ε)
   refine ⟨{
     final := u
     execution := e
+    contacts_transversal := by simp [e, jump, Execution.ContactsTransversal, Jump.ContactTransversal]
     date := rfl
     deliveries := rfl
     pending := rfl

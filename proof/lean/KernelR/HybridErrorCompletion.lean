@@ -3,6 +3,7 @@ import KernelR.HybridPhysicalInvariant
 import KernelR.HybridGuardNoJump
 import KernelR.HybridRawExpiryProgress
 import KernelR.HybridFirstCycleSchedule
+import KernelR.HybridContactTransversality
 
 namespace KernelR.Hybrid
 open Set
@@ -13,6 +14,7 @@ structure ErrorCompletion {n} (θ : Fin n → Parameters) (route : Router n)
     (s : Snapshot n) (i : Fin n) (p : Port) where
   final : Snapshot n
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = s.time + errorTailDuration θ s i p
   main_ready : ∀ j, final.main j = .ready
   aux_ready : ∀ j q, final.aux j q = .ready
@@ -92,6 +94,7 @@ theorem error_completion_without_raw {n θ ε route} (hb : @PhysicalBox n θ ε)
   refine ⟨{
     final := u
     execution := e
+    contacts_transversal := by simp [e, Execution.ContactsTransversal, Jump.ContactTransversal]
     date := rfl
     main_ready := hm
     aux_ready := ?_
@@ -226,6 +229,9 @@ theorem error_completion_with_raw_tail {n θ ε route} (hb : @PhysicalBox n θ �
   refine ⟨{
     final := c.final
     execution := e
+    contacts_transversal := by
+      simp [e, head, Execution.ContactsTransversal, Jump.ContactTransversal,
+        c.contacts_transversal]
     date := c.date.trans hremaining
     main_ready := c.main_ready
     aux_ready := c.aux_ready

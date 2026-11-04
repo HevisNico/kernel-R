@@ -1,5 +1,5 @@
 import KernelR.HybridShortLearnedCycle
-import KernelR.HybridLocalFutureFrame
+import KernelR.HybridContactTransversalityFrame
 
 /-! A genuine local learned cycle can serve a next source after6.9, without
 the older cycle constructor's7.75 queue-spacing premise. Construct the same
@@ -28,6 +28,7 @@ structure ShortLearnedNextSource (θ : Fin 1 → Parameters) (s : Snapshot 1)
   arrival : Jump (fun _ _ => []) before final
   execution : Execution θ (fun _ _ => []) s final
   reconstruct : execution = framed.append (.cons (.jump arrival) (.nil _))
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = H
   values : final.x = (quietAt cycle.returned.final H).x
   prepared : ∀ j, PreparedSection final j
@@ -81,7 +82,7 @@ theorem short_learned_next_source_exists {θ ε} (hb : PhysicalBox θ ε)
   have hOfflineMark (q : Port) : offline.ledger.mark 0 q = 0 := by
     rw [Execution.mark_append,cycle.mark_zero,hQuietMark,zero_add]
   let future : List (Delivery 1) := ⟨0,p,H⟩ :: later
-  obtain ⟨framed0,hFrame,hFrameDel⟩ := offline.appendFuture_emptyRoute future
+  obtain ⟨framed0,hFrame,hFrameDel,hFrameTrans⟩ := offline.appendFuture_emptyRoute_transversal future
     (by intro d hd; rcases List.mem_cons.mp hd with he | hd
         · subst d; exact le_rfl
         · exact (hLater d hd).le)
@@ -165,6 +166,12 @@ theorem short_learned_next_source_exists {θ ε} (hb : PhysicalBox θ ε)
     offline := offline, offline_reconstruct := rfl, before := before, before_state := rfl
     framed := framed, framed_ledger := hFramedLedger, arrival := arrival
     final := final, final_state := rfl, execution := trace, reconstruct := rfl
+    contacts_transversal := by
+      have hOffline : offline.ContactsTransversal := by
+        simp [offline, quiet, cycle.contacts_transversal, Execution.ContactsTransversal]
+      have hFramed : framed.ContactsTransversal := by
+        simpa only [framed, Execution.contactsTransversal_cast_source] using hFrameTrans.mpr hOffline
+      simpa [trace, arrival, Execution.ContactsTransversal, Jump.ContactTransversal] using hFramed
     date := rfl, values := rfl, prepared := hPrepared, charge := hCharge
     raw_active := hRaw, raw_other := hOther, pending := rfl, gains := hGains, recovery := hRecovery
     emissions := heTrace, deliveries := hdTrace, error_zero := hError, mark_zero := hMark

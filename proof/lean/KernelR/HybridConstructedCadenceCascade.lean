@@ -128,11 +128,12 @@ theorem constructed_cadence_cascade_exists
   have hStart : bc.source.time = aSource.time :=
     bc.source_date.trans (cadence_a_receiver_source_date c packet).symm
   have hBalance := HeadQueueBalance.initial bc.execution aSource (cadenceAContacts cascadeBackward) hQueue
-  obtain ⟨Qend,global,hComplete,hTerminal,hTrace⟩ := bc.execution.prepend_causal_complete aRun.execution
-    hStart bc.complete aRun.complete (cadenceAContacts cascadeBackward)
+  obtain ⟨weave⟩ := bc.execution.prepend_causal_result aRun.execution
+    hStart (bc.complete.1.trans aRun.complete.1.symm) (cadenceAContacts cascadeBackward)
     (cadence_a_contacts_strict cascadeBackward hback) (bc.source.pending.map Delivery.succ) hBalance
-  let weave : CausalHeadWeave bc.execution aRun.execution (bc.source.pending.map Delivery.succ)
-      (cadenceAContacts cascadeBackward) := ⟨Qend,global,hTerminal,hTrace⟩
+  let Qend := weave.pending
+  let global := weave.execution
+  have hComplete := weave.complete bc.complete aRun.complete
   let final : Snapshot 3 := bc.final.prependQueued aRun.final Qend
   have hEmpty : Qend = [] := weave.pending_empty bc.pending aRun.pending
   have hSource := cadence_global_source_eq bc packet

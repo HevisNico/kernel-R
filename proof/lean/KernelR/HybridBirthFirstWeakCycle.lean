@@ -11,6 +11,7 @@ structure BirthFirstWeakCycle (θ : Fin 1 → Parameters) (route : Router 1) (bo
   sources : born.pending = sourceTrain 0 0 0 8 16 ++ sourceTrain 0 0 160 8 16
   final : Snapshot 1
   continuation : Execution θ route (birthProtocolFirstAfter born) final
+  continuation_transversal : continuation.ContactsTransversal
   pulse : SilentPulse continuation 0 0
   date : final.time = 15 / 2
   saturated : CompleteThrough continuation (15 / 2)
@@ -22,6 +23,11 @@ structure BirthFirstWeakCycle (θ : Fin 1 → Parameters) (route : Router 1) (bo
 noncomputable def BirthFirstWeakCycle.execution {θ route born} (c : BirthFirstWeakCycle θ route born) :
     Execution θ route born c.final :=
   .cons (.jump (birth_protocol_first_jump c.birth c.sources)) c.continuation
+
+@[simp] theorem BirthFirstWeakCycle.contacts_transversal {θ route born}
+    (c : BirthFirstWeakCycle θ route born) : c.execution.ContactsTransversal := by
+  simpa [BirthFirstWeakCycle.execution, birth_protocol_first_jump,
+    Execution.ContactsTransversal, Jump.ContactTransversal] using c.continuation_transversal
 
 theorem BirthFirstWeakCycle.complete {θ route born} (c : BirthFirstWeakCycle θ route born) :
     CompleteThrough c.execution (15 / 2) := c.saturated
@@ -128,6 +134,10 @@ theorem birth_protocol_first_weak_cycle_exists {θ ε route born}
     sources := hqueue
     final := quietAt c.final (15 / 2)
     continuation := tail
+    continuation_transversal := by
+      simp [tail, preparedTrace, quiet, FirstInputSilent.continuation,
+        Execution.ContactsTransversal, Jump.ContactTransversal,
+        f.contacts_transversal, h.contacts_transversal, c.contacts_transversal]
     pulse := pulse
     date := rfl
     saturated := hsaturated

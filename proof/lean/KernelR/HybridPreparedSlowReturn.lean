@@ -18,6 +18,7 @@ theorem preparedSlowDuration_bounds {n} (s : Snapshot n) (i : Fin n) (hq : s.x i
 structure PreparedSlowReturn (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) (source : ℝ) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = source + 15 / 2
   prepared : ∀ j, PreparedSection final j
   ready : ∀ j, ReadyCoordinates final j
@@ -135,6 +136,8 @@ theorem prepared_slow_return_exists {θ ε route} (hb : @PhysicalBox 1 θ ε) (s
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by
+      simp [e, head, wait, Execution.ContactsTransversal, Jump.ContactTransversal]
     date := rfl
     prepared := ?_
     ready := hfinalReady

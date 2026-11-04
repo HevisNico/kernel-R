@@ -111,8 +111,14 @@ retains the constructed witness and proves its physical endpoint and actual
 per-cell FIRE lists for every other execution complete through the same T,
 from the same initial source state under the same fixed router. For prescribed
 errors, the order is ∀ data/errors ∃ fixed native functions ∀ complete traces;
-FAST indices drop the actual12/14 preparation FIREs. This does not imply
-infinite-run progress or non-Zeno behavior. See the
+FAST indices drop the actual12/14 preparation FIREs. This comparison alone does
+not imply infinite-run progress or non-Zeno behavior; the separate
+[progress theorems](PROGRESS.md) establish those results for the fixed finite-source
+program, allowing quiet flow after source exhaustion. The
+[geometric correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+also refines every finite weak prefix exactly and extends finite model histories
+while retaining their history. Infinite/maximal-run results keep their native
+interface. See the
 [validation ledger](EVERY_N_PLAN.md) for the verified universal checkpoint.
 
 ## Proof map
@@ -195,9 +201,10 @@ corruption checks; this inventory does not assert a fresh local rerun of every
 older suite. Fresh CI status and the verified commit are reported on the PR.
 
 The public [headline](KernelR/Headline.lean) groups the existence, actual terminal
-state/counts and own learned-memory theorems. The global
-[README](../../README.md) records its exact signatures and `#print axioms` outputs;
-the [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
+state/counts and own learned-memory theorems and retains their exact signatures
+and `#print axioms` commands. The [repository overview](../../README.md) states
+the current finite-chain scope; the
+[model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
 [EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain

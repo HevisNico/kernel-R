@@ -15,6 +15,35 @@ A54/B61/C34 at789.9, with B/C born at160/480. The scalable protocol below
 uses independently chosen cells all born at0; its source program and traffic
 counts belong to that different construction.
 
+The checkpoint identifiers in this introduction describe the historical
+universal proof integration. The later geometric correspondence and its local
+validation are recorded below; they do not change those published identities.
+
+## Geometric crossings and finite-prefix progress
+
+[CrossingChainHeadline](KernelR/CrossingChainHeadline.lean) now exports
+`every_finite_chain_every_crossing_execution` for the same birth, physical-box,
+source, delay and prescribed-error budgets. It constructs a complete crossing
+witness and transfers the endpoint, ordered per-cell FIRE lists, counts and
+errors to every geometrically complete competing model execution.
+
+`WeakFlow` allows READY charge ≤1. Model FIRE/MARK require both an actual
+strictly-below left interval in the recorded history and a full-cell incoming-mode
+ODE germ strictly above one on the right. Terminal completion excludes exactly
+jumps meeting both conditions, without assuming native saturation or a positive
+slope in the crossing definition. The transverse witness and strictly delayed
+router are derived from the protocol. Every model completion refines to a complete
+native history with exactly the same paths and jumps; the reverse direction gives
+an observationally equal crossing representative with the same ordered FIRE lists.
+See the [precise correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings).
+
+[HybridCrossingProgress](KernelR/HybridCrossingProgress.lean) proves exact native
+refinement of **every finite weak prefix**, at any finite date, and extends every
+finite crossing history to any horizon at or after its endpoint while retaining
+the original history. Maximal/infinite-run and non-Zeno statements retain the
+native `InfiniteExecution` interface. This does not supply indefinitely repeatable
+responding network operation.
+
 ## Every complete finite execution of the fixed program
 
 [UniversalChainHeadline](KernelR/UniversalChainHeadline.lean) now exports
@@ -59,8 +88,9 @@ The three public headline axiom profiles contain only `propext`,
 `Classical.choice` and `Quot.sound`. The [validation ledger](EVERY_N_PLAN.md)
 records the successful complete frozen-source build and global audit.
 The reviewed universal proof modules are included in this checkout. The
-[release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md) records the
-remaining integration checks and publication steps.
+[historical release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md)
+records the v0.2.0 integration and publication scope; later local validation is
+recorded in the [current ledger](EVERY_N_PLAN.md#validation-and-checkpoint-discipline).
 
 ## Constructed family and exact quantifiers
 
@@ -142,6 +172,8 @@ cell i has depth `N-1-i`.
 | Indexed per-emission errors | `HybridIndexedPreparedCadenceChain`, `HybridIndexedBirthCadenceChain`, `IndexedChainHeadline` | Arbitrary bounded prescribed sequences; generated fixed native functions realize every error on the final fast sender ledger; whole birth-to-terminal invariants retained |
 | Probes, cuts and settings copies | Written results and finite evidence | Retained physical semantics and proofs remain open |
 | Every complete finite execution | `HybridFlowUniqueness`, `HybridJumpLocalDiamond`, `HybridJumpStripping`, `HybridExecutionUniqueness`, `HybridUniversalExecution`, `HybridUniversalBirthCadenceChain`, `UniversalChainHeadline` | Physical endpoint and exact per-cell FIRE lists at fixed T under the same router; no imposed jump priority |
+| Geometric model correspondence | `HybridCrossingExecution`, `HybridCellOrbitExistence`, `HybridWeakNativeRefinement`, `HybridCrossingCorrespondence`, `CrossingChainHeadline` | Exact model-to-native completion, unchanged physical inputs; native-to-model converse preserves observations and ordered FIRE lists |
+| Finite weak/model progress | [HybridCrossingProgress](KernelR/HybridCrossingProgress.lean) | Exact native refinement for every finite weak prefix and history-preserving crossing extension to every later finite horizon |
 | Universal preparation extraction | `HybridUniversalChainPreparation` | Actual arbitrary-network prefixes through128 yield each relay/leaf preparation from source queues, with other-cell interleavings retained |
 | Finite continuation | [HybridChainProgress](KernelR/HybridChainProgress.lean) | Every legal finite prefix of the fixed finite-source program extends to a complete execution at any horizon at or after its endpoint |
 | Physical-event non-Zeno | [HybridNonZeno](KernelR/HybridNonZeno.lean) | Under the birth, physical-box and bounded-fanout hypotheses, infinitely many physical jumps force time divergence. The constructed chain supplies the fanout bound. |
@@ -155,6 +187,20 @@ The [coverage guide](N_CELL_COVERAGE.md) separates the older conditional API
 from the new construction.
 
 ## Validation and checkpoint discipline
+
+The geometric-crossing source revision passed a completely fresh local project
+build (**9,592 jobs**) and global axiom audit (**28,970 project theorems**),
+allowing only `propext`, `Classical.choice` and `Quot.sound`. Source checks cover
+**539 Lean files**, with all five inherited upstream modules unchanged. All
+**81 paired controls** passed: 14 geometric, six scalar transversality, seven
+actual-contact, 36 constructed-chain and 18 causal-weave pairs. These are local
+validation results, not a claim about an unobserved GitHub workflow run or a
+published release. The genuine full-cell grazing fixture in
+[`scripts/fixtures/crossing_grazing.lean`](scripts/fixtures/crossing_grazing.lean)
+exhibits a weak/model flow excluded by native first-contact urgency outside the
+physical box and protocol; it is not a counterexample to the finite-chain result.
+
+### Universal-complete result: historical validated checkpoint
 
 The complete frozen-source universal checkpoint passes **9,557 build jobs**
 and the global axiom audit of **27,741 project theorems**. Source checks cover

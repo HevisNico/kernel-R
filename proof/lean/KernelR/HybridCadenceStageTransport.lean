@@ -21,6 +21,14 @@ private theorem cadence_execution_cast_ledger {k θ θ' route route' s s' u}
   cases hs
   rfl
 
+private theorem cadence_execution_cast_contacts {k θ θ' route route' s s' u}
+    (e : @Execution k θ route s u) (hp : θ=θ') (hr : route=route') (hs : s=s') :
+    (cadence_execution_cast e hp hr hs).ContactsTransversal ↔ e.ContactsTransversal := by
+  cases hp
+  cases hr
+  cases hs
+  rfl
+
 private noncomputable def cadence_cell_cast {parameter parameter' s T}
     (c : FiniteCausalCell parameter s T) (hp : parameter=parameter') :
     FiniteCausalCell parameter' s T := by
@@ -34,6 +42,12 @@ private theorem cadence_cell_cast_final {parameter parameter' s T}
 private theorem cadence_cell_cast_times {parameter parameter' s T}
     (c : FiniteCausalCell parameter s T) (hp : parameter=parameter') :
     (cadence_cell_cast c hp).execution.emissionTimes 0=c.execution.emissionTimes 0 := by
+  cases hp
+  rfl
+
+private theorem cadence_cell_cast_contacts {parameter parameter' s T}
+    (c : FiniteCausalCell parameter s T) (hp : parameter=parameter') :
+    (cadence_cell_cast c hp).execution.ContactsTransversal ↔ c.execution.ContactsTransversal := by
   cases hp
   rfl
 
@@ -53,6 +67,12 @@ noncomputable def transport (c : FiniteCausalChainStage d T depth)
     raw_none:=c.raw_none,pending:=c.pending,physical:=?_,raw_valid:=c.raw_valid
     cells:=fun i => ⟨(c.cells i).1,cadence_cell_cast (c.cells i).2 (congrFun hp i)⟩
     emission_times:=?_,cell_values:=?_
+    contacts_transversal:=by
+      intro localContacts
+      apply (cadence_execution_cast_contacts c.execution hp hr hs).2
+      apply c.contacts_transversal
+      intro i
+      exact (cadence_cell_cast_contacts (c.cells i).2 (congrFun hp i)).1 (localContacts i)
   }
   · simpa only [CompleteThrough,hr] using c.complete
   · simpa only [hp] using c.physical
@@ -106,6 +126,8 @@ noncomputable def transport (c : ConstructedCadenceChainStage d K T depth m L J)
     (hr : d.route depth=d'.route depth) (hs : d.source depth=d'.source depth) :
     ConstructedCadenceChainStage d' K T depth m L J where
   stage:=c.stage.transport hp hr hs
+  contacts_transversal:=
+    (cadence_execution_cast_contacts c.stage.execution hp hr hs).2 c.contacts_transversal
   packet:=c.packet
   calendar:=(c.stage.transport_times hp hr hs 0).trans c.calendar
   envelope:=c.envelope

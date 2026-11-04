@@ -198,12 +198,13 @@ theorem constructed_b_cadence_exists {θ born freshB freshC newbornB newbornC fo
     (bc_head_input_queue full hd).symm
   have hStart : (c.wave.cadence.teaching.final.autonomousView 2).time=bSource.time := rfl
   have hBalance := HeadQueueBalance.initial full.execution bSource (cadenceBCContacts cascadeForward) hQueue
-  obtain ⟨Qend,global,hComplete,hTerminal,hTrace⟩ := full.execution.prepend_causal_complete bRun.execution
-    hStart full.complete bRun.complete (cadenceBCContacts cascadeForward) (cadence_bc_contacts_strict cascadeForward hd)
+  obtain ⟨weave⟩ := full.execution.prepend_causal_result bRun.execution
+    hStart (full.complete.1.trans bRun.complete.1.symm)
+    (cadenceBCContacts cascadeForward) (cadence_bc_contacts_strict cascadeForward hd)
     ((c.wave.cadence.teaching.final.autonomousView 2).pending.map Delivery.succ) hBalance
-  let weave : CausalHeadWeave full.execution bRun.execution
-      ((c.wave.cadence.teaching.final.autonomousView 2).pending.map Delivery.succ) (cadenceBCContacts cascadeForward) :=
-    ⟨Qend,global,hTerminal,hTrace⟩
+  let Qend := weave.pending
+  let global := weave.execution
+  have hComplete := weave.complete full.complete bRun.complete
   have hEmpty : Qend=[] := weave.pending_empty full.pending bRun.pending
   let source := (c.wave.cadence.teaching.final.autonomousView 2).prependQueued bSource
     ((c.wave.cadence.teaching.final.autonomousView 2).pending.map Delivery.succ)

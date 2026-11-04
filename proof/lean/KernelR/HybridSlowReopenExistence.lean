@@ -43,6 +43,7 @@ theorem slowReopen_preguard {n} (s : Snapshot n) (i : Fin n)
 structure SlowReopen (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) where
   final : Snapshot 1
   execution : Execution θ route s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = s.time + slowReopenDuration s 0
   deadline : final.time < 38
   ready : ∀ j, ReadyCoordinates final j
@@ -109,6 +110,7 @@ theorem slow_reopen_exists {θ ε route} (hb : @PhysicalBox 1 θ ε) (s : Snapsh
   refine ⟨{
     final := final
     execution := e
+    contacts_transversal := by trivial
     date := rfl
     deadline := hTupper
     ready := ?_

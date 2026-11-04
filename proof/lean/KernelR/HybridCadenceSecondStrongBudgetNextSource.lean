@@ -1,3 +1,4 @@
+import KernelR.HybridContactTransversalityFrame
 import KernelR.HybridCadenceSecondStrongJitterNextSource
 import KernelR.HybridCadenceSecondStrongBudgetSpan
 
@@ -23,6 +24,7 @@ structure CadenceSecondStrongBudgetNextSource (θ : Fin 1 → Parameters) (s : S
   final_state : final = {setRaw before 0 p (some before.time) with pending := later}
   arrival : Jump (fun _ _ => []) before final
   execution : Execution θ (fun _ _ => []) s final
+  contacts_transversal : execution.ContactsTransversal
   reconstruct : execution = framed.append (.cons (.jump arrival) (.nil _))
   date : final.time = H
   values : final.x = span.final.x
@@ -90,7 +92,9 @@ theorem cadence_second_strong_full_budget_next_source_exists {θ ε} (hb : Physi
     rw [span.pending,fast.pending,fire.pending,List.append_nil]
     rfl
   let future : List (Delivery 1) := ⟨0,p,H⟩ :: later
-  obtain ⟨framed0,hFrame,hFrameDel⟩ := offline.appendFuture_emptyRoute future
+  have hOfflineTransversal : offline.ContactsTransversal := by
+    simp [offline, fire.contacts_transversal, fast.contacts_transversal, span.contacts_transversal]
+  obtain ⟨framed0,hFrame,hFrameDel,hFrameTransversal⟩ := offline.appendFuture_emptyRoute_transversal future
     (by intro d hd; rw [span.date]; rcases List.mem_cons.mp hd with he | hd
         · subst d; exact le_rfl
         · exact (hLater d hd).le)
@@ -99,6 +103,9 @@ theorem cadence_second_strong_full_budget_next_source_exists {θ ε} (hb : Physi
     rw [←hqueue]
   let before := appendPending span.final future
   let framed : Execution θ (fun _ _ => []) s before := framed0.cast_source hSource
+  have hFramedTransversal : framed.ContactsTransversal := by
+    simpa only [framed, Execution.contactsTransversal_cast_source] using
+      hFrameTransversal.mpr hOfflineTransversal
   have hFramedLedger : framed.ledger = offline.ledger := (framed0.cast_source_ledger hSource).trans hFrame
   have heFramed : framed.ledger.emissions = [(0,fire.final.time)] :=
     (congrArg (fun L : Ledger 1 => L.emissions) hFramedLedger).trans heOffline
@@ -191,6 +198,8 @@ theorem cadence_second_strong_full_budget_next_source_exists {θ ε} (hb : Physi
     fire := fire, fast := fast, rest_latency := hRest, fire_window := hFireWindow, span := span, offline := offline, offline_reconstruct := rfl
     before := before, before_state := rfl, framed := framed, framed_ledger := hFramedLedger
     final := final, final_state := rfl, arrival := arrival, execution := trace, reconstruct := rfl
+    contacts_transversal := by
+      simp [trace, arrival, Execution.ContactsTransversal, Jump.ContactTransversal, hFramedTransversal]
     date := span.date, values := rfl, main_slow := span.main_slow, auxiliary := span.auxiliary
     rest := span.rest, charge := span.charge, energy := rfl, raw_active := hRaw, raw_other := hOther
     pending := rfl, gains := hGains, recovery := hRecovery, emissions := heTrace, deliveries := hdTrace

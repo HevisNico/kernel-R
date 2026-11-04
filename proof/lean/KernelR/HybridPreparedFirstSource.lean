@@ -8,6 +8,7 @@ structure PreparedFirstSource (θ : Fin 1 → Parameters) (s : Snapshot 1)
     (p : Port) (H : ℝ) (later : List (Delivery 1)) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) s final
+  contacts_transversal : execution.ContactsTransversal
   date : final.time = H
   values : final.x = (quietAt s H).x
   prepared : PreparedSection final 0
@@ -88,7 +89,9 @@ theorem prepared_first_source_exists {θ ε} (hb : PhysicalBox θ ε)
         contradiction
     · exact hPending
   exact ⟨{
-    final := final, execution := execution, date := rfl, values := rfl
+    final := final, execution := execution,
+    contacts_transversal := by simp [execution, arrival, Execution.ContactsTransversal, Jump.ContactTransversal]
+    date := rfl, values := rfl
     prepared := hPrepared, charge := hCharge, raw_active := hActive, raw_other := hOther
     pending := rfl, gains := fun _ => rfl, recovery := rfl, emissions := rfl, deliveries := rfl
     physical := execution.physical_invariant hb hf, raw_valid := execution.raw_valid hv, complete := hComplete
