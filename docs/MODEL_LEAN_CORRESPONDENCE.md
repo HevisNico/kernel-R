@@ -93,6 +93,23 @@ the original history. The maximal infinite-run theorems retain their native
 it does not identify first contact with upward crossing for arbitrary
 unrelated initial states or parameter choices.
 
+### Descending guards
+
+The remaining mode transitions keep urgent equality guards: FAST ends at
+q=1/4, SLOW reopens at q=1/10, and MARK→SILENT→ERROR→READY occurs at
+mₚ=4/5, 1/10 and 1/40. These are unambiguous downward crossings in the physical
+family: q′=−a q in FAST with a=ln4>0, q′=−b(t)q in SLOW with
+b(t)≥b_birth≥2/25−1/100000=0.07999>0, and mₚ′=−L_mode,p mₚ with positive
+rates in each non-READY auxiliary mode. All these thresholds are positive, so
+the incoming derivative is strictly negative there. The recovery lower bound
+includes the birth tolerance; monotonicity and its preservation are proved by
+`Execution.recovery_nondecreasing` and `Execution.recovery_birth_bounds` in
+[HybridInvariants](../proof/lean/KernelR/HybridInvariants.lean). Thus retaining
+strict preguards and urgent equality for these descending sections introduces
+no tangent-touch ambiguity under these hypotheses. `WeakBeforeGuards` changes
+only the upper READY guards. The [review guide](../REVIEW.md) identifies the
+separate human obligation to validate the crossing convention against the model.
+
 ## Constructed finite-chain result
 
 The [universal finite-chain headline](../proof/lean/KernelR/UniversalChainHeadline.lean)

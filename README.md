@@ -19,6 +19,9 @@ Three entry points:
 2. [Lean theorem for fixed native delays](proof/lean/KernelR/HybridUniversalBirthCadenceChain.lean) and [indexed-error headline](proof/lean/KernelR/UniversalChainHeadline.lean).
 3. [Model ↔ Lean: equations and operational semantics](docs/MODEL_LEAN_CORRESPONDENCE.md).
 
+For review, start with the [semantic review guide](REVIEW.md): fidelity of
+`CrossingExecution` to the written model is the first human review obligation.
+
 ## Result: every finite chain, with explicit scope
 
 > For every positive finite N, admissible source length K, independent fixed
