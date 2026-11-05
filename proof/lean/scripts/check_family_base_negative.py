@@ -10,10 +10,7 @@ import argparse
 import json
 from pathlib import Path
 import re
-import subprocess
-import tempfile
-
-from lean_check import lean_check_command
+from family_control_batches import check_batches
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULES = ['Constants', 'Model', 'Nominal', 'Energy']
@@ -173,6 +170,8 @@ def main():
     parser.add_argument('--case', action='append', help='run exact case name (repeatable)')
     parser.add_argument('--inventory', action='store_true')
     parser.add_argument('--report', type=Path)
+    parser.add_argument('--timeout', type=int, default=120,
+                        help='seconds allowed for each complete Lean batch')
     args = parser.parse_args()
     controls = cases()
     check_coverage(controls)
@@ -185,28 +184,9 @@ def main():
         if set(args.case) - names:
             parser.error('unknown cases: ' + ', '.join(sorted(set(args.case) - names)))
         controls = [c for c in controls if c['name'] in args.case]
-    report = []
-    with tempfile.TemporaryDirectory(prefix='family-base-negative-', dir=ROOT) as tmp:
-        path = Path(tmp) / 'Check.lean'
-        for case in controls:
-            module = 'KernelR.Family.' + case['module']
-            prefix = f'import {module}\nnamespace KernelR.Family\nopen KernelR.Hybrid Set\n'
-            command = lean_check_command(tmp, root_module=module)
-            for expected, key in [(True, 'good'), (False, 'bad')]:
-                path.write_text(prefix + case[key] + '\nend KernelR.Family\n')
-                result = subprocess.run([*command, str(path)], cwd=ROOT, text=True,
-                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                        timeout=120)
-                if (result.returncode == 0) != expected:
-                    raise SystemExit(f'{case["name"]}: unexpected {key} result:\n{result.stdout}')
-                if not expected and ('error:' not in result.stdout or re.search(
-                        r'unknown (constant|identifier)|unexpected token|invalid syntax|'
-                        r'object file .* does not exist|unknown module prefix',
-                        result.stdout, re.I)):
-                    raise SystemExit(f'{case["name"]}: nonsemantic rejection:\n{result.stdout}')
-            report.append(dict(module=module, case=case['name'], covers=case['covers'],
-                               positive='accepted', mutation='rejected'))
-            print(f'{case["name"]}: valid conclusion accepted; mutation rejected.', flush=True)
+    report = check_batches(ROOT, controls,
+                           imports=['KernelR.Family.Nominal', 'KernelR.Family.Energy'],
+                           root_module='KernelR.Family.Energy', timeout=args.timeout)
     if args.report:
         args.report.write_text(json.dumps(report, indent=2) + '\n')
     print(f'All {len(controls)} paired family base controls passed.', flush=True)

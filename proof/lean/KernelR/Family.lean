@@ -1,6 +1,7 @@
 import KernelR.Family.Nominal
 import KernelR.Family.DoseCounting
 import KernelR.Family.Energy
+import KernelR.Family.JumpLocalDiamond
 import KernelR.Family.Witnesses
 
 /-! Parametric native cells: exact nominal compatibility, symbolic section

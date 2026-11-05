@@ -10,14 +10,11 @@ This is a semantic regression suite, not a second proof checker.
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
 import json
 from pathlib import Path
 import re
-import subprocess
-import tempfile
 
-from lean_check import lean_check_command
+from family_control_batches import run_batches
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ("KernelR/Family/Refinement.lean", "KernelR/Family/DoseCounting.lean")
@@ -96,33 +93,23 @@ def cases():
             original = (header + ":=" + proof).replace("theorem " + name, "example", 1)
             changed = (header + ":=").replace(before, after) + proof
             changed = changed.replace("theorem " + name, "example", 1)
+            # Qualified theorem declarations elaborate their proof in that
+            # namespace. Preserve it when replacing the name by `example`.
+            if "." in name:
+                namespace = name.rsplit(".", 1)[0]
+                original = f"namespace {namespace}\n{original}\nend {namespace}\n"
+                changed = f"namespace {namespace}\n{changed}\nend {namespace}\n"
             result.append((name, source, purpose, original, changed))
     if names != MUTATIONS.keys():
         raise RuntimeError(f"Coverage mismatch: missing={sorted(names-MUTATIONS.keys())}, stale={sorted(MUTATIONS.keys()-names)}")
     return result
 
 
-def check_case(case):
-    name, source, purpose, positive, negative = case
-    with tempfile.TemporaryDirectory(prefix="family-dose-") as directory:
-        path = Path(directory) / "Check.lean"
-        command = lean_check_command(directory, root_module="KernelR.Family.DoseCounting")
-        for label, body, should_pass in (("positive", positive, True), ("negative", negative, False)):
-            path.write_text(PREFIX + body + SUFFIX)
-            run = subprocess.run(command + [str(path)], cwd=ROOT, capture_output=True, text=True)
-            output = run.stdout + run.stderr
-            if should_pass and run.returncode:
-                raise RuntimeError(f"{name}: positive control failed\n{output}")
-            if not should_pass and (run.returncode == 0 or "error:" not in output):
-                raise RuntimeError(f"{name}: altered conclusion was not rejected with a Lean diagnostic\n{output}")
-    return {"theorem": name, "source": source, "mutation": purpose, "positive": "passed", "negative": "rejected"}
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--inventory", action="store_true", help="print theorem/mutation coverage without running Lean")
     parser.add_argument("--case", help="run one exact theorem name")
-    parser.add_argument("--jobs", type=int, default=2)
+    parser.add_argument("--timeout", type=int, default=300)
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     selected = cases()
@@ -133,10 +120,12 @@ def main():
     if args.inventory:
         print(json.dumps([{"theorem": x[0], "source": x[1], "mutation": x[2]} for x in selected], indent=2))
         return
-    if args.jobs < 1:
-        parser.error("--jobs must be positive")
-    with ThreadPoolExecutor(max_workers=args.jobs) as pool:
-        checked = list(pool.map(check_case, selected))
+    run_batches([(name, good, bad) for name, _, _, good, bad in selected],
+                PREFIX, SUFFIX, root_module="KernelR.Family.DoseCounting",
+                root=ROOT, timeout=args.timeout)
+    checked = [{"theorem": name, "source": source, "mutation": purpose,
+                "positive": "passed", "negative": "rejected"}
+               for name, source, purpose, _, _ in selected]
     report = {"paired_controls": len(checked), "results": checked}
     if args.report:
         args.report.write_text(json.dumps(report, indent=2) + "\n")

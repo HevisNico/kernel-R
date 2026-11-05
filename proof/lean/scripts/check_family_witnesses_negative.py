@@ -6,12 +6,11 @@ Rejection of a proof mutation is a regression check, not by itself a formal
 proof of the negated proposition. These are quiet witnesses, not evidence of
 active learning or of the nominal protocol at changed constants.
 """
+import argparse
+import json
 from pathlib import Path
 import re
-import subprocess
-import tempfile
-
-from lean_check import lean_check_command
+from family_control_batches import run_batches
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +20,13 @@ SUFFIX = '\nend KernelR.Family\n'
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--case', action='append', help='run exact theorem name (repeatable)')
+    parser.add_argument('--inventory', action='store_true')
+    parser.add_argument('--report', type=Path)
+    parser.add_argument('--timeout', type=int, default=120,
+                        help='seconds allowed for each complete Lean batch')
+    args = parser.parse_args()
     field = '''example {n} (c : Constants) (theta : Fin n → Parameters)
     (s t : ℝ) (i : Fin n) (k : Coord) :
     field c theta (quiet c s) (quiet c s).x t i k = VALUE := by
@@ -75,24 +81,17 @@ def main():
     if declared != covered:
         raise SystemExit(f'Witnesses: coverage mismatch; missing={sorted(declared-covered)}, '
                          f'unknown={sorted(covered-declared)}')
-    with tempfile.TemporaryDirectory(prefix='family-witnesses-negative-', dir=ROOT) as temporary:
-        path = Path(temporary) / 'Check.lean'
-        command = lean_check_command(temporary, root_module=MODULE)
-        for name, good, bad in cases:
-            for expected, source in [(True, good), (False, bad)]:
-                path.write_text(PREFIX + source + SUFFIX)
-                result = subprocess.run([*command, str(path)], cwd=ROOT, text=True,
-                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                        timeout=120)
-                if (result.returncode == 0) != expected:
-                    raise SystemExit(f'{name}: unexpected result:\n{result.stdout}')
-                if not expected and 'error:' not in result.stdout:
-                    raise SystemExit(f'{name}: failed without a Lean diagnostic:\n{result.stdout}')
-                if not expected and re.search(
-                        r'unknown (constant|identifier)|unexpected token|invalid syntax|'
-                        r'object file .* does not exist|unknown module prefix', result.stdout, re.I):
-                    raise SystemExit(f'{name}: nonsemantic rejection:\n{result.stdout}')
-            print(f'{name}: valid witness accepted; altered conclusion rejected.', flush=True)
+    if args.inventory:
+        print(json.dumps([name for name, _, _ in cases], indent=2))
+        return
+    if args.case:
+        if set(args.case) - covered:
+            parser.error('unknown cases: ' + ', '.join(sorted(set(args.case) - covered)))
+        cases = [case for case in cases if case[0] in args.case]
+    report = run_batches(cases, PREFIX, SUFFIX, root=ROOT,
+                         root_module=MODULE, timeout=args.timeout)
+    if args.report:
+        args.report.write_text(json.dumps(report, indent=2) + '\n')
     print(f'All {len(cases)} paired quiet-family witness controls passed.', flush=True)
 
 

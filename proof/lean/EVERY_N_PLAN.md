@@ -186,6 +186,36 @@ Broader introductions, ports or source programs retain their own obligations.
 The [coverage guide](N_CELL_COVERAGE.md) separates the older conditional API
 from the new construction.
 
+## Parametric native family: structural extension
+
+This topic adds new [`Family`](KernelR/Family/) modules without modifying the
+original cell laws, geometric-crossing semantics, physical box, birth family
+or finite-chain headline. One shared `Constants` value supplies the fixed
+cell constants, and the original fabrication parameters remain independent
+per cell and port.
+
+| Obligation | New result | Remaining boundary |
+|---|---|---|
+| Exhibit a family rather than a single numeric point | `Constants`, `Admissible.withLearningFactors`, `alternative_admissible` | Physical sign/level ordering is not protocol admissibility. |
+| Retain the original nominal model | `Nominal`: field/guard identities, both flow/jump/trace conversions, `execution_exists_iff`, `completeThrough_iff` | Human review must compare every substituted constant and guard with the unchanged core. |
+| Remove nominal numbers from transfer/count algebra | `Refinement`, `DoseCounting`: symbolic partial transfers, full-section doses and whole-execution counting | Covers must account for every actual contribution; counts may depend on the device and timing. Comparing distinct constants also requires matching section doses. |
+| Prove continuous uniqueness without a nominal box | `FlowUniqueness`: scalar integral comparison, cap barriers, positivity lemmas and `Flow.path_unique` | Same constants/parameters/source snapshot; signs, nonnegative rates and safe paths remain explicit. |
+| Separate reserve algebra from work estimates | `Energy`: `Flow.energy_lower`, `Flow.energy_upper`, `Flow.safe_of_work_ceiling` | Explicit initial reserve and actual-work bounds; the safe-flow corollary also uses initial auxiliary/recovery and coefficient/input signs. No new all-family protocol work bound is proved. |
+| Generalize simultaneous native-event reasoning | `RawJumpConfluence`, `JumpConfluence`, `JumpDepartures`, `JumpLocalDiamond` | Local observational diamonds cover all native constructors; this does not establish arbitrary-family global execution uniqueness. |
+| Establish non-vacuity | `Witnesses`: actual safe quiet flows and complete executions | Source-free equilibria only; no claim of active learning, firing or cadence for new members. |
+| Separate numerical protocol conditions | [Conditions map](../../docs/PARAMETRIC_PROTOCOL_CONDITIONS.md) and generated catalogue | Historical certificate comparisons and selected current interfaces; no exhaustive transitive numeric-dependency claim for every-N. |
+
+The [review obligation](../../REVIEW.md#parametric-native-family) covers the
+family-to-nominal semantic bridge and the distinction between structural
+hypotheses and protocol margins. The original global crossing, progress and
+finite-chain guarantees are not generalized by these local results.
+
+Validation figures for this topic must be recorded against an exact code
+commit and labeled as a local targeted build, a local full build, or CI.
+The historical totals below remain attached to their own checkpoints and do
+not count this addition. A configured paired-control suite is not a report
+that the suite or the complete CI has passed.
+
 ## Validation and checkpoint discipline
 
 ### Exact counts on the constructed finite-chain witness

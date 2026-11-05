@@ -7,6 +7,7 @@ are refused. The Family audit separately checks permitted axiom dependencies.
 """
 from pathlib import Path
 import re
+import json
 import subprocess
 import tempfile
 
@@ -133,22 +134,54 @@ def cases():
 
 def main():
     controls = cases()
+    public = set(re.findall(r'^theorem\s+([^\s{(]+)',
+                            (ROOT / 'KernelR/Family/FlowUniqueness.lean').read_text(), re.M))
+    covered = {name for name, _, _ in controls}
+    if public != covered:
+        raise SystemExit(f'Flow coverage mismatch: missing={sorted(public-covered)}, '
+                         f'stale={sorted(covered-public)}')
     with tempfile.TemporaryDirectory(prefix='family-flow-negative-', dir=ROOT) as tmp:
         path = Path(tmp) / 'Check.lean'
         command = lean_check_command(tmp, root_module=MODULE)
-        for name, good, bad in controls:
-            for expected, text in [(True, good), (False, bad)]:
-                path.write_text(PREFIX + text)
-                result = subprocess.run([*command, str(path)], cwd=ROOT, text=True,
-                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                        timeout=120)
-                if (result.returncode == 0) != expected:
-                    raise SystemExit(f'{name}: unexpected result:\n{result.stdout}')
-                if not expected:
-                    if 'error:' not in result.stdout:
-                        raise SystemExit(f'{name}: rejection without Lean diagnostic:\n{result.stdout}')
-                    if re.search(r'unknown (constant|identifier)|unexpected token|invalid syntax', result.stdout, re.I):
-                        raise SystemExit(f'{name}: nonsemantic rejection:\n{result.stdout}')
+        # Two compiler processes retain per-result pairing without paying the
+        # Mathlib import/setup cost forty times. Every negative block must have
+        # its own semantic diagnostic; a failure elsewhere cannot satisfy it.
+        path.write_text(PREFIX + '\n'.join(good for _, good, _ in controls))
+        positive = subprocess.run([*command, '--json', str(path)], cwd=ROOT, text=True,
+                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                  timeout=300)
+        if positive.returncode != 0:
+            raise SystemExit(f'Valid controls failed:\n{positive.stdout}')
+        blocks = []
+        text = PREFIX
+        for name, _, bad in controls:
+            first = len(text.splitlines()) + 1
+            text += bad + '\n'
+            blocks.append((name, first, len(text.splitlines())))
+        path.write_text(text)
+        negative = subprocess.run([*command, '--json', str(path)], cwd=ROOT, text=True,
+                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                  timeout=300)
+        messages = []
+        for line in negative.stdout.splitlines():
+            try:
+                message = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if message.get('severity') == 'error':
+                messages.append(message)
+        if negative.returncode == 0 or not messages:
+            raise SystemExit(f'Altered controls were not rejected with Lean errors:\n{negative.stdout}')
+        for message in messages:
+            data = str(message.get('data', ''))
+            if re.search(r'unknown (constant|identifier)|unexpected token|invalid syntax', data, re.I):
+                raise SystemExit(f'Nonsemantic rejection:\n{negative.stdout}')
+            line = message.get('pos', {}).get('line', -1)
+            if not any(first <= line <= last for _, first, last in blocks):
+                raise SystemExit(f'Diagnostic outside a paired block:\n{negative.stdout}')
+        for name, first, last in blocks:
+            if not any(first <= m.get('pos', {}).get('line', -1) <= last for m in messages):
+                raise SystemExit(f'{name}: no semantic rejection for its altered claim:\n{negative.stdout}')
             print(f'{name}: valid conclusion accepted; false strengthening rejected.', flush=True)
     print(f'{len(controls)} paired parametric flow controls passed.', flush=True)
 

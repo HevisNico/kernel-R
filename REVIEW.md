@@ -48,6 +48,49 @@ provides an observationally equal crossing representative. The correspondence
 is proved for the declared finite-chain protocol, not for arbitrary initial
 states or inputs. Infinite/maximal-run theorems retain their native interface.
 
+## Parametric native family
+
+The new [`Family`](proof/lean/KernelR/Family/) layer creates a separate
+semantic review obligation. Compare [`Model`](proof/lean/KernelR/Family/Model.lean)
+and [`Nominal`](proof/lean/KernelR/Family/Nominal.lean) with the unchanged
+`Hybrid.lean`: each substituted constant, all field/work terms, the strict
+flow preguards, every native jump guard/update, RAW support and queue urgency
+must express the intended parameterization. Review both directions of the
+nominal conversions, including preservation of the actual paths and terminal
+completion. The bridge is to the native first-contact semantics; it is not a
+parameterization of `CrossingExecution`.
+
+Also review the hypotheses and limits of the new structural results:
+
+- One `Constants` value is common to a network. Original fabrication
+  parameters still vary per cell and port; the family does not silently
+  enlarge `PhysicalBox` or change `BirthState`.
+- `ErrorSectionCover` and `MarkSectionCover` in
+  [`Family.DoseCounting`](proof/lean/KernelR/Family/DoseCounting.lean) must
+  describe the actual complete exposed sections and account for every
+  learning contribution. Counts may vary with a protocol; equality across
+  members requires equal section doses, not only equal counts.
+- `Flow.path_unique` in
+  [`Family.FlowUniqueness`](proof/lean/KernelR/Family/FlowUniqueness.lean)
+  retains coefficient signs, nonnegative rates and safe-path hypotheses.
+  Initial-state positivity lemmas retain a separate positive-energy premise.
+  [`Family.Energy`](proof/lean/KernelR/Family/Energy.lean) can discharge it
+  through a positive reserve barrier under an explicit actual-work ceiling;
+  review that this ceiling is not presented as a proved work estimate for a
+  new protocol. `Jump.local_diamond` is local and native, modulo pending-list permutation;
+  combining these results into arbitrary-family global execution uniqueness
+  requires further work.
+- The quiet witnesses prove nonempty safe execution classes without sources,
+  learning or FIREs. They do not discharge active training/cadence existence.
+- The [protocol-conditions catalogue](docs/PARAMETRIC_PROTOCOL_CONDITIONS.md)
+  covers historical certificates and selected current Lean interfaces. Check
+  that its sufficient inequalities are not described as necessary conditions
+  or as an exhaustive dependency analysis of the current every-N proof.
+
+The original crossing, physical-box, birth and finite-chain theorems keep
+their existing scope. New paired controls and axiom checks support this
+review but do not replace it.
+
 The [validation ledger](proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
 records the build, axiom audit and paired controls separately from this human
 review obligation.
