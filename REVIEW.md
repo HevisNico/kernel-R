@@ -1,9 +1,26 @@
 # Review guide
 
-**Review the fidelity of `CrossingExecution` to the written model first.**
-Lean checks the proofs against the formal definitions; human review must judge
-whether those definitions express the intended model. The checked build does
-not replace this semantic review.
+Start with [`TrustedHeadline.every_finite_chain`](proof/lean/KernelR/TrustedHeadline.lean)
+and the generated [trusted-base reading list](docs/TRUSTED_BASE.md). Read in
+this order: the statement, the written cell model and its listed definitions,
+the crossing semantics, the protocol inputs, the compared observations, and
+finally the verification trust (`Audit.lean`, the toolchain, dependency pins
+and the trusted-base checker).
+
+CI computes the project-definition closure of the statement independently of
+the explicit allowlist and rejects an unlisted dependency or missing trusted
+name. Mathematical semantic review therefore focuses on the trusted definitions
+and the headline statement; the proofs are checked by Lean. This does not
+claim a formally verified implementation of the checker, compiler or libraries,
+or experimental validation of a physical device.
+
+Within the crossing-semantics step, review the fidelity of `CrossingExecution`
+to the written model. The checked build does not replace this semantic review.
+The existing fixed-delay theorem and construction modules supply the proof;
+they are not additional semantic assumptions of the trusted statement.
+
+The sections below retain additional review guidance for claims outside that
+headline, including learning-section coverage and progress.
 
 For exact dose counting, review whether `ErrorSectionCover` and
 `MarkSectionCover` in [HybridDoseCounting](proof/lean/KernelR/HybridDoseCounting.lean)

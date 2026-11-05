@@ -5,6 +5,13 @@ operational semantics in [Hybrid.lean](../proof/lean/KernelR/Hybrid.lean).
 Lean proves properties of these definitions under stated hypotheses; matching
 a physical device or a numerical engine requires separate justification.
 
+For the main finite-chain result, start with the generated
+[trusted-base reading list](TRUSTED_BASE.md) and
+`TrustedHeadline.every_finite_chain`. The list names every permitted semantic
+parent in the mechanically checked project-definition closure of that
+statement and links each one to its written-model rule at a fixed commit.
+Proof checking and verification-software trust are recorded separately.
+
 Write a=ln4, κ=1/2, r=1/10, rₘ=1/40, and gₚ=exp(zₚ).
 
 | Model component | Equation or operational rule | Exact Lean definition |
