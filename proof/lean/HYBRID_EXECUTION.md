@@ -143,6 +143,65 @@ The reviewed universal proof modules are included in this checkout. The
 records the v0.2.0 integration and publication scope; later local validation is
 recorded in the [current ledger](EVERY_N_PLAN.md#validation-and-checkpoint-discipline).
 
+## Separate parametric native semantics
+
+[`KernelR.Family.Model`](KernelR/Family/Model.lean) reproduces the native
+integral-flow and nine-constructor jump interface with symbolic fixed cell
+constants. It reuses the original snapshots, coordinates, fabrication
+parameters and routers. One `Constants` value is shared within a network;
+fabrication rates, input gains and gain caps remain per cell and port.
+`Admissible` imposes sufficient positive/order conditions, independently of
+protocol latency margins. The original `Hybrid.lean`, `CrossingExecution`,
+`PhysicalBox` and `BirthState` are unchanged.
+
+[`Nominal`](KernelR/Family/Nominal.lean) gives both directions of the bridge
+at the original constants, retaining each actual flow path and all native
+jump updates, and proves equivalence of execution existence and completion.
+The family layer therefore specializes to the existing native rules rather
+than merely reproducing their final numerical outputs.
+
+The structural conclusions have separate hypotheses:
+
+- [`Refinement`](KernelR/Family/Refinement.lean) integrates the matched decay
+  and actuation currents on actual exposed ERROR/MARK sections. Complete
+  doses are `gainFactor*(errorLevel-auxRest)` and
+  `recoveryFactor*(auxThreshold-markExit)`.
+- [`DoseCounting`](KernelR/Family/DoseCounting.lean) counts actual complete
+  sections using covers of all learning contributions. For fixed constants,
+  equal counts imply equal increments across different fabrication parameters
+  and event times; absolute equality also requires equal birth memories.
+  Different constants additionally require equal section doses.
+- [`FlowUniqueness`](KernelR/Family/FlowUniqueness.lean) proves path equality
+  from the same snapshot under coefficient signs, nonnegative fabrication
+  rates and safe paths. Here `Safe` means positive energy, nonnegative
+  recovery and auxiliary charges throughout the interval. Cap barriers and
+  positivity from initial data are proved separately; the positivity
+  derivation retains an explicit positive-energy hypothesis.
+- [`Energy`](KernelR/Family/Energy.lean) gives symbolic lower/upper reserve
+  barriers from initial reserve bounds, a nonnegative pump rate and an
+  explicit ceiling/floor on actual work. `Flow.safe_of_work_ceiling` uses a
+  positive lower barrier, initial auxiliary/recovery nonnegativity and
+  coefficient/input signs to prove `Safe`. The actual-work ceiling remains a
+  hypothesis to verify for a new protocol.
+- [`JumpLocalDiamond`](KernelR/Family/JumpLocalDiamond.lean) proves a local
+  observational diamond for every pair of enabled native events. No numerical
+  assumptions are needed for this local discrete statement. Joining may
+  require a further actual jump on each branch, and pending lists are
+  compared by permutation.
+- [`Witnesses`](KernelR/Family/Witnesses.lean) supplies actual safe quiet
+  flows and complete executions for every admissible member and positive
+  horizon. Their modes stay READY with no sources, learning or FIREs.
+
+These are neither a parameterized global execution-uniqueness theorem nor a
+new all-family existence proof for the teaching/cadence protocol. The
+geometric-crossing, progress, non-Zeno and every-N results above retain their
+original constants and hypotheses. The
+[protocol-conditions map](../../docs/PARAMETRIC_PROTOCOL_CONDITIONS.md)
+separates the structural formulas from numerical chronology, response,
+headroom and reserve obligations; its catalogue covers historical
+certificates and selected current interfaces, not every transitive numeric
+dependency of the current universal proof.
+
 ## Physical definitions
 
 For FIRE/MARK, the native equality guards below are related to the written

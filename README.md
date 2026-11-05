@@ -77,6 +77,8 @@ not a hardware-counter claim. The separate universal theorem transfers
 memories and FIRE dates to every complete execution; it does not supply
 section covers for those competing executions.
 
+A separate [parametric cell family](docs/PARAMETRIC_PROTOCOL_CONDITIONS.md) proves symbolic dose/count identities, safe-flow uniqueness and native local jump diamonds; the existing cadence and geometric-crossing theorems retain their original constants and hypotheses.
+
 ## Hypotheses
 
 - `N >= 1`, `K >= 4*N+12`; the declared independent READY birth family.

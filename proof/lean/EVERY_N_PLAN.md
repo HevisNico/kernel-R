@@ -186,7 +186,58 @@ Broader introductions, ports or source programs retain their own obligations.
 The [coverage guide](N_CELL_COVERAGE.md) separates the older conditional API
 from the new construction.
 
+## Parametric native family: structural extension
+
+This topic adds new [`Family`](KernelR/Family/) modules without modifying the
+original cell laws, geometric-crossing semantics, physical box, birth family
+or finite-chain headline. One shared `Constants` value supplies the fixed
+cell constants, and the original fabrication parameters remain independent
+per cell and port.
+
+| Obligation | New result | Remaining boundary |
+|---|---|---|
+| Exhibit a family rather than a single numeric point | `Constants`, `Admissible.withLearningFactors`, `alternative_admissible` | Physical sign/level ordering is not protocol admissibility. |
+| Retain the original nominal model | `Nominal`: field/guard identities, both flow/jump/trace conversions, `execution_exists_iff`, `completeThrough_iff` | Human review must compare every substituted constant and guard with the unchanged core. |
+| Remove nominal numbers from transfer/count algebra | `Refinement`, `DoseCounting`: symbolic partial transfers, full-section doses and whole-execution counting | Covers must account for every actual contribution; counts may depend on the device and timing. Comparing distinct constants also requires matching section doses. |
+| Prove continuous uniqueness without a nominal box | `FlowUniqueness`: scalar integral comparison, cap barriers, positivity lemmas and `Flow.path_unique` | Same constants/parameters/source snapshot; signs, nonnegative rates and safe paths remain explicit. |
+| Separate reserve algebra from work estimates | `Energy`: `Flow.energy_lower`, `Flow.energy_upper`, `Flow.safe_of_work_ceiling` | Explicit initial reserve and actual-work bounds; the safe-flow corollary also uses initial auxiliary/recovery and coefficient/input signs. No new all-family protocol work bound is proved. |
+| Generalize simultaneous native-event reasoning | `RawJumpConfluence`, `JumpConfluence`, `JumpDepartures`, `JumpLocalDiamond` | Local observational diamonds cover all native constructors; this does not establish arbitrary-family global execution uniqueness. |
+| Establish non-vacuity | `Witnesses`: actual safe quiet flows and complete executions | Source-free equilibria only; no claim of active learning, firing or cadence for new members. |
+| Separate numerical protocol conditions | [Conditions map](../../docs/PARAMETRIC_PROTOCOL_CONDITIONS.md) and generated catalogue | Historical certificate comparisons and selected current interfaces; no exhaustive transitive numeric-dependency claim for every-N. |
+
+The [review obligation](../../REVIEW.md#parametric-native-family) covers the
+family-to-nominal semantic bridge and the distinction between structural
+hypotheses and protocol margins. The original global crossing, progress and
+finite-chain guarantees are not generalized by these local results.
+
+Validation figures for this topic must be recorded against an exact code
+commit and labeled as a local targeted build, a local full build, or CI.
+The historical totals below remain attached to their own checkpoints and do
+not count this addition. A configured paired-control suite is not a report
+that the suite or the complete CI has passed.
+
 ## Validation and checkpoint discipline
+
+### Parametric native family: local targeted checkpoint
+
+The code checkpoint is
+[`cc7ad73981f961963548005cb5a26fedabd9e8bb`](https://github.com/HevisNico/kernel-R/tree/cc7ad73981f961963548005cb5a26fedabd9e8bb).
+The following are **local targeted checks**, not a local full-project build or
+a report of complete CI. This ledger-only follow-up does not change that
+checkpoint's Lean, workflow or control-script sources.
+
+| Measurement | Result and exact scope |
+|---|---|
+| Family build | `lake build KernelR.Family` passed: 3,505 dependency/build jobs, including imported libraries. This is not a count of project modules or a full-project build. |
+| Family axiom audit | 342 theorem declarations under `KernelR.Family`, including private and generated declarations, passed the same axiom filter as `Audit.lean`; only `propext`, `Classical.choice`, `Quot.sound` were allowed. The standalone check imported `KernelR.Family` and restricted the audit's name prefix accordingly. |
+| Public source interface | 119 explicit public `theorem` declarations across the twelve family modules; the additional family aggregator contains imports. Together these are thirteen added Lean files relative to `b5435f3ca16908edb1f4aa9930a8d2f0a384342a`. This source inventory differs from the compiled audit count. |
+| Paired controls | 139 accepted-original/rejected-mutation pairs: base 27, dose/count 43, flow 20, confluence 43, quiet witnesses 6. These cover every public theorem plus three constructive nominal-bridge checks and seventeen concrete event fixtures. Each mutation requires its own semantic diagnostic; parser, missing-name and import failures cannot satisfy the shared checks. Rejection of a proof mutation alone is not a proof of the negated statement. |
+| Source hygiene | `check_sources.py` passed over 578 project Lean files and confirmed the five inherited upstream module identities. All pre-existing files under `KernelR/` were also byte-compared with the base commit and were unchanged; the root `KernelR.lean` only adds the family import. |
+| Layout and evidence | All twelve project-layout tests passed. The protocol catalogue freshness check and independent integer replay of all eight unchanged historical certificates passed; their counts and source snapshot are recorded in the conditions document. |
+
+The full CI result must be checked on the PR's latest commit. These local
+results do not replace the additional semantic review in `REVIEW.md`, and
+they do not extend the nominal cadence/crossing theorem to new constants.
 
 ### Exact counts on the constructed finite-chain witness
 

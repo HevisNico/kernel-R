@@ -93,6 +93,29 @@ finite construction supplies universal
 physical contracts for arbitrary introductions or port permutations, or an
 indefinitely repeatable network contract.
 
+## Parametric cell structure: separate from the every-N protocol
+
+The [`Family`](KernelR/Family/) modules quantify over a common `Constants`
+value for the network while retaining independently chosen original
+fabrication parameters at each cell and port. The original core definitions
+and finite-chain headline are unchanged.
+
+| Result | Family proof | Coverage boundary |
+|---|---|---|
+| Nominal operational equivalence | [`Nominal`](KernelR/Family/Nominal.lean) | Same field/guards, actual paths, every native jump constructor, trace existence and completion at the original constants; this bridge does not introduce a parameterized geometric-crossing semantics. |
+| Exact symbolic learning | [`Refinement`](KernelR/Family/Refinement.lean), [`DoseCounting`](KernelR/Family/DoseCounting.lean) | Partial transfers and complete-section doses; whole-execution formulas require actual exposed-section covers. Same counts compare devices for one member; comparing members also requires the same doses. |
+| Actual integral-flow uniqueness | [`FlowUniqueness`](KernelR/Family/FlowUniqueness.lean) | Same starting snapshot, constants and fabrication parameters; coefficient signs, nonnegative rates and safe paths are explicit. Initial-state positivity lemmas discharge auxiliary/recovery signs with a separate positive-energy premise. |
+| Symbolic reserve and safety | [`Energy`](KernelR/Family/Energy.lean) | Initial reserve bounds plus an actual-work ceiling/floor give barriers. A positive lower barrier, initial auxiliary/recovery nonnegativity and coefficient/input signs discharge `Safe`; establishing the work bound for a new protocol remains separate. |
+| Native local jump diamond | [`JumpLocalDiamond`](KernelR/Family/JumpLocalDiamond.lean) | Every native jump pair, including deliveries and RAW expiry, joins observationally modulo pending-list permutation; no global execution-uniqueness theorem for all family members is claimed. |
+| Admissible family is nonempty | [`Constants`](KernelR/Family/Constants.lean), [`Witnesses`](KernelR/Family/Witnesses.lean) | Distinct admissible constants and actual safe complete quiet executions; these witnesses do not establish active learning or a new cadence protocol. |
+
+The [protocol-conditions catalogue](../../docs/PARAMETRIC_PROTOCOL_CONDITIONS.md)
+separates those structural hypotheses from latency brackets, cap headroom,
+reserve estimates and chronology margins. Its historical certificates and
+selected current Lean interfaces are not an exhaustive dependency inventory of
+the universal construction. No parameterized every-N, crossing, non-Zeno or
+maximal-progress result is asserted by this layer.
+
 ## Checked composition
 
 | Written argument | Lean module and declarations | Scope |

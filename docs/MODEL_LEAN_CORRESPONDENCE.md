@@ -23,6 +23,43 @@ Write a=ln4, κ=1/2, r=1/10, rₘ=1/40, and gₚ=exp(zₚ).
 | Events and causal wiring | Jumps preserve time and physical coordinates. FIRE appends routed tokens; arrival removes one actual due occurrence on a free port | `setMain`, `setAux`, `setRaw`, `Jump`, `Delivery`, `Router`, `CausalRouter`; `Execution` composes actual flows and jumps without a fixed simultaneous-event priority |
 | Births and terminal completion | A starts in the declared birth family; later births add independent READY coordinates and sources. Completion discharges enabled jumps and every token due at the horizon | `BirthState` plus the headline's READY-auxiliary/source premises; [HybridStagedBirth](../proof/lean/KernelR/HybridStagedBirth.lean): `Newborn`, `BirthStep`, `StagedExecution`; `CompleteThrough` |
 
+## Parametric native cell family
+
+[`KernelR.Family`](../proof/lean/KernelR/Family/) adds a separate parameterized
+native semantics. It leaves `Hybrid.lean`, `CrossingExecution`, `PhysicalBox`
+and `BirthState` unchanged. A `Constants` value is common to one network;
+the original `Parameters` remain independently selectable at each cell and
+port. `Admissible` states sufficient sign and level-order conditions, not the
+numerical margins of a teaching or cadence protocol.
+
+| Family component | Formal statement and scope |
+|---|---|
+| Constants and distinct members | [`Constants`](../proof/lean/KernelR/Family/Constants.lean) separates main/auxiliary levels, actuation factors, pulse shape/width and reserve constants; positive learning factors give an admissible two-parameter family, and `alternative_admissible` supplies another explicitly changed member. |
+| Same original operational model at `nominal` | [`Nominal`](../proof/lean/KernelR/Family/Nominal.lean) identifies the pulse, currents, actuators, field and guards; `Flow.toNative`/`ofNative` retain the actual path, and `Jump.toNative`/`ofNative` cover every native constructor. `execution_exists_iff` and `completeThrough_iff` preserve trace existence and terminal completion. |
+| Symbolic transfers and actual counts | [`Refinement`](../proof/lean/KernelR/Family/Refinement.lean) and [`DoseCounting`](../proof/lean/KernelR/Family/DoseCounting.lean) give `Delta z = gainFactor*(m_in-m_out)` and each MARK contribution `recoveryFactor*(m_in-m_out)` on actual exposed sections. Whole-execution counts require covers of every contribution. |
+| Continuous uniqueness | [`FlowUniqueness`](../proof/lean/KernelR/Family/FlowUniqueness.lean), `Flow.path_unique`, compares flows from the same snapshot, with the same constants and fabrication parameters, under `FlowSigns`, nonnegative fabrication rates and `Safe` for both flows. Cap barriers and initial-state positivity lemmas have their own stated hypotheses. |
+| Symbolic reserve barrier | [`Energy`](../proof/lean/KernelR/Family/Energy.lean), `Flow.energy_lower` and `Flow.energy_upper`, use an initial reserve bound, a nonnegative pump rate and an explicit bound on actual work. `Flow.safe_of_work_ceiling` combines a positive lower barrier with initial auxiliary/recovery and coefficient/input signs; it does not supply a new protocol work estimate. |
+| Simultaneous native events | [`JumpLocalDiamond`](../proof/lean/KernelR/Family/JumpLocalDiamond.lean), `Jump.local_diamond`, covers every enabled native jump pair without numerical admissibility or a priority rule; branches agree immediately or after further actual jumps, modulo pending-list permutation. |
+| Nonempty quiet regime | [`Witnesses`](../proof/lean/KernelR/Family/Witnesses.lean), `safe_quiet_flow_exists` and `quiet_complete_exists`, construct source-free READY witnesses for every admissible member and positive horizon. These witnesses contain no learning or FIREs. |
+
+Complete-section doses are `gainFactor*(errorLevel-auxRest)` and
+`recoveryFactor*(auxThreshold-markExit)`. Equal actual counts imply equal
+increments for a fixed member even with different fabrication parameters,
+routers, event dates and initial memories. Equality of absolute memories also
+requires equal initial memories. Across different members, the comparison
+requires equal section doses in addition to equal counts. Neither equality
+asserts that a protocol produces the same counts on every device.
+
+The family layer proves local native diamonds and continuous-flow uniqueness;
+it does not extend the global complete-execution comparison, geometric
+upward-crossing correspondence, progress or cadence construction to arbitrary
+constants. The [protocol-conditions map](PARAMETRIC_PROTOCOL_CONDITIONS.md)
+records symbolic sufficient inequalities and a reproducible catalogue of
+historical certificate comparisons, plus selected current Lean interfaces.
+That catalogue is not a complete transitive dependency analysis of the current
+every-N proof. The [review guide](../REVIEW.md#parametric-native-family)
+states the additional semantic review obligation.
+
 ## Threshold contacts and upward crossings
 
 The [written model](../kernel/README.md#main-unit) specifies first upward
