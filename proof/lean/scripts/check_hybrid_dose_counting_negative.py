@@ -39,13 +39,16 @@ def main():
     (left : @Execution n θ₁ route₁ s₁ u₁)
     (right : @Execution n θ₂ route₂ s₂ u₂)
     (i : Fin n) (p : Port)
-    (lc : ErrorSectionCover i p left) (rc : ErrorSectionCover i p right)
-    (counts : lc.count = rc.count) : {claim} := by
-  have hl := left.gain_balance i p
-  have hr := right.gain_balance i p
-  rw [lc.ledger_eq] at hl
-  rw [rc.ledger_eq, ← counts] at hr
-  linarith
+    (leftErrors : ∀ i p, ErrorSectionCover i p left)
+    (leftMarks : ∀ i p, MarkSectionCover i p left)
+    (rightErrors : ∀ i p, ErrorSectionCover i p right)
+    (rightMarks : ∀ i p, MarkSectionCover i p right)
+    (errorCounts : ∀ i p, (leftErrors i p).count = (rightErrors i p).count)
+    (markCounts : ∀ i,
+      (∑ p : Port, (leftMarks i p).count) = ∑ p : Port, (rightMarks i p).count) :
+    {claim} := by
+  exact (same_increments_of_same_counts left right leftErrors leftMarks
+    rightErrors rightMarks errorCounts markCounts).1 i p
 '''
     unique = '''example {{n θ route s u i p}} {{e : @Execution n θ route s u}}
     (left right : ErrorSectionCover i p e) : left.count = {count} := by
@@ -90,7 +93,7 @@ def main():
   dsimp only
   let cover : ErrorSectionCover i p
       (.cons (.jump entry) (span.append (.cons (.jump exit) (.nil _)))) :=
-    .section entry span exit (.nil _) hb hs hu ha phase exposed (.nil _)
+    .fullPhase entry span exit (.nil _) hb hs hu ha phase exposed (.nil _)
   refine ⟨cover, rfl, ?_⟩
   simpa [cover, ErrorSectionCover.count] using cover.ledger_eq
 '''
@@ -108,7 +111,7 @@ def main():
   dsimp only
   let cover : MarkSectionCover i p
       (.cons (.jump entry) (span.append (.cons (.jump exit) (.nil _)))) :=
-    .section entry span exit (.nil _) hb hs hu ha phase exposed (.nil _)
+    .fullPhase entry span exit (.nil _) hb hs hu ha phase exposed (.nil _)
   refine ⟨cover, rfl, ?_⟩
   simpa [cover, MarkSectionCover.count] using cover.ledger_eq
 '''

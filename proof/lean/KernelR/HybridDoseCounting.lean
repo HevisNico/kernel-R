@@ -53,7 +53,7 @@ theorem Move.mark_zero_of_inactive {n θ route s u}
 
 /-- Exact decomposition of the actual trace into inactive moves and complete
 ERROR sections at a particular cell/port. No dose equality is a constructor
-premise. The `section` constructor records real mode-changing jumps. -/
+premise. The `fullPhase` constructor records real mode-changing jumps. -/
 inductive ErrorSectionCover {n : ℕ} {θ : Fin n → Parameters} {route : Router n}
     (i : Fin n) (p : Port) :
     {s u : Snapshot n} → Execution θ route s u → Type
@@ -61,7 +61,7 @@ inductive ErrorSectionCover {n : ℕ} {θ : Fin n → Parameters} {route : Route
   | inactive {s v u} (move : Move θ route s v) (rest : Execution θ route v u)
       (physical : move.ErrorInactive i p) (tail : ErrorSectionCover i p rest) :
       ErrorSectionCover i p (.cons move rest)
-  | section {s a b c u}
+  | fullPhase {s a b c u}
       (entry : Jump route s a) (span : Execution θ route a b)
       (exit : Jump route b c) (rest : Execution θ route c u)
       (before : s.aux i p ≠ .error) (entered : a.aux i p = .error)
@@ -80,7 +80,7 @@ inductive MarkSectionCover {n : ℕ} {θ : Fin n → Parameters} {route : Router
   | inactive {s v u} (move : Move θ route s v) (rest : Execution θ route v u)
       (physical : move.MarkInactive i p) (tail : MarkSectionCover i p rest) :
       MarkSectionCover i p (.cons move rest)
-  | section {s a b c u}
+  | fullPhase {s a b c u}
       (entry : Jump route s a) (span : Execution θ route a b)
       (exit : Jump route b c) (rest : Execution θ route c u)
       (before : s.aux i p ≠ .mark) (entered : a.aux i p = .mark)
@@ -94,13 +94,13 @@ def ErrorSectionCover.count {n θ route i p s u} {e : @Execution n θ route s u}
     ErrorSectionCover i p e → ℕ
   | .nil _ => 0
   | .inactive _ _ _ tail => tail.count
-  | .section _ _ _ _ _ _ _ _ _ _ tail => tail.count + 1
+  | .fullPhase _ _ _ _ _ _ _ _ _ _ tail => tail.count + 1
 
 def MarkSectionCover.count {n θ route i p s u} {e : @Execution n θ route s u} :
     MarkSectionCover i p e → ℕ
   | .nil _ => 0
   | .inactive _ _ _ tail => tail.count
-  | .section _ _ _ _ _ _ _ _ _ _ tail => tail.count + 1
+  | .fullPhase _ _ _ _ _ _ _ _ _ _ tail => tail.count + 1
 
 theorem Execution.dose_error_append {n θ route s v u}
     (segment : @Execution n θ route s v) (rest : Execution θ route v u)
@@ -129,7 +129,7 @@ theorem ErrorSectionCover.ledger_eq {n θ route i p s u}
     change move.ledger.error i p + rest.ledger.error i p = _
     rw [move.error_zero_of_inactive i p physical, zero_add, ih]
     rfl
-  | section entry span exit rest before entered leaving after phase exposed tail ih =>
+  | fullPhase entry span exit rest before entered leaving after phase exposed tail ih =>
     have hd := guarded_error_dose entry span exit i p before entered leaving after exposed
     simp only [Execution.ledger, Move.ledger, Ledger.add,
       entry.no_actuation.1, zero_add, Execution.dose_error_append,
@@ -145,7 +145,7 @@ theorem MarkSectionCover.ledger_eq {n θ route i p s u}
     change move.ledger.mark i p + rest.ledger.mark i p = _
     rw [move.mark_zero_of_inactive i p physical, zero_add, ih]
     rfl
-  | section entry span exit rest before entered leaving after phase exposed tail ih =>
+  | fullPhase entry span exit rest before entered leaving after phase exposed tail ih =>
     have hd := guarded_mark_dose entry span exit i p before entered leaving after exposed
     simp only [Execution.ledger, Move.ledger, Ledger.add,
       entry.no_mark_actuation, zero_add, Execution.dose_mark_append,
