@@ -39,11 +39,17 @@ jobs:
       - name: Export checked trusted declaration metadata
         working-directory: proof/lean
         run: python scripts/export_trusted_base.py --output /tmp/trusted-base.json --print
+      - name: Preserve checked trusted declaration metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: trusted-base-metadata-${{ github.sha }}
+          path: /tmp/trusted-base.json
+          if-no-files-found: error
       - name: Check explicit headline routing and trusted-closure checker contracts
         working-directory: proof/lean
         run: |
           python scripts/check_trusted_headline_negative.py
-          python scripts/check_trusted_base_negative.py --checker-only
+          python scripts/check_trusted_base_negative.py
       - name: Reject axioms in current and imported project declarations
         working-directory: proof/lean
         run: python scripts/check_audit_negative.py

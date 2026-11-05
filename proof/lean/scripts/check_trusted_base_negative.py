@@ -35,6 +35,13 @@ def checker_cases():
     auxiliary = ('def inner : Nat := 0\ndef model : Nat := 0\n'
                  'def model.match_1 : Nat := inner\n'
                  'theorem headline : model.match_1 = 0 := rfl\n')
+    private = ('private def inner : Nat := 0\ndef model : Nat := inner\n'
+               'theorem headline : model = 0 := rfl\n')
+    proof_only = ('def implementation : Nat := 0\n'
+                  'theorem headline : True := by\n'
+                  '  have hidden : implementation = 0 := rfl\n  trivial\n')
+    proof_in_type = ('def implementation : Nat := 0\n'
+                     'theorem headline : implementation = 0 := rfl\n')
     return [
         ('direct needed name', fixture(direct, '`{NAMESPACE}.model'),
          fixture(direct, ''), 'Untrusted statement dependencies'),
@@ -49,6 +56,44 @@ def checker_cases():
         ('every trusted name must exist', fixture(direct, '`{NAMESPACE}.model'),
          fixture(direct, '`{NAMESPACE}.model, `{NAMESPACE}.missing'),
          'Trusted declaration does not exist'),
+        ('private computational definitions',
+         fixture(private, '``{NAMESPACE}.inner, `{NAMESPACE}.model'),
+         fixture(private, '`{NAMESPACE}.model'), 'Untrusted statement dependencies'),
+        ('proof values are leaves but proposition definitions are not',
+         fixture(proof_only, ''), fixture(proof_in_type, ''),
+         'Untrusted statement dependencies'),
+    ]
+
+
+def headline_cases():
+    command = '''
+open Lean Elab Command in
+run_cmd liftTermElabM do
+  discard <| KernelR.TrustedBaseChecker.check
+    `KernelR.Hybrid.TrustedHeadline.every_finite_chain TRUSTED
+'''
+    trusted = 'KernelR.TrustedBase.trustedDeclarations'
+    variant_command = '''
+open Lean Elab Command in
+run_cmd liftTermElabM do
+  discard <| KernelR.TrustedBaseChecker.check
+    `{NAMESPACE}.variant KernelR.TrustedBase.trustedDeclarations
+'''
+    plain = '''open KernelR.Hybrid
+theorem variant {n : ℕ} (state : Snapshot (n + 1)) : True := True.intro
+'''
+    constructed = '''open KernelR.Hybrid
+theorem variant {n θ bornCells K sigma centre error T}
+    (chain : @ConstructedIndexedBirthCadenceChain n θ bornCells K sigma centre error T) :
+    True := True.intro
+'''
+    return [
+        ('headline excludes construction structures', plain + variant_command,
+         constructed + variant_command, 'Untrusted statement dependencies'),
+        ('actual headline needs the explicit router', command.replace('TRUSTED', trusted),
+         command.replace('TRUSTED',
+                         f'({trusted}.erase `KernelR.Hybrid.explicitFiniteChainRouter)'),
+         'Untrusted statement dependencies'),
     ]
 
 
@@ -97,6 +142,8 @@ def main():
     args = parser.parse_args()
     module = 'KernelR.TrustedBaseChecker' if args.checker_only else 'KernelR.TrustedBase'
     cases = checker_cases()
+    if not args.checker_only:
+        cases += headline_cases()
     check_batches(cases, module)
     print(f'All {len(cases)} paired checker controls passed.', flush=True)
 
