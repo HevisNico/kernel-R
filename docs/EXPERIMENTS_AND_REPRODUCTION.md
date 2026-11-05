@@ -155,6 +155,8 @@ python -B experiments/reciprocal/package.py
 The output is `dist/R_Reciprocal_Prototype.zip`, constrained below 30,000,000 bytes.
 The provided download is a pinned research snapshot; rebuilding an archive need
 not preserve ZIP timestamps, while its source/data manifest remains verifiable.
+It is not a mirror of HEAD. Its immutable identity and the CI verification
+command are recorded in [the archive guide](../downloads/README.md).
 
 Optional viewer QA uses Node.js and the committed `package-lock.json`:
 

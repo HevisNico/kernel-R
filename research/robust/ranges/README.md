@@ -19,8 +19,10 @@ radius valid on the whole range.
 Every formula of the pinned derivations is an interval expression. Evaluated with ν and α
 as intervals, it encloses its value for every ν and α in them, by the inclusion property of
 interval arithmetic. A strict inequality checked on those enclosures therefore holds at every
-point. Two things in the pinned sources assume point parameters, and only these are patched
-by `load.py`, each patch checked by its exact number of occurrences:
+point. The ordinary modules `local_bounds.py`, `birth_bounds.py` and `latency_bounds.py`
+retain these formulas with explicit interval input policies. `load.py` imports them normally;
+it does not rewrite or dynamically execute source code. Two policies differ from the pinned
+point implementations:
 
 1. the checks that ν and α are exact (ε and the section excess stay exact);
 2. the zero-disturbance branch of the latency radius, which tested `nu.lo == 0 and
@@ -29,7 +31,10 @@ by `load.py`, each patch checked by its exact number of occurrences:
 
 The pinned files themselves are not modified, so the eight point certificates and the
 generated Lean evidence keep their source hashes. Each range certificate records the hashes
-of the three pinned sources it patches.
+of the three pinned point sources and of every range module it executes. The formulas are
+duplicated deliberately to preserve the point sources. A whole-module AST comparison in
+`tests.py` rejects any difference except the enumerated validation policies, zero-disturbance
+branch and dependency imports. Formula changes therefore require explicit review.
 
 ## Pieces
 
@@ -51,7 +56,8 @@ python -B ranges/certify.py --epsilon 0.1 --nu 0:0.002 --alpha 0:0 --out /tmp/ra
 ```
 
 `tests.py` checks that zero-width ranges reproduce every published birth and latency point
-certificate bound for bound, that the zero-radius trap is refused, that ranges beyond the
+certificate bound for bound, that the duplicated formulas match the pinned ASTs, that invalid
+range endpoints and inexact fixed parameters are refused, that the zero-radius trap is refused, that ranges beyond the
 budget are refused, and that tampered certificates are refused.
 
 ## Scope

@@ -188,6 +188,38 @@ from the new construction.
 
 ## Validation and checkpoint discipline
 
+### Explicit fixed-delay headline and reproducibility review
+
+`FixedDelayChainHeadline.every_finite_chain_fixed_delay` takes the native delay
+functions as inputs and states existence and universal outcomes in both native
+and geometric semantics under `canonicalFiniteChainRouter`. The router's root,
+parent, receiving port, contact window and delay index are explicit; the
+constructed chain is proved to use that router. No protocol hypothesis or
+axiom is added. The indexed-error theorem remains a separate result.
+
+A local build of `KernelR.Recorded`, `KernelR.HybridFiniteChainCanonicalRouter`
+and `KernelR.FixedDelayChainHeadline` passes **3,788 jobs**. The unchanged audit
+scanner over these modules and their dependencies checks **7,083 project
+theorems**, permitting only `propext`, `Classical.choice` and `Quot.sound`, with
+no admitted proofs or added project axioms. These are scoped local totals.
+Source hygiene passes for **567 Lean files**, including the five unchanged
+inherited modules. `Recorded.lean` and its generator now use a finite
+8,000,000-heartbeat budget; generated evidence still matches.
+
+All **six paired fixed-delay controls** pass, covering the supplied delay,
+both universal semantic contracts and literal parent/port/window/index/root
+routing. The configured Lean paired-control inventory is **1,385**
+(1,379 + 6). Thirteen project Python tests and all nine range tests pass;
+all six range certificates replay independently, with **672 strict obligations**.
+Their numerical payloads and pinned point sources are unchanged. All 16 robust
+certificates and the generated Lean evidence replay unchanged.
+
+The README's global **9,618 jobs / 29,298 theorems** are explicitly anchored
+to `b5435f3`, not this revision. The complete suite at that checkpoint stopped
+at its 90-minute limit after its build, audit and counting tests had passed.
+The workflow here retains every check and uses the 120-minute budget also
+proposed separately in PR #31.
+
 ### Exact counts on the constructed finite-chain witness
 
 `ConstructedBirthCadenceChain.sectionCovered` constructs actual complete

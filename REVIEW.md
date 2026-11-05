@@ -12,6 +12,10 @@ exit jumps, uninterrupted phase exposure and coverage of every learning
 contribution. Their `inactive` constructors must justify zero actuation from
 modes alone; clipping or a closed energy gate must not hide partial learning.
 See the [counting hypotheses](docs/EXACT_DOSE_COUNTING.md).
+The applied `exact_section_counts` theorem constructs covers for the retained
+finite-chain witness. Review this quantifier separately from the universal
+endpoint and FIRE-date comparison: the latter does not construct ERROR/MARK
+covers for every competing complete trace.
 
 For [open-section runs](proof/lean/KernelR/HybridSectionRuns.lean), also check
 that cutting a flow retains an already-open phase and its actual entry and
@@ -32,6 +36,12 @@ In particular, review:
   applying the mode change. Review this convention at simultaneous events too.
 - Crossing is geometric: positive slope is sufficient, but is not part of the
   definition. `WeakFlow` permits a threshold touch without firing.
+- `CellRightCrossing` is existential over full-cell `CellOrbitGerm` solutions.
+  No generic uniqueness theorem for these germs is supplied. At a contact
+  with positive incoming field, `CellOrbitGerm.crossing_of_positive_field`
+  applies to every germ, so that crossing conclusion does not depend on
+  choosing a particular germ. Outside this transverse case, review the
+  existential convention as part of the model's semantics.
 - `CrossingCompleteThrough` excludes exactly the jumps satisfying their
   historical and right-crossing guards, including at the terminal date.
   The descending guards and raw/queue urgency remain in force.
@@ -39,6 +49,15 @@ In particular, review:
 The [descending-guard explanation](docs/MODEL_LEAN_CORRESPONDENCE.md#descending-guards)
 gives the positive rates and recovery bound that make equality an unambiguous
 downward crossing in the physical family.
+
+For the fixed-delay statement, review
+[`canonicalFiniteChainRouter`](proof/lean/KernelR/HybridFiniteChainCanonicalRouter.lean)
+and `ConstructedBirthCadenceChain.router_eq_canonical`. The router in the
+public conclusion must be the declared chain with the supplied delays;
+its topology must not be hidden behind an existential router. The
+[fixed-delay headline](proof/lean/KernelR/FixedDelayChainHeadline.lean) takes
+these functions before constructing either semantic witness. The indexed
+corollary instead constructs them after the prescribed error family is given.
 
 After the definitions, review the theorem directions and hypotheses in
 [CrossingChainHeadline](proof/lean/KernelR/CrossingChainHeadline.lean) and

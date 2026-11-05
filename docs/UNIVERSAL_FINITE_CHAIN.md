@@ -31,6 +31,7 @@ make these restrictions explicit.
 | Each recovery | Own birth value +0.3; three protected MARK sections summed over that cell's ports of the constructed witness |
 | Endpoint | All READY/q=0.1, RAW absent, empty global queue |
 
+**Learning-section count scope: the constructed witness.**
 [`ConstructedBirthCadenceChain.exact_section_counts`](../proof/lean/KernelR/HybridFiniteChainDoseCounting.lean)
 constructs the witness's whole-execution covers under the original physical
 hypotheses. Four is the ERROR count on the active port: the leaf has one
@@ -78,7 +79,7 @@ real times. Its values away from actual FIREs need not be unique.
 The indexed corollary does not take a native delay function, reaching execution
 or output calendar as input. Neither formulation assumes statistical
 independence or cancellation of wire errors. The universal
-[native-delay theorem](../proof/lean/KernelR/HybridUniversalBirthCadenceChain.lean)
+[fixed-delay headline](../proof/lean/KernelR/FixedDelayChainHeadline.lean)
 applies to every admissible supplied delay family; the indexed corollary
 additionally realizes each prescribed bounded error sequence.
 
@@ -91,14 +92,19 @@ simultaneous event orders and flow subdivisions give the same physical
 endpoint and exact ordered per-cell FIRE lists. The global simultaneous event
 list and pending-list presentation may differ by permutation.
 
-The native execution definitions use first threshold contact. The
+The native execution definitions use first threshold contact. The geometric
+right-crossing condition existentially quantifies over full-cell ODE germs.
+Generic germ uniqueness is not claimed; at the protocol's transverse
+contacts, `CellOrbitGerm.crossing_of_positive_field` applies to every germ. The
 [threshold correspondence](MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
 now proves the bridge to geometric upward crossings on this protocol.
 [`CrossingChainHeadline.every_finite_chain_every_crossing_execution`](../proof/lean/KernelR/CrossingChainHeadline.lean)
 constructs a crossing witness and quantifies over every geometrically complete
 model execution under the same static hypotheses. Its exact refinement retains
-all paths and jumps; the endpoint, ordered FIRE dates, learning, counts and
-prescribed wire errors follow from the native results.
+all paths and jumps; the endpoint memories, ordered FIRE dates, FIRE counts
+and prescribed wire errors follow from the native results. ERROR/MARK section
+covers are separately constructed for the retained witness, not for every
+competing complete trace.
 
 This comparison assumes completeness through T. For the same fixed finite-source
 program, the [progress theorems](../proof/lean/PROGRESS.md) extend every legal
@@ -144,9 +150,33 @@ recovery is insufficient remains separate from what is proved here.
 
 ## Lean headline: signatures, axioms and reproduction
 
-### Geometric upward-crossing entry point
+### Delay functions fixed in advance
 
-The model-facing entry point is
+[`FixedDelayChainHeadline.every_finite_chain_fixed_delay`](../proof/lean/KernelR/FixedDelayChainHeadline.lean)
+is the direct public entry point for the fixed-delay headline. It takes
+`delay : ℕ → ℝ → ℝ` with the original pointwise bounds, birth, source,
+physical-box and cumulative-budget hypotheses. Its conclusion explicitly uses
+[`canonicalFiniteChainRouter n delay T`](../proof/lean/KernelR/HybridFiniteChainCanonicalRouter.lean),
+rather than an existentially chosen router.
+
+The conclusion supplies complete native and crossing witnesses under this
+router, with the same actual trace through `Execution.toWeak`. It also
+compares every complete execution in either semantics: physical endpoint,
+ordered per-cell FIRE dates and `UniversalCadenceOutcome`. Those outcomes
+include memory increments and FIRE counts. ERROR/MARK section covers remain
+a separate result for the constructed witness.
+
+`ConstructedBirthCadenceChain.router_eq_canonical` proves that the factory
+uses this router. Thus both its topology and the delay functions are fixed
+before the witnesses; the construction does not choose a new routing policy.
+The `canonicalFiniteChainRouter_root` and `canonicalFiniteChainRouter_parent`
+lemmas expose the wiring: the root sends no token; each non-root FIRE in
+`[160,T+1)` sends one token to its parent on port2, due at its firing time
+plus the supplied link delay. Outside that window it sends none.
+
+### Prescribed-error geometric entry point
+
+The separate indexed-error entry point is
 [`CrossingChainHeadline.every_finite_chain_every_crossing_execution`](../proof/lean/KernelR/CrossingChainHeadline.lean)
 in `KernelR.Hybrid.CrossingChainHeadline`. It constructs a complete execution
 in the model's upward-crossing semantics and compares every complete crossing
@@ -183,12 +213,10 @@ wire errors on those actual FIRE lists. The companion
 `CrossingChainHeadline.terminal_state_and_counts` transfers the terminal
 memories, recovery, FAST counts and total traffic to each model execution.
 
-For delay functions supplied in advance, the native construction below produces
-a `ConstructedBirthCadenceChain`. Its `crossingExecution` and
-`every_crossing_complete` results in
-[HybridCrossingCorrespondence](../proof/lean/KernelR/HybridCrossingCorrespondence.lean)
-supply crossing existence and universal observations for that same fixed delay
-family. This keeps the native-delay and indexed-error quantifier orders explicit.
+The fixed-delay headline above packages the native construction and its
+[geometric correspondence](../proof/lean/KernelR/HybridCrossingCorrespondence.lean)
+directly. The indexed-error theorem here has a different quantifier order:
+its delay functions are constructed after the prescribed error family.
 
 #### Geometric headline axiom transcript
 
@@ -203,11 +231,14 @@ lake build KernelR.CrossingChainHeadline
 lake env lean KernelR/CrossingChainHeadline.lean
 ```
 
-The [validation ledger](../proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
-records a local build of 9,592 jobs and a global audit of 28,970 project
-theorem declarations at `ef5a510`, the geometric-crossing checkpoint. That audit permits
-only `propext`, `Classical.choice` and `Quot.sound`. The per-declaration compiler
-transcript above remains a separate item to capture from a real build.
+At `b5435f3`, [CI run 42026428133](https://github.com/HevisNico/kernel-R/actions/runs/42026428133)
+completed the global build (9,618 jobs) and axiom audit (29,298 project theorem
+declarations), permitting only `propext`, `Classical.choice` and `Quot.sound`.
+The complete suite was canceled after 90 minutes, so its build/audit success
+is not a full-suite pass. These figures precede the present changes; the
+[validation ledger](../proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
+keeps historical checkpoints and stage-specific evidence. The per-declaration
+compiler transcript above remains a separate item to capture from a real build.
 
 ### Native first-contact proof steps
 

@@ -489,6 +489,8 @@ import KernelR.HybridContactSourceRestriction
 import KernelR.HybridContactRouterTransport
 import KernelR.HybridCausalTransversality
 import KernelR.CrossingChainHeadline
+import KernelR.HybridFiniteChainCanonicalRouter
+import KernelR.FixedDelayChainHeadline
 import KernelR.HybridCellOrbitExistence
 import KernelR.HybridCellOrbitGerm
 import KernelR.HybridCrossingCorrespondence
