@@ -188,7 +188,36 @@ from the new construction.
 
 ## Validation and checkpoint discipline
 
-### Constructive section covers: PR #29 milestone 2
+### Exact counts on the constructed finite-chain witness
+
+`ConstructedBirthCadenceChain.sectionCovered` constructs actual complete
+ERROR/MARK covers without a caller-supplied cover or gate premise.
+`exact_section_counts` identifies four ERROR sections on each active port
+and three MARK sections per cell, summed over ports. The original birth,
+physical-box, source-budget and wire hypotheses of the factories are retained.
+
+The application graph builds in **3,758 jobs**. The unchanged audit scanner
+imports all **48 changed modules** across this PR and checks **6,553 project
+theorems** in their dependency closure, permitting only `propext`,
+`Classical.choice` and `Quot.sound`, with no admitted proofs or added project
+axioms. These are scoped local totals, not a completed local global build.
+The umbrella imports all new modules for the ordinary global CI audit.
+
+Source hygiene passes for **565 Lean files**, with all five inherited upstream
+modules unchanged. All **six paired applied controls** in
+[`check_hybrid_chain_section_counts_negative.py`](scripts/check_hybrid_chain_section_counts_negative.py)
+pass, including counts, cover uniqueness and own-birth offsets. Together with
+the 11 section-run pairs, the configured CI inventory is **1,379 pairs**
+(1,362 + 11 + 6), separately from audit-corruption checks. The audit's positive
+public/private controls and corruption-rejection controls pass locally.
+
+The preceding `93abed8` checkpoint also passes the global build, global audit
+and audit-corruption steps in
+[Actions run 42012958868](https://github.com/HevisNico/kernel-R/actions/runs/42012958868).
+Its remaining regression steps were running when this entry was prepared;
+its global totals are not substituted for the scoped application totals above.
+
+### Constructive section covers: checkpoint `93abed8`
 
 The **33 changed Lean modules** and their dependency closure build successfully
 in **3,749 jobs**. The unchanged audit scanner, importing those 33 modules,

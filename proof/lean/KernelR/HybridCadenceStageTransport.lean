@@ -147,6 +147,16 @@ noncomputable def transport (c : ConstructedCadenceChainStage d K T depth m L J)
     (hr : d.route depth=d'.route depth) (hs : d.source depth=d'.source depth) :
     ConstructedCadenceChainStage d' K T depth m L J where
   stage:=c.stage.transport hp hr hs
+  section_covered:=by
+    intro gain recovery
+    have covered := c.section_covered (by
+      intro i p
+      have h := gain i p
+      change c.stage.final.x i (.z p) < Real.log ((d'.parameters depth i).cap p) at h
+      rw [←hp] at h
+      exact h) recovery
+    exact Execution.SectionCovered.of_runs (fun i => i) covered
+      (fun kind i p count run => cadence_execution_cast_sections c.stage.execution hp hr hs run)
   contacts_transversal:=
     (cadence_execution_cast_contacts c.stage.execution hp hr hs).2 c.contacts_transversal
   packet:=c.packet

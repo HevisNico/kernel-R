@@ -27,9 +27,17 @@ make these restrictions explicit.
 | Total fast emissions | `N*(K-N-4)` |
 | Total preparation emissions | `12*N+2` |
 | Entire birth-to-T emission ledger | `N*(K-N+8)+2` |
-| Each active log-gain, leaf port 0 / relays port 2 | Own birth value +2.4 |
-| Each recovery | Own birth value +0.3 |
+| Each active log-gain, leaf port 0 / relays port 2 | Own birth value +2.4; four full exposed ERROR sections on that port of the constructed witness |
+| Each recovery | Own birth value +0.3; three protected MARK sections summed over that cell's ports of the constructed witness |
 | Endpoint | All READY/q=0.1, RAW absent, empty global queue |
+
+[`ConstructedBirthCadenceChain.exact_section_counts`](../proof/lean/KernelR/HybridFiniteChainDoseCounting.lean)
+constructs the witness's whole-execution covers under the original physical
+hypotheses. Four is the ERROR count on the active port: the leaf has one
+additional preparation ERROR on port1. Its three MARK sections split as one
+on preparation port1 and two on active port0. The universal comparison of
+complete traces transfers memories and FIRE dates; cover existence for
+competing complete traces is not part of this count theorem.
 
 For the regular tail, actual dates have the form `t_k = τ + 4*k + η_k`,
 with `|η_k| <= J` and `J <= 0.15`. Successive intervals therefore lie in
@@ -196,8 +204,8 @@ lake env lean KernelR/CrossingChainHeadline.lean
 ```
 
 The [validation ledger](../proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
-records a fresh local build of 9,592 jobs and a global audit of 28,970 project
-theorem declarations for the geometric-crossing revision. That audit permits
+records a local build of 9,592 jobs and a global audit of 28,970 project
+theorem declarations at `ef5a510`, the geometric-crossing checkpoint. That audit permits
 only `propext`, `Classical.choice` and `Quot.sound`. The per-declaration compiler
 transcript above remains a separate item to capture from a real build.
 

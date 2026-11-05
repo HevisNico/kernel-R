@@ -4,6 +4,7 @@ import KernelR.HybridIndependentFiniteFamily
 import KernelR.HybridLocalFutureFrame
 import KernelR.HybridContactTransversalityFrame
 import KernelR.HybridSectionCoverFrame
+import KernelR.HybridLeafPreparationSectionCovers
 
 /-! Common-birth preparation of a finite independent family. Each relay is
 trained at its own port two, and the last cell at its own nominal fast port
@@ -22,6 +23,7 @@ def finiteChainPreparationCount (n : ℕ) (i : Fin (n+1)) : ℕ := if i=Fin.last
 structure FiniteChainPreparationCell (parameter : Parameters) (born : Snapshot 1)
     (port : Port) (dose : ℝ) (count : ℕ) where
   run : FiniteCausalCell parameter born (1599/10)
+  covered : run.execution.SectionCovered
   contacts_transversal : run.execution.ContactsTransversal
   prepared : PreparedSection run.final 0
   gain_target : run.final.x 0 (.z port)=born.x 0 (.z port)+dose
@@ -126,6 +128,7 @@ theorem finite_chain_family_preparation_exists {n θ bornCells K ε}
           pending:=leaf.pending
         }
         contacts_transversal:=leaf.contacts_transversal
+        covered:=leaf.sectionCovered hbox (hborn i) (ha i)
         prepared:=leaf.prepared,gain_target:=?_,gain_other:=?_,recovery:=leaf.recovery
         emission_count:=?_,deliveries:=?_,physical:=leaf.physical,raw_valid:=leaf.raw_valid
       }⟩
@@ -147,6 +150,7 @@ theorem finite_chain_family_preparation_exists {n θ bornCells K ε}
           pending:=relay.pending
         }
         contacts_transversal:=relay.contacts_transversal
+        covered:=relay.covered
         prepared:=relay.prepared,gain_target:=?_,gain_other:=?_,recovery:=relay.recovery
         emission_count:=?_,deliveries:=?_,physical:=relay.physical,raw_valid:=relay.raw_valid
       }⟩
@@ -263,6 +267,19 @@ theorem total_emission_count : f.execution.ledger.emissions.length=12*n+14 := by
       omega
 
 theorem ready (i : Fin (n+1)) : ReadyCoordinates f.final i := (f.prepared i).ready_coordinates
+
+theorem section_covered : f.execution.SectionCovered := by
+  constructor
+  · intro i p
+    obtain ⟨cover⟩ := (f.locals i).covered.1 0 p
+    obtain ⟨mapped, _⟩ := error_section_run_iff.mp
+      (f.error_sections i p cover.count cover.sectionRun)
+    exact ⟨mapped⟩
+  · intro i p
+    obtain ⟨cover⟩ := (f.locals i).covered.2 0 p
+    obtain ⟨mapped, _⟩ := mark_section_run_iff.mp
+      (f.mark_sections i p cover.count cover.sectionRun)
+    exact ⟨mapped⟩
 
 end FiniteChainFamilyPreparation
 end KernelR.Hybrid

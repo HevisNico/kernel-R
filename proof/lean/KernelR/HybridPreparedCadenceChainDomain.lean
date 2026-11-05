@@ -1,4 +1,6 @@
 import KernelR.HybridConstructedCadenceChainStage
+import KernelR.HybridLeafSectionCovers
+import KernelR.HybridSectionGates
 import KernelR.HybridCadenceLeafKEnvelope
 import KernelR.HybridLocalCadenceBudgetReceiverPacket
 import KernelR.HybridFiniteCausalExtension
@@ -95,6 +97,11 @@ theorem base_exists : Nonempty (ConstructedCadenceChainStage d K
   refine ⟨{
     stage:=stage, packet:=leaf.packet, calendar:=leaf.packet_calendar
     contacts_transversal:=leaf.contacts_transversal
+    section_covered:=by
+      intro gain recovery
+      apply leaf.section_covered (domain.parameter_box 0 (by omega))
+      exact leaf.execution.learningGatesOpen_of_final_headroom
+        (domain.parameter_box 0 (by omega)) (domain.source_physical 0 (by omega)) gain recovery
     envelope:=?_, counts:=?_, gain_target:=?_, gain_other:=?_, recovery:=?_
   }⟩
   · constructor

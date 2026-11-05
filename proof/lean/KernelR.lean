@@ -72,6 +72,16 @@ import KernelR.HybridCausalSectionRuns
 import KernelR.HybridSectionCoverFrame
 import KernelR.HybridCompleteSectionCovers
 import KernelR.HybridSectionRouterCopy
+import KernelR.HybridUniformSectionCovers
+import KernelR.HybridSectionCoverSplice
+import KernelR.HybridBirthPreparationSectionCovers
+import KernelR.HybridLeafPreparationSectionCovers
+import KernelR.HybridCadenceWeakSectionCovers
+import KernelR.HybridCadenceTailSectionCovers
+import KernelR.HybridCadenceSectionCovers
+import KernelR.HybridLeafSectionCovers
+import KernelR.HybridCausalCompleteSectionCovers
+import KernelR.HybridFiniteChainDoseCounting
 import KernelR.HybridSensorGain
 import KernelR.HybridInputBalance
 import KernelR.HybridMainBounds

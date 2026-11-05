@@ -51,6 +51,9 @@ jobs:
       - name: Check structural section runs and reject omitted phase boundaries
         working-directory: proof/lean
         run: python scripts/check_hybrid_section_runs_negative.py
+      - name: Check applied finite-chain section counts and retain own birth offsets
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_chain_section_counts_negative.py
       - name: Reject altered physical durations, reserve bounds and raw tails
         working-directory: proof/lean
         run: python scripts/check_hybrid_analytic_negative.py

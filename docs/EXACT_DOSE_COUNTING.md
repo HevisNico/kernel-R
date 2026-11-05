@@ -3,9 +3,12 @@
 The new result in
 [`HybridDoseCounting.lean`](../proof/lean/KernelR/HybridDoseCounting.lean)
 expresses learned memory in terms of counts of complete, exposed sections of
-an actual finite execution. It is a conditional execution theorem, rather
-than a new source protocol or an assumption about the dose ledger. Its trace
-interface is the native finite `Execution` semantics.
+an actual finite execution. Its general theorem takes section covers as
+hypotheses. The application in
+[`HybridFiniteChainDoseCounting.lean`](../proof/lean/KernelR/HybridFiniteChainDoseCounting.lean)
+constructs these covers for the existing finite-chain witness under its
+original physical hypotheses. Its trace interface is the native finite
+`Execution` semantics.
 
 For each cell `i` and port `p`, let `k(i,p)` count complete exposed ERROR
 sections and `j(i,p)` count complete protected MARK sections. Then
@@ -27,6 +30,36 @@ parameters, routers, dates and initial memories. Equal section counts imply
 equal final-minus-initial memory increments. The separate
 `same_memories_of_same_birth_and_counts` also assumes equal initial memories
 and concludes equality of final memories.
+
+## Application to the finite-chain witness
+
+`ConstructedBirthCadenceChain.sectionCovered` constructs ERROR and MARK covers
+for every cell and port of the actual birth-to-terminal execution.
+`ConstructedBirthCadenceChain.exact_section_counts` returns those actual
+covers and proves, for each cell `i`,
+
+```text
+k(i, cadenceActivePort(i)) = 4
+sum_p j(i,p) = 3.
+```
+
+Thus the active log-gain increment is `4 * 0.6 = 2.4`, and recovery gains
+`3 * 0.1 = 0.3`. No cover, count or learning-gate hypothesis is supplied by
+the caller beyond the constructed protocol and its physical box. The proof
+constructs local sections, preserves their actual boundaries through flow
+cuts and causal interleavings, and composes preparation with cadence. Final
+headroom and the physical invariant establish the open gates.
+
+The ERROR claim concerns the **active port**, not the sum over all ports.
+The leaf has one additional preparation ERROR on port1, giving five ERROR
+sections across its ports. Its three MARK sections comprise one preparation
+MARK on port1 and two cadence MARKs on port0.
+
+The separate universal finite-chain theorem transfers the witness's terminal
+memories and ordered FIRE dates to every complete execution from the same
+birth under the same router. It does not construct section covers for all
+those competing traces. The count application here concerns the actual
+constructed witness.
 
 ## What the theorem assumes
 
@@ -123,8 +156,10 @@ hypotheses explicit to state the requested physical family.
 The formula states independence of the **increments**, conditional on the
 counts and coverage conditions. It preserves initial variation. Two cells
 with different initial log-gains need not end with equal log-gains after the
-same count. Likewise, this result does not prove that all parameter choices
-produce the same counts or spike dates.
+same count. The general theorem alone does not fix counts or spike dates
+across parameter choices. The finite-chain application above proves its
+stated active-port and summed MARK counts throughout the protocol's physical
+family; actual spike dates retain their parameter and wire-delay dependence.
 
 An ERROR count is not automatically a count of failed source pulses. A MARK
 count is a count of protected auxiliary sections, not a count of main FIRE
@@ -141,10 +176,12 @@ counter and a general affine split/merge algorithm are not conclusions.
 From `proof/lean` with the pinned Lean toolchain and dependency cache:
 
 ```sh
-lake build KernelR.HybridDoseCounting
+lake build KernelR.HybridDoseCounting KernelR.HybridFiniteChainDoseCounting
 lake build
 lake build Audit
 python3 scripts/check_hybrid_dose_counting_negative.py
+python3 scripts/check_hybrid_section_runs_negative.py
+python3 scripts/check_hybrid_chain_section_counts_negative.py
 ```
 
 The module prints the axiom dependencies of its headline results. The global

@@ -42,7 +42,10 @@ continuous trajectories, pulse origins, deliveries and memory updates.
 It derives:
 
 - Each active log-gain is its own birth value +2.4; each recovery is its own
-  birth value +0.3. Other gains retain their physical preparation memories.
+  birth value +0.3. On the constructed witness, these are exactly four
+  complete exposed ERROR sections on the active port and three protected
+  MARK sections summed over all ports. Other gains retain their physical
+  preparation memories.
 - The root has a regular tail of `K-4*N-4 >= 8` pulses, with actual dates
   `t_k = τ + 4*k + η_k`, where `|η_k| <= J <= 0.15`. Successive intervals
   therefore lie in `[4-2*J, 4+2*J]`.
@@ -61,8 +64,17 @@ expresses each log-gain increment as `0.6 * k` and each recovery increment as
 `0.1 * sum_p j_p`, where the integers count actual full exposed ERROR and
 protected MARK sections. It requires coverage of every learning contribution,
 open caps and positive energy. Initial memories are retained; the counts and
-applicability may depend on the fixed device and protocol. This conditional
-result does not construct an execution or assert a hardware counter.
+applicability may depend on the fixed device and protocol.
+
+For the constructed finite-chain witness,
+[`ConstructedBirthCadenceChain.exact_section_counts`](proof/lean/KernelR/HybridFiniteChainDoseCounting.lean)
+constructs those covers under the original physical hypotheses: each active
+port has `k = 4`, and each cell has `sum_p j_p = 3`, yielding +2.4 and +0.3.
+The leaf also has one preparation ERROR on port 1; four is its active-port
+count, not its total over all ports. This is an exact result in the model,
+not a hardware-counter claim. The separate universal theorem transfers
+memories and FIRE dates to every complete execution; it does not supply
+section covers for those competing executions.
 
 ## Hypotheses
 
