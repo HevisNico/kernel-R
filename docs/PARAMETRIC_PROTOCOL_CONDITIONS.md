@@ -126,15 +126,15 @@ certificate brackets such as `[0.24,0.25]`.
 
 | Current source and interface | Explicit condition / role | Category |
 |---|---|---|
-| [`Hybrid.lean`, `PhysicalBox`](../proof/lean/KernelR/Hybrid.lean) | `epsilon` is `3/1000` or `1/10`; independent nominal-relative boxes for `C,Lm,Ls,Le,M` | Numeric physical family |
-| [`Hybrid.lean`, `BirthState`](../proof/lean/KernelR/Hybrid.lean) | Main rest, recovery, auxiliary rest and log-gain bands of radius `1/100000`; energy `[50,100]` | Numeric birth family |
-| [`HybridBirthCadenceChain.lean`, `birth_cadence_chain_exists`](../proof/lean/KernelR/HybridBirthCadenceChain.lean) | `K >= 4*(n+1)+12`; nonnegative link radii; path sum `<=3/20`; `3/10+sigma <= centre <= 2/5-sigma`; errors bounded at every real time | Numeric resource / wire conditions |
-| [`HybridPreparedCadenceChainDomain.lean`, `PreparedCadenceChainDomain`](../proof/lean/KernelR/HybridPreparedCadenceChainDomain.lean) | Prepared clock `1599/10`, source dates `160+4*k`, exact READY charge and own prepared gain bands, physical and RAW-valid states | Mixed structural and numeric entry interface |
-| [`HybridLocalCadenceBudgetReceiver.lean`, `local_cadence_budget_receiver_exists`](../proof/lean/KernelR/HybridLocalCadenceBudgetReceiver.lean) | `J<=3/20`, tail length `L>=5`, initial `log(3/10)+9/5 +/-1/100000`, first source strictly later, terminal at least last source `+37/10` | Numeric receiver margins |
-| [`HybridCadenceChainEnvelope.lean`, `CadencePacketEnvelope.propagate`](../proof/lean/KernelR/HybridCadenceChainEnvelope.lean) | Low latency `[65/100,66/100]`, high latencies `[4/25,13/50]`, first high latency `<=` rest high latency, wire delay `[3/10,2/5]` | Numeric composition envelope |
-| [`HybridResponseBounds.lean`](../proof/lean/KernelR/HybridResponseBounds.lean) | `response(9/10)>=5001/10000` and `response(t)<=3/4` on ages `[0,1]` | Direct real proofs, not certificate rows |
-| [`HybridFiniteChainDoseCounting.lean`, `terminal_learning_headroom`](../proof/lean/KernelR/HybridFiniteChainDoseCounting.lean) | Final memories remain strictly below their own caps; reserve and monotonicity then supply intermediate gate conditions | Numeric-to-structural discharge |
-| [`CrossingChainHeadline.lean`](../proof/lean/KernelR/CrossingChainHeadline.lean) | Reuses the birth, box, source and wire budgets; crossing witnesses and outcomes are conclusions | Model-facing nominal headline |
+| [`Hybrid.lean`, `PhysicalBox`](https://github.com/HevisNico/kernel-R/blob/b5435f3ca16908edb1f4aa9930a8d2f0a384342a/proof/lean/KernelR/Hybrid.lean) | `epsilon` is `3/1000` or `1/10`; independent nominal-relative boxes for `C,Lm,Ls,Le,M` | Numeric physical family |
+| [`Hybrid.lean`, `BirthState`](https://github.com/HevisNico/kernel-R/blob/b5435f3ca16908edb1f4aa9930a8d2f0a384342a/proof/lean/KernelR/Hybrid.lean) | Main rest, recovery, auxiliary rest and log-gain bands of radius `1/100000`; energy `[50,100]` | Numeric birth family |
+| [`HybridBirthCadenceChain.lean`, `birth_cadence_chain_exists`](https://github.com/HevisNico/kernel-R/blob/b5435f3ca16908edb1f4aa9930a8d2f0a384342a/proof/lean/KernelR/HybridBirthCadenceChain.lean) | `K >= 4*(n+1)+12`; nonnegative link radii; path sum `<=3/20`; `3/10+sigma <= centre <= 2/5-sigma`; errors bounded at every real time | Numeric resource / wire conditions |
+| [`HybridPreparedCadenceChainDomain.lean`, `PreparedCadenceChainDomain`](https://github.com/HevisNico/kernel-R/blob/b5435f3ca16908edb1f4aa9930a8d2f0a384342a/proof/lean/KernelR/HybridPreparedCadenceChainDomain.lean) | Prepared clock `1599/10`, source dates `160+4*k`, exact READY charge and own prepared gain bands, physical and RAW-valid states | Mixed structural and numeric entry interface |
+| [`HybridLocalCadenceBudgetReceiver.lean`, `local_cadence_budget_receiver_exists`](https://github.com/HevisNico/kernel-R/blob/b5435f3ca16908edb1f4aa9930a8d2f0a384342a/proof/lean/KernelR/HybridLocalCadenceBudgetReceiver.lean) | `J<=3/20`, tail length `L>=5`, initial `log(3/10)+9/5 +/-1/100000`, first source strictly later, terminal at least last source `+37/10` | Numeric receiver margins |
+| [`HybridCadenceChainEnvelope.lean`, `CadencePacketEnvelope.propagate`](https://github.com/HevisNico/kernel-R/blob/b5435f3ca16908edb1f4aa9930a8d2f0a384342a/proof/lean/KernelR/HybridCadenceChainEnvelope.lean) | Low latency `[65/100,66/100]`, high latencies `[4/25,13/50]`, first high latency `<=` rest high latency, wire delay `[3/10,2/5]` | Numeric composition envelope |
+| [`HybridResponseBounds.lean`](https://github.com/HevisNico/kernel-R/blob/b5435f3ca16908edb1f4aa9930a8d2f0a384342a/proof/lean/KernelR/HybridResponseBounds.lean) | `response(9/10)>=5001/10000` and `response(t)<=3/4` on ages `[0,1]` | Direct real proofs, not certificate rows |
+| [`HybridFiniteChainDoseCounting.lean`, `terminal_learning_headroom`](https://github.com/HevisNico/kernel-R/blob/b5435f3ca16908edb1f4aa9930a8d2f0a384342a/proof/lean/KernelR/HybridFiniteChainDoseCounting.lean) | Final memories remain strictly below their own caps; reserve and monotonicity then supply intermediate gate conditions | Numeric-to-structural discharge |
+| [`CrossingChainHeadline.lean`](https://github.com/HevisNico/kernel-R/blob/b5435f3ca16908edb1f4aa9930a8d2f0a384342a/proof/lean/KernelR/CrossingChainHeadline.lean) | Reuses the birth, box, source and wire budgets; crossing witnesses and outcomes are conclusions | Model-facing nominal headline |
 
 Exact source fragments and hashes for these selected interfaces are recorded in
 the generated catalogue. This is a coverage map, **not an exhaustive transitive
@@ -142,6 +142,13 @@ dependency analysis** of every numeric lemma in the universal proof. No list of
 historical certificate rows should be presented as such an analysis.
 
 ## 4. Reproducible catalogue and validation
+
+The certificate counts in this section refer to the unchanged certificate and
+verifier sources at commit
+[`b5435f3ca16908edb1f4aa9930a8d2f0a384342a`](https://github.com/HevisNico/kernel-R/tree/b5435f3ca16908edb1f4aa9930a8d2f0a384342a).
+They describe catalogue extraction and independent integer replay, not Lean
+build jobs, theorem counts, or CI status. The generated index also records the
+individual source hashes.
 
 Run from the repository root:
 
