@@ -115,6 +115,10 @@ identities below require the energy gate to remain open and no cap contact:
 - A whole MARK received under protection adds Δb = (1 − 0.8)/2 = 0.1.
 - A partial reception contributes the integral over its true endpoints.
 
+The [whole-execution counting theorem](../docs/EXACT_DOSE_COUNTING.md) sums
+these identities over actual complete exposed sections, conditional on covers
+accounting for every learning contribution.
+
 The cell consults no target, counter or software failure flag.
 
 ## Energy

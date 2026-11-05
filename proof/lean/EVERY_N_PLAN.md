@@ -188,7 +188,29 @@ from the new construction.
 
 ## Validation and checkpoint discipline
 
-The geometric-crossing source revision passed a completely fresh local project
+### Exact dose counting: checkpoint `62376ff`
+
+At `62376ff7dda182bd7e31463eede337fb3390828b`, the local
+`lake build KernelR.HybridDoseCounting` passes **3,502 jobs**. This is the
+module build, not a new full-project build total. Its six printed headline and
+count-uniqueness results use only `propext`, `Classical.choice` and `Quot.sound`.
+Source hygiene covers **540 Lean files**, with all five inherited upstream
+modules unchanged; generated evidence matches and all **16 robust certificates**
+replay.
+
+All **11 new paired controls** in
+[`check_hybrid_dose_counting_negative.py`](scripts/check_hybrid_dose_counting_negative.py)
+pass locally and in [GitHub Actions run 41994544240](https://github.com/HevisNico/kernel-R/actions/runs/41994544240).
+The configured CI inventory is **1,362 pairs** (the preceding **1,351** plus
+these **11**), separately from axiom-audit corruption checks. This inventory
+counts generated cases; it does not assert a fresh rerun of all historical
+suites. The global build and axiom-audit steps in that run pass; their exact
+job and declaration totals have not yet been recorded here. The remaining
+regression steps were still running when this checkpoint entry was prepared.
+
+### Geometric crossing: checkpoint `ef5a510`
+
+The geometric-crossing checkpoint at `ef5a510` passed a completely fresh local project
 build (**9,592 jobs**) and global axiom audit (**28,970 project theorems**),
 allowing only `propext`, `Classical.choice` and `Quot.sound`. Source checks cover
 **539 Lean files**, with all five inherited upstream modules unchanged. All

@@ -120,7 +120,7 @@ lake build
 lake build Audit
 ```
 
-For the current geometric-crossing revision, the
+For the geometric-crossing checkpoint at `ef5a510`, the
 [validation ledger](proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
 records a fresh local build of **9,592 jobs** and a global audit of
 **28,970 project theorem declarations**, permitting only `propext`,

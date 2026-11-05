@@ -108,6 +108,7 @@ indefinitely repeatable network contract.
 | Resource algebra | `Chain.Algebra`, `traffic_closed_form`, `traffic_at_minimum` | Twelve integer identities, natural-number counts, root tail, root emissions and quadratic total traffic |
 | Jitter specialization | `pathJitter_mono`, `uniform_jitter_total`, `full_jitter_iff_four_cells`, `fixed_delays_any_depth` | Nonuniform cumulative budgets; uniform min(1/20,3/(20 links)); full 1/20 jitter is sufficient through four cells |
 | Dose words and settings | `Chain.Consequences` | Leaf/relay word counts, four total ERROR doses, two fast MARK doses, gain exp(12/5), final recovery interval |
+| Exact whole-execution dose counts | `HybridDoseCounting`: `Execution.memory_of_section_covers`, `from_birth_memory_of_section_covers` | Conditional on actual complete exposed ERROR/MARK covers; gain increments are 0.6 times each port's ERROR count and recovery is 0.1 times the sum of MARK counts. Cover existence for the finite-chain witness is not yet supplied. |
 | Cuts and terminal time | `cut_propagates`, `all_cells_quiescent_by` | Induction from explicit local silence and settling-time hypotheses |
 | Same-gain root ordering | `same_gain_ready_comparison`, `first_crossing_no_later` | Residual charge cannot delay the first crossing when comparing the same realized gain |
 | Local certificate endpoints | `Certificates.Composition003`, `Composition010` | All 162 strict comparisons and validity of all 352 rational enclosures in the two committed certificates |
