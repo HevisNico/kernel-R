@@ -36,6 +36,11 @@ jobs:
       - name: Audit every KernelR and A22 theorem
         working-directory: proof/lean
         run: lake build Audit
+      - name: Check explicit headline routing and trusted-closure checker contracts
+        working-directory: proof/lean
+        run: |
+          python scripts/check_trusted_headline_negative.py
+          python scripts/check_trusted_base_negative.py --checker-only
       - name: Reject axioms in current and imported project declarations
         working-directory: proof/lean
         run: python scripts/check_audit_negative.py
