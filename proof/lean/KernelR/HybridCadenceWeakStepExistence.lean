@@ -174,6 +174,8 @@ structure CadenceWeakNextSource {θ route s p k} (c : CadenceWeakResponse θ rou
     (later : List (Delivery 1)) where
   final : Snapshot 1
   execution : Execution θ route s final
+  arrival : Jump route c.final final
+  reconstruct : execution = c.execution.append (.cons (.jump arrival) (.nil _))
   contacts_transversal : execution.ContactsTransversal
   date : final.time = s.time + 4
   values : final.x = c.final.x
@@ -248,7 +250,7 @@ theorem cadence_weak_next_source_exists {θ ε route s p k}
   exact ⟨{
     contacts_transversal := by
       simp [trace, arrival, Execution.ContactsTransversal, Jump.ContactTransversal, c.contacts_transversal]
-    final := final, execution := trace, date := c.date, values := rfl, coordinates := hcoords
+    final := final, execution := trace, arrival := arrival, reconstruct := rfl, date := c.date, values := rfl, coordinates := hcoords
     gain_target := c.pulse.gain_target, gain_other := c.pulse.gain_other
     recovery := c.pulse.recovery_preserved, raw_active := hraw, raw_other := hother
     pending := rfl, emissions := by

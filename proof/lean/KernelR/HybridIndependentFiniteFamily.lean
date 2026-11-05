@@ -71,6 +71,9 @@ structure IndependentFiniteFamily {n : ℕ} (θ : Fin (n+1) → Parameters)
   emission_times : ∀ i, execution.emissionTimes i=(runs i).execution.emissionTimes 0
   emission_count : execution.ledger.emissions.length=∑ i, (runs i).execution.ledger.emissions.length
   delivery_count : execution.deliveries.length=∑ i, (runs i).execution.deliveries.length
+  section_runs : ∀ kind i p first last count,
+    SectionRun kind 0 p (runs i).execution first last count →
+      SectionRun kind i p execution first last count
 
 private noncomputable def independent_family_cast_parameters {n θ θ' route s u}
     (e : @Execution n θ route s u) (hp : θ=θ') : Execution θ' route s u := hp ▸ e
@@ -114,6 +117,20 @@ private theorem independent_family_router_transversal {n θ route route' s u}
   cases hr
   exact positive
 
+private theorem independent_family_parameters_sections {n θ θ' route s u kind i p first last count}
+    (e : @Execution n θ route s u) (hp : θ=θ')
+    (run : SectionRun kind i p e first last count) :
+    SectionRun kind i p (independent_family_cast_parameters e hp) first last count := by
+  cases hp
+  exact run
+
+private theorem independent_family_router_sections {n θ route route' s u kind i p first last count}
+    (e : @Execution n θ route s u) (hr : route=route')
+    (run : SectionRun kind i p e first last count) :
+    SectionRun kind i p (independent_family_cast_router e hr) first last count := by
+  cases hr
+  exact run
+
 /-- Combine independently constructed physical preparations at a common clock
 and horizon. This induction permits actual input arrivals and FIREs in every
 cell. Physical premises concern only the already-constructed local endpoints. -/
@@ -133,6 +150,10 @@ theorem independent_finite_family_exists (n : ℕ)
     refine ⟨{
       final:=(runs 0).final,execution:=execution,complete:=?_,pending:=(runs 0).pending
       contacts_transversal:=fun all => independent_family_parameters_transversal (runs 0).execution hp (all 0)
+      section_runs:=by
+        intro kind i p first last count run
+        fin_cases i
+        exact independent_family_parameters_sections (runs 0).execution hp run
       ready:=?_,charge:=?_,raw_none:=?_,physical:=?_,raw_valid:=hv 0
       final_values:=?_,final_main:=?_,final_aux:=?_,final_raw:=?_,emission_times:=?_
       emission_count:=?_,delivery_count:=?_
@@ -181,6 +202,15 @@ theorem independent_finite_family_exists (n : ℕ)
         (independent_family_parameters_transversal product.execution hp
           (product.contacts_transversal (tail.contacts_transversal (fun i => all i.succ)) (all 0)))
       complete:=independent_family_router_complete e0 hr hcomplete
+      section_runs:=by
+        intro kind i p first last count run
+        apply independent_family_router_sections e0 hr
+        apply independent_family_parameters_sections product.execution hp
+        cases i using Fin.cases with
+        | zero => exact product.head_sections kind p first last count run
+        | succ i =>
+          exact product.tail_sections kind i p first last count
+            (tail.section_runs kind i p first last count run)
       pending:=product.pending_empty tail.pending (runs 0).pending
       ready:=product.ready tail.ready (runs 0).ready,charge:=?_,raw_none:=?_
       physical:=?_,raw_valid:=product.raw_valid (tail.complete.1.trans (runs 0).complete.1.symm) tail.raw_valid (hv 0)

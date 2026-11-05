@@ -5,6 +5,17 @@ import KernelR.HybridBirthWeakSources
 
 namespace KernelR.Hybrid
 
+private theorem ready_flows_append {n θ route s v u}
+    (e : @Execution n θ route s v) (f : Execution θ route v u) (i : Fin n)
+    (left : e.MainFlows i .ready) (right : f.MainFlows i .ready) :
+    (e.append f).MainFlows i .ready := by
+  induction e with
+  | nil => exact right
+  | cons move rest ih =>
+    cases move with
+    | jump j => exact ih f left right
+    | flow g => exact ⟨left.1, ih f left.2 right⟩
+
 theorem readyCoordinates_one_all {s : Snapshot 1} (h : ReadyCoordinates s 0) :
     ∀ j, ReadyCoordinates s j := by
   intro j; have hj : j = 0 := Subsingleton.elim _ _; subst j; exact h
@@ -29,6 +40,7 @@ structure BirthWeakPrefix (θ : Fin 1 → Parameters) (route : Router 1) (born :
   sources : born.pending = sourceTrain 0 0 0 8 16 ++ sourceTrain 0 0 160 8 16
   final : Snapshot 1
   execution : Execution θ route born final
+  ready_flows : execution.MainFlows 0 .ready
   contacts_transversal : execution.ContactsTransversal
   date : final.time = 24
   complete : CompleteThrough execution 24
@@ -102,6 +114,16 @@ theorem birth_protocol_weak_prefix_exists {θ ε route born}
     sources := hqueue
     final := a24.final
     execution := e
+    ready_flows := by
+      have h0 := c0.continuation.allStates_main_flows 0 .ready c0.pulse.ready_states
+      have h1 := c1.execution.allStates_main_flows 0 .ready c1.pulse.ready_states
+      have h2 := c2.execution.allStates_main_flows 0 .ready c2.pulse.ready_states
+      exact ready_flows_append _ _ 0
+        (ready_flows_append _ _ 0
+          (ready_flows_append _ _ 0
+            (ready_flows_append _ _ 0
+              (ready_flows_append _ _ 0 h0 (a8.ready_flows 0)) h1)
+            (a16.ready_flows 0)) h2) (a24.ready_flows 0)
     contacts_transversal := by
       simp [e, c0.contacts_transversal, c1.contacts_transversal, c2.contacts_transversal,
         a8.contacts_transversal, a16.contacts_transversal, a24.contacts_transversal]

@@ -1,6 +1,7 @@
 import KernelR.HybridFiniteCausalChain
 import KernelR.HybridCadenceChainEnvelope
 import KernelR.Chain.Induction
+import KernelR.HybridCompleteSectionCovers
 
 /-! A finite physical cadence stage with its actual root packet, uniform
 clock envelope, exact per-cell FIRE counts and own memory increments. This
@@ -25,6 +26,9 @@ structure ConstructedCadenceChainStage (d : FiniteCausalChainData)
     (K : ℕ) (T : ℝ) (depth m L : ℕ) (J : ℝ) where
   stage : FiniteCausalChainStage d T depth
   contacts_transversal : stage.execution.ContactsTransversal
+  section_covered :
+    (∀ i p, stage.final.x i (.z p) < Real.log ((d.parameters depth i).cap p)) →
+    (∀ i, stage.final.x i .b < 11 / 10) → stage.execution.SectionCovered
   packet : KernelR.Chain.Packet m L J
   calendar : stage.execution.emissionTimes 0=
     List.ofFn (fun i : Fin (m+L) => packet.actual i.val)

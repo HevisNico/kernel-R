@@ -3,6 +3,7 @@ import KernelR.HybridFiniteChainPreparedData
 import KernelR.HybridCadenceChainCounts
 import KernelR.HybridEmissionRouterTransport
 import KernelR.HybridContactRouterTransport
+import KernelR.HybridSectionRouterCopy
 
 /-! Complete physical finite cadence from independently born cells. One fixed
 router governs the entire preparation and fast phase. Its contacts are closed
@@ -29,6 +30,14 @@ private theorem birth_chain_cast_contacts {k θ θ' route s s' u}
   cases hp
   cases hs
   rfl
+
+private theorem birth_chain_cast_sections {k θ θ' route s s' u kind i p first last count}
+    (e : @Execution k θ route s u) (hp : θ=θ') (hs : s'=s)
+    (run : SectionRun kind i p e first last count) :
+    SectionRun kind i p (birth_chain_cast e hp hs) first last count := by
+  cases hp
+  cases hs
+  exact run
 
 private theorem birth_chain_append_ledger {k θ route s u v}
     (e : @Execution k θ route s u) (f : Execution θ route u v) :
@@ -68,10 +77,17 @@ structure ConstructedBirthCadenceChain {n : ℕ} (θ : Fin (n+1) → Parameters)
     preparation.source preparation.final
   preparation_ledger : preparedExecution.ledger=preparation.execution.ledger
   preparation_deliveries : preparedExecution.deliveries=preparation.execution.deliveries
+  preparation_copy : Execution.RouterCopy preparation.execution preparedExecution
+  preparation_sections : ∀ kind i p first last count,
+    SectionRun kind i p preparation.execution first last count →
+      SectionRun kind i p preparedExecution first last count
   fastExecution : Execution θ ((preparation.cadenceData delay T delay_positive).route n)
     preparation.final fast.stage.final
   fast_ledger : fastExecution.ledger=fast.stage.execution.ledger
   fast_deliveries : fastExecution.deliveries=fast.stage.execution.deliveries
+  fast_sections : ∀ kind i p first last count,
+    SectionRun kind i p fast.stage.execution first last count →
+      SectionRun kind i p fastExecution first last count
   execution : Execution θ ((preparation.cadenceData delay T delay_positive).route n)
     preparation.source fast.stage.final
   contacts_transversal : execution.ContactsTransversal
@@ -137,8 +153,9 @@ theorem birth_cadence_chain_exists {n θ bornCells K ε}
     have ht := (preparation.execution.emission_time_bounds event he).2
     rw [preparation.date] at ht
     exact (finite_chain_route_before_open hclosed event.1 (by linarith)).symm
-  obtain ⟨preparedExecution,hPrepLedger,hPrepDelivered,hPrepContacts⟩ :=
-    preparation.execution.retarget_router_transversal (d.route n) hRouteMatches
+  obtain ⟨preparedExecution,hPrepCopy,hPrepLedger,hPrepDelivered⟩ :=
+    preparation.execution.retarget_router_copy (d.route n) hRouteMatches
+  have hPrepContacts := hPrepCopy.contactsTransversal
   let execution := preparedExecution.append fastExecution
   have hLedger : execution.ledger=preparation.execution.ledger.add fast.stage.execution.ledger := by
     change (preparedExecution.append fastExecution).ledger=_
@@ -180,7 +197,10 @@ theorem birth_cadence_chain_exists {n θ bornCells K ε}
   refine ⟨{
     delay_positive:=hd,preparation:=preparation,fast:=fast,preparedExecution:=preparedExecution
     preparation_ledger:=hPrepLedger,preparation_deliveries:=hPrepDelivered
+    preparation_copy:=hPrepCopy
+    preparation_sections:=fun _ _ _ _ _ _ run => run.routerCopy hPrepCopy
     fastExecution:=fastExecution,fast_ledger:=hFastLedger,fast_deliveries:=hFastDelivered
+    fast_sections:=fun _ _ _ _ _ _ run => birth_chain_cast_sections _ hp hs run
     execution:=execution,reconstruct:=rfl,ledger:=hLedger,deliveries:=hDelivered,emission_times:=hTimes
     contacts_transversal:=by
       apply (Execution.contactsTransversal_append preparedExecution fastExecution).mpr

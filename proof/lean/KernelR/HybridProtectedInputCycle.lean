@@ -113,6 +113,8 @@ theorem slow_input_mark_775_exists {θ ε route} (hb : @PhysicalBox 1 θ ε) (s 
   refine ⟨{
     final := final
     execution := e
+    slow_flows := ⟨hm, hmarkmain, trivial⟩
+    initial_aux := fun q => (ha q).1
     contacts_transversal := contacts
     early := by change s.time + 1 / 100 < T; change s.time + 1 / 100 < s.time + latency + slowMarkDuration θ markStart 0 p; linarith [slowMarkDuration_positive hb markStart 0 p (by rw [hmarkm]; norm_num)]
     deadline := hTupper

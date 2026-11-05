@@ -8,6 +8,8 @@ structure CadenceMixedNextSource {θ s p} (mixed : CadenceMixedResponse θ s p)
     (later : List (Delivery 1)) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) s final
+  arrival : Jump (fun _ _ => []) mixed.final final
+  reconstruct : execution = mixed.execution.append (.cons (.jump arrival) (.nil _))
   contacts_transversal : execution.ContactsTransversal
   date : final.time = s.time + 4
   values : final.x = mixed.final.x
@@ -82,7 +84,7 @@ theorem cadence_mixed_next_source_exists {θ ε s p} (mixed : CadenceMixedRespon
     contacts_transversal := by
       simp [execution, arrival, Execution.ContactsTransversal, Jump.ContactTransversal,
         mixed.contacts_transversal]
-    final := final, execution := execution, date := mixed.date, values := rfl
+    final := final, execution := execution, arrival := arrival, reconstruct := rfl, date := mixed.date, values := rfl
     coordinates := hCoords, charge_lower := mixed.charge_lower, raw_active := hRaw, raw_other := hOther
     gain_target := mixed.gain_target, gain_other := mixed.gain_other, recovery_gain := mixed.recovery_gain
     pending := rfl, emissions := ?_, deliveries := ?_

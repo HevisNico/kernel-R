@@ -54,7 +54,11 @@ The [construction ledger](EVERY_N_PLAN.md) records both APIs and validation.
 At `T=160+4*(K-1)+1.1*(N-1)+8`, all cells are READY/q=0.1 with no RAW and an
 empty pending queue; `CompleteThrough`, physical bounds and raw validity
 are derived. Each active log-gain is its own birth value+2.4, and recovery is its
-own birth value+0.3. At leaf-to-root depth j, fast emissions are `K-5-2*j`,
+own birth value+0.3. On the constructed common-birth witness,
+[`ConstructedBirthCadenceChain.exact_section_counts`](KernelR/HybridFiniteChainDoseCounting.lean)
+identifies these with four complete exposed ERROR sections on the active port
+and three protected MARK sections summed over all ports. The leaf also has
+one preparation ERROR on port1. At leaf-to-root depth j, fast emissions are `K-5-2*j`,
 totaling `N*(K-N-4)`. Preparation contributes `12*N+2` actual FIREs; cumulative
 traffic is `N*(K-N+8)+2`. Lean uses `n=N-1`, root0 and leaf `Fin.last n`, so
 physical cell i has depth `n-i.val`.
@@ -63,7 +67,9 @@ The original N=3 staged A/B/C protocol is separately completed at789.9,
 with independent B/C births at160/480 and cumulative A54/B61/C34. Its cadence
 emits A16/B18/C20; all finish READY/q=0.1 with no RAW or pending tokens,
 active log-gains A2/B2/C0 equal to own birth+2.4 and recovery own birth+0.3.
-Its source/birth program differs from the scalable common-birth protocol.
+Its source/birth program differs from the scalable common-birth protocol;
+the new whole-execution cover theorem above applies to that common-birth
+witness, not to this separately staged execution.
 
 `birth_protocol_complete_cadence_exists` returns
 `ConstructedBirthCadenceProtocol`, retaining both genuine births and the
@@ -108,6 +114,8 @@ indefinitely repeatable network contract.
 | Resource algebra | `Chain.Algebra`, `traffic_closed_form`, `traffic_at_minimum` | Twelve integer identities, natural-number counts, root tail, root emissions and quadratic total traffic |
 | Jitter specialization | `pathJitter_mono`, `uniform_jitter_total`, `full_jitter_iff_four_cells`, `fixed_delays_any_depth` | Nonuniform cumulative budgets; uniform min(1/20,3/(20 links)); full 1/20 jitter is sufficient through four cells |
 | Dose words and settings | `Chain.Consequences` | Leaf/relay word counts, four total ERROR doses, two fast MARK doses, gain exp(12/5), final recovery interval |
+| Exact whole-execution dose counts | `HybridDoseCounting`: `Execution.memory_of_section_covers`, `from_birth_memory_of_section_covers` | Conditional on actual complete exposed ERROR/MARK covers; gain increments are 0.6 times each port's ERROR count and recovery is 0.1 times the sum of MARK counts. The finite-chain application below constructs these covers. |
+| Constructed finite-chain section counts | [`HybridFiniteChainDoseCounting`](KernelR/HybridFiniteChainDoseCounting.lean): `ConstructedBirthCadenceChain.sectionCovered`, `exact_section_counts` | Actual covers for the birth-to-terminal witness under its original physical hypotheses: active-port ERROR count 4 and MARK count 3 summed over all ports of each cell. The leaf additionally has one preparation ERROR on port1. Universal endpoint comparison does not assert covers for other complete traces. |
 | Cuts and terminal time | `cut_propagates`, `all_cells_quiescent_by` | Induction from explicit local silence and settling-time hypotheses |
 | Same-gain root ordering | `same_gain_ready_comparison`, `first_crossing_no_later` | Residual charge cannot delay the first crossing when comparing the same realized gain |
 | Local certificate endpoints | `Certificates.Composition003`, `Composition010` | All 162 strict comparisons and validity of all 352 rational enclosures in the two committed certificates |

@@ -18,7 +18,7 @@ Write a=ln4, κ=1/2, r=1/10, rₘ=1/40, and gₚ=exp(zₚ).
 | Gain learning and protection | zₚ′=8Lₑₚmₚ when auxiliary ERROR, main READY, E>0 and zₚ<ln Cₚ; otherwise0 | `errorAct`; `field` at `.z p` |
 | Recovery learning | b′=½ΣₚLₘₚmₚ when auxiliary MARK, main not READY, E>0 and b<11/10; otherwise each contribution0 | `markAct`; `field` at `.b` |
 | Energy and work | E′=10(100−E)−W; W sums main work, auxiliary admission/drains and actual learning actuations | `work`; `field` at `.energy`; [HybridWork](../proof/lean/KernelR/HybridWork.lean), `Execution.reserve_birth_invariant`, proves reserve bounds under physical birth/parameter hypotheses |
-| Caps and actual doses | Gain/recovery actuation vanishes at its cap; full ERROR adds0.6 and protected MARK adds0.1 only when their gates remain open | `errorAct`, `markAct`; [HybridInvariants](../proof/lean/KernelR/HybridInvariants.lean) cap barriers; [Refinement](../proof/lean/KernelR/Refinement.lean) actual integral ledgers and gain/recovery balances |
+| Caps and actual doses | Gain/recovery actuation vanishes at its cap; full ERROR adds0.6 and protected MARK adds0.1 only when their gates remain open | `errorAct`, `markAct`; [HybridInvariants](../proof/lean/KernelR/HybridInvariants.lean) cap barriers; [Refinement](../proof/lean/KernelR/Refinement.lean) actual integral ledgers and gain/recovery balances; [HybridDoseCounting](../proof/lean/KernelR/HybridDoseCounting.lean) whole-execution integer counts, conditional on covers of complete exposed sections; [HybridFiniteChainDoseCounting](../proof/lean/KernelR/HybridFiniteChainDoseCounting.lean) constructs the finite-chain witness covers and proves active-port ERROR count 4 and all-port MARK count 3 |
 | Continuous evolution and first contacts | Integral ODE on every flow prefix; strict interior guards prevent an old-mode flow from passing its first threshold contact | `Flow.integral_eq`, `.guards`, `BeforeGuards`; `.raw_support` and `.pending_urgent` prevent flowing past raw expiry or a due token |
 | Events and causal wiring | Jumps preserve time and physical coordinates. FIRE appends routed tokens; arrival removes one actual due occurrence on a free port | `setMain`, `setAux`, `setRaw`, `Jump`, `Delivery`, `Router`, `CausalRouter`; `Execution` composes actual flows and jumps without a fixed simultaneous-event priority |
 | Births and terminal completion | A starts in the declared birth family; later births add independent READY coordinates and sources. Completion discharges enabled jumps and every token due at the horizon | `BirthState` plus the headline's READY-auxiliary/source premises; [HybridStagedBirth](../proof/lean/KernelR/HybridStagedBirth.lean): `Newborn`, `BirthStep`, `StagedExecution`; `CompleteThrough` |
@@ -127,6 +127,15 @@ ordered actual FIRE dates per cell. The factory constructs a complete witness,
 so the universal class is nonempty. The fixed router covers preparation and
 cadence; [`finiteChainPreparedData`](../proof/lean/KernelR/HybridFiniteChainPreparedData.lean)
 defines its declared sources and contacts.
+
+For this constructed witness,
+[`ConstructedBirthCadenceChain.exact_section_counts`](../proof/lean/KernelR/HybridFiniteChainDoseCounting.lean)
+constructs actual whole-execution covers: +2.4 equals four full exposed ERROR
+sections on each active port, and +0.3 equals three protected MARK sections
+summed over each cell's ports. The leaf has one additional preparation ERROR
+on port 1. Cover existence is asserted for the witness; the universal
+comparison above transfers its memories and FIRE dates to competing complete
+traces without asserting covers for those traces.
 
 | Universal comparison step | Lean proof |
 |---|---|

@@ -5,6 +5,20 @@ Lean checks the proofs against the formal definitions; human review must judge
 whether those definitions express the intended model. The checked build does
 not replace this semantic review.
 
+For exact dose counting, review whether `ErrorSectionCover` and
+`MarkSectionCover` in [HybridDoseCounting](proof/lean/KernelR/HybridDoseCounting.lean)
+express complete exposed sections of the actual execution: real entry and
+exit jumps, uninterrupted phase exposure and coverage of every learning
+contribution. Their `inactive` constructors must justify zero actuation from
+modes alone; clipping or a closed energy gate must not hide partial learning.
+See the [counting hypotheses](docs/EXACT_DOSE_COUNTING.md).
+
+For [open-section runs](proof/lean/KernelR/HybridSectionRuns.lean), also check
+that cutting a flow retains an already-open phase and its actual entry and
+exit. A cut or an interleaved event on another cell must not create a new
+complete section or discard a partial one. Review this preservation through
+the [causal weave](proof/lean/KernelR/HybridCausalSectionRuns.lean).
+
 Compare the [written main and auxiliary rules](kernel/README.md#main-unit)
 with [HybridCrossingExecution](proof/lean/KernelR/HybridCrossingExecution.lean),
 the [full-cell right continuation](proof/lean/KernelR/HybridCellOrbitGerm.lean)

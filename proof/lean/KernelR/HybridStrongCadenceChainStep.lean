@@ -61,6 +61,19 @@ theorem strong_step_exists {j m L : ℕ} {J : ℝ} (hj : j<n) (hL : 5≤L)
   refine ⟨{
     stage:=extension.next,packet:=receiver.outputPacket
     contacts_transversal:=extension.contacts_transversal old.contacts_transversal receiver.contacts_transversal
+    section_covered:=extension.sectionCovered_of_headroom old.section_covered (by
+      intro gain recovery
+      change receiver.execution.SectionCovered
+      apply receiver.sectionCovered (domain.head_box j hj)
+      apply receiver.execution.learningGatesOpen_of_final_headroom (domain.head_box j hj) hf
+      · intro i p
+        have hi : i = 0 := Subsingleton.elim _ _
+        subst i
+        exact gain p
+      · intro i
+        have hi : i = 0 := Subsingleton.elim _ _
+        subst i
+        exact recovery)
     calendar:=extension.head_times.trans receiver.output_packet_calendar
     envelope:=?_,counts:=?_,gain_target:=?_,gain_other:=?_,recovery:=?_
   },?_⟩

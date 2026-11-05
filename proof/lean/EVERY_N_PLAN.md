@@ -188,7 +188,83 @@ from the new construction.
 
 ## Validation and checkpoint discipline
 
-The geometric-crossing source revision passed a completely fresh local project
+### Exact counts on the constructed finite-chain witness
+
+`ConstructedBirthCadenceChain.sectionCovered` constructs actual complete
+ERROR/MARK covers without a caller-supplied cover or gate premise.
+`exact_section_counts` identifies four ERROR sections on each active port
+and three MARK sections per cell, summed over ports. The original birth,
+physical-box, source-budget and wire hypotheses of the factories are retained.
+
+The application graph builds in **3,758 jobs**. The unchanged audit scanner
+imports all **48 changed modules** across this PR and checks **6,553 project
+theorems** in their dependency closure, permitting only `propext`,
+`Classical.choice` and `Quot.sound`, with no admitted proofs or added project
+axioms. These are scoped local totals, not a completed local global build.
+The umbrella imports all new modules for the ordinary global CI audit.
+
+Source hygiene passes for **565 Lean files**, with all five inherited upstream
+modules unchanged. All **six paired applied controls** in
+[`check_hybrid_chain_section_counts_negative.py`](scripts/check_hybrid_chain_section_counts_negative.py)
+pass, including counts, cover uniqueness and own-birth offsets. Together with
+the 11 section-run pairs, the configured CI inventory is **1,379 pairs**
+(1,362 + 11 + 6), separately from audit-corruption checks. The audit's positive
+public/private controls and corruption-rejection controls pass locally.
+
+The preceding `93abed8` checkpoint also passes the global build, global audit
+and audit-corruption steps in
+[Actions run 42012958868](https://github.com/HevisNico/kernel-R/actions/runs/42012958868).
+Its remaining regression steps were running when this entry was prepared;
+its global totals are not substituted for the scoped application totals above.
+
+### Constructive section covers: checkpoint `93abed8`
+
+The **33 changed Lean modules** and their dependency closure build successfully
+in **3,749 jobs**. The unchanged audit scanner, importing those 33 modules,
+checks **6,488 project theorems**, permitting only `propext`, `Classical.choice`
+and `Quot.sound`, with no admitted proofs or added project axioms. This is a
+dependency-closure audit, not a new full-project declaration total; global
+validation of this checkpoint is left to its GitHub Actions run.
+
+Source hygiene for this checkpoint covers **555 Lean files**, including the
+15 new modules, with all five inherited upstream modules unchanged. All
+**11 new paired controls** in
+[`check_hybrid_section_runs_negative.py`](scripts/check_hybrid_section_runs_negative.py)
+pass: closed counts, open boundaries, composition, exposure, foreign events,
+router copies and port relabeling. The configured CI inventory becomes
+**1,373 pairs** (1,362 plus 11), separately from audit-corruption controls.
+
+This checkpoint supplies constructive local covers and preserves actual
+section runs through causal weaving, queue framing and router changes.
+The complete finite-chain cover-existence corollary is still in progress;
+the applied counts of four active-port ERROR sections and three MARK sections
+are not claimed by this checkpoint.
+
+### Exact dose counting: checkpoint `62376ff`
+
+At `62376ff7dda182bd7e31463eede337fb3390828b`, the local
+`lake build KernelR.HybridDoseCounting` passes **3,502 jobs**. This is the
+module build, not a new full-project build total. Its six printed headline and
+count-uniqueness results use only `propext`, `Classical.choice` and `Quot.sound`.
+Source hygiene covers **540 Lean files**, with all five inherited upstream
+modules unchanged; generated evidence matches and all **16 robust certificates**
+replay.
+
+All **11 new paired controls** in
+[`check_hybrid_dose_counting_negative.py`](scripts/check_hybrid_dose_counting_negative.py)
+pass locally and in [GitHub Actions run 41994544240](https://github.com/HevisNico/kernel-R/actions/runs/41994544240).
+The configured CI inventory is **1,362 pairs** (the preceding **1,351** plus
+these **11**), separately from axiom-audit corruption checks. This inventory
+counts generated cases; it does not assert a fresh rerun of all historical
+suites. The completed global build in that run passes **9,593 jobs** and its
+axiom audit checks **29,018 project theorems**, permitting only `propext`,
+`Classical.choice` and `Quot.sound`, with no admitted proofs or added project
+axioms. All regression steps and all three workflows at this revision finish
+successfully. These totals describe `62376ff`, not subsequent revisions.
+
+### Geometric crossing: checkpoint `ef5a510`
+
+The geometric-crossing checkpoint at `ef5a510` passed a completely fresh local project
 build (**9,592 jobs**) and global axiom audit (**28,970 project theorems**),
 allowing only `propext`, `Classical.choice` and `Quot.sound`. Source checks cover
 **539 Lean files**, with all five inherited upstream modules unchanged. All

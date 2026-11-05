@@ -1,6 +1,7 @@
 import KernelR.HybridFiniteChainLowPreparation
 import KernelR.HybridPortPermutation
 import KernelR.HybridContactPortTransport
+import KernelR.HybridDoseCountingTransport
 
 /-! Prepare the relay's own low port two from its own original birth and
 sixteen real direct sources. Port transport retains the complete physical
@@ -36,11 +37,20 @@ private theorem relay_restore_transversal {θ θ' : Fin 1 → Parameters} {s s' 
   cases hs
   exact positive
 
+private theorem relay_restore_covered {θ θ' : Fin 1 → Parameters} {s s' u}
+    (e : Execution θ' (fun _ _ => []) s' u) (hp : θ'=θ) (hs : s=s')
+    (covered : e.SectionCovered) :
+    (relay_restore_execution e hp hs).SectionCovered := by
+  cases hp
+  cases hs
+  exact covered
+
 structure FiniteChainRelayPreparation (θ : Fin 1 → Parameters) (born : Snapshot 1) where
   low : FiniteChainLowPreparation (permuteParameters θ swapLowPorts) (born.permutePorts swapLowPorts)
   final : Snapshot 1
   final_state : final=low.final.permutePorts swapLowPorts.symm
   execution : Execution θ (fun _ _ => []) born final
+  covered : execution.SectionCovered
   contacts_transversal : execution.ContactsTransversal
   date : final.time=1599/10
   prepared : PreparedSection final 0
@@ -76,6 +86,16 @@ theorem finite_chain_relay_preparation_exists {θ ε born}
   have hs : born=(born.permutePorts swapLowPorts).permutePorts swapLowPorts.symm :=
     (Snapshot.permutePorts_inverse born swapLowPorts).symm
   let execution := relay_restore_execution transported hp hs
+  have transportedCovered : transported.SectionCovered := by
+    constructor
+    · intro i p
+      obtain ⟨cover⟩ := low.covered.1 i (swapLowPorts.symm p)
+      simpa only [Equiv.symm_symm, Equiv.apply_symm_apply, transported] using
+        cover.permutePorts_exists swapLowPorts.symm
+    · intro i p
+      obtain ⟨cover⟩ := low.covered.2 i (swapLowPorts.symm p)
+      simpa only [Equiv.symm_symm, Equiv.apply_symm_apply, transported] using
+        cover.permutePorts_exists swapLowPorts.symm
   have hTimes (i : Fin 1) : execution.emissionTimes i=low.execution.emissionTimes i :=
     (relay_restore_times transported hp hs i).trans (low.execution.permutePorts_emissionTimes swapLowPorts.symm i)
   have hDeliveries : execution.deliveries=sourceTrain 0 2 0 8 16 := by
@@ -83,6 +103,7 @@ theorem finite_chain_relay_preparation_exists {θ ε born}
     simp only [Equiv.symm_symm,swapLowPorts_zero]
   refine ⟨{
     low:=low,final:=low.final.permutePorts swapLowPorts.symm,final_state:=rfl,execution:=execution
+    covered:=relay_restore_covered transported hp hs transportedCovered
     contacts_transversal:=relay_restore_transversal transported hp hs
       (low.execution.contactsTransversal_permutePorts swapLowPorts.symm low.contacts_transversal)
     date:=low.date,prepared:=low.prepared.permutePorts swapLowPorts.symm,charge:=low.charge

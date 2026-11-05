@@ -42,7 +42,10 @@ continuous trajectories, pulse origins, deliveries and memory updates.
 It derives:
 
 - Each active log-gain is its own birth value +2.4; each recovery is its own
-  birth value +0.3. Other gains retain their physical preparation memories.
+  birth value +0.3. On the constructed witness, these are exactly four
+  complete exposed ERROR sections on the active port and three protected
+  MARK sections summed over all ports. Other gains retain their physical
+  preparation memories.
 - The root has a regular tail of `K-4*N-4 >= 8` pulses, with actual dates
   `t_k = τ + 4*k + η_k`, where `|η_k| <= J <= 0.15`. Successive intervals
   therefore lie in `[4-2*J, 4+2*J]`.
@@ -53,6 +56,26 @@ A separate indexed-error corollary constructs fixed native delay functions
 realizing every prescribed bounded per-emission error sequence on actual
 FAST sender firings. Its functions are constructed after the errors are given;
 the native-delay theorem above takes the functions as inputs.
+
+## Exact counting of complete learning sections
+
+A separate [whole-execution counting theorem](docs/EXACT_DOSE_COUNTING.md)
+expresses each log-gain increment as `0.6 * k` and each recovery increment as
+`0.1 * sum_p j_p`, where the integers count actual full exposed ERROR and
+protected MARK sections. It requires coverage of every learning contribution;
+the cap and energy conditions are implied by exposure on counted sections
+and proved for the finite-chain witness. Initial memories are retained;
+the counts and applicability may depend on the fixed device and protocol.
+
+For the constructed finite-chain witness,
+[`ConstructedBirthCadenceChain.exact_section_counts`](proof/lean/KernelR/HybridFiniteChainDoseCounting.lean)
+constructs those covers under the original physical hypotheses: each active
+port has `k = 4`, and each cell has `sum_p j_p = 3`, yielding +2.4 and +0.3.
+The leaf also has one preparation ERROR on port 1; four is its active-port
+count, not its total over all ports. This is an exact result in the model,
+not a hardware-counter claim. The separate universal theorem transfers
+memories and FIRE dates to every complete execution; it does not supply
+section covers for those competing executions.
 
 ## Hypotheses
 
@@ -110,7 +133,7 @@ lake build
 lake build Audit
 ```
 
-For the current geometric-crossing revision, the
+For the geometric-crossing checkpoint at `ef5a510`, the
 [validation ledger](proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
 records a fresh local build of **9,592 jobs** and a global audit of
 **28,970 project theorem declarations**, permitting only `propext`,

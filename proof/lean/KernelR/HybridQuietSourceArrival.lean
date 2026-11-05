@@ -34,6 +34,7 @@ structure QuietSourceArrival {n} (θ : Fin n → Parameters) (route : Router n)
     (s : Snapshot n) (d : Delivery n) (later : List (Delivery n)) where
   final : Snapshot n
   execution : Execution θ route s final
+  ready_flows : ∀ j, execution.MainFlows j .ready
   contacts_transversal : execution.ContactsTransversal
   date : final.time = d.due
   deliveries : execution.deliveries = [d]
@@ -72,6 +73,7 @@ theorem quiet_source_arrival_exists {n θ ε route} (hb : @PhysicalBox n θ ε)
   refine ⟨{
     final := u
     execution := e
+    ready_flows := fun j => ⟨(hs j).ready, trivial⟩
     contacts_transversal := by simp [e, jump, Execution.ContactsTransversal, Jump.ContactTransversal]
     date := rfl
     deliveries := rfl

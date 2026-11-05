@@ -1,12 +1,27 @@
 import KernelR.HybridBirthPreparationExists
 import KernelR.HybridLocalSourceRestriction
 import KernelR.HybridContactSourceRestriction
+import KernelR.HybridBirthPreparationSectionCovers
+import KernelR.HybridDoseCountingQueueTransport
 
 /-! A sixteen-input low-port preparation with an independently selected future
 source program. The existing birth constructor is restricted as an entire
 isolated source program, before any finite-family network is assembled. -/
 namespace KernelR.Hybrid
 attribute [local instance] Classical.propDecidable
+
+private theorem restriction_contacts {θ s u cutoff}
+    {e : @Execution 1 θ (fun _ _ => []) s u}
+    {f : Execution θ (fun _ _ => []) ((retainSourcesRequeue cutoff).apply s)
+      ((retainSourcesRequeue cutoff).apply u)}
+    (copy : Execution.RequeueCopy (retainSourcesRequeue cutoff) e f) :
+    f.ContactsTransversal ↔ e.ContactsTransversal := by
+  induction copy with
+  | nil => rfl
+  | cons step tail ih =>
+    cases step with
+    | flow f g path => exact ih
+    | jump j j' => exact Iff.and (j.contactTransversal_requeue j').symm ih
 
 noncomputable def lowPreparationShadow (born : Snapshot 1) : Snapshot 1 :=
   {born with pending := sourceTrain 0 0 0 8 16 ++ sourceTrain 0 0 160 8 16}
@@ -38,6 +53,7 @@ private theorem low_preparation_initial_filter (born : Snapshot 1)
 structure FiniteChainLowPreparation (θ : Fin 1 → Parameters) (born : Snapshot 1) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) born final
+  covered : execution.SectionCovered
   contacts_transversal : execution.ContactsTransversal
   date : final.time = 1599 / 10
   prepared : PreparedSection final 0
@@ -61,9 +77,24 @@ theorem finite_chain_low_preparation_exists {θ ε born}
   have hShadow : BirthState (lowPreparationShadow born) := hborn
   obtain ⟨c,⟨outcome⟩⟩ := birth_protocol_preparation_exists hShadow hb ha rfl
   have hInitial := low_preparation_initial_filter born hqueue
-  have hTransport := c.execution.retainSourcesThrough_transversal c.contacts_transversal 128 c.date.le
+  obtain ⟨rawCut, copy, hLedger, hDelivered⟩ :=
+    c.execution.retainSourcesThrough_emptyRoute_copy 128 c.date.le
+  have cCovered := c.section_covered hb
+  have rawCovered : rawCut.SectionCovered := by
+    constructor
+    · intro i p
+      obtain ⟨cover⟩ := cCovered.1 i p
+      exact cover.requeueCopy_exists copy
+    · intro i p
+      obtain ⟨cover⟩ := cCovered.2 i p
+      exact cover.requeueCopy_exists copy
+  have hTransport : ∃ cut : Execution θ (fun _ _ => [])
+      (retainSourcesThrough 128 (lowPreparationShadow born)) (retainSourcesThrough 128 c.final),
+      cut.ledger = c.execution.ledger ∧ cut.deliveries = c.execution.deliveries ∧
+        cut.ContactsTransversal ∧ cut.SectionCovered :=
+    ⟨rawCut, hLedger, hDelivered, (restriction_contacts copy).mpr c.contacts_transversal, rawCovered⟩
   rw [hInitial] at hTransport
-  obtain ⟨cut,hLedger,hDelivered,hCutTransversal⟩ := hTransport
+  obtain ⟨cut,hLedger,hDelivered,hCutTransversal,cutCovered⟩ := hTransport
   let resting := retainSourcesThrough 128 c.final
   have hPending : resting.pending = [] := by
     change c.final.pending.filter _ = []
@@ -90,6 +121,12 @@ theorem finite_chain_low_preparation_exists {θ ε born}
   let wait : Execution θ (fun _ _ => []) resting (quietAt resting (1599 / 10)) :=
     .cons (.flow flow) (.nil _)
   let execution := cut.append wait
+  have waitCovered : wait.SectionCovered := by
+    constructor
+    · intro i p
+      exact ⟨wait.errorCover_of_inactive i p ⟨Or.inl (by rw [((hReady i).auxiliary p).1]; decide), trivial⟩⟩
+    · intro i p
+      exact ⟨wait.markCover_of_inactive i p ⟨Or.inr (hReady i).ready, trivial⟩⟩
   obtain ⟨_,hComplete⟩ := quiet_complete_exists (θ := θ) (route := fun _ _ => []) resting hBefore
     (fun j => (hReady j).ready) (fun j p => ((hReady j).auxiliary p).1) c.raw_none
     (fun j => by linarith [(hReady j).charge.2])
@@ -97,6 +134,7 @@ theorem finite_chain_low_preparation_exists {θ ε born}
   have hFinalReady := quietAt_ready_coordinates resting 0 (hReady 0) hBefore.le
   refine ⟨{
     final := quietAt resting (1599 / 10), execution := execution, date := rfl
+    covered := cutCovered.append waitCovered
     contacts_transversal := (Execution.contactsTransversal_append cut wait).mpr ⟨hCutTransversal, trivial⟩
     prepared := ⟨hFinalReady.ready,hFinalReady.charge,outcome.prepared.recovery,hFinalReady.auxiliary⟩
     charge := ?_, raw_none := c.raw_none, pending := hPending

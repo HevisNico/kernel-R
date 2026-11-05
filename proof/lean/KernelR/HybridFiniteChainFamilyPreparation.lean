@@ -3,6 +3,8 @@ import KernelR.HybridFiniteChainLeafPreparation
 import KernelR.HybridIndependentFiniteFamily
 import KernelR.HybridLocalFutureFrame
 import KernelR.HybridContactTransversalityFrame
+import KernelR.HybridSectionCoverFrame
+import KernelR.HybridLeafPreparationSectionCovers
 
 /-! Common-birth preparation of a finite independent family. Each relay is
 trained at its own port two, and the last cell at its own nominal fast port
@@ -21,6 +23,7 @@ def finiteChainPreparationCount (n : ℕ) (i : Fin (n+1)) : ℕ := if i=Fin.last
 structure FiniteChainPreparationCell (parameter : Parameters) (born : Snapshot 1)
     (port : Port) (dose : ℝ) (count : ℕ) where
   run : FiniteCausalCell parameter born (1599/10)
+  covered : run.execution.SectionCovered
   contacts_transversal : run.execution.ContactsTransversal
   prepared : PreparedSection run.final 0
   gain_target : run.final.x 0 (.z port)=born.x 0 (.z port)+dose
@@ -72,6 +75,12 @@ structure FiniteChainFamilyPreparation {n : ℕ} (θ : Fin (n+1) → Parameters)
   final : Snapshot (n+1)
   final_state : final=appendPending family.final (sourceTrain (Fin.last n) 0 160 4 K)
   execution : Execution θ (fun _ _ => []) (familyPreparationBornSource bornCells K) final
+  error_sections : ∀ i p count,
+    SectionRun .error 0 p (locals i).run.execution false false count →
+      SectionRun .error i p execution false false count
+  mark_sections : ∀ i p count,
+    SectionRun .mark 0 p (locals i).run.execution false false count →
+      SectionRun .mark i p execution false false count
   contacts_transversal : execution.ContactsTransversal
   ledger : execution.ledger=family.execution.ledger
   deliveries : execution.deliveries=family.execution.deliveries
@@ -119,6 +128,7 @@ theorem finite_chain_family_preparation_exists {n θ bornCells K ε}
           pending:=leaf.pending
         }
         contacts_transversal:=leaf.contacts_transversal
+        covered:=leaf.sectionCovered hbox (hborn i) (ha i)
         prepared:=leaf.prepared,gain_target:=?_,gain_other:=?_,recovery:=leaf.recovery
         emission_count:=?_,deliveries:=?_,physical:=leaf.physical,raw_valid:=leaf.raw_valid
       }⟩
@@ -140,6 +150,7 @@ theorem finite_chain_family_preparation_exists {n θ bornCells K ε}
           pending:=relay.pending
         }
         contacts_transversal:=relay.contacts_transversal
+        covered:=relay.covered
         prepared:=relay.prepared,gain_target:=?_,gain_other:=?_,recovery:=relay.recovery
         emission_count:=?_,deliveries:=?_,physical:=relay.physical,raw_valid:=relay.raw_valid
       }⟩
@@ -156,7 +167,7 @@ theorem finite_chain_family_preparation_exists {n θ bornCells K ε}
     obtain ⟨k,rfl⟩ := List.mem_ofFn.mp hd
     change (1599/10:ℝ)<160+4*(k.val:ℝ)
     nlinarith [Nat.cast_nonneg (α:=ℝ) k.val]
-  obtain ⟨execution,hLedger,hDelivered,hTransversal⟩ := family.execution.appendFuture_emptyRoute_transversal future
+  obtain ⟨execution,hCopy,hLedger,hDelivered⟩ := family.execution.appendFuture_emptyRoute_copy future
     (fun d hd => by rw [family.date]; exact (hfuture d hd).le)
   let final := appendPending family.final future
   have hPrepared : ∀ i, PreparedSection final i := by
@@ -187,13 +198,25 @@ theorem finite_chain_family_preparation_exists {n θ bornCells K ε}
     exact family.emission_times i
   refine ⟨{
     initial_birth:=hborn,locals:=locals,family:=family,source_birth:=hSourceBirth,final:=final,final_state:=rfl,execution:=execution
-    contacts_transversal:=hTransversal.mpr (family.contacts_transversal (fun i => (locals i).contacts_transversal))
+    error_sections:=?_,mark_sections:=?_
+    contacts_transversal:=hCopy.appendFuture_contacts.mpr
+      (family.contacts_transversal (fun i => (locals i).contacts_transversal))
     ledger:=hLedger,deliveries:=hDelivered,date:=family.date,prepared:=hPrepared,charge:=family.charge
     raw_none:=family.raw_none,pending:=hPending,gain_target:=?_,gain_other:=?_,recovery:=?_
     emission_times:=hTimes,emission_count_per_cell:=?_,physical:=⟨family.physical.region,family.physical.gain_cap,family.physical.recovery_cap,family.physical.reserve⟩,
     raw_valid:=family.raw_valid
     complete:=⟨family.date,?_,?_⟩
   }⟩
+  · intro i p count run
+    obtain ⟨cover, hc⟩ := error_section_run_iff.mp
+      (family.section_runs .error i p false false count run)
+    obtain ⟨mapped⟩ := cover.requeueCopy_exists hCopy
+    exact error_section_run_iff.mpr ⟨mapped, (cover.requeueCopy_count hCopy mapped).trans hc⟩
+  · intro i p count run
+    obtain ⟨cover, hc⟩ := mark_section_run_iff.mp
+      (family.section_runs .mark i p false false count run)
+    obtain ⟨mapped⟩ := cover.requeueCopy_exists hCopy
+    exact mark_section_run_iff.mpr ⟨mapped, (cover.requeueCopy_count hCopy mapped).trans hc⟩
   · intro i; change family.final.x i _=_; rw [family.final_values]; exact (locals i).gain_target
   · intro i q hq; change family.final.x i _=_; rw [family.final_values]; exact (locals i).gain_other q hq
   · intro i; change family.final.x i .b=_; rw [family.final_values]; exact (locals i).recovery
@@ -244,6 +267,19 @@ theorem total_emission_count : f.execution.ledger.emissions.length=12*n+14 := by
       omega
 
 theorem ready (i : Fin (n+1)) : ReadyCoordinates f.final i := (f.prepared i).ready_coordinates
+
+theorem section_covered : f.execution.SectionCovered := by
+  constructor
+  · intro i p
+    obtain ⟨cover⟩ := (f.locals i).covered.1 0 p
+    obtain ⟨mapped, _⟩ := error_section_run_iff.mp
+      (f.error_sections i p cover.count cover.sectionRun)
+    exact ⟨mapped⟩
+  · intro i p
+    obtain ⟨cover⟩ := (f.locals i).covered.2 0 p
+    obtain ⟨mapped, _⟩ := mark_section_run_iff.mp
+      (f.mark_sections i p cover.count cover.sectionRun)
+    exact ⟨mapped⟩
 
 end FiniteChainFamilyPreparation
 end KernelR.Hybrid
