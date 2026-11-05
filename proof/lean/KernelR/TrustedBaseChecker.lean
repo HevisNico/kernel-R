@@ -16,8 +16,12 @@ their namespace. Imported Mathlib, Init, Std, Lean and their explicitly named
 pinned dependency modules are leaves; unknown module roots fail closed as
 project code. Every declaration from the current module is considered project
 code, which also lets standalone negative controls introduce fresh names.
-Only recognized compiler-support suffixes are folded into a parent: an
-arbitrary user definition nested in a trusted namespace remains a new name.
+Compiler-support suffixes alone never override an independently declared
+source range. Matchers additionally require Lean's matcher metadata. Generated
+support without its own range requires a parent with source metadata; missing
+source metadata fails closed. Inline derived equality instances and their
+source-ranged `decEq` helpers are attributed only when their generated range
+lies inside the owning inductive declaration.
 
 This is a dependency/interface check, not a replacement for Lean's kernel
 or the independent axiom audit. The list supplied to `check` must be explicit.
@@ -46,11 +50,24 @@ private def auxiliaryPart (part : String) : Bool :=
 private def sameModule (env : Environment) (first second : Name) : Bool :=
   env.getModuleIdxFor? first == env.getModuleIdxFor? second
 
-/-- Parent attribution is metadata-based for constructors and projections,
-then uses only recognized compiler auxiliary suffixes. -/
+private def sourceRanges? (env : Environment) (name : Name) : Option DeclarationRanges :=
+  declRangeExt.find? (level := .exported) env name <|>
+    declRangeExt.find? (level := .server) env name
+
+private def inlineDerived (env : Environment) (name owner : Name) : Bool :=
+  match sourceRanges? env name, sourceRanges? env owner with
+  | some child, some enclosing =>
+    !child.range.pos.lt enclosing.range.pos && !enclosing.range.endPos.lt child.range.endPos
+  | _, _ => false
+
+private def generatedSupport (env : Environment) (name owner : Name) : Bool :=
+  (sourceRanges? env name).isNone && (sourceRanges? env owner).isSome
+
+/-- Constructors, projections and recursors use kernel metadata. Source-declared
+helpers remain separate semantic names even when their suffix looks generated. -/
 partial def parent (env : Environment) (name : Name) : Name := Id.run do
   let user := privateToUserName name
-  let own := if env.contains user then user else name
+  let own := name
   if let some projection := env.getProjectionFnInfo? name then
     if let some (.ctorInfo constructor) := env.find? projection.ctorName then
       return parent env constructor.induct
@@ -62,24 +79,41 @@ partial def parent (env : Environment) (name : Name) : Name := Id.run do
     | .defnInfo definition =>
       if user.getString!.startsWith "instDecidableEq" then
         if let .app (.const `DecidableEq _) (.const inductName _) := definition.type then
-          if sameModule env name inductName then
+          if sameModule env name inductName && inlineDerived env name inductName then
             if let some (.inductInfo _) := env.find? inductName then
               return parent env inductName
     | _ => pure ()
   match user with
   | .str stem suffix =>
-    if suffix == "go" && stem.getString! == "brecOn" && sameModule env name stem then
-      return parent env stem
-    if auxiliaryPart suffix && env.contains stem && sameModule env name stem then
-      return parent env stem
-    if auxiliaryPart suffix then
-      -- An equation auxiliary may be nested below a matcher auxiliary.
-      let owner := parent env stem
-      if env.contains owner && sameModule env name owner then return owner
+    -- Ordinary names cannot be folded. Avoid loading their source metadata
+    -- while scanning the many theorem names in the imported environment.
+    if !((suffix == "go" && stem.getString! == "brecOn") || auxiliaryPart suffix) then
+      return own
+    -- Preserve an existing private parent: its user-facing alias need not be
+    -- present in the environment (notably for a private matcher's equations).
+    let stem := if !env.contains stem && env.contains name.getPrefix then name.getPrefix else stem
+    -- `def model.match_1 := 1` is an independent declaration, including when
+    -- private. The sole source-ranged helper exception is inline deriving:
+    -- its `decEq` helper must belong to the same inductive command.
+    if (sourceRanges? env name).isSome then
+      if suffix == "decEq" && (privateToUserName stem).getString!.startsWith "instDecidableEq" then
+        let owner := parent env stem
+        if sameModule env name owner && inlineDerived env name owner then
+          if let some (.inductInfo _) := env.find? owner then return owner
+      return own
+    -- A name that merely resembles a matcher is not a registered matcher.
+    if suffix.startsWith "match_" && !isMatcherCore env name then return own
+    -- An equation auxiliary may be nested below a matcher auxiliary.
+    let owner := parent env stem
+    if env.contains owner && sameModule env name owner && generatedSupport env name owner then
+      return owner
     return own
   | .num stem _ =>
+    if (sourceRanges? env name).isSome then return own
+    let stem := if !env.contains stem && env.contains name.getPrefix then name.getPrefix else stem
     let owner := parent env stem
-    if env.contains owner && sameModule env name owner then return owner
+    if env.contains owner && sameModule env name owner && generatedSupport env name owner then
+      return owner
     return own
   | _ => return own
 

@@ -218,8 +218,14 @@ def render(manifest: dict, commit: str) -> str:
            f"The allowlist contains **{len(trusted)} semantic parent declarations**. "
            "Generated projections, constructors, recursors, matchers and equation/proof "
            "helpers are attributed to their parents, but their relevant interfaces and "
-           "computational dependencies are still traversed. An arbitrary definition in "
-           "a trusted namespace does not become trusted merely because of that namespace.", ""]
+           "computational dependencies are still traversed. An independently source-declared "
+           "helper remains a separate semantic name, including one named `model.match_1`, "
+           "`model.proof_1` or `model._f`. Matchers require Lean's matcher metadata; "
+           "other generated support requires parent source metadata and no independent "
+           "source range. Inline derived equality instances and their `decEq` helpers "
+           "must have their source range "
+           "inside the owning inductive declaration. An arbitrary definition in a trusted "
+           "namespace does not become trusted merely because of that namespace.", ""]
     for group in ["Model", "Crossing semantics", "Protocol inputs", "Observations", "Statement"]:
         if not by_group.get(group):
             continue
@@ -234,7 +240,10 @@ def render(manifest: dict, commit: str) -> str:
             "dependency of the headline's type belongs to this fixed list after parent "
             "attribution. The closure is computed independently of the allowlist. "
             "The paired controls reject an untrusted construction-based statement, "
-            "a required name removed from the list, and altered routing contracts.", "",
+            "a required name removed from the list, altered routing contracts, and "
+            "handwritten helpers with compiler-looking suffixes and literal-only bodies. "
+            "Source-range attribution is tested both in the current module and across "
+            "an actual compiled/imported module.", "",
             "The theorem proofs are machine-checked. Mathematical semantic review "
             "therefore focuses on the listed definitions and the headline statement. "
             "This does not claim that the checker or Lean's implementation is formally "

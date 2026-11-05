@@ -72,8 +72,7 @@ def main():
     audit = run_log(['lake', 'build', 'Audit'], out / 'audit.log')
     jobs, theorems, used = measurements(build, audit)
     headline_count = checked_pairs(args.headline_report, len(headline_controls.controls()))
-    base_count = checked_pairs(args.base_report,
-                               len(base_controls.checker_cases()) + len(base_controls.headline_cases()))
+    base_count = checked_pairs(args.base_report, len(base_controls.controls()))
     files = sorted(ROOT.glob('*.lean')) + sorted((ROOT / 'KernelR').rglob('*.lean'))
     report = dict(
         scope='CI, after the full workflow regression sequence',
