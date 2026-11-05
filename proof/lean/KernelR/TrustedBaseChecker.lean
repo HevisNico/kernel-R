@@ -37,10 +37,11 @@ def projectConstant (env : Environment) (name : Name) : Bool :=
 private def auxiliaryPart (part : String) : Bool :=
   part.startsWith "match_" || part.startsWith "proof_" ||
   part.startsWith "eq_" || part.startsWith "_eq_" || part.startsWith "_sizeOf_" ||
+  part.startsWith "_sparseCasesOn_" ||
   #["rec", "recOn", "casesOn", "brecOn", "below", "ibelow", "noConfusion",
     "noConfusionType", "inj", "injEq", "inj_iff", "sizeOf_spec", "ctorIdx",
     "_unary", "_sunfold", "_unsafe_rec", "equations", "splitter", "eta",
-    "ext", "ext_iff"].contains part
+    "ext", "ext_iff", "elim", "ctorElim", "ctorElimType", "_f", "decEq"].contains part
 
 private def sameModule (env : Environment) (first second : Name) : Bool :=
   env.getModuleIdxFor? first == env.getModuleIdxFor? second
@@ -58,9 +59,17 @@ partial def parent (env : Environment) (name : Name) : Name := Id.run do
     | .ctorInfo constructor => return parent env constructor.induct
     | .recInfo recursor =>
       if let some inductName := recursor.all.head? then return parent env inductName
+    | .defnInfo definition =>
+      if user.getString!.startsWith "instDecidableEq" then
+        if let .app (.const `DecidableEq _) (.const inductName _) := definition.type then
+          if sameModule env name inductName then
+            if let some (.inductInfo _) := env.find? inductName then
+              return parent env inductName
     | _ => pure ()
   match user with
   | .str stem suffix =>
+    if suffix == "go" && stem.getString! == "brecOn" && sameModule env name stem then
+      return parent env stem
     if auxiliaryPart suffix && env.contains stem && sameModule env name stem then
       return parent env stem
     if auxiliaryPart suffix then
@@ -112,8 +121,7 @@ private def allProjectNames (env : Environment) : Array Name := Id.run do
     if projectConstant env name then names.insert name else names) names
   return names.toArray
 
-/-- Compute the closure without consulting an allowlist. -/
-def closure (headline : Name) : MetaM Closure := do
+private def traverse (headline : Name) (allowed : Option (List Name)) : MetaM Closure := do
   let env ← getEnv
   let some root := env.find? headline | throwError "Unknown headline {headline}"
   let mut auxiliaries : NameMap (Array Name) := {}
@@ -129,6 +137,9 @@ def closure (headline : Name) : MetaM Closure := do
     if !projectConstant env name || result.declarations.contains name then continue
     let some info := env.find? name | throwError "Missing reachable declaration {name}"
     let owner := parent env name
+    if let some trusted := allowed then
+      unless trusted.contains owner do
+        throwError "Untrusted statement dependencies: {[owner]}"
     result := { declarations := result.declarations.insert name,
                 parents := result.parents.insert owner }
     pending := pending ++ (← semanticConstants info.type).toArray
@@ -147,15 +158,16 @@ def closure (headline : Name) : MetaM Closure := do
     | _ => pure ()
   return result
 
+/-- Compute the complete closure independently of any allowlist. -/
+def closure (headline : Name) : MetaM Closure := traverse headline none
+
 /-- Reject missing allowlist names and every unlisted semantic parent. -/
 def check (headline : Name) (trusted : List Name) : MetaM Closure := do
   let env ← getEnv
   for name in trusted do
     unless env.contains name do throwError "Trusted declaration does not exist: {name}"
-  let result ← closure headline
-  let missing := result.parents.toArray.filter (!trusted.contains ·)
-  unless missing.isEmpty do
-    throwError "Untrusted statement dependencies: {missing.toList}"
-  return result
+  -- The traversal itself is unchanged; an unlisted parent permits immediate
+  -- rejection without unfolding an arbitrarily large untrusted construction.
+  traverse headline (some trusted)
 
 end KernelR.TrustedBaseChecker

@@ -36,6 +36,9 @@ jobs:
       - name: Audit every KernelR and A22 theorem
         working-directory: proof/lean
         run: lake build Audit
+      - name: Export checked trusted declaration metadata
+        working-directory: proof/lean
+        run: python scripts/export_trusted_base.py --output /tmp/trusted-base.json --print
       - name: Check explicit headline routing and trusted-closure checker contracts
         working-directory: proof/lean
         run: |
