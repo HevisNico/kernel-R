@@ -62,9 +62,10 @@ the native-delay theorem above takes the functions as inputs.
 A separate [whole-execution counting theorem](docs/EXACT_DOSE_COUNTING.md)
 expresses each log-gain increment as `0.6 * k` and each recovery increment as
 `0.1 * sum_p j_p`, where the integers count actual full exposed ERROR and
-protected MARK sections. It requires coverage of every learning contribution,
-open caps and positive energy. Initial memories are retained; the counts and
-applicability may depend on the fixed device and protocol.
+protected MARK sections. It requires coverage of every learning contribution;
+the cap and energy conditions are implied by exposure on counted sections
+and proved for the finite-chain witness. Initial memories are retained;
+the counts and applicability may depend on the fixed device and protocol.
 
 For the constructed finite-chain witness,
 [`ConstructedBirthCadenceChain.exact_section_counts`](proof/lean/KernelR/HybridFiniteChainDoseCounting.lean)
