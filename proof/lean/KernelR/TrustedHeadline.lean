@@ -43,9 +43,36 @@ theorem every_finite_chain {n θ bornCells K ε}
             (∀ i, candidate.execution.emissionTimes i = native.emissionTimes i) ∧
             UniversalCadenceOutcome θ bornCells K (cadenceChainTerminal n K) u
               candidate.execution.emissionTimes candidate.execution.ledger.emissions.length) := by
-  simpa only [canonicalFiniteChainRouter_eq_explicit] using
-    (FixedDelayChainHeadline.every_finite_chain_fixed_delay
-      hborn hb ha hqueue sigma centre delay hK hsigma hbudget hcentre herror)
+  let contract : Router (n + 1) → Prop := fun route =>
+    ∃ terminal : Snapshot (n + 1),
+      ∃ native : Execution θ (route)
+          (familyPreparationBornSource bornCells K) terminal,
+      ∃ geometric : CrossingExecution θ (route)
+          (familyPreparationBornSource bornCells K) terminal,
+        CompleteThrough native (cadenceChainTerminal n K) ∧
+        CrossingCompleteThrough geometric (cadenceChainTerminal n K) ∧
+        native.toWeak = geometric.execution ∧
+        (∀ u (candidate : Execution θ
+            (route)
+            (familyPreparationBornSource bornCells K) u),
+          CompleteThrough candidate (cadenceChainTerminal n K) →
+          terminal.ObservationalEq u ∧
+            (∀ i, candidate.emissionTimes i = native.emissionTimes i) ∧
+            UniversalCadenceOutcome θ bornCells K (cadenceChainTerminal n K) u
+              candidate.emissionTimes candidate.ledger.emissions.length) ∧
+        (∀ u (candidate : CrossingExecution θ
+            (route)
+            (familyPreparationBornSource bornCells K) u),
+          CrossingCompleteThrough candidate (cadenceChainTerminal n K) →
+          terminal.ObservationalEq u ∧
+            (∀ i, candidate.execution.emissionTimes i = native.emissionTimes i) ∧
+            UniversalCadenceOutcome θ bornCells K (cadenceChainTerminal n K) u
+              candidate.execution.emissionTimes candidate.execution.ledger.emissions.length)
+  have original : contract (canonicalFiniteChainRouter n delay (cadenceChainTerminal n K)) :=
+    FixedDelayChainHeadline.every_finite_chain_fixed_delay
+      hborn hb ha hqueue sigma centre delay hK hsigma hbudget hcentre herror
+  exact Eq.mp (congrArg contract
+    (canonicalFiniteChainRouter_eq_explicit n delay (cadenceChainTerminal n K))) original
 
 #print axioms every_finite_chain
 

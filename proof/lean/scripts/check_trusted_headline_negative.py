@@ -77,11 +77,14 @@ def controls():
         add(label, eq.replace('ROUTER', 'explicitFiniteChainRouter') + counterexample,
             eq.replace('ROUTER', wrong), ['canonicalFiniteChainRouter_eq_explicit'])
 
-    source = (ROOT / 'KernelR/TrustedHeadline.lean').read_text()
-    start = re.search(r'^theorem every_finite_chain\b', source, re.M).end()
+    # Keep the expected contract anchored to the unchanged earlier theorem,
+    # rather than regenerating it from the new headline being checked.
+    source = (ROOT / 'KernelR/FixedDelayChainHeadline.lean').read_text()
+    start = re.search(r'^theorem every_finite_chain_fixed_delay\b', source, re.M).end()
     end = re.search(r':=\s*by\b', source[start:]).start() + start
-    signature = source[start:end].replace('(delay : ℕ → ℝ → ℝ)',
-                                           '(delay otherDelay : ℕ → ℝ → ℝ)')
+    signature = source[start:end].replace('canonicalFiniteChainRouter', 'explicitFiniteChainRouter')
+    signature = signature.replace('(delay : ℕ → ℝ → ℝ)',
+                                  '(delay otherDelay : ℕ → ℝ → ℝ)')
     proof = ''' := by
   exact TrustedHeadline.every_finite_chain
     hborn hb ha hqueue sigma centre delay hK hsigma hbudget hcentre herror

@@ -49,6 +49,7 @@ private def sameModule (env : Environment) (first second : Name) : Bool :=
 then uses only recognized compiler auxiliary suffixes. -/
 partial def parent (env : Environment) (name : Name) : Name := Id.run do
   let user := privateToUserName name
+  let own := if env.contains user then user else name
   if let some projection := env.getProjectionFnInfo? name then
     if let some (.ctorInfo constructor) := env.find? projection.ctorName then
       return parent env constructor.induct
@@ -66,12 +67,12 @@ partial def parent (env : Environment) (name : Name) : Name := Id.run do
       -- An equation auxiliary may be nested below a matcher auxiliary.
       let owner := parent env stem
       if env.contains owner && sameModule env name owner then return owner
-    return user
+    return own
   | .num stem _ =>
     let owner := parent env stem
     if env.contains owner && sameModule env name owner then return owner
-    return user
-  | _ => return user
+    return own
+  | _ => return own
 
 private partial def semanticConstants (expression : Expr) : MetaM NameSet := do
   if ← isProof expression then return {}
