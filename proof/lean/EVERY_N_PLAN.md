@@ -190,12 +190,11 @@ from the new construction.
 
 ### Trusted headline: fixed code checkpoint and final-head CI record
 
-The mathematical and verification source checkpoint is
+The initial mathematical and verification source checkpoint is
 [`e7212249c339fdf282423912244d37c6925c0cd6`](https://github.com/HevisNico/kernel-R/tree/e7212249c339fdf282423912244d37c6925c0cd6).
-The generated [trusted-base guide](../../docs/TRUSTED_BASE.md) pins its source
-links to this commit and authenticates their bytes. The documentation-only
-follow-up adds this ledger entry and the generated guide; it changes no Lean,
-workflow, checker or control-script source from that checkpoint.
+The measurements below retain that initial scope and checkpoint. The generated
+[trusted-base guide](../../docs/TRUSTED_BASE.md) authenticates the current
+verification checkpoint, including the auxiliary-attribution follow-up below.
 
 | Measurement | Recorded result and scope |
 |---|---|
@@ -220,6 +219,34 @@ CI record supplies the exact final-head reference; the static figures above
 retain their fixed code checkpoint and local/scoped labels. They do not
 claim that a still-running CI suite has completed. Mathematical human review
 follows the [trusted reading path](../../REVIEW.md); proofs are checked by Lean.
+
+### Source-declared helper attribution
+
+Verification checkpoint
+[`789620b75fe40f983ae2a8a1944796067a157e0c`](https://github.com/HevisNico/kernel-R/tree/789620b75fe40f983ae2a8a1944796067a157e0c)
+strengthens the checker without changing the mathematical statement, model
+definitions or explicit allowlist. An independently source-declared helper
+remains a separate semantic dependency even if its name ends in `match_1`,
+`proof_1`, `_f`, or another recognized compiler-support suffix. Matchers also
+require Lean's matcher metadata. Other generated support requires parent
+source metadata and no independent source range; an equality instance is
+attributed to an inductive only when its generated range lies inside that
+inductive's source declaration.
+
+The original literal-only counterexample was accepted before this change and
+rejected afterwards. The checker inventory contains 49 pairs, covering every recognized suffix
+family, private helpers, handwritten equality instances, genuine recursive
+and private matchers, deriving with and without fields, helpers declared after
+deriving, and separately compiled/imported fixtures. The complete new-suite
+inventory is 60 pairs: these 49, two actual-headline checks, and nine
+router/headline checks. All 60 pairs passed locally. The CI validation report uses the same
+inventory function as the test runner, including imported-module controls.
+The targeted `lake build KernelR.TrustedBase` passed locally with 3,790 jobs
+and the same 84 semantic parents. A fresh checked export retains exactly the
+same declaration metadata and 523 attributed helpers as the initial checkpoint.
+The regenerated guide and manifest pin and authenticate this verification
+checkpoint. The final-head CI artifact remains the authority for the full
+project build, global audit and complete historical regression sequence.
 
 ### Explicit fixed-delay headline and reproducibility review
 
