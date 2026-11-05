@@ -51,6 +51,15 @@ right-crossing condition. `CrossingCompleteThrough` resolves precisely the
 jumps enabled by both historical and right-crossing conditions, including
 those at the horizon; it does not assume saturation of every equality guard.
 
+`CellRightCrossing` is an **existential** condition: some full-cell
+`CellOrbitGerm` continues above threshold. The development does not supply a
+generic uniqueness theorem for these germs. At a threshold contact with
+positive incoming field, however,
+[`CellOrbitGerm.crossing_of_positive_field`](../proof/lean/KernelR/HybridCellOrbitGerm.lean)
+applies to every germ. Thus the right-crossing conclusion at the protocol's
+proved transverse contacts is independent of which germ witnesses existence.
+The general existential convention remains a semantic review obligation.
+
 The proof proceeds through the following independently checked bridges:
 
 | Bridge | Formal result |
@@ -79,7 +88,7 @@ saturation is an input from the competing model execution.
 
 [`CrossingChainHeadline.every_finite_chain_every_crossing_execution`](../proof/lean/KernelR/CrossingChainHeadline.lean)
 constructs a genuine crossing witness and transfers the physical endpoint,
-ordered per-cell FIRE dates, exact counts and prescribed wire errors to every
+ordered per-cell FIRE dates, FIRE counts and prescribed wire errors to every
 geometrically complete model execution. Its birth, box, source and budget
 hypotheses are the original finite-chain hypotheses. Conversely, every complete
 native outcome has a crossing representative with the same physical endpoint
@@ -112,7 +121,15 @@ separate human obligation to validate the crossing convention against the model.
 
 ## Constructed finite-chain result
 
-The [universal finite-chain headline](../proof/lean/KernelR/UniversalChainHeadline.lean)
+[`FixedDelayChainHeadline.every_finite_chain_fixed_delay`](../proof/lean/KernelR/FixedDelayChainHeadline.lean)
+takes the admissible delay functions as inputs and returns complete native and
+crossing witnesses, together with universal observations and outcomes for
+both semantics. Its conclusion names
+[`canonicalFiniteChainRouter n delay T`](../proof/lean/KernelR/HybridFiniteChainCanonicalRouter.lean).
+`ConstructedBirthCadenceChain.router_eq_canonical` identifies the factory's
+router with that declared topology and contact window.
+
+The separate [indexed-error headline](../proof/lean/KernelR/UniversalChainHeadline.lean)
 constructs the common-birth directed-chain protocol for every positive finite
 N, K≥4N+12, independent fixed parameter/birth choices and arbitrary prescribed
 per-emission wire errors with cumulative budget≤0.15. It constructs fixed
@@ -128,7 +145,7 @@ so the universal class is nonempty. The fixed router covers preparation and
 cadence; [`finiteChainPreparedData`](../proof/lean/KernelR/HybridFiniteChainPreparedData.lean)
 defines its declared sources and contacts.
 
-For this constructed witness,
+**Learning-section counts are witness-only.** For this constructed witness,
 [`ConstructedBirthCadenceChain.exact_section_counts`](../proof/lean/KernelR/HybridFiniteChainDoseCounting.lean)
 constructs actual whole-execution covers: +2.4 equals four full exposed ERROR
 sections on each active port, and +0.3 equals three protected MARK sections

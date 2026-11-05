@@ -1,7 +1,8 @@
 """Pinned semantics of a range certificate, shared by producer and verifier."""
 from fractions import Fraction
 
-SOURCES = ('load.py', 'schema.py', 'certify.py', 'verify.py', 'README.md')
+SOURCES = ('load.py', 'local_bounds.py', 'birth_bounds.py', 'latency_bounds.py',
+           'schema.py', 'certify.py', 'verify.py', 'README.md')
 
 
 def parse_range(text):
@@ -59,6 +60,6 @@ def metadata():
                          'derivations holds for every noise bound nu and every amplitude deviation alpha in the '
                          'stated closed ranges, at the stated exact epsilon, with one common radius delta'),
                 method=('closed pieces covering the ranges, each evaluated with nu and alpha as intervals in the '
-                        'unchanged pinned formulas; ranges/load.py lists the only textual changes'),
+                        'pinned formulas in ordinary range modules; tests.py checks AST parity except explicit input policies'),
                 chain='T >= 7.5 + 2*sum_{i=0}^{N-2}(sigma_i+delta_i), with delta the published radius',
                 trust='authentic sources; integer interval replay; written hybrid proofs, not full Lean semantics')

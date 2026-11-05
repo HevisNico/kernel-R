@@ -97,7 +97,7 @@ def adaptive():
     lots=json.loads(raw)
     lines=['import KernelR.Adaptive','','/-! Exact replay of recorded finite outcomes, not a proof of their ODE origin. -/',
       'namespace KernelR.Recorded','open Adaptive','set_option maxRecDepth 100000',
-      'set_option maxHeartbeats 0','',
+      'set_option maxHeartbeats 8000000','',
       'structure Pupil where','  observations : List Context','  grades : List Bool','  deriving DecidableEq','',
       'def successes (xs : List Pupil) : Nat :=',
       '  ((xs.map fun x => (episode x.observations x.grades).2).filter id).length',

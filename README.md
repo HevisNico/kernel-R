@@ -16,11 +16,13 @@ dynamics, then transmits a cadence through the chain.
 Three entry points:
 
 1. [Detailed result, hypotheses and verification](docs/UNIVERSAL_FINITE_CHAIN.md).
-2. [Geometric upward-crossing theorem](proof/lean/KernelR/CrossingChainHeadline.lean),
-   `CrossingChainHeadline.every_finite_chain_every_crossing_execution`, followed
-   by the [native first-contact construction](proof/lean/KernelR/HybridUniversalBirthCadenceChain.lean)
-   and [native indexed-error theorem](proof/lean/KernelR/UniversalChainHeadline.lean)
-   used in its proof.
+2. [Fixed-delay headline in both semantics](proof/lean/KernelR/FixedDelayChainHeadline.lean),
+   `FixedDelayChainHeadline.every_finite_chain_fixed_delay`, with the delay
+   functions supplied before the witnesses and the
+   [canonical router](proof/lean/KernelR/HybridFiniteChainCanonicalRouter.lean)
+   written in its conclusion. The separate
+   [indexed-error crossing theorem](proof/lean/KernelR/CrossingChainHeadline.lean)
+   constructs delay functions realizing prescribed errors.
 3. [Model ↔ Lean: equations and operational semantics](docs/MODEL_LEAN_CORRESPONDENCE.md).
 
 For review, start with the [semantic review guide](REVIEW.md): fidelity of
@@ -57,7 +59,7 @@ realizing every prescribed bounded per-emission error sequence on actual
 FAST sender firings. Its functions are constructed after the errors are given;
 the native-delay theorem above takes the functions as inputs.
 
-## Exact counting of complete learning sections
+## Exact learning-section counts on the constructed witness
 
 A separate [whole-execution counting theorem](docs/EXACT_DOSE_COUNTING.md)
 expresses each log-gain increment as `0.6 * k` and each recovery increment as
@@ -67,7 +69,11 @@ the cap and energy conditions are implied by exposure on counted sections
 and proved for the finite-chain witness. Initial memories are retained;
 the counts and applicability may depend on the fixed device and protocol.
 
-For the constructed finite-chain witness,
+**Witness scope:** ERROR/MARK section covers and their integer counts are
+proved for the constructed finite-chain execution. They are not asserted for
+every competing complete execution.
+
+For that witness,
 [`ConstructedBirthCadenceChain.exact_section_counts`](proof/lean/KernelR/HybridFiniteChainDoseCounting.lean)
 constructs those covers under the original physical hypotheses: each active
 port has `k = 4`, and each cell has `sum_p j_p = 3`, yielding +2.4 and +0.3.
@@ -100,7 +106,11 @@ The native event guards use first threshold contact. A separate geometric
 semantics requires an actual approach from below and an incoming-mode ODE
 continuation above the threshold. Their correspondence is proved for the
 constructed finite-chain protocol, including every complete competing model
-execution, without adding protocol hypotheses. See the
+execution, without adding protocol hypotheses. The right-crossing guard
+asserts existence of a full-cell ODE germ; no generic uniqueness theorem for
+these germs is claimed. At the protocol's transverse contacts,
+`CellOrbitGerm.crossing_of_positive_field` proves the required crossing for
+every such germ. See the
 [threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings).
 
 The model comparison covers finite crossing executions satisfying
@@ -128,18 +138,19 @@ From the repository root, with Lean installed:
 git rev-parse HEAD
 cd proof/lean
 lake exe cache get
-lake build KernelR.CrossingChainHeadline
+lake build KernelR.FixedDelayChainHeadline KernelR.CrossingChainHeadline
 lake build
 lake build Audit
 ```
 
-For the geometric-crossing checkpoint at `ef5a510`, the
-[validation ledger](proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
-records a fresh local build of **9,592 jobs** and a global audit of
-**28,970 project theorem declarations**, permitting only `propext`,
-`Classical.choice` and `Quot.sound`, with no admitted proofs or added project
-axioms. These are recorded local validation results. The archived v0.2.0
-universal proof checkpoint recorded **9,557 jobs** and **27,741 declarations**.
+At revision `b5435f3`, [CI run 42026428133](https://github.com/HevisNico/kernel-R/actions/runs/42026428133)
+completed the global build (**9,618 jobs**) and axiom audit (**29,298 project
+theorem declarations**). The audit permits only `propext`, `Classical.choice`
+and `Quot.sound`, with no admitted proofs or added project axioms. These
+figures describe that revision, before the present changes. The complete CI
+suite was canceled after 90 minutes; these successful build/audit stages do
+not establish a full-suite pass. Historical checkpoints remain in the
+[validation ledger](proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline).
 
 [Exact Lean signatures, axiom outputs and checkpoint evidence](docs/UNIVERSAL_FINITE_CHAIN.md#lean-headline-signatures-axioms-and-reproduction) ·
 [Fresh-checkout rebuild and full controls](proof/lean/README.md#rebuild-project-proofs-without-a-restored-project-cache).
