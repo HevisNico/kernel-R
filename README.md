@@ -54,6 +54,16 @@ realizing every prescribed bounded per-emission error sequence on actual
 FAST sender firings. Its functions are constructed after the errors are given;
 the native-delay theorem above takes the functions as inputs.
 
+## Exact counting of complete learning sections
+
+A separate [whole-execution counting theorem](docs/EXACT_DOSE_COUNTING.md)
+expresses each log-gain increment as `0.6 * k` and each recovery increment as
+`0.1 * sum_p j_p`, where the integers count actual full exposed ERROR and
+protected MARK sections. It requires coverage of every learning contribution,
+open caps and positive energy. Initial memories are retained; the counts and
+applicability may depend on the fixed device and protocol. This conditional
+result does not construct an execution or assert a hardware counter.
+
 ## Hypotheses
 
 - `N >= 1`, `K >= 4*N+12`; the declared independent READY birth family.

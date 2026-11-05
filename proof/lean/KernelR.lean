@@ -56,6 +56,7 @@ import KernelR.HybridResponseBounds
 import KernelR.HybridSensor
 import KernelR.HybridInputs
 import KernelR.HybridExecutionTools
+import KernelR.HybridDoseCounting
 import KernelR.HybridSensorGain
 import KernelR.HybridInputBalance
 import KernelR.HybridMainBounds

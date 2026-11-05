@@ -31,6 +31,17 @@ Retained probes/copies, operational noise/drift and full written-theorem
 coverage remain open. The Python interval implementations have not been
 verified in Lean.
 
+## Exact counting of complete learning sections
+
+[`HybridDoseCounting`](KernelR/HybridDoseCounting.lean) proves a conditional
+whole-execution memory formula from covers of actual complete exposed ERROR
+and protected MARK sections. Each port has its own natural-number counts;
+recovery sums MARK counts over all ports, including overlapping sections.
+The birth specialization explicitly retains the fabrication box, READY birth
+and terminal auxiliaries, positive energy and strict open caps. The covers
+exclude omitted partial learning contributions without assuming dose-ledger
+equalities. See the [hypotheses and scope](../../docs/EXACT_DOSE_COUNTING.md).
+
 ## Repeatable learned one-cell operation
 
 The [one-cell extension](INDEFINITE_OPERATION.md) constructs a physical
