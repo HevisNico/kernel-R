@@ -19,6 +19,12 @@ structure FiniteCausalExtension {d : FiniteCausalChainData} {T : ℝ} {n : ℕ}
   tail_values : ∀ i, next.final.x i.succ=stage.final.x i
   contacts_transversal : stage.execution.ContactsTransversal →
     head.execution.ContactsTransversal → next.execution.ContactsTransversal
+  tail_sections : ∀ kind i p first last count,
+    SectionRun kind i p stage.execution first last count →
+      SectionRun kind i.succ p next.execution first last count
+  head_sections : ∀ kind p first last count,
+    SectionRun kind 0 p head.execution first last count →
+      SectionRun kind 0 p next.execution first last count
 
 /-- Construct the actual next stage with an explicit bridge to both physical
 input traces. This is stronger than a bare existential stage constructor. -/
@@ -65,6 +71,14 @@ theorem finite_causal_extension_exists {d : FiniteCausalChainData} {T : ℝ} {n 
     pending:=weave.pending_empty stage.pending head.pending
     physical:=execution.physical_invariant hb hf,raw_valid:=execution.raw_valid hv
     cells:=cells
+    section_runs:=by
+      intro kind i p first last count localRun
+      apply SectionRun.cast_source (same := hsource.symm)
+      cases i using Fin.cases with
+      | zero => exact weave.head_sections kind p first last count localRun
+      | succ i =>
+        exact weave.tail_sections kind i p first last count
+          (stage.section_runs kind i p first last count localRun)
     contacts_transversal:=by
       intro localContacts
       apply (weave.execution.contactsTransversal_cast_source hsource.symm).2
@@ -86,6 +100,12 @@ theorem finite_causal_extension_exists {d : FiniteCausalChainData} {T : ℝ} {n 
     head_times:=(htimes 0).trans weave.head_emission_times
     tail_times:=fun i => (htimes i.succ).trans (weave.tail_emission_times i)
     head_values:=rfl,tail_values:=fun _ => rfl
+    tail_sections:=by
+      intro kind i p first last count run
+      exact (weave.tail_sections kind i p first last count run).cast_source hsource.symm
+    head_sections:=by
+      intro kind p first last count run
+      exact (weave.head_sections kind p first last count run).cast_source hsource.symm
     contacts_transversal:=by
       intro tailContacts headContacts
       exact (weave.execution.contactsTransversal_cast_source hsource.symm).2

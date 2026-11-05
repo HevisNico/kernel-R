@@ -51,6 +51,22 @@ private theorem cadence_cell_cast_contacts {parameter parameter' s T}
   cases hp
   rfl
 
+private theorem cadence_execution_cast_sections {k θ θ' route route' s s' u kind i p first last count}
+    (e : @Execution k θ route s u) (hp : θ=θ') (hr : route=route') (hs : s=s')
+    (run : SectionRun kind i p e first last count) :
+    SectionRun kind i p (cadence_execution_cast e hp hr hs) first last count := by
+  cases hp
+  cases hr
+  cases hs
+  exact run
+
+private theorem cadence_cell_cast_sections {parameter parameter' s T kind p first last count}
+    (c : FiniteCausalCell parameter s T) (hp : parameter=parameter') :
+    SectionRun kind 0 p (cadence_cell_cast c hp).execution first last count ↔
+      SectionRun kind 0 p c.execution first last count := by
+  cases hp
+  rfl
+
 namespace FiniteCausalChainStage
 variable {d d' : FiniteCausalChainData} {T : ℝ} {depth : ℕ}
 
@@ -67,6 +83,11 @@ noncomputable def transport (c : FiniteCausalChainStage d T depth)
     raw_none:=c.raw_none,pending:=c.pending,physical:=?_,raw_valid:=c.raw_valid
     cells:=fun i => ⟨(c.cells i).1,cadence_cell_cast (c.cells i).2 (congrFun hp i)⟩
     emission_times:=?_,cell_values:=?_
+    section_runs:=by
+      intro kind i p first last count localRun
+      apply cadence_execution_cast_sections c.execution hp hr hs
+      apply c.section_runs kind i p first last count
+      exact (cadence_cell_cast_sections (c.cells i).2 (congrFun hp i)).1 localRun
     contacts_transversal:=by
       intro localContacts
       apply (cadence_execution_cast_contacts c.execution hp hr hs).2

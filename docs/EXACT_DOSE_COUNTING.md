@@ -78,6 +78,21 @@ Simultaneous events are retained as actual jumps and have no direct learning
 actuation. Exposure belongs to the phase span, not the ordering of its exit
 jump relative to a simultaneous event on another component.
 
+The construction tools in
+[`HybridDoseCountingTools`](../proof/lean/KernelR/HybridDoseCountingTools.lean)
+compose covers of adjacent actual traces. Port relabeling, router copies and
+queue framing preserve their physical entry/span/exit structure. Local
+sensor and protocol lemmas construct exposed ERROR and protected MARK covers.
+
+[`HybridSectionRuns`](../proof/lean/KernelR/HybridSectionRuns.lean) records
+whether a section is open at a trace boundary. This permits a flow to be cut
+inside a learning section and interleaved with another cell's events. A run
+closed at both ends reconstructs the original section cover with the same
+count; an unfinished run does not provide a complete cover.
+[`HybridCausalSectionRuns`](../proof/lean/KernelR/HybridCausalSectionRuns.lean)
+uses the actual component paths and mode changes to preserve those runs
+through causal weaving.
+
 ## Proof route
 
 During a fully exposed ERROR span, the model gives

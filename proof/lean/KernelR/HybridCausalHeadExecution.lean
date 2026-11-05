@@ -1,5 +1,6 @@
 import KernelR.HybridCausalHeadBalance
 import KernelR.HybridCausalTransversality
+import KernelR.HybridCausalSectionRuns
 
 /-! Constructive feed-forward weaving. Local head calendars are proof data
 derived from actual tail FIREs. The resulting execution issues each wire only
@@ -59,9 +60,9 @@ structure CausalHeadResult {n} (θ : Fin n → Parameters) (θH : Fin 1 → Para
   trace : CausalTraceBalance execution.ledger.emissions execution.deliveries
     tailEvents tailDeliveries headEvents headDeliveries
 
-/-- The concrete weave also preserves contact transversality whenever both
-supplied local histories have it. The original existential construction
-continues to accept arbitrary legal local histories. -/
+/-- The concrete weave preserves contact transversality and section runs from
+the supplied local histories. Open runs retain their phase across foreign jumps
+and flow subdivisions, so complete covers survive asynchronous interleaving. -/
 structure CausalHeadWeave {n θ θH route s u a b}
     (tail : @Execution n θ route s u) (head : @Execution 1 θH (fun _ _ => []) a b)
     (Q : List (Delivery (n + 1))) (contacts : HeadRoutes n)
@@ -69,6 +70,12 @@ structure CausalHeadWeave {n θ θH route s u a b}
       tail.ledger.emissions tail.deliveries head.ledger.emissions head.deliveries where
   contacts_transversal : tail.ContactsTransversal → head.ContactsTransversal →
     execution.ContactsTransversal
+  tail_sections : ∀ kind i p first last count,
+    SectionRun kind i p tail first last count →
+      SectionRun kind i.succ p execution first last count
+  head_sections : ∀ kind p first last count,
+    SectionRun kind 0 p head first last count →
+      SectionRun kind 0 p execution first last count
 
 theorem CausalHeadWeave.prepend_tail_jump {n θ θH route s v u a b}
     (j : @Jump n route s v) (rest : Execution θ route v u)
@@ -83,12 +90,21 @@ theorem CausalHeadWeave.prepend_tail_jump {n θ θH route s v u a b}
   refine ⟨{
     pending := w.pending, execution := .cons (.jump g) w.execution
     terminal := w.terminal, trace := ?_, contacts_transversal := ?_
+    tail_sections := ?_, head_sections := ?_
   }⟩
   · simpa only [Execution.ledger,Move.ledger,Ledger.add,Execution.deliveries,Move.deliveries,
       he,hd] using w.trace.prepend_tail j.ledger.emissions j.deliveries
   · intro ht hh
     exact ⟨j.prependQueued_tail_contactTransversal ht.1 a Q Qnext contacts g,
       w.contacts_transversal ht.2 hh⟩
+  · intro kind i p first last count run
+    obtain ⟨middle,stepCount,tailCount,rfl,step,tailRun⟩ := SectionRun.cons_iff.mp run
+    exact .cons (step.prependQueued_tail_jump a Q Qnext contacts g)
+      (w.tail_sections kind i p middle last tailCount tailRun)
+  · intro kind p first last count run
+    simpa only [zero_add] using SectionRun.cons
+      (SectionStep.prependQueued_idle_head run.initial_valid Q Qnext contacts g)
+      (w.head_sections kind p first last count run)
 
 theorem CausalHeadWeave.prepend_head_jump {n θ θH route s u a v b}
     (tail : @Execution n θ route s u) (j : Jump (fun _ _ => []) a v)
@@ -103,12 +119,21 @@ theorem CausalHeadWeave.prepend_head_jump {n θ θH route s u a v b}
   refine ⟨{
     pending := w.pending, execution := .cons (.jump g) w.execution
     terminal := w.terminal, trace := ?_, contacts_transversal := ?_
+    tail_sections := ?_, head_sections := ?_
   }⟩
   · simpa only [Execution.ledger,Move.ledger,Ledger.add,Execution.deliveries,Move.deliveries,
       he,hd] using w.trace.prepend_head j.ledger.emissions j.deliveries
   · intro ht hh
     exact ⟨j.prependQueued_head_contactTransversal hh.1 s hclock Q Qnext contacts g,
       w.contacts_transversal ht hh.2⟩
+  · intro kind i p first last count run
+    simpa only [zero_add] using SectionRun.cons
+      (SectionStep.prependQueued_idle_tail run.initial_valid Q Qnext contacts g)
+      (w.tail_sections kind i p first last count run)
+  · intro kind p first last count run
+    obtain ⟨middle,stepCount,tailCount,rfl,step,tailRun⟩ := SectionRun.cons_iff.mp run
+    exact .cons (step.prependQueued_head_jump s Q Qnext contacts g)
+      (w.head_sections kind p middle last tailCount tailRun)
 
 theorem CausalHeadWeave.prepend_flow {n θ θH route s v u a c b}
     (tail : @Execution n θ route s u) (head : @Execution 1 θH (fun _ _ => []) a b)
@@ -121,12 +146,21 @@ theorem CausalHeadWeave.prepend_flow {n θ θH route s v u a c b}
     (hdh : headRest.deliveries = head.deliveries)
     (htail : tail.ContactsTransversal → tailRest.ContactsTransversal)
     (hhead : head.ContactsTransversal → headRest.ContactsTransversal)
+    (tailSections : ∀ kind i p first last count,
+      SectionRun kind i p tail first last count →
+        SectionStep (route := prependRouted route contacts) kind i.succ p (.flow flow) first first 0 ∧
+          SectionRun kind i p tailRest first last count)
+    (headSections : ∀ kind p first last count,
+      SectionRun kind 0 p head first last count →
+        SectionStep (route := prependRouted route contacts) kind 0 p (.flow flow) first first 0 ∧
+          SectionRun kind 0 p headRest first last count)
     (hrest : Nonempty (CausalHeadWeave tailRest headRest Q contacts)) :
     Nonempty (CausalHeadWeave tail head Q contacts) := by
   obtain ⟨w⟩ := hrest
   refine ⟨{
     pending := w.pending, execution := .cons (.flow flow) w.execution
     terminal := w.terminal, trace := ?_, contacts_transversal := ?_
+    tail_sections := ?_, head_sections := ?_
   }⟩
   · change CausalTraceBalance w.execution.ledger.emissions w.execution.deliveries
       tail.ledger.emissions tail.deliveries head.ledger.emissions head.deliveries
@@ -134,6 +168,14 @@ theorem CausalHeadWeave.prepend_flow {n θ θH route s v u a c b}
     exact w.trace
   · intro ht hh
     exact w.contacts_transversal (htail ht) (hhead hh)
+  · intro kind i p first last count run
+    obtain ⟨step,rest⟩ := tailSections kind i p first last count run
+    simpa only [zero_add] using SectionRun.cons step
+      (w.tail_sections kind i p first last count rest)
+  · intro kind p first last count run
+    obtain ⟨step,rest⟩ := headSections kind p first last count run
+    simpa only [zero_add] using SectionRun.cons step
+      (w.head_sections kind p first last count rest)
 
 /-- One strictly smaller pair of local paths, together with a genuine prefix
 that lifts any completed product of those remaining paths. -/
@@ -208,9 +250,9 @@ theorem Execution.causal_flow_short_step {n θ θH route s vT u a vH b N}
     Nonempty (CausalHeadStep θ θH route u b contacts N
       (CausalHeadWeave (.cons (.flow fT) restT) (.cons (.flow fH) restH) Q contacts)) := by
   have hprefix : a.time < vT.time := by rw [← hstart]; exact fT.positive
-  obtain ⟨prefixH,suffixH,_,_⟩ := fH.cut_pair_exists hprefix hshort
+  obtain ⟨prefixH,suffixH,hPrefixPath,hSuffixPath⟩ := fH.cut_pair_exists hprefix hshort
   let remainingH : Execution θH (fun _ _ => []) (fH.at vT.time) b := .cons (.flow suffixH) restH
-  obtain ⟨combined,_⟩ := fT.prependQueued_exists prefixH hstart rfl Q
+  obtain ⟨combined,hCombinedPath⟩ := fT.prependQueued_exists prefixH hstart rfl Q
     (hbalance.urgent_to fT.pending_urgent prefixH.pending_urgent)
   have hnext : HeadQueueBalance restT (fH.at vT.time) Q contacts :=
     hbalance.rebase fT.queue_fixed prefixH.queue_fixed (Execution.causal_flow_future fT restT contacts).symm
@@ -220,7 +262,21 @@ theorem Execution.causal_flow_short_step {n θ θH route s vT u a vH b N}
       (Execution.causal_flow_emissions fT restT).symm (Execution.causal_flow_deliveries fT restT).symm
       ((Execution.causal_flow_emissions suffixH restH).trans (Execution.causal_flow_emissions fH restH).symm)
       ((Execution.causal_flow_deliveries suffixH restH).trans (Execution.causal_flow_deliveries fH restH).symm)
-      (fun h => h) (fun h => h) result)
+      (fun h => h) (fun h => h)
+      (by
+        intro kind i p first last count run
+        obtain ⟨step,tail⟩ := run.flow_cons
+        exact ⟨step.prependQueued_tail_flow Q contacts combined
+          (by intro t c; rw [hCombinedPath]; rfl),tail⟩)
+      (by
+        intro kind p first last count run
+        obtain ⟨step,tail⟩ := run.flow_cons
+        have before := step.flow_cut_prefix hprefix hshort prefixH hPrefixPath
+        have after := step.flow_cut_suffix hprefix hshort suffixH hSuffixPath
+        refine ⟨before.prependQueued_head_flow hstart rfl Q contacts combined
+          (by intro t c; rw [hCombinedPath]; rfl),?_⟩
+        simpa only [zero_add] using SectionRun.cons after tail)
+      result)
 
 theorem Execution.causal_flow_equal_step {n θ θH route s vT u a vH b N}
     (fT : @Flow n θ s vT) (restT : Execution θ route vT u)
@@ -231,7 +287,7 @@ theorem Execution.causal_flow_equal_step {n θ θH route s vT u a vH b N}
       (Execution.cons (.flow fH) restH).moveCount = N) (hequal : vT.time = vH.time) :
     Nonempty (CausalHeadStep θ θH route u b contacts N
       (CausalHeadWeave (.cons (.flow fT) restT) (.cons (.flow fH) restH) Q contacts)) := by
-  obtain ⟨combined,_⟩ := fT.prependQueued_exists fH hstart hequal Q
+  obtain ⟨combined,hCombinedPath⟩ := fT.prependQueued_exists fH hstart hequal Q
     (hbalance.urgent_to fT.pending_urgent (by simpa only [hequal] using fH.pending_urgent))
   have hnext : HeadQueueBalance restT vH Q contacts :=
     hbalance.rebase fT.queue_fixed fH.queue_fixed (Execution.causal_flow_future fT restT contacts).symm
@@ -240,7 +296,18 @@ theorem Execution.causal_flow_equal_step {n θ θH route s vT u a vH b N}
       (.cons (.flow fH) restH) restT restH Q contacts combined
       (Execution.causal_flow_emissions fT restT).symm (Execution.causal_flow_deliveries fT restT).symm
       (Execution.causal_flow_emissions fH restH).symm (Execution.causal_flow_deliveries fH restH).symm
-      (fun h => h) (fun h => h) result)
+      (fun h => h) (fun h => h)
+      (by
+        intro kind i p first last count run
+        obtain ⟨step,tail⟩ := run.flow_cons
+        exact ⟨step.prependQueued_tail_flow Q contacts combined
+          (by intro t c; rw [hCombinedPath]; rfl),tail⟩)
+      (by
+        intro kind p first last count run
+        obtain ⟨step,tail⟩ := run.flow_cons
+        exact ⟨step.prependQueued_head_flow hstart hequal Q contacts combined
+          (by intro t c; rw [hCombinedPath]; rfl),tail⟩)
+      result)
 
 theorem Execution.causal_flow_long_step {n θ θH route s vT u a vH b N}
     (fT : @Flow n θ s vT) (restT : Execution θ route vT u)
@@ -252,9 +319,9 @@ theorem Execution.causal_flow_long_step {n θ θH route s vT u a vH b N}
     Nonempty (CausalHeadStep θ θH route u b contacts N
       (CausalHeadWeave (.cons (.flow fT) restT) (.cons (.flow fH) restH) Q contacts)) := by
   have hprefix : s.time < vH.time := by rw [hstart]; exact fH.positive
-  obtain ⟨prefixT,suffixT,_,_⟩ := fT.cut_pair_exists hprefix hlong
+  obtain ⟨prefixT,suffixT,hPrefixPath,hSuffixPath⟩ := fT.cut_pair_exists hprefix hlong
   let remainingT : Execution θ route (fT.at vH.time) u := .cons (.flow suffixT) restT
-  obtain ⟨combined,_⟩ := prefixT.prependQueued_exists fH hstart rfl Q
+  obtain ⟨combined,hCombinedPath⟩ := prefixT.prependQueued_exists fH hstart rfl Q
     (hbalance.urgent_to prefixT.pending_urgent fH.pending_urgent)
   have hnext : HeadQueueBalance remainingT vH Q contacts :=
     hbalance.rebase prefixT.queue_fixed fH.queue_fixed ((Execution.causal_flow_future suffixT restT contacts).trans (Execution.causal_flow_future fT restT contacts).symm)
@@ -264,7 +331,21 @@ theorem Execution.causal_flow_long_step {n θ θH route s vT u a vH b N}
       ((Execution.causal_flow_emissions suffixT restT).trans (Execution.causal_flow_emissions fT restT).symm)
       ((Execution.causal_flow_deliveries suffixT restT).trans (Execution.causal_flow_deliveries fT restT).symm)
       (Execution.causal_flow_emissions fH restH).symm (Execution.causal_flow_deliveries fH restH).symm
-      (fun h => h) (fun h => h) result)
+      (fun h => h) (fun h => h)
+      (by
+        intro kind i p first last count run
+        obtain ⟨step,tail⟩ := run.flow_cons
+        have before := step.flow_cut_prefix hprefix hlong prefixT hPrefixPath
+        have after := step.flow_cut_suffix hprefix hlong suffixT hSuffixPath
+        refine ⟨before.prependQueued_tail_flow Q contacts combined
+          (by intro t c; rw [hCombinedPath]; rfl),?_⟩
+        simpa only [zero_add] using SectionRun.cons after tail)
+      (by
+        intro kind p first last count run
+        obtain ⟨step,tail⟩ := run.flow_cons
+        exact ⟨step.prependQueued_head_flow hstart rfl Q contacts combined
+          (by intro t c; rw [hCombinedPath]; rfl),tail⟩)
+      result)
 
 theorem Execution.causal_flow_step {n θ θH route s vT u a vH b N}
     (fT : @Flow n θ s vT) (restT : Execution θ route vT u)
@@ -318,10 +399,17 @@ theorem Execution.prepend_causal_zero {n θ θH route s u a b}
       refine ⟨{
         pending := Q, execution := .nil _, terminal := ?_, trace := ?_
         contacts_transversal := fun _ _ => True.intro
+        tail_sections := ?_, head_sections := ?_
       }⟩
       · simpa only [HeadQueueBalance,Execution.futureHeadWires,Execution.ledger,Ledger.zero,
           List.flatMap_nil,Multiset.coe_nil,add_zero] using hbalance
       · constructor <;> rfl
+      · intro kind i p first last count run
+        cases run with
+        | nil _ active valid => exact .nil _ _ valid
+      · intro kind p first last count run
+        cases run with
+        | nil _ active valid => exact .nil _ _ valid
     | cons => simp only [Execution.moveCount] at hzero; omega
   | cons => simp only [Execution.moveCount] at hzero; omega
 

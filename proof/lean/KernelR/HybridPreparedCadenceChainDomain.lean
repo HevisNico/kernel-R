@@ -81,6 +81,10 @@ theorem base_exists : Nonempty (ConstructedCadenceChainStage d K
     raw_none:=leaf.raw_none, pending:=leaf.pending, physical:=leaf.physical, raw_valid:=leaf.raw_valid
     cells:=fun _ => ⟨d.leafSource,leaf.finiteCell⟩
     contacts_transversal:=fun _ => leaf.contacts_transversal
+    section_runs:=by
+      intro kind i p first last count localRun
+      fin_cases i
+      exact localRun
     emission_times:=by
       intro i
       have hi : i=0 := by fin_cases i; rfl

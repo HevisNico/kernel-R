@@ -57,6 +57,8 @@ theorem slow_input_mark_final_charge {θ ε} (hb : @PhysicalBox 1 θ ε) (s : Sn
 structure SlowInputMark (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) (p : Port) where
   final : Snapshot 1
   execution : Execution θ route s final
+  slow_flows : execution.MainFlows 0 .slow
+  initial_aux : ∀ q, s.aux 0 q = .ready
   contacts_transversal : execution.ContactsTransversal
   early : s.time + 1 / 100 < final.time
   deadline : final.time < s.time + 1 / 20
@@ -182,6 +184,8 @@ theorem slow_input_mark_exists {θ ε route} (hb : @PhysicalBox 1 θ ε) (s : Sn
   refine ⟨{
     final := final
     execution := e
+    slow_flows := ⟨hm, hmarkmain, trivial⟩
+    initial_aux := fun q => (ha q).1
     contacts_transversal := contacts
     early := by change s.time + 1 / 100 < T; change s.time + 1 / 100 < s.time + latency + slowMarkDuration θ markStart 0 p; linarith [slowMarkDuration_positive hb markStart 0 p (by rw [hmarkm]; norm_num)]
     deadline := hTupper

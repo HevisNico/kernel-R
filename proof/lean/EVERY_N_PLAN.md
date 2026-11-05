@@ -188,6 +188,29 @@ from the new construction.
 
 ## Validation and checkpoint discipline
 
+### Constructive section covers: PR #29 milestone 2
+
+The **33 changed Lean modules** and their dependency closure build successfully
+in **3,749 jobs**. The unchanged audit scanner, importing those 33 modules,
+checks **6,488 project theorems**, permitting only `propext`, `Classical.choice`
+and `Quot.sound`, with no admitted proofs or added project axioms. This is a
+dependency-closure audit, not a new full-project declaration total; global
+validation of this checkpoint is left to its GitHub Actions run.
+
+Source hygiene for this checkpoint covers **555 Lean files**, including the
+15 new modules, with all five inherited upstream modules unchanged. All
+**11 new paired controls** in
+[`check_hybrid_section_runs_negative.py`](scripts/check_hybrid_section_runs_negative.py)
+pass: closed counts, open boundaries, composition, exposure, foreign events,
+router copies and port relabeling. The configured CI inventory becomes
+**1,373 pairs** (1,362 plus 11), separately from audit-corruption controls.
+
+This checkpoint supplies constructive local covers and preserves actual
+section runs through causal weaving, queue framing and router changes.
+The complete finite-chain cover-existence corollary is still in progress;
+the applied counts of four active-port ERROR sections and three MARK sections
+are not claimed by this checkpoint.
+
 ### Exact dose counting: checkpoint `62376ff`
 
 At `62376ff7dda182bd7e31463eede337fb3390828b`, the local
@@ -204,9 +227,11 @@ pass locally and in [GitHub Actions run 41994544240](https://github.com/HevisNic
 The configured CI inventory is **1,362 pairs** (the preceding **1,351** plus
 these **11**), separately from axiom-audit corruption checks. This inventory
 counts generated cases; it does not assert a fresh rerun of all historical
-suites. The global build and axiom-audit steps in that run pass; their exact
-job and declaration totals have not yet been recorded here. The remaining
-regression steps were still running when this checkpoint entry was prepared.
+suites. The completed global build in that run passes **9,593 jobs** and its
+axiom audit checks **29,018 project theorems**, permitting only `propext`,
+`Classical.choice` and `Quot.sound`, with no admitted proofs or added project
+axioms. All regression steps and all three workflows at this revision finish
+successfully. These totals describe `62376ff`, not subsequent revisions.
 
 ### Geometric crossing: checkpoint `ef5a510`
 

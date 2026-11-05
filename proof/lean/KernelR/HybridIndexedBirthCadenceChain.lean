@@ -25,6 +25,14 @@ private theorem indexed_birth_chain_cast_contacts {k θ θ' route s s' u}
   cases hs
   rfl
 
+private theorem indexed_birth_chain_cast_sections {k θ θ' route s s' u kind i p first last count}
+    (e : @Execution k θ route s u) (hp : θ=θ') (hs : s'=s)
+    (run : SectionRun kind i p e first last count) :
+    SectionRun kind i p (indexed_birth_chain_cast e hp hs) first last count := by
+  cases hp
+  cases hs
+  exact run
+
 private theorem indexed_birth_chain_append_ledger {k θ route s u v}
     (e : @Execution k θ route s u) (f : Execution θ route u v) :
     (e.append f).ledger=e.ledger.add f.ledger := by
@@ -81,8 +89,9 @@ theorem indexed_birth_cadence_chain_exists {n θ bornCells K ε}
     have ht := (preparation.execution.emission_time_bounds event he).2
     rw [preparation.date] at ht
     exact (finite_chain_route_before_open hclosed event.1 (by linarith)).symm
-  obtain ⟨preparedExecution,hPrepLedger,hPrepDelivered,hPrepContacts⟩ :=
-    preparation.execution.retarget_router_transversal (d.route n) hRouteMatches
+  obtain ⟨preparedExecution,hPrepCopy,hPrepLedger,hPrepDelivered⟩ :=
+    preparation.execution.retarget_router_copy (d.route n) hRouteMatches
+  have hPrepContacts := hPrepCopy.contactsTransversal
   let execution := preparedExecution.append fastExecution
   have hLedger : execution.ledger=preparation.execution.ledger.add fast.stage.execution.ledger := by
     change (preparedExecution.append fastExecution).ledger=_
@@ -128,7 +137,10 @@ theorem indexed_birth_cadence_chain_exists {n θ bornCells K ε}
     chain:={
       delay_positive:=hd,preparation:=preparation,fast:=fast,preparedExecution:=preparedExecution
       preparation_ledger:=hPrepLedger,preparation_deliveries:=hPrepDelivered
+      preparation_copy:=hPrepCopy
+      preparation_sections:=fun _ _ _ _ _ _ run => run.routerCopy hPrepCopy
       fastExecution:=fastExecution,fast_ledger:=hFastLedger,fast_deliveries:=hFastDelivered
+      fast_sections:=fun _ _ _ _ _ _ run => indexed_birth_chain_cast_sections _ hp hs run
       execution:=execution,reconstruct:=rfl,ledger:=hLedger,deliveries:=hDelivered,emission_times:=hTimes
       contacts_transversal:=by
         apply (Execution.contactsTransversal_append preparedExecution fastExecution).mpr

@@ -102,6 +102,7 @@ theorem Execution.silent_charge_return {n θ ε route s u} (e : @Execution n θ 
 
 structure SilentPulse {n θ route s u} (e : @Execution n θ route s u) (i : Fin n) (p : Port) where
   cycle : SensorCycle e i p
+  ready_states : e.AllStates (fun v => v.main i = .ready)
   coordinates : ReadyCoordinates u i
   emissions : e.emissionTimes i = []
   error_dose : e.ledger.error i p = 3 / 5
@@ -133,7 +134,7 @@ theorem Execution.silent_pulse_of_invariant {n θ ε route s u} (e : @Execution 
   have hother : ∀ q, q ≠ p →
       (u.aux i q = .ready ∧ RestBand (u.x i (.m q))) ∧ u.x i (.z q) = s.x i (.z q) :=
     fun q hq => e.aux_no_input_rest_band i q (hs.auxiliary q).1 (hs.auxiliary q).2 (ho q hq) (hno q)
-  refine ⟨⟨cycle,?_,hsilent.2,hd.1,?_,fun q => e.mark_zero_ready i q hflows,
+  refine ⟨⟨cycle,hsilent.1,?_,hsilent.2,hd.1,?_,fun q => e.mark_zero_ready i q hflows,
     hd.2,fun q hq => (hother q hq).2,e.recovery_constant_ready i hflows,hqreturn.2⟩⟩
   · refine ⟨e.allStates_final hsilent.1,⟨hqlower,hqreturn.1⟩,?_⟩
     intro q

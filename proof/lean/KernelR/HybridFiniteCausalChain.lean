@@ -13,6 +13,13 @@ local response constructor. It does not assert that arbitrary contacts admit
 such responses, nor introduce dimension-changing births. -/
 namespace KernelR.Hybrid
 
+theorem SectionRun.cast_source {n θ route s v u kind i p first last count}
+    {e : @Execution n θ route s u} (run : SectionRun kind i p e first last count)
+    (same : v = s) : SectionRun kind i p (e.cast_source same) first last count := by
+  cases same
+  exact run
+
+
 /-- Fixed physical coordinates, parameters, and strictly delayed contacts.
 The newly added cell is index zero; every previous index moves by `Fin.succ`. -/
 structure FiniteCausalChainData where
@@ -103,6 +110,9 @@ structure FiniteCausalChainStage (d : FiniteCausalChainData) (T : ℝ) (n : ℕ)
   cell_values : ∀ i, final.x i=(cells i).2.final.x 0
   contacts_transversal : (∀ i, (cells i).2.execution.ContactsTransversal) →
     execution.ContactsTransversal
+  section_runs : ∀ kind i p first last count,
+    SectionRun kind 0 p (cells i).2.execution first last count →
+      SectionRun kind i p execution first last count
 
 namespace FiniteCausalChainStage
 variable {d : FiniteCausalChainData} {T : ℝ} {n : ℕ}
@@ -146,6 +156,14 @@ theorem extend_exists (stage : FiniteCausalChainStage d T n)
     pending:=weave.pending_empty stage.pending head.pending
     physical:=execution.physical_invariant hb hf,raw_valid:=execution.raw_valid hv
     cells:=cells,emission_times:=?_,cell_values:=?_
+    section_runs:=by
+      intro kind i p first last count localRun
+      apply SectionRun.cast_source (same := hsource.symm)
+      cases i using Fin.cases with
+      | zero => exact weave.head_sections kind p first last count localRun
+      | succ i =>
+        exact weave.tail_sections kind i p first last count
+          (stage.section_runs kind i p first last count localRun)
     contacts_transversal:=by
       intro localContacts
       apply (weave.execution.contactsTransversal_cast_source hsource.symm).2
@@ -198,6 +216,10 @@ theorem finite_causal_chain_exists (d : FiniteCausalChainData) (T : ℝ) {ε}
       raw_valid:=leaf.execution.raw_valid (hv 0)
       cells:=fun _ => ⟨d.leafSource,leaf⟩,emission_times:=?_,cell_values:=?_
       contacts_transversal:=fun localContacts => localContacts 0
+      section_runs:=by
+        intro kind i p first last count localRun
+        fin_cases i
+        exact localRun
     }⟩
     · intro i; fin_cases i; exact leaf.ready
     · intro i; fin_cases i; exact leaf.charge

@@ -26,6 +26,7 @@ structure CadenceMixedFullPulse {n θ route s u} (e : @Execution n θ route s u)
     (i : Fin n) (p : Port) where
   mark_case : ShortMarkPulse e i p
   mixed_return : ShortMarkReturn mark_case
+  error_ready : mark_case.cycle.phases.errorPhase.span.AllStates (fun v => v.main i = .ready)
   emissions : e.emissionTimes i = []
   error_dose : e.ledger.error i p = 3 / 5
   error_other : ∀ q, q ≠ p → e.ledger.error i q = 0
@@ -138,7 +139,7 @@ theorem ShortMarkPulse.mixed_full_case_of_return {n θ ε route s u i p} {e : @E
       linarith [tail.charge_at_end.1])
     rw [tail.charge_decay]
     linarith [tail.charge_at_end.2]
-  refine ⟨⟨pulse,ret,hemissions,herrorDose.1,?_,herrorDose.2,
+  refine ⟨⟨pulse,ret,herror,hemissions,herrorDose.1,?_,herrorDose.2,
     fun q hq => (hother q hq).2,pulse.recovery_gain,
     r.rest.allStates_final tail.ready_states,⟨hqlow,hqupper⟩,hqc,?_,tail.raw_finished⟩⟩
   · intro q hq
