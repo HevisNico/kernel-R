@@ -218,6 +218,27 @@ that the suite or the complete CI has passed.
 
 ## Validation and checkpoint discipline
 
+### Parametric native family: local targeted checkpoint
+
+The code checkpoint is
+[`cc7ad73981f961963548005cb5a26fedabd9e8bb`](https://github.com/HevisNico/kernel-R/tree/cc7ad73981f961963548005cb5a26fedabd9e8bb).
+The following are **local targeted checks**, not a local full-project build or
+a report of complete CI. This ledger-only follow-up does not change that
+checkpoint's Lean, workflow or control-script sources.
+
+| Measurement | Result and exact scope |
+|---|---|
+| Family build | `lake build KernelR.Family` passed: 3,505 dependency/build jobs, including imported libraries. This is not a count of project modules or a full-project build. |
+| Family axiom audit | 342 theorem declarations under `KernelR.Family`, including private and generated declarations, passed the same axiom filter as `Audit.lean`; only `propext`, `Classical.choice`, `Quot.sound` were allowed. The standalone check imported `KernelR.Family` and restricted the audit's name prefix accordingly. |
+| Public source interface | 119 explicit public `theorem` declarations across the twelve family modules; the additional family aggregator contains imports. Together these are thirteen added Lean files relative to `b5435f3ca16908edb1f4aa9930a8d2f0a384342a`. This source inventory differs from the compiled audit count. |
+| Paired controls | 139 accepted-original/rejected-mutation pairs: base 27, dose/count 43, flow 20, confluence 43, quiet witnesses 6. These cover every public theorem plus three constructive nominal-bridge checks and seventeen concrete event fixtures. Each mutation requires its own semantic diagnostic; parser, missing-name and import failures cannot satisfy the shared checks. Rejection of a proof mutation alone is not a proof of the negated statement. |
+| Source hygiene | `check_sources.py` passed over 578 project Lean files and confirmed the five inherited upstream module identities. All pre-existing files under `KernelR/` were also byte-compared with the base commit and were unchanged; the root `KernelR.lean` only adds the family import. |
+| Layout and evidence | All twelve project-layout tests passed. The protocol catalogue freshness check and independent integer replay of all eight unchanged historical certificates passed; their counts and source snapshot are recorded in the conditions document. |
+
+The full CI result must be checked on the PR's latest commit. These local
+results do not replace the additional semantic review in `REVIEW.md`, and
+they do not extend the nominal cadence/crossing theorem to new constants.
+
 ### Exact counts on the constructed finite-chain witness
 
 `ConstructedBirthCadenceChain.sectionCovered` constructs actual complete
