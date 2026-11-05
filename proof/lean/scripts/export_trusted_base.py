@@ -17,6 +17,8 @@ def main():
     parser.add_argument('--output', type=Path, default=DEFAULT)
     parser.add_argument('--check', action='store_true')
     parser.add_argument('--print', action='store_true', dest='print_manifest')
+    parser.add_argument('--actual-output', type=Path,
+                        help='also preserve the fresh raw export, including in check mode')
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix='trusted-base-export-', dir=ROOT) as tmp:
         output = Path(tmp) / 'manifest.json'
@@ -43,6 +45,9 @@ run_cmd liftTermElabM do
     else:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(actual, indent=2, ensure_ascii=False) + '\n')
+    if args.actual_output:
+        args.actual_output.parent.mkdir(parents=True, exist_ok=True)
+        args.actual_output.write_text(json.dumps(actual, indent=2, ensure_ascii=False) + '\n')
     if args.print_manifest:
         print('TRUSTED_BASE_MANIFEST=' + json.dumps(actual, ensure_ascii=False))
     print(f'Trusted metadata {"checked" if args.check else "exported"}: '

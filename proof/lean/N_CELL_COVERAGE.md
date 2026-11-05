@@ -1,5 +1,9 @@
 # N-cell Lean coverage and remaining refinement obligations
 
+For the same fixed-delay headline with a closed-form router and an explicit
+machine-checked reading base, start at the [trusted-base guide](../../docs/TRUSTED_BASE.md).
+This entry point preserves the existing hypotheses and conclusions.
+
 The [written finite-chain argument](../reciprocal_composition/THEOREM.md) now
 has a constructed physical common-birth family for every positive finite N,
 as well as its earlier abstract induction. The new universal-complete layer now

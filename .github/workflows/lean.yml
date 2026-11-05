@@ -17,6 +17,8 @@ jobs:
       LEAN_NUM_THREADS: 2
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
@@ -24,6 +26,7 @@ jobs:
         working-directory: proof/lean
         run: |
           python scripts/check_sources.py
+          python scripts/check_trusted_source_boundary.py
           python scripts/generate_evidence.py --check
           python scripts/robust_evidence.py --check
       - uses: leanprover/lean-action@fe408643ea7367d8c0404a8be3975bb145f5fb64 # v1
@@ -36,20 +39,22 @@ jobs:
       - name: Audit every KernelR and A22 theorem
         working-directory: proof/lean
         run: lake build Audit
-      - name: Export checked trusted declaration metadata
+      - name: Check trusted declaration metadata and pinned reading list
         working-directory: proof/lean
-        run: python scripts/export_trusted_base.py --output /tmp/trusted-base.json --print
+        run: |
+          python scripts/export_trusted_base.py --check --actual-output /tmp/trusted-base.json
+          python ../../tools/generate_trusted_base.py --check
       - name: Preserve checked trusted declaration metadata
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: trusted-base-metadata-${{ github.sha }}
+          name: trusted-base-metadata-${{ github.event.pull_request.head.sha || github.sha }}
           path: /tmp/trusted-base.json
           if-no-files-found: error
       - name: Check explicit headline routing and trusted-closure checker contracts
         working-directory: proof/lean
         run: |
-          python scripts/check_trusted_headline_negative.py
-          python scripts/check_trusted_base_negative.py
+          python scripts/check_trusted_headline_negative.py --report /tmp/trusted-headline-controls.json
+          python scripts/check_trusted_base_negative.py --report /tmp/trusted-base-controls.json
       - name: Reject axioms in current and imported project declarations
         working-directory: proof/lean
         run: python scripts/check_audit_negative.py
@@ -278,3 +283,21 @@ jobs:
       - name: Reject altered universal complete-execution observations and indexed errors
         working-directory: proof/lean
         run: python scripts/check_hybrid_universal_execution_negative.py
+      - name: Record final-commit validation measurements
+        working-directory: proof/lean
+        env:
+          TRUSTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          TRUSTED_BUILD_SHA: ${{ github.sha }}
+        run: >-
+          python scripts/trusted_validation_report.py
+          --head-commit "$TRUSTED_HEAD_SHA"
+          --build-commit "$TRUSTED_BUILD_SHA"
+          --output-directory /tmp/trusted-validation
+          --headline-report /tmp/trusted-headline-controls.json
+          --base-report /tmp/trusted-base-controls.json
+      - name: Preserve final-commit validation measurements
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: trusted-base-validation-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/trusted-validation/
+          if-no-files-found: error

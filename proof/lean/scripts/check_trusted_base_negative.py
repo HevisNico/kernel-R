@@ -134,17 +134,22 @@ def check_batches(cases, module):
             if any(not any(start <= error.get('pos', {}).get('line', -1) <= end
                            for start, end, _, _ in blocks) for error in errors):
                 raise SystemExit('Diagnostic outside a control:\n' + result.stdout)
+    return [dict(case=label, positive='accepted', mutation='rejected')
+            for label, _, _, _ in cases]
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--checker-only', action='store_true')
+    parser.add_argument('--report', type=Path)
     args = parser.parse_args()
     module = 'KernelR.TrustedBaseChecker' if args.checker_only else 'KernelR.TrustedBase'
     cases = checker_cases()
     if not args.checker_only:
         cases += headline_cases()
-    check_batches(cases, module)
+    report = check_batches(cases, module)
+    if args.report:
+        args.report.write_text(json.dumps(report, indent=2) + '\n')
     print(f'All {len(cases)} paired checker controls passed.', flush=True)
 
 

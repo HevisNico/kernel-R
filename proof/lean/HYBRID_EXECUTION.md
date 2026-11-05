@@ -1,5 +1,9 @@
 # Physical execution semantics and analytic refinement
 
+The [trusted-base guide](../../docs/TRUSTED_BASE.md) identifies the definitions
+used by the fixed-delay headline's statement. Its explicit-router restatement
+preserves these execution semantics and their existing hypotheses.
+
 A physical common-birth construction now covers every positive finite N;
 every finite complete execution of its fixed program now has the same
 physical endpoint and exact per-cell FIRE dates. The

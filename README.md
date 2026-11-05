@@ -15,18 +15,23 @@ dynamics, then transmits a cadence through the chain.
 
 Three entry points:
 
-1. [Detailed result, hypotheses and verification](docs/UNIVERSAL_FINITE_CHAIN.md).
-2. [Fixed-delay headline in both semantics](proof/lean/KernelR/FixedDelayChainHeadline.lean),
-   `FixedDelayChainHeadline.every_finite_chain_fixed_delay`, with the delay
-   functions supplied before the witnesses and the
-   [canonical router](proof/lean/KernelR/HybridFiniteChainCanonicalRouter.lean)
-   written in its conclusion. The separate
-   [indexed-error crossing theorem](proof/lean/KernelR/CrossingChainHeadline.lean)
-   constructs delay functions realizing prescribed errors.
+1. [Trusted headline](proof/lean/KernelR/TrustedHeadline.lean),
+   `TrustedHeadline.every_finite_chain`, and its
+   [machine-checked trusted base](docs/TRUSTED_BASE.md). Start with this
+   statement and the fixed list of definitions that determines its meaning.
+2. [Detailed result, hypotheses and verification](docs/UNIVERSAL_FINITE_CHAIN.md).
 3. [Model ↔ Lean: equations and operational semantics](docs/MODEL_LEAN_CORRESPONDENCE.md).
 
-For review, start with the [semantic review guide](REVIEW.md): fidelity of
-`CrossingExecution` to the written model is the first human review obligation.
+The trusted headline uses the supplied delay family and a direct, closed-form
+[finite-chain router](proof/lean/KernelR/ExplicitFiniteChainRouter.lean).
+It is proved from the existing fixed-delay theorem. CI checks that its
+statement's project-definition closure is contained in the explicit trusted
+list; construction structures are not part of that public statement.
+
+For mathematical review, follow the [trusted-base reading path](REVIEW.md).
+Proofs are machine-checked; human review concerns the listed definitions and
+the headline statement, with the verification software and pinned libraries
+identified separately.
 
 ## Result: every finite chain, with explicit scope
 
