@@ -58,6 +58,11 @@ jobs:
       - name: Reject axioms in current and imported project declarations
         working-directory: proof/lean
         run: python scripts/check_audit_negative.py
+      - name: Check zero-recovery locks and reject altered native and crossing contracts
+        working-directory: proof/lean
+        run: |
+          lake env lean ZeroRecoveryAudit.lean
+          python scripts/check_zero_recovery_negative.py --report /tmp/zero-recovery-controls.json
       - name: Reject corrupted endpoints, cadence dose counters and adaptive scores
         working-directory: proof/lean
         run: python scripts/check_negative.py

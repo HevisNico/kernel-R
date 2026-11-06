@@ -148,6 +148,14 @@ parameter families and admissible inputs. It verifies the learning and cadence
 protocol in this setting; the paper's broader argument about saturation when
 recovery is insufficient remains separate from what is proved here.
 
+A separate [zero-recovery milestone](RESET_ZERO_RECOVERY.md) now proves one
+specific obstruction in R: a SLOW cell at q=1/4 and b=0 cannot reopen or fire
+while no sensor is in MARK on its actual positive-duration flow pieces. This is direct for
+arbitrary-network native and upward-crossing executions with that explicit
+premise; the quiet-sensor input-based corollary is native. Exposed MARK can
+repair recovery to 0.1. The result does not alter the finite-chain hypotheses
+or establish the paper's general saturation argument.
+
 ## Lean headline: signatures, axioms and reproduction
 
 ### Delay functions fixed in advance
