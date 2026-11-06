@@ -67,6 +67,9 @@ jobs:
       - name: Check whole-execution dose counts and reject weakened counting contracts
         working-directory: proof/lean
         run: python scripts/check_hybrid_dose_counting_negative.py
+      - name: Check clipped memory saturation in native and crossing executions
+        working-directory: proof/lean
+        run: python scripts/check_memory_saturation_negative.py
       - name: Check structural section runs and reject omitted phase boundaries
         working-directory: proof/lean
         run: python scripts/check_hybrid_section_runs_negative.py

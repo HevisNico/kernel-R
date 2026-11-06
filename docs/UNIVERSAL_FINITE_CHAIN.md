@@ -2,6 +2,12 @@
 
 [Repository overview](../README.md) · [Experiments and reproduction](EXPERIMENTS_AND_REPRODUCTION.md)
 
+The separate [port-memory saturation result](GAIN_MEMORY_SATURATION.md)
+allows the gain cap to close during the last ERROR phase and gives an exact
+conditional count threshold in native and crossing semantics. It does not
+replace this protocol theorem or assert that its four active-port ERROR
+sections reach cap. The protocol's existing open-cap identities are unchanged.
+
 ## Result: every finite chain, with explicit scope
 
 All N cells are born at time 0 in independently chosen READY states. Routes

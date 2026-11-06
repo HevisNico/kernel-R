@@ -134,6 +134,22 @@ See also the [threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#thresh
   saturation when recovery cannot keep pace with forcing is not part of this
   theorem.
 
+## A finite learning capacity
+
+A port's gain never decreases. During a complete ERROR phase, its sensor
+charge falls from 0.1 to 0.025. If the cell stays READY and energy remains
+positive, the phase increases the port's log-gain by 0.6, with the last
+increase clipped exactly at its cap. After enough such phases, that port's
+memory reaches its cap and stays there under every later legal execution.
+
+The [memory saturation theorem](docs/GAIN_MEMORY_SATURATION.md) proves the
+exact number of required phases, including the clipped last one, directly
+for upward-crossing executions and also for native executions. It requires
+actual complete-section coverage; arbitrary arriving pulses need not produce
+those phases. Recovery and other ports' memories may still change. This is
+separate from the finite-chain protocol theorem and from the broader Reset
+Operator argument.
+
 ## How to check it
 
 The project pins **Lean 4.35.0** and **Mathlib v4.35.0**; dependency commits

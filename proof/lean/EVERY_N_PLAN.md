@@ -188,6 +188,32 @@ from the new construction.
 
 ## Validation and checkpoint discipline
 
+### Memory saturation local validation
+
+The separate [port-memory saturation result](../../docs/GAIN_MEMORY_SATURATION.md)
+adds native, weak and direct upward-crossing theorems without changing the
+existing dynamics, guards, physical box, chain protocol or trusted headline.
+The actual section cover permits cap closure and retains complete ERROR
+entry/exit boundaries, READY exposure and positive energy.
+
+Local checks on this change, before publication:
+
+- `lake build KernelR.HybridMemorySaturation KernelR.HybridCrossingMemorySaturation`
+  passed; the crossing target used 3,550 dependency/build jobs. This is a
+  targeted cached-dependency build, not the project-wide validation total.
+- `lake env lean MemorySaturationAudit.lean` passed for 1,966 imported project
+  theorem declarations, allowing only `propext`, `Classical.choice` and
+  `Quot.sound`. The scoped count is not the global audit total.
+- Source checks passed for 574 Lean files and the five inherited module
+  identities. The frozen source-boundary check passed with only the exact
+  new modules and root import added to its allowlist; its old base remains
+  unchanged.
+
+Full-project build/audit and the expanded 12 paired controls are recorded
+separately when they finish. These local observations do not assert a complete
+green CI run. The stationary positive-duration witness begins at cap; no
+cap-reaching section from a subcap protocol birth is claimed.
+
 ### Trusted headline: fixed code checkpoint and final-head CI record
 
 The initial mathematical and verification source checkpoint is
