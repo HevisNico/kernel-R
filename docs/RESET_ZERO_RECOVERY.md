@@ -128,6 +128,7 @@ hypothesis. A rejected altered proof is a regression check, not a proof of
 the negated statement. The explicit complete physical witnesses provide a
 separate constructive non-vacuity check.
 
-These are targeted local checks. They do not by themselves claim a fresh
-full-project build or completed remote CI. No equation, guard, parameter box,
+These targeted figures are separate from the successful full integration
+build and global audit recorded in the [validation ledger](../proof/lean/EVERY_N_PLAN.md#zero-recovery-milestone-local-validation).
+They do not claim completed remote CI. No equation, guard, parameter box,
 birth definition or existing theorem statement is weakened by this milestone.

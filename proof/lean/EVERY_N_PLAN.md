@@ -200,7 +200,8 @@ input-based corollary is native. A fully exposed isolated MARK repairs b=0 to
 0.1; actual complete locked native and crossing witnesses of arbitrary
 positive duration are constructed within the current physical bounds.
 
-Observed targeted local checks, before the integration build:
+Code checkpoint: `d8f55708230082d3499ad0d06b62ee90f608f265`, based on main
+`0f39642`. Observed local checks on 6 November 2026:
 
 | Measurement | Recorded result and scope |
 |---|---|
@@ -210,12 +211,17 @@ Observed targeted local checks, before the integration build:
 | Paired controls | All 20 pairs passed: one for each new public theorem plus retention of the no-MARK hypothesis. Every original compiled before its altered version was individually rejected; parser and import failures are not accepted substitutes. |
 | Non-vacuity | Actual complete locked native and crossing executions are constructed through every later finite horizon; the state is physically admissible for either fabrication box, but is not a nominal birth state. |
 
-These figures describe the targeted local checks. They do not assert a full
-local build, a rerun of every historical control, or a completed remote CI.
+The full default local `lake build` subsequently passed with 9,626 jobs,
+including the unchanged global `Audit` target: 29,377 project theorem declarations
+with only the same three permitted axioms. Dependency caches were reused;
+this is not a fresh external-dependency rebuild or a rerun of every historical
+control. Completed remote CI is not claimed.
+
 The original source-boundary base and byte-identity checks remain unchanged;
 only the two exact new modules, dedicated audit file and added root import
-are whitelisted. Changes to authenticated verification scripts and workflow
-require a fresh checkpoint export and generated metadata before publication.
+are whitelisted. A fresh checked Lean export retained the same 84 trusted
+semantic declarations. The source-hash record and reading list were
+regenerated for the code checkpoint and their authenticated check passed.
 
 ### Trusted headline: fixed code checkpoint and final-head CI record
 
