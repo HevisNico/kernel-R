@@ -9,19 +9,21 @@ directed chain, under the declared protocol. Lean verifies the physical
 construction and complete-execution guarantees, with a proved geometric
 upward-crossing correspondence for the finite-chain protocol.**
 
-R learns by changing two kinds of memory: each input port’s log-gain z, which controls its sensitivity to incoming pulses, and the cell’s recovery rate b. Starting from specified initial values, these memories change only through local cell dynamics during the protocol.
+An R cell learns by changing two kinds of memory: each input port’s log-gain z, which controls its sensitivity to incoming pulses, and the cell’s recovery rate b. Starting from specified initial values, these memories change only through local cell dynamics during the protocol.
 
 Each input port has a sensor. When a sensor is READY, its first upward crossing of charge 1 starts three phases: MARK, SILENT and ERROR. Two can update memory:
 
-ERROR, charge 0.1 → 0.025: if the cell stays READY throughout the phase, that port’s z increases by exactly 0.6.
+- ERROR, charge 0.1 → 0.025: if the cell stays READY (able to fire) throughout the phase, that port’s z increases by exactly 0.6.
 
-MARK, charge 1 → 0.8: if the cell stays protected after a firing (FAST or SLOW) throughout the phase, that phase contributes exactly 0.1 to b.
+- MARK, charge 1 → 0.8: if the cell stays protected after a firing (FAST or SLOW) throughout the phase, that phase contributes exactly 0.1 to b.
 
 These amounts come from the fixed charge drops. Fabrication rates change the durations, but not these increments, provided energy stays positive and the relevant memories remain strictly below their caps throughout.
 
 Under the finite-chain theorem’s assumptions, every execution complete through the protocol horizon leaves each cell with exactly +2.4 on its cadence input’s log-gain and +0.3 on recovery, relative to its initial memories.
 
 In the execution constructed by the proof, four such ERROR phases on that port give 4 × 0.6 = 2.4; three such MARK phases across the cell’s ports give 3 × 0.1 = 0.3. These phase counts are proved for the constructed execution; the memory increments are guaranteed for every complete execution under the theorem’s assumptions.
+
+Three entry points:
 
 1. [Trusted headline](proof/lean/KernelR/TrustedHeadline.lean),
    `TrustedHeadline.every_finite_chain`, and its
