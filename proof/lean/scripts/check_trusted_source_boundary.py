@@ -11,9 +11,12 @@ IMPORTS = {
     'import KernelR.TrustedHeadline',
     'import KernelR.TrustedBaseChecker',
     'import KernelR.TrustedBase',
+    'import KernelR.HybridZeroRecoveryCrossing',
 }
 NEW_MODULES = {f'proof/lean/KernelR/{name}.lean' for name in
-               ['ExplicitFiniteChainRouter', 'TrustedHeadline', 'TrustedBaseChecker', 'TrustedBase']}
+               ['ExplicitFiniteChainRouter', 'TrustedHeadline', 'TrustedBaseChecker', 'TrustedBase',
+                'HybridZeroRecovery', 'HybridZeroRecoveryCrossing']}
+NEW_MODULES.add('proof/lean/ZeroRecoveryAudit.lean')
 ENTRY = 'proof/lean/KernelR.lean'
 
 

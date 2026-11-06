@@ -188,6 +188,35 @@ from the new construction.
 
 ## Validation and checkpoint discipline
 
+### Zero-recovery milestone local validation
+
+The [zero-recovery result](../../docs/RESET_ZERO_RECOVERY.md) is a separate
+arbitrary-network obstruction, not a new finite-chain hypothesis or a general
+Reset Operator theorem. `HybridZeroRecovery` proves native locked snapshots,
+paths and no firing from SLOW/q=1/4/b=0 with no MARK flow on the selected cell.
+`HybridZeroRecoveryCrossing` proves the corresponding weak and model crossing
+statements directly, retaining that explicit no-MARK premise. The quiet-sensor
+input-based corollary is native. A fully exposed isolated MARK repairs b=0 to
+0.1; actual complete locked native and crossing witnesses of arbitrary
+positive duration are constructed within the current physical bounds.
+
+Observed targeted local checks, before the integration build:
+
+| Measurement | Recorded result and scope |
+|---|---|
+| Targeted build | The two new modules passed with 3,560 dependency/build jobs under Lean 4.35.0 and the pinned dependencies. This is not a fresh full-project rebuild. |
+| Scoped axiom audit | `ZeroRecoveryAudit.lean` passed for 1,996 project theorem declarations in the imported closure, allowing only `propext`, `Classical.choice`, `Quot.sound`. This is not the count of new theorems or a global audit total. |
+| New contracts | The modules declare 19 explicit public theorems. Their printed headline axiom profiles use only the three allowed axioms. |
+| Paired controls | All 20 pairs passed: one for each new public theorem plus retention of the no-MARK hypothesis. Every original compiled before its altered version was individually rejected; parser and import failures are not accepted substitutes. |
+| Non-vacuity | Actual complete locked native and crossing executions are constructed through every later finite horizon; the state is physically admissible for either fabrication box, but is not a nominal birth state. |
+
+These figures describe the targeted local checks. They do not assert a full
+local build, a rerun of every historical control, or a completed remote CI.
+The original source-boundary base and byte-identity checks remain unchanged;
+only the two exact new modules, dedicated audit file and added root import
+are whitelisted. Changes to authenticated verification scripts and workflow
+require a fresh checkpoint export and generated metadata before publication.
+
 ### Trusted headline: fixed code checkpoint and final-head CI record
 
 The initial mathematical and verification source checkpoint is
