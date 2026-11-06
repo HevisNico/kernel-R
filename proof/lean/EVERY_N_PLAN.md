@@ -188,6 +188,42 @@ from the new construction.
 
 ## Validation and checkpoint discipline
 
+### Memory saturation local validation
+
+The separate [port-memory saturation result](../../docs/GAIN_MEMORY_SATURATION.md)
+adds native, weak and direct upward-crossing theorems without changing the
+existing dynamics, guards, physical box, chain protocol or trusted headline.
+The actual section cover permits cap closure and retains complete ERROR
+entry/exit boundaries, READY exposure and positive energy.
+
+Code checkpoint: `2f4d268d7842d53ce8da87af73c7491c02340ca2`, based on main
+`0f39642`. Observed local checks on 6 November 2026:
+
+- `lake build KernelR.HybridMemorySaturation KernelR.HybridCrossingMemorySaturation`
+  passed; the crossing target used 3,550 dependency/build jobs. This is a
+  targeted cached-dependency build, not the project-wide validation total.
+- An earlier scoped `MemorySaturationAudit.lean` checkpoint passed for 1,966
+  imported project theorem declarations. The final global measurement below
+  includes the later stationary witness and is the current integration total.
+- Source checks passed for 574 Lean files and the five inherited module
+  identities. The frozen source-boundary check passed with only the exact
+  new modules and root import added to its allowlist; its old base remains
+  unchanged.
+
+The full default local `lake build` passed with 9,626 jobs, including the
+unchanged global `Audit` target: 29,425 project theorem declarations, using
+only `propext`, `Classical.choice` and `Quot.sound`. All twelve paired
+controls passed on the final code, including weak/crossing transfer and the
+positive-duration at-cap witness; infrastructure timeouts are not accepted
+as semantic rejections. Dependency caches were reused.
+
+A fresh checked Lean export retained the same 84 trusted semantic declarations.
+The source-hash record and reading list were regenerated for this checkpoint,
+and the authenticated document check passed. These observations do not assert
+a fresh external-dependency rebuild, rerun of every historical control, or a
+complete green CI run. The stationary positive-duration witness begins at cap; no
+cap-reaching section from a subcap protocol birth is claimed.
+
 ### Trusted headline: fixed code checkpoint and final-head CI record
 
 The initial mathematical and verification source checkpoint is

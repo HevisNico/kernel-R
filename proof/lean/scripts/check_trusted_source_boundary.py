@@ -11,9 +11,15 @@ IMPORTS = {
     'import KernelR.TrustedHeadline',
     'import KernelR.TrustedBaseChecker',
     'import KernelR.TrustedBase',
+    'import KernelR.HybridCrossingMemorySaturation',
 }
 NEW_MODULES = {f'proof/lean/KernelR/{name}.lean' for name in
                ['ExplicitFiniteChainRouter', 'TrustedHeadline', 'TrustedBaseChecker', 'TrustedBase']}
+NEW_MODULES.update({
+    'proof/lean/KernelR/HybridMemorySaturation.lean',
+    'proof/lean/KernelR/HybridCrossingMemorySaturation.lean',
+    'proof/lean/MemorySaturationAudit.lean',
+})
 ENTRY = 'proof/lean/KernelR.lean'
 
 

@@ -1,5 +1,13 @@
 # Exact dose counts over a whole execution
 
+The separate [memory-saturation extension](GAIN_MEMORY_SATURATION.md) handles
+cap-clipped ERROR sections through `ErrorAvailable` and new actual-trace
+covers. Its result is `min(log C,z_initial+0.6*k)`, rather than an unrestricted
+increment of `0.6*k`. The old strictly exposed cover embeds into the native
+new cover with its count preserved. Existing exact open-cap counts and the
+finite-chain construction below are unchanged; the new count theorem does
+not construct a cap-reaching execution from the declared birth family.
+
 The new result in
 [`HybridDoseCounting.lean`](../proof/lean/KernelR/HybridDoseCounting.lean)
 expresses learned memory in terms of counts of complete, exposed sections of

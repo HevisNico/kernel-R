@@ -2,6 +2,13 @@
 
 ## Statement and scope
 
+Here terminal saturation means no remaining enabled jump at the horizon.
+The separate [port-memory saturation theorem](../../docs/GAIN_MEMORY_SATURATION.md)
+concerns a log-gain reaching its cap after enough actual exposed ERROR
+sections. It applies to finite native and upward-crossing histories admitting
+the respective section covers. It supplies neither the existence of those
+sections nor an infinite-progress or wall-clock deadline theorem.
+
 These results use the first-contact operational definitions in `Hybrid.lean`.
 The [threshold correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
 records the proved correspondence with geometric upward crossings for the
