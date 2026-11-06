@@ -22,6 +22,10 @@ checked by the Lean proof assistant. Different parameter and delay choices can
 produce different firing dates; the exact equality of dates compares runs with
 the same parameters, birth data and router.
 
+A [separate general result](#beyond-chains-event-order-does-not-change-the-result)
+also shows that simultaneous-event order cannot change complete runs' physical
+endpoints or firing dates, beyond chain networks.
+
 ## The theorem
 
 Lean statement: [`TrustedHeadline.every_finite_chain`](proof/lean/KernelR/TrustedHeadline.lean).
@@ -79,6 +83,34 @@ errors are given.
 
 Exact statements: [birth, parameter, delay and source hypotheses](docs/UNIVERSAL_FINITE_CHAIN.md#result-every-finite-chain-with-explicit-scope).
 
+## Beyond chains: event order does not change the result
+
+Lean also proves a general result for R's first-contact operational rules.
+For any finite number of cells, any fixed routing rule (including cycles),
+any finite input queue and any initial state within the
+[declared physical bounds](proof/lean/KernelR/HybridPhysicalInvariant.lean#L7-L11),
+two finite executions complete through the same time have the same physical
+state and exactly the same ordered firing dates in each cell. The compared
+runs share the same fixed parameters, initial state and routing rule.
+Parameters must satisfy the [declared fabrication bounds](proof/lean/KernelR/Hybrid.lean#L96-L103).
+
+Simultaneous events can be processed in different legal orders, and continuous
+motion can be divided into different steps. Neither changes these results.
+Only the list order of pending deliveries may differ.
+
+Here, [complete](proof/lean/KernelR/Hybrid.lean#L192-L193) means that the common
+final time has been reached, no event remains enabled and no delivery due by
+that time remains pending.
+
+This proves uniqueness when complete executions exist; it does not establish
+existence or indefinite progress for every network. The correspondence with
+the written model's upward-crossing rule is proved for the finite-chain
+protocol, not for arbitrary cyclic networks.
+
+Lean proofs: [same physical endpoint](proof/lean/KernelR/HybridUniversalExecution.lean#L21-L29)
+and [same firing dates](proof/lean/KernelR/HybridUniversalExecution.lean#L31-L43).
+See also the [threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings).
+
 ## What is not claimed
 
 - **Only complete executions.** The theorem compares executions complete
@@ -87,9 +119,10 @@ Exact statements: [birth, parameter, delay and source hypotheses](docs/UNIVERSAL
   to later horizons. They also prove time divergence for infinite native runs
   maximal under extension through a finite flow limit. An infinite list of
   flow subdivisions alone need not have divergent time.
-- **Only this protocol.** Finite directed chains with the declared inputs.
-  Cyclic networks, noise or drift during operation, and other protocol
-  variants have their own [coverage boundaries](proof/lean/N_CELL_COVERAGE.md).
+- **Learning and cadence only for this protocol.** Those guarantees cover
+  finite directed chains with the declared inputs. Cyclic networks, noise or
+  drift during operation, and other protocol variants have their own
+  [coverage boundaries](proof/lean/N_CELL_COVERAGE.md).
 - **Learning-phase counts on the constructed run only.** On the constructed
   execution, the memory changes come from exactly four complete ERROR phases
   on the active port and three protected MARK phases summed over each cell's ports
