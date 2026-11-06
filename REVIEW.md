@@ -87,3 +87,14 @@ states or inputs. Infinite/maximal-run theorems retain their native interface.
 The [validation ledger](proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
 records the build, axiom audit and paired controls separately from this human
 review obligation.
+
+## Recovery-limited firing rate
+
+Review the [separate rate statement](docs/RESET_RATE_SATURATION.md) and its
+actual-path `RecoveryBound` premise. Initial recovery alone is insufficient for
+a custom envelope because protected MARK phases can increase it. Review the
+FAST/SLOW decomposition, actual firing labels and the one-firing finite-window
+allowance. The arbitrary-network crossing result follows directly from weak
+paths, not from a protocol-scoped correspondence. No arbitrary-queue progress
+or loss of all excess inputs is inferred. The broader Reset Operator thesis
+remains separate.

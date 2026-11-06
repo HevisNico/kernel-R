@@ -513,3 +513,4 @@ import KernelR.ExplicitFiniteChainRouter
 import KernelR.TrustedHeadline
 import KernelR.TrustedBaseChecker
 import KernelR.TrustedBase
+import KernelR.HybridResetRateCrossing

@@ -184,3 +184,14 @@ The earlier [three-cell headline](../proof/lean/KernelR/Headline.lean) retains
 its distinct staged 0/160/480 births, horizon 789.9 and A54/B61/C34. Operational
 drift/noise, frozen probes/settings copies, numerical observations and A22
 retain their separate [coverage boundaries](../proof/lean/N_CELL_COVERAGE.md).
+
+## Recovery-limited firing rates
+
+[RESET_RATE_SATURATION.md](RESET_RATE_SATURATION.md) derives a protocol-independent
+FIRE gap from the actual FAST/SLOW equations and a pathwise recovery bound.
+[HybridResetRate](../proof/lean/KernelR/HybridResetRate.lean) treats native
+executions; [HybridResetRateCrossing](../proof/lean/KernelR/HybridResetRateCrossing.lean)
+proves the same bounds directly for weak and geometric crossing histories.
+This uses protected-coordinate preservation under individual-flow strictification,
+not a general identification of the two execution semantics. It adds no
+input protocol, reserve assumption or global-existence claim to the rate theorem.

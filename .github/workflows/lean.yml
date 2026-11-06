@@ -94,6 +94,9 @@ jobs:
       - name: Check fixed supplied delays and canonical finite-chain routing
         working-directory: proof/lean
         run: python scripts/check_fixed_delay_headline_negative.py
+      - name: Check recovery-limited firing gaps and reject altered rate contracts
+        working-directory: proof/lean
+        run: python scripts/check_hybrid_reset_rate_negative.py
       - name: Reject altered sensor phases, clipped doses and input provenance
         working-directory: proof/lean
         run: python scripts/check_hybrid_phase_negative.py
