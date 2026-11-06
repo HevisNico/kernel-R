@@ -146,7 +146,10 @@ can no longer keep pace with forcing.
 The Lean theorem establishes the behavior of **the R model** for its declared
 parameter families and admissible inputs. It verifies the learning and cadence
 protocol in this setting; the paper's broader argument about saturation when
-recovery is insufficient remains separate from what is proved here.
+recovery is insufficient remains separate from the chain theorem. A
+[separate analytic result](RESET_RATE_SATURATION.md) now proves a recovery-limited
+firing-rate ceiling in R for arbitrary-network native and crossing executions;
+it does not establish the paper's thesis for arbitrary systems.
 
 ## Lean headline: signatures, axioms and reproduction
 
