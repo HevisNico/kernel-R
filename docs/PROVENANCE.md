@@ -18,10 +18,10 @@ blob identities are recorded in `proof/lean/evidence/UPSTREAM.json` and checked
 by `proof/lean/scripts/check_sources.py`. The complete A22 engines, inherited network
 proof archive and old global campaign records remain upstream. In particular,
 historical executable locations in the byte-identical
-[kernel guide snapshot](../kernel/reference/A22_KERNEL_README.txt) and the entries
-of `kernel/KERNEL_SHA256SUMS` identify that upstream reference; they do not imply
-those engines are present here. The current `kernel/README.md` describes the cell
-and the topologies studied in kernel-R. The local-learning source manifest
+[kernel guide snapshot](../archive/spec-216-cells/kernel/reference/A22_KERNEL_README.txt) and the entries
+of the [archived checksum list](../archive/spec-216-cells/kernel/KERNEL_SHA256SUMS) identify that upstream reference. The
+[cell laws](../model/CELL.md) and [chain protocol](../model/CHAIN_PROTOCOL.md) describe
+the current model and main theorem inputs. The local-learning source manifest
 references the archived guide so its original document hash remains checkable.
 
 ## Historical certificates and experiments — 30–31 October 2026
@@ -87,7 +87,7 @@ Neither exact endpoint checks nor replay of recorded Boolean outcomes by
 itself proves a correspondence with complete hybrid trajectories. This is a
 limitation of that evidence layer, not a description of all current Lean proofs.
 
-The Lean cadence extension consumes both `results/reciprocal_cadence/`
+The Lean cadence extension consumes both `archive/reciprocal/results/reciprocal_cadence/`
 certificates directly, including their 95-case pulse traces. The new combined
 MARK/ERROR case is modeled separately from the earlier three-case abstraction.
 The updated bundled archive remains checked by `tools/prepare_recordings.py`;
@@ -139,6 +139,6 @@ representative. Every finite weak prefix refines exactly, and every finite model
 history extends to any later finite horizon while retaining its history.
 Infinite/maximal-run results retain their native `InfiniteExecution` interface.
 
-The [validation ledger](../proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
+The [validation ledger](VALIDATION_LEDGER.md#validation-and-checkpoint-discipline)
 records the fresh local build and audit. This later source development does not
 change the v0.2.0 archive, DOI, published PDF or historical checkpoint counts.

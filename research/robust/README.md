@@ -11,6 +11,11 @@ wording. The sections below describe this module as it is used in the repository
 
 ## Result and scope
 
+The [robust local theorem](THEOREM_ROBUST.md) extends the
+[prepared-section theorem](../../archive/reciprocal/proof/reciprocal_learning/THEOREM.md).
+The certificates authenticate the robust theorem's original bytes, including
+the historical repository path used in its introduction.
+
 The local prepared B→A theorem covers the eight combinations of epsilon in
 {0.003,0.1} with (nu,alpha) in {(0,0),(.002,0),(0,.09),(.0015,.05)}.
 The independent integer replay checks 36 sufficient strict inequalities per

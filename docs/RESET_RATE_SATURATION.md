@@ -105,7 +105,7 @@ From `proof/lean` with the pinned Lean/Mathlib environment:
 
 ```sh
 lake build KernelR.HybridResetRateCrossing
-python scripts/check_hybrid_reset_rate_negative.py
+python -m scripts.negative.check_hybrid_reset_rate_negative
 lake build
 lake build Audit
 ```
@@ -113,5 +113,5 @@ lake build Audit
 The paired controls check valid uses first and require genuine type errors for
 altered contracts. They test interface rejection, not mathematical counterexample
 existence. The unchanged project axiom audit checks the new modules through the
-umbrella import. See the [validation ledger](../proof/lean/EVERY_N_PLAN.md)
+umbrella import. See the [validation ledger](VALIDATION_LEDGER.md#recovery-limited-firing-rate-local-validation)
 for the exact local checkpoint and distinction from CI results.

@@ -178,8 +178,8 @@ lake exe cache get
 python -B scripts/check_sources.py
 lake build
 lake build Audit
-python -B scripts/check_audit_negative.py
-python -B scripts/check_progress_negative.py
+python -B -m scripts.negative.check_audit_negative
+python -B -m scripts.negative.check_progress_negative
 ```
 
 Check the printed assumptions for the new entry points. The finite-continuation

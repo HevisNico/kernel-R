@@ -194,9 +194,10 @@ The active ports are A2/B2/C0, each gaining2.4 from its own birth, with recovery
 +0.3 in each cell. Other gains remain at their639.9 values, including A0+1.8,
 B1+0.6 and C1+0.6. Earlier residual charges, raw tails and energy paths are
 carried through actual executions rather than reset. Fine enclosure soundness,
-retained probes/settings copies, operational
-perturbations and staged-birth universal guarantees remain separate obligations. The separate common-birth
-finite-chain construction and its validation are tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
+retained probes/settings copies, operational perturbations and staged-birth
+universal guarantees remain separate obligations. The
+[construction guide](../../docs/FINITE_CHAIN_CONSTRUCTION.md) and
+[validation ledger](../../docs/VALIDATION_LEDGER.md) track the common-birth result.
 
 ## Constructed common-birth chain for every finite N
 
@@ -249,7 +250,8 @@ birth-to-terminal execution; its generated delay functions and retained actual
 stage satisfy both global native bounds and the requested per-emission values.
 
 See the [finite-chain coverage guide](N_CELL_COVERAGE.md) and
-[construction/validation ledger](EVERY_N_PLAN.md). Retained probes,
+[construction guide](../../docs/FINITE_CHAIN_CONSTRUCTION.md) and
+[validation ledger](../../docs/VALIDATION_LEDGER.md). Retained probes,
 cuts/settings copies and operational drift/noise/amplitude histories remain
 open. The new universal-complete layer below closes comparison of every
 complete finite execution of the fixed program; it does not establish all six
@@ -314,12 +316,12 @@ Infinite maximal-run and non-Zeno results keep their native `InfiniteExecution`
 interface; no crossing-infinite theorem is asserted.
 
 The three public headline axiom profiles contain only `propext`,
-`Classical.choice` and `Quot.sound`. The [validation ledger](EVERY_N_PLAN.md)
+`Classical.choice` and `Quot.sound`. The [validation ledger](../../docs/VALIDATION_LEDGER.md)
 records the successful complete frozen-source build and global audit.
 The reviewed universal proof modules are included in this checkout. The
 [historical release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md)
 records the v0.2.0 integration and publication scope; later local validation is
-recorded in the [current ledger](EVERY_N_PLAN.md#validation-and-checkpoint-discipline).
+recorded in the [current ledger](../../docs/VALIDATION_LEDGER.md#validation-and-checkpoint-discipline).
 
 ## Zero recovery outside the chain protocol
 
@@ -345,7 +347,7 @@ build and global audit include them. The targeted commands are:
 ```sh
 lake build KernelR.HybridZeroRecovery KernelR.HybridZeroRecoveryCrossing
 lake env lean ZeroRecoveryAudit.lean
-python3 scripts/check_zero_recovery_negative.py
+python3 -m scripts.negative.check_zero_recovery_negative
 ```
 
 There are 20 paired controls for the 19 new public theorem contracts and the
@@ -353,6 +355,8 @@ no-MARK premise. This restricted R result is separate from the chain theorem
 and from any general Reset Operator claim.
 
 ## Reproduce
+
+See the [verification script index](scripts/README.md) for the check groups.
 
 Install [elan](https://github.com/leanprover/elan), then from this directory:
 
@@ -362,79 +366,79 @@ lake build
 lake build Audit
 lake build KernelR.IndexedChainHeadline
 lake build KernelR.UniversalChainHeadline
-python3 scripts/check_audit_negative.py
-python3 scripts/generate_evidence.py --check
-python3 scripts/robust_evidence.py --check
+python3 -m scripts.negative.check_audit_negative
+python3 -m scripts.evidence.generate_evidence --check
+python3 -m scripts.evidence.robust_evidence --check
 python3 scripts/check_sources.py
-python3 scripts/check_negative.py
-python3 scripts/check_hybrid_negative.py
-python3 scripts/check_hybrid_analytic_negative.py
-python3 scripts/check_hybrid_event_negative.py
-python3 scripts/check_hybrid_phase_negative.py
-python3 scripts/check_hybrid_pulse_negative.py
-python3 scripts/check_hybrid_return_negative.py
-python3 scripts/check_hybrid_training_negative.py
-python3 scripts/check_hybrid_bootstrap_negative.py
-python3 scripts/check_hybrid_protected_negative.py
-python3 scripts/check_hybrid_source_negative.py
-python3 scripts/check_hybrid_cell_negative.py
-python3 scripts/check_hybrid_local_negative.py
-python3 scripts/check_hybrid_invariant_negative.py
-python3 scripts/check_hybrid_staged_negative.py
-python3 scripts/check_hybrid_boundary_negative.py
-python3 scripts/check_hybrid_calendar_negative.py
-python3 scripts/check_hybrid_routed_negative.py
-python3 scripts/check_hybrid_teaching_negative.py
-python3 scripts/check_hybrid_reciprocal_negative.py
-python3 scripts/check_hybrid_c_introduction_negative.py
-python3 scripts/check_hybrid_cadence_negative.py
-python3 scripts/check_hybrid_cascade_negative.py
-python3 scripts/check_hybrid_existence_negative.py
-python3 scripts/check_hybrid_weak_existence_negative.py
-python3 scripts/check_hybrid_first_fire_negative.py
-python3 scripts/check_hybrid_protected_mark_negative.py
-python3 scripts/check_hybrid_prepared40_negative.py
-python3 scripts/check_hybrid_preparation_existence_negative.py
-python3 scripts/check_hybrid_b_birth_product_negative.py
-python3 scripts/check_hybrid_first_wire_negative.py
-python3 scripts/check_hybrid_first_interleaved_negative.py
-python3 scripts/check_hybrid_second_wire_negative.py
-python3 scripts/check_hybrid_receiver_fire_negative.py
-python3 scripts/check_hybrid_coupled_preparation_negative.py
-python3 scripts/check_hybrid_coupled_teaching_negative.py
-python3 scripts/check_hybrid_feedback_entry_negative.py
-python3 scripts/check_hybrid_reverse_receipt_negative.py
-python3 scripts/check_hybrid_reverse_epoch_negative.py
-python3 scripts/check_hybrid_c_teaching_existence_negative.py
-python3 scripts/check_hybrid_cadence_first_strong_negative.py
-python3 scripts/check_hybrid_cadence_first_wire_negative.py
-python3 scripts/check_hybrid_cadence_first_wave_negative.py
-python3 scripts/check_hybrid_cadence_first_mark_return_negative.py
-python3 scripts/check_hybrid_cadence_second_stage_negative.py
-python3 scripts/check_hybrid_cadence_high_existence_negative.py
-python3 scripts/check_hybrid_local_cadence_tail_negative.py
-python3 scripts/check_hybrid_constructed_leaf_negative.py
-python3 scripts/check_hybrid_local_future_frame_negative.py
-python3 scripts/check_hybrid_learned_source_prefix_negative.py
-python3 scripts/check_hybrid_cadence_jitter_span_negative.py
-python3 scripts/check_hybrid_cadence_mark_only_jitter_negative.py
-python3 scripts/check_hybrid_cadence_strong_jitter_source_negative.py
-python3 scripts/check_hybrid_high_jitter_negative.py
-python3 scripts/check_hybrid_cadence_mixed_jitter_negative.py
-python3 scripts/check_hybrid_causal_weave_negative.py
-python3 scripts/check_hybrid_cadence_receiver_negative.py
-python3 scripts/check_hybrid_cadence_cascade_existence_negative.py
-python3 scripts/check_hybrid_router_transport_negative.py
-python3 scripts/check_hybrid_finite_chain_negative.py
-python3 scripts/check_hybrid_finite_preparation_negative.py
-python3 scripts/check_hybrid_cadence_full_budget_negative.py
-python3 scripts/check_hybrid_cadence_budget_receiver_negative.py
-python3 scripts/check_hybrid_port_wire_transport_negative.py
-python3 scripts/check_hybrid_indexed_chain_negative.py
-python3 scripts/check_hybrid_universal_execution_negative.py
-python3 scripts/check_hybrid_transversality_negative.py
-python3 scripts/check_hybrid_contact_transversality_negative.py
-python3 scripts/check_hybrid_crossing_negative.py
+python3 -m scripts.negative.check_negative
+python3 -m scripts.negative.check_hybrid_negative
+python3 -m scripts.negative.check_hybrid_analytic_negative
+python3 -m scripts.negative.check_hybrid_event_negative
+python3 -m scripts.negative.check_hybrid_phase_negative
+python3 -m scripts.negative.check_hybrid_pulse_negative
+python3 -m scripts.negative.check_hybrid_return_negative
+python3 -m scripts.negative.check_hybrid_training_negative
+python3 -m scripts.negative.check_hybrid_bootstrap_negative
+python3 -m scripts.negative.check_hybrid_protected_negative
+python3 -m scripts.negative.check_hybrid_source_negative
+python3 -m scripts.negative.check_hybrid_cell_negative
+python3 -m scripts.negative.check_hybrid_local_negative
+python3 -m scripts.negative.check_hybrid_invariant_negative
+python3 -m scripts.negative.check_hybrid_staged_negative
+python3 -m scripts.negative.check_hybrid_boundary_negative
+python3 -m scripts.negative.check_hybrid_calendar_negative
+python3 -m scripts.negative.check_hybrid_routed_negative
+python3 -m scripts.negative.check_hybrid_teaching_negative
+python3 -m scripts.negative.check_hybrid_reciprocal_negative
+python3 -m scripts.negative.check_hybrid_c_introduction_negative
+python3 -m scripts.negative.check_hybrid_cadence_negative
+python3 -m scripts.negative.check_hybrid_cascade_negative
+python3 -m scripts.negative.check_hybrid_existence_negative
+python3 -m scripts.negative.check_hybrid_weak_existence_negative
+python3 -m scripts.negative.check_hybrid_first_fire_negative
+python3 -m scripts.negative.check_hybrid_protected_mark_negative
+python3 -m scripts.negative.check_hybrid_prepared40_negative
+python3 -m scripts.negative.check_hybrid_preparation_existence_negative
+python3 -m scripts.negative.check_hybrid_b_birth_product_negative
+python3 -m scripts.negative.check_hybrid_first_wire_negative
+python3 -m scripts.negative.check_hybrid_first_interleaved_negative
+python3 -m scripts.negative.check_hybrid_second_wire_negative
+python3 -m scripts.negative.check_hybrid_receiver_fire_negative
+python3 -m scripts.negative.check_hybrid_coupled_preparation_negative
+python3 -m scripts.negative.check_hybrid_coupled_teaching_negative
+python3 -m scripts.negative.check_hybrid_feedback_entry_negative
+python3 -m scripts.negative.check_hybrid_reverse_receipt_negative
+python3 -m scripts.negative.check_hybrid_reverse_epoch_negative
+python3 -m scripts.negative.check_hybrid_c_teaching_existence_negative
+python3 -m scripts.negative.check_hybrid_cadence_first_strong_negative
+python3 -m scripts.negative.check_hybrid_cadence_first_wire_negative
+python3 -m scripts.negative.check_hybrid_cadence_first_wave_negative
+python3 -m scripts.negative.check_hybrid_cadence_first_mark_return_negative
+python3 -m scripts.negative.check_hybrid_cadence_second_stage_negative
+python3 -m scripts.negative.check_hybrid_cadence_high_existence_negative
+python3 -m scripts.negative.check_hybrid_local_cadence_tail_negative
+python3 -m scripts.negative.check_hybrid_constructed_leaf_negative
+python3 -m scripts.negative.check_hybrid_local_future_frame_negative
+python3 -m scripts.negative.check_hybrid_learned_source_prefix_negative
+python3 -m scripts.negative.check_hybrid_cadence_jitter_span_negative
+python3 -m scripts.negative.check_hybrid_cadence_mark_only_jitter_negative
+python3 -m scripts.negative.check_hybrid_cadence_strong_jitter_source_negative
+python3 -m scripts.negative.check_hybrid_high_jitter_negative
+python3 -m scripts.negative.check_hybrid_cadence_mixed_jitter_negative
+python3 -m scripts.negative.check_hybrid_causal_weave_negative
+python3 -m scripts.negative.check_hybrid_cadence_receiver_negative
+python3 -m scripts.negative.check_hybrid_cadence_cascade_existence_negative
+python3 -m scripts.negative.check_hybrid_router_transport_negative
+python3 -m scripts.negative.check_hybrid_finite_chain_negative
+python3 -m scripts.negative.check_hybrid_finite_preparation_negative
+python3 -m scripts.negative.check_hybrid_cadence_full_budget_negative
+python3 -m scripts.negative.check_hybrid_cadence_budget_receiver_negative
+python3 -m scripts.negative.check_hybrid_port_wire_transport_negative
+python3 -m scripts.negative.check_hybrid_indexed_chain_negative
+python3 -m scripts.negative.check_hybrid_universal_execution_negative
+python3 -m scripts.negative.check_hybrid_transversality_negative
+python3 -m scripts.negative.check_hybrid_contact_transversality_negative
+python3 -m scripts.negative.check_hybrid_crossing_negative
 ```
 
 The toolchain and dependency commits are pinned in `lean-toolchain` and
@@ -508,7 +512,7 @@ the current finite-chain scope; the
 [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
-[EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
+[finite-chain construction](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The validated baseline figures above remain
 those of the N=3 commit; current finite-chain validation and checkpoint
 history are recorded there.
 
@@ -529,7 +533,7 @@ cd proof/lean
 lake exe cache get
 lake build
 lake build Audit
-python3 scripts/check_audit_negative.py
+python3 -m scripts.negative.check_audit_negative
 ```
 
 Do not copy or restore the project's `.lake/build` directory into this checkout.
@@ -572,9 +576,9 @@ perturbation range to ±10%. See [upstream provenance](evidence/UPSTREAM.json).
 
 ## How the evidence is connected
 
-`scripts/generate_evidence.py` reads the eight certificates already in
-[results](../../results) and the adaptive evaluation inside the repository's
-[pinned prototype ZIP](../../downloads/R_Reciprocal_Prototype.zip). It validates
+`scripts/evidence/generate_evidence.py` reads the eight certificates already in
+[results](../../archive/reciprocal/results) and the adaptive evaluation inside the repository's
+[pinned prototype ZIP](../../archive/reciprocal/downloads/R_Reciprocal_Prototype.zip). It validates
 the ZIP and its manifest using the existing repository verifier. It does not
 duplicate the raw recordings. Input SHA-256 identities are recorded in
 [GENERATED_FROM.json](evidence/GENERATED_FROM.json).
@@ -659,9 +663,9 @@ older signature or soundness of every stored certificate enclosure.
 4. For pedagogy, separately formalize the observation/readout/training interface
    and connect numerical records to that semantics.
 
-The existing [local theorem](../reciprocal_learning/THEOREM.md),
-[entry theorem](../reciprocal_entry/THEOREM.md) and
-[cadence theorem](../reciprocal_cadence/THEOREM.md) remain computer-assisted
+The existing [local theorem](../../archive/reciprocal/proof/reciprocal_learning/THEOREM.md),
+[entry theorem](../../archive/reciprocal/proof/reciprocal_entry/THEOREM.md) and
+[cadence theorem](../../archive/reciprocal/proof/reciprocal_cadence/THEOREM.md) remain computer-assisted
 written arguments with independent arithmetic replay. The current partial
 formalization and its exact boundaries are detailed in the
 [hybrid guide](HYBRID_EXECUTION.md).
@@ -679,7 +683,7 @@ locally and in CI. Source code, including Lean source, follows the repository's
 
 `lake build KernelR.HybridResetRateCrossing` checks a separate native, weak and
 geometric-crossing bound for any network/router/queue with an actual pathwise
-recovery envelope. Run `python scripts/check_hybrid_reset_rate_negative.py` for
+recovery envelope. Run `python -m scripts.negative.check_hybrid_reset_rate_negative` for
 the paired contracts. The [scope and equations](../../docs/RESET_RATE_SATURATION.md)
 explain variable recovery, the exact cap bound and the finite-window allowance.
 The umbrella import makes these declarations visible to the global axiom audit.
