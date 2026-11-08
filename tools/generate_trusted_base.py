@@ -29,6 +29,7 @@ VERIFICATION_SOURCES = {
     "proof/lean/KernelR/TrustedBaseChecker.lean",
     "proof/lean/KernelR/TrustedBase.lean",
     "tools/generate_trusted_base.py",
+    ".github/actions/build-lean/action.yml",
     ".github/workflows/lean.yml",
     "proof/lean/scripts/export_trusted_base.py",
     "proof/lean/scripts/check_trusted_base_negative.py",
@@ -253,6 +254,7 @@ def render(manifest: dict, commit: str) -> str:
             f"- [Lean toolchain]({REPOSITORY}/blob/{commit}/proof/lean/lean-toolchain) and [dependency commits]({REPOSITORY}/blob/{commit}/proof/lean/lake-manifest.json): the compiler, kernel, Mathlib and library implementation are verification dependencies.",
             f"- [Dependency traversal]({REPOSITORY}/blob/{commit}/proof/lean/KernelR/TrustedBaseChecker.lean) and [explicit allowlist/check invocation]({REPOSITORY}/blob/{commit}/proof/lean/KernelR/TrustedBase.lean): definitions are followed, proofs are not unfolded, and imported library internals are leaves.",
             f"- [Generated declaration manifest]({REPOSITORY}/blob/{commit}/proof/lean/evidence/trusted_base.json): names, generated source ranges and authenticated source hashes.",
+            f"- [CI build action]({REPOSITORY}/blob/{commit}/.github/actions/build-lean/action.yml): verifies the pinned Lean distribution and builds the Lake package.",
             f"- [Fresh Lean export]({REPOSITORY}/blob/{commit}/proof/lean/scripts/export_trusted_base.py), [source boundary]({REPOSITORY}/blob/{commit}/proof/lean/scripts/check_trusted_source_boundary.py), and [CI workflow]({REPOSITORY}/blob/{commit}/.github/workflows/lean.yml): the exported list is rechecked, existing Lean declarations are preserved, and the controls run at the recorded revision.",
             "",
             "Full CI status and validation counts must be read at their exact recorded "
