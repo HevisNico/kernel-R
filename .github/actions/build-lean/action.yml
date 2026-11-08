@@ -1,0 +1,75 @@
+name: Build Lean package
+description: Install a verified Elan release and build the pinned Lake package.
+inputs:
+  package-directory:
+    description: Path to the Lake package, relative to the repository root.
+    required: true
+  mathlib-cache-targets:
+    description: Space-separated Mathlib modules to cache. Empty fetches the full cache.
+    default: ''
+runs:
+  using: composite
+  steps:
+    - name: Install pinned Elan and Lean toolchain
+      shell: bash
+      working-directory: ${{ inputs.package-directory }}
+      run: |
+        set -euo pipefail
+        install_dir=$(mktemp -d "$RUNNER_TEMP/elan.XXXXXXXX")
+        trap 'rm -rf "$install_dir"' EXIT
+        archive="$install_dir/elan.tar.gz"
+        # Both callers use x64 Linux GitHub-hosted runners.
+        curl --fail --silent --show-error --location \
+          --retry 4 --retry-all-errors --retry-max-time 180 \
+          --connect-timeout 10 --max-time 60 --output "$archive" \
+          https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz
+        printf '%s  %s\n' '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63' "$archive" \
+          | sha256sum --check
+        tar --no-same-owner -xzf "$archive" -C "$install_dir" elan-init
+        "$install_dir/elan-init" -y --default-toolchain none --no-modify-path
+        elan_bin="${ELAN_HOME:-$HOME/.elan}/bin"
+        toolchain=$(cat lean-toolchain)
+        install_toolchain() {
+          local delay
+          for delay in 0 5 15; do
+            sleep "$delay"
+            if "$elan_bin/elan" toolchain install "$toolchain"; then
+              return 0
+            fi
+          done
+          return 1
+        }
+        install_toolchain
+        "$elan_bin/lean" --version
+        "$elan_bin/lake" --version
+        printf '%s\n' "$elan_bin" >> "$GITHUB_PATH"
+
+    - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+      id: cache-restore
+      with:
+        path: ${{ inputs.package-directory }}/.lake
+        key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.package-directory)) }}-${{ github.sha }}
+        restore-keys: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.package-directory)) }}-
+
+    - name: Get Mathlib cache and build
+      shell: bash
+      working-directory: ${{ inputs.package-directory }}
+      env:
+        MATHLIB_CACHE_TARGETS: ${{ inputs.mathlib-cache-targets }}
+      run: |
+        set -euo pipefail
+        read -r -a targets <<< "$MATHLIB_CACHE_TARGETS"
+        if ((${#targets[@]} == 0)); then
+          export MATHLIB_CACHE_GET_URL="${MATHLIB_CACHE_GET_URL-https://cache.mathlib.org/mathlib4}"
+          if [[ -z "$MATHLIB_CACHE_GET_URL" ]]; then
+            unset MATHLIB_CACHE_GET_URL
+          fi
+        fi
+        lake exe cache get "${targets[@]}"
+        lake build
+
+    - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+      if: steps.cache-restore.outputs.cache-hit != 'true'
+      with:
+        path: ${{ inputs.package-directory }}/.lake
+        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
