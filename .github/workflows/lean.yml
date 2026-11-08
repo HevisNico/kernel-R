@@ -29,13 +29,9 @@ jobs:
           python scripts/check_trusted_source_boundary.py
           python scripts/generate_evidence.py --check
           python scripts/robust_evidence.py --check
-      - uses: leanprover/lean-action@fe408643ea7367d8c0404a8be3975bb145f5fb64 # v1
+      - uses: ./.github/actions/build-lean
         with:
-          lake-package-directory: proof/lean
-          build: 'true'
-          test: 'false'
-          lint: 'false'
-          use-mathlib-cache: 'true'
+          package-directory: proof/lean
       - name: Audit every KernelR and A22 theorem
         working-directory: proof/lean
         run: lake build Audit

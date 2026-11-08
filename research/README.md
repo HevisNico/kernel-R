@@ -14,3 +14,6 @@ For the new Lean proofs and their exact scope, see
 [`robust/ranges/`](robust/ranges/README.md) extends the eight point certificates to closed
 ranges of the noise bound and the amplitude deviation (for example every ν in [0, 0.002]),
 without modifying the pinned sources.
+
+The [reset window study](reset-window/README.md) is a standalone Lean model
+of terminal saturation under compressed protection or residual coupling.

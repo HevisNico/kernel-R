@@ -1,0 +1,34 @@
+module
+
+import all ResetWindow
+import all ResetWindow.FixedCadence
+import all ResetWindow.Examples
+meta import Lean.Util.CollectAxioms
+
+set_option maxHeartbeats 8000000
+
+open Lean Elab Command in
+run_cmd do
+  let env ← getEnv
+  let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
+  let inScope := fun name => (`ResetWindow).isPrefixOf (privateToUserName name)
+  let mut candidates : NameSet := {}
+  for data in env.header.moduleData do
+    for name in data.constNames do
+      if inScope name then candidates := candidates.insert name
+  candidates := env.constants.foldStage2
+    (fun names name _ => if inScope name then names.insert name else names) candidates
+  let mut checked : Nat := 0
+  let mut theorems : Nat := 0
+  for name in candidates.toArray do
+    let some info := env.constants.find? name
+      | throwError "Missing declaration {name}"
+    if info.isAxiom then
+      throwError "Unexpected project axiom {name}"
+    for ax in ← collectAxioms name do
+      unless allowed.contains ax do
+        throwError "Unexpected axiom {ax} in {name}"
+    checked := checked + 1
+    if info.isTheorem then theorems := theorems + 1
+  if theorems == 0 then throwError "No project theorems found"
+  logInfo m!"ResetWindow audit passed for {checked} declarations, including {theorems} theorems."
