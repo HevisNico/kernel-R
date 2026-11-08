@@ -24,7 +24,8 @@ simultaneous-event linearization with a crossing history. Birth, fabrication,
 source, delay and budget hypotheses are unchanged.
 
 See [UniversalChainHeadline](KernelR/UniversalChainHeadline.lean) and the
-[exact quantifiers and validation ledger](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The indexed order
+[exact quantifiers](../../docs/FINITE_CHAIN_CONSTRUCTION.md) and
+[validation ledger](../../docs/VALIDATION_LEDGER.md). The indexed order
 is **∀ admissible data/errors, ∃ fixed native functions and a complete witness,
 ∀ finite executions complete at T under that same router**. This is not a
 universal assertion about stopped prefixes or indefinite network runs.
@@ -223,7 +224,7 @@ the current finite-chain scope; the
 [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
-[EVERY_N_PLAN.md](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The validated baseline figures above remain
+[finite-chain construction](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The validated baseline figures above remain
 those of the N=3 commit; current finite-chain validation and checkpoint
 history are recorded there.
 

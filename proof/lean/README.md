@@ -194,9 +194,10 @@ The active ports are A2/B2/C0, each gaining2.4 from its own birth, with recovery
 +0.3 in each cell. Other gains remain at their639.9 values, including A0+1.8,
 B1+0.6 and C1+0.6. Earlier residual charges, raw tails and energy paths are
 carried through actual executions rather than reset. Fine enclosure soundness,
-retained probes/settings copies, operational
-perturbations and staged-birth universal guarantees remain separate obligations. The separate common-birth
-finite-chain construction and its validation are tracked in [EVERY_N_PLAN.md](../../docs/FINITE_CHAIN_CONSTRUCTION.md).
+retained probes/settings copies, operational perturbations and staged-birth
+universal guarantees remain separate obligations. The
+[construction guide](../../docs/FINITE_CHAIN_CONSTRUCTION.md) and
+[validation ledger](../../docs/VALIDATION_LEDGER.md) track the common-birth result.
 
 ## Constructed common-birth chain for every finite N
 
@@ -249,7 +250,8 @@ birth-to-terminal execution; its generated delay functions and retained actual
 stage satisfy both global native bounds and the requested per-emission values.
 
 See the [finite-chain coverage guide](N_CELL_COVERAGE.md) and
-[construction/validation ledger](../../docs/FINITE_CHAIN_CONSTRUCTION.md). Retained probes,
+[construction guide](../../docs/FINITE_CHAIN_CONSTRUCTION.md) and
+[validation ledger](../../docs/VALIDATION_LEDGER.md). Retained probes,
 cuts/settings copies and operational drift/noise/amplitude histories remain
 open. The new universal-complete layer below closes comparison of every
 complete finite execution of the fixed program; it does not establish all six
@@ -510,7 +512,7 @@ the current finite-chain scope; the
 [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
-[EVERY_N_PLAN.md](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The validated baseline figures above remain
+[finite-chain construction](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The validated baseline figures above remain
 those of the N=3 commit; current finite-chain validation and checkpoint
 history are recorded there.
 

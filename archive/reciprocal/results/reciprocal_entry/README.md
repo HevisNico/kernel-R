@@ -76,6 +76,6 @@ python -B code/verify.py eps1e-1/certificate.json --link-certificate ../09_Certi
 python -B code/tests.py --link-code ../09_Certified_A_Learns_From_B/code --link-003 ../09_Certified_A_Learns_From_B/eps3e-3/certificate.json --link-01 ../09_Certified_A_Learns_From_B/eps1e-1/certificate.json --report tests_replay.json
 ```
 
-In the repository use `certify/reciprocal_entry/` as the code folder and
-`results/reciprocal_learning/` plus `certify/reciprocal_learning/` for the pinned
-dependency. `THEOREM.md` contains the complete entry and composition argument.
+In the [reciprocal archive](../../), use [entry code](../../certify/reciprocal_entry/)
+and the pinned [local results](../reciprocal_learning/) and
+[local code](../../certify/reciprocal_learning/). `THEOREM.md` contains the complete entry and composition argument.

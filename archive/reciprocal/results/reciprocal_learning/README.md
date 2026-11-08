@@ -40,8 +40,8 @@ the earlier prototype history over the whole box is not proved here.**
 
 ## Proof method
 
-The written proof is in `THEOREM.md` in the ZIP, or
-`proof/reciprocal_learning/THEOREM.md` in the repository. It establishes a local
+The [written proof](../../proof/reciprocal_learning/THEOREM.md) is also in the
+ZIP as `THEOREM.md`. It establishes a local
 input invariant, exactly three subthreshold full-dose cycles, then a one-response
 regime whose ERROR phases are fully protected. At ±10%, a possible ERROR/raw-current
 overlap is bounded directly instead of assuming an event priority.

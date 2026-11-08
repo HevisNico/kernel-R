@@ -207,11 +207,11 @@ the current finite-chain scope; the
 [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
-[EVERY_N_PLAN.md](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The validated baseline figures above remain
+[finite-chain construction](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The validated baseline figures above remain
 those of the N=3 commit; current finite-chain validation and checkpoint
 history are recorded there.
 
 These isolated future contracts remain distinct from both finite network
 constructions and do not establish indefinite network operation or progress
 of arbitrary maximal runs. The separate [universal finite-complete headline](KernelR/UniversalChainHeadline.lean)
-compares completed finite executions without enlarging these continuation domains. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](../../docs/FINITE_CHAIN_CONSTRUCTION.md).
+compares completed finite executions without enlarging these continuation domains. The authorized finite-chain work is tracked in [finite-chain construction](../../docs/FINITE_CHAIN_CONSTRUCTION.md).
