@@ -179,9 +179,9 @@ From `proof/lean` with the pinned Lean toolchain and dependency cache:
 lake build KernelR.HybridDoseCounting KernelR.HybridFiniteChainDoseCounting
 lake build
 lake build Audit
-python3 scripts/check_hybrid_dose_counting_negative.py
-python3 scripts/check_hybrid_section_runs_negative.py
-python3 scripts/check_hybrid_chain_section_counts_negative.py
+python3 -m scripts.negative.check_hybrid_dose_counting_negative
+python3 -m scripts.negative.check_hybrid_section_runs_negative
+python3 -m scripts.negative.check_hybrid_chain_section_counts_negative
 ```
 
 The module prints the axiom dependencies of its headline results. The global

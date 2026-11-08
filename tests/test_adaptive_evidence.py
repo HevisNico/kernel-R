@@ -1,6 +1,5 @@
 """Lean extraction must reject incomplete or inconsistent adaptive provenance."""
 from pathlib import Path
-import importlib.util
 import json
 import sys
 import tempfile
@@ -8,10 +7,8 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'proof/lean/scripts'))
-spec = importlib.util.spec_from_file_location('adaptive_evidence', ROOT / 'proof/lean/scripts/generate_evidence.py')
-emitter = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(emitter)
+sys.path.insert(0, str(ROOT / 'proof/lean'))
+from scripts.evidence import generate_evidence as emitter
 
 
 class AdaptiveEvidence(unittest.TestCase):

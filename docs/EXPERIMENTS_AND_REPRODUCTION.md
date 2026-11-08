@@ -8,16 +8,16 @@ finite-chain Lean theorem.
 
 ### Guides and experiments
 
-- [N-cell composition theorem](../proof/reciprocal_composition/THEOREM.md): every finite chain, with source-length and path-jitter budgets.
+- [N-cell composition theorem](../archive/reciprocal/proof/reciprocal_composition/THEOREM.md): every finite chain, with source-length and path-jitter budgets.
 - [Robust slow chains](../research/robust/README.md): drift, bounded charge noise and pulse-amplitude variation, from birth; Lean scope in [robust coverage](../proof/lean/ROBUST_COVERAGE.md).
-- [R kernel definition](../kernel/README.md) and [original model](../model/full_model_reference.md).
-- [Cadence cascade proof](../proof/reciprocal_cadence/THEOREM.md): C's faster cadence reaches A through B, from birth through time 789.9.
-- [Birth-to-feedback proof](../proof/reciprocal_entry/THEOREM.md): pulses-only initialization through time 459.9.
-- [Prepared-section theorem](../proof/reciprocal_learning/THEOREM.md): the local A-learns-from-B effect.
+- [R kernel definition](../model/CELL.md) and [original model](../archive/spec-216-cells/full_model_reference.md).
+- [Cadence cascade proof](../archive/reciprocal/proof/reciprocal_cadence/THEOREM.md): C's faster cadence reaches A through B, from birth through time 789.9.
+- [Birth-to-feedback proof](../archive/reciprocal/proof/reciprocal_entry/THEOREM.md): pulses-only initialization through time 459.9.
+- [Prepared-section theorem](../archive/reciprocal/proof/reciprocal_learning/THEOREM.md): the local A-learns-from-B effect.
 - [Lean proof project](../proof/lean/README.md): constructed physical executions, conditional protocol theorems, certificate endpoint checks and finite adaptive-policy replay, with explicit coverage limits.
-- [Reciprocal prototype](../experiments/reciprocal/README.md): cells remain alive and learn back from their students.
-- [Learned teaching choice](../experiments/reciprocal/pedagogy/README.md) and [within-lesson adaptation](../experiments/reciprocal/adaptive/README.md).
-- [Complete English prototype ZIP](../downloads/R_Reciprocal_Prototype.zip): runnable code, recordings, reports and proofs in titled folders.
+- [Reciprocal prototype](../archive/reciprocal/experiments/reciprocal/README.md): cells remain alive and learn back from their students.
+- [Learned teaching choice](../archive/reciprocal/experiments/reciprocal/pedagogy/README.md) and [within-lesson adaptation](../archive/reciprocal/experiments/reciprocal/adaptive/README.md).
+- [Complete English prototype ZIP](../archive/reciprocal/downloads/R_Reciprocal_Prototype.zip): runnable code, recordings, reports and proofs in titled folders.
 
 Extract the ZIP and open `12_Certified_N_Cell_Composition/RESULTS.html` for the latest
 proof, or `03_Visualization/OPEN_IN_BROWSER.html` for the recorded three-cell
@@ -46,7 +46,7 @@ parameters of A and B independently.
 The cadence extension reaches 789.9, including C's introduction, 20/18/16 fast
 emissions in C/B/A and two full recovery MARK doses in each. It covers all 45
 per-port physical parameters independently, with per-pulse wire jitter in [0.3,0.4].
-The [cadence results](../results/reciprocal_cadence/README.md) include retained probes
+The [cadence results](../archive/reciprocal/results/reciprocal_cadence/README.md) include retained probes
 and causal cuts: without either reverse link, A remains at 4/8.
 
 These ±10% prefix results do not certify the older entire A22 network at ±10%,
@@ -73,7 +73,7 @@ model history extends to a later finite horizon with its history retained.
 Infinite/maximal-run results retain their native interface. This does not extend
 the experiments' scope or discharge the robust slow-chain `CellLaw` below.
 
-The [N-cell extension](../results/reciprocal_composition/README.md) uses a closed
+The [N-cell extension](../archive/reciprocal/results/reciprocal_composition/README.md) uses a closed
 packet contract and a written induction, supported by 81 N-independent local
 inequalities and 12 exact polynomial identities. Physical tolerances stay at
 ±10% as N grows. Source length and time grow linearly; fast-block traffic is
@@ -92,6 +92,7 @@ in a supplied dependency directory cannot join that snapshot.
 
 ```sh
 python -B -m unittest discover -s tests
+cd archive/reciprocal
 python -B certify/reciprocal_learning/tests.py
 python -B certify/reciprocal_entry/tests.py --link-code certify/reciprocal_learning --link-003 results/reciprocal_learning/eps3e-3/certificate.json --link-01 results/reciprocal_learning/eps1e-1/certificate.json
 python -B certify/reciprocal_entry/verify.py results/reciprocal_entry/eps1e-1/certificate.json --link-certificate results/reciprocal_learning/eps1e-1/certificate.json --link-code certify/reciprocal_learning
@@ -118,12 +119,13 @@ large JSON files in the source tree. Restore them with their SHA-256 checks:
 python -B tools/prepare_recordings.py
 ```
 
-This creates ignored `audit_runs/` inputs. Existing different local outputs are
+This creates ignored inputs in `archive/reciprocal/audit_runs/`. Existing different local outputs are
 never overwritten. The full records remain directly inspectable inside the ZIP.
 To run a fresh network:
 
 ```sh
 python -m pip install -r requirements.txt
+cd archive/reciprocal
 python -u -B experiments/reciprocal/simulate.py --out audit_runs/new_reciprocal
 python -u -B experiments/reciprocal/analyse.py --out audit_runs/new_reciprocal
 python -u -B experiments/reciprocal/validate.py --out audit_runs/new_reciprocal
@@ -133,30 +135,32 @@ NumPy 2.3.5 and SciPy 1.17.0 are pinned. Use a new output directory for each run
 The individual experiment guides provide further teaching and adaptation commands.
 New adaptive plans lock both simulation engines and the numerical runtime;
 legacy two-file plans are rejected by the updated validators. See the
-[adaptive reproduction notes](../experiments/reciprocal/adaptive/README.md#reproduce).
+[adaptive reproduction notes](../archive/reciprocal/experiments/reciprocal/adaptive/README.md#reproduce).
 The bundled adaptive records have been recomputed on the original seeds with
 that complete manifest. All 127 experiment checks and continuous teacher replay
 pass; legacy adaptive development and aborted-run records have been removed.
 
 After installing the numerical requirements, run the terminal-event and
-provenance regressions with:
+provenance regressions from the repository root:
 
 ```sh
-python -B -m unittest discover -s experiments/reciprocal/tests -v
+python -B -m unittest discover -s archive/reciprocal/experiments/reciprocal/tests -v
 ```
 
 ### Rebuild the ZIP
 
 ```sh
 python -B tools/prepare_recordings.py
-python -B experiments/reciprocal/package.py
+python -B archive/reciprocal/experiments/reciprocal/package.py
 ```
 
-The output is `dist/R_Reciprocal_Prototype.zip`, constrained below 30,000,000 bytes.
+The output is `archive/reciprocal/dist/R_Reciprocal_Prototype.zip`, constrained below 30,000,000 bytes.
 The provided download is a pinned research snapshot; rebuilding an archive need
 not preserve ZIP timestamps, while its source/data manifest remains verifiable.
-It is not a mirror of HEAD. Its immutable identity and the CI verification
-command are recorded in [the archive guide](../downloads/README.md).
+A rebuild pairs the restored adaptive records with their authenticated controller
+source. Use `--adaptive-results` to package a newly validated adaptive run.
+The pinned download has its own immutable identity, and the CI verification
+command is recorded in [the archive guide](../archive/reciprocal/downloads/README.md).
 
 Optional viewer QA uses Node.js and the committed `package-lock.json`:
 
@@ -185,7 +189,7 @@ of the Lean proofs or the standard-library certificate replay.
 
 ### Where the robust results live
 
-The robust results are in `research/robust/`, not in `certify/`, `proof/` and `results/`.
+The robust results are in `research/robust/`.
 They originate in a tested offline package. The original certificates and historical
 numerical records retain their identities. The maintained validators publish new
 campaigns to fresh output directories. The [record restoration and verification
@@ -196,19 +200,19 @@ packet protocol of the N-cell composition theorem. Their status is that of the o
 written theorems: hybrid arguments written by hand, finite inequalities replayed in
 independent integer arithmetic, and, in Lean, the chain induction and the certificate
 endpoints. Proving each cell's `CellLaw` from the hybrid execution is the open step
-([plan](../proof/lean/CELLLAW_PLAN.md)).
+([plan](../archive/plans/CELLLAW_PLAN.md)).
 
 ### Reference boundary and limitations
 
-The [kernel guide](../kernel/README.md) describes R as a cell and links the current
-three-cell and chain protocols. The `model/` snapshots and
-[archived A22 kernel guide](../kernel/reference/A22_KERNEL_README.txt) preserve the
-original reference context. `kernel/KERNEL_SHA256SUMS` identifies upstream engine
+The [kernel guide](../model/CELL.md) describes R as a cell and links the current
+three-cell and chain protocols. The [A22 snapshot](../archive/spec-216-cells/README.md) and
+[archived A22 kernel guide](../archive/spec-216-cells/kernel/reference/A22_KERNEL_README.txt) preserve the
+original reference context. [The archived checksum list](../archive/spec-216-cells/kernel/KERNEL_SHA256SUMS) identifies upstream engine
 files; those engines are not vendored here. See [provenance](../docs/PROVENANCE.md).
 
 General pedagogy, semantic memory, new waveform invention and chip energy/area
 benefits remain unproved. Observation bins, feedback coding, lesson primitives
 and copying rules are supplied components unless explicitly learned in a test.
 R's monotone parameters impose saturation and forgetting limits. The
-[proposed invention protocol](../experiments/reciprocal/adaptive/INVENTION_PROTOCOL.md)
+[proposed invention protocol](../archive/reciprocal/experiments/reciprocal/adaptive/INVENTION_PROTOCOL.md)
 is a future experiment, not a completed result.

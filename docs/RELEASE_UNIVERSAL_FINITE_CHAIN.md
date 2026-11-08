@@ -3,7 +3,7 @@
 **Historical v0.2.0 release preparation.** The checklist and draft text below
 retain their original release scope and validation counts. They are not the
 publication instructions for the later geometric-crossing development; see the
-[current proof ledger](../proof/lean/EVERY_N_PLAN.md#geometric-crossings-and-finite-prefix-progress).
+[current proof ledger](FINITE_CHAIN_CONSTRUCTION.md#geometric-crossings-and-finite-prefix-progress).
 
 This is a publication checklist and draft release text. It does not create a
 tag or publish a release. The proposed next version is **v0.2.0**; the existing
@@ -20,7 +20,7 @@ contain the universal complete-execution modules.
 3. Check that the target contains
    `proof/lean/KernelR/HybridUniversalBirthCadenceChain.lean`,
    `proof/lean/KernelR/UniversalChainHeadline.lean` and the universal paired
-   controls in `proof/lean/scripts/check_hybrid_universal_execution_negative.py`.
+   controls in `proof/lean/scripts/negative/check_hybrid_universal_execution_negative.py`.
 4. Create the new release as a draft against that exact commit and use the
    text below. Review the tag target before publishing. GitHub's source
    archives must include the proof project and its pinned Lake manifest.
@@ -83,13 +83,13 @@ git rev-parse HEAD
 python -B -m unittest discover -s tests
 cd proof/lean
 python scripts/check_sources.py
-python scripts/generate_evidence.py --check
-python scripts/robust_evidence.py --check
+python -m scripts.evidence.generate_evidence --check
+python -m scripts.evidence.robust_evidence --check
 lake exe cache get
 lake build KernelR.HybridUniversalBirthCadenceChain KernelR.UniversalChainHeadline
 lake build
 lake build Audit
-python scripts/check_hybrid_universal_execution_negative.py
+python -m scripts.negative.check_hybrid_universal_execution_negative
 ```
 
 The [Lean workflow](../.github/workflows/lean.yml) runs the full configured

@@ -35,7 +35,7 @@ and C-only789.9 witness remain available. Fixed independent fabrication
 parameters, canonical pulses and bounded delays retain their declared scope;
 fine operational robustness, probes/copies and universal guarantees through
 the separate staged-birth operations remain distinct obligations. The common-birth finite-chain construction and validation are tracked in
-[EVERY_N_PLAN.md](EVERY_N_PLAN.md).
+[EVERY_N_PLAN.md](../../docs/FINITE_CHAIN_CONSTRUCTION.md).
 
 ## Constructed common-birth chain for every finite N
 
@@ -93,7 +93,7 @@ birth-to-terminal execution; its generated delay functions and retained actual
 stage satisfy both global native bounds and the requested per-emission values.
 
 See the [finite-chain coverage guide](N_CELL_COVERAGE.md) and
-[construction/validation ledger](EVERY_N_PLAN.md). Retained probes,
+[construction/validation ledger](../../docs/FINITE_CHAIN_CONSTRUCTION.md). Retained probes,
 cuts/settings copies and operational drift/noise/amplitude histories remain
 open. The universal-complete layer below compares every finite execution of the
 fixed common-birth program complete at T, without claiming all six conclusions
@@ -140,12 +140,12 @@ native-function choice outside the prescribed-error quantifier or assert
 that every arbitrary router realizes a specified error sequence.
 
 The three public headline axiom profiles contain only `propext`,
-`Classical.choice` and `Quot.sound`. The [validation ledger](EVERY_N_PLAN.md)
+`Classical.choice` and `Quot.sound`. The [validation ledger](../../docs/VALIDATION_LEDGER.md)
 records the successful complete frozen-source build and global audit.
 The reviewed universal proof modules are included in this checkout. The
 [historical release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md)
 records the v0.2.0 integration and publication scope; later local validation is
-recorded in the [current ledger](EVERY_N_PLAN.md#validation-and-checkpoint-discipline).
+recorded in the [current ledger](../../docs/VALIDATION_LEDGER.md#validation-and-checkpoint-discipline).
 
 ## Physical definitions
 
@@ -587,7 +587,7 @@ supplies one for this birth/source family. The common-birth every-N program now
 also has universal physical outcomes for the fixed finite-complete class.
 The common-birth program also has [finite and maximal-run progress](PROGRESS.md).
 Finer operational robustness, retained probes and settings copies remain open.
-The finite-chain construction is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
+The finite-chain construction is tracked in [EVERY_N_PLAN.md](../../docs/FINITE_CHAIN_CONSTRUCTION.md).
 
 ## Checked implications
 
@@ -1607,7 +1607,7 @@ the current finite-chain scope; the
 [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
-[EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
+[EVERY_N_PLAN.md](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The validated baseline figures above remain
 those of the N=3 commit; current finite-chain validation and checkpoint
 history are recorded there.
 

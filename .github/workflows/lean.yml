@@ -27,8 +27,8 @@ jobs:
         run: |
           python scripts/check_sources.py
           python scripts/check_trusted_source_boundary.py
-          python scripts/generate_evidence.py --check
-          python scripts/robust_evidence.py --check
+          python -m scripts.evidence.generate_evidence --check
+          python -m scripts.evidence.robust_evidence --check
       - uses: ./.github/actions/build-lean
         with:
           package-directory: proof/lean
@@ -38,7 +38,7 @@ jobs:
       - name: Check trusted declaration metadata and pinned reading list
         working-directory: proof/lean
         run: |
-          python scripts/export_trusted_base.py --check --actual-output /tmp/trusted-base.json
+          python -m scripts.evidence.export_trusted_base --check --actual-output /tmp/trusted-base.json
           python ../../tools/generate_trusted_base.py --check
       - name: Preserve checked trusted declaration metadata
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -49,251 +49,251 @@ jobs:
       - name: Check explicit headline routing and trusted-closure checker contracts
         working-directory: proof/lean
         run: |
-          python scripts/check_trusted_headline_negative.py --report /tmp/trusted-headline-controls.json
-          python scripts/check_trusted_base_negative.py --report /tmp/trusted-base-controls.json
+          python -m scripts.negative.check_trusted_headline_negative --report /tmp/trusted-headline-controls.json
+          python -m scripts.negative.check_trusted_base_negative --report /tmp/trusted-base-controls.json
       - name: Reject axioms in current and imported project declarations
         working-directory: proof/lean
-        run: python scripts/check_audit_negative.py
+        run: python -m scripts.negative.check_audit_negative
       - name: Check zero-recovery locks and reject altered native and crossing contracts
         working-directory: proof/lean
         run: |
           lake env lean ZeroRecoveryAudit.lean
-          python scripts/check_zero_recovery_negative.py --report /tmp/zero-recovery-controls.json
+          python -m scripts.negative.check_zero_recovery_negative --report /tmp/zero-recovery-controls.json
       - name: Reject corrupted endpoints, cadence dose counters and adaptive scores
         working-directory: proof/lean
-        run: python scripts/check_negative.py
+        run: python -m scripts.negative.check_negative
       - name: Reject invalid physical transitions and doses
         working-directory: proof/lean
-        run: python scripts/check_hybrid_negative.py
+        run: python -m scripts.negative.check_hybrid_negative
       - name: Check whole-execution dose counts and reject weakened counting contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_dose_counting_negative.py
+        run: python -m scripts.negative.check_hybrid_dose_counting_negative
       - name: Check structural section runs and reject omitted phase boundaries
         working-directory: proof/lean
-        run: python scripts/check_hybrid_section_runs_negative.py
+        run: python -m scripts.negative.check_hybrid_section_runs_negative
       - name: Check applied finite-chain section counts and retain own birth offsets
         working-directory: proof/lean
-        run: python scripts/check_hybrid_chain_section_counts_negative.py
+        run: python -m scripts.negative.check_hybrid_chain_section_counts_negative
       - name: Reject altered physical durations, reserve bounds and raw tails
         working-directory: proof/lean
-        run: python scripts/check_hybrid_analytic_negative.py
+        run: python -m scripts.negative.check_hybrid_analytic_negative
       - name: Reject altered physical event budgets and delivery chronology
         working-directory: proof/lean
-        run: python scripts/check_hybrid_event_negative.py
+        run: python -m scripts.negative.check_hybrid_event_negative
       - name: Reject unsupported infinite-progress claims
         working-directory: proof/lean
-        run: python scripts/check_progress_negative.py
+        run: python -m scripts.negative.check_progress_negative
       - name: Check transverse scalar contacts and reject false slope claims
         working-directory: proof/lean
-        run: python scripts/check_hybrid_transversality_negative.py
+        run: python -m scripts.negative.check_hybrid_transversality_negative
       - name: Check actual contact fields and reject unsupported witness certificates
         working-directory: proof/lean
-        run: python scripts/check_hybrid_contact_transversality_negative.py
+        run: python -m scripts.negative.check_hybrid_contact_transversality_negative
       - name: Check geometric crossing correspondence and reject weaker substitute claims
         working-directory: proof/lean
-        run: python scripts/check_hybrid_crossing_negative.py
+        run: python -m scripts.negative.check_hybrid_crossing_negative
       - name: Check fixed supplied delays and canonical finite-chain routing
         working-directory: proof/lean
-        run: python scripts/check_fixed_delay_headline_negative.py
+        run: python -m scripts.negative.check_fixed_delay_headline_negative
       - name: Check recovery-limited firing gaps and reject altered rate contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_reset_rate_negative.py
+        run: python -m scripts.negative.check_hybrid_reset_rate_negative
       - name: Reject altered sensor phases, clipped doses and input provenance
         working-directory: proof/lean
-        run: python scripts/check_hybrid_phase_negative.py
+        run: python -m scripts.negative.check_hybrid_phase_negative
       - name: Reject altered physical pulse chronology, total doses and source exhaustion
         working-directory: proof/lean
-        run: python scripts/check_hybrid_pulse_negative.py
+        run: python -m scripts.negative.check_hybrid_pulse_negative
       - name: Reject altered READY returns, memory gates and initial-charge equations
         working-directory: proof/lean
-        run: python scripts/check_hybrid_return_negative.py
+        run: python -m scripts.negative.check_hybrid_return_negative
       - name: Reject altered training gain, silent-dose and charge-return contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_training_negative.py
+        run: python -m scripts.negative.check_hybrid_training_negative
       - name: Reject altered low-recovery firing and premature MARK exposure
         working-directory: proof/lean
-        run: python scripts/check_hybrid_bootstrap_negative.py
+        run: python -m scripts.negative.check_hybrid_bootstrap_negative
       - name: Reject altered protected MARK doses, outputs and prepared return
         working-directory: proof/lean
-        run: python scripts/check_hybrid_protected_negative.py
+        run: python -m scripts.negative.check_hybrid_protected_negative
       - name: Reject altered source chronology, physical warmup and birth preparation
         working-directory: proof/lean
-        run: python scripts/check_hybrid_source_negative.py
+        run: python -m scripts.negative.check_hybrid_source_negative
       - name: Reject lost multicell traffic and weakened variable-gap pulse contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cell_negative.py
+        run: python -m scripts.negative.check_hybrid_cell_negative
       - name: Reject altered prepared cases from current physical invariants
         working-directory: proof/lean
-        run: python scripts/check_hybrid_local_negative.py
+        run: python -m scripts.negative.check_hybrid_local_negative
       - name: Reject altered current-state reserve and positive ERROR/MARK doses
         working-directory: proof/lean
-        run: python scripts/check_hybrid_invariant_negative.py
+        run: python -m scripts.negative.check_hybrid_invariant_negative
       - name: Reject staged-birth resets, source loss and inherited learning
         working-directory: proof/lean
-        run: python scripts/check_hybrid_staged_negative.py
+        run: python -m scripts.negative.check_hybrid_staged_negative
       - name: Reject lost cut events, future tokens and altered preparation at birth
         working-directory: proof/lean
-        run: python scripts/check_hybrid_boundary_negative.py
+        run: python -m scripts.negative.check_hybrid_boundary_negative
       - name: Reject altered physical latency roots and unsupported common calendars
         working-directory: proof/lean
-        run: python scripts/check_hybrid_calendar_negative.py
+        run: python -m scripts.negative.check_hybrid_calendar_negative
       - name: Reject lost routed inputs, future sources, incorrect contacts and erased jitter
         working-directory: proof/lean
-        run: python scripts/check_hybrid_routed_negative.py
+        run: python -m scripts.negative.check_hybrid_routed_negative
       - name: Reject altered staged teaching counts, birth memories and contact guards
         working-directory: proof/lean
-        run: python scripts/check_hybrid_teaching_negative.py
+        run: python -m scripts.negative.check_hybrid_teaching_negative
       - name: Reject altered reciprocal counts, erased residuals and lost future queues
         working-directory: proof/lean
-        run: python scripts/check_hybrid_reciprocal_negative.py
+        run: python -m scripts.negative.check_hybrid_reciprocal_negative
       - name: Reject altered C births, teaching counts, inherited memories and lost sources
         working-directory: proof/lean
-        run: python scripts/check_hybrid_c_introduction_negative.py
+        run: python -m scripts.negative.check_hybrid_c_introduction_negative
       - name: Reject altered physical cadence initiation, mixed doses and residual tails
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_negative
       - name: Reject altered complete physical cascade, birth memories and terminal queues
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cascade_negative.py
+        run: python -m scripts.negative.check_hybrid_cascade_negative
       - name: Reject altered constructive source existence and first MARK
         working-directory: proof/lean
-        run: python scripts/check_hybrid_existence_negative.py
+        run: python -m scripts.negative.check_hybrid_existence_negative
       - name: Reject altered constructed weak cycles and ERROR restarts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_weak_existence_negative.py
+        run: python -m scripts.negative.check_hybrid_weak_existence_negative
       - name: Reject altered actual weak-source iteration and first firing
         working-directory: proof/lean
-        run: python scripts/check_hybrid_first_fire_negative.py
+        run: python -m scripts.negative.check_hybrid_first_fire_negative
       - name: Reject altered constructed FAST/SLOW return and protected MARK
         working-directory: proof/lean
-        run: python scripts/check_hybrid_protected_mark_negative.py
+        run: python -m scripts.negative.check_hybrid_protected_mark_negative
       - name: Reject altered constructed protected return and sixth source
         working-directory: proof/lean
-        run: python scripts/check_hybrid_prepared40_negative.py
+        run: python -m scripts.negative.check_hybrid_prepared40_negative
       - name: Reject altered constructed first-train preparation and learned iteration
         working-directory: proof/lean
-        run: python scripts/check_hybrid_preparation_existence_negative.py
+        run: python -m scripts.negative.check_hybrid_preparation_existence_negative
       - name: Reject altered real B birth and independent cell-flow transport
         working-directory: proof/lean
-        run: python scripts/check_hybrid_b_birth_product_negative.py
+        run: python -m scripts.negative.check_hybrid_b_birth_product_negative
       - name: Reject altered issued-wire existence and joint execution products
         working-directory: proof/lean
-        run: python scripts/check_hybrid_first_wire_negative.py
+        run: python -m scripts.negative.check_hybrid_first_wire_negative
       - name: Reject altered actual interleaved newborn learning and next source
         working-directory: proof/lean
-        run: python scripts/check_hybrid_first_interleaved_negative.py
+        run: python -m scripts.negative.check_hybrid_first_interleaved_negative
       - name: Reject altered second actual wire and derived receiver calendar
         working-directory: proof/lean
-        run: python scripts/check_hybrid_second_wire_negative.py
+        run: python -m scripts.negative.check_hybrid_second_wire_negative
       - name: Reject altered first B output, FAST exit and exact birth trace
         working-directory: proof/lean
-        run: python scripts/check_hybrid_receiver_fire_negative.py
+        run: python -m scripts.negative.check_hybrid_receiver_fire_negative
       - name: Reject altered third contact, protected B preparation and coupled section
         working-directory: proof/lean
-        run: python scripts/check_hybrid_coupled_preparation_negative.py
+        run: python -m scripts.negative.check_hybrid_coupled_preparation_negative
       - name: Reject altered constructed coupled train and original-birth teaching counts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_coupled_teaching_negative.py
+        run: python -m scripts.negative.check_hybrid_coupled_teaching_negative
       - name: Reject altered reciprocal weak entry, residual first FIRE and interval products
         working-directory: proof/lean
-        run: python scripts/check_hybrid_feedback_entry_negative.py
+        run: python -m scripts.negative.check_hybrid_feedback_entry_negative
       - name: Reject altered actual reverse receipt, retained paths and B352 source activation
         working-directory: proof/lean
-        run: python scripts/check_hybrid_reverse_receipt_negative.py
+        run: python -m scripts.negative.check_hybrid_reverse_receipt_negative
       - name: Reject altered constructed reciprocal epoch, own memories and original-birth counts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_reverse_epoch_negative.py
+        run: python -m scripts.negative.check_hybrid_reverse_epoch_negative
       - name: Reject altered actual C birth, protected teaching and original-birth three-cell counts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_c_teaching_existence_negative.py
+        run: python -m scripts.negative.check_hybrid_c_teaching_existence_negative
       - name: Reject altered cadence residual first FIRE and actual FAST completion
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_first_strong_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_first_strong_negative
       - name: Reject altered actual cadence warmup, first C wire and isolated learned bridge
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_first_wire_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_first_wire_negative
       - name: Reject altered first physical cadence wave, retained paths and original-birth counts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_first_wave_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_first_wave_negative
       - name: Reject altered global C656 and C660 arrivals, own MARK memory and birth counts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_first_mark_return_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_first_mark_return_negative
       - name: Reject altered local second strong and mixed cadence sources, RAW and doses
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_second_stage_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_second_stage_negative
       - name: Reject altered constructive high-gain cadence FIRE and protected completion
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_high_existence_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_high_existence_negative
       - name: Reject altered autonomous C cadence tail, own memories and original-birth counts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_local_cadence_tail_negative.py
+        run: python -m scripts.negative.check_hybrid_local_cadence_tail_negative
       - name: Reject altered exact autonomous projection, constructed C packet and real wire labels
         working-directory: proof/lean
-        run: python scripts/check_hybrid_constructed_leaf_negative.py
+        run: python -m scripts.negative.check_hybrid_constructed_leaf_negative
       - name: Reject altered cadence cascade existence contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_cascade_existence_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_cascade_existence_negative
       - name: Reject altered cadence jitter span contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_jitter_span_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_jitter_span_negative
       - name: Reject altered cadence mark only jitter contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_mark_only_jitter_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_mark_only_jitter_negative
       - name: Reject altered cadence mixed jitter contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_mixed_jitter_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_mixed_jitter_negative
       - name: Reject altered cadence receiver contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_receiver_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_receiver_negative
       - name: Reject altered cadence strong jitter source contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_strong_jitter_source_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_strong_jitter_source_negative
       - name: Reject altered causal weave contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_causal_weave_negative.py
+        run: python -m scripts.negative.check_hybrid_causal_weave_negative
       - name: Reject altered high jitter contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_high_jitter_negative.py
+        run: python -m scripts.negative.check_hybrid_high_jitter_negative
       - name: Reject altered learned source prefix contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_learned_source_prefix_negative.py
+        run: python -m scripts.negative.check_hybrid_learned_source_prefix_negative
       - name: Reject altered local future frame contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_local_future_frame_negative.py
+        run: python -m scripts.negative.check_hybrid_local_future_frame_negative
       - name: Reject altered router transport contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_router_transport_negative.py
+        run: python -m scripts.negative.check_hybrid_router_transport_negative
       - name: Reject altered finite-chain physical composition and variable source contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_finite_chain_negative.py
+        run: python -m scripts.negative.check_hybrid_finite_chain_negative
       - name: Reject altered cadence budget receiver contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_budget_receiver_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_budget_receiver_negative
       - name: Reject altered cadence full budget contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_cadence_full_budget_negative.py
+        run: python -m scripts.negative.check_hybrid_cadence_full_budget_negative
       - name: Reject altered constructed chain contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_constructed_chain_negative.py
+        run: python -m scripts.negative.check_hybrid_constructed_chain_negative
       - name: Reject altered finite preparation contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_finite_preparation_negative.py
+        run: python -m scripts.negative.check_hybrid_finite_preparation_negative
       - name: Reject altered port wire transport contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_port_wire_transport_negative.py
+        run: python -m scripts.negative.check_hybrid_port_wire_transport_negative
       - name: Reject altered prescribed wire error realization and indexed full-chain contracts
         working-directory: proof/lean
-        run: python scripts/check_hybrid_indexed_chain_negative.py
+        run: python -m scripts.negative.check_hybrid_indexed_chain_negative
       - name: Reject altered universal complete-execution observations and indexed errors
         working-directory: proof/lean
-        run: python scripts/check_hybrid_universal_execution_negative.py
+        run: python -m scripts.negative.check_hybrid_universal_execution_negative
       - name: Record final-commit validation measurements
         working-directory: proof/lean
         env:
           TRUSTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           TRUSTED_BUILD_SHA: ${{ github.sha }}
         run: >-
-          python scripts/trusted_validation_report.py
+          python -m scripts.evidence.trusted_validation_report
           --head-commit "$TRUSTED_HEAD_SHA"
           --build-commit "$TRUSTED_BUILD_SHA"
           --output-directory /tmp/trusted-validation

@@ -1,6 +1,6 @@
 # R model ↔ Lean correspondence
 
-This map compares the [R cell equations](../kernel/README.md) with the
+This map compares the [R cell equations](../model/CELL.md) with the
 operational semantics in [Hybrid.lean](../proof/lean/KernelR/Hybrid.lean).
 Lean proves properties of these definitions under stated hypotheses; matching
 a physical device or a numerical engine requires separate justification.
@@ -32,7 +32,7 @@ Write a=ln4, κ=1/2, r=1/10, rₘ=1/40, and gₚ=exp(zₚ).
 
 ## Threshold contacts and upward crossings
 
-The [written model](../kernel/README.md#main-unit) specifies first upward
+The [written model](../model/CELL.md#main-unit) specifies first upward
 crossings for FIRE and MARK. The native operational definitions `Jump.fire`
 and `Jump.mark` enable jumps at threshold equality, while `Flow.guards`
 requires strict preguards. The distinction is now resolved for the constructed

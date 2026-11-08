@@ -3,7 +3,8 @@ from pathlib import Path,PurePosixPath
 import argparse,hashlib,json,stat,zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'downloads'/'R_Reciprocal_Prototype.zip'
+RECIPROCAL=ROOT/'archive'/'reciprocal'
+BUNDLE=RECIPROCAL/'downloads'/'R_Reciprocal_Prototype.zip'
 BUNDLE_SHA256='34d49bab7ad29d357cbae8ac24fd278623c707fe2f442cc07d0b2166a351b03e'
 PREFIX='R_Reciprocal_Prototype/'
 
@@ -64,13 +65,13 @@ def restore():
     files=restoration_plan(verify_bundle())
     # Check every destination before writing anything; never overwrite different local work.
     for relative,content in files.items():
-        target=ROOT/relative
-        if not target.resolve().is_relative_to(ROOT.resolve()):raise RuntimeError('unsafe restoration destination')
+        target=RECIPROCAL/relative
+        if not target.resolve().is_relative_to(RECIPROCAL.resolve()):raise RuntimeError('unsafe restoration destination')
         if target.exists() and (not target.is_file() or target.read_bytes()!=content):
             raise RuntimeError('existing output differs; preserve or move it first: '+relative)
     created=0
     for relative,content in files.items():
-        target=ROOT/relative
+        target=RECIPROCAL/relative
         if target.exists():continue
         target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(content);created+=1
     return dict(restored=created,available=len(files),archive_sha256=BUNDLE_SHA256)

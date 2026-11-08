@@ -93,7 +93,7 @@ higher gain/recovery endpoint or provide indefinite contracts for every C
 state. The isolated learned-domain theorem above and the finite global N=3
 cadence are separate results; indefinite network operation remains open.
 
-The separate [common-birth finite-chain factory](EVERY_N_PLAN.md) now constructs
+The separate [common-birth finite-chain factory](../../docs/FINITE_CHAIN_CONSTRUCTION.md) now constructs
 preparation and a variable-K fast phase for every positive finite N under one
 fixed gated router. At its finite terminal horizon, every cell is READY/q=0.1
 with no RAW or pending tokens, active log-gain own birth+2.4 and recovery own
@@ -119,7 +119,7 @@ program, allowing quiet flow after source exhaustion. The
 also refines every finite weak prefix exactly and extends finite model histories
 while retaining their history. Infinite/maximal-run results keep their native
 interface. See the
-[validation ledger](EVERY_N_PLAN.md) for the verified universal checkpoint.
+[validation ledger](../../docs/VALIDATION_LEDGER.md) for the verified universal checkpoint.
 
 ## Proof map
 
@@ -207,11 +207,11 @@ the current finite-chain scope; the
 [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
-[EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
+[EVERY_N_PLAN.md](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The validated baseline figures above remain
 those of the N=3 commit; current finite-chain validation and checkpoint
 history are recorded there.
 
 These isolated future contracts remain distinct from both finite network
 constructions and do not establish indefinite network operation or progress
 of arbitrary maximal runs. The separate [universal finite-complete headline](KernelR/UniversalChainHeadline.lean)
-compares completed finite executions without enlarging these continuation domains. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](EVERY_N_PLAN.md).
+compares completed finite executions without enlarging these continuation domains. The authorized finite-chain work is tracked in [EVERY_N_PLAN.md](../../docs/FINITE_CHAIN_CONSTRUCTION.md).

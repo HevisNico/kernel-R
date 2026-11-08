@@ -64,24 +64,11 @@ A corollary also realizes any prescribed sequence of bounded per-pulse wire
 errors on the actual sending firings, with delay functions built after the
 errors are given.
 
-## Hypotheses
+## The protocol
 
-- `N >= 1` and `K >= 4N + 12`.
-- Fifteen fabrication parameters per cell, chosen independently in the ±0.3%
-  or ±10% box and fixed in time.
-- Independent READY births at time zero: charges and memories within 10⁻⁵
-  of their declared values, initial energy in `[50,100]`, and no active pulse
-  currents.
-- Canonical width-one exponential pulses. Each cell receives sixteen
-  period-eight preparation inputs; the leaf then receives K period-four
-  inputs from time 160. All sources are in the birth queue.
-- One fixed directed-chain router, closed during preparation and open on
-  `[160, T+1)`. Each non-root firing at date F sends one pulse to its parent
-  on port 2 at `F + δ_j(F)`; the root has no outgoing link.
-- Delay functions fixed in advance, with delays in `[0.3, 0.4]` and summed
-  jitter budgets `J <= 0.15`.
-
-Exact statements: [birth, parameter, delay and source hypotheses](docs/UNIVERSAL_FINITE_CHAIN.md#result-every-finite-chain-with-explicit-scope).
+The [finite-chain specification](model/CHAIN_PROTOCOL.md) states the exact
+READY birth data, source schedules, fabrication boxes, and fixed delay bounds.
+The [cell laws](model/CELL.md) and [glossary](docs/GLOSSARY.md) define the model terms.
 
 ## Beyond chains: event order does not change the result
 
@@ -189,7 +176,7 @@ only `propext`, `Classical.choice` and `Quot.sound`, with no admitted proofs
 or added project axioms. These measurements describe that revision. The run's
 `trusted-base-validation-05436400704dc7fc2126d12d38e93d899300363b` artifact
 contains the report and captured build/audit logs. Historical checkpoints
-remain in the [validation ledger](proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline).
+remain in the [validation ledger](docs/VALIDATION_LEDGER.md#validation-and-checkpoint-discipline).
 
 [Exact Lean signatures and axiom outputs](docs/UNIVERSAL_FINITE_CHAIN.md#lean-headline-signatures-axioms-and-reproduction) ·
 [Fresh-checkout rebuild](proof/lean/README.md#rebuild-project-proofs-without-a-restored-project-cache).
@@ -208,11 +195,11 @@ semantics (`CrossingExecution`) to the written model comes first.
   including the [threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
   between the native first-contact semantics and the model's upward
   crossings, proved for this protocol
-- [Cell equations](kernel/README.md)
+- [Finite-chain proof construction](docs/FINITE_CHAIN_CONSTRUCTION.md)
 - [Explicit finite-chain router](proof/lean/KernelR/ExplicitFiniteChainRouter.lean)
 - [Fixed-delay construction](proof/lean/KernelR/HybridUniversalBirthCadenceChain.lean) ·
   [indexed-error theorem](proof/lean/KernelR/UniversalChainHeadline.lean)
-- [Experiments, historical results, certificate replay and viewer QA](docs/EXPERIMENTS_AND_REPRODUCTION.md)
+- [Experiments and certificate replay](docs/EXPERIMENTS_AND_REPRODUCTION.md) · [Archive](archive/README.md)
 - [Dated provenance and scope](docs/PROVENANCE.md) ·
   [release checklist](docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md)
 

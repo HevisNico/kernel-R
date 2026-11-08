@@ -4,7 +4,7 @@
 Declaration locations are supplied by Lean, never by a handwritten line table.
 The selected commit and file hashes authenticate the source behind every link.
 The written-model mapping is keyed by declaration names and checked against
-the headings in kernel/README.md. This renderer is not the dependency checker;
+the headings in the cell laws and chain protocol. This renderer is not the dependency checker;
 KernelR.TrustedBaseChecker computes the closure in Lean before export.
 """
 from __future__ import annotations
@@ -21,8 +21,12 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = ROOT / "proof/lean/evidence/trusted_base.json"
 DEFAULT_OUTPUT = ROOT / "docs/TRUSTED_BASE.md"
 REPOSITORY = "https://github.com/HevisNico/kernel-R"
+CELL_LAWS = "model/CELL.md"
+CHAIN_PROTOCOL = "model/CHAIN_PROTOCOL.md"
+PROTOCOL_SECTIONS = {"birth-and-fabrication", "chain-and-sources", "complete-executions-and-outcomes"}
 VERIFICATION_SOURCES = {
-    "kernel/README.md",
+    CELL_LAWS,
+    CHAIN_PROTOCOL,
     "proof/lean/Audit.lean",
     "proof/lean/lean-toolchain",
     "proof/lean/lake-manifest.json",
@@ -31,12 +35,16 @@ VERIFICATION_SOURCES = {
     "tools/generate_trusted_base.py",
     ".github/actions/build-lean/action.yml",
     ".github/workflows/lean.yml",
-    "proof/lean/scripts/export_trusted_base.py",
-    "proof/lean/scripts/check_trusted_base_negative.py",
-    "proof/lean/scripts/check_trusted_headline_negative.py",
+    "proof/lean/scripts/evidence/export_trusted_base.py",
+    "proof/lean/scripts/negative/check_trusted_base_negative.py",
+    "proof/lean/scripts/negative/check_trusted_headline_negative.py",
     "proof/lean/scripts/check_trusted_source_boundary.py",
-    "proof/lean/scripts/trusted_validation_report.py",
+    "proof/lean/scripts/evidence/trusted_validation_report.py",
 }
+
+
+def model_source(anchor: str) -> str:
+    return CHAIN_PROTOCOL if anchor in PROTOCOL_SECTIONS else CELL_LAWS
 
 
 @cache
@@ -89,7 +97,7 @@ def model_rule(name: str) -> tuple[str, str, str]:
     tail = name.removeprefix("KernelR.Hybrid.")
     leaf = tail.rsplit(".", 1)[-1]
     if tail.startswith("TrustedHeadline."):
-        return "Statement", "topologies-and-sources-in-this-repository", "Finite directed-chain protocol and its explicitly quantified observations."
+        return "Statement", "chain-and-sources", "Finite directed-chain protocol and its explicitly quantified observations."
     if tail in {"Port", "Values", "Coord", "MainMode", "AuxMode", "Snapshot", "Parameters", "Delivery", "Router"}:
         return "Model", "state-of-a-cell", "Cell coordinates, three ports, modes, fixed parameters, raw origins and pending deliveries."
     if leaf.startswith("instDecidableEq") or leaf.startswith("decEq"):
@@ -97,7 +105,7 @@ def model_rule(name: str) -> tuple[str, str, str]:
     if tail in {"a", "response", "nominalGain", "InRelativeBox", "PhysicalBox"}:
         return "Model", "constants", "Fixed constants, canonical READY response and independent per-port fabrication boxes."
     if tail == "BirthState":
-        return "Protocol inputs", "initial-and-prepared-sections", "Common birth at zero, no RAW currents, main READY, declared 1e−5 charge/memory bands, reserve [50,100], and auxiliary rest/ERROR alternatives; the headline separately requires all auxiliaries READY."
+        return "Protocol inputs", "birth-and-fabrication", "Common birth at zero, no RAW currents, main READY, declared 1e−5 charge/memory bands, reserve [50,100], and auxiliary rest/ERROR alternatives; the headline separately requires all auxiliaries READY."
     if tail == "PhysicalInvariant":
         return "Observations", "energy", "Current upper-region bounds, own gain/recovery caps and reserve [50,100]."
     if tail == "ReadyCoordinates":
@@ -111,7 +119,7 @@ def model_rule(name: str) -> tuple[str, str, str]:
     if tail == "RestBand":
         return "Observations", "initial-and-prepared-sections", "Auxiliary rest band 1/40 ± 1/100000."
     if tail in {"pulse", "current"}:
-        return "Model", "topologies-and-sources-in-this-repository", "Canonical current a·exp(−a·(t−F)) on [F,F+1), with the actual raw origin F."
+        return "Model", "canonical-pulses", "Canonical current a·exp(−a·(t−F)) on [F,F+1), with the actual raw origin F."
     if tail == "drive":
         return "Model", "main-unit", "Admitted READY current Σ exp(zₚ)·pₚ(t)."
     if tail in {"errorAct", "markAct", "auxDrain"}:
@@ -135,27 +143,27 @@ def model_rule(name: str) -> tuple[str, str, str]:
     if tail == "Snapshot.ObservationalEq":
         return "Observations", "event-semantics", "Equal clock, physical coordinates, modes and RAW origins; pending lists agree up to permutation."
     if tail == "UniversalCadenceOutcome":
-        return "Observations", "topologies-and-sources-in-this-repository", "Terminal READY/rest state, no RAW or pending traffic, own memory increments and exact actual FIRE counts."
+        return "Observations", "complete-executions-and-outcomes", "Terminal READY/rest state, no RAW or pending traffic, own memory increments and exact actual FIRE counts."
     if tail == "finiteChainPreparationCount":
-        return "Observations", "topologies-and-sources-in-this-repository", "Actual preparation prefix length: fourteen leaf FIREs and twelve at each other cell."
+        return "Observations", "complete-executions-and-outcomes", "Actual preparation prefix length: fourteen leaf FIREs and twelve at each other cell."
     if tail == "cadenceActivePort":
-        return "Observations", "topologies-and-sources-in-this-repository", "Active cadence port: zero at the leaf, two at each other cell."
+        return "Observations", "complete-executions-and-outcomes", "Active cadence port: zero at the leaf, two at each other cell."
     if tail == "sourceTrain":
-        return "Protocol inputs", "topologies-and-sources-in-this-repository", "Finite input-token train at dates start + gap·k, with supplied receiving cell and port."
+        return "Protocol inputs", "chain-and-sources", "Finite input-token train at dates start + gap·k, with supplied receiving cell and port."
     if tail == "finiteChainPreparationPort":
-        return "Protocol inputs", "topologies-and-sources-in-this-repository", "Preparation enters port one at the leaf and port two at every other cell."
+        return "Protocol inputs", "chain-and-sources", "Preparation enters port one at the leaf and port two at every other cell."
     if tail == "familyPreparationBornSource":
-        return "Protocol inputs", "initial-and-prepared-sections", "Independent supplied births and their preparation queues, plus K period-four leaf inputs from time 160."
+        return "Protocol inputs", "chain-and-sources", "Independent supplied births and their preparation queues, plus K period-four leaf inputs from time 160."
     if tail == "explicitFiniteChainRouter":
-        return "Protocol inputs", "topologies-and-sources-in-this-repository", "Root sends nothing; cell i > 0 sends one parent-port-2 token on [160,T+1), due at t + delay(n−i,t)."
+        return "Protocol inputs", "chain-and-sources", "Root sends nothing; cell i > 0 sends one parent-port-2 token on [160,T+1), due at t + delay(n−i,t)."
     if tail == "cadenceChainTerminal":
-        return "Protocol inputs", "topologies-and-sources-in-this-repository", "Terminal horizon 160 + 4(K−1) + (11/10)·n + 8 for n+1 cells."
+        return "Protocol inputs", "chain-and-sources", "Terminal horizon 160 + 4(K−1) + (11/10)·n + 8 for n+1 cells."
     if tail == "finiteCadenceTerminal":
-        return "Protocol inputs", "topologies-and-sources-in-this-repository", "Horizon start + 4·(K−1) + (11/10)·(N−1) + 8, using natural-number subtraction before conversion to real time."
+        return "Protocol inputs", "chain-and-sources", "Horizon start + 4·(K−1) + (11/10)·(N−1) + 8, using natural-number subtraction before conversion to real time."
     if name == "KernelR.Chain.pathJitter":
-        return "Protocol inputs", "topologies-and-sources-in-this-repository", "Sum of the supplied per-link nonnegative jitter budgets along the chain."
+        return "Protocol inputs", "chain-and-sources", "Sum of the supplied per-link nonnegative jitter budgets along the chain."
     if tail in {"independentFamilySource", "independentHeadQueue", "Snapshot.prependQueued", "Snapshot.prependQuiet", "Snapshot.requeue", "appendPending", "Delivery.head", "Delivery.succ"}:
-        return "Protocol inputs", "initial-and-prepared-sections", "Assemble independent birth coordinates and exact source queues, preserving token dates/ports while embedding receiving-cell indices."
+        return "Protocol inputs", "chain-and-sources", "Assemble independent birth coordinates and exact source queues, preserving token dates/ports while embedding receiving-cell indices."
     raise ValueError(f"No written-model correspondence registered for trusted declaration {name}")
 
 
@@ -185,11 +193,13 @@ def authenticate(manifest: dict, commit: str) -> None:
         start, end = entry["line"], entry.get("end_line", entry["line"])
         if not (1 <= start <= end <= len(lines)):
             raise ValueError(f"Out-of-range generated declaration location: {entry['name']}")
-    model_rule_names = [model_rule(entry["name"]) for entry in trusted]
-    model_headings = headings(git_bytes(commit, "kernel/README.md").decode())
-    for _, anchor, _ in model_rule_names:
-        if anchor not in model_headings:
-            raise ValueError(f"Written-model heading does not exist: {anchor}")
+    model_headings = {path: headings(git_bytes(commit, path).decode())
+                      for path in (CELL_LAWS, CHAIN_PROTOCOL)}
+    for entry in trusted:
+        _, anchor, _ = model_rule(entry["name"])
+        path = model_source(anchor)
+        if anchor not in model_headings[path]:
+            raise ValueError(f"Written-model heading does not exist: {path}#{anchor}")
 
 
 def render(manifest: dict, commit: str) -> str:
@@ -210,7 +220,8 @@ def render(manifest: dict, commit: str) -> str:
            f"1. Read [`{headline['name']}`]({source_link(commit, headline, statement_only=True)}). "
            "Its witnesses and universal conclusions use the supplied closed-form router; "
            "no construction structure occurs in the statement.",
-           f"2. Compare the model definitions below with the [written cell laws]({REPOSITORY}/blob/{commit}/kernel/README.md).",
+           f"2. Compare the definitions below with the [cell laws]({REPOSITORY}/blob/{commit}/{CELL_LAWS}) "
+           f"and the [chain protocol]({REPOSITORY}/blob/{commit}/{CHAIN_PROTOCOL}).",
            "3. Read the crossing semantics, including the actual left history, the full-cell right ODE germ and terminal saturation.",
            "4. Read the protocol inputs: birth/source program, explicit router, delay/jitter assumptions and horizon.",
            "5. Read the compared observations: physical endpoint, actual FIRE lists and counts, and memory increments.",
@@ -233,7 +244,7 @@ def render(manifest: dict, commit: str) -> str:
         out += [f"### {group}", "", "| Trusted declaration | Corresponding written-model equation or rule |", "|---|---|"]
         for entry in by_group[group]:
             _, anchor, description = model_rule(entry["name"])
-            model = f"{REPOSITORY}/blob/{commit}/kernel/README.md#{anchor}"
+            model = f"{REPOSITORY}/blob/{commit}/{model_source(anchor)}#{anchor}"
             out.append(f"| [`{entry['name']}`]({source_link(commit, entry)}) | [{description}]({model}) |")
         out.append("")
     out += ["## What the check establishes", "",
@@ -255,7 +266,7 @@ def render(manifest: dict, commit: str) -> str:
             f"- [Dependency traversal]({REPOSITORY}/blob/{commit}/proof/lean/KernelR/TrustedBaseChecker.lean) and [explicit allowlist/check invocation]({REPOSITORY}/blob/{commit}/proof/lean/KernelR/TrustedBase.lean): definitions are followed, proofs are not unfolded, and imported library internals are leaves.",
             f"- [Generated declaration manifest]({REPOSITORY}/blob/{commit}/proof/lean/evidence/trusted_base.json): names, generated source ranges and authenticated source hashes.",
             f"- [CI build action]({REPOSITORY}/blob/{commit}/.github/actions/build-lean/action.yml): verifies the pinned Lean distribution and builds the Lake package.",
-            f"- [Fresh Lean export]({REPOSITORY}/blob/{commit}/proof/lean/scripts/export_trusted_base.py), [source boundary]({REPOSITORY}/blob/{commit}/proof/lean/scripts/check_trusted_source_boundary.py), and [CI workflow]({REPOSITORY}/blob/{commit}/.github/workflows/lean.yml): the exported list is rechecked, existing Lean declarations are preserved, and the controls run at the recorded revision.",
+            f"- [Fresh Lean export]({REPOSITORY}/blob/{commit}/proof/lean/scripts/evidence/export_trusted_base.py), [source boundary]({REPOSITORY}/blob/{commit}/proof/lean/scripts/check_trusted_source_boundary.py), and [CI workflow]({REPOSITORY}/blob/{commit}/.github/workflows/lean.yml): the exported list is rechecked, existing Lean declarations are preserved, and the controls run at the recorded revision.",
             "",
             "Full CI status and validation counts must be read at their exact recorded "
             "commit. The generated declaration list is not itself a claim that a CI run passed.", ""]
