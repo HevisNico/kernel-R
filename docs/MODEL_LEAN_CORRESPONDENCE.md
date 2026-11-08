@@ -126,6 +126,26 @@ no tangent-touch ambiguity under these hypotheses. `WeakBeforeGuards` changes
 only the upper READY guards. The [review guide](../REVIEW.md) identifies the
 separate human obligation to validate the crossing convention against the model.
 
+## Zero recovery and protected learning
+
+The positive birth recovery bound used above belongs to the birth-based
+protocol; `PhysicalInvariant` alone permits zero recovery. The separate
+[zero-recovery theorem](RESET_ZERO_RECOVERY.md) starts in SLOW at q=1/4 and
+b=0. With no MARK sensor on the selected cell's actual flow pieces, the
+integral equations force b=0 and q=1/4 throughout the execution. The reopening
+guard q=1/10 is never reached, and no later FIRE occurs.
+
+[HybridZeroRecoveryCrossing](../proof/lean/KernelR/HybridZeroRecoveryCrossing.lean)
+proves this directly for weak integral executions and hence for arbitrary
+upward-crossing executions, without using the finite-chain correspondence.
+Its crossing theorem retains the explicit actual no-MARK premise. The
+input-based quiet-sensor corollary in
+[HybridZeroRecovery](../proof/lean/KernelR/HybridZeroRecovery.lean) is native.
+An isolated fully exposed MARK can instead repair b from zero to 0.1.
+Actual complete native and crossing locked witnesses exist through every
+later finite horizon. These are results about this specified regime in R,
+not a proof of the broader structural Reset Operator argument.
+
 ## Constructed finite-chain result
 
 [`FixedDelayChainHeadline.every_finite_chain_fixed_delay`](../proof/lean/KernelR/FixedDelayChainHeadline.lean)

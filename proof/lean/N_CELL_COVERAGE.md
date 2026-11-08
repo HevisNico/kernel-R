@@ -97,6 +97,22 @@ finite construction supplies universal
 physical contracts for arbitrary introductions or port permutations, or an
 indefinitely repeatable network contract.
 
+## Separate zero-recovery scope
+
+The [zero-recovery milestone](../../docs/RESET_ZERO_RECOVERY.md) is independent
+of the finite-chain source program. For any network size and router, a cell
+starting in SLOW with q=1/4 and b=0 remains locked and produces no further
+FIRE if its actual flow pieces contain no MARK sensor. The result is proved
+directly in native and upward-crossing semantics; its crossing statement has
+the explicit actual no-MARK premise. The quiet-sensor input-based corollary
+is currently native.
+
+Zero recovery is allowed by current physical-state bounds, but not by the
+protocol's nominal birth band. An isolated exposed MARK section repairs it
+to 0.1. Complete locked witnesses through arbitrarily late finite horizons
+establish non-vacuity, not general continuation or time divergence for all
+arbitrary-network executions. No broader Reset Operator conclusion is claimed.
+
 ## Checked composition
 
 | Written argument | Lean module and declarations | Scope |

@@ -147,6 +147,23 @@ For a window of duration L, the number of firings is at most
 that every excess input pulse is lost, or prove the broader Reset Operator
 argument. [Lean statement](proof/lean/KernelR/HybridResetRateCrossing.lean).
 
+## Separate result: when recovery stays at zero
+
+Lean also proves that a cell starting in SLOW with charge 1/4 and recovery
+zero cannot fire again while none of its sensors is in MARK during a
+positive-duration flow.
+Its charge and recovery stay fixed. This result holds directly in both
+semantics for any network size and router. A separate native corollary derives
+the missing-MARK condition from initially resting READY sensors, no active
+pulse and no later delivery to that cell.
+
+Zero recovery is allowed by the current physical bounds, although it is not
+the protocol's birth state. It can be repaired: an isolated fully exposed MARK
+phase raises it from zero to 0.1. The proofs construct complete locked
+executions through arbitrarily late finite horizons; they do not claim that
+every deficient cell remains silent despite learning, or prove the broader
+Reset Operator argument. See the [precise statements and validation](docs/RESET_ZERO_RECOVERY.md).
+
 ## How to check it
 
 The project pins **Lean 4.35.0** and **Mathlib v4.35.0**; dependency commits
