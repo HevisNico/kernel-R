@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Authenticate the unchanged Lean base of the dedicated trusted-headline PR."""
+"""Authenticate the unchanged Lean base and explicitly listed additive modules."""
 import hashlib
 from pathlib import Path
 import subprocess
@@ -11,12 +11,18 @@ IMPORTS = {
     'import KernelR.TrustedHeadline',
     'import KernelR.TrustedBaseChecker',
     'import KernelR.TrustedBase',
+    'import KernelR.HybridResetRateCrossing',
     'import KernelR.HybridZeroRecoveryCrossing',
 }
 NEW_MODULES = {f'proof/lean/KernelR/{name}.lean' for name in
-               ['ExplicitFiniteChainRouter', 'TrustedHeadline', 'TrustedBaseChecker', 'TrustedBase',
-                'HybridZeroRecovery', 'HybridZeroRecoveryCrossing']}
-NEW_MODULES.add('proof/lean/ZeroRecoveryAudit.lean')
+               ['ExplicitFiniteChainRouter', 'TrustedHeadline', 'TrustedBaseChecker', 'TrustedBase']}
+NEW_MODULES |= {
+    'proof/lean/KernelR/HybridResetRate.lean',
+    'proof/lean/KernelR/HybridResetRateCrossing.lean',
+    'proof/lean/KernelR/HybridZeroRecovery.lean',
+    'proof/lean/KernelR/HybridZeroRecoveryCrossing.lean',
+    'proof/lean/ZeroRecoveryAudit.lean',
+}
 ENTRY = 'proof/lean/KernelR.lean'
 
 

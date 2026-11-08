@@ -674,3 +674,12 @@ The five unchanged upstream Lean files come from Nicolas Breuillaud's
 locally and in CI. Source code, including Lean source, follows the repository's
 [MIT license](../../LICENSE); this guide and evidence provenance follow
 [CC BY 4.0](../../LICENSE-docs.md).
+
+## Recovery-limited firing rate
+
+`lake build KernelR.HybridResetRateCrossing` checks a separate native, weak and
+geometric-crossing bound for any network/router/queue with an actual pathwise
+recovery envelope. Run `python scripts/check_hybrid_reset_rate_negative.py` for
+the paired contracts. The [scope and equations](../../docs/RESET_RATE_SATURATION.md)
+explain variable recovery, the exact cap bound and the finite-window allowance.
+The umbrella import makes these declarations visible to the global axiom audit.

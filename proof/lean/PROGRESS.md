@@ -186,3 +186,11 @@ Check the printed assumptions for the new entry points. The finite-continuation
 proof handles simultaneous jumps and both orders of unequal flow cuts.
 [HybridProgressControls](KernelR/HybridProgressControls.lean) proves that the actual one-cell bounded subdivision has a semantic
 extension through its flow limit.
+
+## Physical rate limits and terminal saturation
+
+The separate [recovery-limited rate theorem](../../docs/RESET_RATE_SATURATION.md)
+uses physical protection to bound the number of firings in existing executions.
+This physical saturation differs from terminal jump saturation in
+`CompleteThrough`. A firing-rate bound alone does not prove continuation for
+an arbitrary queue/router and does not replace any progress hypothesis here.

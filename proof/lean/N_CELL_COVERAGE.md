@@ -232,3 +232,12 @@ leaf/relay premise is replaced by a project axiom.
 
 The original written theorem and its authenticated snapshots are retained
 unchanged. This guide states the current machine-checked coverage separately.
+
+## Protocol-independent recovery bound
+
+[HybridResetRateCrossing](KernelR/HybridResetRateCrossing.lean) bounds every
+ordered pair of same-cell firing dates and finite-window firing counts in
+existing native, weak and geometric-crossing executions of any finite network.
+It needs an actual recovery envelope, or initial recovery below the built-in
+cap. It imposes no chain topology and asserts no arbitrary-input existence.
+See [precise scope](../../docs/RESET_RATE_SATURATION.md).

@@ -134,6 +134,19 @@ See also the [threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#thresh
   saturation when recovery cannot keep pace with forcing is not part of this
   theorem.
 
+## Recovery limits the output rate
+
+A [separate analytic theorem](docs/RESET_RATE_SATURATION.md) applies to any
+network topology and any supplied finite execution in both native and upward
+crossing semantics. If recovery stays below a positive bound β, two firings of
+the same cell are separated by at least `1 + log(5/2)/β`. Starting within the
+built-in recovery cap gives a uniform gap of approximately 1.83299 time units.
+
+For a window of duration L, the number of firings is at most
+`1 + L/(1 + log(5/2)/β)`. This limits sustained output cadence; it does not say
+that every excess input pulse is lost, or prove the broader Reset Operator
+argument. [Lean statement](proof/lean/KernelR/HybridResetRateCrossing.lean).
+
 ## Separate result: when recovery stays at zero
 
 Lean also proves that a cell starting in SLOW with charge 1/4 and recovery
