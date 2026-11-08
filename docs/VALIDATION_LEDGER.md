@@ -4,6 +4,22 @@
 
 ## Validation and checkpoint discipline
 
+### Full Lean validation at 0543640
+
+The complete Lean workflow passed at revision
+[`05436400704dc7fc2126d12d38e93d899300363b`](https://github.com/HevisNico/kernel-R/commit/05436400704dc7fc2126d12d38e93d899300363b)
+in [CI run 42212189044](https://github.com/HevisNico/kernel-R/actions/runs/42212189044), including the build, global axiom
+audit, trusted-base checks and regression controls.
+
+The final report records **9,624 build jobs** (a cached replay of all default
+targets, including dependencies) and **29,330 project theorem declarations**
+audited. The only allowed axioms were `propext`, `Classical.choice` and
+`Quot.sound`, with no admitted proofs or added project axioms. These
+measurements describe that revision.
+
+The [`trusted-base-validation-05436400704dc7fc2126d12d38e93d899300363b` artifact](https://github.com/HevisNico/kernel-R/actions/runs/42212189044/artifacts/13502314203)
+contains the report and the captured build and audit logs.
+
 ### Zero-recovery milestone local validation
 
 The [zero-recovery result](RESET_ZERO_RECOVERY.md) is a separate

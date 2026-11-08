@@ -140,10 +140,8 @@ lake build Audit
 
 The audit checks every project theorem and allows only `propext`,
 `Classical.choice` and `Quot.sound`. The source checks reject `sorry`, added
-axiom declarations and `native_decide`. One recorded full validation is
-[CI run 42212189044](https://github.com/HevisNico/kernel-R/actions/runs/42212189044)
-at `0543640`, with 29,330 theorems audited. See the
-[validation ledger](docs/VALIDATION_LEDGER.md#validation-and-checkpoint-discipline),
+axiom declarations and `native_decide`. See the
+[recorded full validation](docs/VALIDATION_LEDGER.md#full-lean-validation-at-0543640),
 [exact signatures and axiom outputs](docs/UNIVERSAL_FINITE_CHAIN.md#lean-headline-signatures-axioms-and-reproduction), and
 [fresh-checkout rebuild instructions](proof/lean/README.md#rebuild-project-proofs-without-a-restored-project-cache).
 
