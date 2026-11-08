@@ -1,5 +1,5 @@
 name: Build Lean package
-description: Install a verified Elan release and build the pinned Lake package.
+description: Install the verified Lean distribution and build the pinned Lake package.
 inputs:
   package-directory:
     description: Path to the Lake package, relative to the repository root.
@@ -10,39 +10,36 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install pinned Elan and Lean toolchain
+    - name: Install the pinned Lean distribution
       shell: bash
       working-directory: ${{ inputs.package-directory }}
       run: |
         set -euo pipefail
-        install_dir=$(mktemp -d "$RUNNER_TEMP/elan.XXXXXXXX")
-        trap 'rm -rf "$install_dir"' EXIT
-        archive="$install_dir/elan.tar.gz"
         # Both callers use x64 Linux GitHub-hosted runners.
-        curl --fail --silent --show-error --location \
-          --retry 4 --retry-all-errors --retry-max-time 180 \
-          --connect-timeout 10 --max-time 60 --output "$archive" \
-          https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz
-        printf '%s  %s\n' '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63' "$archive" \
-          | sha256sum --check
-        tar --no-same-owner -xzf "$archive" -C "$install_dir" elan-init
-        "$install_dir/elan-init" -y --default-toolchain none --no-modify-path
-        elan_bin="${ELAN_HOME:-$HOME/.elan}/bin"
         toolchain=$(cat lean-toolchain)
-        install_toolchain() {
-          local delay
-          for delay in 0 5 15; do
-            sleep "$delay"
-            if "$elan_bin/elan" toolchain install "$toolchain"; then
-              return 0
-            fi
-          done
-          return 1
+        if [[ "$toolchain" != "leanprover/lean4:v4.35.0" ]]; then
+          printf 'Update the CI asset ID and digest for toolchain %s\n' "$toolchain" >&2
+          exit 1
+        fi
+        archive=$(mktemp "$RUNNER_TEMP/lean.XXXXXXXX.tar.zst")
+        trap 'rm -f "$archive"' EXIT
+        install_dir=$(mktemp -d "$RUNNER_TEMP/lean.XXXXXXXX")
+        download_toolchain() {
+          curl --fail --silent --show-error --location \
+            --retry 2 --retry-all-errors --retry-max-time 180 \
+            --connect-timeout 10 --max-time 180 --output "$archive" "$@" &&
+          printf '%s  %s\n' '7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d' "$archive" \
+            | sha256sum --check
         }
-        install_toolchain
-        "$elan_bin/lean" --version
-        "$elan_bin/lake" --version
-        printf '%s\n' "$elan_bin" >> "$GITHUB_PATH"
+        # The release asset API and the browser URL take different download routes.
+        download_toolchain -H 'Accept: application/octet-stream' \
+          "https://api.github.com/repos/leanprover/lean4/releases/assets/634574462?download=1&run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" ||
+        download_toolchain \
+          "https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst?run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+        tar --no-same-owner --strip-components=1 --zstd -xf "$archive" -C "$install_dir"
+        "$install_dir/bin/lean" --version
+        "$install_dir/bin/lake" --version
+        printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
 
     - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
       id: cache-restore
