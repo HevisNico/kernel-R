@@ -1,0 +1,37 @@
+name: Reset window Lean proofs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - research/reset-window/**
+      - .github/workflows/reset-window.yml
+  pull_request:
+    paths:
+      - research/reset-window/**
+      - .github/workflows/reset-window.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      LEAN_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: leanprover/lean-action@fe408643ea7367d8c0404a8be3975bb145f5fb64 # v1
+        with:
+          lake-package-directory: research/reset-window
+          build: 'false'
+          test: 'false'
+          lint: 'false'
+          use-mathlib-cache: 'false'
+      - name: Build and audit the reset window proofs
+        working-directory: research/reset-window
+        run: |
+          lake exe cache get Mathlib.Analysis.SpecialFunctions.ExpDeriv Mathlib.Analysis.SpecialFunctions.Log.Basic Mathlib.Tactic.FieldSimp Mathlib.Tactic.Linarith Mathlib.Tactic.LinearCombination Mathlib.Tactic.Positivity Mathlib.Tactic.Ring Mathlib.Tactic.NormNum
+          lake build
