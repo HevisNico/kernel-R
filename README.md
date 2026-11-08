@@ -3,15 +3,16 @@
 [![Lean proof checks](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml/badge.svg)](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml)
 **Archived release v0.2.0 — DOI:** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
 
-A pulse-driven cell with exact learning doses under fixed fabrication
-variation. Lean proves that a chain of any finite length learns and relays
-a rhythm under the declared protocol.
-
 ## Why it matters
 
-In the R model, a fabrication rate can change how fast a sensor discharges.
-During a full learning phase, the cell integrates that discharge between
-fixed charge thresholds. The rate cancels from the learning dose.
+Kernel R makes learning exactly predictable in a model of asynchronous cells
+with fabrication mismatch. In every complete run of the declared protocol,
+each cell's memory increments are the same across the allowed fabrication
+parameters, wire delays and legal orders of simultaneous events. Lean proves
+this from the cell's differential equations for chains of any finite length.
+
+During a full learning phase, the cell integrates a sensor's discharge between
+fixed charge thresholds. The fabrication rate cancels from the dose.
 
 - A complete ERROR phase adds `Δz = 8 × (0.1 − 0.025) = 0.6` to the port's
   log-gain when the cell stays READY.
@@ -174,6 +175,8 @@ It is done with two AI assistants, **Claude** (Anthropic) and **ChatGPT**
 (OpenAI), under the direction of Nicolas Breuillaud. AI assists the
 construction of models, code, proofs and documentation. Lean checks the
 resulting proof terms against their definitions and hypotheses.
+That check does not experimentally validate the physical assumptions or
+establish every claim made in the repository.
 
 Source code is [MIT](LICENSE). Documents, proofs, data, certificates and other
 non-code material are CC BY 4.0 under [LICENSE-docs.md](LICENSE-docs.md).
