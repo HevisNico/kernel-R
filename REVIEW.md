@@ -96,6 +96,34 @@ provides an observationally equal crossing representative. The correspondence
 is proved for the declared finite-chain protocol, not for arbitrary initial
 states or inputs. Infinite/maximal-run theorems retain their native interface.
 
+## Zero recovery outside the chain protocol
+
+For the [separate zero-recovery result](docs/RESET_ZERO_RECOVERY.md), review
+the unchanged SLOW field, recovery actuator gates and reopening guard first.
+`NoMarkFlows` must refer to the selected cell's actual sensor modes on each
+positive-duration flow; it does not assume the locked-mode conclusion.
+The arbitrary-network crossing proof is direct in `WeakExecution` and then
+`CrossingExecution`, without a generic model-to-native conversion.
+
+Keep the hypotheses of the native quiet-sensor corollary distinct: no new
+arrivals alone does not exclude a pre-existing MARK phase or active raw pulse.
+The repair theorem requires an actual isolated fully exposed MARK section.
+Check the explicit constant-flow witnesses, including the reserve equilibrium
+99.89 and the current physical bounds. Zero recovery is admissible there but
+is outside the declared nominal birth band. The result neither changes the
+chain theorem nor proves the broader Reset Operator claim.
+
 The [validation ledger](proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
 records the build, axiom audit and paired controls separately from this human
 review obligation.
+
+## Recovery-limited firing rate
+
+Review the [separate rate statement](docs/RESET_RATE_SATURATION.md) and its
+actual-path `RecoveryBound` premise. Initial recovery alone is insufficient for
+a custom envelope because protected MARK phases can increase it. Review the
+FAST/SLOW decomposition, actual firing labels and the one-firing finite-window
+allowance. The arbitrary-network crossing result follows directly from weak
+paths, not from a protocol-scoped correspondence. No arbitrary-queue progress
+or loss of all excess inputs is inferred. The broader Reset Operator thesis
+remains separate.

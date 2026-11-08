@@ -126,6 +126,26 @@ no tangent-touch ambiguity under these hypotheses. `WeakBeforeGuards` changes
 only the upper READY guards. The [review guide](../REVIEW.md) identifies the
 separate human obligation to validate the crossing convention against the model.
 
+## Zero recovery and protected learning
+
+The positive birth recovery bound used above belongs to the birth-based
+protocol; `PhysicalInvariant` alone permits zero recovery. The separate
+[zero-recovery theorem](RESET_ZERO_RECOVERY.md) starts in SLOW at q=1/4 and
+b=0. With no MARK sensor on the selected cell's actual flow pieces, the
+integral equations force b=0 and q=1/4 throughout the execution. The reopening
+guard q=1/10 is never reached, and no later FIRE occurs.
+
+[HybridZeroRecoveryCrossing](../proof/lean/KernelR/HybridZeroRecoveryCrossing.lean)
+proves this directly for weak integral executions and hence for arbitrary
+upward-crossing executions, without using the finite-chain correspondence.
+Its crossing theorem retains the explicit actual no-MARK premise. The
+input-based quiet-sensor corollary in
+[HybridZeroRecovery](../proof/lean/KernelR/HybridZeroRecovery.lean) is native.
+An isolated fully exposed MARK can instead repair b from zero to 0.1.
+Actual complete native and crossing locked witnesses exist through every
+later finite horizon. These are results about this specified regime in R,
+not a proof of the broader structural Reset Operator argument.
+
 ## Constructed finite-chain result
 
 [`FixedDelayChainHeadline.every_finite_chain_fixed_delay`](../proof/lean/KernelR/FixedDelayChainHeadline.lean)
@@ -184,3 +204,14 @@ The earlier [three-cell headline](../proof/lean/KernelR/Headline.lean) retains
 its distinct staged 0/160/480 births, horizon 789.9 and A54/B61/C34. Operational
 drift/noise, frozen probes/settings copies, numerical observations and A22
 retain their separate [coverage boundaries](../proof/lean/N_CELL_COVERAGE.md).
+
+## Recovery-limited firing rates
+
+[RESET_RATE_SATURATION.md](RESET_RATE_SATURATION.md) derives a protocol-independent
+FIRE gap from the actual FAST/SLOW equations and a pathwise recovery bound.
+[HybridResetRate](../proof/lean/KernelR/HybridResetRate.lean) treats native
+executions; [HybridResetRateCrossing](../proof/lean/KernelR/HybridResetRateCrossing.lean)
+proves the same bounds directly for weak and geometric crossing histories.
+This uses protected-coordinate preservation under individual-flow strictification,
+not a general identification of the two execution semantics. It adds no
+input protocol, reserve assumption or global-existence claim to the rate theorem.

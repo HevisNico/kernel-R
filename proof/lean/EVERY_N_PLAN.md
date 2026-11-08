@@ -224,6 +224,41 @@ a fresh external-dependency rebuild, rerun of every historical control, or a
 complete green CI run. The stationary positive-duration witness begins at cap; no
 cap-reaching section from a subcap protocol birth is claimed.
 
+### Zero-recovery milestone local validation
+
+The [zero-recovery result](../../docs/RESET_ZERO_RECOVERY.md) is a separate
+arbitrary-network obstruction, not a new finite-chain hypothesis or a general
+Reset Operator theorem. `HybridZeroRecovery` proves native locked snapshots,
+paths and no firing from SLOW/q=1/4/b=0 with no MARK flow on the selected cell.
+`HybridZeroRecoveryCrossing` proves the corresponding weak and model crossing
+statements directly, retaining that explicit no-MARK premise. The quiet-sensor
+input-based corollary is native. A fully exposed isolated MARK repairs b=0 to
+0.1; actual complete locked native and crossing witnesses of arbitrary
+positive duration are constructed within the current physical bounds.
+
+Code checkpoint: `d8f55708230082d3499ad0d06b62ee90f608f265`, based on main
+`0f39642`. Observed local checks on 6 November 2026:
+
+| Measurement | Recorded result and scope |
+|---|---|
+| Targeted build | The two new modules passed with 3,560 dependency/build jobs under Lean 4.35.0 and the pinned dependencies. This is not a fresh full-project rebuild. |
+| Scoped axiom audit | `ZeroRecoveryAudit.lean` passed for 1,996 project theorem declarations in the imported closure, allowing only `propext`, `Classical.choice`, `Quot.sound`. This is not the count of new theorems or a global audit total. |
+| New contracts | The modules declare 19 explicit public theorems. Their printed headline axiom profiles use only the three allowed axioms. |
+| Paired controls | All 20 pairs passed: one for each new public theorem plus retention of the no-MARK hypothesis. Every original compiled before its altered version was individually rejected; parser and import failures are not accepted substitutes. |
+| Non-vacuity | Actual complete locked native and crossing executions are constructed through every later finite horizon; the state is physically admissible for either fabrication box, but is not a nominal birth state. |
+
+The full default local `lake build` subsequently passed with 9,626 jobs,
+including the unchanged global `Audit` target: 29,377 project theorem declarations
+with only the same three permitted axioms. Dependency caches were reused;
+this is not a fresh external-dependency rebuild or a rerun of every historical
+control. Completed remote CI is not claimed.
+
+The original source-boundary base and byte-identity checks remain unchanged;
+only the two exact new modules, dedicated audit file and added root import
+are whitelisted. A fresh checked Lean export retained the same 84 trusted
+semantic declarations. The source-hash record and reading list were
+regenerated for the code checkpoint and their authenticated check passed.
+
 ### Trusted headline: fixed code checkpoint and final-head CI record
 
 The initial mathematical and verification source checkpoint is
@@ -493,3 +528,34 @@ explicit instruction. The [historical PR description](UNIVERSAL_EXECUTION_PR.md)
 records the reviewed universal proof change; the current
 [release checklist](../../docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md) does not
 authorize an automatic merge or release publication.
+
+## Recovery-limited firing rate local validation
+
+Code checkpoint: `b33af69356790f3ab45fd8dc4ee675c721221e3a`, based on main
+`0f39642`. The new native and direct weak/crossing proof modules are
+[HybridResetRate](KernelR/HybridResetRate.lean) and
+[HybridResetRateCrossing](KernelR/HybridResetRateCrossing.lean). They establish
+actual FIRE gaps and finite-window count bounds for arbitrary finite networks
+under a pathwise recovery envelope, with a uniform specialization from the
+initial built-in recovery cap. No protocol or completion premise is imposed.
+
+Local validation on 6 November 2026:
+
+- Full default `lake build`: passed, 9,626 jobs including cached dependencies.
+- The unchanged global `Audit` target passed for 29,405 imported project
+  theorem declarations, allowing only `propext`, `Classical.choice` and
+  `Quot.sound`. New modules are included through the umbrella import.
+- `python scripts/check_hybrid_reset_rate_negative.py`: ten paired controls
+  passed; valid contracts compile and mutated contracts fail with type errors.
+- Source hygiene and five inherited-source identities passed; the unchanged
+  base byte checks retain the same base and permit only named added modules.
+- Generated numerical evidence freshness, sixteen robust certificate replays
+  and all three project-layout tests passed.
+- A fresh Lean metadata export retained the same 84 trusted semantic
+  declarations. The source-hash record and reading list were regenerated for
+  the code checkpoint; the authenticated document check passed.
+
+The dependency caches were reused. These are local checks, not a fresh
+external-dependency rebuild or the entire CI workflow. The new paired suite
+is included in CI; the unchanged historical negative suites retain their
+existing CI stages. See [scope](../../docs/RESET_RATE_SATURATION.md).

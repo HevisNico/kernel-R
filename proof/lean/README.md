@@ -337,6 +337,37 @@ The reviewed universal proof modules are included in this checkout. The
 records the v0.2.0 integration and publication scope; later local validation is
 recorded in the [current ledger](EVERY_N_PLAN.md#validation-and-checkpoint-discipline).
 
+## Zero recovery outside the chain protocol
+
+[HybridZeroRecovery](KernelR/HybridZeroRecovery.lean) proves an actual SLOW
+cell with q=1/4 and b=0 stays locked and emits no further FIRE while its flow
+pieces have no MARK sensor. The native quiet-sensor corollary derives that
+premise from READY sensors at rest, absent raw pulses and absent deliveries.
+[HybridZeroRecoveryCrossing](KernelR/HybridZeroRecoveryCrossing.lean) proves
+the locked paths, states and no-FIRE conclusion directly for `WeakExecution`
+and `CrossingExecution`, for arbitrary network size and router, with the
+explicit actual no-MARK premise. It assumes no chain protocol or generic
+weak-to-native conversion.
+
+An isolated exposed MARK section repairs b=0 to b=0.1. Complete locked native
+and crossing witnesses of arbitrary positive duration establish non-vacuity;
+their energy is the exact SLOW equilibrium 99.89. They satisfy current
+physical bounds in either fabrication box, but are not nominal birth states.
+See the [scope, definitions and reproduction commands](../../docs/RESET_ZERO_RECOVERY.md).
+
+The root imports both modules through the crossing module, so the default
+build and global audit include them. The targeted commands are:
+
+```sh
+lake build KernelR.HybridZeroRecovery KernelR.HybridZeroRecoveryCrossing
+lake env lean ZeroRecoveryAudit.lean
+python3 scripts/check_zero_recovery_negative.py
+```
+
+There are 20 paired controls for the 19 new public theorem contracts and the
+no-MARK premise. This restricted R result is separate from the chain theorem
+and from any general Reset Operator claim.
+
 ## Reproduce
 
 Install [elan](https://github.com/leanprover/elan), then from this directory:
@@ -659,3 +690,12 @@ The five unchanged upstream Lean files come from Nicolas Breuillaud's
 locally and in CI. Source code, including Lean source, follows the repository's
 [MIT license](../../LICENSE); this guide and evidence provenance follow
 [CC BY 4.0](../../LICENSE-docs.md).
+
+## Recovery-limited firing rate
+
+`lake build KernelR.HybridResetRateCrossing` checks a separate native, weak and
+geometric-crossing bound for any network/router/queue with an actual pathwise
+recovery envelope. Run `python scripts/check_hybrid_reset_rate_negative.py` for
+the paired contracts. The [scope and equations](../../docs/RESET_RATE_SATURATION.md)
+explain variable recovery, the exact cap bound and the finite-window allowance.
+The umbrella import makes these declarations visible to the global axiom audit.

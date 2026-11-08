@@ -36,6 +36,20 @@ replaced, physical coordinates are not reset, and no event priority is added.
 These statements concern the same finite network and finite source protocol;
 they do not cover arbitrary new cyclic routers or infinitely many new sources.
 
+## Zero recovery does not imply stopped physical time
+
+The [separate zero-recovery result](../../docs/RESET_ZERO_RECOVERY.md) concerns
+a SLOW cell with q=1/4 and b=0 whose actual flow pieces have no MARK sensor.
+It proves no later FIRE, directly in native and upward-crossing executions,
+for any router and network size. The crossing theorem keeps that no-MARK
+premise explicit; the quiet-input corollary is native.
+
+This is a firing obstruction, not a claim that time cannot advance. The
+explicit locked witnesses admit genuine positive flows and complete native
+and crossing executions through every later finite horizon. They do not
+extend the chain's every-prefix or infinite maximal-run theorems to arbitrary
+networks. A protected learning section may instead restore positive recovery.
+
 ## Existing ingredients
 
 - `HybridUniversalExecution.lean`: physical flow uniqueness and cancellation
@@ -179,3 +193,11 @@ Check the printed assumptions for the new entry points. The finite-continuation
 proof handles simultaneous jumps and both orders of unequal flow cuts.
 [HybridProgressControls](KernelR/HybridProgressControls.lean) proves that the actual one-cell bounded subdivision has a semantic
 extension through its flow limit.
+
+## Physical rate limits and terminal saturation
+
+The separate [recovery-limited rate theorem](../../docs/RESET_RATE_SATURATION.md)
+uses physical protection to bound the number of firings in existing executions.
+This physical saturation differs from terminal jump saturation in
+`CompleteThrough`. A firing-rate bound alone does not prove continuation for
+an arbitrary queue/router and does not replace any progress hypothesis here.

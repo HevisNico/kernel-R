@@ -1,0 +1,39 @@
+name: Reset window Lean proofs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - research/reset-window/**
+      - .github/workflows/reset-window.yml
+      - .github/actions/build-lean/**
+  pull_request:
+    paths:
+      - research/reset-window/**
+      - .github/workflows/reset-window.yml
+      - .github/actions/build-lean/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      LEAN_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/build-lean
+        with:
+          package-directory: research/reset-window
+          mathlib-cache-targets: >-
+            Mathlib.Analysis.SpecialFunctions.ExpDeriv
+            Mathlib.Analysis.SpecialFunctions.Log.Basic
+            Mathlib.Tactic.FieldSimp
+            Mathlib.Tactic.Linarith
+            Mathlib.Tactic.LinearCombination
+            Mathlib.Tactic.Positivity
+            Mathlib.Tactic.Ring
+            Mathlib.Tactic.NormNum

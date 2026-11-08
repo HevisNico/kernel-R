@@ -134,6 +134,36 @@ See also the [threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#thresh
   saturation when recovery cannot keep pace with forcing is not part of this
   theorem.
 
+## Recovery limits the output rate
+
+A [separate analytic theorem](docs/RESET_RATE_SATURATION.md) applies to any
+network topology and any supplied finite execution in both native and upward
+crossing semantics. If recovery stays below a positive bound β, two firings of
+the same cell are separated by at least `1 + log(5/2)/β`. Starting within the
+built-in recovery cap gives a uniform gap of approximately 1.83299 time units.
+
+For a window of duration L, the number of firings is at most
+`1 + L/(1 + log(5/2)/β)`. This limits sustained output cadence; it does not say
+that every excess input pulse is lost, or prove the broader Reset Operator
+argument. [Lean statement](proof/lean/KernelR/HybridResetRateCrossing.lean).
+
+## Separate result: when recovery stays at zero
+
+Lean also proves that a cell starting in SLOW with charge 1/4 and recovery
+zero cannot fire again while none of its sensors is in MARK during a
+positive-duration flow.
+Its charge and recovery stay fixed. This result holds directly in both
+semantics for any network size and router. A separate native corollary derives
+the missing-MARK condition from initially resting READY sensors, no active
+pulse and no later delivery to that cell.
+
+Zero recovery is allowed by the current physical bounds, although it is not
+the protocol's birth state. It can be repaired: an isolated fully exposed MARK
+phase raises it from zero to 0.1. The proofs construct complete locked
+executions through arbitrarily late finite horizons; they do not claim that
+every deficient cell remains silent despite learning, or prove the broader
+Reset Operator argument. See the [precise statements and validation](docs/RESET_ZERO_RECOVERY.md).
+
 ## A finite learning capacity
 
 A port's gain never decreases. During a complete ERROR phase, its sensor
