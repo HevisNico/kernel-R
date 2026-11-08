@@ -1,6 +1,7 @@
 # kernel-R
 
 [![Lean proof checks](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml/badge.svg)](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml)
+
 **Archived release v0.2.0 — DOI:** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
 
 ## Why it matters
@@ -124,7 +125,7 @@ bounded per-pulse wire errors on the actual sending firings.
 
 | Result | Scope | Statement |
 |---|---|---|
-| **Event order does not matter.** Executions complete through the same horizon agree on the physical endpoint up to pending-list order, and on each cell's ordered firing dates. | Native semantics for any finite network, including cycles, with the same parameters, initial snapshot and fixed router, under the physical bounds. | [endpoint](proof/lean/KernelR/HybridUniversalExecution.lean#L21-L29) · [dates](proof/lean/KernelR/HybridUniversalExecution.lean#L31-L43) |
+| **Event order does not matter.** Executions complete through the same horizon agree on the physical endpoint up to pending-list order, and on each cell's ordered firing dates. | Native semantics for any finite network, including cycles, with the same parameters, initial snapshot and fixed router, under the physical bounds. | [endpoint and dates](proof/lean/KernelR/HybridUniversalExecution.lean) |
 | **Recovery limits the output rate.** If recovery stays at most `β > 0`, two firings of a cell are at least `1 + log(5/2)/β` apart (about 1.833 at the built-in cap). A window of length L contains at most `1 + L/(1 + log(5/2)/β)` firings. | Any topology, both semantics. | [guide](docs/RESET_RATE_SATURATION.md) · [Lean](proof/lean/KernelR/HybridResetRateCrossing.lean) |
 | **Zero recovery can lock a cell.** A cell starting in SLOW with charge 1/4 and zero recovery cannot fire again while no sensor spends positive time in MARK. An isolated, fully exposed MARK phase can restore recovery to 0.1. | Any finite network and router. Lock in both semantics, conditional repair in native semantics. | [guide](docs/RESET_ZERO_RECOVERY.md) |
 
