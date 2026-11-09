@@ -126,6 +126,39 @@ Common-mode ERROR threshold errors produce a different, smaller dose
 sensitivity than independent opposite-sign endpoint errors. The formulas
 do not prove a box-wide result or a hardware tolerance.
 
+### Predictions for the optimized timer
+
+For an unclipped nominal dose `d`, write `G = 1.2 exp(d)` for the learned
+gain and `h(t)` for the response to a unit-gain pulse. At the first read
+crossing the magnitude of the latency sensitivity to relative current error is
+`d G h(t) / q'(t)`. With `d = 1`, the nominal read latency falls to about
+0.25180 units and the current coefficient falls to 0.32845. The FIRE
+coefficient is then 0.36502. The local primary-scale prediction is
+`0.32845 ε_I + 0.36502 ε_F < 0.025`. At nominal FIRE the estimated
+current tolerance rises from 5.4% at dose 0.6 to 7.6% at dose 1. These
+estimates apply while both writes remain below their realized caps.
+
+The optimized timer can also aim for the cap. In the ±0.3% fabrication
+box the cap lies in [3.988, 4.012]. The setting `I = 0.12`, `D = 12`
+offers at least 1.296 log-gain units at the largest registered current
+error, 10%. The largest increment required to reach a cap from gain 1.2
+is about 1.207. Include this common setting at every current radius.
+Check that ERROR starts by time 4, the write stays eligible long enough,
+and training emits no report. Once the cap is reached, the learned gain
+depends on the realized cap and the remaining reserve can still depend
+on the write history.
+
+With those gains already at cap, the reduced READY readout predicts a
+latency spread of about 0.028 units even at ±5% FIRE. At 100 µs per unit
+this uses about 2.8 µs of the 5 µs budget left by input jitter, predicting
+that the capped timer can pass at every current radius in the narrow
+fabrication box. At 200 µs per unit the same spread exceeds the budget,
+so the prediction does not extend to that time scale. This calculation
+only covers the first read crossing. The full task also requires the
+training, reserve, cap, silence and report-count checks in the protocol.
+A common setting certified to pass the full contract rules out a
+separation in that box.
+
 ## Execution and conclusion rule
 
 Before the first run, commit the complete runner, its exact dependencies,
