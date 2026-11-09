@@ -160,7 +160,7 @@ dispatch and receipt.
 ## A selector read that preserves the gain
 
 The [prepared read](SelectorRead.lean) uses one canonical selector pulse
-and the same starting charge band `[0.650, 0.776]` for either stored value.
+and the same starting charge band `[0.650, 0.780]` for either stored value.
 The high log-gain `0.6` produces a FIRE between offsets 0.1 and 0.195.
 The low log-gain `0` produces a FIRE between offsets 0.3 and 0.8.
 Both fires start protection before the sensor's ERROR phase, and
@@ -185,7 +185,7 @@ execution through that horizon.
 A full pulse at the work port's fabrication cap would take a resting
 READY cell above threshold. The [precharge proof](SelectorPrecharge.lean)
 uses only the part of that pulse left after the cell reopens. It covers
-reopening at pulse age `[0.558, 0.559]` in either fabrication box, or at
+reopening at pulse age `[0.556, 0.55965]` in either fabrication box, or at
 age `[0.53, 0.59]` in the ±0.3% box.
 
 `capped_work_precharge_of_reopened` shows that an isolated continuation
@@ -195,10 +195,29 @@ gain stays at its cap and the unused selector port preserves its gain
 when its sensor starts at rest. The proof applies across legal sensor
 transitions, including ERROR on the work port.
 
-This result takes the reopening and its isolated continuation as
-hypotheses. The next network step is to schedule the work pulse from
-the first round, admit the read pulse, and supply the receiver's timing
-reference. A second teaching round remains open.
+### The teacher schedules its own reopening
+
+[`teacher_own_fire_reopen_exists`](TeacherReopen.lean) starts from an
+admitted ignition pulse on a READY teacher with recovery `0.08` and an
+empty queue. Its actual FIRE schedules a work pulse on itself at a fixed
+offset of approximately `11.236009` time units. The execution goes
+through FAST, admits the scheduled pulse during SLOW, and performs the
+actual READY reopening while the work pulse is still active. The gains
+are preserved. `TeacherOwnFireReopen.toCrossing` gives the same history
+with genuine upward crossings.
+
+The work pulse's MARK phase raises recovery to `0.18`. The calculation
+uses its actual onset and duration. The resulting reopening is in
+`[0.556, 0.55965]` across the full ±10% box, without choosing a delay
+from the fabrication parameters or selector value. The self-delivery
+uses a fixed local delay. `teacher_work_timer_jitter_limit` shows that
+an independent delay range of width `0.1` would not fit this reopening
+window. The output wire after the selector read has its own timing bound.
+
+The teacher history ends at reopening. The precharge theorem above
+applies to an isolated continuation with the work gain at its cap.
+Joining those stages to the first network round, admitting the selector
+read and supplying the receiver's reference remain open.
 
 ## Verify
 
@@ -213,7 +232,7 @@ lake build
 The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
 builds this package with the pinned dependencies. Its default targets compile
 `NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson`, `Dispatch`,
-`SelectorRead` and `SelectorPrecharge`, and run
+`SelectorRead`, `SelectorPrecharge` and `TeacherReopen`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

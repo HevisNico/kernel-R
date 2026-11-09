@@ -23,7 +23,7 @@ noncomputable def cappedWorkTail (cap reopen : ℝ) : ℝ → ℝ :=
 /-- A window that works in either fabrication box, with a wider option
     when fabrication errors are at most 0.3%. -/
 def CappedWorkTiming (ε age : ℝ) : Prop :=
-  (279 / 500 ≤ age ∧ age ≤ 559 / 1000) ∨
+  (139 / 250 ≤ age ∧ age ≤ 11193 / 20000) ∨
     (ε = 3 / 1000 ∧ 53 / 100 ≤ age ∧ age ≤ 59 / 100)
 
 private theorem CappedWorkTiming.coarse {ε age : ℝ} (timing : CappedWorkTiming ε age) :
@@ -40,7 +40,7 @@ theorem capped_work_tail_precharge {n θ ε}
     (timing : CappedWorkTiming ε reopen) :
     (∀ t ∈ Icc reopen 1, cappedWorkTail ((θ i).cap p) reopen t < 1) ∧
     (13 / 20 ≤ relax (1 / 2) (1 / 10) (cappedWorkTail ((θ i).cap p) reopen 1) 1 (7 / 5) ∧
-      relax (1 / 2) (1 / 10) (cappedWorkTail ((θ i).cap p) reopen 1) 1 (7 / 5) ≤ 97 / 125) := by
+      relax (1 / 2) (1 / 10) (cappedWorkTail ((θ i).cap p) reopen 1) 1 (7 / 5) ≤ 39 / 50) := by
   let cap := (θ i).cap p
   have age := timing.coarse
   have arange : (138629 / 100000 : ℝ) ≤ a ∧ a ≤ 138630 / 100000 := by
@@ -73,8 +73,8 @@ theorem capped_work_tail_precharge {n θ ε}
     · exact mul_le_mul (mul_le_mul hc.2 selector_response_coefficient_bounds.2
         ratioNonneg capHiNonneg) high (by linarith) (by positivity)
   have product :
-      (672 / 1000 : ℝ) ≤ cap * (a / (a - 1 / 2)) * residual ∧
-        cap * (a / (a - 1 / 2)) * residual ≤ 8255 / 10000 := by
+      (6719 / 10000 : ℝ) ≤ cap * (a / (a - 1 / 2)) * residual ∧
+        cap * (a / (a - 1 / 2)) * residual ≤ 83 / 100 := by
     rcases timing with full | ⟨narrow, dates⟩
     · have capBounds : (18 / 5 : ℝ) ≤ cap ∧ cap ≤ 22 / 5 := by
         have bounds := (box.2 i p).1
@@ -82,23 +82,23 @@ theorem capped_work_tail_precharge {n θ ε}
         change 4 * (1 - ε) ≤ cap ∧ cap ≤ 4 * (1 + ε) at bounds
         constructor <;> linarith [bounds.1, bounds.2]
       have expBounds :
-          (36955 / 100000 : ℝ) ≤ Real.exp (-(1 / 2) - (a - 1 / 2) * reopen) ∧
-          Real.exp (-(1 / 2) - (a - 1 / 2) * reopen) ≤ 36990 / 100000 := by
+          (73869 / 200000 : ℝ) ≤ Real.exp (-(1 / 2) - (a - 1 / 2) * reopen) ∧
+          Real.exp (-(1 / 2) - (a - 1 / 2) * reopen) ≤ 7411 / 20000 := by
         constructor
         · apply le_trans _ (Real.exp_le_exp.mpr (show
-            -(99545 / 100000 : ℝ) ≤ -(1 / 2) - (a - 1 / 2) * reopen by
+            -(99602 / 100000 : ℝ) ≤ -(1 / 2) - (a - 1 / 2) * reopen by
               have product := mul_le_mul (show a - 1 / 2 ≤ (88630 / 100000 : ℝ) by linarith [arange.2])
                 full.2 (by linarith [full.1]) (by norm_num)
               linarith))
-          have estimate := Real.exp_bound (x := -(99545 / 100000 : ℝ)) (n := 13) (by norm_num) (by norm_num)
+          have estimate := Real.exp_bound (x := -(99602 / 100000 : ℝ)) (n := 13) (by norm_num) (by norm_num)
           norm_num [Finset.sum_range_succ] at estimate
           linarith [(abs_sub_le_iff.mp estimate).2]
         · apply le_trans (Real.exp_le_exp.mpr (show
-            -(1 / 2) - (a - 1 / 2) * reopen ≤ -(99454 / 100000 : ℝ) by
+            -(1 / 2) - (a - 1 / 2) * reopen ≤ -(99277 / 100000 : ℝ) by
               have product := mul_le_mul (show (88629 / 100000 : ℝ) ≤ a - 1 / 2 by linarith [arange.1])
                 full.1 (by norm_num) (by linarith [arange.1])
               linarith))
-          have estimate := Real.exp_bound (x := -(99454 / 100000 : ℝ)) (n := 13) (by norm_num) (by norm_num)
+          have estimate := Real.exp_bound (x := -(99277 / 100000 : ℝ)) (n := 13) (by norm_num) (by norm_num)
           norm_num [Finset.sum_range_succ] at estimate
           linarith [(abs_sub_le_iff.mp estimate).1]
       have band := productBounds capBounds expBounds (by norm_num) (by norm_num)
@@ -241,7 +241,7 @@ theorem capped_work_precharge_of_reopened {n θ ε route s u} (e : @Execution n 
     (active : s.raw i p = some origin) (other : ∀ q, q ≠ p → s.raw i q = none)
     (noInput : ∀ q, NoArrivalAt e i q) (finish : u.time = origin + 7 / 5) :
     u.main i = .ready ∧ e.emissionTimes i = [] ∧ (∀ q, u.raw i q = none) ∧
-      (13 / 20 ≤ u.x i .q ∧ u.x i .q ≤ 97 / 125) ∧
+      (13 / 20 ≤ u.x i .q ∧ u.x i .q ≤ 39 / 50) ∧
       u.x i (.z p) = Real.log ((θ i).cap p) ∧
       ∀ q, q ≠ p → s.aux i q = .ready → RestBand (s.x i (.m q)) →
         (u.aux i q = .ready ∧ RestBand (u.x i (.m q))) ∧ u.x i (.z q) = s.x i (.z q) := by
