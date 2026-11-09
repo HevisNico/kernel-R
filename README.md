@@ -113,7 +113,38 @@ native first-contact semantics, with the
 proved for this protocol. A corollary realizes any prescribed sequence of
 bounded per-pulse wire errors on the actual sending firings.
 
-## Result 2: a teaching loop driven by learner readouts
+## Research results
+
+### Native binary search for a hidden need
+
+For any positive integer `K`, a compiled R network can identify a hidden
+need `m` in `{1, …, K}`. The router, schedule and initial pulse queue are
+the same for every `m`. At each visited pivot `c`, the probe receives `c`
+training pulses and a read pulse. Its readout fires exactly when
+`m ≤ c`. The decision circuit uses that result to launch the next test
+or the leaf action. Only the selected leaf receives its declared lesson
+and writes one credit dose of `0.6`.
+
+Lean constructs a complete upward-crossing execution. With birth data
+and fabrication fixed, all complete runs agree on the terminal physical
+state up to pending-list order, ordered firing dates and the multiset of
+deliveries. See the
+[exact Lean statement](https://github.com/HevisNico/kernel-R/blob/7dd1d29f521f159a913f8b98c13ca6fc4b9c640c/research/recursive-learning/native/CalibratedDecisionTree.lean#L359).
+
+**Scope of the search**
+
+- **Hidden input.** The search recovers one integer from a declared finite
+  range. Its value is encoded in the birth log-gain `−0.6(m − 1)` of
+  each fresh probe cell.
+- **Fixed schedule.** The circuit is feed-forward and uses fixed absolute
+  clocks. Each probe spaces its training pulses and final read by 24
+  time units.
+- **Declared leaf actions.** Leaf lessons are specified in advance, use
+  fresh receivers, and contain at most four pulses per block.
+- **Physical parameters.** Fabrication parameters are fixed during a
+  run and chosen independently within the ±0.3% or ±10% box.
+
+### A teaching loop driven by learner readouts
 
 **The question.** Can feedback from a learner change both the next lesson
 and which edit the teacher tries after that? A
@@ -184,14 +215,13 @@ discrete model only.
 
 ## Scope and assumptions
 
-- **Complete executions.** Both results compare executions complete
+- **Complete executions.** The results above compare executions complete
   through a horizon. For the chain, separate [progress theorems](proof/lean/PROGRESS.md)
   extend every legal finite prefix to later horizons and prove time divergence
   for infinite native runs maximal under extension at a finite flow limit.
 - **Learning and cadence only for the chain protocol.** Cyclic networks, noise
   or drift during operation, and other protocols have their own
   [coverage boundaries](proof/lean/N_CELL_COVERAGE.md).
-- **Teaching only for the stated experiment.** See the scope of Result 2.
 - **Dose counts on the constructed run only.** The
   [counting theorem](docs/EXACT_DOSE_COUNTING.md) gives four ERROR phases on
   the active port and three MARK phases across each cell's ports in the
@@ -224,7 +254,7 @@ lake build
 lake build Audit
 ```
 
-For the teaching experiment, from the repository root:
+For the research results, from the repository root:
 
 ```sh
 cd research/recursive-learning/native
@@ -246,7 +276,7 @@ The core source checks also reject added axiom declarations and
 Lean checks the proofs. Human review starts with whether `CrossingExecution`
 faithfully represents the written model. See the [reading path](REVIEW.md).
 
-For Result 2, the router in
+For the nine-cell teaching experiment, the router in
 [`ReadoutSeries.lean`](research/recursive-learning/native/ReadoutSeries.lean)
 is part of the statement. Review which pulses it schedules and which
 physical events trigger them.
