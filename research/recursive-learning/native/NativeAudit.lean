@@ -1,5 +1,5 @@
 import Dispatch
-import CappedWorkRun
+import CappedDispatch
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

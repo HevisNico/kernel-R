@@ -68,8 +68,15 @@ its own FIRE and reaches that reopening in both fabrication boxes.
 With recovery at its cap, a [fixed recovery clock](native/TeacherStableClock.lean)
 allows bounded timing variation on that self-delivery and preserves the
 read. From an admitted work pulse, a [single physical continuation](native/CappedWorkRun.lean)
-now builds the precharge and admits the selector pulse. Joining that
-admission to the network and iterating the teaching loop remain open.
+builds the precharge and admits the selector pulse. In the
+[prepared controller and receiver](native/CappedDispatch.lean), the
+controller's own ignition FIRE schedules both work and read, and the
+read FIRE routes the next pulse to the selected learner port without
+changing the selector. Both stored values use the same absolute
+decoder. The controller's work port and the two credit memories must
+belong to separate cells in this design. Connecting the credit memory,
+preparing the controller within the network and iterating the native
+teaching loop remain open.
 
 The discrete results above establish the two improvements and a bound for
 the capped architecture.

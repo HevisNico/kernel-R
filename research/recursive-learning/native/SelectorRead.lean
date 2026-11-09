@@ -231,6 +231,9 @@ structure SelectorReadRun (θ : Fin 1 → Parameters) (s : Snapshot 1) (high : B
   rawNone : ∀ p, final.raw 0 p = none
   empty : final.pending = []
   horizonBounds : s.time + 1 < horizon ∧ horizon < s.time + 419 / 300
+  mainClock : final.main 0 = if horizon < s.time + latency + 1 then .fast else .slow
+  chargeClock : final.x 0 .q = cadenceProtectedCharge (s.x 0 .b) (s.time + latency) horizon
+  auxiliaryBelow : ∀ p, final.x 0 (.m p) < 1
 
 /-- The read uses the actual admitted pulse. Both outcomes fire early
     enough to cover the whole ERROR phase with FAST or SLOW protection. -/
@@ -448,6 +451,8 @@ theorem selector_read_run_exists {θ ε s high}
     gains := fun p => (error.gains 0 p).trans ((decay.gains 0 p).trans (firedGains p))
     recovery := (error.recovery 0).trans ((decay.recovery 0).trans firedRecovery)
     auxiliaryReady := finalAux, rawNone := finalRaw, empty := finalEmpty, horizonBounds := returnBounds
+    mainClock := error.main_mode, chargeClock := error.main_clock
+    auxiliaryBelow := fun p => by simpa only [finalAux] using finalGuard.2 0 p
   }⟩
   · intro v
     apply finalGuard.no_jump
