@@ -499,6 +499,27 @@ firing dates. A wire can forward a list of tokens, and multiple wires
 can read the same report. The [NAND construction](ScheduledGates.lean)
 connects an AND and a NOT in series in one native execution.
 
+## Compiling finite report circuits
+
+[`ReportCircuit.run_with_learners`](ScheduledCircuit.lean) lays out any
+finite acyclic circuit of AND and NOT gates over physical learner
+reports. The circuit fixes the wiring and the absolute clocks. The
+delivered trials determine the input bits. Each compiled gate
+implements its Boolean output through native R dynamics. Complete
+upward-crossing executions agree on the endpoint and firing dates.
+
+[`threshold_report_network`](ReportFormula.lean) constructs an output
+that fires exactly when at least k inputs pass, including OR at k = 1.
+It composes Boolean gates so that excess reports have their intended
+effect. The formula expands into separate gates and can grow rapidly.
+
+[`ReportCircuit.run_guarded_branch`](ScheduledCommit.lean) attaches a
+credit cell and a fresh lesson receiver to a decision output. A true
+report issues one credit dose and the declared lesson. A false report
+delivers zero tokens to both action cells. Tests inside the circuit
+can still receive inputs. The branch theorem also compares the
+delivery multiset of every complete upward-crossing execution.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -516,7 +537,7 @@ builds this package with the pinned dependencies. Its default targets compile
 `CappedWorkRun`, `TeacherCappedCycle`, `CappedDispatch`, `NativeLesson`,
 `NativeAcceptance`, `AcceptanceDispatch`, `SerialAcceptance`,
 `LearnerReadout`, `ReadoutSeries`, `LearnerConjunction`, `LearnerFanIn` and
-`ScheduledGates`, and run
+`ScheduledGates`, `ScheduledCircuit`, `ReportFormula` and `ScheduledCommit`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
