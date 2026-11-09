@@ -24,10 +24,12 @@ SCALES = (50, 100, 200)
 ARRIVALS = (-35, -25, -5, 5, 25, 35)
 JITTER_PAIRS = list(itertools.product((-5, 5), repeat=2))
 DOSE_GRID = tuple(i / 20 for i in range(12, 31))
+DECAY_DURATIONS = (.15, .20, .25, .30, .35, .40, .45, .50, .55, .60,
+                   .65, .70, .80, 1., 1.5, 2., 4., 8., 12.)
 BASE_SETTINGS = (
     ("R", "native", 0., 0.),
-    ("decay", "matched_decay", 0., .15),
-    ("decay", "long_decay", 0., 12.),
+    *(("decay", f"decay_{duration:g}", 0., duration)
+      for duration in DECAY_DURATIONS),
 )
 TIMED_SETTINGS = (
     ("timer", "nominal_timer", 4., .15),
@@ -75,7 +77,14 @@ def sample_points():
         point[:, 24] = [-orientation, orientation]
         point[:, 8 * port + 7] = current
         points.append(point)
-    return np.concatenate((points, rng.uniform(-1, 1, (512, 2, 25))))
+    error_corners = []
+    for port, orientation in itertools.product(range(2), (-1, 1)):
+        point = np.zeros((2, 25))
+        point[:, 8 * port + 5] = [orientation, -orientation]
+        point[:, 8 * port + 6] = [-orientation, orientation]
+        point[:, 24] = [-orientation, orientation]
+        error_corners.append(point)
+    return np.concatenate((points, rng.uniform(-1, 1, (512, 2, 25)), error_corners))
 
 
 def realizations(points, fabrication, error, fire, current):
@@ -195,9 +204,8 @@ def evaluate(prepared, scale):
 
     # The three other input-port pairs have a silent cell, so only the trained
     # pair can supply a coincidence. A shared wire delay cancels in the skew.
-    return dict(failures=sum(counts.values()), binary_failures=0,
-                missing_reports=0, extra_reports=0, untrained_reports=0,
-                training_reports=0, positive_slack_us=margin[0],
+    return dict(failures=sum(counts.values()), report_guards_passed=True,
+                positive_slack_us=margin[0],
                 negative_slack_us=min(margin[-30], margin[30]),
                 reserve_lower_bound=float(reserve.min()),
                 cap_contacts=int(np.count_nonzero(dose == cap_dose)),
@@ -209,6 +217,7 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("--runner-commit", required=True)
     parser.add_argument("--quadrature-order", type=int, choices=(16, 32), default=32)
+    parser.add_argument("--fabrication", type=float, choices=FABRICATION)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     nodes, weights = np.polynomial.legendre.leggauss(args.quadrature_order)
@@ -216,15 +225,15 @@ def main():
     # Store exact coordinates and the construction order used for every box.
     np.save(args.output/"points.npy", points, allow_pickle=False)
     fields = ["fabrication", "error", "fire", "current", "scale", "setting",
-              "write_current", "duration", "optimized", "failures", "binary_failures",
-              "missing_reports", "extra_reports", "untrained_reports",
-              "training_reports", "positive_slack_us",
+              "write_current", "duration", "optimized", "failures",
+              "report_guards_passed", "positive_slack_us",
               "negative_slack_us", "reserve_lower_bound", "cap_contacts",
               "failure_counts", "worst_witnesses"]
+    radii = FABRICATION if args.fabrication is None else (args.fabrication,)
     with (args.output/"sweep.csv").open("w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fields)
         writer.writeheader()
-        for fabrication, error, fire in itertools.product(FABRICATION, THRESHOLDS, THRESHOLDS):
+        for fabrication, error, fire in itertools.product(radii, THRESHOLDS, THRESHOLDS):
             for current in CURRENTS:
                 physical = realizations(points, fabrication, error, fire, current)
                 settings = TIMED_SETTINGS + (BASE_SETTINGS if current == 0 else ())
@@ -247,6 +256,7 @@ def main():
     manifest = dict(model=MODEL, protocol=PROTOCOL, runner=args.runner_commit,
                     python=platform.python_version(), numpy=np.__version__,
                     seed=SEED, random_draws=512, total_points=len(points),
+                    fabrication_radii=radii, decay_durations=DECAY_DURATIONS,
                     root_bisections=42, quadrature_order=args.quadrature_order)
     for filename in ("points.npy", "sweep.csv"):
         manifest[filename] = hashlib.sha256((args.output/filename).read_bytes()).hexdigest()
