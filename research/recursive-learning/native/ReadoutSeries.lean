@@ -31,31 +31,35 @@ private theorem quiet_prefix_at_rest {θ : Fin 1 → Parameters} {s : Snapshot 1
 
 /-- The trial queue contains its actual ordered lesson plus a common
 read pulse, which is placed first as a future token. -/
-noncomputable def scheduledTrial (clock : ℝ) (lesson : Lesson) (port : Port) : Snapshot 1 :=
-  withFuture (readoutLearner clock lesson port) [learnerRead clock port]
+noncomputable def scheduledTrial (clock : ℝ) (lesson : Lesson) (port : Port)
+    (birthGain : ℝ := -(6 / 5 : ℝ)) : Snapshot 1 :=
+  withFuture (readoutLearner clock lesson port birthGain) [learnerRead clock port]
 
 noncomputable def seriesTrial (clock : ℝ) (practice third : Bool) : Snapshot 1 :=
   scheduledTrial clock (trialLesson practice third) (trialPort practice)
 
-theorem scheduled_trial_future {clock lesson port d}
-    (h : d ∈ (scheduledTrial clock lesson port).pending) : clock < d.due := by
+theorem scheduled_trial_future {clock lesson port birthGain d}
+    (h : d ∈ (scheduledTrial clock lesson port birthGain).pending) : clock < d.due := by
   change d ∈ learnerRead clock port :: lessonDeliveries clock (lessonPorts lesson) at h
   rcases List.mem_cons.mp h with rfl | member
   · change clock < clock + 65
     linarith
   · linarith [lesson_delivery_time member]
 
-theorem staged_lesson_read_exists {θ ε time clock T} (box : @PhysicalBox 1 θ ε)
+theorem staged_lesson_read_exists_of_gain {θ ε time clock T} (box : @PhysicalBox 1 θ ε)
     (later : time ≤ clock) (horizon : clock + 96 < T) (lesson : Lesson) (port : Port)
     (third : Bool) (capacity : lesson.preparation ≤ 4 ∧ lesson.practice ≤ 4)
-    (count : (lessonPorts lesson).count port = if third then 3 else 2) :
-    ∃ (run : LocalRun θ {scheduledTrial clock lesson port with time := time} T) (fire : Option ℝ),
+    (birthGain : ℝ) (nonpositive : birthGain ≤ 0)
+    (gainTest : let gain := birthGain + (3 / 5 : ℝ) * (lessonPorts lesson).count port
+      if third then gain = 3 / 5 else gain ≤ 0) :
+    ∃ (run : LocalRun θ {scheduledTrial clock lesson port birthGain with time := time} T) (fire : Option ℝ),
       fire.isSome = third ∧
       (∀ F, fire = some F → clock + 65 < F ∧ F < clock + 66) ∧
       run.execution.emissionTimes 0 = fire.toList ∧
       run.execution.deliveries.length = lesson.cost + 1 := by
-  let s := scheduledTrial clock lesson port
-  obtain ⟨read⟩ := full_learner_read_exists box clock lesson port third capacity count
+  let s := scheduledTrial clock lesson port birthGain
+  obtain ⟨read⟩ := full_learner_read_exists_of_gain box clock lesson port third capacity
+    birthGain nonpositive gainTest
   obtain ⟨wait, positive, silent, noDelivery⟩ := quiet_prefix_at_rest (θ := θ) (s := s)
     later (fun _ => rfl) (fun _ _ => rfl) (fun _ _ => rfl)
     (fun _ => rfl) (fun _ _ => rfl) (fun _ => rfl)
@@ -86,6 +90,20 @@ theorem staged_lesson_read_exists {θ ε time clock T} (box : @PhysicalBox 1 θ 
       restDelivery, List.nil_append, List.append_nil]
     rw [List.length_append, lessonDeliveries_length, lessonPorts_length]
     rfl
+
+theorem staged_lesson_read_exists {θ ε time clock T} (box : @PhysicalBox 1 θ ε)
+    (later : time ≤ clock) (horizon : clock + 96 < T) (lesson : Lesson) (port : Port)
+    (third : Bool) (capacity : lesson.preparation ≤ 4 ∧ lesson.practice ≤ 4)
+    (count : (lessonPorts lesson).count port = if third then 3 else 2) :
+    ∃ (run : LocalRun θ {scheduledTrial clock lesson port with time := time} T) (fire : Option ℝ),
+      fire.isSome = third ∧
+      (∀ F, fire = some F → clock + 65 < F ∧ F < clock + 66) ∧
+      run.execution.emissionTimes 0 = fire.toList ∧
+      run.execution.deliveries.length = lesson.cost + 1 := by
+  apply staged_lesson_read_exists_of_gain box later horizon lesson port third capacity _ (by norm_num)
+  dsimp only
+  rw [count]
+  cases third <;> norm_num
 
 private theorem series_trial_future {clock practice third d}
     (h : d ∈ (seriesTrial clock practice third).pending) : clock < d.due :=

@@ -555,9 +555,32 @@ upward-crossing executions from each initial state agree on the
 terminal observations, ordered firing dates and delivery multiset.
 
 The layout uses fresh cells for later trials and fixed absolute
-clocks. Trial lessons have at most four pulses per block. The block
-read by a trial has two or three pulses, with the trial's readout
-certified against the declared requirement of three pulses per block.
+clocks. Trial lessons have at most four pulses per block. A trial
+declares a calibrated birth gain and proves that its physical readout
+implements the corresponding retention test.
+
+## Searching for an unknown need
+
+[`blind_search_recovers_need`](BlindNeedSearch.lean) uses the same
+router, clocks and initial pulse queue for all four combinations of
+preparation and practice needs in {3, 4}. The hidden profile sets
+birth gains on the ports that will be read. The practice test uses
+two possible fresh receivers with the same hidden practice gain.
+
+An eight-pulse reference lesson starts the search. The 3 + 4 probe
+tests preparation. Its physical report determines whether the next
+trial receives 3 + 3 or 4 + 3. The practice report selects the final
+lesson. The selected receiver alone gets its lesson and the associated
+credit cell writes exactly one dose. The theorem checks the learned
+gains of the selected receiver and proves minimality under the declared
+two-block retention criterion.
+
+| Hidden preparation | Hidden practice | Selected lesson |
+| --- | --- | --- |
+| 3 | 3 | 3 + 3 |
+| 3 | 4 | 3 + 4 |
+| 4 | 3 | 4 + 3 |
+| 4 | 4 | 4 + 4 |
 
 ## Verify
 
@@ -577,7 +600,7 @@ builds this package with the pinned dependencies. Its default targets compile
 `NativeAcceptance`, `AcceptanceDispatch`, `SerialAcceptance`,
 `LearnerReadout`, `ReadoutSeries`, `LearnerConjunction`, `LearnerFanIn` and
 `ScheduledGates`, `ScheduledCircuit`, `ReportFormula`, `ScheduledCommit` and
-`ScheduledProgram` and `AdaptiveRounds`, and run
+`ScheduledProgram`, `AdaptiveRounds` and `BlindNeedSearch`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

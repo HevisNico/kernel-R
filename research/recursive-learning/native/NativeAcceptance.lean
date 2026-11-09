@@ -250,12 +250,12 @@ private theorem lesson_deliveries_ports (time : ℝ) (ports : List Port) :
   | nil => rfl
   | cons p ps ih => simp [lessonDeliveries, ih]
 
-theorem dose_readout_exists {θ ε start ports probe T third} (box : @PhysicalBox 1 θ ε)
+theorem dose_readout_exists_of_gain {θ ε start ports probe T third} (box : @PhysicalBox 1 θ ε)
     (lesson : LessonDoseRun θ start ports) (phys : PhysicalInvariant θ start)
     (before : lesson.final.time < probe.due) (horizon : probe.due + 23 ≤ T)
     (recovery : start.x 0 .b = 2 / 25)
-    (readGain : start.x 0 (.z probe.port) + (3 / 5 : ℝ) * ports.count probe.port =
-      if third then 3 / 5 else 0) :
+    (readGain : let gain := start.x 0 (.z probe.port) + (3 / 5 : ℝ) * ports.count probe.port
+      if third then gain = 3 / 5 else gain ≤ 0) :
     Nonempty (DoseReadout θ start ports probe T third) := by
   let run : CalendarDoseRun θ start (lessonDeliveries start.time ports) :=
     ⟨lesson.final, lesson.execution, lesson.transverse, lesson.silent, lesson.deliveries,
@@ -265,13 +265,25 @@ theorem dose_readout_exists {θ ε start ports probe T third} (box : @PhysicalBo
       (3 / 5 : ℝ) * ((lessonDeliveries start.time ports).map Delivery.port).count probe.port
       if third then value = 3 / 5 else value ≤ 0 := by
     dsimp only
-    rw [lesson_deliveries_ports, readGain]
-    cases third <;> simp
+    rw [lesson_deliveries_ports]
+    exact readGain
   obtain ⟨read⟩ := calendar_dose_readout_exists box run phys before horizon recovery gain
   exact ⟨⟨read.final, read.execution, read.complete, read.transverse, read.empty, read.ready,
     read.rawNone, read.fire, read.reports, read.window, read.emissions, read.deliveries,
     read.observed, read.observation, read.observationPrefix, read.observedRaw,
     fun p => by simpa only [lesson_deliveries_ports] using read.measured p⟩⟩
+
+theorem dose_readout_exists {θ ε start ports probe T third} (box : @PhysicalBox 1 θ ε)
+    (lesson : LessonDoseRun θ start ports) (phys : PhysicalInvariant θ start)
+    (before : lesson.final.time < probe.due) (horizon : probe.due + 23 ≤ T)
+    (recovery : start.x 0 .b = 2 / 25)
+    (readGain : start.x 0 (.z probe.port) + (3 / 5 : ℝ) * ports.count probe.port =
+      if third then 3 / 5 else 0) :
+    Nonempty (DoseReadout θ start ports probe T third) := by
+  apply dose_readout_exists_of_gain box lesson phys before horizon recovery
+  dsimp only
+  rw [readGain]
+  cases third <;> simp
 
 theorem acceptance_signal_exists {θ ε} (box : @PhysicalBox 1 θ ε) (time : ℝ) (third : Bool) :
     Nonempty (AcceptanceSignal θ time third) := by

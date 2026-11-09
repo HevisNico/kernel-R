@@ -34,6 +34,8 @@ structure BranchCommit {n θ route s u} (prior : @Execution n θ route s u)
     if p = port ∧ accepted then 3 / 5 else 0
   lessonReceipts : RecursiveLearning.Native.lessonReceipts execution.deliveries 0 =
     if accepted then proposal.cost else 0
+  lessonRetention : ∀ needs, NativeRetains final 0 needs ↔
+    ((if accepted then proposal else ⟨0, 0⟩).train needs).retained = true
   previousValues : ∀ i, final.x i.succ.succ = u.x i
   previousTimes : ∀ i, execution.emissionTimes i.succ.succ = prior.emissionTimes i
   previousReceipts : ∀ i, RecursiveLearning.Native.lessonReceipts execution.deliveries i.succ.succ =
@@ -101,7 +103,7 @@ theorem compose_report_commit {n θ θC θL ε route s u T clock}
   have lessonHorizon : clock + 8 * taught.cost < T := by
     cases bit <;> simp [taught, Lesson.cost] at * <;> linarith
   obtain ⟨lesson⟩ := native_lesson_exists lessonBox clock taught cap.1 cap.2
-  obtain ⟨tail, tailDone, tailTransverse, tailCount, _, _⟩ := lesson.finish_at lessonHorizon
+  obtain ⟨tail, tailDone, tailTransverse, tailCount, _, retains⟩ := lesson.finish_at lessonHorizon
   obtain ⟨lead, leadTransverse, _, leadDeliveries⟩ := native_lesson_wait (θ := θL) future taught
   let learn := lead.append tail
   have delivered : learn.deliveries.length = taught.cost := by
@@ -118,7 +120,7 @@ theorem compose_report_commit {n θ θC θL ε route s u T clock}
   let e : Execution (prependParameters θL (prependParameters θC θ))
       (branchRouter route sender window clock port proposal) (branchStart s) _ := whole.execution
   refine ⟨⟨_, e, whole.complete committedDone tailDone, ?_, ?_, ?_, ?_,
-    fun _ => rfl, ?_, ?_⟩⟩
+    retains, fun _ => rfl, ?_, ?_⟩⟩
   · intro h
     exact whole.contacts_transversal (committed.contacts_transversal h credit.positive)
       ((Execution.contactsTransversal_append _ _).2 ⟨leadTransverse, tailTransverse⟩)
