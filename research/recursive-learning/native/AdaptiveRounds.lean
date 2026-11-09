@@ -110,7 +110,7 @@ theorem append_trial_timed {n} {layout : ReportLayout n} (timed : layout.WellTim
   | zero => exact le_rfl
   | succ i => exact (timed.2 i).trans later.le
 
-private theorem append_trial_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
+theorem append_trial_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
     (prior : CompiledRun θ layout T bits) (box : @PhysicalBox 1 θH ε)
     (source : Fin n) (trial : AdaptiveTrial) (timed : layout.WellTimed)
     (horizon : (layout.appendTrial source trial).last + 75 < T) :
@@ -118,7 +118,8 @@ private theorem append_trial_run {n θ θH ε T} {layout : ReportLayout n} {bits
       (Fin.cases (bits source && trial.passes) bits),
       lessonReceipts run.execution.deliveries 0 = (if bits source then trial.lesson.cost + 1 else 0) ∧
       (∀ i, run.final.x i.succ = prior.final.x i) ∧
-      (∀ i, lessonReceipts run.execution.deliveries i.succ = lessonReceipts prior.execution.deliveries i) := by
+      (∀ i, lessonReceipts run.execution.deliveries i.succ = lessonReceipts prior.execution.deliveries i) ∧
+      (∀ i, run.execution.emissionTimes i.succ = prior.execution.emissionTimes i) := by
   let clock := layout.last + 1
   let origin := layout.start.time
   let window := layout.windows source
@@ -169,7 +170,7 @@ private theorem append_trial_run {n θ θH ε T} {layout : ReportLayout n} {bits
       prepend_physical prior.physical ⟨hp.region, hp.gain_cap, hp.recovery_cap, hp.reserve⟩ _,
       prepend_initial_ready prior.initial hi, prepend_routed_causal prior.causal causal⟩
   exact ⟨run, (CausalTraceBalance.head_receipts weave.trace).trans count, fun _ => rfl,
-    CausalTraceBalance.tail_receipts weave.trace⟩
+    CausalTraceBalance.tail_receipts weave.trace, weave.tail_emission_times⟩
 
 
 /-- Topologically ordered instructions over available reports. A guarded
@@ -379,7 +380,7 @@ theorem AdaptiveProgram.run {n m θ ε T} (p : AdaptiveProgram n m) {layout : Re
       change (prior.compile layout).last + 1 + 66 + 75 < T at horizon
       linarith
     obtain ⟨tail, effects⟩ := ih input tailBox limit
-    obtain ⟨head, count, values, receipts⟩ := append_trial_run tail headBox source spec
+    obtain ⟨head, count, values, receipts, _⟩ := append_trial_run tail headBox source spec
       (prior.compile_timed timed) horizon
     have result : ∃ run : CompiledRun _ ((prior.trial source spec).compile layout) T _,
         (prior.trial source spec).Effects bits (fun i q => run.final.x i (.z q))
@@ -434,7 +435,7 @@ theorem AdaptiveProgram.run {n m θ ε T} (p : AdaptiveProgram n m) {layout : Re
 def ReportLayout.SameSources {n} (a b : ReportLayout n) : Prop :=
   a.SameWiring b ∧ a.start.pending = b.start.pending
 
-private theorem same_trial_sources {n} {a b : ReportLayout n} (same : a.SameSources b)
+theorem same_trial_sources {n} {a b : ReportLayout n} (same : a.SameSources b)
     (source : Fin n) (trialA trialB : AdaptiveTrial)
     (tokens : ∀ t, trialA.tokens t = trialB.tokens t) :
     (a.appendTrial source trialA).SameSources (b.appendTrial source trialB) := by
@@ -457,7 +458,7 @@ private theorem same_threshold_sources {n} {a b : ReportLayout n} (same : a.Same
   · simp only [ReportLayout.appendThreshold, times]
   · rw [ReportLayout.appendThreshold_source_queue, ReportLayout.appendThreshold_source_queue, pending]
 
-private theorem same_not_sources {n} {a b : ReportLayout n} (same : a.SameSources b)
+theorem same_not_sources {n} {a b : ReportLayout n} (same : a.SameSources b)
     (source : Fin n) : (a.appendNot source).SameSources (b.appendNot source) := by
   obtain ⟨⟨routes, windows, times⟩, pending⟩ := same
   refine ⟨⟨?_, ?_, ?_⟩, ?_⟩

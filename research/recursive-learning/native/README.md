@@ -624,6 +624,42 @@ tested count. All complete upward-crossing executions for each fixed
 setup agree on the endpoint, firing dates and deliveries. In a compiled
 decision tree, an upstream report sends the entire threshold packet. Only the final read window feeds the next decision.
 
+## Reusing a learned choice in two rounds
+
+[PolicyReuse.lean](PolicyReuse.lean) compares two possible first edits
+to the same two-by-two lesson. The two declared profiles need either
+two preparation and one practice pulse, or one preparation and two
+practice pulses. Each profile has exactly one successful single-pulse
+reduction.
+
+A physical calibration probe tests the preparation reduction. Its
+silence enables a diagnostic FIRE, which routes three separated pulses
+to one policy cell. Those doses take the cell's log-gain from -1.2 to
+0.6. Each of two later read windows on that same cell chooses the
+practice reduction if the cell fires, and the preparation reduction
+if it stays silent. The second window follows the first trial window.
+Each round delivers one three-pulse lesson and its read pulse to the
+selected learner. The other candidate receives zero deliveries.
+
+| Profile | Feedback | First choices accepted in the two rounds |
+| --- | --- | --- |
+| Needs two preparation pulses | Enabled | 2 of 2 |
+| Needs two preparation pulses | Cut | 0 of 2 |
+| Needs one preparation pulse | Either | 2 of 2 |
+
+The router and birth pulse queue are fixed across profiles for each
+feedback setting. The comparison counts rejected first choices on the
+two evaluation rounds separately from calibration traffic. The
+theorem constructs a complete upward-crossing execution for either
+fabrication box. All complete executions with the same setup agree
+on endpoint observations, firing times and delivery multiplicities.
+
+The experiment uses fresh, identically calibrated learners, a fixed
+schedule and one policy update. At the high gain, both reads leave the
+learned gain intact. At the low gain, both reads are silent and each
+writes a dose. The two-read guarantee therefore uses the declared
+initial low gain and its two remaining silent read slots.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
