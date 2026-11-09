@@ -484,6 +484,21 @@ issued by the sender. The composed initial queue contains the external
 inputs. The fan-in theorem uses this operation to connect the learners
 to the counter and the counter to the credit cell.
 
+## Connecting report gates
+
+[`ScheduledGates.lean`](ScheduledGates.lean) defines a report as zero or
+one FIRE in a declared time window. A cell's local contract includes its
+actual input deliveries and can specify a terminal effect. The NOT
+cell's optional trigger can produce an earlier preparation FIRE. The
+router forwards only FIREs in the report window.
+
+The composition theorems attach an AND with any positive number of
+inputs, or a NOT with one input, to an existing execution. The wires
+schedule tokens at declared dates, and the original cells retain their
+firing dates. A wire can forward a list of tokens, and multiple wires
+can read the same report. The [NAND construction](ScheduledGates.lean)
+connects an AND and a NOT in series in one native execution.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -500,7 +515,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `SelectorRead`, `SelectorPrecharge`, `TeacherReopen`, `TeacherStableClock`,
 `CappedWorkRun`, `TeacherCappedCycle`, `CappedDispatch`, `NativeLesson`,
 `NativeAcceptance`, `AcceptanceDispatch`, `SerialAcceptance`,
-`LearnerReadout`, `ReadoutSeries`, `LearnerConjunction` and `LearnerFanIn`, and run
+`LearnerReadout`, `ReadoutSeries`, `LearnerConjunction`, `LearnerFanIn` and
+`ScheduledGates`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
