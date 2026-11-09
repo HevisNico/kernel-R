@@ -125,10 +125,10 @@ theorem lessonPorts_count (lesson : Lesson) :
     (lessonPorts lesson).count 2 = 0 := by
   simp [lessonPorts, List.count_append, List.count_replicate]
 
-private theorem lessonPorts_length (lesson : Lesson) :
+theorem lessonPorts_length (lesson : Lesson) :
     (lessonPorts lesson).length = lesson.cost := by simp [lessonPorts, Lesson.cost]
 
-private theorem lessonDeliveries_length (origin : ℝ) (ports : List Port) :
+theorem lessonDeliveries_length (origin : ℝ) (ports : List Port) :
     (lessonDeliveries origin ports).length = ports.length := by
   induction ports generalizing origin with
   | nil => rfl
