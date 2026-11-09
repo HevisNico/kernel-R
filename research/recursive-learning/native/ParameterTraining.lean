@@ -1,5 +1,5 @@
 import TrainingRead
-import KernelR.HybridParameterExecution
+import KernelR.HybridParameterUniversalExecution
 
 /-! The existing estimates construct a trajectory of the fixed-parameter
 kernel. The realized thresholds are read from the cell's parameters. -/
@@ -181,6 +181,14 @@ private noncomputable def parameterRead {θ s p upper lower level}
   exact (parameterMarkSilent g config read.before_mark read.before_silent).append
     (.cons (.flow f) (.cons (.jump fire) (.nil _)))
 
+private def parameterReadArrival {θ s p m lower level readTime}
+    (run : ErrorReadHandoff θ s p m lower level readTime) :
+    ParameterJump θ (fun _ _ => [])
+      (quietAt (setAux {s with time := run.span.stop, x := run.span.path run.span.stop}
+        0 p .ready) readTime) run.readStart := by
+  rw [run.read_start_eq]
+  exact .arrive _ (errorReadDelivery p readTime) [] [] run.queued rfl (run.error_raw_empty p)
+
 private noncomputable def parameterHandoff {θ s p m upper lower level readTime}
     (run : ErrorReadHandoff θ s p m lower level readTime)
     (config : (θ 0).thresholds = trainingThresholds p upper lower level)
@@ -233,10 +241,8 @@ private noncomputable def parameterHandoff {θ s p m upper lower level readTime}
   }
   have reopen : ParameterJump θ (fun _ _ => []) boundary reopened :=
     .auxReady _ 0 p mode (by rw [config]; simpa [trainingThresholds] using span.charge_out)
-  have delivery : ParameterJump θ (fun _ _ => []) (quietAt reopened readTime) run.readStart := by
-    rw [run.read_start_eq]
-    exact .arrive _ (errorReadDelivery p readTime) [] [] run.queued rfl (run.error_raw_empty p)
-  exact .cons (.flow flow) (.cons (.jump reopen) (.cons (.flow wait) (.cons (.jump delivery)
+  exact .cons (.flow flow) (.cons (.jump reopen) (.cons (.flow wait)
+    (.cons (.jump (parameterReadArrival run))
     (parameterRead run.decision config silent))))
 
 /-- The estimates in the training certificate produce an execution of
@@ -321,5 +327,219 @@ theorem training_read_in_parameters {θ ε time gains p}
       ParameterCompleteThrough (run.parameterExecution config) run.handoff.decision.stop := by
   obtain ⟨run⟩ := training_read_exists box threshold hi lo gain caps
   exact ⟨run, run.parameterComplete config threshold.1⟩
+
+private theorem training_threshold_bounds {θ : Fin 1 → Parameters} {p upper lower level}
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
+    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800) :
+    ParameterThresholdBounds θ := by
+  obtain ⟨h₁, h₂⟩ := abs_le.mp hi
+  obtain ⟨l₁, l₂⟩ := abs_le.mp lo
+  constructor
+  · intro i
+    rw [Subsingleton.elim i 0, config]
+    change level ≤ 11 / 10
+    linarith [threshold.2]
+  · intro i
+    rw [Subsingleton.elim i 0, config]
+    norm_num [trainingThresholds]
+  · intro i
+    rw [Subsingleton.elim i 0, config]
+    change (1 / 4 : ℝ) < level
+    linarith [threshold.1]
+  · intro i
+    rw [Subsingleton.elim i 0, config]
+    norm_num [trainingThresholds]
+  · intro i q
+    rw [Subsingleton.elim i 0, config]
+    norm_num [trainingThresholds]
+  · intro i q
+    rw [Subsingleton.elim i 0, config]
+    norm_num [trainingThresholds]
+  · intro i q
+    rw [Subsingleton.elim i 0, config]
+    by_cases h : q = p
+    · subst q
+      simp only [trainingThresholds, Function.update_self]
+      linarith
+    · norm_num [trainingThresholds, Function.update_of_ne h]
+  · intro i q
+    rw [Subsingleton.elim i 0, config]
+    by_cases h : q = p
+    · subst q
+      simp only [trainingThresholds, Function.update_self]
+      linarith
+    · norm_num [trainingThresholds, Function.update_of_ne h]
+
+private theorem training_initial_invariant {θ time gains p}
+    (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
+    ParameterPhysicalInvariant θ (trainingStart time gains p) := by
+  constructor
+  · intro i
+    norm_num [trainingStart, toleranceStartOn]
+  · intro i q
+    norm_num [trainingStart, toleranceStartOn]
+  · intro i q
+    rw [Subsingleton.elim i 0]
+    exact caps q
+  · intro i
+    norm_num [trainingStart, toleranceStartOn]
+  · intro i
+    norm_num [trainingStart, toleranceStartOn]
+
+private theorem parameter_emissions_append {n θ route s u v}
+    (e : @ParameterExecution n θ route s u) (f : ParameterExecution θ route u v) :
+    (e.append f).emissions = e.emissions ++ f.emissions := by
+  induction e with
+  | nil => rfl
+  | cons m rest ih =>
+    simp only [ParameterExecution.append, ParameterExecution.emissions_cons, ih, List.append_assoc]
+
+private theorem parameterMarkSilent_emissions {θ : Fin 1 → Parameters} {s : Snapshot 1}
+    {p upper lower level} {f : FirstInputMark θ s 0 p} (g : FirstInputSilent f)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (first : ∀ t ∈ Ico s.time (s.time + f.latency), f.flow.path t 0 .q < level)
+    (second : ∀ t ∈ Ico f.final.time g.final.time, g.flow.path t 0 .q < level) :
+    (parameterMarkSilent g config first second).emissions = [] := by
+  rfl
+
+private theorem parameterTrace_emissions {θ s u p upper lower level}
+    (trace : TrainingTrace θ p upper lower level s u)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
+    (parameterTrainingTrace trace config).emissions = [] := by
+  induction trace with
+  | nil => rfl
+  | silent leg rest ih => exact ih
+  | enter mode hit rest ih => exact ih
+  | expire active due rest ih => exact ih
+  | liveError leg rest ih => exact ih
+
+private theorem emissions_of_ready_to_fast {θ route s u}
+    (j : @ParameterJump 1 θ route s u)
+    (before : s.main 0 = .ready) (after : u.main 0 = .fast) :
+    j.emissions = [(0, s.time)] := by
+  cases j with
+  | fire i _ _ =>
+    have hi : i = 0 := Subsingleton.elim _ _
+    subst i
+    rfl
+  | fastEnd i _ _ =>
+    have hi : i = 0 := Subsingleton.elim _ _
+    subst i
+    simp [setMain] at after
+  | reopen i _ _ =>
+    have hi : i = 0 := Subsingleton.elim _ _
+    subst i
+    simp [setMain] at after
+  | _ => simp_all [setRaw, setAux]
+
+private theorem emissions_if_main_fixed {θ route s u}
+    (j : @ParameterJump 1 θ route s u) (fixed : u.main 0 = s.main 0) :
+    j.emissions = [] := by
+  cases j with
+  | fire i mode _ =>
+    have hi : i = 0 := Subsingleton.elim _ _
+    subst i
+    simp [setMain, mode] at fixed
+  | _ => rfl
+
+private theorem parameterRead_emissions {θ s p upper lower level}
+    (read : TolerantSnapshotDecision θ s p true level)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (silent : ∀ t ∈ Icc read.silent.final.time read.stop,
+      upper < readyProtectedValues θ read.silent.final 0 p .silent (some s.time) t 0 (.m p)) :
+    (parameterRead read config silent).emissions = [(0, read.stop)] := by
+  unfold parameterRead
+  simp only [parameter_emissions_append, parameterMarkSilent_emissions, List.nil_append,
+    ParameterExecution.emissions,
+    List.append_nil]
+  apply emissions_of_ready_to_fast
+  · exact read.silent.main_ready 0
+  · simp [TolerantSnapshotDecision.final, setMain]
+
+private theorem parameterHandoff_emissions {θ s p m upper lower level readTime}
+    (run : ErrorReadHandoff θ s p m lower level readTime)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (silent : ∀ t ∈ Icc run.decision.silent.final.time run.decision.stop,
+      upper < readyProtectedValues θ run.decision.silent.final 0 p .silent
+        (some run.readStart.time) t 0 (.m p)) :
+    (parameterHandoff run config silent).emissions = [(0, run.decision.stop)] := by
+  have labels : (parameterReadArrival run).emissions = [] := by
+    apply emissions_if_main_fixed
+    rw [run.read_start_eq]
+    rfl
+  unfold parameterHandoff
+  simp only [ParameterExecution.emissions_cons, ParameterMove.emissions,
+    parameterRead_emissions, labels, List.nil_append]
+  rfl
+
+/-- The constructed execution records one actual FIRE, at the read's
+first upward contact. -/
+theorem TrainingRead.parameterEmissionTimes {θ time gains p upper lower level}
+    (run : TrainingRead θ time gains p upper lower level)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
+    (run.parameterExecution config).emissionTimes 0 = [run.handoff.decision.stop] := by
+  have prefixLabels := parameterMarkSilent_emissions run.silent config run.pre_mark run.pre_silent
+  unfold ParameterExecution.emissionTimes TrainingRead.parameterExecution
+  simp only [ParameterExecution.emissions_cons, ParameterMove.emissions, ParameterJump.emissions,
+    parameter_emissions_append, List.nil_append, prefixLabels, parameterTrace_emissions,
+    parameterHandoff_emissions, List.filter_cons, decide_true, List.filter_nil]
+  rfl
+
+/-- Every execution of the two-pulse task that is complete through the
+constructed read horizon has the same endpoint and the same single FIRE.
+The result uses the realized guards and the two full fabrication boxes. -/
+theorem TrainingRead.every_complete_run {θ ε time gains p upper lower level u}
+    (run : TrainingRead θ time gains p upper lower level)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (box : @PhysicalBox 1 θ ε)
+    (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
+    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800)
+    (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q))
+    (e : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p) u)
+    (complete : ParameterCompleteThrough e run.handoff.decision.stop) :
+    u.ObservationalEq run.handoff.decision.final ∧
+      e.emissionTimes 0 = [run.handoff.decision.stop] := by
+  have bounds := training_threshold_bounds config threshold hi lo
+  have initial := training_initial_invariant (time := time) (p := p) caps
+  have reference := run.parameterComplete config threshold.1
+  refine ⟨(ParameterExecution.observational_unique box bounds e
+    (run.parameterExecution config) initial complete reference).1, ?_⟩
+  exact (e.emissionTimes_unique (run.parameterExecution config) box bounds initial
+    complete reference 0).trans (run.parameterEmissionTimes config)
+
+/-- Existence and every-complete-run correctness of one training pulse
+followed by one read, for either fabrication box and the realized guard
+errors. Every competing complete run is compared at the same horizon. -/
+theorem training_read_every_complete {θ ε time gains p}
+    (box : @PhysicalBox 1 θ ε)
+    (config : (θ 0).thresholds = trainingThresholds p ((θ 0).thresholds.error p)
+      ((θ 0).thresholds.auxReady p) (θ 0).thresholds.fire)
+    (threshold : 19 / 20 ≤ (θ 0).thresholds.fire ∧ (θ 0).thresholds.fire ≤ 21 / 20)
+    (hi : |(θ 0).thresholds.error p - 1 / 10| ≤ 1 / 200)
+    (lo : |(θ 0).thresholds.auxReady p - 1 / 40| ≤ 1 / 800)
+    (gain : 7 / 6 ≤ Real.exp (gains p) ∧ Real.exp (gains p) ≤ 6 / 5)
+    (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
+    ∃ T final,
+      time + 16 + 3 / 10 < T ∧ T < time + 16 + 9 / 10 ∧
+      (∃ e : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p) final,
+        ParameterCompleteThrough e T) ∧
+      ∀ {u} (e : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p) u),
+        ParameterCompleteThrough e T →
+        u.ObservationalEq final ∧ e.emissionTimes 0 = [T] ∧
+        u.x 0 (.z p) = gains p + 8 * ((θ 0).thresholds.error p - (θ 0).thresholds.auxReady p) := by
+  obtain ⟨run, complete⟩ := training_read_in_parameters (time := time) box config threshold hi lo gain caps
+  let decision := run.handoff.decision
+  have after := decision.outcome.1
+  have before := decision.outcome.2.1
+  rw [run.read_date] at after before
+  refine ⟨decision.stop, decision.final, after, before,
+    ⟨run.parameterExecution config, complete⟩, ?_⟩
+  intro u e done
+  obtain ⟨same, times⟩ := run.every_complete_run config box threshold hi lo caps e done
+  refine ⟨same, times, ?_⟩
+  rw [same.values]
+  change decision.silent.final.x 0 (.z p) = _
+  rw [decision.silent.gain_preserved, run.handoff.learned_at_read, run.dose_from_birth]
 
 end RecursiveLearning.Native

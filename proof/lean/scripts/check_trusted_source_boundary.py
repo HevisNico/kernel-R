@@ -15,6 +15,7 @@ IMPORTS = {
     'import KernelR.HybridResetRateCrossing',
     'import KernelR.HybridZeroRecoveryCrossing',
     'import KernelR.HybridParameterNominal',
+    'import KernelR.HybridParameterUniversalExecution',
 }
 NEW_MODULES = {f'proof/lean/KernelR/{name}.lean' for name in
                ['ExplicitFiniteChainRouter', 'TrustedHeadline', 'TrustedBaseChecker', 'TrustedBase']}
@@ -29,6 +30,12 @@ NEW_MODULES |= {
     'proof/lean/MemorySaturationAudit.lean',
     'proof/lean/KernelR/HybridParameterExecution.lean',
     'proof/lean/KernelR/HybridParameterNominal.lean',
+    'proof/lean/KernelR/HybridParameterJumpDiamond.lean',
+    'proof/lean/KernelR/HybridParameterPhysical.lean',
+    'proof/lean/KernelR/HybridParameterFlowUniqueness.lean',
+    'proof/lean/KernelR/HybridParameterTransport.lean',
+    'proof/lean/KernelR/HybridParameterJumpStripping.lean',
+    'proof/lean/KernelR/HybridParameterUniversalExecution.lean',
 }
 ENTRY = 'proof/lean/KernelR.lean'
 # Declared replacements for the threshold-parameter migration. All other
