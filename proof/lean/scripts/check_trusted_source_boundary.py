@@ -41,6 +41,7 @@ ENTRY = 'proof/lean/KernelR.lean'
 # Declared replacements for the threshold-parameter migration. All other
 # inherited Lean sources are still checked against the original base.
 MIGRATION_REPLACEMENTS = {
+    'proof/lean/KernelR/FutureControls.lean': '20373ccbdad7f53701a434fbdc2c77d7726f085e',
     'proof/lean/KernelR/Hybrid.lean': '7a32c5e8dabbba911d7c28aa421514aa4f4e0590',
     'proof/lean/KernelR/HybridPortPermutation.lean': 'a129c6f6283960e06aa1caf78cd8cc187b9bbf62',
 }

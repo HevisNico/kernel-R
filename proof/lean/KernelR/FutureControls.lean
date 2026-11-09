@@ -8,9 +8,11 @@ namespace KernelR.FutureControls
 open KernelR.Hybrid
 
 noncomputable def parameters : Fin 1 → Parameters := fun _ =>
-  ⟨fun _ => 4, fun _ => Real.log (5/4) / (1/50),
-   fun _ => Real.log 8 / (53/50), fun _ => a / (3/20),
-   fun _ => (1-1/40) / response (1/50)⟩
+  { cap := fun _ => 4
+    lm := fun _ => Real.log (5/4) / (1/50)
+    ls := fun _ => Real.log 8 / (53/50)
+    le := fun _ => a / (3/20)
+    inputGain := fun _ => (1-1/40) / response (1/50) }
 
 theorem parameters_box : PhysicalBox parameters (1/10) := by
   have selfbox (x : ℝ) (hx : 0 ≤ x) : InRelativeBox (1/10) x x := by
