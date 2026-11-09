@@ -111,7 +111,7 @@ From `proof/lean`:
 ```sh
 lake build KernelR.HybridZeroRecovery KernelR.HybridZeroRecoveryCrossing
 lake env lean ZeroRecoveryAudit.lean
-python3 scripts/check_zero_recovery_negative.py
+python3 -m scripts.negative.check_zero_recovery_negative
 ```
 
 The targeted build passed locally with Lean 4.35.0 and the pinned Mathlib
@@ -129,6 +129,6 @@ the negated statement. The explicit complete physical witnesses provide a
 separate constructive non-vacuity check.
 
 These targeted figures are separate from the successful full integration
-build and global audit recorded in the [validation ledger](../proof/lean/EVERY_N_PLAN.md#zero-recovery-milestone-local-validation).
+build and global audit recorded in the [validation ledger](VALIDATION_LEDGER.md#zero-recovery-milestone-local-validation).
 They do not claim completed remote CI. No equation, guard, parameter box,
 birth definition or existing theorem statement is weakened by this milestone.

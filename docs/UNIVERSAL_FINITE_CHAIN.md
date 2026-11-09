@@ -10,19 +10,9 @@ sections reach cap. The protocol's existing open-cap identities are unchanged.
 
 ## Result: every finite chain, with explicit scope
 
-All N cells are born at time 0 in independently chosen READY states. Routes
-are closed during 16 direct period-eight preparation inputs per cell: the
-leaf receives them on port 1, each relay on port 2. The leaf then receives
-K period-four port 0 sources from 160, with **K≥4N+12**. These future sources
-are present in the global queue from birth. Each source and wire is consumed
-by an actual arrival; each routed token is issued by an actual FIRE.
-Preparation and cadence share **one fixed gated router**, opening at 160.
-Each non-root FIRE in the contact window [160,T+1) issues exactly one token
-to its parent on port 2, due at F+δ_j(F); the root has no outgoing link.
-The topology, destination, port and contact window are fixed by the protocol.
-The [contact definition](../proof/lean/KernelR/HybridFiniteCadenceContact.lean)
-and [chain assembly](../proof/lean/KernelR/HybridFiniteChainPreparedData.lean)
-make these restrictions explicit.
+The [finite-chain protocol](../model/CHAIN_PROTOCOL.md) gives the exact birth, fabrication,
+input and router hypotheses of the headline theorem. For those inputs, the complete
+executions have the following outcomes.
 
 | Derived quantity | Result |
 |---|---|
@@ -59,18 +49,8 @@ reserve/cap invariants and actual raw-current origins are retained throughout.
 Physical cell indices run root-first in Lean; the depth index in the table
 runs leaf-first.
 
-The 15 fabrication parameters per cell are chosen independently in either the
-±0.3% or ±10% box and are **fixed in time**. Births have q=0.1±10⁻⁵,
-b=0.08±10⁻⁵, energy in [50,100], each auxiliary READY with m=0.025±10⁻⁵,
-no RAW, and log-gains within 10⁻⁵ of log(0.3), log(1.2), log(0.3) on ports 0/1/2.
-Pulses have the declared canonical width-one exponential shape. Sources,
-ports and contact windows are supplied protocol data.
-
-For each link, a fixed centre d and budget σ satisfy
-`0≤σ≤0.05` and `0.3+σ≤d≤0.4-σ`; the path sum is at most 0.15.
-The native-delay theorem accepts any fixed functions δ_j(t) satisfying
-`|δ_j(t)-d_j|≤σ_j` at **every real time**. They are inputs to the theorem;
-no sending FIRE dates or output calendar are supplied.
+The delay functions are supplied in advance and bounded at every real time.
+No sending FIRE dates or output calendar are supplied.
 
 As a separate indexed-error corollary, for every prescribed sequence e_j(k)
 in [-σ_j,σ_j], the construction supplies
@@ -125,7 +105,7 @@ instead accepts the delay functions fixed in advance. Neither formulation
 asserts an online synthesis algorithm, continuity or one function uniform
 across different families. Frozen
 probes, cuts/settings copies, indefinite networks and operational noise/drift
-retain their own obligations. See the [proof ledger](../proof/lean/EVERY_N_PLAN.md)
+retain their own obligations. See the [proof ledger](FINITE_CHAIN_CONSTRUCTION.md)
 and [coverage map](../proof/lean/N_CELL_COVERAGE.md).
 
 The earlier **staged three-cell protocol** remains proved from A's original
@@ -141,7 +121,7 @@ activity increases an input's log-gain while the main cell is READY; protected
 MARK activity increases recovery while admission is closed. Gain changes the
 response to future inputs; recovery changes the actual SLOW-to-READY return.
 The constructed protocol uses both to acquire and transmit cadence. The
-[kernel equations](../kernel/README.md) and
+[kernel equations](../model/CELL.md) and
 [model correspondence](../docs/MODEL_LEAN_CORRESPONDENCE.md) give their exact gates.
 
 This work draws inspiration from Nicolas Breuillaud's
@@ -253,7 +233,7 @@ completed the global build (9,618 jobs) and axiom audit (29,298 project theorem
 declarations), permitting only `propext`, `Classical.choice` and `Quot.sound`.
 The complete suite was canceled after 90 minutes, so its build/audit success
 is not a full-suite pass. These figures precede the present changes; the
-[validation ledger](../proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
+[validation ledger](VALIDATION_LEDGER.md#validation-and-checkpoint-discipline)
 keeps historical checkpoints and stage-specific evidence. The per-declaration
 compiler transcript above remains a separate item to capture from a real build.
 
@@ -411,7 +391,7 @@ three standard workflows passed: [Lean](https://github.com/HevisNico/kernel-R/ac
 [research](https://github.com/HevisNico/kernel-R/actions/runs/41379429036) and
 [robust evidence](https://github.com/HevisNico/kernel-R/actions/runs/41379429046).
 The inventory totals do not claim a fresh local rerun of every historical
-suite. The [validation ledger](../proof/lean/EVERY_N_PLAN.md) distinguishes the
+suite. The [validation ledger](VALIDATION_LEDGER.md) distinguishes the
 universal checkpoint from the earlier indexed-existence result.
 The [full reproduction commands](../proof/lean/README.md#reproduce) include source,
 evidence and paired corruption controls. The badge at the top follows `main`;
@@ -429,7 +409,7 @@ claim made in the repository.
 The [**one-page correspondence**](../docs/MODEL_LEAN_CORRESPONDENCE.md) maps main
 and auxiliary charges, gain/recovery learning, energy/work, pulses, thresholds,
 jumps, caps, fixed parameters and birth families to actual Lean definitions.
-The [kernel guide](../kernel/README.md) explains the cell; the
-[archived model](../model/full_model_reference.md) preserves its original network
+The [kernel guide](../model/CELL.md) explains the cell; the
+[archived model](../archive/spec-216-cells/full_model_reference.md) preserves its original network
 context. A22 topology and simulations remain supporting material below.
 

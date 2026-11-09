@@ -2,9 +2,9 @@
 
 Start with [`TrustedHeadline.every_finite_chain`](proof/lean/KernelR/TrustedHeadline.lean)
 and the generated [trusted-base reading list](docs/TRUSTED_BASE.md). Read in
-this order: the statement, the written cell model and its listed definitions,
-the crossing semantics, the protocol inputs, the compared observations, and
-finally the verification trust (`Audit.lean`, the toolchain, dependency pins
+this order: the statement, the [cell laws](model/CELL.md) and their Lean
+definitions, the crossing semantics, the [chain protocol](model/CHAIN_PROTOCOL.md),
+the compared observations, and finally the verification trust (`Audit.lean`, the toolchain, dependency pins
 and the trusted-base checker).
 
 CI computes the project-definition closure of the statement independently of
@@ -52,7 +52,7 @@ exit. A cut or an interleaved event on another cell must not create a new
 complete section or discard a partial one. Review this preservation through
 the [causal weave](proof/lean/KernelR/HybridCausalSectionRuns.lean).
 
-Compare the [written main and auxiliary rules](kernel/README.md#main-unit)
+Compare the [written main and auxiliary rules](model/CELL.md#main-unit)
 with [HybridCrossingExecution](proof/lean/KernelR/HybridCrossingExecution.lean),
 the [full-cell right continuation](proof/lean/KernelR/HybridCellOrbitGerm.lean)
 and the [correspondence map](docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings).
@@ -113,7 +113,7 @@ Check the explicit constant-flow witnesses, including the reserve equilibrium
 is outside the declared nominal birth band. The result neither changes the
 chain theorem nor proves the broader Reset Operator claim.
 
-The [validation ledger](proof/lean/EVERY_N_PLAN.md#validation-and-checkpoint-discipline)
+The [validation ledger](docs/VALIDATION_LEDGER.md#validation-and-checkpoint-discipline)
 records the build, axiom audit and paired controls separately from this human
 review obligation.
 

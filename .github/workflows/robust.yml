@@ -35,4 +35,5 @@ jobs:
           python -B ranges/tests.py
           for c in ranges/certificates/*.json; do python -B ranges/verify.py "$c"; done
       - name: Replay all robust birth and latency certificates
-        run: python -B ../../proof/lean/scripts/robust_evidence.py --check
+        working-directory: proof/lean
+        run: python -B -m scripts.evidence.robust_evidence --check

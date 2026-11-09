@@ -3,24 +3,35 @@ from pathlib import Path
 import hashlib,importlib.util,json,re,unittest
 
 ROOT=Path(__file__).resolve().parents[1]
+RECIPROCAL=ROOT/'archive/reciprocal'
+A22=ROOT/'archive/spec-216-cells'
+A22_SPEC=A22/'A22_216_CELL_SPEC.md'
+# These keys are paths in the published source manifests. Keep the manifests
+# byte-identical and resolve their paths in the reorganized checkout.
+MOVED_REFERENCES={
+    'model/CURRENT_SPEC.md': A22_SPEC,
+    'model/full_model_reference.md': A22/'full_model_reference.md',
+    'kernel/KERNEL_SHA256SUMS': A22/'kernel/KERNEL_SHA256SUMS',
+    'kernel/reference/A22_KERNEL_README.txt': A22/'kernel/reference/A22_KERNEL_README.txt',
+}
 
 class ProjectLayout(unittest.TestCase):
     def test_proof_source_manifests_match(self):
         for result in ['reciprocal_learning','reciprocal_entry','reciprocal_cadence','reciprocal_composition']:
-            manifest=json.loads((ROOT/'results'/result/'SOURCE_MANIFEST.json').read_text())
+            manifest=json.loads((RECIPROCAL/'results'/result/'SOURCE_MANIFEST.json').read_text())
             for name,want in manifest['files'].items():
-                with self.subTest(path=name):self.assertEqual(hashlib.sha256((ROOT/name).read_bytes()).hexdigest(),want)
+                with self.subTest(path=name):self.assertEqual(hashlib.sha256(MOVED_REFERENCES.get(name, RECIPROCAL/name).read_bytes()).hexdigest(),want)
     def test_maintained_project_markdown_links_resolve(self):
-        paths=[ROOT/'README.md']
-        for folder in ['experiments/reciprocal','proof','results','model','kernel','docs','research']:
+        paths=[ROOT/'README.md',ROOT/'REVIEW.md']
+        for folder in ['archive','proof','model','docs','research']:
             paths.extend((ROOT/folder).rglob('*.md'))
         for path in paths:
             # Lake materializes third-party docs outside the maintained source set.
             if '.lake' in path.relative_to(ROOT).parts:continue
             # Frozen authenticated A22 source: its six upstream-only references
-            # are mapped to pinned URLs in model/README.md. Identity is checked
+            # are mapped to pinned URLs in the archive index. Identity is checked
             # by test_proof_source_manifests_match; do not rewrite the snapshot.
-            if path==ROOT/'model/CURRENT_SPEC.md':continue
+            if path==A22_SPEC:continue
             for target in re.findall(r'\]\(([^)]+)\)',path.read_text()):
                 if re.match(r'\w+://|#|mailto:',target):continue
                 target=target.split('#')[0]

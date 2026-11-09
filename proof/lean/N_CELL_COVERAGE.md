@@ -12,7 +12,7 @@ It does not imply that arbitrary inputs create enough such sections, that a
 protocol birth reaches cap, or that recovery and other ports stop learning.
 It changes none of the chain construction, cadence, or progress hypotheses.
 
-The [written finite-chain argument](../reciprocal_composition/THEOREM.md) now
+The [written finite-chain argument](../../archive/reciprocal/proof/reciprocal_composition/THEOREM.md) now
 has a constructed physical common-birth family for every positive finite N,
 as well as its earlier abstract induction. The new universal-complete layer now
 also proves the terminal physical outcome and actual per-cell FIRE dates for
@@ -32,7 +32,8 @@ simultaneous-event linearization with a crossing history. Birth, fabrication,
 source, delay and budget hypotheses are unchanged.
 
 See [UniversalChainHeadline](KernelR/UniversalChainHeadline.lean) and the
-[exact quantifiers and validation ledger](EVERY_N_PLAN.md). The indexed order
+[exact quantifiers](../../docs/FINITE_CHAIN_CONSTRUCTION.md) and
+[validation ledger](../../docs/VALIDATION_LEDGER.md). The indexed order
 is **∀ admissible data/errors, ∃ fixed native functions and a complete witness,
 ∀ finite executions complete at T under that same router**. This is not a
 universal assertion about stopped prefixes or indefinite network runs.
@@ -61,7 +62,7 @@ uniqueness, including capped actuator gates, and legal jump confluence; it is
 not an added caller premise. At an arbitrary complete trace, FAST errors are
 indexed after dropping its own12/14 preparation FIREs from the full list.
 
-The [construction ledger](EVERY_N_PLAN.md) records both APIs and validation.
+The [construction ledger](../../docs/FINITE_CHAIN_CONSTRUCTION.md) records both APIs and validation.
 
 At `T=160+4*(K-1)+1.1*(N-1)+8`, all cells are READY/q=0.1 with no RAW and an
 empty pending queue; `CompleteThrough`, physical bounds and raw validity
@@ -188,16 +189,16 @@ covers both N-cell certificates. The axiom audit includes every imported chain
 and certificate theorem. Negative tests reject altered traffic counts and an
 over-budget four-link jitter claim, in addition to the existing endpoint,
 cadence and adaptive-record corruption cases. The 29 paired controls in
-`python scripts/check_hybrid_feedback_entry_negative.py` additionally check
+`python -m scripts.negative.check_hybrid_feedback_entry_negative` additionally check
 the constructed weak entry and first reverse FIRE, own memories and exact
 source/wire queues. The 40 additional paired controls in
-`python scripts/check_hybrid_reverse_receipt_negative.py` pass for the
+`python -m scripts.negative.check_hybrid_reverse_receipt_negative` pass for the
 actual first receipt and352 handoff, own memories, exact queues and
-A28/B15. The 40 subsequent pairs in `python scripts/check_hybrid_reverse_epoch_negative.py`
+A28/B15. The 40 subsequent pairs in `python -m scripts.negative.check_hybrid_reverse_epoch_negative`
 cover the constructed reciprocal epoch through459.9, its actual
 sources and wires, retained own memories and A38/B27: all valid conclusions
 compile and all altered claims are rejected. The 50 new pairs in
-`python scripts/check_hybrid_c_teaching_existence_negative.py` pass for the
+`python -m scripts.negative.check_hybrid_c_teaching_existence_negative` pass for the
 actual C birth/teaching, three-cell execution, own memories and A38/B43/C14.
 The preceding autonomous-C/leaf-packet checkpoint passed the complete pinned
 build (9,458 jobs) and global audit (25,538 project theorems), with 405 Lean
@@ -231,7 +232,7 @@ the current finite-chain scope; the
 [model correspondence](../../docs/MODEL_LEAN_CORRESPONDENCE.md) maps equations
 to their operational definitions. N=3 remains finalized; the distinct
 common-birth every-N construction is tracked in
-[EVERY_N_PLAN.md](EVERY_N_PLAN.md). The validated baseline figures above remain
+[finite-chain construction](../../docs/FINITE_CHAIN_CONSTRUCTION.md). The validated baseline figures above remain
 those of the N=3 commit; current finite-chain validation and checkpoint
 history are recorded there.
 

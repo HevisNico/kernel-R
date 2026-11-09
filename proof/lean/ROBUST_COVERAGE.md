@@ -26,7 +26,7 @@ unchanged b after preparation, frozen probes 0/8 then 8/8, reserve in [50,100]) 
 fields of `CellWitness` and are not concluded by the Lean induction. They are proved by the
 written local arguments and their certificates. A later version can add them to the
 witness, so that the induction carries them unchanged, once `CellLaw` itself is derived
-from the hybrid execution. [CELLLAW_PLAN.md](CELLLAW_PLAN.md) proposes how to split that
+from the hybrid execution. [CELLLAW_PLAN.md](../../archive/plans/CELLLAW_PLAN.md) proposes how to split that
 derivation.
 
 The sufficient period is `T ≥ 7.5 + 2 Σ (δᵢ + σᵢ)` over the first N−1
@@ -53,11 +53,11 @@ Reproduce from `proof/lean`:
 
 ```sh
 python scripts/check_sources.py
-python scripts/generate_evidence.py --check
-python scripts/robust_evidence.py --check
+python -m scripts.evidence.generate_evidence --check
+python -m scripts.evidence.robust_evidence --check
 lake build
 lake build Audit
-python scripts/check_negative.py
+python -m scripts.negative.check_negative
 ```
 
 The robust emitter independently replays every certificate with integer

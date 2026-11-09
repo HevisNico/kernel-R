@@ -118,7 +118,7 @@ From `proof/lean`:
 ```sh
 lake build KernelR.HybridMemorySaturation KernelR.HybridCrossingMemorySaturation
 lake env lean MemorySaturationAudit.lean
-python3 scripts/check_memory_saturation_negative.py
+python3 -m scripts.negative.check_memory_saturation_negative
 lake build
 lake build Audit
 ```
@@ -126,5 +126,5 @@ lake build Audit
 Lean 4.35.0 and Mathlib v4.35.0 remain pinned. The scoped and global audits
 permit only `propext`, `Classical.choice` and `Quot.sound`, and reject added
 axioms and admitted proofs. See the
-[validation ledger](../proof/lean/EVERY_N_PLAN.md#memory-saturation-local-validation)
+[validation ledger](VALIDATION_LEDGER.md#memory-saturation-local-validation)
 for the observed checks and their scope.
