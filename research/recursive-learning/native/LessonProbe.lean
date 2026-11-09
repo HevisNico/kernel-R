@@ -256,7 +256,7 @@ theorem LessonProbeAdmission.gain_every_complete {θ ε prepared time final}
     complete admission.complete).1
   rw [same.values, admission.logGain]
 
-private theorem learnedProbe_gain :
+theorem learnedProbe_gain :
     9 / 5 ≤ Real.exp (3 / 5 : ℝ) ∧ Real.exp (3 / 5 : ℝ) ≤ 11 / 5 := by
   constructor
   · have bound := Real.sum_le_exp_of_nonneg (x := (3 / 5 : ℝ)) (by norm_num) 4
@@ -338,13 +338,20 @@ theorem quiet_ready_tail_exists {θ : Fin 1 → Parameters} {s : Snapshot 1} {T 
     (fun i => (ready i).ready) (fun i p => ((ready i).auxiliary p).1) rawNone charge sensor noDue
   exact ⟨.cons (.flow flow) (.nil _), complete, by simp, rfl, rfl⟩
 
+structure LearnerDispatchState (s : Snapshot 1) : Prop where
+  rawNone : ∀ i p, s.raw i p = none
+  auxiliary : ∀ p, s.aux 0 p = .ready ∧ RestBand (s.x 0 (.m p))
+  main : ReadyCoordinates s 0 ∨
+    (s.main 0 = .slow ∧ 1 / 10 < s.x 0 .q ∧ s.x 0 .q ≤ 1 / 4 ∧ s.x 0 .b = 2 / 25)
+
 private theorem slow_readout_tail_exists {θ : Fin 1 → Parameters} {s : Snapshot 1} {T : ℝ}
     (later : s.time < T) (short : T + 1 / 10 - s.time ≤ 8)
     (slow : s.main 0 = .slow) (charge : s.x 0 .q = 1 / 4) (recovery : s.x 0 .b = 2 / 25)
     (aux : ∀ i p, s.aux i p = .ready) (rest : ∀ p, RestBand (s.x 0 (.m p)))
     (rawNone : ∀ i p, s.raw i p = none) (empty : s.pending = []) :
     ∃ (final : Snapshot 1) (e : Execution θ (fun _ _ => []) s final),
-      CompleteThrough e T ∧ e.ContactsTransversal ∧ e.ledger.emissions = [] := by
+      CompleteThrough e T ∧ e.ContactsTransversal ∧ e.ledger.emissions = [] ∧
+        LearnerDispatchState final := by
   let finish := T + 1 / 10
   have positive : s.time < finish := by dsimp [finish]; linarith
   have mainGuard (t : ℝ) (ht : t ∈ Set.Ico s.time finish) :
@@ -370,16 +377,38 @@ private theorem slow_readout_tail_exists {θ : Fin 1 → Parameters} {s : Snapsh
           simp only [ite_true, rawInputScale, mul_zero, auxPulse_zero_eq_relax]
           exact relax_lt (by norm_num) ht.1 (otherSensor 0 0) (by norm_num))
       (by simp [empty])
-  let execution : Execution θ (fun _ _ => []) s _ := .cons (.flow flow) (.nil _)
-  obtain ⟨cut⟩ := execution.before_flow_cut_exists T later.le (by change T < T + 1 / 10; linarith)
-  exact ⟨cut.state, cut.cut, cut.complete,
-    cut.isPrefix.contacts_transversal (by simp [execution]),
-    (List.append_eq_nil_iff.mp cut.emissions.symm).1⟩
+  have before : T < finish := by dsimp [finish]; linarith
+  let final := flow.at T
+  let next := flow.suffix later.le before
+  let trace : Execution θ (fun _ _ => []) s final := .cons (.flow (flow.prefix later before.le)) (.nil _)
+  have complete : CompleteThrough trace T :=
+    ⟨rfl, fun _ => next.initial_before_guards.no_jump
+      (fun i p origin active => next.initial_raw_strict i p origin active)
+      next.initial_pending_strict _, next.initial_pending_strict⟩
+  refine ⟨final, trace, complete, by simp [trace], rfl, ⟨rawNone, ?_, ?_⟩⟩
+  · intro p
+    refine ⟨aux 0 p, ?_⟩
+    have band := relax_mem_Icc (by norm_num : (0 : ℝ) ≤ 1 / 2) later.le (rest p)
+      (by constructor <;> norm_num : (1 / 40 : ℝ) ∈ Set.Icc
+        (1 / 40 - 1 / 100000) (1 / 40 + 1 / 100000))
+    change RestBand (protectedMainValues θ s 0 0 .slow .ready none T 0 (.m p))
+    by_cases hp : p = 0
+    · subst p
+      simpa [protectedMainValues, rawInputScale, auxPulse_zero_eq_relax, RestBand] using band
+    · simpa [protectedMainValues, hp, RestBand] using band
+  · refine Or.inr ⟨slow, ?_, ?_, recovery⟩
+    · exact mainGuard T ⟨later.le, before⟩
+    · change s.x 0 .q * Real.exp (-s.x 0 .b * (T - s.time)) ≤ 1 / 4
+      rw [charge, recovery]
+      have decay : Real.exp (-(2 / 25 : ℝ) * (T - s.time)) ≤ 1 :=
+        Real.exp_le_one_iff.mpr (by linarith)
+      linarith
 
 /-- The learner remains complete until after the routed teacher dose can
     finish. Its readout still reports only the original offset-17 probe. -/
-theorem lesson_probe_late_run_exists {θ ε} (box : @PhysicalBox 1 θ ε)
-    (prepared : Bool) (time : ℝ) : Nonempty (LessonProbeRun θ prepared time (time + 26)) := by
+theorem lesson_probe_dispatch_state_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (prepared : Bool) (time : ℝ) :
+    ∃ run : LessonProbeRun θ prepared time (time + 26), LearnerDispatchState run.final := by
   obtain ⟨admission⟩ := lesson_probe_admission_exists box prepared time
   have physical := admission.execution.physical_invariant box (lessonProbe_physical box)
   have date := admission.complete.1
@@ -403,7 +432,7 @@ theorem lesson_probe_late_run_exists {θ ε} (box : @PhysicalBox 1 θ ε)
     have fastEmpty : fast.final.pending = [] := by
       rw [fast.pending, fire.pending, admission.queue]
       rfl
-    obtain ⟨final, slow, complete, slowTransverse, slowSilent⟩ :=
+    obtain ⟨final, slow, complete, slowTransverse, slowSilent, dispatch⟩ :=
       slow_readout_tail_exists (θ := θ) (T := time + 26)
         (by rw [fastDate]; linarith [fire.deadline]) (by rw [fastDate]; linarith [fire.early])
         fast.main_slow fast.charge fastRecovery fast.auxiliary fast.rest fast.raw_none fastEmpty
@@ -411,7 +440,8 @@ theorem lesson_probe_late_run_exists {θ ε} (box : @PhysicalBox 1 θ ε)
     have emissions : readout.ledger.emissions = [(0, fire.final.time)] := by
       simp [readout, Execution.emissions_append, fire.emissions, fast.emissions, slowSilent, fire.date]
     refine ⟨⟨admission, final, readout, complete, ?_, ⟨_, emissions⟩, ?_,
-      readout.pending_empty_of_sources_due _ complete (by simp [admission.queue]) (fun _ _ => rfl)⟩⟩
+      readout.pending_empty_of_sources_due _ complete (by simp [admission.queue]) (fun _ _ => rfl)⟩,
+      dispatch⟩
     · simp [readout, fire.contacts_transversal, fast.contacts_transversal, slowTransverse]
     · intro e member
       rw [emissions] at member
@@ -432,9 +462,21 @@ theorem lesson_probe_late_run_exists {θ ε} (box : @PhysicalBox 1 θ ε)
     let readout := response.execution.append wait
     have emissions : readout.ledger.emissions = [] := by
       simp [readout, Execution.emissions_append, response.emissions, silent]
+    have later : response.final.time ≤ time + 26 := by rw [response.date, date]; linarith
+    have ready := quietAt_ready_coordinates response.final 0 response.pulse.coordinates later
     exact ⟨⟨admission, _, readout, complete,
       (Execution.contactsTransversal_append _ _).2 ⟨response.contacts_transversal, transverse⟩,
-      emissions, by simp [emissions], empty⟩⟩
+      emissions, by simp [emissions], empty⟩, ⟨
+      fun i p => by
+        change response.final.raw i p = none
+        rw [Subsingleton.elim i 0]
+        exact response.pulse.raw_finished p,
+      ready.auxiliary, Or.inl ready⟩⟩
+
+theorem lesson_probe_late_run_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (prepared : Bool) (time : ℝ) : Nonempty (LessonProbeRun θ prepared time (time + 26)) := by
+  obtain ⟨run, _⟩ := lesson_probe_dispatch_state_exists box prepared time
+  exact ⟨run⟩
 
 /-- Recover the original probe horizon as a saturated prefix of the longer
     run. Every readout FIRE is strictly before that cut. -/

@@ -129,8 +129,33 @@ nothing to the teacher.
 same physical endpoint, FIREs and deliveries in every complete execution at that
 horizon. The result covers both fabrication boxes and delays in
 `[0.3, 0.4]`. The selector value now comes from the actual lesson and
-readout. Using it to choose and send the next lesson is the remaining
-network step.
+readout.
+
+## The selector sends the next pulse
+
+The [dispatch proof](Dispatch.lean) adds two clock pulses on the teacher's
+selector port at offsets 50 and 58. Both clocks are in the initial queue
+in both cases. The teacher starts dispatch from the state carried out of
+the lesson, including its learned selector gain. The learner also retains
+its state and finishes any remaining recovery before the return.
+
+| Selector after the probe | First teacher FIRE | Learner receives |
+|---|---|---|
+| High, after omitted preparation | After clock 50 | Practice pulse on port 1 |
+| Low, after successful preparation | After clock 58 | Preparation pulse on port 0 |
+
+At low gain the first clock is silent and adds a full ERROR dose. The
+second clock then crosses the firing threshold. The same fixed router
+uses the actual FIRE date to select the destination port and schedules
+the return after the wire delay.
+
+`dispatched_lesson_crossing_exists` constructs one execution from the
+initial lesson through receipt of the selected pulse on the original
+learner. `DispatchedLesson.every_crossing_complete` transfers the physical
+endpoint and FIREs to all complete executions through that receipt horizon.
+The horizon is the selected FIRE date plus its wire delay. In the early
+case the second clock is still due later. The proof covers this first
+dispatch and receipt.
 
 ## Verify
 
@@ -144,7 +169,7 @@ lake build
 
 The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
 builds this package with the pinned dependencies. Its default targets compile
-`NativeLearning`, `Feedback`, `LessonProbe` and `RoutedLesson`, and run
+`NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson` and `Dispatch`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
