@@ -89,8 +89,14 @@ lesson. The native result uses a one-shot selector and a fixed calendar
 for this example. A separate [learner-readout experiment](native/LearnerReadout.lean)
 uses the gains learned by the cell receiving each full trial. The learner's
 readout drives a credit write, or the failure of the 2 + 4 trial drives
-a selector update through a diagnostic cell. The general credit bound
-above concerns the discrete architecture.
+a selector update through a diagnostic cell. The
+[readout-driven serial theorem](native/ReadoutSeries.lean) joins those
+steps in one native execution. The accepted 3 + 4 trial launches the
+2 + 4 probe. Its failure writes the selector, whose readout launches
+3 + 3. The two actual acceptance firings write the two credits and
+issue the deployed lessons. With the feedback wire cut, the same
+network keeps the seven-pulse lesson and the first credit. The general
+credit bound above concerns the discrete architecture.
 
 ## Verify
 

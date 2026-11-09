@@ -402,8 +402,44 @@ The selector experiment covers both fabrication boxes and output wire
 delays in [0.3, 0.4]. Complete upward-crossing runs agree on the endpoint
 and firing dates at the common horizon.
 
-These are separate readout-driven experiments. The serial 8 → 7 → 6
-construction above still uses its own calendar-fed counters.
+These local results provide the learner and diagnostic traces used in the
+readout-driven serial experiment below.
+
+## The 8 → 7 → 6 experiment with learner readouts
+
+[`native_readout_eight_seven_six`](ReadoutSeries.lean) composes the
+readout-driven updates in one complete upward-crossing execution of nine
+R cells. The original seven-cell construction above uses calendar-fed
+tests. In this version the learners that receive the actual trial
+pulses supply the acceptance signals.
+
+1. A fresh learner receives the full 3 + 4 trial. Its common read
+   pulse sees the preparation gain acquired by that trial. The
+   learner's FIRE writes the preparation credit, schedules the
+   seven-pulse lesson and launches the full 2 + 4 trial.
+2. The 2 + 4 learner receives all six trial pulses and its own read
+   pulse. Its silent read leaves the diagnostic cell exposed. The
+   diagnostic readout FIRE issues the feedback pulse to the selector.
+3. The selector's common read pulse sees the gain written by feedback.
+   Its FIRE launches the full 3 + 3 trial. That learner's own readout
+   FIRE writes the practice credit and schedules the six-pulse lesson.
+
+The deployed lessons are received by separate fresh cells. Their
+delivery counts are 8, 7 and 6. Each completed lesson meets needs
+(3, 3). In the control with the selector update wire cut, the same
+initial snapshot yields the same first credit and seven-pulse lesson.
+The selector stays silent at its readout, the practice trial is absent
+and the practice credit stays zero.
+
+The theorem holds in either fabrication box with independent fixed
+parameters. At the common horizon all complete upward-crossing
+executions agree on the terminal state and ordered firing dates.
+Complete first-contact executions also agree on the multiset of
+deliveries. The experiment uses fixed candidate shapes and clocks, a
+one-shot selector, and one diagnostic cell. The other lesson block
+already meets its requirement in each trial, so each acceptance reads
+the block under test. Counts for deployed lessons exclude trial inputs,
+read pulses, diagnostic inputs and credit writes.
 
 ## Verify
 
@@ -421,7 +457,7 @@ builds this package with the pinned dependencies. Its default targets compile
 `SelectorRead`, `SelectorPrecharge`, `TeacherReopen`, `TeacherStableClock`
 `CappedWorkRun`, `TeacherCappedCycle`, `CappedDispatch`, `NativeLesson`,
 `NativeAcceptance`, `AcceptanceDispatch`, `SerialAcceptance` and
-`LearnerReadout`, and run
+`LearnerReadout` and `ReadoutSeries`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
