@@ -172,11 +172,11 @@ def prepare(physical, setting, nodes, weights):
     if np.any(reserve <= 0):
         raise RuntimeError("The reserve envelope does not keep the write gate open")
 
-    return residual, 1.2*np.exp(learned_dose), fire, learned_dose, cap_dose, reserve
+    return residual, 1.2*np.exp(learned_dose), fire, learned_dose, cap_dose, reserve, sensor_end
 
 
 def evaluate(prepared, scale):
-    residual, gain, fire, dose, cap_dose, reserve = prepared
+    residual, gain, fire, dose, cap_dose, reserve, _ = prepared
     arrivals = 17 + np.array(ARRIVALS)/scale
     rest = residual[..., None]*np.exp(-.5*(arrivals-1))
     threshold = np.broadcast_to(fire[..., None], rest.shape)
