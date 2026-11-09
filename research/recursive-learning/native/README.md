@@ -160,11 +160,17 @@ dispatch and receipt.
 ## A selector read that preserves the gain
 
 The [prepared read](SelectorRead.lean) uses one canonical selector pulse
-and the same starting charge band `[0.69, 0.71]` for either stored value.
-The high log-gain `0.6` produces a FIRE between offsets 0.1 and 0.2.
-The low log-gain `0` produces a FIRE between offsets 0.2 and 0.7.
+and the same starting charge band `[0.650, 0.776]` for either stored value.
+The high log-gain `0.6` produces a FIRE between offsets 0.1 and 0.195.
+The low log-gain `0` produces a FIRE between offsets 0.3 and 0.8.
 Both fires start protection before the sensor's ERROR phase, and
 protection continues through the end of ERROR.
+
+`SelectorReadRun.reads_high_after_wire` separates the two cases even
+after a delivery delay in `[0.3, 0.4]`. The receiver can compare its
+delivery date with offset `0.5975` from a reference within `0.0025` of
+the actual read-pulse arrival. This is a timing guarantee for a receiver
+with that reference.
 
 `prepared_selector_read_crossing_exists` constructs both reads under the
 upward-crossing semantics in either fabrication box. Each read is complete
@@ -174,9 +180,25 @@ gain preservation at intermediate cuts. `SelectorReadRun.every_crossing_complete
 transfers the exact FIRE and gain values to every complete crossing
 execution through that horizon.
 
-The charge band and the admitted pulse are preparation hypotheses. The
-proof starts there. Producing this band from the actual first-round
-endpoint and running a second teaching round remain open.
+### Precharge on a saturated work port
+
+A full pulse at the work port's fabrication cap would take a resting
+READY cell above threshold. The [precharge proof](SelectorPrecharge.lean)
+uses only the part of that pulse left after the cell reopens. It covers
+reopening at pulse age `[0.558, 0.559]` in either fabrication box, or at
+age `[0.53, 0.59]` in the ±0.3% box.
+
+`capped_work_precharge_of_reopened` shows that an isolated continuation
+from such a reopening stays READY without firing and reaches the read
+band at pulse age `1.4`. It uses the actual raw-expiry jump. The work
+gain stays at its cap and the unused selector port preserves its gain
+when its sensor starts at rest. The proof applies across legal sensor
+transitions, including ERROR on the work port.
+
+This result takes the reopening and its isolated continuation as
+hypotheses. The next network step is to schedule the work pulse from
+the first round, admit the read pulse, and supply the receiver's timing
+reference. A second teaching round remains open.
 
 ## Verify
 
@@ -190,7 +212,8 @@ lake build
 
 The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
 builds this package with the pinned dependencies. Its default targets compile
-`NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson`, `Dispatch` and `SelectorRead`, and run
+`NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson`, `Dispatch`,
+`SelectorRead` and `SelectorPrecharge`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
