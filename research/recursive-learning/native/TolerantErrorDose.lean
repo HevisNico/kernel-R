@@ -130,6 +130,27 @@ private theorem exp_dose_upper : Real.exp (13 / 20 : ℝ) ≤ 2 := by
   norm_num [Finset.sum_range_succ] at h
   linarith [(abs_sub_le_iff.mp h).1]
 
+/-- The concrete high-band budget for one dose with both sensor
+endpoints within five percent of nominal. -/
+theorem one_error_dose_gain {z upper lower : ℝ}
+    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800)
+    (initial : 7 / 6 ≤ Real.exp z ∧ Real.exp z ≤ 6 / 5) :
+    2 ≤ Real.exp (z + 8 * (upper - lower)) ∧ Real.exp (z + 8 * (upper - lower)) ≤ 12 / 5 := by
+  obtain ⟨hi₁, hi₂⟩ := abs_le.mp hi
+  obtain ⟨lo₁, lo₂⟩ := abs_le.mp lo
+  have dose : 11 / 20 ≤ 8 * (upper - lower) ∧ 8 * (upper - lower) ≤ 13 / 20 := by
+    constructor <;> linarith
+  rw [Real.exp_add]
+  constructor
+  · have h := mul_le_mul initial.1 (exp_dose_lower.trans (Real.exp_le_exp.mpr dose.1))
+      (by norm_num : (0 : ℝ) ≤ 12 / 7) (Real.exp_pos _).le
+    norm_num at h
+    exact h
+  · have h := mul_le_mul initial.2 ((Real.exp_le_exp.mpr dose.2).trans exp_dose_upper)
+      (Real.exp_pos _).le (by norm_num : (0 : ℝ) ≤ 6 / 5)
+    norm_num at h
+    exact h
+
 /-- A one-dose memory test on the same port. An untrained gain in
 [7/6, 1.2] reads silent. One exposed ERROR dose with each sensor
 endpoint within 5% of nominal makes the prepared read fire. -/
@@ -143,23 +164,13 @@ theorem tolerant_one_dose_memory {θ ε time gains p level after upper lower}
     Nonempty (TolerantPortDecision θ time (Function.update gains p after) p true level) := by
   constructor
   · exact tolerant_port_readout box threshold initialGain.2 other
-  · let train : ExposedErrorTrain θ p (gains p) [(upper, lower)] after := .cons span (.nil _)
-    refine tolerant_readout_after_error_train box threshold train (δhi := 1 / 200)
-      (δlo := 1 / 800) ?_ ?_ ?_ other
-    · intro cut mem
-      obtain rfl := List.mem_singleton.mp mem
-      exact ⟨hi, lo⟩
-    · norm_num only [List.length_singleton, Nat.cast_one, one_mul]
-      rw [Real.exp_add]
-      have h := mul_le_mul initialGain.1 exp_dose_lower
-        (by norm_num : (0 : ℝ) ≤ 12 / 7) (Real.exp_pos _).le
-      norm_num at h
-      exact h
-    · norm_num only [List.length_singleton, Nat.cast_one, one_mul]
-      rw [Real.exp_add]
-      have h := mul_le_mul initialGain.2 exp_dose_upper
-        (Real.exp_pos _).le (by norm_num : (0 : ℝ) ≤ 6 / 5)
-      norm_num at h
-      exact h
+  · apply tolerant_port_readout box threshold
+    · have dose := span.dose
+      rw [Function.update_self]
+      rw [show after = gains p + 8 * (upper - lower) by linarith]
+      exact one_error_dose_gain hi lo initialGain
+    · intro q hq
+      rw [Function.update_of_ne hq]
+      exact other q hq
 
 end RecursiveLearning.Native
