@@ -78,7 +78,7 @@ noncomputable def conjunctionCounter (time : ℝ) (arity : ℕ) : Snapshot 1 :=
       | other => (preparedTeacher time).x i other
     pending := [] }
 
-private theorem conjunction_counter_physical {θ ε} (box : @PhysicalBox 1 θ ε) (time : ℝ)
+theorem conjunction_counter_physical {θ ε} (box : @PhysicalBox 1 θ ε) (time : ℝ)
     (arity : ℕ) : PhysicalInvariant θ (conjunctionCounter time arity) := by
   let phys := preparedTeacher_physical box time []
   refine ⟨phys.region, ?_, phys.recovery_cap, phys.reserve⟩

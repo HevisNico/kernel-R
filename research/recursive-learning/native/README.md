@@ -466,6 +466,24 @@ parameters in either fabrication box. All complete upward-crossing
 executions from each initial queue agree on terminal observations and
 firing dates at the stated horizon.
 
+## Any finite number of learner reports
+
+[`native_learner_fan_in`](LearnerFanIn.lean) extends the conjunction to
+any positive number of independently fabricated learners. Each learner
+receives its trial and read pulse. Its actual readout FIRE, when present,
+sends a dose to its reserved counter slot. The router and the probe time
+depend on the number of learners and their clock, while the trial queues
+determine which learners report. The counter issues one credit if every
+trial passes. All complete upward-crossing executions agree on the
+terminal observations and the ordered firing dates.
+
+[`compose_scheduled_receiver`](LearnerFanIn.lean) joins an arbitrary
+sender network to one receiver. The receiver's local execution must
+admit exactly its external inputs and the strictly causal tokens
+issued by the sender. The composed initial queue contains the external
+inputs. The fan-in theorem uses this operation to connect the learners
+to the counter and the counter to the credit cell.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -482,7 +500,7 @@ builds this package with the pinned dependencies. Its default targets compile
 `SelectorRead`, `SelectorPrecharge`, `TeacherReopen`, `TeacherStableClock`,
 `CappedWorkRun`, `TeacherCappedCycle`, `CappedDispatch`, `NativeLesson`,
 `NativeAcceptance`, `AcceptanceDispatch`, `SerialAcceptance`,
-`LearnerReadout`, `ReadoutSeries` and `LearnerConjunction`, and run
+`LearnerReadout`, `ReadoutSeries`, `LearnerConjunction` and `LearnerFanIn`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
