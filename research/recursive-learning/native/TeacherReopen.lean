@@ -505,7 +505,7 @@ theorem teacher_self_router_causal (work : Port) : StrictCausalRouter (teacherSe
   change fire < fire + teacherWorkOffset
   linarith [teacher_work_offset_bounds.1]
 
-private theorem teacher_future_transverse {n θ route s u} (e : @Execution n θ route s u)
+theorem teacher_future_transverse {n θ route s u} (e : @Execution n θ route s u)
     (token : Delivery n) (later : u.time ≤ token.due)
     (positive : e.ContactsTransversal) :
     (e.withFuture [token] (by intro d hd; simpa using (List.mem_singleton.mp hd) ▸ later)).ContactsTransversal := by
