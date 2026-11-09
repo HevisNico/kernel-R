@@ -159,6 +159,39 @@ training, reserve, cap, silence and report-count checks in the protocol.
 A common setting certified to pass the full contract rules out a
 separation in that box.
 
+In the ±10% fabrication box the caps are 3.6 and 4.4 at the endpoints.
+At gain 4 the magnitude of the local latency coefficient for relative
+gain error is 0.23784. A 10% error therefore moves one cell's latency
+by about 0.024 units, against the 0.025 per-cell budget in the linear
+approximation. Solving for both first crossings in the reduced READY
+response gives a more precise prediction. Use the two opposite caps
+and input dates 16.95 and 17.05 in the zero-offset class, with the lower
+cap on the later input. Use the nominal residual from the training
+pulse in the readout.
+
+| FIRE error radius | Latency spread | Slack at 100 µs per unit |
+| --- | ---: | ---: |
+| 0% | 0.048334 units | +0.1666 µs |
+| 0.3% | 0.049957 units | +0.0043 µs |
+| 1% | 0.053746 units | −0.3746 µs |
+
+Use the lower FIRE threshold on the earlier input and the higher one on
+the later input. The spread consumes the remaining 0.05-unit pair
+budget at approximately 0.308% FIRE error. At the primary scale, predict
+a capped timer pass with nominal FIRE, a marginal pass at 0.3%, and
+failure at 1% and above. The two adjacent offset classes give slightly
+more slack in the same reduced readout. Include the joint opposite-cap
+and opposite-FIRE endpoints in both cell orders, with the registered
+jitter endpoints, in addition to the standard sweep.
+
+For the wide box include a separate common setting of `I = 0.125` and
+`D = 12`. It offers at least 1.350 log-gain units at 10% current error,
+against at most `log(4.4 / 1.2) ≈ 1.29928` needed to reach the cap.
+Certify actual cap attainment and the full execution conditions before
+treating the predicted passes as counterexamples to separation. The
+wide-box failure prediction concerns the capped setting. The optimized
+timer still includes all other permitted settings.
+
 ## Execution and conclusion rule
 
 Before the first run, commit the complete runner, its exact dependencies,
