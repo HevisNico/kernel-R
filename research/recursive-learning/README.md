@@ -54,11 +54,11 @@ are discrete definitions. A credit is a unit dose in this model. The
 [native R dose theorem](../../docs/EXACT_DOSE_COUNTING.md) motivates that
 abstraction through exact increments from fully exposed sensor phases.
 
-A native realization still needs a route from actual learner outputs to the
-teacher's dose and selector updates. It would need to establish that the
-continuous flows and jumps produce the same observations and commits. The
-present result establishes two improvements in the stated model and a
-bound for its capped architecture.
+The [native memory experiment](native/README.md) realizes the teacher's two
+commits with actual R flows and arrivals for a supplied pulse script. A
+closed loop still needs a route from actual learner outputs to that script.
+The discrete results above establish the two improvements and a bound for
+the capped architecture.
 
 ## Verify
 
