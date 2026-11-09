@@ -62,8 +62,10 @@ update, and receipt of the next selected pulse. The dispatch in that round
 changes the low selector gain. A [prepared read](native/SelectorRead.lean)
 preserves both values and leaves a timing margin for routing the output.
 A [saturated work pulse](native/SelectorPrecharge.lean) supplies the
-required charge after a suitably timed reopening. Scheduling that
-reopening in the network and iterating the loop remain open.
+required charge after a suitably timed reopening. A [local teacher
+execution](native/TeacherReopen.lean) now schedules the work pulse from
+its own FIRE and reaches that reopening in both fabrication boxes.
+Joining this execution to the network and iterating the loop remain open.
 
 The discrete results above establish the two improvements and a bound for
 the capped architecture.

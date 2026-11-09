@@ -31,7 +31,7 @@ theorem selector_response_coefficient_bounds :
     linarith [KernelR.log_four_bounds.1]
 
 private theorem selector_early_mono {gain start : ℝ} (lower : 1 ≤ gain) (upper : gain ≤ 2) :
-    MonotoneOn (readyPulse (97 / 125) gain start) (Icc start (start + 3 / 10)) := by
+    MonotoneOn (readyPulse (39 / 50) gain start) (Icc start (start + 3 / 10)) := by
   apply (strictMonoOn_of_deriv_pos (convex_Icc _ _) ?_ ?_).monotoneOn
   · unfold readyPulse response
     fun_prop
@@ -43,7 +43,7 @@ private theorem selector_early_mono {gain start : ℝ} (lower : 1 ≤ gain) (upp
     have responseBound := response_upper age
     have product : a * (t - start) ≤ 21 / 50 :=
       (mul_le_mul a_coarse_bounds.2.le ageUpper age (by norm_num)).trans (by norm_num)
-    have charge : readyPulse (97 / 125) gain start t ≤ 202 / 125 := by
+    have charge : readyPulse (39 / 50) gain start t ≤ 81 / 50 := by
       have bound : gain * response (t - start) ≤ 2 * (21 / 50) :=
         mul_le_mul upper (responseBound.trans product) (response_nonnegative age) (by norm_num)
       unfold readyPulse
@@ -60,7 +60,7 @@ private theorem selector_early_mono {gain start : ℝ} (lower : 1 ≤ gain) (upp
 
 private theorem selector_early_margin (high : Bool) {start t : ℝ}
     (after : start ≤ t) (early : t ≤ start + 1 / 10) :
-    readyPulse (97 / 125) (Real.exp (selectorReadLogGain high)) start t < 1 := by
+    readyPulse (39 / 50) (Real.exp (selectorReadLogGain high)) start t < 1 := by
   have gain := selector_gain_bounds high
   have mono := selector_early_mono (start := start) gain.1 (by linarith [gain.2])
   apply (mono ⟨after, by linarith⟩ ⟨by linarith, by linarith⟩ early).trans_lt
@@ -88,7 +88,7 @@ private theorem selector_early_margin (high : Bool) {start t : ℝ}
 
 private theorem selector_low_before_split {start t : ℝ}
     (after : start ≤ t) (early : t ≤ start + 3 / 10) :
-    readyPulse (97 / 125) 1 start t < 1 := by
+    readyPulse (39 / 50) 1 start t < 1 := by
   have mono := selector_early_mono (start := start) (gain := 1) (by norm_num) (by norm_num)
   apply (mono ⟨after, early⟩ ⟨by linarith, le_rfl⟩ early).trans_lt
   have head : Real.exp (-(3 / 20 : ℝ)) ≤ 8608 / 10000 := by
@@ -157,7 +157,7 @@ private theorem selector_low_after_window (start : ℝ) :
 
 /-- The first READY contacts are strict, with two disjoint latency windows. -/
 theorem selector_read_response {charge start : ℝ} (high : Bool)
-    (band : 13 / 20 ≤ charge ∧ charge ≤ 97 / 125) :
+    (band : 13 / 20 ≤ charge ∧ charge ≤ 39 / 50) :
     ∃ latency : ℝ,
       (if high then 1 / 10 < latency ∧ latency < 39 / 200
         else 3 / 10 < latency ∧ latency < 4 / 5) ∧
@@ -207,7 +207,7 @@ theorem selector_read_response {charge start : ℝ} (high : Bool)
 
 structure SelectorReadPrepared (s : Snapshot 1) (high : Bool) : Prop where
   ready : s.main 0 = .ready
-  charge : 13 / 20 ≤ s.x 0 .q ∧ s.x 0 .q ≤ 97 / 125
+  charge : 13 / 20 ≤ s.x 0 .q ∧ s.x 0 .q ≤ 39 / 50
   gain : s.x 0 (.z 2) = selectorReadLogGain high
   recovery : 0 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 2 / 5
   auxiliary : ∀ p, s.aux 0 p = .ready ∧ RestBand (s.x 0 (.m p))
