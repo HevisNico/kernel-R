@@ -380,6 +380,31 @@ selector is read once, and the low read can write to its sensor gain.
 A reusable selector and an adaptive rule for arbitrary lesson shapes
 are separate problems.
 
+## Feedback from a learner's actual readout
+
+[`learner_readout_commits_trial`](LearnerReadout.lean) delivers the whole
+trial to one R learner. The learner's own gains record both input blocks.
+A common probe then reads the port whose block was shortened. In the
+preparation comparison it distinguishes 2 + 4 from 3 + 4. In the practice
+comparison it distinguishes 3 + 2 from 3 + 3. The other block meets its
+requirement in both comparisons. The learner's real FIRE writes a
+0.6 dose on the corresponding credit port. A silent read leaves that
+credit at zero.
+
+[`preparation_failure_updates_selector`](LearnerReadout.lean) tests the
+opposite signal. The 2 + 4 learner receives six lesson pulses and a
+common read pulse. Its silent read leaves a diagnostic cell exposed.
+That cell fires and its output writes 0.6 on the selector. With 3 + 4,
+the learner's real readout FIRE protects the diagnostic cell and no
+feedback token reaches the selector. Both cases use the same router
+and diagnostic clocks. The extra read pulse is outside the lesson count.
+The selector experiment covers both fabrication boxes and output wire
+delays in [0.3, 0.4]. Complete upward-crossing runs agree on the endpoint
+and firing dates at the common horizon.
+
+These are separate readout-driven experiments. The serial 8 → 7 → 6
+construction above still uses its own calendar-fed counters.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -395,7 +420,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson`, `Dispatch`,
 `SelectorRead`, `SelectorPrecharge`, `TeacherReopen`, `TeacherStableClock`
 `CappedWorkRun`, `TeacherCappedCycle`, `CappedDispatch`, `NativeLesson`,
-`NativeAcceptance`, `AcceptanceDispatch` and `SerialAcceptance`, and run
+`NativeAcceptance`, `AcceptanceDispatch`, `SerialAcceptance` and
+`LearnerReadout`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

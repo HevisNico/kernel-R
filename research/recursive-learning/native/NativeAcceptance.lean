@@ -45,6 +45,163 @@ structure AcceptanceSignal (θ : Fin 1 → Parameters) (time : ℝ) (third : Boo
   window : ∀ F, fire = some F → time + 25 < F ∧ F < time + 26
   emissions : execution.ledger.emissions = fire.toList.map (fun F => (0, F))
 
+private theorem lesson_prefix_append {n θ route s v u}
+    (e : @Execution n θ route s v) (tail : Execution θ route v u) :
+    (e.append tail).IsPrefix e := by
+  induction e with
+  | nil => exact .nil _
+  | cons move rest ih => exact .step move _ rest (ih tail)
+
+/-- A native readout of the actual endpoint of a completed dose lesson.
+The admitted read pulse sees the same gains written by the lesson. -/
+structure DoseReadout (θ : Fin 1 → Parameters) (start : Snapshot 1) (ports : List Port)
+    (probe : Delivery 1) (T : ℝ) (third : Bool) where
+  final : Snapshot 1
+  execution : Execution θ (fun _ _ => []) (withFuture start [probe]) final
+  complete : CompleteThrough execution T
+  transverse : execution.ContactsTransversal
+  empty : final.pending = []
+  ready : ∀ i, ReadyCoordinates final i
+  rawNone : ∀ i p, final.raw i p = none
+  fire : Option ℝ
+  reports : fire.isSome = third
+  window : ∀ F, fire = some F → probe.due < F ∧ F < probe.due + 1
+  emissions : execution.ledger.emissions = fire.toList.map (fun F => (0, F))
+  deliveries : execution.deliveries = lessonDeliveries start.time ports ++ [probe]
+  observed : Snapshot 1
+  observation : Execution θ (fun _ _ => []) (withFuture start [probe]) observed
+  observationPrefix : execution.IsPrefix observation
+  observedRaw : observed.raw 0 probe.port = some observed.time
+  measured : ∀ p, observed.x 0 (.z p) = start.x 0 (.z p) + (3 / 5 : ℝ) * ports.count p
+
+/-- Add the common read pulse to an existing lesson. Gain zero produces
+no spike. A gain of 0.6 produces a transverse FIRE before raw expiry. -/
+theorem dose_readout_exists {θ ε start ports probe T third} (box : @PhysicalBox 1 θ ε)
+    (lesson : LessonDoseRun θ start ports) (phys : PhysicalInvariant θ start)
+    (before : lesson.final.time < probe.due) (horizon : probe.due + 23 ≤ T)
+    (recovery : start.x 0 .b = 2 / 25)
+    (readGain : start.x 0 (.z probe.port) + (3 / 5 : ℝ) * ports.count probe.port =
+      if third then 3 / 5 else 0) :
+    Nonempty (DoseReadout θ start ports probe T third) := by
+  let framed := lesson.execution.withFuture [probe] (by
+    intro d hd; obtain rfl := List.mem_singleton.mp hd; exact before.le)
+  have framedTransverse : framed.ContactsTransversal :=
+    teacher_future_transverse lesson.execution probe before.le lesson.transverse
+  have framedSilent : framed.ledger.emissions = [] := by
+    rw [Execution.withFuture_ledger, lesson.silent]
+  let waiting := withFuture lesson.final [probe]
+  have tailPhysical := lesson.execution.physical_invariant box phys
+  have waitingPhysical : PhysicalInvariant θ waiting :=
+    ⟨tailPhysical.region, tailPhysical.gain_cap, tailPhysical.recovery_cap, tailPhysical.reserve⟩
+  have waitingReady (i : Fin 1) : ReadyCoordinates waiting i := by
+    rw [Subsingleton.elim i 0]
+    exact ⟨lesson.ready.ready, lesson.ready.charge, lesson.ready.auxiliary⟩
+  have rawNone (i : Fin 1) (p : Port) : waiting.raw i p = none := by
+    rw [Subsingleton.elim i 0]; exact lesson.rawNone p
+  have queue : waiting.pending = [probe] := by simp [waiting, withFuture, lesson.empty]
+  obtain ⟨arrival⟩ := quiet_source_arrival_exists (route := fun _ _ => []) box waiting probe []
+    waitingPhysical (by intro i p o raw; rw [rawNone] at raw; contradiction)
+    waitingReady rawNone before queue (by simp)
+  let lead := framed.append arrival.execution
+  have prefixTransverse : lead.ContactsTransversal :=
+    (Execution.contactsTransversal_append _ _).2 ⟨framedTransverse, arrival.contacts_transversal⟩
+  have prefixSilent : lead.ledger.emissions = [] := by
+    rw [Execution.emissions_append, framedSilent, arrival.emissions]
+    rfl
+  have admitted : arrival.final.time = probe.due := arrival.date
+  have measured (p : Port) : arrival.final.x 0 (.z p) =
+      start.x 0 (.z p) + (3 / 5 : ℝ) * ports.count p := by
+    rw [arrival.gain_preserved]
+    exact lesson.gains p
+  have gain : arrival.final.x 0 (.z probe.port) = if third then 3 / 5 else 0 := by
+    rw [measured]
+    exact readGain
+  have leadDeliveries : lead.deliveries = lessonDeliveries start.time ports ++ [probe] := by
+    rw [Execution.deliveries_append, teacher_future_deliveries, lesson.deliveries, arrival.deliveries]
+  have future : ∀ d ∈ arrival.final.pending, arrival.final.time + 8 ≤ d.due := by simp [arrival.pending]
+  have active : arrival.final.raw 0 probe.port = some arrival.final.time := by
+    simpa only [Subsingleton.elim probe.cell 0] using arrival.raw_active
+  have other (i : Fin 1) (p : Port) (h : i ≠ 0 ∨ p ≠ probe.port) : arrival.final.raw i p = none :=
+    arrival.raw_other i p (by simpa only [Subsingleton.elim probe.cell 0] using h)
+  cases third with
+  | false =>
+    obtain ⟨cycle⟩ := weak_input_cycle_exists (route := fun _ _ => []) arrival.final box
+      arrival.physical arrival.raw_valid 0 probe.port arrival.ready (by rw [gain]; norm_num)
+      (by rw [gain]; norm_num; linarith [Real.log_nonneg (show (1 : ℝ) ≤ 6 / 5 by norm_num)])
+      active other future
+    have later : cycle.final.time < T := by rw [cycle.complete.1, admitted]; linarith [horizon]
+    obtain ⟨tail, complete, positive, silent, noDeliveries⟩ := quiet_ready_tail_exists (θ := θ) later
+      (fun i => by rw [Subsingleton.elim i 0]; exact cycle.pulse.coordinates)
+      (fun i p => by rw [Subsingleton.elim i 0]; exact cycle.pulse.raw_finished p)
+      (cycle.pending.trans arrival.pending)
+    refine ⟨⟨_, (lead.append cycle.execution).append tail, complete, ?_,
+      cycle.pending.trans arrival.pending, ?_,
+      (fun i p => by rw [Subsingleton.elim i 0]; exact cycle.pulse.raw_finished p),
+      none, rfl, by simp, ?_, ?_, arrival.final, lead, ?_, active, measured⟩⟩
+    · change ((lead.append cycle.execution).append tail).ContactsTransversal
+      exact (Execution.contactsTransversal_append _ _).2
+        ⟨(Execution.contactsTransversal_append _ _).2 ⟨prefixTransverse, cycle.contacts_transversal⟩, positive⟩
+    · intro i
+      rw [Subsingleton.elim i 0]
+      exact quietAt_ready_coordinates cycle.final 0 cycle.pulse.coordinates later.le
+    · change ((lead.append cycle.execution).append tail).ledger.emissions = []
+      rw [Execution.emissions_append, Execution.emissions_append, prefixSilent, cycle.emissions, silent]
+      rfl
+    · change ((lead.append cycle.execution).append tail).deliveries = _
+      rw [Execution.deliveries_append, Execution.deliveries_append, leadDeliveries,
+        cycle.deliveries, noDeliveries]
+      simp
+    · change ((lead.append cycle.execution).append tail).IsPrefix lead
+      rw [Execution.append_assoc]
+      exact lesson_prefix_append lead _
+  | true =>
+    have strong : 9 / 5 ≤ Real.exp (arrival.final.x 0 (.z probe.port)) ∧
+        Real.exp (arrival.final.x 0 (.z probe.port)) ≤ 11 / 5 := by
+      rw [gain]
+      exact learnedProbe_gain
+    have late : ∀ d ∈ arrival.final.pending, arrival.final.time + 31 / 4 ≤ d.due := by simp [arrival.pending]
+    obtain ⟨fire⟩ := first_mid_learned_fire_exists arrival.final box arrival.physical arrival.raw_valid
+      0 probe.port arrival.ready strong active other late
+    obtain ⟨fast⟩ := fire.mid_learned_fast_end_exists box (arrival.ready 0) strong.2
+      (fun p different => other 0 p (Or.inr different)) late
+    have b : fast.final.x 0 .b = 2 / 25 := by
+      rw [fast.recovery, fire.recovery_preserved, arrival.recovery_preserved]
+      change lesson.final.x 0 .b = _
+      exact lesson.recovery.trans recovery
+    have state : LearnerDispatchState fast.final :=
+      ⟨fast.raw_none, fun p => ⟨fast.auxiliary 0 p, fast.rest p⟩,
+        Or.inr ⟨fast.main_slow, by rw [fast.charge]; norm_num, fast.charge.le, b⟩⟩
+    have noQueue : fast.final.pending = [] := by
+      rw [fast.pending, fire.pending, arrival.pending]
+      rfl
+    have date : fire.final.time = probe.due + fire.latency := by rw [fire.date, admitted]
+    have wait : fast.final.time + 19 < T := by rw [fast.date, date]; linarith [fire.deadline, horizon]
+    obtain ⟨tail⟩ := learner_wait_exists (θ := θ) state noQueue wait
+    refine ⟨⟨_, ((lead.append fire.execution).append fast.execution).append tail.execution,
+      tail.complete, ?_, tail.empty, tail.ready, tail.rawNone, some fire.final.time, rfl, ?_, ?_, ?_,
+      arrival.final, lead, ?_, active, measured⟩⟩
+    · change (((lead.append fire.execution).append fast.execution).append tail.execution).ContactsTransversal
+      exact (Execution.contactsTransversal_append _ _).2
+        ⟨(Execution.contactsTransversal_append _ _).2
+          ⟨(Execution.contactsTransversal_append _ _).2 ⟨prefixTransverse, fire.contacts_transversal⟩,
+            fast.contacts_transversal⟩, tail.transverse⟩
+    · intro F equal
+      have e : fire.final.time = F := Option.some.inj equal
+      rw [← e, date]
+      constructor <;> linarith [fire.early, fire.deadline]
+    · change (((lead.append fire.execution).append fast.execution).append tail.execution).ledger.emissions =
+        [(0, fire.final.time)]
+      rw [Execution.emissions_append, Execution.emissions_append, Execution.emissions_append,
+        prefixSilent, fire.emissions, fast.emissions, tail.silent, fire.date]
+      rfl
+    · change (((lead.append fire.execution).append fast.execution).append tail.execution).deliveries = _
+      rw [Execution.deliveries_append, Execution.deliveries_append, Execution.deliveries_append,
+        leadDeliveries, fire.deliveries, fast.deliveries, tail.deliveries]
+      simp
+    · change (((lead.append fire.execution).append fast.execution).append tail.execution).IsPrefix lead
+      rw [Execution.append_assoc, Execution.append_assoc]
+      exact lesson_prefix_append lead _
+
 theorem acceptance_signal_exists {θ ε} (box : @PhysicalBox 1 θ ε) (time : ℝ) (third : Bool) :
     Nonempty (AcceptanceSignal θ time third) := by
   let s := acceptanceCounter time third
@@ -61,101 +218,19 @@ theorem acceptance_signal_exists {θ ε} (box : @PhysicalBox 1 θ ε) (time : �
     rw [lesson.complete.1]
     change time + 8 * (thresholdPorts third).length < time + 25
     cases third <;> simp [thresholdPorts] <;> linarith
-  let framed := lesson.execution.withFuture [token] (by
-    intro d hd; obtain rfl := List.mem_singleton.mp hd; exact lessonBefore.le)
-  have framedTransverse : framed.ContactsTransversal :=
-    teacher_future_transverse lesson.execution token lessonBefore.le lesson.transverse
-  have framedSilent : framed.ledger.emissions = [] := by
-    rw [Execution.withFuture_ledger, lesson.silent]
-  let waiting := withFuture lesson.final [token]
-  have tailPhysical := lesson.execution.physical_invariant box phys
-  have waitingPhysical : PhysicalInvariant θ waiting :=
-    ⟨tailPhysical.region, tailPhysical.gain_cap, tailPhysical.recovery_cap, tailPhysical.reserve⟩
-  have waitingReady (i : Fin 1) : ReadyCoordinates waiting i := by
-    rw [Subsingleton.elim i 0]
-    exact ⟨lesson.ready.ready, lesson.ready.charge, lesson.ready.auxiliary⟩
-  have rawNone (i : Fin 1) (p : Port) : waiting.raw i p = none := by
-    rw [Subsingleton.elim i 0]; exact lesson.rawNone p
-  have queue : waiting.pending = [token] := by simp [waiting, withFuture, lesson.empty]
-  obtain ⟨arrival⟩ := quiet_source_arrival_exists (route := fun _ _ => []) box waiting token []
-    waitingPhysical (by intro i p o raw; rw [rawNone] at raw; contradiction)
-    waitingReady rawNone lessonBefore queue (by simp)
-  let lead := framed.append arrival.execution
-  have prefixTransverse : lead.ContactsTransversal :=
-    (Execution.contactsTransversal_append _ _).2 ⟨framedTransverse, arrival.contacts_transversal⟩
-  have prefixSilent : lead.ledger.emissions = [] := by
-    rw [Execution.emissions_append, framedSilent, arrival.emissions]
-    rfl
-  have admitted : arrival.final.time = time + 25 := arrival.date
-  have gain : arrival.final.x 0 (.z 0) = if third then 3 / 5 else 0 := by
-    rw [arrival.gain_preserved]
-    change lesson.final.x 0 (.z 0) = _
-    rw [lesson.gains]
-    cases third <;> norm_num [s, acceptanceCounter, thresholdPorts]
-  have future : ∀ d ∈ arrival.final.pending, arrival.final.time + 8 ≤ d.due := by simp [arrival.pending]
-  cases third with
-  | false =>
-    obtain ⟨cycle⟩ := weak_input_cycle_exists (route := fun _ _ => []) arrival.final box
-      arrival.physical arrival.raw_valid 0 0 arrival.ready (by rw [gain]; norm_num)
-      (by rw [gain]; norm_num; linarith [Real.log_nonneg (show (1 : ℝ) ≤ 6 / 5 by norm_num)])
-      arrival.raw_active arrival.raw_other future
-    have later : cycle.final.time < time + 48 := by rw [cycle.complete.1, admitted]; linarith
-    obtain ⟨tail, complete, positive, silent, _⟩ := quiet_ready_tail_exists (θ := θ) later
-      (fun i => by rw [Subsingleton.elim i 0]; exact cycle.pulse.coordinates)
-      (fun i p => by rw [Subsingleton.elim i 0]; exact cycle.pulse.raw_finished p)
-      (cycle.pending.trans arrival.pending)
-    refine ⟨⟨_, (lead.append cycle.execution).append tail, complete, ?_,
-      cycle.pending.trans arrival.pending, ?_,
-      (fun i p => by rw [Subsingleton.elim i 0]; exact cycle.pulse.raw_finished p),
-      none, rfl, by simp, ?_⟩⟩
-    · change ((lead.append cycle.execution).append tail).ContactsTransversal
-      exact (Execution.contactsTransversal_append _ _).2
-        ⟨(Execution.contactsTransversal_append _ _).2 ⟨prefixTransverse, cycle.contacts_transversal⟩, positive⟩
-    · intro i
-      rw [Subsingleton.elim i 0]
-      exact quietAt_ready_coordinates cycle.final 0 cycle.pulse.coordinates later.le
-    · change ((lead.append cycle.execution).append tail).ledger.emissions = []
-      rw [Execution.emissions_append, Execution.emissions_append, prefixSilent, cycle.emissions, silent]
-      rfl
-  | true =>
-    have strong : 9 / 5 ≤ Real.exp (arrival.final.x 0 (.z 0)) ∧
-        Real.exp (arrival.final.x 0 (.z 0)) ≤ 11 / 5 := by
-      rw [gain]
-      exact learnedProbe_gain
-    have late : ∀ d ∈ arrival.final.pending, arrival.final.time + 31 / 4 ≤ d.due := by simp [arrival.pending]
-    obtain ⟨fire⟩ := first_mid_learned_fire_exists arrival.final box arrival.physical arrival.raw_valid
-      0 0 arrival.ready strong arrival.raw_active arrival.raw_other late
-    obtain ⟨fast⟩ := fire.mid_learned_fast_end_exists box (arrival.ready 0) strong.2
-      (fun p different => arrival.raw_other 0 p (Or.inr different)) late
-    have b : fast.final.x 0 .b = 2 / 25 := by
-      rw [fast.recovery, fire.recovery_preserved, arrival.recovery_preserved]
-      change lesson.final.x 0 .b = _
-      exact lesson.recovery
-    have state : LearnerDispatchState fast.final :=
-      ⟨fast.raw_none, fun p => ⟨fast.auxiliary 0 p, fast.rest p⟩,
-        Or.inr ⟨fast.main_slow, by rw [fast.charge]; norm_num, fast.charge.le, b⟩⟩
-    have noQueue : fast.final.pending = [] := by
-      rw [fast.pending, fire.pending, arrival.pending]
-      rfl
-    have date : fire.final.time = time + 25 + fire.latency := by rw [fire.date, admitted]
-    have wait : fast.final.time + 19 < time + 48 := by rw [fast.date, date]; linarith [fire.deadline]
-    obtain ⟨tail⟩ := learner_wait_exists (θ := θ) state noQueue wait
-    refine ⟨⟨_, ((lead.append fire.execution).append fast.execution).append tail.execution,
-      tail.complete, ?_, tail.empty, tail.ready, tail.rawNone, some fire.final.time, rfl, ?_, ?_⟩⟩
-    · change (((lead.append fire.execution).append fast.execution).append tail.execution).ContactsTransversal
-      exact (Execution.contactsTransversal_append _ _).2
-        ⟨(Execution.contactsTransversal_append _ _).2
-          ⟨(Execution.contactsTransversal_append _ _).2 ⟨prefixTransverse, fire.contacts_transversal⟩,
-            fast.contacts_transversal⟩, tail.transverse⟩
-    · intro F equal
-      have e : fire.final.time = F := Option.some.inj equal
-      rw [← e, date]
-      constructor <;> linarith [fire.early, fire.deadline]
-    · change (((lead.append fire.execution).append fast.execution).append tail.execution).ledger.emissions =
-        [(0, fire.final.time)]
-      rw [Execution.emissions_append, Execution.emissions_append, Execution.emissions_append,
-        prefixSilent, fire.emissions, fast.emissions, tail.silent, fire.date]
-      rfl
+  have gain : s.x 0 (.z token.port) + (3 / 5 : ℝ) * (thresholdPorts third).count token.port =
+      if third then 3 / 5 else 0 := by
+    cases third <;> norm_num [s, token, acceptanceProbe, acceptanceCounter, thresholdPorts]
+  obtain ⟨read⟩ := dose_readout_exists (T := time + 48) box lesson phys lessonBefore
+    (by change time + 25 + 23 ≤ time + 48; linarith) rfl gain
+  exact ⟨⟨read.final, read.execution, read.complete, read.transverse, read.empty,
+    read.ready, read.rawNone, read.fire, read.reports,
+    fun F h => by
+      obtain ⟨early, late⟩ := read.window F h
+      change time + 25 < F at early
+      change F < time + 25 + 1 at late
+      exact ⟨early, by linarith⟩,
+    read.emissions⟩⟩
 
 noncomputable def acceptanceContacts (credit : Port) : HeadRoutes 1 :=
   fun _ F => [⟨0, credit, F + 7 / 20⟩]
@@ -164,17 +239,17 @@ noncomputable def acceptanceNetworkStart (time : ℝ) (third : Bool) : Snapshot 
   let tester := acceptanceStart time third
   tester.prependQueued (preparedTeacher time) (tester.pending.map Delivery.succ)
 
-private structure CreditResponse (θ : Fin 1 → Parameters) (time : ℝ) (credit : Port) (fire : Option ℝ) where
+structure CreditResponse (θ : Fin 1 → Parameters) (time T : ℝ) (credit : Port) (fire : Option ℝ) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => [])
     ((preparedTeacher time).requeue (fire.toList.map (fun F => ⟨0, credit, F + 7 / 20⟩))) final
-  complete : CompleteThrough execution (time + 48)
+  complete : CompleteThrough execution T
   positive : execution.ContactsTransversal
   written : ∀ p, final.x 0 (.z p) = if p = credit ∧ fire.isSome then 3 / 5 else 0
 
-private theorem credit_response_exists {θ ε time credit fire} (box : @PhysicalBox 1 θ ε)
-    (window : ∀ F, fire = some F → time + 25 < F ∧ F < time + 26) :
-    Nonempty (CreditResponse θ time credit fire) := by
+theorem credit_response_exists {θ ε time T credit fire} (box : @PhysicalBox 1 θ ε)
+    (later : time < T) (window : ∀ F, fire = some F → time < F ∧ F + 8 ≤ T) :
+    Nonempty (CreditResponse θ time T credit fire) := by
   let start := (preparedTeacher time).requeue (fire.toList.map (fun F => ⟨0, credit, F + 7 / 20⟩))
   have ready (i : Fin 1) : ReadyCoordinates start i :=
     ⟨rfl, by norm_num [start, Snapshot.requeue, preparedTeacher],
@@ -183,7 +258,7 @@ private theorem credit_response_exists {θ ε time credit fire} (box : @Physical
   cases fire with
   | none =>
     obtain ⟨wait, complete, positive, _, _⟩ := quiet_ready_tail_exists (θ := θ)
-      (T := time + 48) (by change time < time + 48; linarith) ready raw rfl
+      (T := T) later ready raw rfl
     exact ⟨⟨_, wait, complete, positive, fun p => by simp [quietAt, quietValues, start,
       Snapshot.requeue, preparedTeacher]⟩⟩
   | some F =>
@@ -195,7 +270,7 @@ private theorem credit_response_exists {θ ε time credit fire} (box : @Physical
       (ready 0) (raw 0) (by change time < F + 7 / 20; linarith [later.1]) rfl
       (by simp) (by change Real.exp 0 ≤ _; norm_num)
       (by change 0 ≤ _; linarith [Real.log_nonneg (show (1 : ℝ) ≤ 6 / 5 by norm_num)])
-    have before : dose.final.time < time + 48 := by
+    have before : dose.final.time < T := by
       rw [dose.complete.1]
       dsimp [due]
       linarith [later.2]
@@ -223,7 +298,8 @@ theorem native_acceptance_writes_credit {θT θC ε} (testBox : @PhysicalBox 1 �
       (e.emissionTimes 1).length = (if third then 1 else 0) ∧
       ∀ p, final.x 0 (.z p) = if p = credit ∧ third then 3 / 5 else 0 := by
   obtain ⟨test⟩ := acceptance_signal_exists testBox time third
-  obtain ⟨response⟩ := credit_response_exists creditBox (credit := credit) test.window
+  obtain ⟨response⟩ := credit_response_exists creditBox (credit := credit) (T := time + 48) (by linarith)
+    (fun F h => by obtain ⟨early, late⟩ := test.window F h; constructor <;> linarith)
   let tester := acceptanceStart time third
   let receiver := (preparedTeacher time).requeue (test.fire.toList.map (fun F => ⟨0, credit, F + 7 / 20⟩))
   have queue : receiver.pending = test.execution.headInputQueue (acceptanceContacts credit) := by
