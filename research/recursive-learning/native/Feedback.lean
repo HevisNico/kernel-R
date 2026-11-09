@@ -1,5 +1,6 @@
 import NativeLearning
 import KernelR.HybridPortSourceWire
+import KernelR.HybridUniversalExecution
 
 /-! One native feedback link. The learner's actual FIRE creates the only
 delivery to the teacher. This stage starts at an admitted learner probe. -/
@@ -22,6 +23,35 @@ structure RoutedFeedback (learner : Fin 1 → Parameters) (teacher : Parameters)
   pendingEmpty : final.pending = []
   selectorDose : final.x 1 (.z 2) = start.x 1 (.z 2) + 3 / 5
   otherGains : ∀ p, p ≠ 2 → final.x 1 (.z p) = start.x 1 (.z p)
+
+/-- Every complete execution through the witness horizon has its one FIRE,
+    its one delivery, and the same teacher gain changes. -/
+theorem RoutedFeedback.every_complete {learner teacher ε delay start final}
+    (feedback : RoutedFeedback learner teacher delay start)
+    (box : @PhysicalBox 2 (extendParameters learner teacher) ε)
+    (physical : PhysicalInvariant (extendParameters learner teacher) start)
+    (queue : start.pending = [])
+    (execution : Execution (extendParameters learner teacher) (feedbackRouter delay) start final)
+    (complete : CompleteThrough execution (feedback.fire + delay feedback.fire + 15 / 2)) :
+    execution.ledger.emissions = [(0, feedback.fire)] ∧
+      execution.deliveries = [⟨1, 2, feedback.fire + delay feedback.fire⟩] ∧
+      final.pending = [] ∧
+      final.x 1 (.z 2) = start.x 1 (.z 2) + 3 / 5 ∧
+      (∀ p, p ≠ 2 → final.x 1 (.z p) = start.x 1 (.z p)) := by
+  obtain ⟨endpoint, emissions⟩ :=
+    execution.observational_unique feedback.execution box physical complete feedback.complete
+  rw [feedback.emissions] at emissions
+  have fire := List.perm_singleton.mp emissions
+  have empty := List.perm_nil.mp (feedback.pendingEmpty ▸ endpoint.pending)
+  have balance := execution.token_balance
+  rw [empty, queue, fire] at balance
+  have delivery : execution.deliveries.Perm [⟨1, 2, feedback.fire + delay feedback.fire⟩] := by
+    apply Multiset.coe_eq_coe.mp
+    simpa [feedbackRouter] using balance
+  refine ⟨fire, List.perm_singleton.mp delivery, empty, ?_, ?_⟩
+  · rw [endpoint.values, feedback.selectorDose]
+  · intro p other
+    rw [endpoint.values, feedback.otherGains p other]
 
 private theorem projected_physical {learner : Fin 1 → Parameters} {teacher : Parameters}
     {s : Snapshot 2} (physical : PhysicalInvariant (extendParameters learner teacher) s)
@@ -248,9 +278,9 @@ noncomputable def probeStart (gain time : ℝ) : Snapshot 2 where
 
 private theorem probe_physical {learner teacher ε gain time}
     (box : @PhysicalBox 2 (extendParameters learner teacher) ε)
-    (positive : 0 < gain) (upper : gain ≤ 2) :
+    (positive : 0 < gain) (upper : gain ≤ 11 / 5) :
     PhysicalInvariant (extendParameters learner teacher) (probeStart gain time) := by
-  have caps (i : Fin 2) (p : Port) : 2 ≤ (extendParameters learner teacher i).cap p := by
+  have caps (i : Fin 2) (p : Port) : 11 / 5 ≤ (extendParameters learner teacher i).cap p := by
     have lower := (box.2 i p).1.1
     rcases box.1 with hε | hε
     all_goals rw [hε] at lower
@@ -286,22 +316,77 @@ private theorem probe_raw_other (gain time : ℝ) (i : Fin 2) (p : Port)
   have notProbe : ¬ (i = 0 ∧ p = 0) := by tauto
   simp [probeStart, notProbe]
 
-/-- The high-gain learner emits and the teacher receives its routed dose. -/
-theorem prepared_routed_feedback_exists {learner teacher ε delay}
+/-- The entire certified high-gain band produces a routed selector dose. -/
+theorem prepared_routed_feedback_of_strong_gain {learner teacher ε delay gain}
     (box : @PhysicalBox 2 (extendParameters learner teacher) ε) (time : ℝ)
+    (strong : 9 / 5 ≤ gain ∧ gain ≤ 11 / 5)
     (delayBounds : ∀ t, (3 / 10 : ℝ) ≤ delay t ∧ delay t ≤ 2 / 5) :
-    Nonempty (RoutedFeedback learner teacher delay (probeStart 2 time)) := by
-  have ready := probe_ready 2 time 0
-  have prepared : PreparedSection (probeStart 2 time) 0 :=
+    Nonempty (RoutedFeedback learner teacher delay (probeStart gain time)) := by
+  have positive : 0 < gain := by linarith [strong.1]
+  have ready := probe_ready gain time 0
+  have prepared : PreparedSection (probeStart gain time) 0 :=
     ⟨ready.ready, ready.charge, by norm_num [probeStart], ready.auxiliary⟩
   have logPos : 0 ≤ Real.log (6 / 5 : ℝ) := Real.log_nonneg (by norm_num)
-  exact routed_feedback_exists box (probe_physical box (by norm_num) le_rfl)
-    (probe_raw_valid 2 time) prepared (probe_ready 2 time 1)
-    (by norm_num [probeStart, Real.exp_log (show (0 : ℝ) < 2 by norm_num)])
-    rfl (probe_raw_other 2 time) rfl delayBounds
+  exact routed_feedback_exists box (probe_physical box positive strong.2)
+    (probe_raw_valid gain time) prepared (probe_ready gain time 1)
+    (by simpa [probeStart, Real.exp_log positive] using strong)
+    rfl (probe_raw_other gain time) rfl delayBounds
     (by norm_num [probeStart]) (by
       change 0 ≤ Real.log (6 / 5 : ℝ) + 1 / 1000
       linarith)
+
+/-- The original gain-two example is an instance of the strong band. -/
+theorem prepared_routed_feedback_exists {learner teacher ε delay}
+    (box : @PhysicalBox 2 (extendParameters learner teacher) ε) (time : ℝ)
+    (delayBounds : ∀ t, (3 / 10 : ℝ) ≤ delay t ∧ delay t ≤ 2 / 5) :
+    Nonempty (RoutedFeedback learner teacher delay (probeStart 2 time)) :=
+  prepared_routed_feedback_of_strong_gain box time (by norm_num) delayBounds
+
+private theorem prepared_weak_probe_cycle {learner teacher ε delay gain}
+    (box : @PhysicalBox 2 (extendParameters learner teacher) ε) (time : ℝ)
+    (positive : 0 < gain) (weak : gain ≤ 7 / 6) :
+    Nonempty (WeakInputCycle (extendParameters learner teacher) (feedbackRouter delay)
+      (probeStart gain time) 0 0) := by
+  have small : Real.log gain ≤ Real.log (6 / 5 : ℝ) :=
+    Real.log_le_log positive (by linarith)
+  exact weak_input_cycle_exists (route := feedbackRouter delay)
+    (probeStart gain time) box (probe_physical box positive (by linarith))
+    (probe_raw_valid gain time) 0 0 (probe_ready gain time)
+    (by simpa [probeStart, Real.exp_log positive] using weak)
+    (by simpa [probeStart] using le_trans small (by linarith :
+      Real.log (6 / 5 : ℝ) ≤ Real.log (6 / 5) + 1 / 1000))
+    rfl (probe_raw_other gain time) (by simp [probeStart])
+
+private theorem prepared_probe_initially_below (gain time : ℝ) :
+    InitiallyBelowReady (probeStart gain time) := by
+  intro i coordinate ready
+  cases coordinate with
+  | q => norm_num [probeStart]
+  | m _ => norm_num [probeStart]
+  | z _ => exact False.elim ready
+  | b => exact False.elim ready
+  | energy => exact False.elim ready
+
+/-- The weak-gain case also admits a complete upward-crossing execution. -/
+theorem prepared_weak_probe_crossing_exists {learner teacher ε delay gain}
+    (box : @PhysicalBox 2 (extendParameters learner teacher) ε) (time : ℝ)
+    (positive : 0 < gain) (weak : gain ≤ 7 / 6) :
+    ∃ (final : Snapshot 2) (crossing : CrossingExecution (extendParameters learner teacher)
+      (feedbackRouter delay) (probeStart gain time) final),
+      CrossingCompleteThrough crossing (time + 15 / 2) ∧
+      crossing.execution.ledger.emissions = [] ∧
+      final.x 1 (.z 2) = (probeStart gain time).x 1 (.z 2) := by
+  obtain ⟨response⟩ := prepared_weak_probe_cycle (delay := delay) box time positive weak
+  have physical := probe_physical box (time := time) positive (by linarith)
+  let crossing := response.execution.toCrossing (prepared_probe_initially_below gain time)
+    box physical response.contacts_transversal
+  refine ⟨response.final, crossing, ?_, ?_, ?_⟩
+  · exact CompleteThrough.toCrossing response.execution response.complete
+      (prepared_probe_initially_below gain time) box physical response.contacts_transversal
+  · change response.execution.toWeak.ledger.emissions = []
+    simpa using response.emissions
+  · exact selector_unchanged_without_learner_fire response.execution rfl rfl
+      ((probe_ready gain time 1).auxiliary 2).2 rfl (by simp [response.emissions])
 
 /-- With the same probe, router and unit learner gain, there is a complete
 silent response with no delivery and no selector change. -/
@@ -311,15 +396,60 @@ theorem prepared_silent_probe_exists {learner teacher ε delay}
       (probeStart 1 time) final),
       CompleteThrough execution (time + 15 / 2) ∧ execution.ledger.emissions = [] ∧
         execution.deliveries = [] ∧ final.x 1 (.z 2) = (probeStart 1 time).x 1 (.z 2) := by
-  have logPos : 0 ≤ Real.log (6 / 5 : ℝ) := Real.log_nonneg (by norm_num)
-  obtain ⟨response⟩ := weak_input_cycle_exists (route := feedbackRouter delay)
-    (probeStart 1 time) box (probe_physical box (by norm_num) (by norm_num))
-    (probe_raw_valid 1 time) 0 0 (probe_ready 1 time)
-    (by norm_num [probeStart]) (by simp [probeStart]; linarith)
-    rfl (probe_raw_other 1 time) (by simp [probeStart])
+  obtain ⟨response⟩ := prepared_weak_probe_cycle (delay := delay) box time
+    (gain := 1) (by norm_num) (by norm_num)
   refine ⟨response.final, response.execution, response.complete, response.emissions,
     response.deliveries, ?_⟩
   exact selector_unchanged_without_learner_fire response.execution rfl rfl
     ((probe_ready 1 time 1).auxiliary 2).2 rfl (by simp [response.emissions])
+
+/-- If the lesson outcome is supplied by the corresponding gain band, the
+    learner's FIRE reports failure, and the same failure sets the teacher's
+    selector. All complete executions through the witness horizon agree.
+    The gain encoding is an input; this theorem supplies its physical readout. -/
+theorem prepared_probe_reports_failure {learner teacher ε delay gain}
+    (box : @PhysicalBox 2 (extendParameters learner teacher) ε) (time : ℝ)
+    (experiment : Experiment) (trial : Memory)
+    (delayBounds : ∀ t, (3 / 10 : ℝ) ≤ delay t ∧ delay t ≤ 2 / 5)
+    (unselected : trial.focusOnPractice = false)
+    (failedGain : experiment.preparationProbePasses trial = false →
+      9 / 5 ≤ gain ∧ gain ≤ 11 / 5)
+    (passedGain : experiment.preparationProbePasses trial = true →
+      0 < gain ∧ gain ≤ 7 / 6) :
+    ∃ (T : ℝ) (witnessFinal : Snapshot 2) (witness : Execution (extendParameters learner teacher)
+      (feedbackRouter delay) (probeStart gain time) witnessFinal),
+      CompleteThrough witness T ∧
+      ∀ (final : Snapshot 2) (execution : Execution (extendParameters learner teacher)
+        (feedbackRouter delay) (probeStart gain time) final), CompleteThrough execution T →
+        ((∃ fire, (0, fire) ∈ execution.ledger.emissions) ↔
+          experiment.preparationProbePasses trial = false) ∧
+        final.x 1 (.z 2) = (probeStart gain time).x 1 (.z 2) +
+          (if experiment.preparationProbePasses trial then 0 else 3 / 5) ∧
+        ((probeStart gain time).x 1 (.z 2) + 3 / 10 < final.x 1 (.z 2) ↔
+          (experiment.commit true trial).focusOnPractice = true) := by
+  cases result : experiment.preparationProbePasses trial with
+  | false =>
+    have strong := failedGain result
+    have physical := probe_physical box (time := time) (by linarith [strong.1]) strong.2
+    obtain ⟨feedback⟩ := prepared_routed_feedback_of_strong_gain box time strong delayBounds
+    refine ⟨_, feedback.final, feedback.execution, feedback.complete, ?_⟩
+    intro final execution complete
+    obtain ⟨fires, _, _, dose, _⟩ := feedback.every_complete box physical rfl execution complete
+    simp [fires, dose, Experiment.commit, result, unselected]
+    linarith
+  | true =>
+    obtain ⟨positive, weak⟩ := passedGain result
+    have physical := probe_physical box (time := time) positive (by linarith)
+    obtain ⟨response⟩ := prepared_weak_probe_cycle (delay := delay) box time positive weak
+    refine ⟨_, response.final, response.execution, response.complete, ?_⟩
+    intro final execution complete
+    have same := execution.observational_unique response.execution box physical complete
+      response.complete
+    have fires : execution.ledger.emissions = [] :=
+      List.perm_nil.mp (response.emissions ▸ same.2)
+    have unchanged := selector_unchanged_without_learner_fire execution rfl rfl
+      ((probe_ready gain time 1).auxiliary 2).2 rfl (by simp [fires])
+    simp [fires, unchanged, Experiment.commit, result, unselected]
+    linarith
 
 end RecursiveLearning.Native

@@ -44,23 +44,33 @@ admitted on learner 0. The teacher's raw ports and the global pending queue
 are empty. The fixed router sends any learner FIRE at time `F` to the teacher's
 selector port at `F + δ(F)`, with `0.3 ≤ δ(F) ≤ 0.4`.
 
-- With learner input gain 2, `prepared_routed_feedback_exists` constructs a
-  complete native execution with one learner FIRE, one corresponding feedback
-  delivery and an exact increase of `3/5` on the selector port. The other two
-  teacher gains stay fixed.
-- With learner input gain 1, `prepared_silent_probe_exists` constructs a
-  complete native execution with no FIRE, no delivery and unchanged selector
-  gain. More generally, `selector_unchanged_without_learner_fire` derives the
-  unchanged gain in any execution with the fixed router, an empty initial
-  queue and a resting selector sensor with no active raw pulse if the learner
-  never fires.
+- With learner input gain in `[9/5, 11/5]`, `prepared_routed_feedback_of_strong_gain`
+  constructs a complete first-contact execution with one learner FIRE, one
+  corresponding feedback delivery and an exact increase of `3/5` on the
+  selector port. `RoutedFeedback.every_complete` proves the same firing date,
+  delivery and teacher gains for every first-contact execution complete through
+  that horizon, from the same state with the same parameters and router.
+- With learner input gain in `(0, 7/6]`, the probe is silent and the selector
+  gain stays fixed. `prepared_weak_probe_crossing_exists` also constructs a
+  complete upward-crossing execution with this outcome.
 
-Both prepared cases work in either fabrication box. `RoutedFeedback.sets_selector`
-links the routed dose to the discrete selector transition when the teacher
-starts with the first teaching credit already set. The learner's firing here
-comes from its prepared gain and probe. Deriving that gain from a lesson,
-implementing the full acceptance test and using the selector to dispatch the
-next lesson within the network remain separate obligations.
+Both bands apply in either fabrication box. They leave a gap between
+`7/6` and `9/5`; the exact firing threshold and the upward-crossing witness
+for the routed case are open.
+
+The discrete commit tests whether the accepted lesson still works with one
+fewer preparation pulse. Its failure tells the teacher to switch to
+practice. `prepared_probe_reports_failure` fixes the same meaning for the
+physical signal. If failure is encoded by a gain in the strong band and
+success by a gain in the weak band, the learner fires exactly on failure.
+When the selector starts off, its final log-gain reads as on exactly when
+the discrete commit selects practice. This holds for every first-contact
+execution complete through the constructed horizon.
+
+The test outcome is supplied via the starting gain. The next obligations
+are to derive that gain from the lesson and to use the selector to send
+the next lesson within the network. The current router carries the response
+from learner to teacher.
 
 ## Verify
 

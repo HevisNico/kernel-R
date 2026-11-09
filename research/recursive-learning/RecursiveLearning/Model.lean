@@ -110,13 +110,16 @@ def Experiment.accepts (experiment : Experiment) (before trial : Memory) : Bool 
   lesson.passes experiment.validation &&
     decide (lesson.cost < (experiment.lesson before).cost)
 
-/-- A failed preparation probe supplies the signal that can switch the selector.
-    The probe tests the accepted lesson with one fewer preparation pulse. -/
-def Experiment.commit (experiment : Experiment) (adapt : Bool) (trial : Memory) : Memory :=
+/-- Test the accepted lesson with one fewer preparation pulse. -/
+def Experiment.preparationProbePasses (experiment : Experiment) (trial : Memory) : Bool :=
   let lesson := experiment.lesson trial
   let probe := { lesson with preparation := lesson.preparation - 1 }
+  probe.passes experiment.validation
+
+/-- A failed preparation probe supplies the signal that can switch the selector. -/
+def Experiment.commit (experiment : Experiment) (adapt : Bool) (trial : Memory) : Memory :=
   { trial with focusOnPractice :=
-      trial.focusOnPractice || (adapt && !(probe.passes experiment.validation)) }
+      trial.focusOnPractice || (adapt && !(experiment.preparationProbePasses trial)) }
 
 /-- One attempted edit. A rejected or capped proposal commits no memory. -/
 def Experiment.step (experiment : Experiment) (adapt : Bool) (before : Memory) : Option Memory :=
