@@ -9,103 +9,163 @@ open KernelR.Hybrid Set
 noncomputable def selectorReadLogGain (high : Bool) : ℝ := if high then 3 / 5 else 0
 
 private theorem selector_gain_bounds (high : Bool) :
-    0 < Real.exp (selectorReadLogGain high) ∧ Real.exp (selectorReadLogGain high) ≤ 2 := by
-  refine ⟨Real.exp_pos _, ?_⟩
+    1 ≤ Real.exp (selectorReadLogGain high) ∧ Real.exp (selectorReadLogGain high) ≤ 11 / 6 := by
   cases high
   · norm_num [selectorReadLogGain]
-  · rw [selectorReadLogGain, ite_eq_left rfl, ← Real.exp_log (by norm_num : (0 : ℝ) < 2)]
-    apply Real.exp_le_exp.mpr
-    linarith [Real.log_two_gt_d9]
+  · simp only [selectorReadLogGain, ite_true]
+    constructor
+    · exact Real.one_le_exp (by norm_num)
+    · have estimate := Real.exp_bound (x := (3 / 5 : ℝ)) (n := 10) (by norm_num) (by norm_num)
+      norm_num [Finset.sum_range_succ] at estimate
+      linarith [(abs_sub_le_iff.mp estimate).1]
+
+theorem selector_response_coefficient_bounds :
+    (391 / 250 : ℝ) ≤ a / (a - 1 / 2) ∧ a / (a - 1 / 2) ≤ 7821 / 5000 := by
+  have positive : 0 < a - 1 / 2 := by linarith [a_coarse_bounds.1]
+  constructor
+  · apply (le_div_iff₀ positive).mpr
+    dsimp [a]
+    linarith [KernelR.log_four_bounds.2]
+  · apply (div_le_iff₀ positive).mpr
+    dsimp [a]
+    linarith [KernelR.log_four_bounds.1]
+
+private theorem selector_early_mono {gain start : ℝ} (lower : 1 ≤ gain) (upper : gain ≤ 2) :
+    MonotoneOn (readyPulse (97 / 125) gain start) (Icc start (start + 3 / 10)) := by
+  apply (strictMonoOn_of_deriv_pos (convex_Icc _ _) ?_ ?_).monotoneOn
+  · unfold readyPulse response
+    fun_prop
+  · intro t ht
+    rw [interior_Icc] at ht
+    have age : 0 ≤ t - start := sub_nonneg.mpr ht.1.le
+    have ageUpper : t - start ≤ 3 / 10 := by linarith [ht.2]
+    have decay : Real.exp (-(1 / 2) * (t - start)) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
+    have responseBound := response_upper age
+    have product : a * (t - start) ≤ 21 / 50 :=
+      (mul_le_mul a_coarse_bounds.2.le ageUpper age (by norm_num)).trans (by norm_num)
+    have charge : readyPulse (97 / 125) gain start t ≤ 202 / 125 := by
+      have bound : gain * response (t - start) ≤ 2 * (21 / 50) :=
+        mul_le_mul upper (responseBound.trans product) (response_nonnegative age) (by norm_num)
+      unfold readyPulse
+      linarith
+    have aLower : (27 / 20 : ℝ) ≤ a := by dsimp [a]; linarith [KernelR.log_four_bounds.1]
+    have drive : (27 / 20 : ℝ) * (29 / 50) ≤ gain * a * Real.exp (-a * (t - start)) := by
+      have expLower : (29 / 50 : ℝ) ≤ Real.exp (-a * (t - start)) := by
+        linarith [Real.add_one_le_exp (-a * (t - start))]
+      have gainBound : (27 / 20 : ℝ) ≤ gain * a := by
+        simpa using mul_le_mul lower aLower (by norm_num) (by linarith : 0 ≤ gain)
+      exact mul_le_mul gainBound expLower (by norm_num) (by positivity)
+    rw [(readyPulse_derivative _ _ _ _).deriv]
+    linarith
 
 private theorem selector_early_margin (high : Bool) {start t : ℝ}
     (after : start ≤ t) (early : t ≤ start + 1 / 10) :
-    readyPulse (71 / 100) (Real.exp (selectorReadLogGain high)) start t < 1 := by
-  have age := sub_nonneg.mpr after
-  have decay : Real.exp (-(1 / 2) * (t - start)) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
-  have raw := response_upper age
-  have resp := response_nonnegative age
-  have gain := mul_le_mul_of_nonneg_right (selector_gain_bounds high).2 resp
-  have drive : a * (t - start) ≤ (7 / 5 : ℝ) * (1 / 10) :=
-    mul_le_mul a_coarse_bounds.2.le (by linarith) age (by norm_num)
+    readyPulse (97 / 125) (Real.exp (selectorReadLogGain high)) start t < 1 := by
+  have gain := selector_gain_bounds high
+  have mono := selector_early_mono (start := start) gain.1 (by linarith [gain.2])
+  apply (mono ⟨after, by linarith⟩ ⟨by linarith, by linarith⟩ early).trans_lt
+  have head : Real.exp (-(1 / 20 : ℝ)) ≤ 952 / 1000 := by
+    have estimate := Real.exp_bound (x := -(1 / 20 : ℝ)) (n := 8) (by norm_num) (by norm_num)
+    norm_num [Finset.sum_range_succ] at estimate
+    linarith [(abs_sub_le_iff.mp estimate).1]
+  have tail : (869 / 1000 : ℝ) ≤ Real.exp (-a * (1 / 10)) := by
+    apply le_trans _ (Real.exp_le_exp.mpr (show -(7 / 50 : ℝ) ≤ -a * (1 / 10) by
+      linarith [a_coarse_bounds.2]))
+    have estimate := Real.exp_bound (x := -(7 / 50 : ℝ)) (n := 8) (by norm_num) (by norm_num)
+    norm_num [Finset.sum_range_succ] at estimate
+    linarith [(abs_sub_le_iff.mp estimate).2]
+  have pulse : response (1 / 10) ≤ 13 / 100 := by
+    have difference : Real.exp (-(1 / 20 : ℝ)) - Real.exp (-a * (1 / 10)) ≤ 83 / 1000 := by linarith
+    have product := mul_le_mul selector_response_coefficient_bounds.2 difference
+      (sub_nonneg.mpr (Real.exp_le_exp.mpr (by linarith [a_coarse_bounds.1]))) (by norm_num)
+    unfold response
+    rw [show -(1 / 2 : ℝ) * (1 / 10) = -(1 / 20) by norm_num]
+    exact product.trans (by norm_num)
+  have amplified := mul_le_mul gain.2 pulse (response_nonnegative (by norm_num)) (by norm_num)
   unfold readyPulse
+  rw [add_sub_cancel_left, show -(1 / 2 : ℝ) * (1 / 10) = -(1 / 20) by norm_num]
   linarith
 
 private theorem selector_low_before_split {start t : ℝ}
-    (after : start ≤ t) (early : t ≤ start + 1 / 5) :
-    readyPulse (71 / 100) 1 start t < 1 := by
-  have age := sub_nonneg.mpr after
-  have decay : Real.exp (-(1 / 2) * (t - start)) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
-  have raw := response_upper age
-  have drive : a * (t - start) ≤ (7 / 5 : ℝ) * (1 / 5) :=
-    mul_le_mul a_coarse_bounds.2.le (by linarith) age (by norm_num)
-  unfold readyPulse
+    (after : start ≤ t) (early : t ≤ start + 3 / 10) :
+    readyPulse (97 / 125) 1 start t < 1 := by
+  have mono := selector_early_mono (start := start) (gain := 1) (by norm_num) (by norm_num)
+  apply (mono ⟨after, early⟩ ⟨by linarith, le_rfl⟩ early).trans_lt
+  have head : Real.exp (-(3 / 20 : ℝ)) ≤ 8608 / 10000 := by
+    have estimate := Real.exp_bound (x := -(3 / 20 : ℝ)) (n := 10) (by norm_num) (by norm_num)
+    norm_num [Finset.sum_range_succ] at estimate
+    linarith [(abs_sub_le_iff.mp estimate).1]
+  have tail : (6597 / 10000 : ℝ) ≤ Real.exp (-a * (3 / 10)) := by
+    apply le_trans _ (Real.exp_le_exp.mpr (show -(4159 / 10000 : ℝ) ≤ -a * (3 / 10) by
+      dsimp [a]; linarith [KernelR.log_four_bounds.2]))
+    have estimate := Real.exp_bound (x := -(4159 / 10000 : ℝ)) (n := 10) (by norm_num) (by norm_num)
+    norm_num [Finset.sum_range_succ] at estimate
+    linarith [(abs_sub_le_iff.mp estimate).2]
+  have difference : Real.exp (-(3 / 20 : ℝ)) - Real.exp (-a * (3 / 10)) ≤ 2011 / 10000 := by linarith
+  have product := mul_le_mul selector_response_coefficient_bounds.2 difference
+    (sub_nonneg.mpr (Real.exp_le_exp.mpr (by linarith [a_coarse_bounds.1]))) (by norm_num)
+  unfold readyPulse response
+  rw [add_sub_cancel_left, show -(1 / 2 : ℝ) * (3 / 10) = -(3 / 20) by norm_num]
   linarith
 
 private theorem selector_high_after_split (start : ℝ) :
-    1 < readyPulse (69 / 100) (Real.exp (3 / 5)) start (start + 1 / 5) := by
-  have head : (9 / 10 : ℝ) ≤ Real.exp (-1 / 10) := by
-    linarith [Real.add_one_le_exp (-1 / 10 : ℝ)]
-  have tail : Real.exp (-a * (1 / 5)) ≤ (153 / 200 : ℝ) := by
-    have estimate := Real.exp_bound (x := (-27 / 100 : ℝ)) (n := 6) (by norm_num) (by norm_num)
+    1 < readyPulse (13 / 20) (Real.exp (3 / 5)) start (start + 39 / 200) := by
+  have head : (907 / 1000 : ℝ) ≤ Real.exp (-(39 / 400 : ℝ)) := by
+    have estimate := Real.exp_bound (x := -(39 / 400 : ℝ)) (n := 10) (by norm_num) (by norm_num)
     norm_num [Finset.sum_range_succ] at estimate
-    apply le_trans (Real.exp_le_exp.mpr ?_) (show Real.exp (-27 / 100) ≤ 153 / 200 by
-      linarith [(abs_sub_le_iff.mp estimate).1])
-    dsimp [a]
-    linarith [KernelR.log_four_bounds.1]
-  have coefficient : (14 / 9 : ℝ) ≤ a / (a - 1 / 2) :=
-    (le_div_iff₀ (by linarith [a_coarse_bounds.1])).mpr (by linarith [a_coarse_bounds.2])
-  have pulse : (21 / 100 : ℝ) ≤ response (1 / 5) := by
+    linarith [(abs_sub_le_iff.mp estimate).2]
+  have tail : Real.exp (-a * (39 / 200)) ≤ (764 / 1000 : ℝ) := by
+    apply le_trans (Real.exp_le_exp.mpr (show -a * (39 / 200) ≤ -(2703 / 10000 : ℝ) by
+      dsimp [a]; linarith [KernelR.log_four_bounds.1]))
+    have estimate := Real.exp_bound (x := -(2703 / 10000 : ℝ)) (n := 10) (by norm_num) (by norm_num)
+    norm_num [Finset.sum_range_succ] at estimate
+    linarith [(abs_sub_le_iff.mp estimate).1]
+  have difference : (143 / 1000 : ℝ) ≤ Real.exp (-(39 / 400 : ℝ)) - Real.exp (-a * (39 / 200)) := by linarith
+  have product := mul_le_mul selector_response_coefficient_bounds.1 difference (by norm_num)
+    (div_pos (by linarith [a_coarse_bounds.1]) (by linarith [a_coarse_bounds.1])).le
+  have pulse : (223 / 1000 : ℝ) ≤ response (39 / 200) := by
     unfold response
-    have difference : (27 / 200 : ℝ) ≤ Real.exp (-(1 / 2) * (1 / 5)) - Real.exp (-a * (1 / 5)) := by
-      rw [show -(1 / 2 : ℝ) * (1 / 5) = -1 / 10 by norm_num]
-      linarith
-    have product := mul_le_mul coefficient difference (by norm_num : (0 : ℝ) ≤ 27 / 200)
-      (div_nonneg (by linarith [a_coarse_bounds.1]) (by linarith [a_coarse_bounds.1]))
-    linarith
-  have amplified := mul_le_mul learnedProbe_gain.1 pulse (by norm_num : (0 : ℝ) ≤ 21 / 100)
+    rw [show -(1 / 2 : ℝ) * (39 / 200) = -(39 / 400) by norm_num]
+    exact (by norm_num : (223 / 1000 : ℝ) ≤ (391 / 250) * (143 / 1000)).trans product
+  have amplified := mul_le_mul learnedProbe_gain.1 pulse (by norm_num : (0 : ℝ) ≤ 223 / 1000)
     (Real.exp_pos _).le
   unfold readyPulse
-  rw [add_sub_cancel_left, show -(1 / 2 : ℝ) * (1 / 5) = -1 / 10 by norm_num]
+  rw [add_sub_cancel_left, show -(1 / 2 : ℝ) * (39 / 200) = -(39 / 400) by norm_num]
   linarith
 
 private theorem selector_low_after_window (start : ℝ) :
-    1 < readyPulse (69 / 100) 1 start (start + 7 / 10) := by
-  have head : (7 / 10 : ℝ) ≤ Real.exp (-7 / 20) := by
-    have estimate := Real.exp_bound (x := (-7 / 20 : ℝ)) (n := 6) (by norm_num) (by norm_num)
+    1 < readyPulse (13 / 20) 1 start (start + 4 / 5) := by
+  have head : (6703 / 10000 : ℝ) ≤ Real.exp (-(2 / 5 : ℝ)) := by
+    have estimate := Real.exp_bound (x := -(2 / 5 : ℝ)) (n := 10) (by norm_num) (by norm_num)
     norm_num [Finset.sum_range_succ] at estimate
     linarith [(abs_sub_le_iff.mp estimate).2]
-  have tail : Real.exp (-a * (7 / 10)) ≤ (77 / 200 : ℝ) := by
-    have estimate := Real.exp_bound (x := (-24 / 25 : ℝ)) (n := 8) (by norm_num) (by norm_num)
-    norm_num [Finset.sum_range_succ] at estimate
-    apply le_trans (Real.exp_le_exp.mpr ?_) (show Real.exp (-24 / 25) ≤ 77 / 200 by
-      linarith [(abs_sub_le_iff.mp estimate).1])
-    dsimp [a]
-    linarith [KernelR.log_four_bounds.1]
-  have coefficient : (14 / 9 : ℝ) ≤ a / (a - 1 / 2) :=
-    (le_div_iff₀ (by linarith [a_coarse_bounds.1])).mpr (by linarith [a_coarse_bounds.2])
-  have pulse : (49 / 100 : ℝ) ≤ response (7 / 10) := by
-    unfold response
-    have difference : (63 / 200 : ℝ) ≤ Real.exp (-(1 / 2) * (7 / 10)) - Real.exp (-a * (7 / 10)) := by
-      rw [show -(1 / 2 : ℝ) * (7 / 10) = -7 / 20 by norm_num]
-      linarith
-    have product := mul_le_mul coefficient difference (by norm_num : (0 : ℝ) ≤ 63 / 200)
-      (div_nonneg (by linarith [a_coarse_bounds.1]) (by linarith [a_coarse_bounds.1]))
-    linarith
-  unfold readyPulse
-  rw [add_sub_cancel_left, show -(1 / 2 : ℝ) * (7 / 10) = -7 / 20 by norm_num]
+  have tail : Real.exp (-a * (4 / 5)) ≤ (3299 / 10000 : ℝ) := by
+    have half : Real.exp (-a * (2 / 5)) ≤ (57436 / 100000 : ℝ) := by
+      apply le_trans (Real.exp_le_exp.mpr (show -a * (2 / 5) ≤ -(55451 / 100000 : ℝ) by
+        dsimp [a]; linarith [KernelR.log_four_bounds.1]))
+      have estimate := Real.exp_bound (x := -(55451 / 100000 : ℝ)) (n := 11) (by norm_num) (by norm_num)
+      norm_num [Finset.sum_range_succ] at estimate
+      linarith [(abs_sub_le_iff.mp estimate).1]
+    rw [show -a * (4 / 5) = -a * (2 / 5) + -a * (2 / 5) by ring, Real.exp_add]
+    exact (mul_le_mul half half (Real.exp_pos _).le (by norm_num)).trans (by norm_num)
+  have difference : (3404 / 10000 : ℝ) ≤ Real.exp (-(2 / 5 : ℝ)) - Real.exp (-a * (4 / 5)) := by linarith
+  have product := mul_le_mul selector_response_coefficient_bounds.1 difference (by norm_num)
+    (div_pos (by linarith [a_coarse_bounds.1]) (by linarith [a_coarse_bounds.1])).le
+  unfold readyPulse response
+  rw [add_sub_cancel_left, show -(1 / 2 : ℝ) * (4 / 5) = -(2 / 5) by norm_num]
   linarith
 
 /-- The first READY contacts are strict, with two disjoint latency windows. -/
 theorem selector_read_response {charge start : ℝ} (high : Bool)
-    (band : 69 / 100 ≤ charge ∧ charge ≤ 71 / 100) :
+    (band : 13 / 20 ≤ charge ∧ charge ≤ 97 / 125) :
     ∃ latency : ℝ,
-      (if high then 1 / 10 < latency ∧ latency < 1 / 5
-        else 1 / 5 < latency ∧ latency < 7 / 10) ∧
+      (if high then 1 / 10 < latency ∧ latency < 39 / 200
+        else 3 / 10 < latency ∧ latency < 4 / 5) ∧
       readyPulse charge (Real.exp (selectorReadLogGain high)) start (start + latency) = 1 ∧
       (∀ t ∈ Ico start (start + latency),
         readyPulse charge (Real.exp (selectorReadLogGain high)) start t < 1) ∧
       0 < deriv (readyPulse charge (Real.exp (selectorReadLogGain high)) start) (start + latency) := by
-  let D : ℝ := if high then 1 / 5 else 7 / 10
+  let D : ℝ := if high then 39 / 200 else 4 / 5
   have deadline : 0 < D := by cases high <;> norm_num [D]
   have above : 1 < readyPulse charge (Real.exp (selectorReadLogGain high)) start (start + D) := by
     apply lt_of_lt_of_le _ (readyPulse_mono_initial band.1)
@@ -118,13 +178,13 @@ theorem selector_read_response {charge start : ℝ} (high : Bool)
     fun_prop
   obtain ⟨latency, positive, upper, root, pre⟩ := scalar_first_one_crossing continuous deadline
     (by rw [add_zero, readyPulse_initial]; linarith [band.2]) above
-  have lower : (if high then (1 / 10 : ℝ) else 1 / 5) < latency := by
+  have lower : (if high then (1 / 10 : ℝ) else 3 / 10) < latency := by
     by_contra notAfter
     have before := le_of_not_gt notAfter
     cases high with
     | false =>
       have margin := selector_low_before_split (start := start) (t := start + latency)
-        (by linarith) (by change latency ≤ (1 / 5 : ℝ) at before; linarith)
+        (by linarith) (by change latency ≤ (3 / 10 : ℝ) at before; linarith)
       rw [show Real.exp (selectorReadLogGain false) = 1 by simp [selectorReadLogGain]] at root
       have strict := lt_of_le_of_lt (readyPulse_mono_initial band.2) margin
       rw [root] at strict
@@ -147,7 +207,7 @@ theorem selector_read_response {charge start : ℝ} (high : Bool)
 
 structure SelectorReadPrepared (s : Snapshot 1) (high : Bool) : Prop where
   ready : s.main 0 = .ready
-  charge : 69 / 100 ≤ s.x 0 .q ∧ s.x 0 .q ≤ 71 / 100
+  charge : 13 / 20 ≤ s.x 0 .q ∧ s.x 0 .q ≤ 97 / 125
   gain : s.x 0 (.z 2) = selectorReadLogGain high
   recovery : 0 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 2 / 5
   auxiliary : ∀ p, s.aux 0 p = .ready ∧ RestBand (s.x 0 (.m p))
@@ -162,8 +222,8 @@ structure SelectorReadRun (θ : Fin 1 → Parameters) (s : Snapshot 1) (high : B
   complete : CompleteThrough execution horizon
   transversal : execution.ContactsTransversal
   latency : ℝ
-  window : if high then 1 / 10 < latency ∧ latency < 1 / 5
-    else 1 / 5 < latency ∧ latency < 7 / 10
+  window : if high then 1 / 10 < latency ∧ latency < 39 / 200
+    else 3 / 10 < latency ∧ latency < 4 / 5
   emissions : execution.ledger.emissions = [(0, s.time + latency)]
   gains : ∀ p, final.x 0 (.z p) = s.x 0 (.z p)
   recovery : final.x 0 .b = s.x 0 .b
@@ -199,7 +259,7 @@ theorem selector_read_run_exists {θ ε s high}
     prepared.raw rawOther chargeBelow auxBelow margin (prepared.auxiliary 2).2 (by simp [prepared.empty])
   obtain ⟨silent⟩ := mark.first_silent_of_response_margin_until_exists box margin (by simp [prepared.empty])
   obtain ⟨latency, window, root, prior, slope⟩ := selector_read_response (start := s.time) high prepared.charge
-  have bounds : 1 / 10 < latency ∧ latency < 7 / 10 := by
+  have bounds : 1 / 10 < latency ∧ latency < 4 / 5 := by
     cases high <;> simp at window
     all_goals constructor <;> linarith [window.1, window.2]
   let F := s.time + latency
@@ -407,10 +467,22 @@ theorem selector_read_run_exists {θ ε s high}
 theorem SelectorReadRun.reads_high {θ s high} (run : SelectorReadRun θ s high) :
     run.latency < 1 / 5 ↔ high = true := by
   cases high
-  · have late : 1 / 5 < run.latency := run.window.1
-    exact ⟨fun h => (not_lt_of_ge late.le h).elim, fun h => Bool.noConfusion h⟩
-  · have early : run.latency < 1 / 5 := run.window.2
-    exact ⟨fun _ => rfl, fun _ => early⟩
+  · have late : 3 / 10 < run.latency := run.window.1
+    exact ⟨fun h => (not_lt_of_ge (show 1 / 5 ≤ run.latency by linarith) h).elim, fun h => Bool.noConfusion h⟩
+  · have early : run.latency < 39 / 200 := run.window.2
+    exact ⟨fun _ => rfl, fun _ => by linarith⟩
+
+/-- A routed read can be decoded with delays between 0.3 and 0.4.
+    The receiver's reference to the read-pulse arrival may err by 0.0025. -/
+theorem SelectorReadRun.reads_high_after_wire {θ s high} (run : SelectorReadRun θ s high)
+    {delay reference : ℝ} (wire : 3 / 10 ≤ delay ∧ delay ≤ 2 / 5)
+    (clock : s.time - 1 / 400 ≤ reference ∧ reference ≤ s.time + 1 / 400) :
+    s.time + run.latency + delay < reference + 239 / 400 ↔ high = true := by
+  cases high
+  · have late : 3 / 10 < run.latency := run.window.1
+    exact ⟨fun h => by linarith [wire.1, clock.2], fun h => Bool.noConfusion h⟩
+  · have early : run.latency < 39 / 200 := run.window.2
+    exact ⟨fun _ => rfl, fun _ => by linarith [wire.2, clock.1]⟩
 
 /-- Equality at sensor return excludes a gain change even on an intermediate
     cut of the native read, by the existing monotonicity theorem. -/
