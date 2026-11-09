@@ -9,44 +9,42 @@
 ## Why it matters
 
 Fabrication mismatch can make the same training pulse produce different
-updates in nominally identical devices, which usually calls for per-device
-calibration or a controller that computes the updates. Kernel R shows how a
-learning rule can make the size of an update independent of the rate at
-which it happens, with no calibration and no external controller.
+updates in nominally identical devices. Existing designs address this with
+per-device calibration, with clocked charge-transfer circuits, or with
+training that tolerates the variation.
 
-An R cell learns by integrating a sensor's discharge between two fixed
-charge thresholds. A faster discharge finishes sooner, and the decay rate
-cancels from the total update. This gives two exact increments:
+Kernel R couples a sensor's discharge to a memory update. When the learning
+gates stay open and the memory stays below its cap, the update is
+proportional to the charge lost between two sensor thresholds. The discharge
+rate changes how long the phase lasts, while the realized thresholds
+determine the increment. No clock or external controller computes the
+update.
 
-- A complete ERROR phase adds `Δz = 8 × (0.1 − 0.025) = 0.6` to the input
-  port's log-gain while the cell stays ready to fire.
+- A complete ERROR phase adds `Δz = 8 × (upper − lower)` to the input port's
+  log-gain while the cell stays ready to fire. At the nominal thresholds
+  this is `8 × (0.1 − 0.025) = 0.6`.
 - A complete MARK phase contributes `Δb = (1 − 0.8) / 2 = 0.1` to the
   recovery rate while the cell stays protected.
 
-These increments require positive energy and a memory that stays below its
-cap throughout the phase.
+Lean proves that, under the declared protocol, these local updates give the
+same learning increments in chains of any finite length despite fixed
+fabrication variation of up to ±10% and bounded wire jitter.
 
-Lean proves that this mechanism holds along chains of any finite length
-under the declared training protocol. Every complete run gives each cell
-the same increments relative to its own starting values, across independent
-fixed fabrication variation of up to ±10%, bounded wire delays and legal
-orders of simultaneous events.
-
-The same cells can also be wired into small adaptive circuits, where what
-one cell has stored decides which pulses another receives. Three such
-circuits are proved in the [research results](#research-results).
+Analog synaptic increments that contain no discharge rate already exist in
+switched-capacitor circuits (see [related work](#related-work)). What this
+repository adds is a self-timed update set by two state thresholds, and a
+machine-checked account of how those updates compose in a network.
 
 These are guarantees about a mathematical model, and no device has been
-built. The chain proofs assume exact thresholds and actuation factors. A
-separate [single-cell result](https://github.com/HevisNico/kernel-R/blob/ae69e06fa467ba7bf10c9b2f0989a481e9d863e3/research/recursive-learning/native/ParameterTraining.lean)
-shows that one training pulse followed by one read tolerates up to 5%
-error independently in the ERROR entry and exit thresholds and the FIRE
-threshold. The guarantee applies to every run complete through the read
-horizon.
+built.
 
-> **Scope of the chain's robustness.** Each port's gain cap, sensor rates and sensor
+> **Scope of the robustness.** Each port's gain cap, sensor rates and sensor
 > input gain (`C, L_m, L_s, L_e, M`) may vary across cells and ports, with
-> values fixed in time. Thresholds and actuation factors are exact.
+> values fixed in time. The chain theorem uses nominal thresholds and birth
+> values within `10⁻⁵` of nominal. A
+> [single-cell result](#one-training-pulse-and-one-read-with-inexact-thresholds)
+> tolerates 5% error on the ERROR and FIRE thresholds. Actuation factors are
+> exact throughout.
 
 ## An R cell in one picture
 
@@ -80,12 +78,14 @@ See the [cell laws](model/CELL.md) and [glossary](docs/GLOSSARY.md).
 
 **In plain words.** Take a chain of any positive finite length. Choose its
 fabrication parameters independently within the ±10% or ±0.3% box and start
-every cell in READY, with birth charges, log-gains and recovery rates within
-10⁻⁵ of their nominal values. Each cell first receives its own preparation
-train while the links are switched off. In the constructed run, this writes
-three of the four doses on each relay's active port. The links then open, the
-leaf is driven with a regular rhythm, and each relay receives the input that
-writes its fourth dose from its upstream neighbour.
+every cell in READY, within `10⁻⁵` of its nominal resting values.
+
+The protocol has two stages. Each cell first receives its own preparation
+train of sixteen pulses while the links are switched off. This writes three
+of the four doses on a relay's active port. At time 160 the links open and
+the leaf is driven with a regular rhythm. Each relay then receives its
+fourth dose from its neighbour, and the leaf receives its four doses from
+the source.
 
 Each link delivers pulses with a delay in `[0.3, 0.4]`. The delay functions
 are fixed in advance and may vary over time, with summed jitter budgets at
@@ -129,6 +129,39 @@ proved for this protocol. A corollary realizes any prescribed sequence of
 bounded per-pulse wire errors on the actual sending firings.
 
 ## Research results
+
+### One training pulse and one read with inexact thresholds
+
+A single R cell at rest receives two pulses on the same port, sixteen time
+units apart. The first pulse writes one dose. The second makes the cell
+fire between 0.3 and 0.9 time units after it arrives.
+
+The cell's charge thresholds are fields of its fabrication parameters. The
+FIRE threshold may lie anywhere in `[0.95, 1.05]`, and the two ERROR
+thresholds of the trained port may each differ from nominal by up to 5%.
+The log-gain increment is exactly `8 × (upper − lower)` for the realized
+thresholds, which puts it in `[0.55, 0.65]`.
+
+Lean constructs a complete run and proves that every complete run through
+the read horizon has the same endpoint, the same single firing and the same
+increment. The result holds for either fabrication box. See
+[`training_read_every_complete`](https://github.com/HevisNico/kernel-R/blob/11f476c3eb299263b980d5b69fb4592e8c0c093b/research/recursive-learning/native/ParameterTraining.lean).
+
+The uniqueness part comes from a general theorem. For any finite network
+and router, runs from the same state with the same realized parameters
+agree at a common horizon on their endpoint and firing dates. See the
+[parameterized semantics](https://github.com/HevisNico/kernel-R/blob/11f476c3eb299263b980d5b69fb4592e8c0c093b/proof/lean/KernelR/HybridParameterExecution.lean)
+and its
+[uniqueness theorem](https://github.com/HevisNico/kernel-R/blob/11f476c3eb299263b980d5b69fb4592e8c0c093b/proof/lean/KernelR/HybridParameterUniversalExecution.lean).
+
+**Scope of this result**
+
+- **One cell, one dose.** The experiment covers one training pulse and one
+  read. The port's initial gain lies in `[7/6, 1.2]`.
+- **Three tolerant thresholds.** The MARK, SILENT, FAST-end and reopening
+  thresholds keep their nominal values in this experiment.
+- **The chain is separate.** Result 1 uses nominal thresholds.
+- **First-contact semantics.** The constructed read firing is transverse.
 
 ### Native binary search for a hidden need
 
@@ -281,7 +314,19 @@ discrete model only.
   the active port and three MARK phases across each cell's ports in the
   constructed execution. The universal comparison transfers the resulting
   memory increments to every complete execution.
-- **Thresholds held exact.** See the scope note above.
+- **Thresholds.** The chain theorem and the adaptive circuits use nominal
+  thresholds. The tolerant result covers one cell, one training pulse and
+  one read.
+- **Preparation is local.** In the chain protocol the links are off before
+  time 160. A relay receives three of its four active-port doses from its
+  own preparation train and one from its neighbour.
+- **Overlapping pulses.** A delivery cannot arrive on a port whose previous
+  pulse is still live. Such a run has no complete execution, so the
+  theorems say nothing about it. Each proved protocol constructs a complete
+  run, so this does not occur in them.
+- **Pulse tails.** A pulse that arrives during protection stays live for one
+  time unit. If the cell reopens in that time, the rest of the pulse is
+  admitted.
 - **Model verification.** The proofs concern the stated equations and
   semantics. Experimental validation would require hardware measurements.
 - **The Reset Operator.** The broader saturation argument is a separate result.
@@ -290,10 +335,86 @@ discrete model only.
 
 | Result | Scope | Statement |
 |---|---|---|
-| **Event order does not matter.** Executions complete through the same horizon agree on the physical endpoint up to pending-list order, and on each cell's ordered firing dates. | Native semantics for any finite network, including cycles, with the same parameters, initial snapshot and fixed router, under the physical bounds. | [endpoint and dates](proof/lean/KernelR/HybridUniversalExecution.lean) |
+| **Event order does not matter.** Executions complete through the same horizon agree on the physical endpoint up to pending-list order, and on each cell's ordered firing dates. | Native first-contact semantics for any finite network, including cycles, with the same parameters, initial snapshot and fixed router. The declared threshold and physical bounds apply. | [parameterized endpoint and dates](https://github.com/HevisNico/kernel-R/blob/11f476c3eb299263b980d5b69fb4592e8c0c093b/proof/lean/KernelR/HybridParameterUniversalExecution.lean) · [nominal theorem](proof/lean/KernelR/HybridUniversalExecution.lean) |
 | **Recovery limits the output rate.** If recovery stays at most `β > 0`, two firings of a cell are at least `1 + log(5/2)/β` apart (about 1.833 at the built-in cap). A window of length L contains at most `1 + L/(1 + log(5/2)/β)` firings. | Any topology, both semantics. | [guide](docs/RESET_RATE_SATURATION.md) · [Lean](proof/lean/KernelR/HybridResetRateCrossing.lean) |
 | **Zero recovery can lock a cell.** A cell starting in SLOW with charge 1/4 and zero recovery cannot fire again while no sensor spends positive time in MARK. An isolated, fully exposed MARK phase can restore recovery to 0.1. | Any finite network and router. Lock in both semantics, conditional repair in native semantics. | [guide](docs/RESET_ZERO_RECOVERY.md) |
 | **Port memory saturates after an exact number of ERROR phases.** After `k` counted phases, the log-gain is `min(log C, z₀ + 0.6k)`. It reaches the cap exactly when `k ≥ ⌈(log C − z₀)/0.6⌉` and stays there in later legal executions. | Any finite network and router in both semantics, under the physical box. The count theorem requires an actual complete section cover and a starting log-gain at or below the cap. | [guide](docs/GAIN_MEMORY_SATURATION.md) · [Lean](proof/lean/KernelR/HybridCrossingMemorySaturation.lean) |
+
+## Related work
+
+The comparison below covers the works we examined. It is not a general
+priority claim.
+
+**Closest precedent.**
+[Noack et al.](https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00010/full)
+build switched-capacitor stop-learning synapses in 28 nm CMOS. Their ideal
+weight step has the form `(C_hebb / C_syn) × (V_a − V_cm)` and contains no
+discharge rate. Membrane and calcium thresholds enable or block the step,
+and its size comes from control voltages and a capacitor ratio. The circuit
+is clocked and shares its drivers along a row, which reduces mismatch
+between the synapses of that row.
+[Mayr et al.](https://arxiv.org/abs/1412.3233) still measure spread in the
+update amplitude of the presynaptic adaptation.
+
+Kernel R differs in two ways. Its update integrates a self-timed sensor
+discharge between two state thresholds, so the thresholds set the size of
+the step. And Lean checks how these updates compose in the chain protocol.
+
+**Other learning circuits**
+
+- **Threshold-gated increments.** In the
+  [TEXEL processor](https://pmc.ncbi.nlm.nih.gov/articles/PMC12254410/),
+  one depression branch uses a fixed increment. Potentiation is
+  proportional to a presynaptic trace sampled at the spike, and analog
+  biases set both amplitudes.
+- **Floating-gate synapses.**
+  [Hasler et al.](https://papers.neurips.cc/paper/1994/hash/934815ad542a4a7c5e8a2dfa04fea9f5-Abstract.html)
+  store a weight as charge on a floating gate. In
+  [Figueroa, Bridges and Diorio](https://papers.nips.cc/paper_files/paper/2004/file/f6185f0ef02dcaec414a3171cd01c697-Paper.pdf),
+  update rates vary by more than 3:1 between synapses before calibration.
+  The authors adjust tunnelling and injection rates locally to obtain
+  uniform, symmetric updates, and let LMS learning compensate some offsets.
+- **Charge packets in patents.** Fixed charge packets are old. In
+  [US 5,136,176](https://patents.google.com/patent/US5136176) the packet
+  carries the product of the input and a programmed weight. In
+  [US 5,343,555](https://patents.google.com/patent/US5343555) a fixed charge
+  is a reference in the signal sent to the soma.
+  [US 5,303,329](https://patents.google.com/patent/US5303329) writes the
+  weight continuously by injection and tunnelling.
+  [US 2015/0278682](https://patents.google.com/patent/US20150278682A1) has
+  an asynchronous write triggered by a threshold, with an increment that
+  depends on transconductance, capacitance and pulse shape.
+- **Write-verify.** Memristive synapses are commonly programmed by cycles of
+  reading and rewriting, which
+  [add delay](https://arxiv.org/abs/2403.06712).
+- **Robust training and homeostasis.**
+  [Büchel et al.](https://arxiv.org/abs/2102.06408) train networks for
+  performance after deployment on mismatched chips. A
+  [cross-homeostatic rule](https://ideas.repec.org/a/nat/natcom/v16y2025i1d10.1038_s41467-025-60697-2.html)
+  targets stable dynamics. In Kernel R the discharge rate cancels from the
+  full-phase update, while the thresholds and the actuation factor remain
+  in the formula.
+
+**Related principles**
+
+- **Ratiometric measurement.** In a
+  [dual-slope ADC](https://en.wikipedia.org/wiki/Integrating_ADC) the factor
+  `1/RC` is common to both ramps and cancels. In Kernel R the same
+  discharge lowers the sensor charge and raises the memory.
+- **Delay-insensitive circuits.**
+  [Quasi-delay-insensitive logic](https://avlsi.csl.yale.edu/~rajit/ps/qdi.pdf)
+  is correct for arbitrary gate and wire delays apart from isochronic
+  forks, and that literature already relates confluence to determinism for
+  digital circuits. Kernel R gives two separate guarantees. Uniqueness
+  compares complete executions for a fixed router and fixed parameters.
+  Bounded delays are a hypothesis of the chain theorem.
+- **Formal verification.** Hybrid systems are verified with
+  [KeYmaera X](https://logic.kastel.kit.edu/research/keymaerax) and
+  [IsaVODEs](https://link.springer.com/article/10.1007/s10817-024-09709-2).
+  [De Maria et al.](https://arxiv.org/abs/1808.01893) model spiking networks
+  as timed automata, with parameter inference.
+  [Bahrami, De Maria, Felty and co-authors](https://arxiv.org/abs/2505.05362)
+  prove properties of spiking neuron archetypes in Coq.
 
 ## How to check it
 
