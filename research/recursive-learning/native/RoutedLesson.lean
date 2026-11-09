@@ -28,7 +28,7 @@ private theorem lesson_contacts_strict {time : ℝ} {delay : ℝ → ℝ}
     exact lt_add_of_pos_right t (positive t)
   · simp [lessonSelectorContacts, after] at member
 
-private theorem lesson_router_strict {time : ℝ} {delay : ℝ → ℝ}
+theorem lesson_router_strict {time : ℝ} {delay : ℝ → ℝ}
     (positive : ∀ t, 0 < delay t) : StrictCausalRouter (lessonSelectorRouter time delay) := by
   intro i t d member
   cases i using Fin.cases with
@@ -97,6 +97,8 @@ private structure SelectorResponse (θ : Fin 1 → Parameters) (time : ℝ)
   deliveries : execution.deliveries = selectorQueue delay fire
   empty : final.pending = []
   gains : ∀ p, final.x 0 (.z p) = if p = 2 ∧ fire.isSome then 3 / 5 else 0
+  ready : ReadyCoordinates final 0
+  rawNone : ∀ p, final.raw 0 p = none
 
 private theorem selector_response_exists {θ ε time delay fire}
     (box : @PhysicalBox 1 θ ε)
@@ -110,10 +112,12 @@ private theorem selector_response_exists {θ ε time delay fire}
   have rawNone (i : Fin 1) (p : Port) : start.raw i p = none := rfl
   cases fire with
   | none =>
+    have later : start.time < time + 26 := by change time < time + 26; linarith
     obtain ⟨wait, complete, transverse, silent, noDeliveries⟩ := quiet_ready_tail_exists (θ := θ)
-      (s := start) (T := time + 26) (by change time < time + 26; linarith) ready rawNone rfl
+      (s := start) (T := time + 26) later ready rawNone rfl
     exact ⟨⟨_, wait, complete, transverse, silent, noDeliveries, rfl, fun p => by simp [quietAt,
-      quietValues, start, preparedTeacher]⟩⟩
+      quietValues, start, preparedTeacher],
+      quietAt_ready_coordinates start 0 (ready 0) later.le, rawNone 0⟩⟩
   | some f =>
     let due := f + delay f
     have positiveLog := Real.log_nonneg (show (1 : ℝ) ≤ 6 / 5 by norm_num)
@@ -123,15 +127,19 @@ private theorem selector_response_exists {θ ε time delay fire}
       (preparedTeacher_physical box time _) (by simp [RawValid, start, preparedTeacher])
       (ready 0) (rawNone 0) (by change time < f + delay f; linarith [(bounds f).1])
       rfl (by simp) (by change Real.exp 0 ≤ _; norm_num) (by change 0 ≤ _; linarith)
+    have later : dose.final.time < time + 26 := by
+      rw [dose.complete.1]
+      dsimp [due]
+      linarith [after.2, (bounds f).2]
     obtain ⟨wait, complete, transverse, silent, noDeliveries⟩ := quiet_ready_tail_exists (θ := θ)
-      (T := time + 26) (by rw [dose.complete.1]; dsimp [due]; linarith [after.2, (bounds f).2])
+      (T := time + 26) later
       (fun i => by simpa only [Subsingleton.elim i 0] using dose.ready)
       (fun i p => by simpa only [Subsingleton.elim i 0] using dose.rawNone p) dose.pending
     refine ⟨⟨_, dose.execution.append wait, complete,
       (Execution.contactsTransversal_append _ _).2 ⟨dose.transversal, transverse⟩,
       by rw [Execution.emissions_append, dose.emissions, silent]; rfl,
       by rw [Execution.deliveries_append, dose.deliveries, noDeliveries]; rfl,
-      dose.pending, ?_⟩⟩
+      dose.pending, ?_, quietAt_ready_coordinates dose.final 0 dose.ready later.le, dose.rawNone⟩⟩
     intro p
     change dose.final.x 0 (.z p) = _
     rw [dose.gain]
@@ -153,6 +161,9 @@ structure RoutedLessonRun (learner : Fin 1 → Parameters) (teacher : Parameters
       fire.toList.map (fun f => ⟨0, 2, f + delay f⟩))
   pendingEmpty : final.pending = []
   teacherGains : ∀ p, final.x 0 (.z p) = if p = 2 ∧ prepared = false then 3 / 5 else 0
+  teacherReady : ReadyCoordinates final 0
+  teacherRawNone : ∀ p, final.raw 0 p = none
+  learnerDispatch : LearnerDispatchState (final.cellProjection 1 [])
 
 /-- There is one complete network history. The teacher's local input
     calendar comes from the actual learner trace. Only the external lesson
@@ -162,7 +173,7 @@ theorem routed_lesson_run_exists {learner teacher ε delay}
     (prepared : Bool) (time : ℝ)
     (bounds : ∀ f, (3 / 10 : ℝ) ≤ delay f ∧ delay f ≤ 2 / 5) :
     Nonempty (RoutedLessonRun learner teacher prepared time delay) := by
-  obtain ⟨run⟩ := lesson_probe_late_run_exists box.extend_old prepared time
+  obtain ⟨run, learnerDispatch⟩ := lesson_probe_dispatch_state_exists box.extend_old prepared time
   obtain ⟨fire, reported, window, readout, queue⟩ := readout_label run delay
   obtain ⟨response⟩ := selector_response_exists box.extend_new (delay := delay) window bounds
   let head := {preparedTeacher time with pending := selectorQueue delay fire}
@@ -183,6 +194,10 @@ theorem routed_lesson_run_exists {learner teacher ε delay}
     deliveries := ?_
     pendingEmpty := weave.pending_empty run.pendingEmpty response.empty
     teacherGains := ?_
+    teacherReady := ⟨response.ready.ready,response.ready.charge,response.ready.auxiliary⟩
+    teacherRawNone := response.rawNone
+    learnerDispatch := ⟨
+      fun i p => learnerDispatch.rawNone 0 p, learnerDispatch.auxiliary, ?_⟩
   }⟩
   · intro f after
     change f ∈ weave.execution.emissionTimes ((0 : Fin 1).succ) ↔ fire = some f
@@ -202,6 +217,9 @@ theorem routed_lesson_run_exists {learner teacher ε delay}
     change response.final.x 0 (.z p) = _
     rw [response.gains, reported]
     cases prepared <;> simp
+  · rcases learnerDispatch.main with ready | slow
+    · exact Or.inl ⟨ready.ready,ready.charge,ready.auxiliary⟩
+    · exact Or.inr slow
 
 /-- The selector's native readout agrees with the discrete validation at the
     last preparation slot. Half a dose separates its two physical values. -/
@@ -212,7 +230,7 @@ theorem RoutedLessonRun.selector_reports_failure {learner teacher prepared time 
   rw [run.teacherGains, lastPreparationLesson_passes]
   cases prepared <;> norm_num
 
-private theorem network_physical {learner teacher ε prepared time}
+theorem routed_lesson_physical {learner teacher ε prepared time}
     (box : @PhysicalBox 2 (extendParameters learner teacher) ε) :
     PhysicalBox (prependParameters (fun _ => teacher) learner) ε ∧
       PhysicalInvariant (prependParameters (fun _ => teacher) learner) (routedLessonStart prepared time) ∧
@@ -263,7 +281,7 @@ theorem routed_lesson_crossing_exists {learner teacher ε delay}
         (lessonSelectorRouter time delay) (routedLessonStart prepared time) run.final),
       crossing.execution = run.execution.toWeak ∧ CrossingCompleteThrough crossing (time + 26) := by
   obtain ⟨run⟩ := routed_lesson_run_exists box prepared time bounds
-  obtain ⟨orderedBox, physical, initial⟩ := network_physical (prepared := prepared) (time := time) box
+  obtain ⟨orderedBox, physical, initial⟩ := routed_lesson_physical (prepared := prepared) (time := time) box
   exact ⟨run, run.execution.toCrossing initial orderedBox physical run.transversal, rfl,
     run.complete.toCrossing run.execution initial orderedBox physical run.transversal⟩
 
@@ -293,7 +311,7 @@ theorem RoutedLessonRun.every_complete {learner teacher ε prepared time delay f
     (complete : CompleteThrough execution (time + 26)) :
     run.final.ObservationalEq final ∧ run.execution.ledger.emissions.Perm execution.ledger.emissions ∧
       run.execution.deliveries.Perm execution.deliveries := by
-  obtain ⟨orderedBox, physical, _⟩ := network_physical (prepared := prepared) (time := time) box
+  obtain ⟨orderedBox, physical, _⟩ := routed_lesson_physical (prepared := prepared) (time := time) box
   obtain ⟨endpoint, fires⟩ :=
     run.execution.observational_unique execution orderedBox physical run.complete complete
   exact ⟨endpoint, fires, deliveries_of_agreement run execution endpoint fires⟩
@@ -312,7 +330,7 @@ theorem RoutedLessonRun.every_crossing_complete {learner teacher ε prepared tim
       native.toWeak = crossing.execution ∧ run.final.ObservationalEq final ∧
       run.execution.ledger.emissions.Perm crossing.execution.ledger.emissions ∧
       run.execution.deliveries.Perm native.deliveries := by
-  obtain ⟨orderedBox, physical, initial⟩ := network_physical (prepared := prepared) (time := time) box
+  obtain ⟨orderedBox, physical, initial⟩ := routed_lesson_physical (prepared := prepared) (time := time) box
   obtain ⟨native, same⟩ := crossing.execution.toNative_of_transverse_completion run.execution
     (lesson_router_strict positive) orderedBox physical run.complete run.transversal (le_of_eq complete.1)
   have weakComplete := complete.toWeak_of_native crossing native same initial orderedBox physical

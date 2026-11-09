@@ -55,10 +55,15 @@ are discrete definitions. A credit is a unit dose in this model. The
 abstraction through exact increments from fully exposed sensor phases.
 
 The [native memory experiment](native/README.md) realizes the teacher's two
-commits with actual R flows and arrivals for a supplied pulse script. It also
-shows how a learner's actual FIRE can route a dose to the selector. The full
-acceptance and dispatch loop remains to be realized in R. The discrete results
-above establish the two improvements and a bound for the capped architecture.
+commits with actual R flows and arrivals for a supplied pulse script.
+For the final preparation slot, a single native R execution now carries the
+lesson through readout, routed feedback when the learner fires, the selector
+update, and receipt of the next selected pulse. Iterating this loop remains
+open. Reading the selector for dispatch changes its low gain, so another
+round needs a way to preserve or restore the selector memory.
+
+The discrete results above establish the two improvements and a bound for
+the capped architecture.
 
 ## Verify
 
