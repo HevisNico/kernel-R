@@ -65,7 +65,9 @@ A [saturated work pulse](native/SelectorPrecharge.lean) supplies the
 required charge after a suitably timed reopening. A [local teacher
 execution](native/TeacherReopen.lean) now schedules the work pulse from
 its own FIRE and reaches that reopening in both fabrication boxes.
-Joining this execution to the network and iterating the loop remain open.
+With recovery at its cap, a [fixed recovery clock](native/TeacherStableClock.lean)
+allows bounded timing variation on that self-delivery and preserves the
+read. Joining these stages to the network and iterating the loop remain open.
 
 The discrete results above establish the two improvements and a bound for
 the capped architecture.

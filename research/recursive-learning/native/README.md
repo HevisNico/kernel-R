@@ -178,7 +178,9 @@ through the sensor's return to READY, with the raw input expired and all
 log-gains and recovery preserved. `SelectorReadRun.gain_at_prefix` proves
 gain preservation at intermediate cuts. `SelectorReadRun.every_crossing_complete`
 transfers the exact FIRE and gain values to every complete crossing
-execution through that horizon.
+execution through that horizon. `capped_selector_read_crossing_exists`
+also constructs both reads at recovery `1.1`. Protection covers the
+whole ERROR phase and recovery stays at the cap.
 
 ### Precharge on a saturated work port
 
@@ -209,15 +211,40 @@ with genuine upward crossings.
 The work pulse's MARK phase raises recovery to `0.18`. The calculation
 uses its actual onset and duration. The resulting reopening is in
 `[0.556, 0.55965]` across the full ±10% box, without choosing a delay
-from the fabrication parameters or selector value. The self-delivery
-uses a fixed local delay. `teacher_work_timer_jitter_limit` shows that
-an independent delay range of width `0.1` would not fit this reopening
-window. The output wire after the selector read has its own timing bound.
+from the fabrication parameters or selector value. The constructed
+history uses the exact offset. `teacher_reopen_age_with_jitter` gives a
+conservative symmetric tolerance of `0.00005` for its solved clock.
+Once recovery reaches `0.18`, the same timer would send the next work
+pulse after the quiet teacher has already reopened.
 
-The teacher history ends at reopening. The precharge theorem above
-applies to an isolated continuation with the work gain at its cap.
-Joining those stages to the first network round, admitting the selector
-read and supplying the receiver's reference remain open.
+`TeacherOwnFireReopen.every_complete` and
+`TeacherOwnFireReopen.every_crossing_complete` identify the same
+physical endpoint and the same firing date in all complete runs of
+this local setup through the constructed reopening horizon.
+
+### A reusable clock at the recovery cap
+
+[At `b = 1.1`](TeacherStableClock.lean), every legal continuation
+preserves recovery. SLOW lasts exactly `log(5/2) / 1.1` after FAST,
+even when a work pulse triggers MARK. The local work delay is centred
+at `1 + log(5/2) / 1.1 - 0.557825`, about `1.27517`. A different delay
+may be realized at each FIRE. Every delay within `0.001825` of that
+centre puts reopening in `[0.556, 0.55965]`, the window certified in
+both fabrication boxes. `capped_teacher_jitter_iff` gives the exact
+symmetric budget for this particular window. The output wire after
+the read still has its separate timing bound.
+
+`capped_teacher_fire_work_window` locates the real reopening in any
+actual continuation through it, with the work token already admitted
+and still active. `capped_teacher_precharge_of_execution` gives the
+read charge band at work-pulse age `1.4` for an isolated continuation
+with the work gain at its cap. It preserves the gain on other ports
+whose sensors start at rest.
+
+The capped timing and precharge results assume recovery is already at
+its cap and an actual continuation reaches the stated horizon.
+Constructing that continuation in the first network round, admitting the
+selector read and supplying the receiver's reference remain open.
 
 ## Verify
 
@@ -232,7 +259,7 @@ lake build
 The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
 builds this package with the pinned dependencies. Its default targets compile
 `NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson`, `Dispatch`,
-`SelectorRead`, `SelectorPrecharge` and `TeacherReopen`, and run
+`SelectorRead`, `SelectorPrecharge`, `TeacherReopen` and `TeacherStableClock`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

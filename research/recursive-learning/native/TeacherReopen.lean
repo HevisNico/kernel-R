@@ -147,10 +147,10 @@ theorem teacher_work_offset_bounds : (11 : ℝ) < teacherWorkOffset ∧ teacherW
   constructor <;> linarith [KernelR.log_recovery_bounds.1, KernelR.log_recovery_bounds.2]
 
 /-- The actual MARK deficit, including the time before the sensor contact. -/
-theorem teacher_mark_deficit_bounds {n θ ε} (box : @PhysicalBox n θ ε) (i : Fin n) (p : Port)
+private theorem teacher_mark_deficit_tight_bounds {n θ ε} (box : @PhysicalBox n θ ε) (i : Fin n) (p : Port)
     {age : ℝ} (timing : 9 / 500 ≤ age ∧ age ≤ 9 / 400) :
-    (267 / 100000 : ℝ) ≤ KernelR.Cadence.markDeficit age ((θ i).lm p) ∧
-      KernelR.Cadence.markDeficit age ((θ i).lm p) ≤ 133 / 40000 := by
+    (1337 / 500000 : ℝ) ≤ KernelR.Cadence.markDeficit age ((θ i).lm p) ∧
+      KernelR.Cadence.markDeficit age ((θ i).lm p) ≤ 1661 / 500000 := by
   let L := Real.log (5 / 4 : ℝ)
   have logBounds : (22314 / 100000 : ℝ) ≤ L ∧ L ≤ 22315 / 100000 := by
     dsimp [L]
@@ -178,6 +178,29 @@ theorem teacher_mark_deficit_bounds {n θ ε} (box : @PhysicalBox n θ ε) (i : 
     field_simp [pos.ne', (box.rates_positive i p).1.ne']
   rw [identity]
   constructor <;> linarith [timing.1, timing.2]
+
+theorem teacher_mark_deficit_bounds {n θ ε} (box : @PhysicalBox n θ ε) (i : Fin n) (p : Port)
+    {age : ℝ} (timing : 9 / 500 ≤ age ∧ age ≤ 9 / 400) :
+    (267 / 100000 : ℝ) ≤ KernelR.Cadence.markDeficit age ((θ i).lm p) ∧
+      KernelR.Cadence.markDeficit age ((θ i).lm p) ≤ 133 / 40000 := by
+  have tight := teacher_mark_deficit_tight_bounds box i p timing
+  constructor <;> linarith [tight.1, tight.2]
+
+/-- The original, unsaturated recovery clock has a small positive
+symmetric budget, under the same bound on actual MARK onset. -/
+theorem teacher_reopen_age_with_jitter {n θ ε} (box : @PhysicalBox n θ ε) (i : Fin n) (p : Port)
+    {age delay σ : ℝ} (timing : 9 / 500 ≤ age ∧ age ≤ 9 / 400)
+    (budget : σ ≤ 1 / 20000)
+    (wire : delay ∈ Icc (teacherWorkOffset - σ) (teacherWorkOffset + σ)) :
+    CappedWorkTiming ε
+      ((Real.log (5 / 2) - (2 / 25) * (delay - 1) +
+        KernelR.Cadence.markDeficit age ((θ i).lm p)) / (9 / 50)) := by
+  have deficit := teacher_mark_deficit_tight_bounds box i p timing
+  have offset : Real.log (5 / 2) - (2 / 25) * (teacherWorkOffset - 1) = (9741 / 100000 : ℝ) := by
+    unfold teacherWorkOffset
+    ring
+  apply Or.inl
+  constructor <;> linarith [deficit.1, deficit.2, wire.1, wire.2]
 
 /-- The fixed schedule puts the solved reopening inside the expanded work
 window even at ±10%. All dates are relative to the actual FIRE. -/
@@ -227,6 +250,7 @@ structure TeacherReopenPrefix (θ : Fin 1 → Parameters) (route : Router 1) (s 
   final : Snapshot 1
   execution : Execution θ route s final
   transverse : execution.ContactsTransversal
+  complete : CompleteThrough execution final.time
   ready : final.main 0 = .ready
   charge : final.x 0 .q = 1 / 10
   recovery : final.x 0 .b = 9 / 50
@@ -413,7 +437,53 @@ theorem teacher_reopen_prefix_exists {θ ε route s} (box : @PhysicalBox 1 θ ε
       (by change 0 < deriv (auxPulse (s.x 0 (.m p)) ((θ 0).inputGain p) s.time) (s.time + age); exact slope)
   have transverse : trace.ContactsTransversal := by
     simpa [trace, markTrace, Jump.ContactTransversal] using markTransverse
-  refine ⟨⟨final, trace, transverse, by simp [final, setMain], returnGuard, silentRecovery, ?_, ?_, ?_, ?_⟩⟩
+  have finalReady : final.main 0 = .ready := by simp [final, setMain]
+  have finalGuards : BeforeGuards final final.x := by
+    constructor
+    · intro i
+      rw [Subsingleton.elim i 0, finalReady]
+      change beforeReturn.x 0 .q < 1
+      linarith [returnGuard]
+    · intro i q
+      rw [Subsingleton.elim i 0]
+      by_cases eq : q = p
+      · subst q
+        have mode : final.aux 0 p = .silent := by
+          simp [final, setMain, beforeReturn, protectedMainEnd, silent, setAux]
+        rw [mode]
+        change (1 / 10 : ℝ) < beforeReturn.x 0 (.m p)
+        simp only [beforeReturn, protectedMainEnd, protectedMainValues, and_self, ite_true,
+          reduceCtorEq, ite_false, silentSensor, protectedReadyRate]
+        have hs := protected_decay_schedule (initial := (4 / 5 : ℝ)) (floor := (1 / 10 : ℝ))
+          (by norm_num) (by norm_num) (box.rates_positive 0 p).2.1
+        exact hs.2.2 (W - P) (by linarith)
+          (by norm_num; linarith [(box.aux_durations_lower 0 p).2.1])
+      · have mode : final.aux 0 q = .ready := silentOtherAux 0 q (Or.inr eq)
+        rw [mode]
+        change beforeReturn.x 0 (.m q) < 1
+        simpa [beforeReturn, protectedMainEnd, protectedMainValues, eq] using
+          relax_lt (rate := (1 / 2 : ℝ)) (target := (1 / 40 : ℝ))
+            (by norm_num) (show silent.time ≤ W by change P ≤ W; linarith)
+            (silentOtherBelow 0 q (Or.inr eq)) (by norm_num)
+  have finalFuture : ∀ d ∈ final.pending, final.time < d.due := by
+    intro d hd
+    change d ∈ s.pending at hd
+    change W < d.due
+    linarith [pending d hd]
+  have complete : CompleteThrough trace final.time := by
+    refine ⟨rfl, fun next => finalGuards.no_jump ?_ finalFuture next, finalFuture⟩
+    intro i q origin present
+    rw [Subsingleton.elim i 0] at present
+    change s.raw 0 q = some origin at present
+    by_cases eq : q = p
+    · subst q
+      rw [active] at present
+      have same := Option.some.inj present
+      change W < origin + 1
+      linarith
+    · rw [other q eq] at present
+      contradiction
+  refine ⟨⟨final, trace, transverse, complete, finalReady, returnGuard, silentRecovery, ?_, ?_, ?_, ?_⟩⟩
   · change s.raw 0 p = some s.time
     exact active
   · apply Or.inl
@@ -637,20 +707,56 @@ theorem TeacherOwnFireReopen.gain_preserved {θ s work ε} (run : TeacherOwnFire
     run.reopen.final.x 0 (.z p) = s.x 0 (.z p) :=
   (run.reopen.gains p).trans (run.gains p)
 
+theorem TeacherOwnFireReopen.complete {θ s work ε} (run : TeacherOwnFireReopen θ s work ε) :
+    CompleteThrough run.execution run.reopen.final.time :=
+  run.reopen.complete
+
+private theorem teacher_ignition_below_ready {s : Snapshot 1} (ready : ReadyCoordinates s 0) :
+    InitiallyBelowReady s := by
+  intro i c guard
+  rw [Subsingleton.elim i 0]
+  cases c with
+  | q => linarith [ready.charge.2]
+  | m p => linarith [(ready.auxiliary p).2.2]
+  | z _ => exact False.elim guard
+  | b => exact False.elim guard
+  | energy => exact False.elim guard
+
 /-- The same prefix is a model execution with genuine upward crossings. -/
 noncomputable def TeacherOwnFireReopen.toCrossing {θ s work ε} (run : TeacherOwnFireReopen θ s work ε)
     (box : PhysicalBox θ ε) (physical : PhysicalInvariant θ s) (ready : ReadyCoordinates s 0) :
-    CrossingExecution θ (teacherSelfRouter work) s run.reopen.final := by
-  have initially : InitiallyBelowReady s := by
-    intro i c guard
-    rw [Subsingleton.elim i 0]
-    cases c with
-    | q => linarith [ready.charge.2]
-    | m p => linarith [(ready.auxiliary p).2.2]
-    | z _ => exact False.elim guard
-    | b => exact False.elim guard
-    | energy => exact False.elim guard
-  exact run.execution.toCrossing initially box physical
+    CrossingExecution θ (teacherSelfRouter work) s run.reopen.final :=
+  run.execution.toCrossing (teacher_ignition_below_ready ready) box physical
     ((Execution.contactsTransversal_append _ _).2 ⟨run.transverse, run.reopen.transverse⟩)
+
+/-- Complete first-contact runs agree at the constructed reopening horizon. -/
+theorem TeacherOwnFireReopen.every_complete {θ s work ε final}
+    (run : TeacherOwnFireReopen θ s work ε) (box : PhysicalBox θ ε)
+    (physical : PhysicalInvariant θ s)
+    (execution : Execution θ (teacherSelfRouter work) s final)
+    (complete : CompleteThrough execution run.reopen.final.time) :
+    final.ObservationalEq run.reopen.final ∧ execution.ledger.emissions = [(0, run.fireTime)] := by
+  obtain ⟨endpoint, fires⟩ :=
+    execution.observational_unique run.execution box physical complete run.complete
+  rw [run.only_fire] at fires
+  exact ⟨endpoint, List.perm_singleton.mp fires⟩
+
+/-- Complete upward-crossing runs agree at that same reopening horizon. -/
+theorem TeacherOwnFireReopen.every_crossing_complete {θ s work ε final}
+    (run : TeacherOwnFireReopen θ s work ε) (box : PhysicalBox θ ε)
+    (physical : PhysicalInvariant θ s) (ready : ReadyCoordinates s 0)
+    (crossing : CrossingExecution θ (teacherSelfRouter work) s final)
+    (complete : CrossingCompleteThrough crossing run.reopen.final.time) :
+    final.ObservationalEq run.reopen.final ∧ crossing.execution.ledger.emissions = [(0, run.fireTime)] := by
+  have transverse := (Execution.contactsTransversal_append _ _).2
+    ⟨run.transverse, run.reopen.transverse⟩
+  obtain ⟨native, same⟩ := crossing.execution.toNative_of_transverse_completion run.execution
+    (teacher_self_router_causal work) box physical run.complete transverse (le_of_eq complete.1)
+  have weakComplete := complete.toWeak_of_native crossing native same
+    (teacher_ignition_below_ready ready) box physical
+  obtain ⟨endpoint, fires⟩ := run.execution.observational_unique_weak box crossing.execution physical
+    run.complete transverse weakComplete
+  rw [run.only_fire] at fires
+  exact ⟨endpoint.symm, List.perm_singleton.mp fires.symm⟩
 
 end RecursiveLearning.Native
