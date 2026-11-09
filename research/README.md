@@ -17,3 +17,6 @@ without modifying the pinned sources.
 
 The [reset window study](reset-window/README.md) is a standalone Lean model
 of terminal saturation under compressed protection or residual coupling.
+
+The [adaptive teaching loop](recursive-learning/README.md) is a standalone
+Lean model of feedback that changes both a lesson and the next edit it proposes.
