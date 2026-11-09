@@ -399,6 +399,83 @@ theorem AdaptiveProgram.run {n m θ ε T} (p : AdaptiveProgram n m) {layout : Re
     rw [show parameters = θ from split_branch_parameters θ] at result
     exact result
 
+def ReportLayout.SameSources {n} (a b : ReportLayout n) : Prop :=
+  a.SameWiring b ∧ a.start.pending = b.start.pending
+
+private theorem same_trial_sources {n} {a b : ReportLayout n} (same : a.SameSources b)
+    (source : Fin n) (trialA trialB : AdaptiveTrial)
+    (tokens : ∀ t, trialA.tokens t = trialB.tokens t) :
+    (a.appendTrial source trialA).SameSources (b.appendTrial source trialB) := by
+  obtain ⟨⟨routes, windows, times⟩, pending⟩ := same
+  refine ⟨⟨?_, ?_, ?_⟩, ?_⟩
+  · change prependRouted a.route (forwardReport source (a.windows source) (trialA.tokens (a.last + 1))) =
+      prependRouted b.route (forwardReport source (b.windows source) (trialB.tokens (b.last + 1)))
+    rw [routes, windows, times, tokens]
+  · simp only [ReportLayout.appendTrial, windows, times]
+  · simp only [ReportLayout.appendTrial, times]
+  · rw [ReportLayout.appendTrial_source_queue, ReportLayout.appendTrial_source_queue, pending]
+
+private theorem same_not_sources {n} {a b : ReportLayout n} (same : a.SameSources b)
+    (source : Fin n) : (a.appendNot source).SameSources (b.appendNot source) := by
+  obtain ⟨⟨routes, windows, times⟩, pending⟩ := same
+  refine ⟨⟨?_, ?_, ?_⟩, ?_⟩
+  · simp only [ReportLayout.appendNot, routes, windows, times]
+  · simp only [ReportLayout.appendNot, windows, times]
+  · simp only [ReportLayout.appendNot, times]
+  · change (notExternal (a.last + 1)).map Delivery.head ++ a.start.pending.map Delivery.succ =
+      (notExternal (b.last + 1)).map Delivery.head ++ b.start.pending.map Delivery.succ
+    rw [times, pending]
+
+private theorem same_and_sources {n} {a b : ReportLayout n} (same : a.SameSources b)
+    (sources : List (Fin n)) : (a.appendAnd sources).SameSources (b.appendAnd sources) := by
+  obtain ⟨⟨routes, windows, times⟩, pending⟩ := same
+  refine ⟨⟨?_, ?_, ?_⟩, ?_⟩
+  · simp only [ReportLayout.appendAnd, routes, windows, times]
+  · simp only [ReportLayout.appendAnd, windows, times]
+  · simp only [ReportLayout.appendAnd, times]
+  · change ([conjunctionProbe (a.last + 1 + 8 * sources.length)] : List (Delivery 1)).map Delivery.head ++
+      a.start.pending.map Delivery.succ =
+        ([conjunctionProbe (b.last + 1 + 8 * sources.length)] : List (Delivery 1)).map Delivery.head ++
+          b.start.pending.map Delivery.succ
+    rw [times, pending]
+
+private theorem same_commit_sources {n} {a b : ReportLayout n} (same : a.SameSources b)
+    (source : Fin n) (port : Port) (lesson : Lesson) :
+    (a.appendBranch source port lesson).SameSources (b.appendBranch source port lesson) := by
+  obtain ⟨⟨routes, windows, times⟩, pending⟩ := same
+  refine ⟨⟨?_, ?_, times⟩, ?_⟩
+  · simp only [ReportLayout.appendBranch, routes, windows, times]
+  · simp only [ReportLayout.appendBranch, windows, times]
+  · change (a.start.pending.map Delivery.succ).map Delivery.succ =
+      (b.start.pending.map Delivery.succ).map Delivery.succ
+    rw [pending]
+
+/-- Two programs share a plan if every node has the same predecessors,
+logic and pulse packet. The trial calibration and expected bit may vary. -/
+inductive AdaptiveProgram.SamePlan {inputs : ℕ} :
+    {n : ℕ} → AdaptiveProgram inputs n → AdaptiveProgram inputs n → Prop
+  | inputs : SamePlan .inputs .inputs
+  | andGate {n} {a b : AdaptiveProgram inputs n} {first rest} (prior : SamePlan a b) :
+      SamePlan (.andGate a first rest) (.andGate b first rest)
+  | notGate {n} {a b : AdaptiveProgram inputs n} {source} (prior : SamePlan a b) :
+      SamePlan (.notGate a source) (.notGate b source)
+  | trial {n} {a b : AdaptiveProgram inputs n} {source ta tb} (prior : SamePlan a b)
+      (tokens : ∀ t, ta.tokens t = tb.tokens t) :
+      SamePlan (.trial a source ta) (.trial b source tb)
+  | commit {n} {a b : AdaptiveProgram inputs n} {source port lesson capA capB}
+      (prior : SamePlan a b) :
+      SamePlan (.commit a source port lesson capA) (.commit b source port lesson capB)
+
+theorem AdaptiveProgram.SamePlan.compile_same_sources {n m} {a b : AdaptiveProgram n m}
+    (plan : a.SamePlan b) {x y : ReportLayout n} (same : x.SameSources y) :
+    (a.compile x).SameSources (b.compile y) := by
+  induction plan with
+  | inputs => exact same
+  | @andGate _ _ _ first rest _ ih => exact same_and_sources ih (first :: rest)
+  | @notGate _ _ _ source _ ih => exact same_not_sources ih source
+  | @trial _ _ _ source ta tb _ tokens ih => exact same_trial_sources ih source ta tb tokens
+  | @commit _ _ _ source port lesson _ _ _ ih => exact same_commit_sources ih source port lesson
+
 theorem AdaptiveProgram.compile_same_wiring {n m} (p : AdaptiveProgram n m)
     {a b : ReportLayout n} (same : a.SameWiring b) :
     (p.compile a).SameWiring (p.compile b) := by

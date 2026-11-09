@@ -1,4 +1,4 @@
-import AdaptiveRounds
+import CalibratedDecisionTree
 
 /-! Blind finite search. The two hidden needs are encoded by the birth
 gain of the port under test. The candidate lessons, wires, source queue
@@ -150,75 +150,19 @@ noncomputable def blindSearchProgram (h : HiddenNeed) : AdaptiveProgram 1 17 :=
 noncomputable def blindSearchLayout (time : ℝ) (h : HiddenNeed) : ReportLayout 17 :=
   (blindSearchProgram h).compile (blindSeedLayout time)
 
-private def SameSources {n} (a b : ReportLayout n) : Prop :=
-  a.SameWiring b ∧ a.start.pending = b.start.pending
-
-private theorem same_trial_sources {n} {a b : ReportLayout n} (same : SameSources a b)
-    (source : Fin n) (trialA trialB : AdaptiveTrial)
-    (tokens : ∀ t, trialA.tokens t = trialB.tokens t) :
-    SameSources (a.appendTrial source trialA) (b.appendTrial source trialB) := by
-  obtain ⟨⟨routes, windows, times⟩, pending⟩ := same
-  refine ⟨⟨?_, ?_, ?_⟩, ?_⟩
-  · change prependRouted a.route (forwardReport source (a.windows source) (trialA.tokens (a.last + 1))) =
-      prependRouted b.route (forwardReport source (b.windows source) (trialB.tokens (b.last + 1)))
-    rw [routes, windows, times, tokens]
-  · simp only [ReportLayout.appendTrial, windows, times]
-  · simp only [ReportLayout.appendTrial, times]
-  · rw [ReportLayout.appendTrial_source_queue, ReportLayout.appendTrial_source_queue, pending]
-
-private theorem same_not_sources {n} {a b : ReportLayout n} (same : SameSources a b)
-    (source : Fin n) : SameSources (a.appendNot source) (b.appendNot source) := by
-  obtain ⟨⟨routes, windows, times⟩, pending⟩ := same
-  refine ⟨⟨?_, ?_, ?_⟩, ?_⟩
-  · simp only [ReportLayout.appendNot, routes, windows, times]
-  · simp only [ReportLayout.appendNot, windows, times]
-  · simp only [ReportLayout.appendNot, times]
-  · change (notExternal (a.last + 1)).map Delivery.head ++ a.start.pending.map Delivery.succ =
-      (notExternal (b.last + 1)).map Delivery.head ++ b.start.pending.map Delivery.succ
-    rw [times, pending]
-
-private theorem same_and_sources {n} {a b : ReportLayout n} (same : SameSources a b)
-    (sources : List (Fin n)) : SameSources (a.appendAnd sources) (b.appendAnd sources) := by
-  obtain ⟨⟨routes, windows, times⟩, pending⟩ := same
-  refine ⟨⟨?_, ?_, ?_⟩, ?_⟩
-  · simp only [ReportLayout.appendAnd, routes, windows, times]
-  · simp only [ReportLayout.appendAnd, windows, times]
-  · simp only [ReportLayout.appendAnd, times]
-  · change ([conjunctionProbe (a.last + 1 + 8 * sources.length)] : List (Delivery 1)).map Delivery.head ++
-      a.start.pending.map Delivery.succ =
-        ([conjunctionProbe (b.last + 1 + 8 * sources.length)] : List (Delivery 1)).map Delivery.head ++
-          b.start.pending.map Delivery.succ
-    rw [times, pending]
-
-private theorem same_commit_sources {n} {a b : ReportLayout n} (same : SameSources a b)
-    (source : Fin n) (port : Port) (lesson : Lesson) :
-    SameSources (a.appendBranch source port lesson) (b.appendBranch source port lesson) := by
-  obtain ⟨⟨routes, windows, times⟩, pending⟩ := same
-  refine ⟨⟨?_, ?_, times⟩, ?_⟩
-  · simp only [ReportLayout.appendBranch, routes, windows, times]
-  · simp only [ReportLayout.appendBranch, windows, times]
-  · change (a.start.pending.map Delivery.succ).map Delivery.succ =
-      (b.start.pending.map Delivery.succ).map Delivery.succ
-    rw [pending]
-
 /-- Compilation uses a single representative to fix the routing and
 schedule. Every profile also has the same initial delivery queue. -/
 theorem blind_search_same_compilation (time : ℝ) (h h' : HiddenNeed) :
     (blindSearchLayout time h).SameWiring (blindSearchLayout time h') ∧
     (blindSearchLayout time h).start.pending = (blindSearchLayout time h').start.pending := by
-  have seed : SameSources (blindSeedLayout time) (blindSeedLayout time) := ⟨⟨rfl, rfl, rfl⟩, rfl⟩
-  have prep := same_trial_sources seed 0 (prepTrial h) (prepTrial h') (fun _ => rfl)
-  have decidePrep := same_not_sources prep 0
-  have small := same_trial_sources decidePrep 1 (lowPracticeTrial h) (lowPracticeTrial h') (fun _ => rfl)
-  have large := same_trial_sources small 1 (highPracticeTrial h) (highPracticeTrial h') (fun _ => rfl)
-  have smallFails := same_not_sources large 1
-  have select34 := same_and_sources smallFails [4, 0]
-  have largeFails := same_not_sources select34 2
-  have decisions := same_and_sources largeFails [5, 0]
-  have commit33 := same_commit_sources decisions 5 0 ⟨3, 3⟩
-  have commit34 := same_commit_sources commit33 4 0 ⟨3, 4⟩
-  have commit43 := same_commit_sources commit34 8 0 ⟨4, 3⟩
-  exact same_commit_sources commit43 6 0 ⟨4, 4⟩
+  have prep : (tryPreparation h).SamePlan (tryPreparation h') := .trial .inputs (fun _ => rfl)
+  have tries : (tryBothBranches h).SamePlan (tryBothBranches h') :=
+    .trial (.trial (.notGate prep) (fun _ => rfl)) (fun _ => rfl)
+  have decisions : (blindDecisions h).SamePlan (blindDecisions h') :=
+    .andGate (.notGate (.andGate (.notGate tries)))
+  have plan : (blindSearchProgram h).SamePlan (blindSearchProgram h') :=
+    .commit (.commit (.commit (.commit decisions)))
+  exact plan.compile_same_sources ⟨⟨rfl, rfl, rfl⟩, rfl⟩
 
 /-- The compiler can fix these clocks and wires before seeing the birth
 gains. The representative's continuous values are used only as a template. -/
@@ -371,5 +315,23 @@ theorem blind_search_recovers_need {θ ε} (box : @PhysicalBox 17 θ ε)
   rw [← sameRoute]
   exact ⟨run.final, run.execution, crossing, same, done, blind_effects effects, minimum.1,
     fun lesson retained => (minimum.2 lesson retained).2.2, every⟩
+
+
+/-- The four-profile search also instantiates the generic tree compiler. -/
+noncomputable def blindNeedTree : CalibratedTree HiddenNeed :=
+  let prep : CalibratedProbe HiddenNeed :=
+    ⟨⟨3, 4⟩, false, prepTrial, fun _ => rfl, fun _ => rfl⟩
+  let small : CalibratedProbe HiddenNeed :=
+    ⟨⟨3, 3⟩, true, lowPracticeTrial, fun _ => rfl, fun _ => rfl⟩
+  let large : CalibratedProbe HiddenNeed :=
+    ⟨⟨4, 3⟩, true, highPracticeTrial, fun _ => rfl, fun _ => rfl⟩
+  .ask prep
+    (.ask small (.leaf ⟨⟨3, 3⟩, 0, by decide⟩) (.leaf ⟨⟨3, 4⟩, 0, by decide⟩))
+    (.ask large (.leaf ⟨⟨4, 3⟩, 0, by decide⟩) (.leaf ⟨⟨4, 4⟩, 0, by decide⟩))
+
+theorem blind_need_tree_selects_minimum (h : HiddenNeed) :
+    (blindNeedTree.select h).action.lesson = h.minimumLesson := by
+  rcases h with ⟨p, q⟩
+  cases p <;> cases q <;> rfl
 
 end RecursiveLearning.Native

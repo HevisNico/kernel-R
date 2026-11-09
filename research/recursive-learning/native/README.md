@@ -582,6 +582,30 @@ two-block retention criterion.
 | 4 | 3 | 4 + 3 |
 | 4 | 4 | 4 + 4 |
 
+## Compiling a calibrated decision tree
+
+[`compile_calibrated_decision_tree`](CalibratedDecisionTree.lean)
+compiles a finite tree over any declared family of birth profiles.
+Each probe has one lesson and one read port across all profiles.
+Its calibration certifies the report for each profile. The compiler
+fixes one router, one schedule and one initial pulse queue. A
+positive report launches the yes branch. Silence launches the no
+branch only if the probe was activated.
+
+Only the reached leaf receives its lesson and one credit pulse.
+The theorem checks the learned gains at the leaf and the actual
+delivery counts on every leaf. All complete upward-crossing runs for
+each profile and fixed fabrication agree on terminal observations,
+firing dates and deliveries. The four-profile search above also
+instantiates this tree interface.
+
+The binary-search construction bisects the declared interval and
+selects the action indexed by the hidden need. Its hypotheses require
+calibrated physical comparisons at the pivots. The existing fixed
+log-gain encoding certifies some comparisons, including the
+three-versus-four example. Other pivot comparisons require their own
+calibration proof.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -600,7 +624,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `NativeAcceptance`, `AcceptanceDispatch`, `SerialAcceptance`,
 `LearnerReadout`, `ReadoutSeries`, `LearnerConjunction`, `LearnerFanIn` and
 `ScheduledGates`, `ScheduledCircuit`, `ReportFormula`, `ScheduledCommit` and
-`ScheduledProgram`, `AdaptiveRounds` and `BlindNeedSearch`, and run
+`ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
+`BlindNeedSearch`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
