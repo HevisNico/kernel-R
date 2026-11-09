@@ -45,16 +45,14 @@ discrete experiment.
 Run from the repository root with Lean 4.35.0 available:
 
 ```sh
-repo=$PWD
-(cd research/recursive-learning && lake build)
-cd proof/lean
+cd research/recursive-learning/native
 lake exe cache get
-lake build KernelR.HybridDoseCounting KernelR.HybridQuietSourceArrival \
-  KernelR.HybridWeakInputCycleExistence KernelR.HybridCrossingExecution
-LEAN_PATH="$repo/research/recursive-learning/.lake/build/lib/lean${LEAN_PATH:+:$LEAN_PATH}" \
-  lake env lean --root="$repo/research/recursive-learning/native" \
-  "$repo/research/recursive-learning/native/NativeLearning.lean"
+lake build
 ```
 
-The native file prints the axiom dependencies of its public results. The
-underlying R imports and Mathlib pins come from the existing proof package.
+The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
+builds this package with the pinned dependencies. Its default targets compile
+`NativeLearning` and run [the axiom audit](NativeAudit.lean), which checks all
+imported declarations under `RecursiveLearning`, including private ones.
+Unexpected axioms and admitted proofs fail the build. The underlying R imports
+and Mathlib pins come from the existing proof package.

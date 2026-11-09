@@ -1,0 +1,40 @@
+name: Recursive learning Lean proofs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - research/recursive-learning/**
+      - proof/lean/**
+      - .github/workflows/recursive-learning.yml
+      - .github/actions/build-lean/**
+  pull_request:
+    paths:
+      - research/recursive-learning/**
+      - proof/lean/**
+      - .github/workflows/recursive-learning.yml
+      - .github/actions/build-lean/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      LEAN_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/build-lean
+        with:
+          package-directory: research/recursive-learning/native
+          mathlib-cache-targets: >-
+            Mathlib.Tactic
+            Mathlib.Analysis.Calculus.MeanValue
+            Mathlib.Analysis.Complex.ExponentialBounds
+            Mathlib.Analysis.SpecialFunctions.ExpDeriv
+            Mathlib.Analysis.SpecialFunctions.Log.Basic
+            Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+            Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
