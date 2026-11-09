@@ -13,8 +13,10 @@ and keep results from the original protocol.
 
 Two R cells represent the left and right channels. Each cell has two
 selectable input ports, A and B, with identical initial gain 1.2. All other
-birth coordinates follow the single-cell training start, with the unused
-port at gain 0.3. Train both cells with one canonical pulse at time zero on
+birth coordinates follow the pinned single-cell
+[training start](https://github.com/HevisNico/kernel-R/blob/11f476c3eb299263b980d5b69fb4592e8c0c093b/research/recursive-learning/native/TrainingRead.lean#L11),
+with the unused port at gain 0.3. The implementation source is commit
+`11f476c3eb299263b980d5b69fb4592e8c0c093b`. Train both cells with one canonical pulse at time zero on
 the selected port. Run separate experiments with A and B selected. The
 network wiring and read schedule are the same in both experiments.
 
@@ -27,14 +29,20 @@ time 20 and observe their deliveries through time 20.35.
 
 The synthetic input offsets are −30, 0 and +30 µs. Use independent
 timestamp errors in [−5, 5] µs on each side. These values and the 100 µs
-interspike interval come from Lagorce et al., section 4.3. Use that interval
-to define one R time unit for the benchmark. This is a time convention for
-simulation. The test uses isolated event pairs and does not reproduce the
+interspike interval come from Lagorce et al., section 4.3. Define one R time
+unit as 100 µs for this benchmark. This choice fixes the difficulty, because
+the model's response times are expressed in R units. Include time scale in
+the sensitivity study, with 50, 100 and 200 µs per unit, holding the input
+offsets, jitter and receiver aperture fixed in physical time. This is a
+simulation convention. The test uses isolated event pairs and does not reproduce the
 published spike trains. [Lagorce et al., section 4.3](https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00206/full)
 
 The receiver accepts exactly one report from each cell if their arrival
-dates differ by strictly less than 15 µs (0.15 R units). Fifteen
-microseconds is half the spacing of the source task's offset classes.
+dates differ by strictly less than 15 µs (0.15 R units at the primary time
+scale). Fifteen microseconds is half the spacing of the source task's offset
+classes. The paper describes a 15 µs detector window. This protocol chooses
+15 µs as the maximum absolute difference and does not assume that this is
+the same half-width as the paper's detector.
 The receiver uses the same fixed delay of 0.35 units on both lines, with
 the same delay in all comparisons. The expected decision is acceptance
 only when both test ports match the trained ports and the programmed
@@ -82,15 +90,67 @@ model of one programming mechanism. [Figueroa et al., section 3.2](https://paper
 ## Variation and outcomes
 
 Use the existing independent fixed fabrication boxes of ±0.3% and ±10%,
-plus a nominal control. Cross each box with independent relative errors
-of 0%, ±0.3%, ±1% and ±5% on the two ERROR thresholds and FIRE threshold
-in each cell. The latter three realized guards are the only guard
-variations in this benchmark. Use the same realized guards and common
-fabrication values in paired comparisons. In comparator 2, independently
-sweep bounded current mismatch of 0%, ±0.3% and ±10%. For the ablation
+plus a nominal control. Vary the two ERROR thresholds independently within
+relative boxes with radii 0%, 0.3%, 1%, 2%, 3% and 5%. Independently vary
+the FIRE threshold within a box with the same set of radii. Sweep the two
+radii separately, including nominal FIRE with varying ERROR thresholds and
+the reverse. Other guards stay nominal. Use the same realized guards and
+common fabrication values in paired comparisons. In comparator 2, independently
+sweep bounded current mismatch of 0%, 0.3%, 1%, 3%, 5% and 10%. For the ablation
 the discharge rate comes from the same fabrication draw as in R.
 Treat the cross-product as a sensitivity study. These intervals are model
 inputs and are not a joint tolerance specification for a fabricated circuit.
+
+## Registered local prediction
+
+For the nominal positive trial at 17, a rested charge of 0.1, and the
+residual from the time-zero training pulse, the closed-form READY response
+gives a read latency of approximately 0.45137 model units. At the nominal
+crossing, its local sensitivities are approximately −0.76823 units per unit
+of log-gain dose and +0.85376 units per unit of FIRE threshold.
+
+If each ERROR endpoint has independent relative error at most ε_E, its
+worst-case dose error is approximately ε_E in log-gain units. A constant
+current write with relative error ε_I around its matched 0.6 dose has
+worst-case dose error 0.6 ε_I. FIRE threshold relative error is ε_F.
+With independent opposing changes in the two cells, and the ±0.10 units
+of relative input jitter, predict the primary-scale coincidence boundary
+
+    R:                0.76823 ε_E + 0.85376 ε_F < 0.025
+    nominal timer:    0.46094 ε_I + 0.85376 ε_F < 0.025
+
+These are first-order estimates for the positive pair and the two adjacent
+offset classes. They assume no missed or extra fires, open gates, no cap
+contact and a single transverse crossing. Test all of those conditions.
+Common-mode ERROR threshold errors produce a different, smaller dose
+sensitivity than independent opposite-sign endpoint errors. The formulas
+do not prove a box-wide result or a hardware tolerance.
+
+## Execution and conclusion rule
+
+Before the first run, commit the complete runner, its exact dependencies,
+event-order policy and numerical solver settings. Record the full runner
+commit and the protocol commit in every result. Use the pinned model commit
+above. Do not describe this registration as preceding the earlier one-cell
+exploration.
+
+For each box and time scale evaluate the nominal point, all single-variable
+endpoint perturbations, and 512 independently drawn paired parameter vectors
+using NumPy PCG64 with seed 20261110. Generate the draws once in a fixed,
+documented parameter order and reuse them across methods. For every draw test
+both training labels, all four input port pairs, the three offsets and all
+four jitter endpoint pairs. Record actual vectors, results, software versions
+and hashes. A Monte Carlo pass is a sampled result. A universal result needs
+a proof or certified enclosure for the entire box, including interior
+parameter values and legal event orderings.
+
+Report a separation only if R satisfies the full decision contract for every
+admissible execution in the declared box and the comparison establishes
+failure for every permitted common timer setting. Certify both statements
+or identify the exact conditional assumptions and scope. If both pass, both
+fail, or the comparison remains undecided, report that outcome directly.
+Do not infer impossibility from failure of the nominal timer alone. Report
+binary recognition and coincidence results separately.
 
 Report a worst-case coincidence margin for the positive class and a
 worst-case rejection margin for wrong-offset pairs with two reports.
