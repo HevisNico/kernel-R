@@ -37,9 +37,14 @@ one cell has stored decides which pulses another receives. Three such
 circuits are proved in the [research results](#research-results).
 
 These are guarantees about a mathematical model, and no device has been
-built. The proofs assume exact thresholds and actuation factors.
+built. The chain proofs assume exact thresholds and actuation factors. A
+separate [single-cell result](https://github.com/HevisNico/kernel-R/blob/ae69e06fa467ba7bf10c9b2f0989a481e9d863e3/research/recursive-learning/native/ParameterTraining.lean)
+shows that one training pulse followed by one read tolerates up to 5%
+error independently in the ERROR entry and exit thresholds and the FIRE
+threshold. The guarantee applies to every run complete through the read
+horizon.
 
-> **Scope of the robustness.** Each port's gain cap, sensor rates and sensor
+> **Scope of the chain's robustness.** Each port's gain cap, sensor rates and sensor
 > input gain (`C, L_m, L_s, L_e, M`) may vary across cells and ports, with
 > values fixed in time. Thresholds and actuation factors are exact.
 
