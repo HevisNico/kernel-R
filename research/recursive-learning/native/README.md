@@ -263,10 +263,46 @@ preserves all gains and emits exactly one spike, from the read.
 `CappedWorkRead.every_complete` and `CappedWorkRead.every_crossing_complete`
 give the same endpoint and spike date at the common completion horizon.
 
-This history starts at work admission, with the SLOW charge supplied by
-the capped clock formula. Preparing the capped teacher and reaching that
-admission from the first network round, supplying the receiver's timing
-reference and running the next teaching round remain open.
+### From the controller's own FIRE to the learner
+
+[`capped_teacher_cycle_exists`](TeacherCappedCycle.lean) starts from a
+prepared controller with an admitted ignition pulse and an empty queue.
+Its actual ignition FIRE creates both local deliveries. Work reaches
+port 0 during SLOW. The read reaches port 2 exactly 1.4 time units after
+work arrives. The controller emits one ignition spike and one read
+spike, keeps every gain, and finishes with recovery at its cap.
+The module checks complete histories at first contact and under upward
+crossings.
+
+[`prepared_capped_dispatch_both`](CappedDispatch.lean) uses the same fixed
+router for both stored values, within either fabrication box. It obtains
+an absolute ignition reference from the prepared charge `q = 0.1` and
+ignition gain `2`, which are shared by both cases. The high read fires
+before age 0.195 and the low read after age 0.3. The decoder places its
+cutoff halfway between them, at nominal read age 0.2475. That leaves
+0.0525 of timing margin on either side. The work delay uses at most
+0.001825 of that margin. The read delay relative to work is exact in
+this construction. The output wire is selected at FIRE, before its own
+delay. It delivers to learner port 1 for high and port 0 for low, with
+any delay in [0.3, 0.4]. The global queue starts empty. The certified
+upward-crossing execution runs through actual admission at the learner.
+
+| Controller resource | Use |
+|---|---|
+| Port 0, gain at cap | Work pulse |
+| Port 1, prepared gain 2 | Ignition |
+| Port 2 | Selector |
+| Recovery at cap | Stable reopening clock |
+
+The two credit gains belong to a separate memory cell in this design.
+The dispatch theorem contains the controller and receiver. Connecting a
+credit cell and feeding the previous round into this controller remain
+open, as does the full native `8 → 7 → 6` lesson sequence. Saturated
+recovery and the prepared ignition gain are initial conditions. From
+`b = 0.08`, ten full MARK doses of 0.1 leave recovery at 1.08, so
+preparing the cap by MARK would require an eleventh protected section
+with the last dose cut short. No such preparation sequence is part of
+this theorem.
 
 ## Verify
 
@@ -282,7 +318,7 @@ The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
 builds this package with the pinned dependencies. Its default targets compile
 `NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson`, `Dispatch`,
 `SelectorRead`, `SelectorPrecharge`, `TeacherReopen`, `TeacherStableClock`
-and `CappedWorkRun`, and run
+`CappedWorkRun`, `TeacherCappedCycle` and `CappedDispatch`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
