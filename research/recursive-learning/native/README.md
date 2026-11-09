@@ -733,7 +733,7 @@ after arrival, for every fixed FIRE threshold in [0.95, 1.05] and either
 fabrication box. At the nominal ERROR exit and FIRE levels the whole
 joined trajectory is an execution of the original kernel.
 
-The supplied ERROR state has main charge in [0.1, 0.9], other sensors at
+The supplied ERROR state has main charge in [0.1, 0.94], other sensors at
 rest, and energy in [50, 100].
 
 ## A complete training pulse followed by a read
@@ -743,9 +743,13 @@ with one READY cell at rest and two canonical pulses queued on the same
 port, sixteen time units apart. The initial gain of that port is in
 [7/6, 1.2]. The first pulse drives the sensor
 through MARK and SILENT while the cell stays below its FIRE threshold.
-After the raw pulse expires, the sensor reaches its realized ERROR
-entry charge. The resulting snapshot supplies the learning and read
-trajectory above, including the residual main charge.
+The sensor enters ERROR at its realized upper threshold, which can be
+before, at, or after expiry of the training pulse. If ERROR starts while
+the pulse is live, [LiveErrorExpiry.lean](LiveErrorExpiry.lean) proves
+that the current overlaps ERROR for at most 0.04 time units, the main
+charge stays below 0.94, and the sensor cannot reach its exit threshold
+before expiry. Expiry removes the raw tag and carries the charge, gain
+and energy into the rest of the ERROR phase.
 
 The net log-gain increment from training is exactly
 `8 * (upper - lower)`. The second pulse produces a transverse first FIRE
@@ -753,11 +757,9 @@ The net log-gain increment from training is exactly
 threshold each tolerate 5% error. All three nominal levels give a
 native R execution from before the first delivery through the read FIRE.
 
-The full ±0.3% fabrication box is covered. In the ±10% box the proof
-additionally requires the active port's SILENT decay rate to be at most
-2, which ensures raw expiry strictly precedes ERROR entry. ERROR entry
-with live current, repeated training, and recovery after the read FIRE
-remain outside this construction.
+Both full fabrication boxes are covered, ±0.3% and ±10%, with every
+parameter fixed independently in its declared interval. The construction
+covers one training pulse and one read through the first FIRE.
 
 ## Verify
 
