@@ -520,6 +520,22 @@ delivers zero tokens to both action cells. Tests inside the circuit
 can still receive inputs. The branch theorem also compares the
 delivery multiset of every complete upward-crossing execution.
 
+[`compile_finite_teaching_program`](ScheduledProgram.lean) composes a
+report circuit with any finite plan of guarded credit and lesson
+actions. Each action has fresh receivers. The theorem records the exact
+credit and lesson delivery counts for every action and the resulting
+credit log-gains. All complete upward-crossing runs agree on the terminal
+observations, ordered firing dates and the multiset of actual deliveries.
+[`finite_teaching_program_fixed_wiring`](ScheduledProgram.lean) proves
+that the router, report windows and horizon are shared across trial
+outcomes.
+
+The inputs are the declared learner trials. The actions deliver their
+lessons to fresh receivers with at most four pulses per block. The
+compiled circuit is feed-forward, with fixed clocks and one decision
+round. An inactive action receives neither a credit nor a lesson.
+Internal test cells can still receive partial input.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -537,7 +553,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `CappedWorkRun`, `TeacherCappedCycle`, `CappedDispatch`, `NativeLesson`,
 `NativeAcceptance`, `AcceptanceDispatch`, `SerialAcceptance`,
 `LearnerReadout`, `ReadoutSeries`, `LearnerConjunction`, `LearnerFanIn` and
-`ScheduledGates`, `ScheduledCircuit`, `ReportFormula` and `ScheduledCommit`, and run
+`ScheduledGates`, `ScheduledCircuit`, `ReportFormula`, `ScheduledCommit` and
+`ScheduledProgram`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

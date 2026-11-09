@@ -1,7 +1,7 @@
 import Dispatch
 import CappedDispatch
 import ReportFormula
-import ScheduledCommit
+import ScheduledProgram
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

@@ -139,6 +139,74 @@ theorem compose_report_commit {n θ θC θL ε route s u T clock}
       (CausalTraceBalance.tail_receipts committed.trace i)
 
 
+theorem branch_physical {n θ θC θL ε} {s : Snapshot n} (physical : PhysicalInvariant θ s)
+    (creditBox : PhysicalBox θC ε) (lessonBox : PhysicalBox θL ε) :
+    PhysicalInvariant (prependParameters θL (prependParameters θC θ)) (branchStart s) :=
+  prepend_physical (prepend_physical physical (preparedTeacher_physical creditBox s.time []) _)
+    (native_lesson_physical lessonBox s.time ⟨0, 0⟩) _
+
+theorem branch_initial {n} {s : Snapshot n} (initial : InitiallyBelowReady s) :
+    InitiallyBelowReady (branchStart s) := by
+  have creditInitial : InitiallyBelowReady ((preparedTeacher s.time).requeue []) := by
+    intro i c h
+    cases c with
+    | q => change (1 / 10 : ℝ) < 1; norm_num
+    | m p => change (1 / 40 : ℝ) < 1; norm_num
+    | z _ => exact False.elim h
+    | b => exact False.elim h
+    | energy => exact False.elim h
+  intro i c h
+  cases i using Fin.cases with
+  | zero => exact native_lesson_initial s.time ⟨0, 0⟩ 0 c h
+  | succ i =>
+    cases i using Fin.cases with
+    | zero => exact creditInitial 0 c h
+    | succ i => exact initial i c h
+
+theorem branch_causal {n} {route : Router n} (causal : StrictCausalRouter route)
+    (sender : Fin n) {window : ReportWindow} {clock : ℝ} (port : Port) (proposal : Lesson)
+    (margin : window.stop ≤ clock) :
+    StrictCausalRouter (branchRouter route sender window clock port proposal) := by
+  have creditCausal : StrictHeadRoutes (branchCreditContacts sender window clock port) :=
+    forward_report_strict sender window (by
+      intro d h
+      obtain rfl := List.mem_singleton.mp h
+      change window.stop ≤ clock + 1
+      linarith)
+  have lessonCausal : StrictHeadRoutes (branchLessonContacts sender window clock proposal) :=
+    forward_report_strict sender.succ window (fun d h => by linarith [lesson_delivery_time h])
+  exact prepend_routed_causal (prepend_routed_causal causal creditCausal) lessonCausal
+
+/-- Exact delivery accounting for any completed transverse witness. -/
+theorem complete_crossing_accounting {n θ ε route s u T} (e : @Execution n θ route s u)
+    (complete : CompleteThrough e T) (positive : e.ContactsTransversal)
+    (box : PhysicalBox θ ε) (physical : PhysicalInvariant θ s) (initial : InitiallyBelowReady s)
+    (causal : StrictCausalRouter route) :
+    ∃ crossing : CrossingExecution θ route s u,
+      crossing.execution = e.toWeak ∧ CrossingCompleteThrough crossing T ∧
+      ∀ v (other : CrossingExecution θ route s v), CrossingCompleteThrough other T →
+        ∃ native : Execution θ route s v, native.toWeak = other.execution ∧
+          v.ObservationalEq u ∧ native.deliveries.Perm e.deliveries ∧
+          ∀ i, other.execution.emissionTimes i = e.emissionTimes i := by
+  refine ⟨e.toCrossing initial box physical positive, rfl,
+    complete.toCrossing e initial box physical positive, ?_⟩
+  intro v other done
+  obtain ⟨native, same⟩ := other.execution.toNative_of_transverse_completion e causal
+    box physical complete positive (le_of_eq done.1)
+  have weak := done.toWeak_of_native other native same initial box physical
+  obtain ⟨state, emissions⟩ := e.observational_unique_weak box other.execution physical complete positive weak
+  have ledger : native.ledger = other.execution.ledger := by rw [← same, Execution.toWeak_ledger]
+  have queues := Multiset.coe_eq_coe.mpr state.symm.pending
+  have issued := Multiset.coe_eq_coe.mpr (emissions.symm.flatMap_right (fun event => route event.1 event.2))
+  have balanced := native.token_balance.trans
+    ((congrArg (fun m : Multiset (Delivery n) => (s.pending : Multiset _) + m)
+      (by simpa only [ledger] using issued)).trans e.token_balance.symm)
+  have receipts : native.deliveries.Perm e.deliveries := by
+    apply Multiset.coe_eq_coe.mp
+    exact add_left_cancel (by simpa only [queues] using balanced)
+  exact ⟨native, same, state.symm, receipts,
+    fun i => (e.emissionTimes_unique_weak other.execution box physical complete positive weak i).symm⟩
+
 /-- Every complete crossing execution has the same endpoint, dates and
 delivery multiset as the constructed branch. The native representative
 has the very same weak steps as the crossing execution. -/
@@ -157,58 +225,10 @@ theorem BranchCommit.crossing {n θ θC θL ε route s u sender window clock T p
         ∃ native : Execution parameters wiring (branchStart s) otherFinal,
           native.toWeak = other.execution ∧ otherFinal.ObservationalEq b.final ∧
           native.deliveries.Perm b.execution.deliveries ∧
-          ∀ i, other.execution.emissionTimes i = b.execution.emissionTimes i := by
-  have allBox := prepend_box (prepend_box box creditBox) lessonBox
-  have allPhysical : PhysicalInvariant (prependParameters θL (prependParameters θC θ)) (branchStart s) :=
-    prepend_physical (prepend_physical physical (preparedTeacher_physical creditBox s.time []) _)
-      (native_lesson_physical lessonBox s.time ⟨0, 0⟩) _
-  have creditInitial : InitiallyBelowReady ((preparedTeacher s.time).requeue []) := by
-    intro i c h
-    cases c with
-    | q => change (1 / 10 : ℝ) < 1; norm_num
-    | m p => change (1 / 40 : ℝ) < 1; norm_num
-    | z _ => exact False.elim h
-    | b => exact False.elim h
-    | energy => exact False.elim h
-  have allInitial : InitiallyBelowReady (branchStart s) := by
-    intro i c h
-    cases i using Fin.cases with
-    | zero => exact native_lesson_initial s.time ⟨0, 0⟩ 0 c h
-    | succ i =>
-      cases i using Fin.cases with
-      | zero => exact creditInitial 0 c h
-      | succ i => exact initial i c h
-  have creditCausal : StrictHeadRoutes (branchCreditContacts sender window clock port) :=
-    forward_report_strict sender window (by
-      intro d h
-      obtain rfl := List.mem_singleton.mp h
-      change window.stop ≤ clock + 1
-      linarith)
-  have lessonCausal : StrictHeadRoutes (branchLessonContacts sender window clock proposal) :=
-    forward_report_strict sender.succ window (fun d h => by linarith [lesson_delivery_time h])
-  have strict := prepend_routed_causal (prepend_routed_causal causal creditCausal) lessonCausal
-  have pos := b.transverse transverse
-  refine ⟨b.execution.toCrossing allInitial allBox allPhysical pos, rfl,
-    b.complete.toCrossing b.execution allInitial allBox allPhysical pos, ?_⟩
-  intro otherFinal other done
-  obtain ⟨native, same⟩ := other.execution.toNative_of_transverse_completion b.execution strict
-    allBox allPhysical b.complete pos (le_of_eq done.1)
-  have weak := done.toWeak_of_native other native same allInitial allBox allPhysical
-  obtain ⟨state, emissions⟩ :=
-    b.execution.observational_unique_weak allBox other.execution allPhysical b.complete pos weak
-  have ledger : native.ledger = other.execution.ledger := by rw [← same, Execution.toWeak_ledger]
-  have queues := Multiset.coe_eq_coe.mpr state.symm.pending
-  have issued := Multiset.coe_eq_coe.mpr
-    (emissions.symm.flatMap_right (fun event => branchRouter route sender window clock port proposal event.1 event.2))
-  have balanced := native.token_balance.trans
-    ((congrArg (fun m : Multiset (Delivery (n + 1 + 1)) => ((branchStart s).pending : Multiset _) + m)
-      (by simpa only [ledger] using issued)).trans b.execution.token_balance.symm)
-  have receipts : native.deliveries.Perm b.execution.deliveries := by
-    apply Multiset.coe_eq_coe.mp
-    exact add_left_cancel (by simpa only [queues] using balanced)
-  exact ⟨native, same, state.symm, receipts,
-    fun i => (b.execution.emissionTimes_unique_weak other.execution allBox allPhysical b.complete pos weak i).symm⟩
-
+          ∀ i, other.execution.emissionTimes i = b.execution.emissionTimes i :=
+  complete_crossing_accounting b.execution b.complete (b.transverse transverse)
+    (prepend_box (prepend_box box creditBox) lessonBox) (branch_physical physical creditBox lessonBox)
+    (branch_initial initial) (branch_causal causal sender port proposal margin)
 
 /-- Compile a decision over physical learner reports and attach its guarded
 action. Inactive actions deliver neither a lesson nor a credit. -/
