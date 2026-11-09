@@ -12,7 +12,7 @@ open KernelR.Hybrid Set MeasureTheory
 def tolerancePort (high : Bool) : Port := if high then 1 else 0
 
 /-- Ready at rest, with precisely the selected canonical pulse admitted. -/
-noncomputable def toleranceStart (time : ℝ) (gains : Port → ℝ) (high : Bool) : Snapshot 1 where
+noncomputable def toleranceStartOn (time : ℝ) (gains : Port → ℝ) (port : Port) : Snapshot 1 where
   time := time
   x := fun _ c => match c with
     | .q => 1 / 10
@@ -22,16 +22,16 @@ noncomputable def toleranceStart (time : ℝ) (gains : Port → ℝ) (high : Boo
     | .energy => 100
   main := fun _ => .ready
   aux := fun _ _ => .ready
-  raw := fun _ p => if p = tolerancePort high then some time else none
+  raw := fun _ p => if p = port then some time else none
   pending := []
 
-private theorem early_bound {G time t : ℝ} (upper : G ≤ 11 / 5)
+private theorem early_bound {G time t : ℝ} (upper : G ≤ 12 / 5)
     (start : time ≤ t) (stop : t ≤ time + 3 / 10) :
-    readyPulse (1 / 10) G time t ≤ 87 / 100 := by
+    readyPulse (1 / 10) G time t ≤ 47 / 50 := by
   have nonneg := response_nonnegative (show 0 ≤ t - time by linarith)
   have responseBound := response_mid_early_upper (t := t - time) (by linarith) (by linarith)
   have gainBound := mul_le_mul_of_nonneg_right upper nonneg
-  have bound := mul_le_mul_of_nonneg_left responseBound (by norm_num : (0 : ℝ) ≤ 11 / 5)
+  have bound := mul_le_mul_of_nonneg_left responseBound (by norm_num : (0 : ℝ) ≤ 12 / 5)
   simp only [readyPulse, sub_self, zero_mul, add_zero]
   linarith
 
@@ -75,44 +75,44 @@ structure TolerantLeg (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Port)
 also satisfy the perturbed READY guard. On a positive output the terminal
 event is a transverse FIRE at the perturbed level. The resulting mode
 change is the ordinary R update from READY to FAST. -/
-structure TolerantDecision (θ : Fin 1 → Parameters) (time : ℝ) (gains : Port → ℝ)
-    (high : Bool) (level : ℝ) where
-  physical_start : PhysicalInvariant θ (toleranceStart time gains high)
-  mark : FirstInputMark θ (toleranceStart time gains high) 0 (tolerancePort high)
+structure TolerantPortDecision (θ : Fin 1 → Parameters) (time : ℝ) (gains : Port → ℝ)
+    (port : Port) (high : Bool) (level : ℝ) where
+  physical_start : PhysicalInvariant θ (toleranceStartOn time gains port)
+  mark : FirstInputMark θ (toleranceStartOn time gains port) 0 port
   silent : FirstInputSilent mark
   before_mark : ∀ t ∈ Ico time (time + mark.latency), mark.flow.path t 0 .q < level
   before_silent : ∀ t ∈ Ico mark.final.time silent.final.time, silent.flow.path t 0 .q < level
   stop : ℝ
-  leg : TolerantLeg θ silent.final (tolerancePort high) time level stop
+  leg : TolerantLeg θ silent.final port time level stop
   scalar_guard : ∀ t ∈ Ico time stop,
-    readyPulse (1 / 10) (Real.exp (gains (tolerancePort high))) time t < level
-  charge : (readyProtectedEnd θ silent.final 0 (tolerancePort high) .silent (some time) stop).x 0 .q =
-    readyPulse (1 / 10) (Real.exp (gains (tolerancePort high))) time stop
+    readyPulse (1 / 10) (Real.exp (gains port)) time t < level
+  charge : (readyProtectedEnd θ silent.final 0 port .silent (some time) stop).x 0 .q =
+    readyPulse (1 / 10) (Real.exp (gains port)) time stop
   outcome :
-    let endpoint := readyProtectedEnd θ silent.final 0 (tolerancePort high) .silent (some time) stop
+    let endpoint := readyProtectedEnd θ silent.final 0 port .silent (some time) stop
     if high then
       time + 3 / 10 < stop ∧ stop < time + 9 / 10 ∧ endpoint.x 0 .q = level ∧
         0 < field θ endpoint endpoint.x stop 0 .q
     else stop = time + 9 / 10 ∧ endpoint.x 0 .q < level
 
-noncomputable def TolerantDecision.final {θ time gains high level}
-    (run : TolerantDecision θ time gains high level) : Snapshot 1 :=
-  let endpoint := readyProtectedEnd θ run.silent.final 0 (tolerancePort high) .silent (some time) run.stop
+noncomputable def TolerantPortDecision.final {θ time gains port high level}
+    (run : TolerantPortDecision θ time gains port high level) : Snapshot 1 :=
+  let endpoint := readyProtectedEnd θ run.silent.final 0 port .silent (some time) run.stop
   if high then setMain endpoint 0 .fast else endpoint
 
-private theorem tolerant_readout_exists {θ ε time gains high level}
+private theorem tolerant_readout_exists {θ ε time gains port high level}
     (box : @PhysicalBox 1 θ ε)
-    (physical : PhysicalInvariant θ (toleranceStart time gains high))
+    (physical : PhysicalInvariant θ (toleranceStartOn time gains port))
     (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (gain : if high then
-      2 ≤ Real.exp (gains (tolerancePort high)) ∧ Real.exp (gains (tolerancePort high)) ≤ 11 / 5
-      else Real.exp (gains (tolerancePort high)) ≤ 6 / 5) :
-    Nonempty (TolerantDecision θ time gains high level) := by
-  let p := tolerancePort high
-  let s := toleranceStart time gains high
+      2 ≤ Real.exp (gains port) ∧ Real.exp (gains port) ≤ 12 / 5
+      else Real.exp (gains port) ≤ 6 / 5) :
+    Nonempty (TolerantPortDecision θ time gains port high level) := by
+  let p := port
+  let s := toleranceStartOn time gains port
   let G := Real.exp (gains p)
   let q := readyPulse (1 / 10) G time
-  have amplitude : G ≤ 11 / 5 := by
+  have amplitude : G ≤ 12 / 5 := by
     cases high
     · simp only [Bool.false_eq_true, ite_false] at gain
       dsimp [G, p]
@@ -125,11 +125,11 @@ private theorem tolerant_readout_exists {θ ε time gains high level}
     intro t ht hu
     change q t < 1
     exact (early_bound amplitude ht (by linarith)).trans_lt (by norm_num)
-  have active : s.raw 0 p = some s.time := by simp [s, toleranceStart, p]
+  have active : s.raw 0 p = some s.time := by simp [s, toleranceStartOn, p]
   have otherRaw : ∀ i port, i ≠ 0 ∨ port ≠ p → s.raw i port = none := by
     intro i port h
     have he : i = 0 := Subsingleton.elim _ _
-    simp [he, s, toleranceStart, p] at h ⊢
+    simp [he, s, toleranceStartOn, p] at h ⊢
     exact h
   obtain ⟨f⟩ := first_input_mark_of_response_margin_until_exists s box 0 p
     (fun _ => rfl) (fun _ _ => rfl) active otherRaw
@@ -137,8 +137,8 @@ private theorem tolerant_readout_exists {θ ε time gains high level}
     (by intro i port; change (1 / 40 : ℝ) < 1; norm_num)
     earlyStock (by change (1 / 40 : ℝ) - 1 / 100000 ≤ 1 / 40 ∧
       (1 / 40 : ℝ) ≤ 1 / 40 + 1 / 100000; norm_num)
-    (by simp [s, toleranceStart])
-  obtain ⟨g⟩ := f.first_silent_of_response_margin_until_exists box earlyStock (by simp [s, toleranceStart])
+    (by simp [s, toleranceStartOn])
+  obtain ⟨g⟩ := f.first_silent_of_response_margin_until_exists box earlyStock (by simp [s, toleranceStartOn])
   have firstBelow : ∀ t ∈ Ico time (time + f.latency), f.flow.path t 0 .q < level := by
     intro t ht
     have he := f.flow.ready_single_pulse_solution 0 p s.time rfl active
@@ -267,8 +267,8 @@ private theorem tolerant_readout_exists {θ ε time gains high level}
 /-- The stop is determined by the first crossing or the quiet deadline.
 This compares certificates for the same one-shot task, including its
 fixed realized threshold and gain. -/
-theorem TolerantDecision.stop_unique {θ time gains high level}
-    (a b : TolerantDecision θ time gains high level) : a.stop = b.stop := by
+theorem TolerantPortDecision.stop_unique {θ time gains port high level}
+    (a b : TolerantPortDecision θ time gains port high level) : a.stop = b.stop := by
   cases high
   · exact a.outcome.1.trans b.outcome.1.symm
   · apply le_antisymm
@@ -281,50 +281,72 @@ theorem TolerantDecision.stop_unique {θ time gains high level}
       have hit := a.charge.symm.trans a.outcome.2.2.1
       exact (ne_of_lt below) hit
 
-/-- Distinguish which of the two ports received one canonical input pulse.
-The same cell works for every fixed main FIRE threshold in [0.95, 1.05].
-The fabrication parameters and both port gains may vary independently
-within their declared bounds. -/
+/-- The classifier of the original two-port experiment. -/
+abbrev TolerantDecision (θ : Fin 1 → Parameters) (time : ℝ) (gains : Port → ℝ)
+    (high : Bool) (level : ℝ) := TolerantPortDecision θ time gains (tolerancePort high) high level
+
+noncomputable abbrev toleranceStart (time : ℝ) (gains : Port → ℝ) (high : Bool) :=
+  toleranceStartOn time gains (tolerancePort high)
+
+/-- Read a specified physical port. The output bit is certified from its
+gain band, so the same port can be tested at two different gain states. -/
+theorem tolerant_port_readout {θ ε time gains port high level} (box : @PhysicalBox 1 θ ε)
+    (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
+    (gain : if high then 2 ≤ Real.exp (gains port) ∧ Real.exp (gains port) ≤ 12 / 5
+      else Real.exp (gains port) ≤ 6 / 5)
+    (other : ∀ p, p ≠ port → Real.exp (gains p) ≤ 18 / 5) :
+    Nonempty (TolerantPortDecision θ time gains port high level) := by
+  apply tolerant_readout_exists box (physical := ?_) threshold gain
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro i
+    norm_num [toleranceStartOn, auxUpper]
+  · intro i p
+    have hi : i = 0 := Subsingleton.elim _ _
+    subst i
+    have cap : (18 / 5 : ℝ) ≤ (θ 0).cap p := by
+      have h := (box.2 0 p).1.1
+      change 4 * (1 - ε) ≤ (θ 0).cap p at h
+      linarith [box.epsilon_bounds.2]
+    change gains p ≤ Real.log ((θ 0).cap p)
+    apply Real.exp_le_exp.mp
+    rw [Real.exp_log (box.cap_positive 0 p)]
+    apply le_trans ?_ cap
+    by_cases eq : p = port
+    · subst p
+      cases high
+      · exact (show Real.exp (gains port) ≤ 6 / 5 from gain).trans (by norm_num)
+      · exact (show Real.exp (gains port) ≤ 12 / 5 from gain.2).trans (by norm_num)
+    · exact other p eq
+  · intro i
+    norm_num [toleranceStartOn]
+  · intro i
+    norm_num [toleranceStartOn]
+
+/-- Distinguish which of the two ports received one canonical input pulse. -/
 theorem tolerant_two_port_readout {θ ε time gains level} (box : @PhysicalBox 1 θ ε)
     (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (weak : Real.exp (gains 0) ≤ 6 / 5)
-    (strong : 2 ≤ Real.exp (gains 1) ∧ Real.exp (gains 1) ≤ 11 / 5)
+    (strong : 2 ≤ Real.exp (gains 1) ∧ Real.exp (gains 1) ≤ 12 / 5)
     (unused : Real.exp (gains 2) ≤ 18 / 5) :
     ∀ high, Nonempty (TolerantDecision θ time gains high level) := by
   intro high
-  apply tolerant_readout_exists box (physical := ?_) threshold
+  apply tolerant_port_readout box threshold
   · cases high
     · exact weak
     · exact strong
-  · refine ⟨?_, ?_, ?_, ?_⟩
-    · intro i
-      norm_num [toleranceStart, auxUpper]
-    · intro i p
-      have hi : i = 0 := Subsingleton.elim _ _
-      subst i
-      have cap : (18 / 5 : ℝ) ≤ (θ 0).cap p := by
-        have h := (box.2 0 p).1.1
-        change 4 * (1 - ε) ≤ (θ 0).cap p at h
-        linarith [box.epsilon_bounds.2]
-      change gains p ≤ Real.log ((θ 0).cap p)
-      apply Real.exp_le_exp.mp
-      rw [Real.exp_log (box.cap_positive 0 p)]
-      apply le_trans ?_ cap
-      fin_cases p
-      · exact weak.trans (by norm_num)
-      · exact strong.2.trans (by norm_num)
-      · exact unused
-    · intro i
-      norm_num [toleranceStart]
-    · intro i
-      norm_num [toleranceStart]
+  · intro p hp
+    cases high <;> fin_cases p <;> simp [tolerancePort] at hp ⊢
+    · exact strong.2.trans (by norm_num)
+    · exact unused
+    · exact weak.trans (by norm_num)
+    · exact unused
 
 /-- At level one the entire prefix, including the output event, is
 an execution in the original kernel. -/
-noncomputable def TolerantDecision.nominalExecution {θ time gains high}
-    (run : TolerantDecision θ time gains high 1) :
-    Execution θ (fun _ _ => []) (toleranceStart time gains high) run.final := by
-  let p := tolerancePort high
+noncomputable def TolerantPortDecision.nominalExecution {θ time gains port high}
+    (run : TolerantPortDecision θ time gains port high 1) :
+    Execution θ (fun _ _ => []) (toleranceStartOn time gains port) run.final := by
+  let p := port
   let sensor := run.silent
   let last := readyProtectedEnd θ sensor.final 0 p .silent (some time) run.stop
   let flow : Flow θ sensor.final last :=
@@ -348,5 +370,22 @@ noncomputable def TolerantDecision.nominalExecution {θ time gains high}
   · exact before
   · exact before.append
       (.cons (.jump (.fire last 0 (sensor.main_ready 0) run.outcome.2.2.1)) (.nil _))
+
+namespace TolerantDecision
+
+noncomputable abbrev final {θ time gains high level}
+    (run : TolerantDecision θ time gains high level) : Snapshot 1 :=
+  TolerantPortDecision.final run
+
+theorem stop_unique {θ time gains high level}
+    (a b : TolerantDecision θ time gains high level) : a.stop = b.stop :=
+  TolerantPortDecision.stop_unique a b
+
+noncomputable abbrev nominalExecution {θ time gains high}
+    (run : TolerantDecision θ time gains high 1) :
+    Execution θ (fun _ _ => []) (toleranceStart time gains high) run.final :=
+  TolerantPortDecision.nominalExecution run
+
+end TolerantDecision
 
 end RecursiveLearning.Native

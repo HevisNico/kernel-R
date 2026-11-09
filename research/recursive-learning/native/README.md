@@ -666,7 +666,7 @@ initial low gain and its two remaining silent read slots.
 task for a single R cell. Starting just after admission of one canonical
 pulse, the cell reports which of two ports received it. On port 0, a
 gain at most 1.2 gives silence through time 0.9. On port 1, a gain in
-[2, 2.2] gives a transverse FIRE between times 0.3 and 0.9. Times are
+[2, 2.4] gives a transverse FIRE between times 0.3 and 0.9. Times are
 relative to admission. The two gains are fixed for the cell and may
 vary independently within those bounds. The unused third port has
 gain at most 3.6, which keeps the starting state within the physical
@@ -687,6 +687,33 @@ initial state and gain bounds are part of the task. Sensor thresholds,
 actuation factors and recovery guards retain their original values.
 Post-decision recovery and the training of these gains are outside
 the one-shot specification.
+
+## Error dose with inexact sensor endpoints
+
+[TolerantErrorDose.lean](TolerantErrorDose.lean) derives the dose from
+the original integral field for an exposed ERROR segment. If its
+realized entry and exit charges are `u` and `l`, the log-gain changes
+by exactly `8 * (u - l)`. The cap and energy gates must stay open
+and the main cell must stay READY. The sensor's decay rate cancels.
+
+With absolute charge errors `δhi` and `δlo` at the two endpoints, the
+dose is within `8 * (δhi + δlo)` of 0.6. After `k` segments with
+matching end and start log-gains, the worst-case error is at most
+`k * 8 * (δhi + δlo)`. If the two extremal gains lie in the reader's
+high band, a prepared read on that port fires.
+
+For a concrete one-dose memory test, the initial gain can be anywhere
+in [7/6, 1.2]. Independent relative errors of up to 5% in the nominal
+0.1 and 0.025 sensor endpoints put the dose in [0.55, 0.65]. The read
+of the initial gain is silent, and the read of the resulting gain on
+the same port fires. The high band is [2, 2.4] with the same 0.3 to 0.9
+firing window. Both reads tolerate a fixed main threshold in
+[0.95, 1.05] and either fabrication box.
+
+The bridge transfers the learned log-gain to the prepared readout
+state. Its input contract supplies completed exposed ERROR segments.
+A continuous execution from the learning pulses through sensor
+reopening and the subsequent read remains a separate construction.
 
 ## Verify
 
