@@ -39,6 +39,30 @@ lower exit, using log(0.1 / 0.0025) divided by the nominal discharge rate.
 The timed discharge results and the original R results provide the
 reference for this modified write duration.
 
+## Required checks before scoring
+
+For each error convention and every tested cell and trained port, record
+the latest training ERROR exit, the largest sensor residual at read,
+and the smallest log-gain headroom. All three checks must hold.
+
+1. Training ERROR ends before time 2. Use the latest exit from the
+   actual sample, including the lowest perturbed exit threshold.
+2. The sensor is in READY at read, with absolute distance at most
+   0.00002 from its READY rest of 0.025. Evaluate the exponential
+   relaxation from the exit threshold to the earliest registered
+   arrival, 16.3 at 50 µs per unit. This bounds the residual at the
+   nominal read at 17 and all registered later arrivals.
+3. No training write contacts its gain cap. Check the full perturbed
+   dose against log(cap / 1.2) at each point. The nominal dose is 0.78
+   and the absolute error grid allows at most 0.83. The smallest
+   allowed gain cap is 3.6, so the smallest nominal headroom before
+   the write is log(3.6 / 1.2), approximately 1.09861.
+
+Any failed check invalidates the comparison. The relative hypothesis
+requires equality of the pass sets, even when both counts are 27.
+Keep the prediction document at a commit preceding the runner revision
+that enforces these checks. Record both commits in the output.
+
 The new comparator uses the existing reduced numerical runner. Its
 outputs describe the sampled cases under the same report guards and
 carry the commit that registered these predictions.
