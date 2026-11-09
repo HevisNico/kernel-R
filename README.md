@@ -8,35 +8,36 @@
 
 ## Why it matters
 
-Kernel R makes learning exactly predictable in a model of asynchronous cells
-with fabrication mismatch. In every complete run of the declared protocol,
-each cell's memory increments are the same across the allowed fabrication
-parameters, wire delays and legal orders of simultaneous events. Lean proves
-this from the cell's differential equations for chains of any finite length.
+Fabrication mismatch can make the same training pulse produce different
+updates in nominally identical devices, which usually calls for per-device
+calibration or a controller that computes the updates. Kernel R shows how a
+learning rule can make the size of an update independent of the rate at
+which it happens, with no calibration and no external controller.
 
-The same cells can also run adaptive teaching programs. For any positive
-integer `K`, a compiled R network identifies a learner's hidden need in
-`{1, …, K}` from physical readouts and delivers only the matching lesson,
-with one router and one initial pulse queue for every need. A nine-cell
-network learns which edit to try first and reads that choice again in
-two later rounds. In a separate experiment, learner feedback reduces
-lessons from 8 to 7 to 6 pulses. Cutting its single feedback wire
-prevents the second reduction. Lean proves these outcomes for complete
-upward-crossing runs, with independent fixed fabrication variation of up
-to ±10% in every cell.
+An R cell learns by integrating a sensor's discharge between two fixed
+charge thresholds. A faster discharge finishes sooner, and the decay rate
+cancels from the total update. This gives two exact increments:
 
-During a full learning phase, the cell integrates a sensor's discharge between
-fixed charge thresholds. The fabrication rate cancels from the dose.
+- A complete ERROR phase adds `Δz = 8 × (0.1 − 0.025) = 0.6` to the input
+  port's log-gain while the cell stays ready to fire.
+- A complete MARK phase contributes `Δb = (1 − 0.8) / 2 = 0.1` to the
+  recovery rate while the cell stays protected.
 
-- A complete ERROR phase adds `Δz = 8 × (0.1 − 0.025) = 0.6` to the port's
-  log-gain when the cell stays READY.
-- A complete MARK phase contributes `(1 − 0.8) / 2 = 0.1` to the cell's
-  recovery rate when the cell stays protected. Contributions from different
-  ports add together.
+These increments require positive energy and a memory that stays below its
+cap throughout the phase.
 
-These exact increments require positive energy and an open cap gate for the
-relevant memory throughout the phase. No external controller computes the
-learning updates.
+Lean proves that this mechanism holds along chains of any finite length
+under the declared training protocol. Every complete run gives each cell
+the same increments relative to its own starting values, across independent
+fixed fabrication variation of up to ±10%, bounded wire delays and legal
+orders of simultaneous events.
+
+The same cells can also be wired into small adaptive circuits, where what
+one cell has stored decides which pulses another receives. Three such
+circuits are proved in the [research results](#research-results).
+
+These are guarantees about a mathematical model, and no device has been
+built. The proofs assume exact thresholds and actuation factors.
 
 > **Scope of the robustness.** Each port's gain cap, sensor rates and sensor
 > input gain (`C, L_m, L_s, L_e, M`) may vary across cells and ports, with
