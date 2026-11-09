@@ -660,6 +660,34 @@ learned gain intact. At the low gain, both reads are silent and each
 writes a dose. The two-read guarantee therefore uses the declared
 initial low gain and its two remaining silent read slots.
 
+## A two-port readout with a tolerant FIRE threshold
+
+[ThresholdTolerance.lean](ThresholdTolerance.lean) proves a one-shot
+task for a single R cell. Starting just after admission of one canonical
+pulse, the cell reports which of two ports received it. On port 0, a
+gain at most 1.2 gives silence through time 0.9. On port 1, a gain in
+[2, 2.2] gives a transverse FIRE between times 0.3 and 0.9. Times are
+relative to admission. The two gains are fixed for the cell and may
+vary independently within those bounds. The unused third port has
+gain at most 3.6, which keeps the starting state within the physical
+gain caps for either fabrication box.
+
+The actual main FIRE threshold is a parameter in [0.95, 1.05].
+Fabrication parameters can independently take any values in either
+declared fabrication box. The prefix uses the original sensor MARK
+and SILENT events. The final READY flow satisfies the original
+integral field in every coordinate, with the main guard set to the
+chosen threshold. The FIRE applies the usual READY-to-FAST update.
+At threshold 1 the complete decision prefix embeds into an ordinary
+kernel execution. The stop time is unique among decision certificates
+with the same realized parameters, gains and threshold.
+
+The certificate ends at the first FIRE or the read deadline. The
+initial state and gain bounds are part of the task. Sensor thresholds,
+actuation factors and recovery guards retain their original values.
+Post-decision recovery and the training of these gains are outside
+the one-shot specification.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
