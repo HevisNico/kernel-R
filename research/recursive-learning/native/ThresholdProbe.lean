@@ -1,0 +1,367 @@
+import ScheduledCommit
+
+/-! A physical count threshold with excess pulses. A pulse delivered
+after the gain reaches the read level can fire, but it cannot increase
+the learned gain or change the recovery rate. A final read is reported
+in a separate window. -/
+
+namespace RecursiveLearning.Native
+open KernelR.Hybrid
+
+private noncomputable def thresholdGain (remaining : ℕ) : ℝ :=
+  (3 / 5 : ℝ) * (1 - (remaining : ℝ))
+
+private structure ThresholdSlot (θ : Fin 1 → Parameters) (start : Snapshot 1) (due : ℝ)
+    (later : List (Delivery 1)) (remaining : ℕ) where
+  final : Snapshot 1
+  execution : Execution θ (fun _ _ => []) start final
+  transverse : execution.ContactsTransversal
+  ready : ReadyCoordinates final 0
+  rawNone : ∀ p, final.raw 0 p = none
+  pending : final.pending = later
+  date : final.time ≤ due + 23
+  gain : final.x 0 (.z 0) = thresholdGain (remaining - 1)
+  recovery : final.x 0 .b = 2 / 25
+  deliveries : execution.deliveries = [⟨0, 0, due⟩]
+  fires : ∃ fire : Option ℝ, fire.isSome = decide (remaining = 0) ∧
+    execution.emissionTimes 0 = fire.toList ∧
+    ∀ F, fire = some F → due < F ∧ F < due + 1
+
+private theorem raw_valid_of_rest {s : Snapshot 1} (raw : ∀ p, s.raw 0 p = none) : RawValid s := by
+  intro i p t h
+  rw [Subsingleton.elim i 0, raw p] at h
+  contradiction
+
+private theorem no_deliveries_of_pending_eq {θ s u} (e : @Execution 1 θ (fun _ _ => []) s u)
+    (queue : u.pending = s.pending) : e.deliveries = [] := by
+  have balance := e.token_balance
+  have emptyRoute : e.ledger.emissions.flatMap (fun (_ : Fin 1 × ℝ) => ([] : List (Delivery 1))) = [] := by simp
+  change (u.pending : Multiset (Delivery 1)) + (e.deliveries : Multiset (Delivery 1)) =
+    (s.pending : Multiset (Delivery 1)) +
+      ((e.ledger.emissions.flatMap (fun _ => []) : List (Delivery 1)) : Multiset (Delivery 1)) at balance
+  simp only [emptyRoute, queue, Multiset.coe_nil, add_zero] at balance
+  have cancelled : (e.deliveries : Multiset (Delivery 1)) = 0 :=
+    add_left_cancel (balance.trans (add_zero _).symm)
+  exact (Multiset.coe_eq_coe.mp cancelled : e.deliveries.Perm []).eq_nil
+
+private theorem threshold_slot_exists {θ ε start due later remaining}
+    (box : @PhysicalBox 1 θ ε) (physical : PhysicalInvariant θ start)
+    (ready : ReadyCoordinates start 0) (rawNone : ∀ p, start.raw 0 p = none)
+    (before : start.time < due) (queue : start.pending = ⟨0, 0, due⟩ :: later)
+    (spacing : ∀ d ∈ later, due + 24 ≤ d.due)
+    (gain : start.x 0 (.z 0) = thresholdGain remaining) (recovery : start.x 0 .b = 2 / 25) :
+    Nonempty (ThresholdSlot θ start due later remaining) := by
+  cases remaining with
+  | succ m =>
+    have le : start.x 0 (.z 0) ≤ 0 := by rw [gain]; simp [thresholdGain]
+    obtain ⟨dose⟩ := port_dose_exists (route := fun _ _ => []) box physical (raw_valid_of_rest rawNone)
+      ready rawNone before queue (fun d hd => by linarith [spacing d hd])
+      (by
+        have h := Real.exp_le_exp.mpr le
+        rw [Real.exp_zero] at h
+        linarith)
+      (by linarith [Real.log_nonneg (show (1 : ℝ) ≤ 6 / 5 by norm_num)])
+    refine ⟨⟨dose.final, dose.execution, dose.transversal, dose.ready, dose.rawNone,
+      dose.pending, ?_, ?_, dose.recovery.trans recovery, dose.deliveries, none, rfl, ?_, by simp⟩⟩
+    · rw [dose.complete.1]
+      linarith
+    · rw [dose.gain, gain]
+      simp [thresholdGain]
+      ring
+    · simp [Execution.emissionTimes, dose.emissions]
+  | zero =>
+    let token : Delivery 1 := ⟨0, 0, due⟩
+    have localReady (i : Fin 1) : ReadyCoordinates start i := by rw [Subsingleton.elim i 0]; exact ready
+    have localRaw (i : Fin 1) (p : Port) : start.raw i p = none := by
+      rw [Subsingleton.elim i 0]
+      exact rawNone p
+    obtain ⟨arrival⟩ := quiet_source_arrival_exists (route := fun _ _ => []) box start token later
+      physical (raw_valid_of_rest rawNone) localReady localRaw before queue
+      (fun d hd => by change due ≤ d.due; linarith [spacing d hd])
+    have date : arrival.final.time = due := arrival.date
+    have readGain : arrival.final.x 0 (.z 0) = 3 / 5 := by
+      rw [arrival.gain_preserved, gain]
+      norm_num [thresholdGain]
+    have strong : 9 / 5 ≤ Real.exp (arrival.final.x 0 (.z 0)) ∧
+        Real.exp (arrival.final.x 0 (.z 0)) ≤ 11 / 5 := by rw [readGain]; exact learnedProbe_gain
+    have late : ∀ d ∈ arrival.final.pending, arrival.final.time + 31 / 4 ≤ d.due := by
+      rw [arrival.pending, date]
+      intro d h
+      linarith [spacing d h]
+    obtain ⟨fire⟩ := first_mid_learned_fire_exists arrival.final box arrival.physical arrival.raw_valid
+      0 0 arrival.ready strong arrival.raw_active arrival.raw_other late
+    obtain ⟨fast⟩ := fire.mid_learned_fast_end_exists box (arrival.ready 0) strong.2
+      (fun p ne => arrival.raw_other 0 p (Or.inr ne)) late
+    let empty := fast.final.requeue []
+    have b : empty.x 0 .b = 2 / 25 := by
+      change fast.final.x 0 .b = _
+      rw [fast.recovery, fire.recovery_preserved, arrival.recovery_preserved, recovery]
+    have dispatch : LearnerDispatchState empty :=
+      ⟨fast.raw_none, fun p => ⟨fast.auxiliary 0 p, fast.rest p⟩,
+        Or.inr ⟨fast.main_slow, by rw [show empty.x 0 .q = 1 / 4 from fast.charge]; norm_num,
+          fast.charge.le, b⟩⟩
+    have wait : empty.time + 19 < due + 23 := by
+      change fast.final.time + 19 < _
+      rw [fast.date, fire.date, date]
+      linarith [fire.deadline]
+    obtain ⟨tail⟩ := learner_wait_exists (θ := θ) (T := due + 23) dispatch rfl wait
+    have tailFuture (d : Delivery 1) (hd : d ∈ later) : tail.final.time ≤ d.due := by
+      rw [tail.complete.1]
+      linarith [spacing d hd]
+    have startQueue : fast.final.pending = later := by
+      rw [fast.pending, fire.pending, arrival.pending, List.append_nil]
+    have startEq : withFuture empty later = fast.final := by
+      have eta (s : Snapshot 1) : s.requeue s.pending = s := by cases s; rfl
+      change fast.final.requeue (later ++ []) = fast.final
+      rw [List.append_nil]
+      exact (congrArg fast.final.requeue startQueue.symm).trans (eta fast.final)
+    let framed := tail.execution.withFuture later tailFuture
+    have framedSilent : framed.ledger.emissions = [] := by rw [Execution.withFuture_ledger, tail.silent]
+    have framedPending : (withFuture tail.final later).pending = later := by simp [withFuture, tail.empty]
+    have framedDeliveries : framed.deliveries = [] := no_deliveries_of_pending_eq framed
+      (framedPending.trans (by simp [empty, withFuture, Snapshot.requeue]))
+    obtain ⟨ending, endingPositive, endingSilent, endingDeliveries⟩ :
+        ∃ ending : Execution θ (fun _ _ => []) fast.final (withFuture tail.final later),
+          ending.ContactsTransversal ∧ ending.ledger.emissions = [] ∧ ending.deliveries = [] := by
+      rw [← startEq]
+      exact ⟨framed, future_transverse tail.execution later tailFuture tail.transverse,
+        framedSilent, framedDeliveries⟩
+    let lead := (arrival.execution.append fire.execution).append fast.execution
+    let e := lead.append ending
+    have emissions : e.ledger.emissions = [(0, fire.final.time)] := by
+      change (lead.append ending).ledger.emissions = _
+      rw [Execution.emissions_append, endingSilent]
+      change (((arrival.execution.append fire.execution).append fast.execution).ledger.emissions ++ []) = _
+      rw [Execution.emissions_append, Execution.emissions_append, arrival.emissions,
+        fire.emissions, fast.emissions, fire.date]
+      rfl
+    have finalReady : ReadyCoordinates (withFuture tail.final later) 0 :=
+      ⟨(tail.ready 0).ready, (tail.ready 0).charge, (tail.ready 0).auxiliary⟩
+    refine ⟨⟨_, e, ?_, finalReady, tail.rawNone 0, framedPending,
+      tail.complete.1.le, ?_, (tail.recovery 0).trans b, ?_, some fire.final.time, rfl, ?_, ?_⟩⟩
+    · exact (Execution.contactsTransversal_append _ _).2
+        ⟨(Execution.contactsTransversal_append _ _).2
+          ⟨(Execution.contactsTransversal_append _ _).2 ⟨arrival.contacts_transversal, fire.contacts_transversal⟩,
+            fast.contacts_transversal⟩, endingPositive⟩
+    · change tail.final.x 0 (.z 0) = _
+      rw [tail.gain]
+      change fast.final.x 0 (.z 0) = _
+      rw [fast.gains, fire.gain_preserved, readGain]
+      norm_num [thresholdGain]
+    · change (lead.append ending).deliveries = _
+      rw [Execution.deliveries_append, endingDeliveries]
+      change (((arrival.execution.append fire.execution).append fast.execution).deliveries ++ []) = _
+      rw [Execution.deliveries_append, Execution.deliveries_append, arrival.deliveries, fire.deliveries,
+        fast.deliveries]
+      rfl
+    · rw [Execution.emissionTimes, emissions]
+      rfl
+    · intro F h
+      obtain rfl := Option.some.inj h
+      rw [fire.date, date]
+      constructor <;> linarith [fire.early, fire.deadline]
+
+
+private theorem threshold_training_exists {θ ε start read remaining dates}
+    (box : @PhysicalBox 1 θ ε) (physical : PhysicalInvariant θ start)
+    (ready : ReadyCoordinates start 0) (rawNone : ∀ p, start.raw 0 p = none)
+    (before : start.time < read) (future : ∀ d ∈ dates, start.time < d)
+    (after : ∀ d ∈ dates, d + 24 ≤ read)
+    (separated : dates.Pairwise (fun a b => a + 24 ≤ b))
+    (queue : start.pending = conjunctionDoseTokens 0 dates ++ [conjunctionProbe read])
+    (gain : start.x 0 (.z 0) = thresholdGain remaining) (recovery : start.x 0 .b = 2 / 25) :
+    ∃ (final : Snapshot 1) (e : Execution θ (fun _ _ => []) start final),
+      e.ContactsTransversal ∧ ReadyCoordinates final 0 ∧ (∀ p, final.raw 0 p = none) ∧
+      final.time < read ∧ final.pending = [conjunctionProbe read] ∧
+      final.x 0 (.z 0) = thresholdGain (remaining - dates.length) ∧ final.x 0 .b = 2 / 25 ∧
+      e.deliveries = conjunctionDoseTokens 0 dates ∧ ∀ F ∈ e.emissionTimes 0, F < read := by
+  induction dates generalizing start remaining with
+  | nil =>
+    exact ⟨start, .nil _, trivial, ready, rawNone, before, queue, by simpa using gain,
+      recovery, rfl, by simp [Execution.emissionTimes, Execution.ledger, Ledger.zero]⟩
+  | cons d ds ih =>
+    obtain ⟨gap, spaced⟩ := List.pairwise_cons.mp separated
+    have nextSpacing : ∀ t ∈ conjunctionDoseTokens 0 ds ++ [conjunctionProbe read], d + 24 ≤ t.due := by
+      intro t ht
+      rcases List.mem_append.mp ht with ht | ht
+      · obtain ⟨date, hd, rfl⟩ := List.mem_map.mp ht
+        exact gap date hd
+      · obtain rfl := List.mem_singleton.mp ht
+        exact after d (by simp)
+    obtain ⟨slot⟩ := threshold_slot_exists box physical ready rawNone (future d (by simp))
+      queue nextSpacing gain recovery
+    obtain ⟨final, tail, positive, hready, hraw, date, pending, hgain, hb, deliveries, silent⟩ :=
+      ih (slot.execution.physical_invariant box physical) slot.ready slot.rawNone
+        (by linarith [slot.date, after d (by simp)]) (fun t ht => by linarith [slot.date, gap t ht])
+        (fun t ht => after t (by simp [ht])) spaced slot.pending slot.gain slot.recovery
+    refine ⟨final, slot.execution.append tail,
+      (Execution.contactsTransversal_append _ _).2 ⟨slot.transverse, positive⟩,
+      hready, hraw, date, pending, ?_, hb, ?_, ?_⟩
+    · rw [hgain]
+      congr 1
+      simp only [List.length_cons]
+      omega
+    · rw [Execution.deliveries_append, slot.deliveries, deliveries]
+      rfl
+    · intro F h
+      rw [Execution.emissionTimes_append, List.mem_append] at h
+      rcases h with head | last
+      · obtain ⟨fire, _, emit, window⟩ := slot.fires
+        rw [emit] at head
+        cases fire with
+        | none => simp at head
+        | some G =>
+          have eq : F = G := by simpa using head
+          subst F
+          linarith [(window G rfl).2, after d (by simp)]
+      · exact silent F last
+
+noncomputable def thresholdProbeStart (time read : ℝ) (need : ℕ) (dates : List ℝ) : Snapshot 1 :=
+  (conjunctionCounter time need).requeue (conjunctionDoseTokens 0 dates ++ [conjunctionProbe read])
+
+theorem threshold_probe_physical {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time read : ℝ) (need : ℕ) (dates : List ℝ) :
+    PhysicalInvariant θ (thresholdProbeStart time read need dates) := by
+  have p := conjunction_counter_physical box time need
+  exact ⟨p.region, p.gain_cap, p.recovery_cap, p.reserve⟩
+
+/-- With a full recovery interval between pulses, a fixed final read
+reports whether the number of training pulses meets the hidden need.
+The theorem includes excess pulses, whose earlier FIREs are outside
+the report window. -/
+theorem native_threshold_probe_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time read : ℝ) (need : ℕ) (dates : List ℝ)
+    (positive : 0 < need) (before : time < read)
+    (future : ∀ d ∈ dates, time < d) (after : ∀ d ∈ dates, d + 24 ≤ read)
+    (spacing : dates.Pairwise (fun a b => a + 24 ≤ b)) :
+    Nonempty (ScheduledCell θ (thresholdProbeStart time read need dates) (read + 24)
+      (counterWindow read) (decide (need ≤ dates.length)) (fun s => s.pending = [])) := by
+  let start := thresholdProbeStart time read need dates
+  have phys := threshold_probe_physical box time read need dates
+  have ready : ReadyCoordinates start 0 :=
+    ⟨rfl, by norm_num [start, thresholdProbeStart, conjunctionCounter, Snapshot.requeue, preparedTeacher],
+      fun _ => ⟨rfl, by norm_num [start, thresholdProbeStart, conjunctionCounter, Snapshot.requeue,
+        preparedTeacher, RestBand]⟩⟩
+  have gain : start.x 0 (.z 0) = thresholdGain need := by
+    change -(3 / 5 : ℝ) * ((need - 1 : ℕ) : ℝ) = thresholdGain need
+    rw [Nat.cast_sub (by omega : 1 ≤ need), Nat.cast_one]
+    unfold thresholdGain
+    ring
+  obtain ⟨middle, train, positive, ready, raw, early, queue, gain, recovery, delivered, earlier⟩ :=
+    threshold_training_exists box phys ready (fun _ => rfl) before future after spacing rfl gain rfl
+  obtain ⟨readout⟩ := threshold_slot_exists box (train.physical_invariant box phys) ready raw early queue
+    (by simp) gain recovery
+  have late : readout.final.time < read + 24 := by linarith [readout.date]
+  obtain ⟨tail, complete, tailPositive, tailSilent, tailDeliveries⟩ :=
+    quiet_ready_tail_exists (θ := θ) late
+      (fun i => by rw [Subsingleton.elim i 0]; exact readout.ready)
+      (fun i p => by rw [Subsingleton.elim i 0]; exact readout.rawNone p) readout.pending
+  let e := (train.append readout.execution).append tail
+  have empty : (quietAt readout.final (read + 24)).pending = [] := readout.pending
+  refine ⟨⟨_, e, complete, (Execution.contactsTransversal_append _ _).2
+    ⟨(Execution.contactsTransversal_append _ _).2 ⟨positive, readout.transverse⟩, tailPositive⟩,
+    ?_, ?_, empty⟩⟩
+  · apply List.Perm.of_eq
+    change ((train.append readout.execution).append tail).deliveries = _
+    rw [Execution.deliveries_append, Execution.deliveries_append, delivered, readout.deliveries,
+      tailDeliveries, List.append_nil]
+    rfl
+  · obtain ⟨fire, isSome, fireDates, window⟩ := readout.fires
+    have none : tail.emissionTimes 0 = [] := by simp [Execution.emissionTimes, tailSilent]
+    have silent : (train.emissionTimes 0).filter (counterWindow read).accepts = [] := by
+      apply List.filter_eq_nil_iff.mpr
+      intro F h
+      have early := earlier F h
+      simp [ReportWindow.accepts, counterWindow, not_le.mpr early]
+    have readDates : fire.toList.filter (counterWindow read).accepts = fire.toList := by
+      cases eq : fire with
+      | none => rfl
+      | some F =>
+        have bounds := window F eq
+        simp [ReportWindow.accepts, counterWindow, bounds.1.le, bounds.2]
+    unfold Reports ReportWindow.dates
+    change ((((train.append readout.execution).append tail).emissionTimes 0).filter _).length = _
+    rw [Execution.emissionTimes_append, Execution.emissionTimes_append, none, List.append_nil,
+      List.filter_append, silent, List.nil_append, fireDates, readDates]
+    have flags : fire.isSome = decide (need ≤ dates.length) :=
+      isSome.trans (decide_eq_decide.mpr (by omega))
+    cases fire <;> simp_all
+
+
+/-- The pulse schedule depends on the tested count, independently of
+the hidden need encoded in the start gain. -/
+noncomputable def thresholdCalendar (time : ℝ) (count : ℕ) : List ℝ :=
+  (List.range count).map fun (i : ℕ) => time + 24 * ((i : ℝ) + 1)
+
+noncomputable def thresholdReadTime (time : ℝ) (count : ℕ) : ℝ :=
+  time + 24 * ((count : ℝ) + 1)
+
+private theorem threshold_calendar_length (time : ℝ) (count : ℕ) :
+    (thresholdCalendar time count).length = count := by simp [thresholdCalendar]
+
+private theorem threshold_calendar_valid (time : ℝ) (count : ℕ) :
+    (∀ d ∈ thresholdCalendar time count, time < d ∧ d + 24 ≤ thresholdReadTime time count) ∧
+    (thresholdCalendar time count).Pairwise (fun a b => a + 24 ≤ b) := by
+  constructor
+  · intro d h
+    obtain ⟨i, mem, rfl⟩ := List.mem_map.mp h
+    have bound : (i : ℝ) + 1 ≤ count := by
+      exact_mod_cast Nat.succ_le_of_lt (List.mem_range.mp mem)
+    have nonnegative : (0 : ℝ) ≤ i := by positivity
+    constructor
+    · linarith
+    · unfold thresholdReadTime
+      linarith
+  · apply List.pairwise_map.mpr
+    apply List.pairwise_lt_range.imp
+    intro i j ij
+    have bound : (i : ℝ) + 1 ≤ j := by exact_mod_cast Nat.succ_le_of_lt ij
+    linarith
+
+theorem threshold_count_probe_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time : ℝ) (need count : ℕ) (positive : 0 < need) :
+    let read := thresholdReadTime time count
+    let start := thresholdProbeStart time read need (thresholdCalendar time count)
+    Nonempty (ScheduledCell θ start (read + 24) (counterWindow read)
+      (decide (need ≤ count)) (fun s => s.pending = [])) := by
+  have bound : (0 : ℝ) ≤ count := by positivity
+  have ⟨valid, spacing⟩ := threshold_calendar_valid time count
+  have before : time < thresholdReadTime time count := by unfold thresholdReadTime; linarith
+  have probe := native_threshold_probe_exists box time (thresholdReadTime time count) need
+    (thresholdCalendar time count) positive before (fun d hd => (valid d hd).1)
+    (fun d hd => (valid d hd).2) spacing
+  rwa [threshold_calendar_length] at probe
+
+/-- For each hidden need, the threshold run exists in upward-crossing
+semantics. Every complete crossing run agrees on its physical state,
+ordered firing dates and actual deliveries. -/
+theorem threshold_count_probe_crossing {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time : ℝ) (need count : ℕ) (positive : 0 < need) :
+    let read := thresholdReadTime time count
+    let start := thresholdProbeStart time read need (thresholdCalendar time count)
+    ∃ (run : ScheduledCell θ start (read + 24) (counterWindow read)
+        (decide (need ≤ count)) (fun s => s.pending = []))
+      (crossing : CrossingExecution θ (fun _ _ => []) start run.final),
+      crossing.execution = run.execution.toWeak ∧ CrossingCompleteThrough crossing (read + 24) ∧
+      ∀ v (other : CrossingExecution θ (fun _ _ => []) start v), CrossingCompleteThrough other (read + 24) →
+        ∃ native : Execution θ (fun _ _ => []) start v, native.toWeak = other.execution ∧
+          v.ObservationalEq run.final ∧ native.deliveries.Perm run.execution.deliveries ∧
+          ∀ i, other.execution.emissionTimes i = run.execution.emissionTimes i := by
+  obtain ⟨run⟩ := threshold_count_probe_exists box time need count positive
+  have initial : InitiallyBelowReady
+      (thresholdProbeStart time (thresholdReadTime time count) need (thresholdCalendar time count)) := by
+    intro i c h
+    cases c with
+    | q => change (1 / 10 : ℝ) < 1; norm_num
+    | m p => change (1 / 40 : ℝ) < 1; norm_num
+    | z _ => exact False.elim h
+    | b => exact False.elim h
+    | energy => exact False.elim h
+  have physical := threshold_probe_physical box time (thresholdReadTime time count) need (thresholdCalendar time count)
+  have causal : StrictCausalRouter (fun (_ : Fin 1) (_ : ℝ) => []) :=
+    fun _ _ _ h => (List.not_mem_nil h).elim
+  obtain ⟨crossing, agree, done, every⟩ := complete_crossing_accounting run.execution run.complete
+    run.transverse box physical initial causal
+  exact ⟨run, crossing, agree, done, every⟩
+
+end RecursiveLearning.Native
