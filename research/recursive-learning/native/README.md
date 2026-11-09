@@ -157,6 +157,27 @@ The horizon is the selected FIRE date plus its wire delay. In the early
 case the second clock is still due later. The proof covers this first
 dispatch and receipt.
 
+## A selector read that preserves the gain
+
+The [prepared read](SelectorRead.lean) uses one canonical selector pulse
+and the same starting charge band `[0.69, 0.71]` for either stored value.
+The high log-gain `0.6` produces a FIRE between offsets 0.1 and 0.2.
+The low log-gain `0` produces a FIRE between offsets 0.2 and 0.7.
+Both fires start protection before the sensor's ERROR phase, and
+protection continues through the end of ERROR.
+
+`prepared_selector_read_crossing_exists` constructs both reads under the
+upward-crossing semantics in either fabrication box. Each read is complete
+through the sensor's return to READY, with the raw input expired and all
+log-gains and recovery preserved. `SelectorReadRun.gain_at_prefix` proves
+gain preservation at intermediate cuts. `SelectorReadRun.every_crossing_complete`
+transfers the exact FIRE and gain values to every complete crossing
+execution through that horizon.
+
+The charge band and the admitted pulse are preparation hypotheses. The
+proof starts there. Producing this band from the actual first-round
+endpoint and running a second teaching round remain open.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -169,7 +190,7 @@ lake build
 
 The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
 builds this package with the pinned dependencies. Its default targets compile
-`NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson` and `Dispatch`, and run
+`NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson`, `Dispatch` and `SelectorRead`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
