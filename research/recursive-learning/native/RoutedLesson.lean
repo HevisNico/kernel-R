@@ -16,10 +16,10 @@ noncomputable def routedLessonStart (prepared : Bool) (time : ℝ) : Snapshot 2 
   let learner := lessonProbeStart prepared time
   learner.prependQueued (preparedTeacher time) (learner.pending.map Delivery.succ)
 
-private def selectorQueue (delay : ℝ → ℝ) (fire : Option ℝ) : List (Delivery 1) :=
+def selectorQueue (delay : ℝ → ℝ) (fire : Option ℝ) : List (Delivery 1) :=
   fire.toList.map (fun t => ⟨0, 2, t + delay t⟩)
 
-private theorem lesson_contacts_strict {time : ℝ} {delay : ℝ → ℝ}
+theorem lesson_contacts_strict {time : ℝ} {delay : ℝ → ℝ}
     (positive : ∀ t, 0 < delay t) : StrictHeadRoutes (lessonSelectorContacts time delay) := by
   intro i t d member
   by_cases after : time + 17 ≤ t
@@ -38,7 +38,7 @@ theorem lesson_router_strict {time : ℝ} {delay : ℝ → ℝ}
     obtain ⟨token, present, rfl⟩ := List.mem_map.mp member
     exact lesson_contacts_strict positive i t token present
 
-private theorem readout_label {θ prepared time finish}
+theorem readout_label {θ prepared time finish}
     (run : LessonProbeRun θ prepared time finish) (delay : ℝ → ℝ) :
     ∃ fire : Option ℝ,
       fire.isSome = !prepared ∧
@@ -86,7 +86,7 @@ private theorem readout_label {θ prepared time finish}
     | none => rfl
     | some f => simp [lessonSelectorContacts, (window f rfl).1, selectorContacts, selectorQueue]
 
-private structure SelectorResponse (θ : Fin 1 → Parameters) (time : ℝ)
+structure SelectorResponse (θ : Fin 1 → Parameters) (time : ℝ)
     (delay : ℝ → ℝ) (fire : Option ℝ) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => [])
@@ -100,7 +100,7 @@ private structure SelectorResponse (θ : Fin 1 → Parameters) (time : ℝ)
   ready : ReadyCoordinates final 0
   rawNone : ∀ p, final.raw 0 p = none
 
-private theorem selector_response_exists {θ ε time delay fire}
+theorem selector_response_exists {θ ε time delay fire}
     (box : @PhysicalBox 1 θ ε)
     (window : ∀ f, fire = some f → time + 17 ≤ f ∧ f < time + 18)
     (bounds : ∀ f, (3 / 10 : ℝ) ≤ delay f ∧ delay f ≤ 2 / 5) :

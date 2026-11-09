@@ -255,7 +255,7 @@ private theorem serial_credit_run_exists {θ ε time first T second} (box : @Phy
       rw [next.gain, unused]
       norm_num
 
-private theorem prepend_physical {n θ θH s h} (tail : @PhysicalInvariant n θ s)
+theorem prepend_physical {n θ θH s h} (tail : @PhysicalInvariant n θ s)
     (head : PhysicalInvariant θH h) (Q : List (Delivery (n + 1))) :
     PhysicalInvariant (prependParameters θH θ) (s.prependQueued h Q) := by
   refine ⟨?_, ?_, ?_, ?_⟩
@@ -272,7 +272,7 @@ private theorem prepend_physical {n θ θH s h} (tail : @PhysicalInvariant n θ 
     | zero => exact head.reserve 0
     | succ j => exact tail.reserve j
 
-private theorem prepend_box {n θ θH ε} (tail : @PhysicalBox n θ ε) (head : PhysicalBox θH ε) :
+theorem prepend_box {n θ θH ε} (tail : @PhysicalBox n θ ε) (head : PhysicalBox θH ε) :
     PhysicalBox (prependParameters θH θ) ε := by
   refine ⟨tail.1, ?_⟩
   intro i p
@@ -564,7 +564,7 @@ abbrev nativeImprovementParameters (first selector test credit seven six eight :
     Fin 7 → Parameters :=
   prependParameters eight (prependParameters six (prependParameters seven (serialParameters first selector test credit)))
 
-private theorem prepend_routed_causal {n} {route : Router n} {contacts : HeadRoutes n}
+theorem prepend_routed_causal {n} {route : Router n} {contacts : HeadRoutes n}
     (tail : StrictCausalRouter route) (head : StrictHeadRoutes contacts) :
     StrictCausalRouter (prependRouted route contacts) := by
   intro i t d member

@@ -119,7 +119,7 @@ def NativeRetains {n} (state : Snapshot n) (i : Fin n) (needs : Learner) : Prop 
   -(12 / 5 : ℝ) + (3 / 5 : ℝ) * needs.preparationLeft ≤ state.x i (.z 0) ∧
   -(12 / 5 : ℝ) + (3 / 5 : ℝ) * needs.practiceLeft ≤ state.x i (.z 1)
 
-private theorem lessonPorts_count (lesson : Lesson) :
+theorem lessonPorts_count (lesson : Lesson) :
     (lessonPorts lesson).count 0 = lesson.preparation ∧
     (lessonPorts lesson).count 1 = lesson.practice ∧
     (lessonPorts lesson).count 2 = 0 := by

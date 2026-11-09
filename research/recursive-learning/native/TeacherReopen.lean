@@ -518,7 +518,7 @@ theorem teacher_future_transverse {n θ route s u} (e : @Execution n θ route s 
       exact ⟨(jump.contactTransversal_requeue (jump.withOneFuture token)).1 positive.1,
         ih later positive.2⟩
 
-private theorem teacher_future_deliveries {n θ route s u} (e : @Execution n θ route s u)
+theorem teacher_future_deliveries {n θ route s u} (e : @Execution n θ route s u)
     (token : Delivery n) (later : ∀ d ∈ [token], u.time ≤ d.due) :
     (e.withFuture [token] later).deliveries = e.deliveries := by
   induction e with

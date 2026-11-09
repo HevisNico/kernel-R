@@ -86,8 +86,11 @@ upward-crossing execution. The first acceptance issues seven pulses.
 Its routed selector update enables the second acceptance, which issues
 six. Blocking just that update keeps the first credit and the seven-pulse
 lesson. The native result uses a one-shot selector and a fixed calendar
-for this example. The general credit bound above concerns the discrete
-architecture.
+for this example. A separate [learner-readout experiment](native/LearnerReadout.lean)
+uses the gains learned by the cell receiving each full trial. The learner's
+readout drives a credit write, or the failure of the 2 + 4 trial drives
+a selector update through a diagnostic cell. The general credit bound
+above concerns the discrete architecture.
 
 ## Verify
 
