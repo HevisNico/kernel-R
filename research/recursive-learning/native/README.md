@@ -242,9 +242,31 @@ with the work gain at its cap. It preserves the gain on other ports
 whose sensors start at rest.
 
 The capped timing and precharge results assume recovery is already at
-its cap and an actual continuation reaches the stated horizon.
-Constructing that continuation in the first network round, admitting the
-selector read and supplying the receiver's reference remain open.
+its cap. The clock results identify the reopening in an actual
+continuation that reaches the stated horizon.
+
+### From work admission to a completed read
+
+[`CappedWorkRun.lean`](CappedWorkRun.lean) constructs the continuation
+from a prepared work pulse already admitted during SLOW. The work gain
+and recovery are at their caps. The sensor still goes through MARK,
+SILENT and ERROR. The execution reopens at the physical SLOW guard and
+consumes raw expiry at its real date, including when expiry and the
+start of ERROR coincide. The cell reaches the read charge band at
+work-pulse age `1.4`, without firing during precharge.
+
+At that date, a selector pulse from the initial queue is admitted.
+`prepared_capped_work_read_crossing_exists` constructs both stored
+values with the same work/read protocol for either fabrication box and
+every local delay in the certified budget. The combined execution
+preserves all gains and emits exactly one spike, from the read.
+`CappedWorkRead.every_complete` and `CappedWorkRead.every_crossing_complete`
+give the same endpoint and spike date at the common completion horizon.
+
+This history starts at work admission, with the SLOW charge supplied by
+the capped clock formula. Preparing the capped teacher and reaching that
+admission from the first network round, supplying the receiver's timing
+reference and running the next teaching round remain open.
 
 ## Verify
 
@@ -259,7 +281,8 @@ lake build
 The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
 builds this package with the pinned dependencies. Its default targets compile
 `NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson`, `Dispatch`,
-`SelectorRead`, `SelectorPrecharge`, `TeacherReopen` and `TeacherStableClock`, and run
+`SelectorRead`, `SelectorPrecharge`, `TeacherReopen`, `TeacherStableClock`
+and `CappedWorkRun`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

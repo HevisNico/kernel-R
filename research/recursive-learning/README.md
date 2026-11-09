@@ -67,7 +67,9 @@ execution](native/TeacherReopen.lean) now schedules the work pulse from
 its own FIRE and reaches that reopening in both fabrication boxes.
 With recovery at its cap, a [fixed recovery clock](native/TeacherStableClock.lean)
 allows bounded timing variation on that self-delivery and preserves the
-read. Joining these stages to the network and iterating the loop remain open.
+read. From an admitted work pulse, a [single physical continuation](native/CappedWorkRun.lean)
+now builds the precharge and admits the selector pulse. Joining that
+admission to the network and iterating the teaching loop remain open.
 
 The discrete results above establish the two improvements and a bound for
 the capped architecture.
