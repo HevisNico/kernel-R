@@ -502,4 +502,135 @@ theorem append_threshold_run {n θ θH ε T} {layout : ReportLayout n} {bits : F
   change (if bits source then packet else []).length = _
   cases bits source <;> simp [packet, thresholdPacket, conjunctionDoseTokens, threshold_calendar_length]
 
+
+private theorem counter_window_eq_nil {read : ℝ} {dates : List ℝ}
+    (outside : ∀ F ∈ dates, F < read ∨ read + 1 ≤ F) :
+    dates.filter (counterWindow read).accepts = [] := by
+  apply List.filter_eq_nil_iff.mpr
+  intro F h
+  rcases outside F h with early | late
+  · simp [ReportWindow.accepts, counterWindow, not_le.mpr early]
+  · simp [ReportWindow.accepts, counterWindow, not_lt.mpr late]
+
+private theorem threshold_slot_reports {θ s due later remaining}
+    (slot : ThresholdSlot θ s due later remaining) :
+    Reports slot.execution 0 (counterWindow due) (decide (remaining = 0)) ∧
+      ∀ F ∈ slot.execution.emissionTimes 0, due < F ∧ F < due + 1 := by
+  obtain ⟨fire, flag, dates, window⟩ := slot.fires
+  cases eq : fire with
+  | none => simp [Reports, ReportWindow.dates, dates, eq, ← flag]
+  | some F =>
+    have bounds := window F eq
+    simp [Reports, ReportWindow.dates, dates, eq, ← flag, ReportWindow.accepts,
+      counterWindow, bounds.1.le, bounds.2, bounds]
+
+private theorem threshold_calendar_run {θ ε s T} (box : @PhysicalBox 1 θ ε)
+    (dates : List ℝ) (remaining : ℕ)
+    (physical : PhysicalInvariant θ s) (ready : ReadyCoordinates s 0)
+    (raw : ∀ p, s.raw 0 p = none) (before : s.time < T)
+    (future : ∀ d ∈ dates, s.time < d) (finish : ∀ d ∈ dates, d + 23 < T)
+    (spacing : dates.Pairwise (fun a b => a + 24 ≤ b))
+    (queue : s.pending = conjunctionDoseTokens 0 dates)
+    (gain : s.x 0 (.z 0) = thresholdGain remaining) (recovery : s.x 0 .b = 2 / 25) :
+    ∃ run : LocalRun θ s T,
+      run.final.x 0 (.z 0) = thresholdGain (remaining - dates.length) ∧
+      run.execution.deliveries = conjunctionDoseTokens 0 dates ∧
+      (∀ F ∈ run.execution.emissionTimes 0, ∃ d ∈ dates, d < F ∧ F < d + 1) ∧
+      ∀ earlierSlots d suffix, dates = earlierSlots ++ d :: suffix →
+        Reports run.execution 0 (counterWindow d) (decide (remaining ≤ earlierSlots.length)) := by
+  induction dates generalizing s remaining with
+  | nil =>
+    obtain ⟨e, complete, positive, silent, delivered⟩ :=
+      quiet_ready_tail_exists (θ := θ) before
+        (fun i => by rw [Subsingleton.elim i 0]; exact ready)
+        (fun i p => by rw [Subsingleton.elim i 0]; exact raw p) queue
+    refine ⟨⟨_, e, complete, positive⟩, ?_, delivered, ?_, ?_⟩
+    · simpa [quietAt, quietValues] using gain
+    · simp [Execution.emissionTimes, silent]
+    · intro earlierSlots d suffix split
+      cases earlierSlots <;> simp at split
+  | cons d ds ih =>
+    obtain ⟨gap, spaced⟩ := List.pairwise_cons.mp spacing
+    have late : ∀ t ∈ conjunctionDoseTokens 0 ds, d + 24 ≤ t.due := by
+      intro t ht
+      obtain ⟨a, ha, rfl⟩ := List.mem_map.mp ht
+      exact gap a ha
+    obtain ⟨slot⟩ := threshold_slot_exists box physical ready raw (future d (by simp))
+      queue late gain recovery
+    obtain ⟨tail, finalGain, delivered, tailDates, tailReports⟩ :=
+      ih (remaining - 1) (slot.execution.physical_invariant box physical) slot.ready slot.rawNone
+        (by linarith [slot.date, finish d (by simp)])
+        (fun a ha => by linarith [slot.date, gap a ha])
+        (fun a ha => finish a (by simp [ha])) spaced slot.pending slot.gain slot.recovery
+    obtain ⟨headReport, headDates⟩ := threshold_slot_reports slot
+    let e := slot.execution.append tail.execution
+    have complete : CompleteThrough e T := tail.complete
+    refine ⟨⟨_, e, complete, (Execution.contactsTransversal_append _ _).2
+      ⟨slot.transverse, tail.positive⟩⟩, ?_, ?_, ?_, ?_⟩
+    · rw [finalGain, List.length_cons]
+      congr 1
+      omega
+    · rw [show e.deliveries = _ from Execution.deliveries_append _ _, slot.deliveries, delivered]
+      rfl
+    · intro F h
+      rw [show e.emissionTimes 0 = _ from Execution.emissionTimes_append _ _ _, List.mem_append] at h
+      rcases h with h | h
+      · exact ⟨d, by simp, headDates F h⟩
+      · obtain ⟨a, ha, bounds⟩ := tailDates F h
+        exact ⟨a, by simp [ha], bounds⟩
+    · intro earlierSlots a suffix split
+      unfold Reports ReportWindow.dates at *
+      change (e.emissionTimes 0 |>.filter (counterWindow a).accepts).length = _
+      rw [show e.emissionTimes 0 = _ from Execution.emissionTimes_append _ _ _, List.filter_append]
+      cases earlierSlots with
+      | nil =>
+        simp only [List.nil_append, List.cons.injEq] at split
+        obtain ⟨rfl, rfl⟩ := split
+        rw [counter_window_eq_nil (dates := tail.execution.emissionTimes 0) (fun F h => by
+          obtain ⟨t, ht, bounds⟩ := tailDates F h
+          exact Or.inr (by linarith [gap t ht, bounds.1])), List.append_nil]
+        simpa using headReport
+      | cons first earlierSlots =>
+        simp only [List.cons_append, List.cons.injEq] at split
+        have ha : a ∈ ds := by rw [split.2]; simp
+        rw [counter_window_eq_nil (fun F h => Or.inl (by
+          linarith [gap a ha, (headDates F h).2])), List.nil_append, tailReports earlierSlots a suffix split.2]
+        have eq : decide (remaining - 1 ≤ earlierSlots.length) =
+            decide (remaining ≤ (first :: earlierSlots).length) := by
+          apply decide_eq_decide.mpr
+          simp only [List.length_cons]
+          omega
+        rw [eq]
+
+/-- One physical counter cell reports at every slot after its dose
+threshold. Earlier pulses write the memory, whereas pulses after the
+threshold report without changing its stored gain. -/
+theorem threshold_calendar_reports {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time T : ℝ) (need : ℕ) (dates : List ℝ) (positive : 0 < need)
+    (before : time < T) (future : ∀ d ∈ dates, time < d)
+    (finish : ∀ d ∈ dates, d + 23 < T)
+    (spacing : dates.Pairwise (fun a b => a + 24 ≤ b)) :
+    let start := (conjunctionCounter time need).requeue (conjunctionDoseTokens 0 dates)
+    ∃ run : LocalRun θ start T,
+      run.final.x 0 (.z 0) = (3 / 5 : ℝ) * (1 - ((need - dates.length : ℕ) : ℝ)) ∧
+      run.execution.deliveries = conjunctionDoseTokens 0 dates ∧
+      ∀ earlierSlots d suffix, dates = earlierSlots ++ d :: suffix →
+        Reports run.execution 0 (counterWindow d) (decide (need ≤ earlierSlots.length)) := by
+  let start := (conjunctionCounter time need).requeue (conjunctionDoseTokens 0 dates)
+  have physical : PhysicalInvariant θ start := by
+    have h := conjunction_counter_physical box time need
+    exact ⟨h.region, h.gain_cap, h.recovery_cap, h.reserve⟩
+  have ready : ReadyCoordinates start 0 := by
+    have h := threshold_probe_ready time time need dates
+    exact ⟨h.ready, h.charge, h.auxiliary⟩
+  have gain : start.x 0 (.z 0) = thresholdGain need := by
+    change -(3 / 5 : ℝ) * ((need - 1 : ℕ) : ℝ) = thresholdGain need
+    rw [Nat.cast_sub (by omega : 1 ≤ need), Nat.cast_one]
+    unfold thresholdGain
+    ring
+  obtain ⟨run, gain, deliveries, _, reports⟩ :=
+    threshold_calendar_run box dates need physical ready (fun _ => rfl) before future finish
+      spacing rfl gain rfl
+  exact ⟨run, gain, deliveries, reports⟩
+
 end RecursiveLearning.Native

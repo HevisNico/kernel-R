@@ -236,13 +236,14 @@ theorem append_and_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n �
       rw [previous]
       exact prior.reports i
 
-theorem append_not_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
+theorem append_not_run_with_dates {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
     (prior : CompiledRun θ layout T bits) (box : @PhysicalBox 1 θH ε)
     (source : Fin n) (timed : layout.WellTimed) (horizon : (layout.appendNot source).last + 45 < T) :
     ∃ run : CompiledRun (prependParameters θH θ) (layout.appendNot source) T
       (Fin.cases (!bits source) bits),
       (∀ i, run.final.x i.succ = prior.final.x i) ∧
-      (∀ i, lessonReceipts run.execution.deliveries i.succ = lessonReceipts prior.execution.deliveries i) := by
+      (∀ i, lessonReceipts run.execution.deliveries i.succ = lessonReceipts prior.execution.deliveries i) ∧
+      (∀ i, run.execution.emissionTimes i.succ = prior.execution.emissionTimes i) := by
   let clock := layout.last + 1
   have last : (layout.appendNot source).last = clock + 18 := rfl
   have margin : (layout.windows source).stop ≤ clock + 1 := by
@@ -258,7 +259,7 @@ theorem append_not_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n �
     prepend_physical prior.physical ⟨phys.region, phys.gain_cap, phys.recovery_cap, phys.reserve⟩ _,
     prepend_initial_ready prior.initial (lessonProbe_initial false clock),
     prepend_routed_causal prior.causal (forward_report_strict source (layout.windows source) ?_)⟩,
-    fun _ => rfl, CausalTraceBalance.tail_receipts weave.trace⟩
+    fun _ => rfl, CausalTraceBalance.tail_receipts weave.trace, previous⟩
   · intro i
     cases i using Fin.cases with
     | zero => exact gate
@@ -269,6 +270,16 @@ theorem append_not_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n �
   · intro d mem
     obtain rfl := List.mem_singleton.mp mem
     exact margin
+
+theorem append_not_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
+    (prior : CompiledRun θ layout T bits) (box : @PhysicalBox 1 θH ε)
+    (source : Fin n) (timed : layout.WellTimed) (horizon : (layout.appendNot source).last + 45 < T) :
+    ∃ run : CompiledRun (prependParameters θH θ) (layout.appendNot source) T
+      (Fin.cases (!bits source) bits),
+      (∀ i, run.final.x i.succ = prior.final.x i) ∧
+      (∀ i, lessonReceipts run.execution.deliveries i.succ = lessonReceipts prior.execution.deliveries i) := by
+  obtain ⟨run, values, receipts, _⟩ := append_not_run_with_dates prior box source timed horizon
+  exact ⟨run, values, receipts⟩
 
 /-- For a fixed finite DAG and declared input windows, a single computed
 layout works for every input pattern and every admissible fabrication.
