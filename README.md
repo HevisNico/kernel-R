@@ -18,10 +18,12 @@ The same cells can also run adaptive teaching programs. For any positive
 integer `K`, a compiled R network identifies a learner's hidden need in
 `{1, …, K}` from physical readouts and delivers only the matching lesson,
 with one router and one initial pulse queue for every need. A nine-cell
-network also achieves two successive improvements, from 8 to 7 to 6
-lesson pulses. Cutting its single feedback wire prevents the second
-improvement. Lean proves these outcomes for complete upward-crossing runs,
-with independent fixed fabrication variation of up to ±10% in every cell.
+network learns which edit to try first and reads that choice again in
+two later rounds. In a separate experiment, learner feedback reduces
+lessons from 8 to 7 to 6 pulses. Cutting its single feedback wire
+prevents the second reduction. Lean proves these outcomes for complete
+upward-crossing runs, with independent fixed fabrication variation of up
+to ±10% in every cell.
 
 During a full learning phase, the cell integrates a sensor's discharge between
 fixed charge thresholds. The fabrication rate cancels from the dose.
@@ -152,6 +154,37 @@ deliveries. See the
 - **Credit.** The selected leaf's credit is write-only in this protocol.
 - **Physical parameters.** Fabrication parameters are fixed during a
   run and chosen independently within the ±0.3% or ±10% box.
+
+### Reusing a learned choice in two rounds
+
+A nine-cell R network chooses which block to shorten in a lesson with
+two preparation and two practice pulses. A calibration failure triggers
+a diagnostic firing that sends three pulses to one policy cell. The
+pulses raise its log-gain from `−1.2` to `0.6`. In each of two later
+rounds, the network reads that same cell. A firing selects the practice
+reduction, and silence selects the preparation reduction. Only the
+selected learner receives the three-pulse trial and its read pulse.
+
+| Learner's needs (preparation, practice) | First choices accepted with feedback | First choices accepted with write wire cut |
+|---|---|---|
+| (2, 1) | 2 of 2 | 0 of 2 |
+| (1, 2) | 2 of 2 | 2 of 2 |
+
+The counts cover the two evaluation rounds, with calibration traffic
+counted separately. Cutting the write wire preserves the starting
+snapshot. For each feedback setting, the router, schedule and birth
+queue are the same across the two calibrated profiles.
+
+Lean constructs a complete upward-crossing execution for either
+fabrication box. At fixed birth data, parameters and router, all
+complete runs satisfy these outcomes and agree on endpoint observations,
+ordered firing dates and delivery counts.
+[`native_policy_reuse_two_rounds`](https://github.com/HevisNico/kernel-R/blob/99566e1d43b51541bfe1b08ede3352bfc411579d/research/recursive-learning/native/PolicyReuse.lean)
+
+The experiment uses one policy update, two fixed candidate edits and
+fresh trial learners. The high-gain reads preserve the stored gain.
+At low gain, each of the two reads adds a dose and stays silent. The
+proof covers the declared two-read schedule.
 
 ### A teaching loop driven by learner readouts
 
