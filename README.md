@@ -80,10 +80,16 @@ See the [cell laws](model/CELL.md) and [glossary](docs/GLOSSARY.md).
 
 **In plain words.** Take a chain of any positive finite length. Choose its
 fabrication parameters independently within the ±10% or ±0.3% box and start
-every cell in READY, near its nominal resting values. Send each cell a
-preparation train, then drive the leaf with a regular rhythm. Each link
-delivers pulses with a delay in `[0.3, 0.4]`. The delay functions are fixed
-in advance and may vary over time, with summed jitter budgets at most 0.15.
+every cell in READY, with birth charges, log-gains and recovery rates within
+10⁻⁵ of their nominal values. Each cell first receives its own preparation
+train while the links are switched off. In the constructed run, this writes
+three of the four doses on each relay's active port. The links then open, the
+leaf is driven with a regular rhythm, and each relay receives the input that
+writes its fourth dose from its upstream neighbour.
+
+Each link delivers pulses with a delay in `[0.3, 0.4]`. The delay functions
+are fixed in advance and may vary over time, with summed jitter budgets at
+most 0.15.
 
 With these inputs fixed, the theorem gives the following guarantees.
 
