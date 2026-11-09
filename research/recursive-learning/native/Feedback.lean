@@ -1,6 +1,8 @@
 import NativeLearning
 import KernelR.HybridPortSourceWire
 import KernelR.HybridUniversalExecution
+import KernelR.HybridCausalHeadComplete
+import KernelR.HybridWeakNativeRefinement
 
 /-! One native feedback link. The learner's actual FIRE creates the only
 delivery to the teacher. This stage starts at an admitted learner probe. -/
@@ -56,8 +58,9 @@ theorem RoutedFeedback.every_complete {learner teacher ε delay start final}
 private theorem projected_physical {learner : Fin 1 → Parameters} {teacher : Parameters}
     {s : Snapshot 2} (physical : PhysicalInvariant (extendParameters learner teacher) s)
     (i : Fin 2) (parameters : Fin 1 → Parameters)
-    (parameter : parameters 0 = extendParameters learner teacher i) :
-    PhysicalInvariant parameters (s.cellProjection i []) := by
+    (parameter : parameters 0 = extendParameters learner teacher i)
+    {pending : List (Delivery 1)} :
+    PhysicalInvariant parameters (s.cellProjection i pending) := by
   refine ⟨fun _ => physical.region i, ?_, fun _ => physical.recovery_cap i,
     fun _ => physical.reserve i⟩
   intro j p
@@ -451,5 +454,247 @@ theorem prepared_probe_reports_failure {learner teacher ε delay gain}
       ((probe_ready gain time 1).auxiliary 2).2 rfl (by simp [fires])
     simp [fires, unchanged, Experiment.commit, result, unselected]
     linarith
+
+/-- In the causal product, the teacher is the head (0) and the learner is
+    the tail (1). Their local initial physical states are those of probeStart. -/
+noncomputable def causalProbeStart (gain time : ℝ) : Snapshot 2 :=
+  (portSourceSender (probeStart gain time)).prependQueued (portSourceReceiver (probeStart gain time)) []
+
+def selectorContacts (delay : ℝ → ℝ) : HeadRoutes 1 :=
+  fun _ time => [⟨0, 2, time + delay time⟩]
+
+abbrev causalFeedbackRouter (delay : ℝ → ℝ) : Router 2 :=
+  prependRouted (fun _ _ => []) (selectorContacts delay)
+
+private theorem causalFeedbackRouter_strict {delay : ℝ → ℝ}
+    (positive : ∀ t, 0 < delay t) : StrictCausalRouter (causalFeedbackRouter delay) := by
+  intro i t d routed
+  fin_cases i
+  · exact False.elim (List.not_mem_nil routed)
+  · have token : d = (⟨0, 2, t + delay t⟩ : Delivery 2) := List.mem_singleton.mp routed
+    subst d
+    exact lt_add_of_pos_right t (positive t)
+
+structure CausalRoutedFeedback (learner : Fin 1 → Parameters) (teacher : Parameters)
+    (delay : ℝ → ℝ) (gain time : ℝ) where
+  final : Snapshot 2
+  execution : Execution (prependParameters (fun _ => teacher) learner) (causalFeedbackRouter delay)
+    (causalProbeStart gain time) final
+  fire : ℝ
+  complete : CompleteThrough execution (fire + delay fire + 15 / 2)
+  transversal : execution.ContactsTransversal
+  emissions : execution.ledger.emissions = [(1, fire)]
+  deliveries : execution.deliveries = [⟨0, 2, fire + delay fire⟩]
+  pendingEmpty : final.pending = []
+  teacherGains : ∀ p, final.x 0 (.z p) = (causalProbeStart gain time).x 0 (.z p) +
+    (if p = 2 then 3 / 5 else 0)
+
+/-- The teacher's isolated analysis queue is derived from the learner trace.
+    The causal weave starts from an empty operational queue and emits the
+    token at the learner's real FIRE. It preserves the transverse contacts. -/
+theorem causal_routed_feedback_exists {learner teacher ε delay gain}
+    (box : @PhysicalBox 2 (extendParameters learner teacher) ε) (time : ℝ)
+    (strong : 9 / 5 ≤ gain ∧ gain ≤ 11 / 5)
+    (delayBounds : ∀ t, (3 / 10 : ℝ) ≤ delay t ∧ delay t ≤ 2 / 5) :
+    Nonempty (CausalRoutedFeedback learner teacher delay gain time) := by
+  let start := probeStart gain time
+  let studentStart := portSourceSender start
+  have positive : 0 < gain := by linarith [strong.1]
+  have physical := probe_physical box (time := time) positive strong.2
+  have ready := probe_ready gain time 0
+  have prepared : PreparedSection studentStart 0 :=
+    ⟨ready.ready, ready.charge, by norm_num [studentStart, portSourceSender, start, probeStart,
+      Snapshot.cellProjection], ready.auxiliary⟩
+  obtain ⟨student⟩ := short_learned_cycle_exists box.extend_old studentStart 0
+    (projected_physical physical 0 learner rfl)
+    (fun _ p origin active => probe_raw_valid gain time 0 p origin active)
+    prepared (by simpa [studentStart, portSourceSender, Snapshot.cellProjection, start,
+      probeStart, Real.exp_log positive] using strong)
+    rfl (fun p hp => probe_raw_other gain time 0 p (Or.inr hp)) (by simp [studentStart,
+      portSourceSender, Snapshot.cellProjection])
+  let fire := student.fire.final.time
+  let due := fire + delay fire
+  let finish := due + 15 / 2
+  let teacherStart := start.cellProjection 1 [⟨0, 2, due⟩]
+  have readyAtTeacher := probe_ready gain time 1
+  have teacherReady : ReadyCoordinates teacherStart 0 :=
+    ⟨readyAtTeacher.ready, readyAtTeacher.charge, readyAtTeacher.auxiliary⟩
+  have teacherRaw (p : Port) : teacherStart.raw 0 p = none :=
+    probe_raw_other gain time 1 p (Or.inl (by decide))
+  have logPos : 0 ≤ Real.log (6 / 5 : ℝ) := Real.log_nonneg (by norm_num)
+  have fireAfter : time + 2 / 5 < fire := student.fire_bounds.1
+  have delayPos := (delayBounds fire).1
+  have dueAfter : teacherStart.time < due := by
+    change time < fire + delay fire
+    linarith
+  obtain ⟨dose⟩ := port_dose_exists (route := fun _ _ => []) box.extend_new
+    (projected_physical physical 1 (fun _ => teacher) rfl)
+    (fun _ p origin active => probe_raw_valid gain time 1 p origin active) teacherReady
+    teacherRaw dueAfter rfl (by simp)
+    (by change Real.exp 0 ≤ _; norm_num)
+    (by change 0 ≤ Real.log (6 / 5 : ℝ) + 1 / 1000; linarith)
+  have waitTime : student.returned.final.time < finish := by
+    rw [student.date]
+    change time + 69 / 10 < fire + delay fire + 15 / 2
+    linarith
+  have emptyStudent : student.returned.final.pending = [] := student.pending
+  have future : ∀ d ∈ student.returned.final.pending, finish < d.due := by simp [emptyStudent]
+  have studentCharge (i : Fin 1) : student.returned.final.x i .q < 1 := by
+    linarith [(student.ready i).charge.2]
+  have studentSensor (i : Fin 1) (p : Port) : student.returned.final.x i (.m p) < 1 := by
+    linarith [((student.ready i).auxiliary p).2.2]
+  let waitFlow : Flow learner student.returned.final (quietAt student.returned.final finish) :=
+    quietFlow student.returned.final waitTime (fun i => (student.ready i).ready)
+      (fun i p => ((student.ready i).auxiliary p).1) student.raw_none studentCharge studentSensor
+      (fun d hd => (future d hd).le)
+  let wait : Execution learner (fun _ _ => []) student.returned.final
+      (quietAt student.returned.final finish) := .cons (.flow waitFlow) (.nil _)
+  let trace := student.execution.append wait
+  have tailComplete : CompleteThrough trace finish := by
+    obtain ⟨_, complete⟩ := quiet_complete_exists (θ := learner) (route := fun _ _ => [])
+      student.returned.final waitTime (fun i => (student.ready i).ready)
+      (fun i p => ((student.ready i).auxiliary p).1) student.raw_none studentCharge studentSensor future
+    exact complete
+  have tailEmissions : trace.ledger.emissions = [(0, fire)] := by
+    rw [Execution.emissions_append, student.emissions]
+    rfl
+  have tailDeliveries : trace.deliveries = [] := by
+    rw [Execution.deliveries_append, student.deliveries]
+    rfl
+  have headQueue : teacherStart.pending = trace.headInputQueue (selectorContacts delay) := by
+    simp [Execution.headInputQueue, tailEmissions, selectorContacts, teacherStart, Snapshot.cellProjection, due]
+  have balance : HeadQueueBalance trace teacherStart [] (selectorContacts delay) :=
+    HeadQueueBalance.initial trace teacherStart (selectorContacts delay) headQueue
+  have strict : StrictHeadRoutes (selectorContacts delay) := by
+    intro i t d member
+    have token := List.mem_singleton.mp member
+    subst d
+    linarith [(delayBounds t).1]
+  obtain ⟨weave⟩ := trace.prepend_causal_result dose.execution rfl
+    (tailComplete.1.trans dose.complete.1.symm) (selectorContacts delay) strict [] balance
+  refine ⟨{
+    final := _
+    execution := weave.execution
+    fire := fire
+    complete := weave.complete tailComplete dose.complete
+    transversal := weave.contacts_transversal
+      ((student.execution.contactsTransversal_append wait).2 ⟨student.contacts_transversal, by simp [wait]⟩)
+      dose.transversal
+    emissions := ?_
+    deliveries := ?_
+    pendingEmpty := weave.pending_empty emptyStudent dose.pending
+    teacherGains := dose.gain
+  }⟩
+  · have counts :
+        (trace.ledger.emissions.map (fun event => (event.1.succ, event.2)) : Multiset (Fin 2 × ℝ)) +
+          (dose.execution.ledger.emissions.map (fun event => ((0 : Fin 2), event.2)) : Multiset (Fin 2 × ℝ)) =
+            ([(1, fire)] : List (Fin 2 × ℝ)) := by
+      rw [tailEmissions, dose.emissions]
+      rfl
+    exact List.perm_singleton.mp (Multiset.coe_eq_coe.mp (weave.trace.emissions.trans counts))
+  · have counts :
+        (trace.deliveries.map Delivery.succ : Multiset (Delivery 2)) +
+          (dose.execution.deliveries.map (Delivery.head (n := 1)) : Multiset (Delivery 2)) =
+            ([⟨0, 2, due⟩] : List (Delivery 2)) := by
+      rw [tailDeliveries, dose.deliveries]
+      rfl
+    exact List.perm_singleton.mp (Multiset.coe_eq_coe.mp (weave.trace.deliveries.trans counts))
+
+private theorem causalProbe_box {learner teacher ε}
+    (box : @PhysicalBox 2 (extendParameters learner teacher) ε) :
+    PhysicalBox (prependParameters (fun _ => teacher) learner) ε := by
+  refine ⟨box.1, ?_⟩
+  intro i p
+  fin_cases i
+  · exact box.2 1 p
+  · exact box.2 0 p
+
+private theorem causalProbe_physical {learner teacher ε gain time}
+    (box : @PhysicalBox 2 (extendParameters learner teacher) ε)
+    (positive : 0 < gain) (upper : gain ≤ 11 / 5) :
+    PhysicalInvariant (prependParameters (fun _ => teacher) learner) (causalProbeStart gain time) := by
+  have old := probe_physical box (time := time) positive upper
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro i; fin_cases i
+    · exact old.region 1
+    · exact old.region 0
+  · intro i p; fin_cases i
+    · exact old.gain_cap 1 p
+    · exact old.gain_cap 0 p
+  · intro i; fin_cases i
+    · exact old.recovery_cap 1
+    · exact old.recovery_cap 0
+  · intro i; fin_cases i
+    · exact old.reserve 1
+    · exact old.reserve 0
+
+private theorem causalProbe_initial (gain time : ℝ) :
+    InitiallyBelowReady (causalProbeStart gain time) := by
+  intro i c ready
+  fin_cases i
+  · exact prepared_probe_initially_below gain time 1 c ready
+  · exact prepared_probe_initially_below gain time 0 c ready
+
+/-- The constructed strong-gain trace realizes actual upward crossings,
+    including the learner FIRE that issues the delivery. -/
+theorem causal_routed_crossing_exists {learner teacher ε delay gain}
+    (box : @PhysicalBox 2 (extendParameters learner teacher) ε) (time : ℝ)
+    (strong : 9 / 5 ≤ gain ∧ gain ≤ 11 / 5)
+    (delayBounds : ∀ t, (3 / 10 : ℝ) ≤ delay t ∧ delay t ≤ 2 / 5) :
+    ∃ (feedback : CausalRoutedFeedback learner teacher delay gain time)
+      (crossing : CrossingExecution (prependParameters (fun _ => teacher) learner)
+        (causalFeedbackRouter delay) (causalProbeStart gain time) feedback.final),
+      crossing.execution = feedback.execution.toWeak ∧
+      CrossingCompleteThrough crossing (feedback.fire + delay feedback.fire + 15 / 2) := by
+  obtain ⟨feedback⟩ := causal_routed_feedback_exists box time strong delayBounds
+  have physical := causalProbe_physical box (time := time) (by linarith [strong.1]) strong.2
+  let crossing := feedback.execution.toCrossing (causalProbe_initial gain time)
+    (causalProbe_box box) physical feedback.transversal
+  exact ⟨feedback, crossing, rfl, feedback.complete.toCrossing feedback.execution
+    (causalProbe_initial gain time) (causalProbe_box box) physical feedback.transversal⟩
+
+/-- Every complete upward-crossing history retains the witness's one FIRE,
+    one delivery and teacher memory changes. Its exact jumps are retained by
+    the refinement, including the delivery created by the routed FIRE. -/
+theorem CausalRoutedFeedback.every_crossing_complete {learner teacher ε delay gain time final}
+    (feedback : CausalRoutedFeedback learner teacher delay gain time)
+    (box : @PhysicalBox 2 (extendParameters learner teacher) ε)
+    (strong : 9 / 5 ≤ gain ∧ gain ≤ 11 / 5)
+    (positiveDelay : ∀ t, 0 < delay t)
+    (crossing : CrossingExecution (prependParameters (fun _ => teacher) learner)
+      (causalFeedbackRouter delay) (causalProbeStart gain time) final)
+    (complete : CrossingCompleteThrough crossing (feedback.fire + delay feedback.fire + 15 / 2)) :
+    ∃ native : Execution (prependParameters (fun _ => teacher) learner) (causalFeedbackRouter delay)
+        (causalProbeStart gain time) final,
+      native.toWeak = crossing.execution ∧
+      crossing.execution.ledger.emissions = [(1, feedback.fire)] ∧
+      native.deliveries = [⟨0, 2, feedback.fire + delay feedback.fire⟩] ∧
+      final.pending = [] ∧
+      ∀ p, final.x 0 (.z p) = (causalProbeStart gain time).x 0 (.z p) +
+        (if p = 2 then 3 / 5 else 0) := by
+  have reorderedBox := causalProbe_box box
+  have physical := causalProbe_physical box (time := time) (by linarith [strong.1]) strong.2
+  obtain ⟨native, same⟩ := crossing.execution.toNative_of_transverse_completion feedback.execution
+    (causalFeedbackRouter_strict positiveDelay) reorderedBox physical feedback.complete
+    feedback.transversal (le_of_eq complete.1)
+  have weakComplete := complete.toWeak_of_native crossing native same
+    (causalProbe_initial gain time) reorderedBox physical
+  obtain ⟨endpoint, emissions⟩ := feedback.execution.observational_unique_weak reorderedBox
+    crossing.execution physical feedback.complete feedback.transversal weakComplete
+  have fires := List.perm_singleton.mp (feedback.emissions ▸ emissions.symm)
+  have empty := List.perm_nil.mp (feedback.pendingEmpty ▸ endpoint.pending.symm)
+  have balance := native.token_balance
+  have nativeFires : native.ledger.emissions = [(1, feedback.fire)] := by
+    simpa only [← same, Execution.toWeak_ledger] using fires
+  rw [empty, nativeFires] at balance
+  have delivery : native.deliveries = [⟨0, 2, feedback.fire + delay feedback.fire⟩] := by
+    have counts : (native.deliveries : Multiset (Delivery 2)) =
+        ([⟨0, 2, feedback.fire + delay feedback.fire⟩] : List (Delivery 2)) := by
+      change (↑([] : List (Delivery 2)) : Multiset (Delivery 2)) + ↑native.deliveries =
+        ↑([] : List (Delivery 2)) + ↑([⟨0, 2, feedback.fire + delay feedback.fire⟩] : List (Delivery 2)) at balance
+      simpa only [Multiset.coe_nil, zero_add] using balance
+    exact List.perm_singleton.mp (Multiset.coe_eq_coe.mp counts)
+  exact ⟨native, same, fires, delivery, empty, fun p => by
+    rw [← endpoint.values, feedback.teacherGains]⟩
 
 end RecursiveLearning.Native
