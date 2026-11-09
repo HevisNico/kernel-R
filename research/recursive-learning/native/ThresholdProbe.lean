@@ -225,23 +225,36 @@ theorem threshold_probe_physical {θ ε} (box : @PhysicalBox 1 θ ε)
   have p := conjunction_counter_physical box time need
   exact ⟨p.region, p.gain_cap, p.recovery_cap, p.reserve⟩
 
+theorem threshold_probe_ready (time read : ℝ) (need : ℕ) (dates : List ℝ) :
+    ReadyCoordinates (thresholdProbeStart time read need dates) 0 :=
+  ⟨rfl, by norm_num [thresholdProbeStart, conjunctionCounter, Snapshot.requeue, preparedTeacher],
+    fun _ => ⟨rfl, by norm_num [thresholdProbeStart, conjunctionCounter, Snapshot.requeue,
+      preparedTeacher, RestBand]⟩⟩
+
+theorem threshold_probe_initial (time read : ℝ) (need : ℕ) (dates : List ℝ) :
+    InitiallyBelowReady (thresholdProbeStart time read need dates) := by
+  intro i c h
+  cases c with
+  | q => change (1 / 10 : ℝ) < 1; norm_num
+  | m p => change (1 / 40 : ℝ) < 1; norm_num
+  | z _ => exact False.elim h
+  | b => exact False.elim h
+  | energy => exact False.elim h
+
 /-- With a full recovery interval between pulses, a fixed final read
 reports whether the number of training pulses meets the hidden need.
 The theorem includes excess pulses, whose earlier FIREs are outside
 the report window. -/
-theorem native_threshold_probe_exists {θ ε} (box : @PhysicalBox 1 θ ε)
-    (time read : ℝ) (need : ℕ) (dates : List ℝ)
+theorem native_threshold_probe_exists_until {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time read horizon : ℝ) (need : ℕ) (dates : List ℝ)
     (positive : 0 < need) (before : time < read)
     (future : ∀ d ∈ dates, time < d) (after : ∀ d ∈ dates, d + 24 ≤ read)
-    (spacing : dates.Pairwise (fun a b => a + 24 ≤ b)) :
-    Nonempty (ScheduledCell θ (thresholdProbeStart time read need dates) (read + 24)
+    (spacing : dates.Pairwise (fun a b => a + 24 ≤ b)) (finish : read + 24 ≤ horizon) :
+    Nonempty (ScheduledCell θ (thresholdProbeStart time read need dates) horizon
       (counterWindow read) (decide (need ≤ dates.length)) (fun s => s.pending = [])) := by
   let start := thresholdProbeStart time read need dates
   have phys := threshold_probe_physical box time read need dates
-  have ready : ReadyCoordinates start 0 :=
-    ⟨rfl, by norm_num [start, thresholdProbeStart, conjunctionCounter, Snapshot.requeue, preparedTeacher],
-      fun _ => ⟨rfl, by norm_num [start, thresholdProbeStart, conjunctionCounter, Snapshot.requeue,
-        preparedTeacher, RestBand]⟩⟩
+  have ready := threshold_probe_ready time read need dates
   have gain : start.x 0 (.z 0) = thresholdGain need := by
     change -(3 / 5 : ℝ) * ((need - 1 : ℕ) : ℝ) = thresholdGain need
     rw [Nat.cast_sub (by omega : 1 ≤ need), Nat.cast_one]
@@ -251,13 +264,13 @@ theorem native_threshold_probe_exists {θ ε} (box : @PhysicalBox 1 θ ε)
     threshold_training_exists box phys ready (fun _ => rfl) before future after spacing rfl gain rfl
   obtain ⟨readout⟩ := threshold_slot_exists box (train.physical_invariant box phys) ready raw early queue
     (by simp) gain recovery
-  have late : readout.final.time < read + 24 := by linarith [readout.date]
+  have late : readout.final.time < horizon := by linarith [readout.date]
   obtain ⟨tail, complete, tailPositive, tailSilent, tailDeliveries⟩ :=
     quiet_ready_tail_exists (θ := θ) late
       (fun i => by rw [Subsingleton.elim i 0]; exact readout.ready)
       (fun i p => by rw [Subsingleton.elim i 0]; exact readout.rawNone p) readout.pending
   let e := (train.append readout.execution).append tail
-  have empty : (quietAt readout.final (read + 24)).pending = [] := readout.pending
+  have empty : (quietAt readout.final horizon).pending = [] := readout.pending
   refine ⟨⟨_, e, complete, (Execution.contactsTransversal_append _ _).2
     ⟨(Execution.contactsTransversal_append _ _).2 ⟨positive, readout.transverse⟩, tailPositive⟩,
     ?_, ?_, empty⟩⟩
@@ -287,6 +300,16 @@ theorem native_threshold_probe_exists {θ ε} (box : @PhysicalBox 1 θ ε)
       isSome.trans (decide_eq_decide.mpr (by omega))
     cases fire <;> simp_all
 
+
+theorem native_threshold_probe_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time read : ℝ) (need : ℕ) (dates : List ℝ)
+    (positive : 0 < need) (before : time < read)
+    (future : ∀ d ∈ dates, time < d) (after : ∀ d ∈ dates, d + 24 ≤ read)
+    (spacing : dates.Pairwise (fun a b => a + 24 ≤ b)) :
+    Nonempty (ScheduledCell θ (thresholdProbeStart time read need dates) (read + 24)
+      (counterWindow read) (decide (need ≤ dates.length)) (fun s => s.pending = [])) :=
+  native_threshold_probe_exists_until box time read (read + 24) need dates positive before
+    future after spacing le_rfl
 
 /-- The pulse schedule depends on the tested count, independently of
 the hidden need encoded in the start gain. -/
@@ -318,19 +341,28 @@ private theorem threshold_calendar_valid (time : ℝ) (count : ℕ) :
     have bound : (i : ℝ) + 1 ≤ j := by exact_mod_cast Nat.succ_le_of_lt ij
     linarith
 
+theorem threshold_count_probe_exists_until {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time clock horizon : ℝ) (need count : ℕ) (positive : 0 < need)
+    (starts : time ≤ clock) (ends : thresholdReadTime clock count + 24 ≤ horizon) :
+    let read := thresholdReadTime clock count
+    let start := thresholdProbeStart time read need (thresholdCalendar clock count)
+    Nonempty (ScheduledCell θ start horizon (counterWindow read)
+      (decide (need ≤ count)) (fun s => s.pending = [])) := by
+  have bound : (0 : ℝ) ≤ count := by positivity
+  have ⟨valid, spacing⟩ := threshold_calendar_valid clock count
+  have before : time < thresholdReadTime clock count := by unfold thresholdReadTime; linarith
+  have probe := native_threshold_probe_exists_until box time (thresholdReadTime clock count) horizon need
+    (thresholdCalendar clock count) positive before (fun d hd => starts.trans_lt (valid d hd).1)
+    (fun d hd => (valid d hd).2) spacing ends
+  rwa [threshold_calendar_length] at probe
+
 theorem threshold_count_probe_exists {θ ε} (box : @PhysicalBox 1 θ ε)
     (time : ℝ) (need count : ℕ) (positive : 0 < need) :
     let read := thresholdReadTime time count
     let start := thresholdProbeStart time read need (thresholdCalendar time count)
     Nonempty (ScheduledCell θ start (read + 24) (counterWindow read)
-      (decide (need ≤ count)) (fun s => s.pending = [])) := by
-  have bound : (0 : ℝ) ≤ count := by positivity
-  have ⟨valid, spacing⟩ := threshold_calendar_valid time count
-  have before : time < thresholdReadTime time count := by unfold thresholdReadTime; linarith
-  have probe := native_threshold_probe_exists box time (thresholdReadTime time count) need
-    (thresholdCalendar time count) positive before (fun d hd => (valid d hd).1)
-    (fun d hd => (valid d hd).2) spacing
-  rwa [threshold_calendar_length] at probe
+      (decide (need ≤ count)) (fun s => s.pending = [])) :=
+  threshold_count_probe_exists_until box time time _ need count positive le_rfl le_rfl
 
 /-- For each hidden need, the threshold run exists in upward-crossing
 semantics. Every complete crossing run agrees on its physical state,
@@ -348,20 +380,126 @@ theorem threshold_count_probe_crossing {θ ε} (box : @PhysicalBox 1 θ ε)
           v.ObservationalEq run.final ∧ native.deliveries.Perm run.execution.deliveries ∧
           ∀ i, other.execution.emissionTimes i = run.execution.emissionTimes i := by
   obtain ⟨run⟩ := threshold_count_probe_exists box time need count positive
-  have initial : InitiallyBelowReady
-      (thresholdProbeStart time (thresholdReadTime time count) need (thresholdCalendar time count)) := by
-    intro i c h
-    cases c with
-    | q => change (1 / 10 : ℝ) < 1; norm_num
-    | m p => change (1 / 40 : ℝ) < 1; norm_num
-    | z _ => exact False.elim h
-    | b => exact False.elim h
-    | energy => exact False.elim h
+  have initial := threshold_probe_initial time (thresholdReadTime time count) need (thresholdCalendar time count)
   have physical := threshold_probe_physical box time (thresholdReadTime time count) need (thresholdCalendar time count)
   have causal : StrictCausalRouter (fun (_ : Fin 1) (_ : ℝ) => []) :=
     fun _ _ _ h => (List.not_mem_nil h).elim
   obtain ⟨crossing, agree, done, every⟩ := complete_crossing_accounting run.execution run.complete
     run.transverse box physical initial causal
   exact ⟨run, crossing, agree, done, every⟩
+
+
+/-- The entire routed packet is determined by the tested count. -/
+noncomputable def thresholdPacket (clock : ℝ) (count : ℕ) : List (Delivery 1) :=
+  conjunctionDoseTokens 0 (thresholdCalendar clock count) ++ [conjunctionProbe (thresholdReadTime clock count)]
+
+private theorem threshold_packet_future {clock count d} (mem : d ∈ thresholdPacket clock count) :
+    clock < d.due := by
+  rcases List.mem_append.mp mem with before | read
+  · obtain ⟨t, ht, rfl⟩ := List.mem_map.mp before
+    exact ((threshold_calendar_valid clock count).1 t ht).1
+  · obtain rfl := List.mem_singleton.mp read
+    change clock < thresholdReadTime clock count
+    unfold thresholdReadTime
+    linarith [show (0 : ℝ) ≤ count by positivity]
+
+noncomputable def ReportLayout.appendThreshold {n} (layout : ReportLayout n) (source : Fin n)
+    (need count : ℕ) : ReportLayout (n + 1) :=
+  let clock := layout.last + 1
+  let read := thresholdReadTime clock count
+  let receiver := (thresholdProbeStart layout.start.time read need (thresholdCalendar clock count)).requeue []
+  ⟨queueHead layout.start receiver,
+    prependRouted layout.route (forwardReport source (layout.windows source) (thresholdPacket clock count)),
+    Fin.cases (counterWindow read) layout.windows, read + 1⟩
+
+theorem ReportLayout.appendThreshold_source_queue {n} (layout : ReportLayout n) (source : Fin n)
+    (need count : ℕ) :
+    (layout.appendThreshold source need count).start.pending = layout.start.pending.map Delivery.succ := rfl
+
+theorem append_threshold_timed {n} {layout : ReportLayout n} (timed : layout.WellTimed)
+    (source : Fin n) (need count : ℕ) : (layout.appendThreshold source need count).WellTimed := by
+  have later : layout.last < (layout.appendThreshold source need count).last := by
+    change layout.last < layout.last + 1 + 24 * ((count : ℝ) + 1) + 1
+    linarith [show (0 : ℝ) ≤ count by positivity]
+  refine ⟨timed.1.trans later, ?_⟩
+  intro i
+  cases i using Fin.cases with
+  | zero => exact le_rfl
+  | succ i => exact (timed.2 i).trans later.le
+
+private theorem guarded_threshold_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time clock horizon : ℝ) (need count : ℕ) (launch : Bool) (positive : 0 < need)
+    (starts : time < clock) (ends : thresholdReadTime clock count + 24 ≤ horizon) :
+    let read := thresholdReadTime clock count
+    let base := thresholdProbeStart time read need (thresholdCalendar clock count)
+    let start := base.requeue (if launch then thresholdPacket clock count else [])
+    Nonempty (ScheduledCell θ start horizon (counterWindow read)
+      (launch && decide (need ≤ count)) (fun s => s.pending = [])) := by
+  cases launch with
+  | true => exact threshold_count_probe_exists_until box time clock horizon need count positive starts.le ends
+  | false =>
+    let read := thresholdReadTime clock count
+    let s := (thresholdProbeStart time read need (thresholdCalendar clock count)).requeue []
+    have before : time < horizon := by
+      change clock + 24 * ((count : ℝ) + 1) + 24 ≤ horizon at ends
+      linarith [show (0 : ℝ) ≤ count by positivity]
+    have ready (i : Fin 1) : ReadyCoordinates s i := by
+      rw [Subsingleton.elim i 0]
+      have h := threshold_probe_ready time read need (thresholdCalendar clock count)
+      exact ⟨h.ready, h.charge, h.auxiliary⟩
+    obtain ⟨wait, done, transverse, silent, deliveries⟩ :=
+      quiet_ready_tail_exists (θ := θ) (s := s) before ready (fun _ _ => rfl) rfl
+    exact ⟨⟨_, wait, done, transverse, by rw [deliveries]; rfl,
+      by simp [Reports, ReportWindow.dates, Execution.emissionTimes, silent], rfl⟩⟩
+
+/-- An earlier physical report launches the fixed threshold packet.
+Only the final read window is visible to the downstream report wires. -/
+theorem append_threshold_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
+    (prior : CompiledRun θ layout T bits) (box : @PhysicalBox 1 θH ε)
+    (source : Fin n) (need count : ℕ) (positive : 0 < need) (timed : layout.WellTimed)
+    (horizon : (layout.appendThreshold source need count).last + 75 < T) :
+    ∃ run : CompiledRun (prependParameters θH θ) (layout.appendThreshold source need count) T
+      (Fin.cases (bits source && decide (need ≤ count)) bits),
+      lessonReceipts run.execution.deliveries 0 = (if bits source then count + 1 else 0) ∧
+      (∀ i, run.final.x i.succ = prior.final.x i) ∧
+      (∀ i, lessonReceipts run.execution.deliveries i.succ = lessonReceipts prior.execution.deliveries i) := by
+  let clock := layout.last + 1
+  let read := thresholdReadTime clock count
+  let packet := thresholdPacket clock count
+  let contacts := forwardReport source (layout.windows source) packet
+  have starts : layout.start.time < clock := by dsimp [clock]; linarith [timed.1]
+  obtain ⟨cell⟩ := guarded_threshold_exists box layout.start.time clock T need count (bits source)
+    positive starts (by change read + 1 + 75 < T at horizon; linarith)
+  have strict : StrictHeadRoutes contacts := forward_report_strict source (layout.windows source)
+    (fun d hd => by linarith [threshold_packet_future hd, timed.2 source, show clock = layout.last + 1 from rfl])
+  have queue := forward_report_inputs prior.execution source (layout.windows source) packet
+    (bits source) (prior.reports source)
+  obtain ⟨weave⟩ := compose_scheduled_receiver prior.execution cell.execution prior.complete cell.complete
+    rfl [] contacts strict (List.Perm.of_eq queue)
+  let e : Execution (prependParameters θH θ) (layout.appendThreshold source need count).route
+      (layout.appendThreshold source need count).start _ := weave.execution
+  have hp := threshold_probe_physical box layout.start.time read need (thresholdCalendar clock count)
+  have init := threshold_probe_initial layout.start.time read need (thresholdCalendar clock count)
+  have reports (i : Fin (n + 1)) : Reports e i ((layout.appendThreshold source need count).windows i)
+      (Fin.cases (bits source && decide (need ≤ count)) bits i) := by
+    cases i using Fin.cases with
+    | zero =>
+      unfold Reports ReportWindow.dates
+      rw [show e.emissionTimes 0 = cell.execution.emissionTimes 0 from weave.head_emission_times]
+      exact cell.reports
+    | succ i =>
+      unfold Reports ReportWindow.dates
+      rw [show e.emissionTimes i.succ = prior.execution.emissionTimes i from weave.tail_emission_times i]
+      exact prior.reports i
+  let run : CompiledRun (prependParameters θH θ) (layout.appendThreshold source need count) T
+      (Fin.cases (bits source && decide (need ≤ count)) bits) :=
+    ⟨_, e, weave.complete prior.complete cell.complete, weave.contacts_transversal prior.positive cell.transverse,
+      reports, prepend_physical prior.physical ⟨hp.region, hp.gain_cap, hp.recovery_cap, hp.reserve⟩ _,
+      prepend_initial_ready prior.initial init, prepend_routed_causal prior.causal strict⟩
+  refine ⟨run, (CausalTraceBalance.head_receipts weave.trace).trans ?_, fun _ => rfl,
+    CausalTraceBalance.tail_receipts weave.trace⟩
+  refine cell.deliveries.length_eq.trans ?_
+  change (if bits source then packet else []).length = _
+  cases bits source <;> simp [packet, thresholdPacket, conjunctionDoseTokens, threshold_calendar_length]
 
 end RecursiveLearning.Native

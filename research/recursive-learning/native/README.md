@@ -599,12 +599,14 @@ each profile and fixed fabrication agree on terminal observations,
 firing dates and deliveries. The four-profile search above also
 instantiates this tree interface.
 
-The binary-search construction bisects the declared interval and
-selects the action indexed by the hidden need. Its hypotheses require
-calibrated physical comparisons at the pivots. The existing fixed
-log-gain encoding certifies some comparisons, including the
-three-versus-four example. Other pivot comparisons require their own
-calibration proof.
+[`compile_native_binary_need_search`](CalibratedDecisionTree.lean)
+bisects the interval from 1 to K for any positive K. Each pivot
+uses the native threshold probe, with the same hidden need encoded
+in the birth gains of all its probe cells. The router, source queue
+and windows are fixed across needs. The action indexed by the
+hidden need receives its lesson and credit, and every other leaf
+receives zero inputs. Leaf lessons retain the four-pulse limit per
+block.
 
 ## A threshold probe with excess pulses
 
@@ -619,9 +621,8 @@ gain and recovery rate. Those FIREs precede the report window.
 The common read reports exactly when the tested count meets or
 exceeds the hidden need. Its queue and report window depend on the
 tested count. All complete upward-crossing executions for each fixed
-setup agree on the endpoint, firing dates and deliveries. The
-decision-tree compiler still uses its original calibrated trial
-interface.
+setup agree on the endpoint, firing dates and deliveries. In a compiled
+decision tree, an upstream report sends the entire threshold packet. Only the final read window feeds the next decision.
 
 ## Verify
 

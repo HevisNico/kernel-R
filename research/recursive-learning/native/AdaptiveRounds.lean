@@ -1,4 +1,5 @@
 import ScheduledProgram
+import ThresholdProbe
 
 /-! A later learner receives its training pulses and read pulse from an
 earlier report. A round may add logic, new trials, or guarded actions.
@@ -181,6 +182,8 @@ inductive AdaptiveProgram (inputs : ℕ) : ℕ → Type
       AdaptiveProgram inputs (n + 1)
   | trial {n} (prior : AdaptiveProgram inputs n) (source : Fin n) (spec : AdaptiveTrial) :
       AdaptiveProgram inputs (n + 1)
+  | threshold {n} (prior : AdaptiveProgram inputs n) (source : Fin n) (need count : ℕ)
+      (positive : 0 < need) : AdaptiveProgram inputs (n + 1)
   | commit {n} (prior : AdaptiveProgram inputs n) (source : Fin n) (port : Port) (lesson : Lesson)
       (capacity : lesson.preparation ≤ 4 ∧ lesson.practice ≤ 4) : AdaptiveProgram inputs (n + 1 + 1)
 
@@ -202,6 +205,7 @@ noncomputable def AdaptiveProgram.compile {n m} (p : AdaptiveProgram n m)
   | .andGate prior first rest => (prior.compile input).appendAnd (first :: rest)
   | .notGate prior source => (prior.compile input).appendNot source
   | .trial prior source spec => (prior.compile input).appendTrial source spec
+  | .threshold prior source need count _ => (prior.compile input).appendThreshold source need count
   | .commit prior source port lesson _ => (prior.compile input).appendBranch source port lesson
 
 def AdaptiveProgram.eval {n m} (p : AdaptiveProgram n m)
@@ -217,6 +221,9 @@ def AdaptiveProgram.eval {n m} (p : AdaptiveProgram n m)
   | .trial prior source spec =>
     let bits := prior.eval input
     Fin.cases (bits source && spec.passes) bits
+  | .threshold prior source need count _ =>
+    let bits := prior.eval input
+    Fin.cases (bits source && decide (need ≤ count)) bits
   | .commit prior _ _ _ _ => noActionReports (prior.eval input)
 
 theorem AdaptiveProgram.trial_reports_retention {n m} (prior : AdaptiveProgram n m)
@@ -231,6 +238,7 @@ def AdaptiveProgram.initialParameters {n m} : AdaptiveProgram n m → (Fin m →
   | .andGate prior _ _, θ => prior.initialParameters (fun i => θ i.succ)
   | .notGate prior _, θ => prior.initialParameters (fun i => θ i.succ)
   | .trial prior _ _, θ => prior.initialParameters (fun i => θ i.succ)
+  | .threshold prior _ _ _ _, θ => prior.initialParameters (fun i => θ i.succ)
   | .commit prior _ _ _ _, θ => prior.initialParameters (fun i => θ i.succ.succ)
 
 def GainsRetain (gain : Port → ℝ) (needs : Learner) : Prop :=
@@ -249,6 +257,9 @@ def AdaptiveProgram.Effects {n m} (p : AdaptiveProgram n m) (input : Fin n → B
   | .trial prior source spec =>
     receipts 0 = (if prior.eval input source then spec.lesson.cost + 1 else 0) ∧
     prior.Effects input (fun i => gains i.succ) (fun i => receipts i.succ)
+  | .threshold prior source _ count _ =>
+    receipts 0 = (if prior.eval input source then count + 1 else 0) ∧
+    prior.Effects input (fun i => gains i.succ) (fun i => receipts i.succ)
   | @AdaptiveProgram.commit _ k prior source port lesson _ =>
     let accepted := prior.eval input source
     receipts 0 = (if accepted then lesson.cost else 0) ∧
@@ -265,6 +276,7 @@ theorem AdaptiveProgram.initial_box {n m θ ε} (p : AdaptiveProgram n m)
   | andGate _ _ _ ih => exact ih ⟨box.1, fun i => box.2 i.succ⟩
   | notGate _ _ ih => exact ih ⟨box.1, fun i => box.2 i.succ⟩
   | trial _ _ _ ih => exact ih ⟨box.1, fun i => box.2 i.succ⟩
+  | threshold _ _ _ _ _ ih => exact ih ⟨box.1, fun i => box.2 i.succ⟩
   | commit _ _ _ _ _ ih => exact ih ⟨box.1, fun i => box.2 i.succ.succ⟩
 
 theorem AdaptiveProgram.compile_timed {n m} (p : AdaptiveProgram n m) {layout : ReportLayout n}
@@ -274,6 +286,7 @@ theorem AdaptiveProgram.compile_timed {n m} (p : AdaptiveProgram n m) {layout : 
   | andGate _ first rest ih => exact append_and_timed ih (first :: rest)
   | notGate _ source ih => exact append_not_timed ih source
   | trial _ source spec ih => exact append_trial_timed ih source spec
+  | threshold _ source need count _ ih => exact append_threshold_timed ih source need count
   | commit _ source port lesson _ ih => exact append_branch_timed ih source port lesson
 
 theorem AdaptiveProgram.layout_last_mono {n m} (p : AdaptiveProgram n m) (layout : ReportLayout n) :
@@ -289,6 +302,9 @@ theorem AdaptiveProgram.layout_last_mono {n m} (p : AdaptiveProgram n m) (layout
   | trial prior source spec ih =>
     change _ ≤ (prior.compile layout).last + 1 + 66
     linarith
+  | threshold prior source need count _ ih =>
+    change _ ≤ (prior.compile layout).last + 1 + 24 * ((count : ℝ) + 1) + 1
+    linarith [show (0 : ℝ) ≤ count by positivity]
   | commit _ _ _ _ _ ih => exact ih
 
 private theorem carries_effects {n m k} (p : AdaptiveProgram n m) {bits : Fin n → Bool}
@@ -371,6 +387,22 @@ theorem AdaptiveProgram.run {n m θ ε T} (p : AdaptiveProgram n m) {layout : Re
       ⟨head, count, carries_effects prior Fin.succ values receipts effects⟩
     rw [prepend_parameters_all θ] at result
     exact result
+  | threshold prior source need count positive ih =>
+    rename_i k
+    have tailBox : PhysicalBox (fun i : Fin k => θ i.succ) ε := ⟨box.1, fun i => box.2 i.succ⟩
+    have headBox : @PhysicalBox 1 (fun _ => θ 0) ε := ⟨box.1, fun _ => box.2 0⟩
+    have limit : (prior.compile layout).last + 75 < T := by
+      change (prior.compile layout).last + 1 + 24 * ((count : ℝ) + 1) + 1 + 75 < T at horizon
+      linarith [show (0 : ℝ) ≤ count by positivity]
+    obtain ⟨tail, effects⟩ := ih input tailBox limit
+    obtain ⟨head, delivered, values, receipts⟩ := append_threshold_run tail headBox source need count positive
+      (prior.compile_timed timed) horizon
+    have result : ∃ run : CompiledRun _ ((prior.threshold source need count positive).compile layout) T _,
+        (prior.threshold source need count positive).Effects bits (fun i q => run.final.x i (.z q))
+          (lessonReceipts run.execution.deliveries) :=
+      ⟨head, delivered, carries_effects prior Fin.succ values receipts effects⟩
+    rw [prepend_parameters_all θ] at result
+    exact result
   | commit prior source port lesson capacity ih =>
     rename_i k
     have tailBox : PhysicalBox (fun i : Fin k => θ i.succ.succ) ε := ⟨box.1, fun i => box.2 i.succ.succ⟩
@@ -414,6 +446,16 @@ private theorem same_trial_sources {n} {a b : ReportLayout n} (same : a.SameSour
   · simp only [ReportLayout.appendTrial, windows, times]
   · simp only [ReportLayout.appendTrial, times]
   · rw [ReportLayout.appendTrial_source_queue, ReportLayout.appendTrial_source_queue, pending]
+
+private theorem same_threshold_sources {n} {a b : ReportLayout n} (same : a.SameSources b)
+    (source : Fin n) (needA needB count : ℕ) :
+    (a.appendThreshold source needA count).SameSources (b.appendThreshold source needB count) := by
+  obtain ⟨⟨routes, windows, times⟩, pending⟩ := same
+  refine ⟨⟨?_, ?_, ?_⟩, ?_⟩
+  · simp only [ReportLayout.appendThreshold, routes, windows, times]
+  · simp only [ReportLayout.appendThreshold, windows, times]
+  · simp only [ReportLayout.appendThreshold, times]
+  · rw [ReportLayout.appendThreshold_source_queue, ReportLayout.appendThreshold_source_queue, pending]
 
 private theorem same_not_sources {n} {a b : ReportLayout n} (same : a.SameSources b)
     (source : Fin n) : (a.appendNot source).SameSources (b.appendNot source) := by
@@ -462,6 +504,9 @@ inductive AdaptiveProgram.SamePlan {inputs : ℕ} :
   | trial {n} {a b : AdaptiveProgram inputs n} {source ta tb} (prior : SamePlan a b)
       (tokens : ∀ t, ta.tokens t = tb.tokens t) :
       SamePlan (.trial a source ta) (.trial b source tb)
+  | threshold {n} {a b : AdaptiveProgram inputs n} {source needA needB count posA posB}
+      (prior : SamePlan a b) :
+      SamePlan (.threshold a source needA count posA) (.threshold b source needB count posB)
   | commit {n} {a b : AdaptiveProgram inputs n} {source port lesson capA capB}
       (prior : SamePlan a b) :
       SamePlan (.commit a source port lesson capA) (.commit b source port lesson capB)
@@ -474,6 +519,8 @@ theorem AdaptiveProgram.SamePlan.compile_same_sources {n m} {a b : AdaptiveProgr
   | @andGate _ _ _ first rest _ ih => exact same_and_sources ih (first :: rest)
   | @notGate _ _ _ source _ ih => exact same_not_sources ih source
   | @trial _ _ _ source ta tb _ tokens ih => exact same_trial_sources ih source ta tb tokens
+  | @threshold _ _ _ source needA needB count _ _ _ ih =>
+    exact same_threshold_sources ih source needA needB count
   | @commit _ _ _ source port lesson _ _ _ ih => exact same_commit_sources ih source port lesson
 
 theorem AdaptiveProgram.compile_same_wiring {n m} (p : AdaptiveProgram n m)
@@ -490,6 +537,9 @@ theorem AdaptiveProgram.compile_same_wiring {n m} (p : AdaptiveProgram n m)
   | trial prior source spec ih =>
     obtain ⟨route, windows, clock⟩ := ih
     simp [AdaptiveProgram.compile, ReportLayout.SameWiring, ReportLayout.appendTrial, route, windows, clock]
+  | threshold prior source need count positive ih =>
+    obtain ⟨route, windows, clock⟩ := ih
+    simp [AdaptiveProgram.compile, ReportLayout.SameWiring, ReportLayout.appendThreshold, route, windows, clock]
   | commit prior source port lesson capacity ih =>
     obtain ⟨route, windows, clock⟩ := ih
     simp [AdaptiveProgram.compile, ReportLayout.SameWiring, ReportLayout.appendBranch, route, windows, clock]
