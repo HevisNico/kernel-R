@@ -111,6 +111,11 @@ settings. The continuous optimization problem remains open.
 | 200 | 0.3% | 8 | 0 | 30 | 30 | 14 |
 | 200 | 10% | 8 | 0 | 0 | 0 | 14 |
 
+## Lower ERROR exit
+
+The [registered fourth-comparator run](LOWER_EXIT_RESULTS.md) evaluates
+exit 0.0025 under relative and inherited absolute threshold errors.
+
 ## Evidence and scope
 
 The reduced equations and constants are a Python transcription of the
