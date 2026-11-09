@@ -470,6 +470,7 @@ import KernelR.HybridSnapshotObservational
 import KernelR.HybridUniversalBirthCadenceChain
 import KernelR.HybridUniversalChainPreparation
 import KernelR.HybridUniversalExecution
+import KernelR.HybridParameterNominal
 import KernelR.HybridUrgentMoves
 import KernelR.UniversalChainHeadline
 import KernelR.HybridFiniteProgress

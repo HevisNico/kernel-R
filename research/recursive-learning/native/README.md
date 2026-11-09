@@ -761,6 +761,25 @@ Both full fabrication boxes are covered, ±0.3% and ±10%, with every
 parameter fixed independently in its declared interval. The construction
 covers one training pulse and one read through the first FIRE.
 
+## Thresholds in the parameters
+
+[HybridParameterExecution.lean](../../../proof/lean/KernelR/HybridParameterExecution.lean)
+uses the fixed charge guards stored in each cell's `Parameters`. The
+continuous equations, pulse origin and queue rules are shared with the
+nominal kernel. Flows and completion check the same realized guards as
+jumps.
+
+[ParameterTraining.lean](ParameterTraining.lean) places the two-pulse
+experiment in this semantics. Lean constructs a complete run through
+the read FIRE for every admissible choice in either full fabrication
+box, with the three tolerances above. The other charge guards are
+nominal. The experiment covers one training pulse and one read.
+
+At nominal levels, [HybridParameterNominal.lean](../../../proof/lean/KernelR/HybridParameterNominal.lean)
+transfers the original endpoint and per-cell firing-time uniqueness
+theorem to the parameterized interface. Generalizing that uniqueness
+proof to perturbed guards is a separate step.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:

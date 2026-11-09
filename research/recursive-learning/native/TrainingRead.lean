@@ -22,6 +22,11 @@ present, is carried through unchanged. -/
 structure TrainingSilentLeg (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Port)
     (origin : Option ℝ) (upper level stop : ℝ) where
   positive : s.time < stop
+  main : ∀ i, s.main i = .ready
+  mode : s.aux 0 p = .silent
+  other_modes : ∀ q ≠ p, s.aux 0 q = .ready
+  raw : s.raw 0 p = origin
+  other_raw : ∀ i q, i ≠ 0 ∨ q ≠ p → s.raw i q = none
   continuous : ∀ i c, ContinuousOn (fun t => readyProtectedValues θ s 0 p .silent origin t i c)
     (Icc s.time stop)
   integrable : ∀ i c, IntervalIntegrable (fun t =>
@@ -158,7 +163,8 @@ private theorem makeSilentLeg {θ ε s p origin upper level stop}
     linarith [(charge t ⟨ht.1, ht.2.le⟩).2]
   have mbound (t : ℝ) (q : Port) (hq : q ≠ p) : path t 0 (.m q) < 1 := by
     norm_num [path, readyProtectedValues, hq, rest q hq, relax]
-  refine ⟨⟨positive, ?_, ?_, ?_, qbound, sensor, fun t _ => mbound t, support, pending, ?_, ?_⟩⟩
+  refine ⟨⟨positive, main, mode, fun q h => other 0 q (Or.inr h), raw, otherRaw,
+    ?_, ?_, ?_, qbound, sensor, fun t _ => mbound t, support, pending, ?_, ?_⟩⟩
   · intro i c
     exact (continuous_iff_continuousAt.mpr fun t =>
       (readyProtectedValues_derivative (θ := θ) s 0 p .silent origin t i c).continuousAt).continuousOn

@@ -142,14 +142,24 @@ structure ErrorReadHandoff (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Por
     (quietAt (setAux {s with time := span.stop, x := span.path span.stop} 0 p .ready)
       (errorReadDelivery p readTime).due)
   quiet_main_guard : ∀ t ∈ Ico span.stop (errorReadDelivery p readTime).due, quiet.path t 0 .q < level
+  queued : s.pending = [errorReadDelivery p readTime]
   readStart : Snapshot 1
-  arrival : Jump (fun _ _ => [])
-    (quietAt (setAux {s with time := span.stop, x := span.path span.stop} 0 p .ready)
-      (errorReadDelivery p readTime).due) readStart
+  read_start_eq : readStart =
+    { setRaw (quietAt (setAux {s with time := span.stop, x := span.path span.stop} 0 p .ready)
+        readTime) 0 p (some readTime) with pending := [] }
   read_date : readStart.time = readTime
   ready_at_read : ReadoutReady readStart p
   learned_at_read : readStart.x 0 (.z p) = learned
   decision : TolerantSnapshotDecision θ readStart p true level
+
+/-- The native delivery at the scheduled date. -/
+def ErrorReadHandoff.arrival {θ s p upper lower level readTime}
+    (run : ErrorReadHandoff θ s p upper lower level readTime) :
+    Jump (fun _ _ => [])
+      (quietAt (setAux {s with time := run.span.stop, x := run.span.path run.span.stop} 0 p .ready)
+        readTime) run.readStart := by
+  rw [run.read_start_eq]
+  exact .arrive _ (errorReadDelivery p readTime) [] [] run.queued rfl (run.error_raw_empty p)
 
 /-- A single already-exposed ERROR phase trains the port, then a scheduled
 pulse reads it. The initial queue contains only that read pulse. Other
@@ -305,8 +315,6 @@ theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
       (fun i => by linarith [(chargeBand i).2])
       (fun i q => by rw [Subsingleton.elim i 0, reopenedSensor]; split <;> linarith)
       (by change ∀ v ∈ s.pending, d.due ≤ v.due; simp [queue, d])
-  have arrival : Jump (fun _ _ => []) beforeRead admitted :=
-    .arrive beforeRead d [] [] queue rfl (noneRaw 0 p)
   have preserved (q : Port) : admitted.x 0 (.z q) = reopened.x 0 (.z q) := rfl
   have got : admitted.x 0 (.z p) = learned := span.gain_out
   have readReady : ReadoutReady admitted p := {
@@ -375,7 +383,7 @@ theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
   obtain ⟨read⟩ := tolerant_snapshot_readout (high := true) box physical readReady threshold
     (show 2 ≤ Real.exp (admitted.x 0 (.z p)) ∧ Real.exp (admitted.x 0 (.z p)) ≤ 12 / 5 by
       rw [got]; exact learnedGain)
-  refine ⟨⟨learned, span, rfl, ?_, ?_, raw, ?_, quiet, ?_, admitted, arrival, rfl, readReady, got, read⟩⟩
+  refine ⟨⟨learned, span, rfl, ?_, ?_, raw, ?_, quiet, ?_, queue, admitted, rfl, rfl, readReady, got, read⟩⟩
   · intro t ht
     change errorTailValues θ s 0 p none t 0 .q < level
     rw [quiet_error_charge]
