@@ -11,6 +11,7 @@ IMPORTS = {
     'import KernelR.TrustedHeadline',
     'import KernelR.TrustedBaseChecker',
     'import KernelR.TrustedBase',
+    'import KernelR.HybridCrossingMemorySaturation',
     'import KernelR.HybridResetRateCrossing',
     'import KernelR.HybridZeroRecoveryCrossing',
 }
@@ -22,6 +23,9 @@ NEW_MODULES |= {
     'proof/lean/KernelR/HybridZeroRecovery.lean',
     'proof/lean/KernelR/HybridZeroRecoveryCrossing.lean',
     'proof/lean/ZeroRecoveryAudit.lean',
+    'proof/lean/KernelR/HybridMemorySaturation.lean',
+    'proof/lean/KernelR/HybridCrossingMemorySaturation.lean',
+    'proof/lean/MemorySaturationAudit.lean',
 }
 ENTRY = 'proof/lean/KernelR.lean'
 

@@ -22,6 +22,18 @@ they are not additional semantic assumptions of the trusted statement.
 The sections below retain additional review guidance for claims outside that
 headline, including learning-section coverage and progress.
 
+For [finite port-memory saturation](docs/GAIN_MEMORY_SATURATION.md), review
+`ErrorAvailable`, `CappedErrorSectionCover` and `WeakCappedErrorSectionCover`.
+Exposure must retain READY and positive energy while permitting the automatic
+cap gate to close. Counted phases need real entry/exit jumps and uninterrupted
+ERROR states; inactive portions need mode-based reasons, not zero-dose
+premises. The crossing result uses the actual `run.execution` cover, with a
+coordinate-preserving single-flow argument rather than arbitrary-network
+native/crossing correspondence. The theorem gives a conditional section-count
+threshold, not input-to-section existence or a universal deadline. Cap
+permanence concerns only the selected port's log-gain. The explicit stationary
+at-cap witness does not prove reachability from below or from protocol births.
+
 For exact dose counting, review whether `ErrorSectionCover` and
 `MarkSectionCover` in [HybridDoseCounting](proof/lean/KernelR/HybridDoseCounting.lean)
 express complete exposed sections of the actual execution: real entry and

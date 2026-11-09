@@ -4,6 +4,14 @@ For the same fixed-delay headline with a closed-form router and an explicit
 machine-checked reading base, start at the [trusted-base guide](../../docs/TRUSTED_BASE.md).
 This entry point preserves the existing hypotheses and conclusions.
 
+A separate [port-memory cap theorem](../../docs/GAIN_MEMORY_SATURATION.md)
+has arbitrary-router finite-execution scope in native and upward-crossing
+semantics. Its exact ceiling threshold requires actual complete ERROR
+section covers with READY and positive-energy exposure; the cap may close.
+It does not imply that arbitrary inputs create enough such sections, that a
+protocol birth reaches cap, or that recovery and other ports stop learning.
+It changes none of the chain construction, cadence, or progress hypotheses.
+
 The [written finite-chain argument](../../archive/reciprocal/proof/reciprocal_composition/THEOREM.md) now
 has a constructed physical common-birth family for every positive finite N,
 as well as its earlier abstract induction. The new universal-complete layer now

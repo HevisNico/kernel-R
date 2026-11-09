@@ -42,6 +42,22 @@ and terminal auxiliaries, positive energy and strict open caps. The covers
 exclude omitted partial learning contributions without assuming dose-ledger
 equalities. See the [hypotheses and scope](../../docs/EXACT_DOSE_COUNTING.md).
 
+## Finite port-memory saturation
+
+The separate [memory-cap result](../../docs/GAIN_MEMORY_SATURATION.md) proves
+`z_final = min(log C,z_initial+0.6*k)` from actual mechanically exposed ERROR
+section covers, including the final cap-clipped phase. The natural ceiling of
+the initial headroom divided by 0.6 is the exact count threshold. Only the
+selected port's log-gain is frozen after cap attainment.
+
+`HybridMemorySaturation` gives the native result;
+`HybridCrossingMemorySaturation` proves it for weak histories and actual
+upward-crossing runs without assuming general native/model correspondence.
+The count theorem does not construct enough sections for arbitrary inputs.
+Its positive-duration at-cap witness does not establish reachability from a
+protocol birth. [The paired control script](scripts/negative/check_memory_saturation_negative.py) checks the corresponding
+native, weak and crossing interfaces with paired mutations.
+
 ## Repeatable learned one-cell operation
 
 The [one-cell extension](INDEFINITE_OPERATION.md) constructs a physical
