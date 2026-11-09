@@ -2,6 +2,7 @@ import Dispatch
 import CappedDispatch
 import ReportFormula
 import BlindNeedSearch
+import ThresholdProbe
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

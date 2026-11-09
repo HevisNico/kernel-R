@@ -606,6 +606,23 @@ log-gain encoding certifies some comparisons, including the
 three-versus-four example. Other pivot comparisons require their own
 calibration proof.
 
+## A threshold probe with excess pulses
+
+[`threshold_count_probe_crossing`](ThresholdProbe.lean) proves a
+physical comparison for any positive hidden need and any tested pulse
+count. For a hidden need of m, the initial log-gain is `−0.6(m − 1)`. Training pulses and the
+common read are spaced by 24 time units. Before the threshold, each
+training pulse adds one dose. Once the gain reaches 0.6, later pulses
+can cause FIREs and complete their recovery while preserving both
+gain and recovery rate. Those FIREs precede the report window.
+
+The common read reports exactly when the tested count meets or
+exceeds the hidden need. Its queue and report window depend on the
+tested count. All complete upward-crossing executions for each fixed
+setup agree on the endpoint, firing dates and deliveries. The
+decision-tree compiler still uses its original calibrated trial
+interface.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -625,7 +642,7 @@ builds this package with the pinned dependencies. Its default targets compile
 `LearnerReadout`, `ReadoutSeries`, `LearnerConjunction`, `LearnerFanIn` and
 `ScheduledGates`, `ScheduledCircuit`, `ReportFormula`, `ScheduledCommit` and
 `ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
-`BlindNeedSearch`, and run
+`BlindNeedSearch` and `ThresholdProbe`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
