@@ -78,8 +78,14 @@ belong to separate cells in this design. Connecting the credit memory,
 preparing the controller within the network and iterating the native
 teaching loop remain open.
 
-The discrete results above establish the two improvements and a bound for
-the capped architecture.
+The [full-lesson trials](native/NativeLesson.lean) check the actual
+8-, 7- and 6-pulse lessons and two failing reductions in native R on
+fresh learners. A [native acceptance FIRE](native/NativeAcceptance.lean)
+can write a credit on a separate cell or
+[release all six pulses](native/AcceptanceDispatch.lean) of a supplied
+candidate to a fresh learner. These checks cover the physical lesson
+counts, retention and one acceptance gate. The two successive adaptive
+commits and the general credit bound are established in the discrete model.
 
 ## Verify
 

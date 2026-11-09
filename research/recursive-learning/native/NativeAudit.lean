@@ -1,5 +1,6 @@
 import Dispatch
 import CappedDispatch
+import AcceptanceDispatch
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000
