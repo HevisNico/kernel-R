@@ -1,5 +1,5 @@
 import Dispatch
-import TeacherReopen
+import TeacherStableClock
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

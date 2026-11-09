@@ -1,5 +1,5 @@
 import LessonProbe
-import KernelR.HybridCadenceHighCompletion
+import SelectorProtection
 
 /-! Read either selector value at the same prepared charge. The FIRE date
     distinguishes the two values. The ensuing protection covers ERROR. -/
@@ -209,7 +209,7 @@ structure SelectorReadPrepared (s : Snapshot 1) (high : Bool) : Prop where
   ready : s.main 0 = .ready
   charge : 13 / 20 ≤ s.x 0 .q ∧ s.x 0 .q ≤ 39 / 50
   gain : s.x 0 (.z 2) = selectorReadLogGain high
-  recovery : 0 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 2 / 5
+  recovery : 0 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 11 / 10
   auxiliary : ∀ p, s.aux 0 p = .ready ∧ RestBand (s.x 0 (.m p))
   raw : s.raw 0 2 = some s.time
   other : ∀ p, p ≠ 2 → s.raw 0 p = none
@@ -357,7 +357,7 @@ theorem selector_read_run_exists {θ ε s high}
     simp only [fired, FirstInputSilent.learnedFireFinal, FirstInputSilent.learnedFireBefore,
       setMain, readyProtectedEnd, readyProtectedValues, and_self, ite_true, silent.sensor_charge]
     rfl
-  obtain ⟨decay⟩ := cadence_protected_aux_phase_exists (route := fun _ _ => []) box fired 2 .silent
+  obtain ⟨decay⟩ := selector_protected_aux_phase_exists (route := fun _ _ => []) box fired 2 .silent
     s.time E F P (4 / 5) B (Or.inl rfl) beforeError
     (by change MainMode.fast = (if F < F + 1 then _ else _); simp)
     silent.aux_silent silent.aux_other
@@ -383,7 +383,7 @@ theorem selector_read_run_exists {θ ε s high}
     have different : p ≠ 2 := by simpa [Subsingleton.elim i 0] using other
     rw [Subsingleton.elim i 0]
     simpa [errorStart, setAux, different] using decay.aux_other 0 p (Or.inr different)
-  obtain ⟨error⟩ := cadence_protected_aux_phase_exists (route := fun _ _ => []) box errorStart 2 .error
+  obtain ⟨error⟩ := selector_protected_aux_phase_exists (route := fun _ _ => []) box errorStart 2 .error
     s.time R F E (1 / 10) B (Or.inr rfl)
     (by change decay.final.time < R; rwa [decay.date])
     (by simpa only [errorStart, setAux, decay.date] using decay.main_mode)
@@ -434,12 +434,8 @@ theorem selector_read_run_exists {θ ε s high}
         apply Real.exp_lt_exp.mpr
         nlinarith [a_coarse_bounds.1]
       · simp only [cadenceProtectedCharge, fast, ite_false]
-        have elapsed : 0 ≤ R - (F + 1) ∧ R - (F + 1) ≤ 1 := by
-          dsimp [F] at *
-          constructor <;> linarith [returnBounds.2, bounds.1, le_of_not_gt fast]
-        have product : B * (R - (F + 1)) ≤ 2 / 5 := by
-          exact (mul_le_mul prepared.recovery.2 elapsed.2 elapsed.1 (by norm_num)).trans (by norm_num)
-        linarith [Real.add_one_le_exp (-B * (R - (F + 1)))]
+        exact selector_slow_charge_preguard prepared.recovery (le_of_not_gt fast)
+          (by dsimp [F]; linarith [returnBounds.2, bounds.1])
     · intro i p
       rw [Subsingleton.elim i 0, finalAux]
       change error.final.x 0 (.m p) < 1
@@ -550,23 +546,23 @@ theorem SelectorReadRun.every_crossing_complete {θ ε s high final}
 
 /-- The two concrete read preparations differ only in the stored gain.
     The canonical selector pulse is already active at time `time`. -/
-noncomputable def selectorReadStart (high : Bool) (time : ℝ) : Snapshot 1 where
+noncomputable def selectorReadStart (high : Bool) (time : ℝ) (recovery : ℝ := 2 / 25) : Snapshot 1 where
   time := time
   x := fun _ c => match c with
     | .q => 7 / 10
     | .m _ => 1 / 40
     | .z p => if p = 2 then selectorReadLogGain high else 0
-    | .b => 2 / 25
+    | .b => recovery
     | .energy => 100
   main := fun _ => .ready
   aux := fun _ _ => .ready
   raw := fun _ p => if p = 2 then some time else none
   pending := []
 
-theorem prepared_selector_read_crossing_exists {θ ε} (box : @PhysicalBox 1 θ ε)
-    (high : Bool) (time : ℝ) :
-    ∃ (run : SelectorReadRun θ (selectorReadStart high time) high)
-      (crossing : CrossingExecution θ (fun _ _ => []) (selectorReadStart high time) run.final),
+theorem prepared_selector_read_with_recovery_crossing_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (high : Bool) (time recovery : ℝ) (band : 0 ≤ recovery ∧ recovery ≤ 11 / 10) :
+    ∃ (run : SelectorReadRun θ (selectorReadStart high time recovery) high)
+      (crossing : CrossingExecution θ (fun _ _ => []) (selectorReadStart high time recovery) run.final),
       crossing.execution = run.execution.toWeak ∧ CrossingCompleteThrough crossing run.horizon := by
   have cap (i : Fin 1) (p : Port) : 2 ≤ (θ i).cap p := by
     have lower := (box.2 i p).1.1
@@ -574,9 +570,9 @@ theorem prepared_selector_read_crossing_exists {θ ε} (box : @PhysicalBox 1 θ 
     all_goals rw [h] at lower
     all_goals norm_num at lower
     all_goals linarith
-  have physical : PhysicalInvariant θ (selectorReadStart high time) := by
-    refine ⟨fun i => by norm_num [UpperRegion, selectorReadStart, auxUpper], ?_,
-      fun i => by norm_num [selectorReadStart], fun i => by norm_num [selectorReadStart]⟩
+  have physical : PhysicalInvariant θ (selectorReadStart high time recovery) := by
+    refine ⟨fun i => by norm_num [UpperRegion, selectorReadStart, auxUpper, band.1], ?_,
+      fun _ => band.2, fun i => by norm_num [selectorReadStart]⟩
     intro i p
     change (if p = 2 then selectorReadLogGain high else 0) ≤ Real.log ((θ i).cap p)
     have logCap := Real.log_le_log (show (0 : ℝ) < 2 by norm_num) (cap i p)
@@ -585,8 +581,27 @@ theorem prepared_selector_read_crossing_exists {θ ε} (box : @PhysicalBox 1 θ 
     · cases high <;> simp [selectorReadLogGain] <;> linarith
     · linarith
   exact selector_read_crossing_exists box physical
-    ⟨rfl, by norm_num [selectorReadStart], rfl, by norm_num [selectorReadStart],
+    ⟨rfl, by norm_num [selectorReadStart], rfl, band,
       fun _ => ⟨rfl, by norm_num [selectorReadStart, RestBand]⟩, rfl,
       fun p other => by simp [selectorReadStart, other], rfl⟩
+
+theorem prepared_selector_read_crossing_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (high : Bool) (time : ℝ) :
+    ∃ (run : SelectorReadRun θ (selectorReadStart high time) high)
+      (crossing : CrossingExecution θ (fun _ _ => []) (selectorReadStart high time) run.final),
+      crossing.execution = run.execution.toWeak ∧ CrossingCompleteThrough crossing run.horizon :=
+  prepared_selector_read_with_recovery_crossing_exists box high time (2 / 25) (by norm_num)
+
+/-- With recovery already saturated, either stored value still has a
+complete physical read, preserving all gains and the cap. -/
+theorem capped_selector_read_crossing_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (high : Bool) (time : ℝ) :
+    ∃ (run : SelectorReadRun θ (selectorReadStart high time (11 / 10)) high)
+      (crossing : CrossingExecution θ (fun _ _ => []) (selectorReadStart high time (11 / 10)) run.final),
+      crossing.execution = run.execution.toWeak ∧ CrossingCompleteThrough crossing run.horizon ∧
+        run.final.x 0 .b = 11 / 10 := by
+  obtain ⟨run, crossing, trace, complete⟩ :=
+    prepared_selector_read_with_recovery_crossing_exists box high time (11 / 10) (by norm_num)
+  exact ⟨run, crossing, trace, complete, run.recovery⟩
 
 end RecursiveLearning.Native
