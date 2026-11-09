@@ -55,8 +55,21 @@ selector port at `F + δ(F)`, with `0.3 ≤ δ(F) ≤ 0.4`.
   complete upward-crossing execution with this outcome.
 
 Both bands apply in either fabrication box. They leave a gap between
-`7/6` and `9/5`; the exact firing threshold and the upward-crossing witness
-for the routed case are open.
+`7/6` and `9/5` where the exact firing threshold is open.
+
+### Routed feedback under upward crossings
+
+`causal_routed_crossing_exists` proves the strong-gain case in the model's
+upward-crossing semantics. This construction numbers the teacher 0 and the
+learner 1 and uses the same local starting states. The network starts with an
+empty delivery queue. The learner's actual FIRE issues the token, and the
+teacher consumes it at the routed date.
+
+`CausalRoutedFeedback.every_crossing_complete` gives the same single FIRE,
+single delivery, empty final queue and exact selector dose for every
+upward-crossing execution complete through the constructed horizon. The other
+two teacher gains stay fixed. The proof retains each candidate execution's
+own paths and jumps when relating it to the first-contact semantics.
 
 The discrete commit tests whether the accepted lesson still works with one
 fewer preparation pulse. Its failure tells the teacher to switch to
