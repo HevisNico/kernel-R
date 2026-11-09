@@ -180,7 +180,7 @@ private theorem credit_contacts_strict : StrictHeadRoutes serialCreditContacts :
       linarith
     · simp at hd
 
-private structure SerialCreditRun (θ : Fin 1 → Parameters) (time first T : ℝ) (second : Option ℝ) where
+structure SerialCreditRun (θ : Fin 1 → Parameters) (time first T : ℝ) (second : Option ℝ) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => [])
     ((preparedTeacher time).requeue (⟨0, 0, first + 7 / 20⟩ ::
@@ -191,10 +191,9 @@ private structure SerialCreditRun (θ : Fin 1 → Parameters) (time first T : �
   firstGain : final.x 0 (.z 0) = 3 / 5
   secondGain : final.x 0 (.z 1) = if second.isSome then 3 / 5 else 0
 
-private theorem serial_credit_run_exists {θ ε time first T second} (box : @PhysicalBox 1 θ ε)
-    (firstWindow : time + 25 < first ∧ first < time + 26)
-    (secondWindow : ∀ F, second = some F → time + 85 < F ∧ F < time + 86)
-    (horizon : time + 108 < T) :
+theorem two_credit_run_exists {θ ε time first T second} (box : @PhysicalBox 1 θ ε)
+    (firstWindow : time < first ∧ first + 8 ≤ T)
+    (secondWindow : ∀ F, second = some F → first + 8 ≤ F ∧ F + 8 ≤ T) :
     Nonempty (SerialCreditRun θ time first T second) := by
   let later := second.toList.map (fun F => (⟨0, 1, F + 7 / 20⟩ : Delivery 1))
   let due := first + 7 / 20
@@ -210,7 +209,7 @@ private theorem serial_credit_run_exists {θ ε time first T second} (box : @Phy
       have same : d = ⟨0, 1, F + 7 / 20⟩ := by simpa [later, h] using hd
       rw [same]
       change first + 7 / 20 + 8 ≤ F + 7 / 20
-      linarith [firstWindow.2, (secondWindow F h).1]
+      linarith [(secondWindow F h).1]
   obtain ⟨dose⟩ := port_dose_exists (route := fun _ _ => []) (port := 0) (due := due)
     box (preparedTeacher_physical box time _) (by simp [RawValid, preparedTeacher])
     ready (fun _ => rfl) (by change time < first + 7 / 20; linarith [firstWindow.1]) rfl
@@ -236,7 +235,7 @@ private theorem serial_credit_run_exists {θ ε time first T second} (box : @Phy
     have before : dose.final.time < d := by
       rw [dose.complete.1]
       dsimp [due, d]
-      linarith [firstWindow.2, (secondWindow F rfl).1]
+      linarith [(secondWindow F rfl).1]
     obtain ⟨next⟩ := port_dose_exists (route := fun _ _ => []) (port := 1) (due := d)
       box dose.physical dose.rawValid dose.ready dose.rawNone before queue (by simp)
       (by rw [unused]; norm_num) (by rw [unused]; linarith)
@@ -415,7 +414,9 @@ theorem native_serial_acceptance {θF θS θP θC ε}
       time + 85 < G ∧ G < time + 86 := by
     obtain ⟨a, b⟩ := test.window G same
     constructor <;> linarith
-  obtain ⟨credit⟩ := serial_credit_run_exists creditBox firstWindow secondWindow horizon
+  obtain ⟨credit⟩ := two_credit_run_exists creditBox
+    (show time < F ∧ F + 8 ≤ T by constructor <;> linarith [firstWindow.1, firstWindow.2])
+    (fun G h => by obtain ⟨early, late⟩ := secondWindow G h; constructor <;> linarith [firstWindow.2])
   let creditStart := (preparedTeacher time).requeue
     (⟨0, 0, F + 7 / 20⟩ :: test.fire.toList.map (fun f => ⟨0, 1, f + 7 / 20⟩))
   have creditQueue : (tested.execution.headInputQueue serialCreditContacts).Perm creditStart.pending := by
@@ -468,7 +469,7 @@ lesson, at a fixed offset from that physical FIRE. -/
 noncomputable def deployedLessonContacts {n} (sender : Fin n) (gap : ℝ) (lesson : Lesson) :
     HeadRoutes n := fun i F => if i = sender then lessonDeliveries (F + gap) (lessonPorts lesson) else []
 
-private theorem deployed_contacts_strict {n} (sender : Fin n) {gap : ℝ} (positive : 0 < gap)
+theorem deployed_contacts_strict {n} (sender : Fin n) {gap : ℝ} (positive : 0 < gap)
     (lesson : Lesson) : StrictHeadRoutes (deployedLessonContacts sender gap lesson) := by
   intro i F d hd
   by_cases h : i = sender
@@ -489,10 +490,10 @@ private theorem deployed_input_queue {n θ route s u} (e : @Execution n θ route
     by_cases h : event.1 = sender <;>
       simp [deployedLessonContacts, h, ih]
 
-private noncomputable def addEmptyLearner {n} (s : Snapshot n) : Snapshot (n + 1) :=
+noncomputable def addEmptyLearner {n} (s : Snapshot n) : Snapshot (n + 1) :=
   s.prependQueued (nativeLessonStart s.time ⟨0, 0⟩) (s.pending.map Delivery.succ)
 
-private structure DeployedLesson {n θ route s u} (e : @Execution n θ route s u)
+structure DeployedLesson {n θ route s u} (e : @Execution n θ route s u)
     (θL : Fin 1 → Parameters) (sender : Fin n) (gap T : ℝ) (proposal taught : Lesson) where
   final : Snapshot (n + 1)
   execution : Execution (prependParameters θL θ)
@@ -505,7 +506,7 @@ private structure DeployedLesson {n θ route s u} (e : @Execution n θ route s u
   previousTimes : ∀ i, execution.emissionTimes i.succ = e.emissionTimes i
   previousReceipts : ∀ i, lessonReceipts execution.deliveries i.succ = lessonReceipts e.deliveries i
 
-private theorem deployed_lesson_exists {n θ θL ε route s u T gap}
+theorem deployed_lesson_exists {n θ θL ε route s u T gap}
     (e : @Execution n θ route s u) (box : PhysicalBox θL ε)
     (complete : CompleteThrough e T) (positive : e.ContactsTransversal)
     (sender : Fin n) (delay : 0 < gap) (proposal : Lesson) (fire : Option ℝ)
@@ -591,7 +592,7 @@ theorem native_improvement_route_causal (time : ℝ) (adaptive : Bool) :
       (deployed_contacts_strict 2 (by norm_num : (0 : ℝ) < 50) ⟨3, 3⟩))
     (fun _ _ _ member => False.elim (List.not_mem_nil member))
 
-private theorem same_complete_deliveries {n θ ε route s u v T}
+theorem same_complete_deliveries {n θ ε route s u v T}
     (e : @Execution n θ route s u) (f : Execution θ route s v)
     (box : PhysicalBox θ ε) (physical : PhysicalInvariant θ s)
     (complete : CompleteThrough e T) (other : CompleteThrough f T) :

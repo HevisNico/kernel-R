@@ -118,7 +118,7 @@ noncomputable def readoutFeedbackStart (time : ℝ) (third : Bool) : Snapshot 3 
 
 /-- A quiet prefix to an exact rest snapshot. This changes the clock
 continuously while the charge, reserve and all memories remain at rest. -/
-private theorem rest_prefix {θ : Fin 1 → Parameters} {s : Snapshot 1} {origin : ℝ}
+theorem rest_prefix {θ : Fin 1 → Parameters} {s : Snapshot 1} {origin : ℝ}
     (later : origin < s.time) (main : ∀ i, s.main i = .ready) (aux : ∀ i p, s.aux i p = .ready)
     (raw : ∀ i p, s.raw i p = none) (q : ∀ i, s.x i .q = 1 / 10)
     (m : ∀ i p, s.x i (.m p) = 1 / 40) (reserve : ∀ i, s.x i .energy = 100)
