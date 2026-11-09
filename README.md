@@ -127,24 +127,26 @@ or the leaf action. Only the selected leaf receives its declared lesson
 and writes one credit dose of `0.6`. This search instantiates a general
 compiler for finite decision trees over calibrated learner profiles,
 built from native report gates. See the
-[native guide](https://github.com/HevisNico/kernel-R/blob/7dd1d29f521f159a913f8b98c13ca6fc4b9c640c/research/recursive-learning/native/README.md#compiling-a-calibrated-decision-tree).
+[native guide](research/recursive-learning/native/README.md#compiling-a-calibrated-decision-tree).
 
 Lean constructs a complete upward-crossing execution. With birth data
 and fabrication fixed, all complete runs agree on the terminal physical
 state up to pending-list order, ordered firing dates and the multiset of
 deliveries. See the
-[exact Lean statement](https://github.com/HevisNico/kernel-R/blob/7dd1d29f521f159a913f8b98c13ca6fc4b9c640c/research/recursive-learning/native/CalibratedDecisionTree.lean#L359).
+[`compile_native_binary_need_search`](research/recursive-learning/native/CalibratedDecisionTree.lean).
 
 **Scope of the search**
 
 - **Hidden input.** The search recovers one integer from a declared finite
-  range. Its value is encoded in the birth log-gain `−0.6(m − 1)` of
-  each fresh probe cell.
+  range. The birth log-gain `−0.6(m − 1)` encodes its value.
+- **Fresh probes.** Each pivot tests a separate, fresh probe cell carrying
+  the same hidden need.
+- **Exact encoding.** The birth log-gain is exact. Fabrication varies the
+  declared rates and gains, while the encoded need stays fixed.
 - **Fixed schedule.** The circuit is feed-forward and uses fixed absolute
   clocks. Each probe spaces its training pulses and final read by 24
   time units.
-- **Network size.** Each probe uses fresh cells, and the compiled network
-  grows with `K`.
+- **Network size.** The compiled network grows with `K`.
 - **Declared leaf actions.** Leaf lessons are specified in advance, use
   fresh receivers, and contain at most four pulses per block.
 - **Credit.** The selected leaf's credit is write-only in this protocol.

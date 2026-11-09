@@ -12,10 +12,11 @@ def preparationTrial (third : Bool) : Lesson :=
 def practiceTrial (third : Bool) : Lesson :=
   ⟨3, if third then 3 else 2⟩
 
-noncomputable def readoutLearner (time : ℝ) (lesson : Lesson) (readPort : Port) : Snapshot 1 :=
+noncomputable def readoutLearner (time : ℝ) (lesson : Lesson) (readPort : Port)
+    (birthGain : ℝ := -(6 / 5 : ℝ)) : Snapshot 1 :=
   { nativeLessonStart time lesson with
     x := fun i c => match c with
-      | .z p => if p = readPort then -(6 / 5 : ℝ) else -(12 / 5 : ℝ)
+      | .z p => if p = readPort then birthGain else -(12 / 5 : ℝ)
       | other => (preparedTeacher time).x i other }
 
 noncomputable def learnerRead (time : ℝ) (port : Port) : Delivery 1 := ⟨0, port, time + 65⟩
@@ -25,28 +26,36 @@ noncomputable abbrev preparationLearner (time : ℝ) (third : Bool) :=
 
 noncomputable abbrev preparationRead (time : ℝ) := learnerRead time 0
 
-theorem readout_learner_physical {θ ε} (box : @PhysicalBox 1 θ ε)
-    (time : ℝ) (lesson : Lesson) (readPort : Port) :
-    PhysicalInvariant θ (readoutLearner time lesson readPort) := by
+theorem readout_learner_physical_of_gain {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time : ℝ) (lesson : Lesson) (readPort : Port)
+    (birthGain : ℝ) (nonpositive : birthGain ≤ 0) :
+    PhysicalInvariant θ (readoutLearner time lesson readPort birthGain) := by
   have rest := preparedTeacher_physical box time []
   refine ⟨rest.region, ?_, rest.recovery_cap, rest.reserve⟩
   intro i p
   have cap := rest.gain_cap i p
   change (0 : ℝ) ≤ Real.log ((θ i).cap p) at cap
-  change (if p = readPort then -(6 / 5 : ℝ) else -(12 / 5 : ℝ)) ≤ Real.log ((θ i).cap p)
+  change (if p = readPort then birthGain else -(12 / 5 : ℝ)) ≤ Real.log ((θ i).cap p)
   split <;> linarith
+
+theorem readout_learner_physical {θ ε} (box : @PhysicalBox 1 θ ε)
+    (time : ℝ) (lesson : Lesson) (readPort : Port) :
+    PhysicalInvariant θ (readoutLearner time lesson readPort) :=
+  readout_learner_physical_of_gain box time lesson readPort _ (by norm_num)
 
 /-- Read a preparation or practice counter on the very cell that received
 the full two-block trial. The read port has received two or three doses. -/
-theorem full_learner_read_exists {θ ε} (box : @PhysicalBox 1 θ ε) (time : ℝ) (lesson : Lesson)
+theorem full_learner_read_exists_of_gain {θ ε} (box : @PhysicalBox 1 θ ε) (time : ℝ) (lesson : Lesson)
     (port : Port) (third : Bool) (capacity : lesson.preparation ≤ 4 ∧ lesson.practice ≤ 4)
-    (count : (lessonPorts lesson).count port = if third then 3 else 2) :
-    Nonempty (DoseReadout θ (readoutLearner time lesson port) (lessonPorts lesson)
+    (birthGain : ℝ) (nonpositive : birthGain ≤ 0)
+    (gainTest : let gain := birthGain + (3 / 5 : ℝ) * (lessonPorts lesson).count port
+      if third then gain = 3 / 5 else gain ≤ 0) :
+    Nonempty (DoseReadout θ (readoutLearner time lesson port birthGain) (lessonPorts lesson)
       (learnerRead time port) (time + 96) third) := by
-  let start := readoutLearner time lesson port
+  let start := readoutLearner time lesson port birthGain
   let ports := lessonPorts lesson
   let read := learnerRead time port
-  have physical := readout_learner_physical box time lesson port
+  have physical := readout_learner_physical_of_gain box time lesson port birthGain nonpositive
   have ready : ReadyCoordinates start 0 :=
     ⟨rfl, by norm_num [start, readoutLearner, preparedTeacher],
       fun p => ⟨rfl, by norm_num [start, readoutLearner, preparedTeacher, RestBand]⟩⟩
@@ -60,13 +69,17 @@ theorem full_learner_read_exists {θ ε} (box : @PhysicalBox 1 θ ε) (time : �
     · change (lessonPorts lesson).count 2 ≤ 4
       rw [h2]; norm_num
   have bounds (p : Port) : start.x 0 (.z p) + (3 / 5 : ℝ) * ports.count p ≤ 3 / 5 := by
-    change (if p = port then -(6 / 5 : ℝ) else -(12 / 5 : ℝ)) + 3 / 5 * ports.count p ≤ 3 / 5
+    change (if p = port then birthGain else -(12 / 5 : ℝ)) + 3 / 5 * ports.count p ≤ 3 / 5
     by_cases same : p = port
     · subst p
-      change (if port = port then -(6 / 5 : ℝ) else -(12 / 5 : ℝ)) +
-        3 / 5 * (lessonPorts lesson).count port ≤ 3 / 5
-      rw [count]
-      cases third <;> norm_num
+      rw [ite_eq_left rfl]
+      cases third with
+      | false =>
+        have h : birthGain + (3 / 5 : ℝ) * ports.count port ≤ 0 := gainTest
+        linarith
+      | true =>
+        have h : birthGain + (3 / 5 : ℝ) * ports.count port = 3 / 5 := gainTest
+        exact h.le
     · rw [ite_eq_right same]
       have upper : (ports.count p : ℝ) ≤ 4 := by exact_mod_cast maxDoses p
       linarith
@@ -79,9 +92,20 @@ theorem full_learner_read_exists {θ ε} (box : @PhysicalBox 1 θ ε) (time : �
     have k : (lesson.practice : ℝ) ≤ 4 := by exact_mod_cast capacity.2
     simp only [lessonPorts, List.length_append, List.length_replicate, Nat.cast_add]
     linarith
-  apply dose_readout_exists box lessonRun physical before (by change time + 65 + 23 ≤ time + 96; linarith) rfl
-  change (if port = port then -(6 / 5 : ℝ) else -(12 / 5 : ℝ)) +
-    3 / 5 * (lessonPorts lesson).count port = _
+  apply dose_readout_exists_of_gain box lessonRun physical before
+    (by change time + 65 + 23 ≤ time + 96; linarith) rfl
+  change let gain := (if port = port then birthGain else -(12 / 5 : ℝ)) +
+      3 / 5 * (lessonPorts lesson).count port
+    if third then gain = 3 / 5 else gain ≤ 0
+  simpa only [eq_self, ite_true] using gainTest
+
+theorem full_learner_read_exists {θ ε} (box : @PhysicalBox 1 θ ε) (time : ℝ) (lesson : Lesson)
+    (port : Port) (third : Bool) (capacity : lesson.preparation ≤ 4 ∧ lesson.practice ≤ 4)
+    (count : (lessonPorts lesson).count port = if third then 3 else 2) :
+    Nonempty (DoseReadout θ (readoutLearner time lesson port) (lessonPorts lesson)
+      (learnerRead time port) (time + 96) third) := by
+  apply full_learner_read_exists_of_gain box time lesson port third capacity _ (by norm_num)
+  dsimp only
   rw [count]
   cases third <;> norm_num
 

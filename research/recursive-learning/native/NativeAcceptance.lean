@@ -52,9 +52,22 @@ private theorem lesson_prefix_append {n θ route s v u}
   | nil => exact .nil _
   | cons move rest ih => exact .step move _ rest (ih tail)
 
-/-- A native readout of the actual endpoint of a completed dose lesson.
-The admitted read pulse sees the same gains written by the lesson. -/
-structure DoseReadout (θ : Fin 1 → Parameters) (start : Snapshot 1) (ports : List Port)
+/-- A silent sequence of dose deliveries, with its exact physical gain balance. -/
+structure CalendarDoseRun (θ : Fin 1 → Parameters) (start : Snapshot 1)
+    (calendar : List (Delivery 1)) where
+  final : Snapshot 1
+  execution : Execution θ (fun _ _ => []) start final
+  transverse : execution.ContactsTransversal
+  silent : execution.ledger.emissions = []
+  deliveries : execution.deliveries = calendar
+  gains : ∀ p, final.x 0 (.z p) =
+    start.x 0 (.z p) + (3 / 5 : ℝ) * (calendar.map Delivery.port).count p
+  recovery : final.x 0 .b = start.x 0 .b
+  ready : ReadyCoordinates final 0
+  rawNone : ∀ p, final.raw 0 p = none
+  empty : final.pending = []
+
+structure CalendarDoseReadout (θ : Fin 1 → Parameters) (start : Snapshot 1) (calendar : List (Delivery 1))
     (probe : Delivery 1) (T : ℝ) (third : Bool) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) (withFuture start [probe]) final
@@ -67,22 +80,23 @@ structure DoseReadout (θ : Fin 1 → Parameters) (start : Snapshot 1) (ports : 
   reports : fire.isSome = third
   window : ∀ F, fire = some F → probe.due < F ∧ F < probe.due + 1
   emissions : execution.ledger.emissions = fire.toList.map (fun F => (0, F))
-  deliveries : execution.deliveries = lessonDeliveries start.time ports ++ [probe]
+  deliveries : execution.deliveries = calendar ++ [probe]
   observed : Snapshot 1
   observation : Execution θ (fun _ _ => []) (withFuture start [probe]) observed
   observationPrefix : execution.IsPrefix observation
   observedRaw : observed.raw 0 probe.port = some observed.time
-  measured : ∀ p, observed.x 0 (.z p) = start.x 0 (.z p) + (3 / 5 : ℝ) * ports.count p
+  measured : ∀ p, observed.x 0 (.z p) = start.x 0 (.z p) + (3 / 5 : ℝ) * (calendar.map Delivery.port).count p
 
-/-- Add the common read pulse to an existing lesson. Gain zero produces
+/-- Add the common read pulse to an existing lesson. Nonpositive log-gain produces
 no spike. A gain of 0.6 produces a transverse FIRE before raw expiry. -/
-theorem dose_readout_exists {θ ε start ports probe T third} (box : @PhysicalBox 1 θ ε)
-    (lesson : LessonDoseRun θ start ports) (phys : PhysicalInvariant θ start)
+theorem calendar_dose_readout_exists {θ ε start calendar probe T third} (box : @PhysicalBox 1 θ ε)
+    (lesson : CalendarDoseRun θ start calendar) (phys : PhysicalInvariant θ start)
     (before : lesson.final.time < probe.due) (horizon : probe.due + 23 ≤ T)
     (recovery : start.x 0 .b = 2 / 25)
-    (readGain : start.x 0 (.z probe.port) + (3 / 5 : ℝ) * ports.count probe.port =
-      if third then 3 / 5 else 0) :
-    Nonempty (DoseReadout θ start ports probe T third) := by
+    (readGain : let gain := start.x 0 (.z probe.port) +
+        (3 / 5 : ℝ) * (calendar.map Delivery.port).count probe.port
+      if third then gain = 3 / 5 else gain ≤ 0) :
+    Nonempty (CalendarDoseReadout θ start calendar probe T third) := by
   let framed := lesson.execution.withFuture [probe] (by
     intro d hd; obtain rfl := List.mem_singleton.mp hd; exact before.le)
   have framedTransverse : framed.ContactsTransversal :=
@@ -110,13 +124,14 @@ theorem dose_readout_exists {θ ε start ports probe T third} (box : @PhysicalBo
     rfl
   have admitted : arrival.final.time = probe.due := arrival.date
   have measured (p : Port) : arrival.final.x 0 (.z p) =
-      start.x 0 (.z p) + (3 / 5 : ℝ) * ports.count p := by
+      start.x 0 (.z p) + (3 / 5 : ℝ) * (calendar.map Delivery.port).count p := by
     rw [arrival.gain_preserved]
     exact lesson.gains p
-  have gain : arrival.final.x 0 (.z probe.port) = if third then 3 / 5 else 0 := by
+  have gain : if third then arrival.final.x 0 (.z probe.port) = 3 / 5
+      else arrival.final.x 0 (.z probe.port) ≤ 0 := by
     rw [measured]
     exact readGain
-  have leadDeliveries : lead.deliveries = lessonDeliveries start.time ports ++ [probe] := by
+  have leadDeliveries : lead.deliveries = calendar ++ [probe] := by
     rw [Execution.deliveries_append, teacher_future_deliveries, lesson.deliveries, arrival.deliveries]
   have future : ∀ d ∈ arrival.final.pending, arrival.final.time + 8 ≤ d.due := by simp [arrival.pending]
   have active : arrival.final.raw 0 probe.port = some arrival.final.time := by
@@ -125,9 +140,14 @@ theorem dose_readout_exists {θ ε start ports probe T third} (box : @PhysicalBo
     arrival.raw_other i p (by simpa only [Subsingleton.elim probe.cell 0] using h)
   cases third with
   | false =>
+    have nonpositive : arrival.final.x 0 (.z probe.port) ≤ 0 := gain
     obtain ⟨cycle⟩ := weak_input_cycle_exists (route := fun _ _ => []) arrival.final box
-      arrival.physical arrival.raw_valid 0 probe.port arrival.ready (by rw [gain]; norm_num)
-      (by rw [gain]; norm_num; linarith [Real.log_nonneg (show (1 : ℝ) ≤ 6 / 5 by norm_num)])
+      arrival.physical arrival.raw_valid 0 probe.port arrival.ready
+      (by
+        have h := Real.exp_le_exp.mpr nonpositive
+        rw [Real.exp_zero] at h
+        linarith)
+      (by linarith [Real.log_nonneg (show (1 : ℝ) ≤ 6 / 5 by norm_num)])
       active other future
     have later : cycle.final.time < T := by rw [cycle.complete.1, admitted]; linarith [horizon]
     obtain ⟨tail, complete, positive, silent, noDeliveries⟩ := quiet_ready_tail_exists (θ := θ) later
@@ -157,7 +177,7 @@ theorem dose_readout_exists {θ ε start ports probe T third} (box : @PhysicalBo
   | true =>
     have strong : 9 / 5 ≤ Real.exp (arrival.final.x 0 (.z probe.port)) ∧
         Real.exp (arrival.final.x 0 (.z probe.port)) ≤ 11 / 5 := by
-      rw [gain]
+      rw [show arrival.final.x 0 (.z probe.port) = 3 / 5 from gain]
       exact learnedProbe_gain
     have late : ∀ d ∈ arrival.final.pending, arrival.final.time + 31 / 4 ≤ d.due := by simp [arrival.pending]
     obtain ⟨fire⟩ := first_mid_learned_fire_exists arrival.final box arrival.physical arrival.raw_valid
@@ -201,6 +221,69 @@ theorem dose_readout_exists {θ ε start ports probe T third} (box : @PhysicalBo
     · change (((lead.append fire.execution).append fast.execution).append tail.execution).IsPrefix lead
       rw [Execution.append_assoc, Execution.append_assoc]
       exact lesson_prefix_append lead _
+
+/-- A native readout of the actual endpoint of a completed dose lesson.
+The admitted read pulse sees the same gains written by the lesson. -/
+structure DoseReadout (θ : Fin 1 → Parameters) (start : Snapshot 1) (ports : List Port)
+    (probe : Delivery 1) (T : ℝ) (third : Bool) where
+  final : Snapshot 1
+  execution : Execution θ (fun _ _ => []) (withFuture start [probe]) final
+  complete : CompleteThrough execution T
+  transverse : execution.ContactsTransversal
+  empty : final.pending = []
+  ready : ∀ i, ReadyCoordinates final i
+  rawNone : ∀ i p, final.raw i p = none
+  fire : Option ℝ
+  reports : fire.isSome = third
+  window : ∀ F, fire = some F → probe.due < F ∧ F < probe.due + 1
+  emissions : execution.ledger.emissions = fire.toList.map (fun F => (0, F))
+  deliveries : execution.deliveries = lessonDeliveries start.time ports ++ [probe]
+  observed : Snapshot 1
+  observation : Execution θ (fun _ _ => []) (withFuture start [probe]) observed
+  observationPrefix : execution.IsPrefix observation
+  observedRaw : observed.raw 0 probe.port = some observed.time
+  measured : ∀ p, observed.x 0 (.z p) = start.x 0 (.z p) + (3 / 5 : ℝ) * ports.count p
+
+private theorem lesson_deliveries_ports (time : ℝ) (ports : List Port) :
+    (lessonDeliveries time ports).map Delivery.port = ports := by
+  induction ports generalizing time with
+  | nil => rfl
+  | cons p ps ih => simp [lessonDeliveries, ih]
+
+theorem dose_readout_exists_of_gain {θ ε start ports probe T third} (box : @PhysicalBox 1 θ ε)
+    (lesson : LessonDoseRun θ start ports) (phys : PhysicalInvariant θ start)
+    (before : lesson.final.time < probe.due) (horizon : probe.due + 23 ≤ T)
+    (recovery : start.x 0 .b = 2 / 25)
+    (readGain : let gain := start.x 0 (.z probe.port) + (3 / 5 : ℝ) * ports.count probe.port
+      if third then gain = 3 / 5 else gain ≤ 0) :
+    Nonempty (DoseReadout θ start ports probe T third) := by
+  let run : CalendarDoseRun θ start (lessonDeliveries start.time ports) :=
+    ⟨lesson.final, lesson.execution, lesson.transverse, lesson.silent, lesson.deliveries,
+      fun p => by rw [lesson_deliveries_ports]; exact lesson.gains p,
+      lesson.recovery, lesson.ready, lesson.rawNone, lesson.empty⟩
+  have gain : let value := start.x 0 (.z probe.port) +
+      (3 / 5 : ℝ) * ((lessonDeliveries start.time ports).map Delivery.port).count probe.port
+      if third then value = 3 / 5 else value ≤ 0 := by
+    dsimp only
+    rw [lesson_deliveries_ports]
+    exact readGain
+  obtain ⟨read⟩ := calendar_dose_readout_exists box run phys before horizon recovery gain
+  exact ⟨⟨read.final, read.execution, read.complete, read.transverse, read.empty, read.ready,
+    read.rawNone, read.fire, read.reports, read.window, read.emissions, read.deliveries,
+    read.observed, read.observation, read.observationPrefix, read.observedRaw,
+    fun p => by simpa only [lesson_deliveries_ports] using read.measured p⟩⟩
+
+theorem dose_readout_exists {θ ε start ports probe T third} (box : @PhysicalBox 1 θ ε)
+    (lesson : LessonDoseRun θ start ports) (phys : PhysicalInvariant θ start)
+    (before : lesson.final.time < probe.due) (horizon : probe.due + 23 ≤ T)
+    (recovery : start.x 0 .b = 2 / 25)
+    (readGain : start.x 0 (.z probe.port) + (3 / 5 : ℝ) * ports.count probe.port =
+      if third then 3 / 5 else 0) :
+    Nonempty (DoseReadout θ start ports probe T third) := by
+  apply dose_readout_exists_of_gain box lesson phys before horizon recovery
+  dsimp only
+  rw [readGain]
+  cases third <;> simp
 
 theorem acceptance_signal_exists {θ ε} (box : @PhysicalBox 1 θ ε) (time : ℝ) (third : Bool) :
     Nonempty (AcceptanceSignal θ time third) := by

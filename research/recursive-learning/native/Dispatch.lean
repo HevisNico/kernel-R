@@ -115,7 +115,7 @@ theorem teacher_dispatch_exists {θ ε s prepared time} (box : @PhysicalBox 1 θ
   rw [fire.date, arrival.date]
   constructor <;> linarith [fire.early, fire.deadline]
 
-private theorem future_transverse {n θ route s u} (e : @Execution n θ route s u)
+theorem future_transverse {n θ route s u} (e : @Execution n θ route s u)
     (future : List (Delivery n)) (later : ∀ d ∈ future, u.time ≤ d.due)
     (positive : e.ContactsTransversal) : (e.withFuture future later).ContactsTransversal := by
   induction e with
@@ -137,6 +137,8 @@ structure LearnerWait (θ : Fin 1 → Parameters) (s : Snapshot 1) (T : ℝ) whe
   ready : ∀ i, ReadyCoordinates final i
   rawNone : ∀ i p, final.raw i p = none
   empty : final.pending = []
+  gain : ∀ i p, final.x i (.z p) = s.x i (.z p)
+  recovery : ∀ i, final.x i .b = s.x i .b
 
 /-- Let a genuinely SLOW learner reopen at its own logarithmic guard.
     This uses the low recovery carried out of the lesson. -/
@@ -193,7 +195,7 @@ private theorem learner_reopens {θ : Fin 1 → Parameters} {s : Snapshot 1}
           auxPulse_zero_eq_relax, RestBand] using band
       · simpa [before, protectedMainEnd, protectedMainValues, same, RestBand] using band
   refine ⟨T, limit, ⟨⟨final, trace, ⟨rfl, ?_, by simp [final, setMain, before, protectedMainEnd, empty]⟩,
-    by simp [trace, Jump.ContactTransversal], rfl, rfl, ready, state.rawNone, empty⟩⟩⟩
+    by simp [trace, Jump.ContactTransversal], rfl, rfl, ready, state.rawNone, empty, fun _ _ => rfl, fun _ => rfl⟩⟩⟩
   intro v
   apply ready_no_jump final (fun i => (ready i).ready) (fun i p => ((ready i).auxiliary p).1)
     state.rawNone (fun i => by linarith [(ready i).charge.2])
@@ -207,7 +209,8 @@ theorem learner_wait_exists {θ : Fin 1 → Parameters} {s : Snapshot 1} {T : �
       (next : v.time < T) (ready : ∀ i, ReadyCoordinates v i)
       (raw : ∀ i p, v.raw i p = none) (empty : v.pending = [])
       (transverse : lead.ContactsTransversal)
-      (silent : lead.ledger.emissions = []) (deliveries : lead.deliveries = []) :
+      (silent : lead.ledger.emissions = []) (deliveries : lead.deliveries = [])
+      (gain : ∀ i p, v.x i (.z p) = s.x i (.z p)) (recovery : ∀ i, v.x i .b = s.x i .b) :
       Nonempty (LearnerWait θ s T) := by
     obtain ⟨wait, complete, waitTransverse, waitSilent, waitDeliveries⟩ :=
       quiet_ready_tail_exists (θ := θ) next ready raw empty
@@ -215,13 +218,14 @@ theorem learner_wait_exists {θ : Fin 1 → Parameters} {s : Snapshot 1} {T : �
       (Execution.contactsTransversal_append _ _).2 ⟨transverse, waitTransverse⟩,
       by simp [Execution.emissions_append, silent, waitSilent],
       by simp [Execution.deliveries_append, deliveries, waitDeliveries],
-      fun i => quietAt_ready_coordinates v i (ready i) next.le, raw, empty⟩⟩
+      fun i => quietAt_ready_coordinates v i (ready i) next.le, raw, empty, gain, recovery⟩⟩
   rcases state.main with ready | ⟨mode, lower, upper, rate⟩
   · exact finish s (.nil _) (by linarith) (fun i => by simpa only [Subsingleton.elim i 0] using ready)
-      state.rawNone empty trivial rfl rfl
+      state.rawNone empty trivial rfl rfl (fun _ _ => rfl) (fun _ => rfl)
   · obtain ⟨date, bound, ⟨reopen⟩⟩ := learner_reopens (θ := θ) state empty mode lower upper rate
     exact finish reopen.final reopen.execution (by rw [reopen.complete.1]; linarith)
       reopen.ready reopen.rawNone reopen.empty reopen.transverse reopen.silent reopen.deliveries
+      reopen.gain reopen.recovery
 
 noncomputable def dispatchRouter (time : ℝ) (delay : ℝ → ℝ) : Router 2 :=
   fun i t => if i = 0 then

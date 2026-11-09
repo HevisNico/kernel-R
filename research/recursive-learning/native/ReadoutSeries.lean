@@ -6,7 +6,7 @@ FIRE jumps. The selector update wire is the only frozen intervention. -/
 namespace RecursiveLearning.Native
 open KernelR.Hybrid
 
-private structure LocalRun (θ : Fin 1 → Parameters) (start : Snapshot 1) (T : ℝ) where
+structure LocalRun (θ : Fin 1 → Parameters) (start : Snapshot 1) (T : ℝ) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) start final
   complete : CompleteThrough execution T
@@ -31,41 +31,39 @@ private theorem quiet_prefix_at_rest {θ : Fin 1 → Parameters} {s : Snapshot 1
 
 /-- The trial queue contains its actual ordered lesson plus a common
 read pulse, which is placed first as a future token. -/
-noncomputable def seriesTrial (clock : ℝ) (practice third : Bool) : Snapshot 1 :=
-  withFuture (readoutLearner clock (trialLesson practice third) (trialPort practice))
-    [learnerRead clock (trialPort practice)]
+noncomputable def scheduledTrial (clock : ℝ) (lesson : Lesson) (port : Port)
+    (birthGain : ℝ := -(6 / 5 : ℝ)) : Snapshot 1 :=
+  withFuture (readoutLearner clock lesson port birthGain) [learnerRead clock port]
 
-private theorem series_trial_future {clock practice third d}
-    (h : d ∈ (seriesTrial clock practice third).pending) : clock < d.due := by
-  change d ∈ learnerRead clock (trialPort practice) ::
-    lessonDeliveries clock (lessonPorts (trialLesson practice third)) at h
+noncomputable def seriesTrial (clock : ℝ) (practice third : Bool) : Snapshot 1 :=
+  scheduledTrial clock (trialLesson practice third) (trialPort practice)
+
+theorem scheduled_trial_future {clock lesson port birthGain d}
+    (h : d ∈ (scheduledTrial clock lesson port birthGain).pending) : clock < d.due := by
+  change d ∈ learnerRead clock port :: lessonDeliveries clock (lessonPorts lesson) at h
   rcases List.mem_cons.mp h with rfl | member
   · change clock < clock + 65
     linarith
   · linarith [lesson_delivery_time member]
 
-private theorem staged_trial_exists {θ ε time clock T} (box : @PhysicalBox 1 θ ε)
-    (later : time ≤ clock) (horizon : clock + 96 < T) (practice third : Bool) :
-    ∃ (run : LocalRun θ {seriesTrial clock practice third with time := time} T) (fire : Option ℝ),
+theorem staged_lesson_read_exists_of_gain {θ ε time clock T} (box : @PhysicalBox 1 θ ε)
+    (later : time ≤ clock) (horizon : clock + 96 < T) (lesson : Lesson) (port : Port)
+    (third : Bool) (capacity : lesson.preparation ≤ 4 ∧ lesson.practice ≤ 4)
+    (birthGain : ℝ) (nonpositive : birthGain ≤ 0)
+    (gainTest : let gain := birthGain + (3 / 5 : ℝ) * (lessonPorts lesson).count port
+      if third then gain = 3 / 5 else gain ≤ 0) :
+    ∃ (run : LocalRun θ {scheduledTrial clock lesson port birthGain with time := time} T) (fire : Option ℝ),
       fire.isSome = third ∧
       (∀ F, fire = some F → clock + 65 < F ∧ F < clock + 66) ∧
       run.execution.emissionTimes 0 = fire.toList ∧
-      run.execution.deliveries.length = (trialLesson practice third).cost + 1 := by
-  let s := seriesTrial clock practice third
-  have capacity : (trialLesson practice third).preparation ≤ 4 ∧
-      (trialLesson practice third).practice ≤ 4 := by
-    cases practice <;> cases third <;> decide
-  have count : (lessonPorts (trialLesson practice third)).count (trialPort practice) =
-      if third then 3 else 2 := by
-    cases practice
-    · exact (lessonPorts_count (preparationTrial third)).1
-    · exact (lessonPorts_count (practiceTrial third)).2.1
-  obtain ⟨read⟩ := full_learner_read_exists box clock (trialLesson practice third) (trialPort practice)
-    third capacity count
+      run.execution.deliveries.length = lesson.cost + 1 := by
+  let s := scheduledTrial clock lesson port birthGain
+  obtain ⟨read⟩ := full_learner_read_exists_of_gain box clock lesson port third capacity
+    birthGain nonpositive gainTest
   obtain ⟨wait, positive, silent, noDelivery⟩ := quiet_prefix_at_rest (θ := θ) (s := s)
     later (fun _ => rfl) (fun _ _ => rfl) (fun _ _ => rfl)
     (fun _ => rfl) (fun _ _ => rfl) (fun _ => rfl)
-    (fun d h => (series_trial_future h).le)
+    (fun d h => (scheduled_trial_future h).le)
   obtain ⟨rest, complete, restPositive, restSilent, restDelivery⟩ := quiet_ready_tail_exists (θ := θ)
     (T := T) (by rw [read.complete.1]; exact horizon) read.ready read.rawNone read.empty
   let measured : Execution θ (fun _ _ => []) s read.final := read.execution
@@ -90,7 +88,39 @@ private theorem staged_trial_exists {θ ε time clock T} (box : @PhysicalBox 1 �
   · change e.deliveries.length = _
     rw [Execution.deliveries_append, Execution.deliveries_append, noDelivery, measuredDeliveries,
       restDelivery, List.nil_append, List.append_nil]
-    cases practice <;> cases third <;> rfl
+    rw [List.length_append, lessonDeliveries_length, lessonPorts_length]
+    rfl
+
+theorem staged_lesson_read_exists {θ ε time clock T} (box : @PhysicalBox 1 θ ε)
+    (later : time ≤ clock) (horizon : clock + 96 < T) (lesson : Lesson) (port : Port)
+    (third : Bool) (capacity : lesson.preparation ≤ 4 ∧ lesson.practice ≤ 4)
+    (count : (lessonPorts lesson).count port = if third then 3 else 2) :
+    ∃ (run : LocalRun θ {scheduledTrial clock lesson port with time := time} T) (fire : Option ℝ),
+      fire.isSome = third ∧
+      (∀ F, fire = some F → clock + 65 < F ∧ F < clock + 66) ∧
+      run.execution.emissionTimes 0 = fire.toList ∧
+      run.execution.deliveries.length = lesson.cost + 1 := by
+  apply staged_lesson_read_exists_of_gain box later horizon lesson port third capacity _ (by norm_num)
+  dsimp only
+  rw [count]
+  cases third <;> norm_num
+
+private theorem series_trial_future {clock practice third d}
+    (h : d ∈ (seriesTrial clock practice third).pending) : clock < d.due :=
+  scheduled_trial_future h
+
+theorem staged_trial_exists {θ ε time clock T} (box : @PhysicalBox 1 θ ε)
+    (later : time ≤ clock) (horizon : clock + 96 < T) (practice third : Bool) :
+    ∃ (run : LocalRun θ {seriesTrial clock practice third with time := time} T) (fire : Option ℝ),
+      fire.isSome = third ∧
+      (∀ F, fire = some F → clock + 65 < F ∧ F < clock + 66) ∧
+      run.execution.emissionTimes 0 = fire.toList ∧
+      run.execution.deliveries.length = (trialLesson practice third).cost + 1 := by
+  apply staged_lesson_read_exists box later horizon
+  · cases practice <;> cases third <;> decide
+  · cases practice
+    · exact (lessonPorts_count (preparationTrial third)).1
+    · exact (lessonPorts_count (practiceTrial third)).2.1
 
 private theorem fired {fire : Option ℝ} (h : fire.isSome = true) : ∃ F, fire = some F := by
   cases fire with
@@ -102,17 +132,17 @@ private theorem silent {fire : Option ℝ} (h : fire.isSome = false) : fire = no
   | none => rfl
   | some F => simp at h
 
-private noncomputable def atCell {n} (sender : Fin n) (send : ℝ → List (Delivery 1)) : HeadRoutes n :=
+noncomputable def atCell {n} (sender : Fin n) (send : ℝ → List (Delivery 1)) : HeadRoutes n :=
   fun i F => if i = sender then send F else []
 
-private theorem atCell_strict {n} (sender : Fin n) {send : ℝ → List (Delivery 1)}
+theorem atCell_strict {n} (sender : Fin n) {send : ℝ → List (Delivery 1)}
     (strict : ∀ F d, d ∈ send F → F < d.due) : StrictHeadRoutes (atCell sender send) := by
   intro i F d member
   by_cases matchCell : i = sender
   · exact strict F d (by simpa [atCell, matchCell] using member)
   · simp [atCell, matchCell] at member
 
-private theorem atCell_inputs {n θ route s u} (e : @Execution n θ route s u)
+theorem atCell_inputs {n θ route s u} (e : @Execution n θ route s u)
     (i : Fin n) (send : ℝ → List (Delivery 1)) :
     e.headInputQueue (atCell i send) = (e.emissionTimes i).flatMap send := by
   unfold Execution.headInputQueue Execution.emissionTimes
@@ -122,10 +152,10 @@ private theorem atCell_inputs {n θ route s u} (e : @Execution n θ route s u)
     simp only [atCell] at ih
     by_cases h : event.1 = i <;> simp [atCell, h, ih]
 
-private noncomputable def fixedCalendar (gate : ℝ) (tokens : List (Delivery 1))
+noncomputable def fixedCalendar (gate : ℝ) (tokens : List (Delivery 1))
     (F : ℝ) : List (Delivery 1) := if F < gate then tokens else []
 
-private theorem fixedCalendar_strict {gate tokens} (future : ∀ d ∈ tokens, gate ≤ d.due) :
+theorem fixedCalendar_strict {gate tokens} (future : ∀ d ∈ tokens, gate ≤ d.due) :
     ∀ F d, d ∈ fixedCalendar gate tokens F → F < d.due := by
   intro F d member
   by_cases early : F < gate
@@ -133,7 +163,7 @@ private theorem fixedCalendar_strict {gate tokens} (future : ∀ d ∈ tokens, g
   · simp [fixedCalendar, early] at member
 
 /-- Initial head sources are separate from the proof-only future wires. -/
-private theorem stage_balance {n θ route s u} (e : @Execution n θ route s u)
+theorem stage_balance {n θ route s u} (e : @Execution n θ route s u)
     (h : Snapshot 1) (external : List (Delivery 1)) (contacts : HeadRoutes n)
     (pending : (external ++ e.headInputQueue contacts).Perm h.pending) :
     HeadQueueBalance e h
@@ -301,9 +331,9 @@ private theorem staged_practice_exists {θ ε time T} (box : @PhysicalBox 1 θ �
   | false =>
     let start := practiceReceiver time
     have ready (i : Fin 1) : ReadyCoordinates start i :=
-      ⟨rfl, by norm_num [start, practiceReceiver, seriesTrial, Snapshot.requeue, withFuture,
+      ⟨rfl, by norm_num [start, practiceReceiver, seriesTrial, scheduledTrial, Snapshot.requeue, withFuture,
           readoutLearner, preparedTeacher],
-        fun _ => ⟨rfl, by norm_num [start, practiceReceiver, seriesTrial, Snapshot.requeue,
+        fun _ => ⟨rfl, by norm_num [start, practiceReceiver, seriesTrial, scheduledTrial, Snapshot.requeue,
           withFuture, readoutLearner, preparedTeacher, RestBand]⟩⟩
     obtain ⟨e, complete, positive, silent, deliveries⟩ := quiet_ready_tail_exists (θ := θ)
       (s := start) (T := T) (by change time < T; linarith) ready (fun _ _ => rfl) rfl
@@ -317,7 +347,7 @@ private theorem staged_practice_exists {θ ε time T} (box : @PhysicalBox 1 θ �
     obtain ⟨a,b⟩ := window F h
     constructor <;> linarith
 
-private noncomputable def queueHead {n} (s : Snapshot n) (h : Snapshot 1) : Snapshot (n + 1) :=
+noncomputable def queueHead {n} (s : Snapshot n) (h : Snapshot 1) : Snapshot (n + 1) :=
   s.prependQueued h (independentHeadQueue s h)
 
 private noncomputable def probeReceiver (time : ℝ) : Snapshot 1 :=
