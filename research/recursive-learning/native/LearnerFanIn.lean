@@ -13,17 +13,17 @@ noncomputable def trialBankStart (time : ℝ) : {n : ℕ} → (Fin n → Bool) �
     queueHead (trialBankStart time (fun i : Fin n => kinds i.succ) (fun i => passed i.succ))
       {seriesTrial time (kinds 0) (passed 0) with time := time}
 
-private def trialBankRouter : (n : ℕ) → Router n
+def trialBankRouter : (n : ℕ) → Router n
   | 0 => fun i => Fin.elim0 i
   | n + 1 => prependRouted (trialBankRouter n) (fun _ _ => [])
 
-private theorem trial_bank_clock (time : ℝ) {n} (kinds passed : Fin n → Bool) :
+theorem trial_bank_clock (time : ℝ) {n} (kinds passed : Fin n → Bool) :
     (trialBankStart time kinds passed).time = time := by
   induction n with
   | zero => rfl
   | succ n ih => exact ih _ _
 
-private theorem trial_bank_causal (n : ℕ) : StrictCausalRouter (trialBankRouter n) := by
+theorem trial_bank_causal (n : ℕ) : StrictCausalRouter (trialBankRouter n) := by
   induction n with
   | zero => intro i; exact Fin.elim0 i
   | succ n ih => exact prepend_routed_causal ih (fun _ _ _ h => (List.not_mem_nil h).elim)
@@ -33,7 +33,7 @@ private theorem prepend_parameters_split {n} (θ : Fin (n + 1) → Parameters) :
   funext i
   cases i using Fin.cases <;> rfl
 
-private theorem trial_bank_physical {n θ ε} (box : @PhysicalBox n θ ε) (time : ℝ)
+theorem trial_bank_physical {n θ ε} (box : @PhysicalBox n θ ε) (time : ℝ)
     (kinds passed : Fin n → Bool) : PhysicalInvariant θ (trialBankStart time kinds passed) := by
   induction n with
   | zero =>
@@ -59,7 +59,7 @@ private theorem prepend_initial {n} {s : Snapshot n} {h : Snapshot 1} {Q}
   | zero => exact head 0 c ready
   | succ i => exact tail i c ready
 
-private theorem trial_bank_initial {n} (time : ℝ) (kinds passed : Fin n → Bool) :
+theorem trial_bank_initial {n} (time : ℝ) (kinds passed : Fin n → Bool) :
     InitiallyBelowReady (trialBankStart time kinds passed) := by
   induction n with
   | zero => intro i; exact Fin.elim0 i
@@ -79,7 +79,7 @@ private def reportLedger : {n : ℕ} → (Fin n → Option ℝ) → List (Fin n 
     (fires 0).toList.map (fun F => (0, F)) ++
       (reportLedger (fun i : Fin n => fires i.succ)).map (fun ev => (ev.1.succ, ev.2))
 
-private structure TrialBankRun {n} (θ : Fin n → Parameters) (time T : ℝ)
+structure TrialBankRun {n} (θ : Fin n → Parameters) (time T : ℝ)
     (kinds passed : Fin n → Bool) where
   final : Snapshot n
   execution : Execution θ (trialBankRouter n) (trialBankStart time kinds passed) final
@@ -105,7 +105,7 @@ private theorem head_emission_ledger {θ route s u}
   change _ = e.ledger.emissions.map (fun ev => (0, ev.2))
   rw [same, List.map_id]
 
-private theorem trial_bank_exists {n θ ε time T} (box : @PhysicalBox n θ ε)
+theorem trial_bank_exists {n θ ε time T} (box : @PhysicalBox n θ ε)
     (horizon : time + 96 < T) (kinds passed : Fin n → Bool) :
     Nonempty (TrialBankRun θ time T kinds passed) := by
   induction n with
