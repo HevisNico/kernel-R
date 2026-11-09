@@ -304,6 +304,46 @@ preparing the cap by MARK would require an eleventh protected section
 with the last dose cut short. No such preparation sequence is part of
 this theorem.
 
+## Full lessons and a routed acceptance test
+
+[`native_lesson_improvement_trials`](NativeLesson.lean) constructs one
+complete upward-crossing execution of five independently prepared R learners.
+Each preparation or practice delivery writes a dose of 0.6 into the
+corresponding input gain. Both gains start at −2.4 so that up to four
+successive inputs per port stay weak. The terminal test agrees with the
+discrete learner's retention test for ordered preparation and practice
+blocks. Practice deliveries write to their gain counter even if the
+preparation requirement is unmet.
+
+| Preparation and practice | Actual deliveries | Native terminal result |
+|---|---:|---|
+| 4 and 4 | 8 | Passes validation and retains for both held-out learners |
+| 3 and 4 | 7 | Passes validation and retains for both held-out learners |
+| 3 and 3 | 6 | Passes validation and retains for both held-out learners |
+| 2 and 4 | 6 | Fails the validation learner with needs (3, 2) |
+| 3 and 2 | 5 | Fails the validation learner with needs (2, 3) |
+
+A separate [acceptance test](NativeAcceptance.lean) starts its counter
+gain at −1.2. After two pulses its gain is 0, and after three it is 0.6.
+A common test pulse triggers a FIRE only in the three-pulse case.
+[`native_acceptance_writes_credit`](NativeAcceptance.lean) routes that
+FIRE to a chosen port of a separate credit cell. The pulse is absent
+from the initial queue. It writes one dose on acceptance and no dose
+on rejection.
+
+[`native_acceptance_dispatches_six`](AcceptanceDispatch.lean) uses
+the same test to release a full 3 + 3 lesson to a fresh learner. The
+learner starts with no scheduled lesson inputs. The fixed router
+releases all six on the actual acceptance FIRE, and the resulting
+state retains the skill for needs (3, 3). With two test inputs the
+receiver gets no lesson. The common test pulse is outside the six-pulse
+lesson count.
+
+The bank uses supplied lesson calendars. The acceptance construction
+releases a fixed proposal from a single native test. The full adaptive
+sequence still needs both commits joined to the native selector, with
+the candidate test and next proposal obtained from the preceding round.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -318,7 +358,8 @@ The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
 builds this package with the pinned dependencies. Its default targets compile
 `NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson`, `Dispatch`,
 `SelectorRead`, `SelectorPrecharge`, `TeacherReopen`, `TeacherStableClock`
-`CappedWorkRun`, `TeacherCappedCycle` and `CappedDispatch`, and run
+`CappedWorkRun`, `TeacherCappedCycle`, `CappedDispatch`, `NativeLesson`,
+`NativeAcceptance` and `AcceptanceDispatch`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

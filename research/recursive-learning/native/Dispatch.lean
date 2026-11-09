@@ -127,7 +127,7 @@ private theorem future_transverse {n θ route s u} (e : @Execution n θ route s 
       exact ⟨(jump.contactTransversal_requeue (jump.withFuture future)).1 positive.1,
         ih later positive.2⟩
 
-private structure LearnerWait (θ : Fin 1 → Parameters) (s : Snapshot 1) (T : ℝ) where
+structure LearnerWait (θ : Fin 1 → Parameters) (s : Snapshot 1) (T : ℝ) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) s final
   complete : CompleteThrough execution T
@@ -200,7 +200,7 @@ private theorem learner_reopens {θ : Fin 1 → Parameters} {s : Snapshot 1}
     (fun i p => by linarith [((ready i).auxiliary p).2.2])
   simp [final, setMain, before, protectedMainEnd, empty]
 
-private theorem learner_wait_exists {θ : Fin 1 → Parameters} {s : Snapshot 1} {T : ℝ}
+theorem learner_wait_exists {θ : Fin 1 → Parameters} {s : Snapshot 1} {T : ℝ}
     (state : LearnerDispatchState s) (empty : s.pending = []) (later : s.time + 19 < T) :
     Nonempty (LearnerWait θ s T) := by
   have finish (v : Snapshot 1) (lead : Execution θ (fun _ _ => []) s v)
