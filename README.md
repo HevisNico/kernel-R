@@ -4,7 +4,7 @@
 
 [![Recursive learning proofs](https://github.com/HevisNico/kernel-R/actions/workflows/recursive-learning.yml/badge.svg)](https://github.com/HevisNico/kernel-R/actions/workflows/recursive-learning.yml)
 
-**Archived release v0.2.0 — DOI:** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
+**Zenodo archive (all versions)** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
 
 ## Why it matters
 
@@ -14,13 +14,14 @@ each cell's memory increments are the same across the allowed fabrication
 parameters, wire delays and legal orders of simultaneous events. Lean proves
 this from the cell's differential equations for chains of any finite length.
 
-The same cells can also run a teaching loop. In a fixed network of nine R
-cells, learners' measured physical state drives acceptance, a failed probe
-drives a selector update, and the network delivers lessons of 8, then 7,
-then 6 pulses. Cutting the single feedback wire removes the second
-improvement. Lean proves these outcomes for complete upward-crossing runs
-at the protocol horizon, with independent fixed fabrication variation of up
-to ±10% in every cell.
+The same cells can also run adaptive teaching programs. For any positive
+integer `K`, a compiled R network identifies a learner's hidden need in
+`{1, …, K}` from physical readouts and delivers only the matching lesson,
+with one router and one initial pulse queue for every need. A nine-cell
+network also achieves two successive improvements, from 8 to 7 to 6
+lesson pulses. Cutting its single feedback wire prevents the second
+improvement. Lean proves these outcomes for complete upward-crossing runs,
+with independent fixed fabrication variation of up to ±10% in every cell.
 
 During a full learning phase, the cell integrates a sensor's discharge between
 fixed charge thresholds. The fabrication rate cancels from the dose.
@@ -123,7 +124,10 @@ the same for every `m`. At each visited pivot `c`, the probe receives `c`
 training pulses and a read pulse. Its readout fires exactly when
 `m ≤ c`. The decision circuit uses that result to launch the next test
 or the leaf action. Only the selected leaf receives its declared lesson
-and writes one credit dose of `0.6`.
+and writes one credit dose of `0.6`. This search instantiates a general
+compiler for finite decision trees over calibrated learner profiles,
+built from native report gates. See the
+[native guide](https://github.com/HevisNico/kernel-R/blob/7dd1d29f521f159a913f8b98c13ca6fc4b9c640c/research/recursive-learning/native/README.md#compiling-a-calibrated-decision-tree).
 
 Lean constructs a complete upward-crossing execution. With birth data
 and fabrication fixed, all complete runs agree on the terminal physical
@@ -139,8 +143,11 @@ deliveries. See the
 - **Fixed schedule.** The circuit is feed-forward and uses fixed absolute
   clocks. Each probe spaces its training pulses and final read by 24
   time units.
+- **Network size.** Each probe uses fresh cells, and the compiled network
+  grows with `K`.
 - **Declared leaf actions.** Leaf lessons are specified in advance, use
   fresh receivers, and contain at most four pulses per block.
+- **Credit.** The selected leaf's credit is write-only in this protocol.
 - **Physical parameters.** Fabrication parameters are fixed during a
   run and chosen independently within the ±0.3% or ±10% box.
 
