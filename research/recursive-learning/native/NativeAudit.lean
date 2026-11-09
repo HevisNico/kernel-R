@@ -1,4 +1,4 @@
-import Feedback
+import LessonProbe
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

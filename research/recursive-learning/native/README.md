@@ -80,10 +80,37 @@ When the selector starts off, its final log-gain reads as on exactly when
 the discrete commit selects practice. This holds for every first-contact
 execution complete through the constructed horizon.
 
-The test outcome is supplied via the starting gain. The next obligations
-are to derive that gain from the lesson and to use the selector to send
-the next lesson within the network. The current router carries the response
-from learner to teacher.
+## The last preparation pulse determines the probe gain
+
+The [one-cell assay](LessonProbe.lean) starts both runs with the same physical
+state and unit gain on the probe port. It schedules a common diagnostic pulse
+at offset 9 and a readout pulse on the same port at offset 17. The two lessons
+differ by the preparation pulse on port 1 at offset 1.
+
+| Last preparation pulse | State during the diagnostic | Probe log-gain at offset 17 | Readout through offset 18 |
+|---|---|---:|---|
+| Present | Protected recovery | 0 | Silent |
+| Omitted | READY | 0.6 | One FIRE |
+
+In the prepared case the diagnostic completes its sensor cycle during
+protection and leaves the gain unchanged. In the omitted case it completes
+an exposed ERROR phase and raises the log-gain by `3/5`. Lean proves that
+`exp(3/5)` is in the strong band. The readout uses the actual state carried
+from the lesson, including charge, recovery and energy. Only FIREs in the
+readout window report failure.
+
+`lesson_probe_run_exists` constructs the whole history and
+`lesson_probe_crossing_exists` gives the same history under upward crossings.
+`LessonProbeAdmission.gain_every_complete` fixes the gain at admission for
+all complete first-contact histories. At offset 18, the failure signal is
+the same for all complete histories under either semantics. Both fabrication
+boxes are covered.
+
+`LessonProbeRun.reports_example_failure` matches the two outcomes of the
+discrete validation at its last preparation slot. The assay implements that
+varying slot. The earlier discrete lesson pulses are outside this assay.
+Joining this readout to the teacher's routed update and dispatching the next
+lesson in the network are the remaining steps.
 
 ## Verify
 
@@ -97,7 +124,7 @@ lake build
 
 The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
 builds this package with the pinned dependencies. Its default targets compile
-`NativeLearning` and `Feedback`, and run [the axiom audit](NativeAudit.lean), which checks all
+`NativeLearning`, `Feedback` and `LessonProbe`, and run [the axiom audit](NativeAudit.lean), which checks all
 imported declarations under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
 and Mathlib pins come from the existing proof package.
