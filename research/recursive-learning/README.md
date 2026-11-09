@@ -58,9 +58,10 @@ The [native memory experiment](native/README.md) realizes the teacher's two
 commits with actual R flows and arrivals for a supplied pulse script.
 For the final preparation slot, a single native R execution now carries the
 lesson through readout, routed feedback when the learner fires, the selector
-update, and receipt of the next selected pulse. Iterating this loop remains
-open. Reading the selector for dispatch changes its low gain, so another
-round needs a way to preserve or restore the selector memory.
+update, and receipt of the next selected pulse. The dispatch in that round
+changes the low selector gain. A [prepared read](native/SelectorRead.lean)
+now preserves both selector values. Integrating that read into the network
+and iterating the loop remain open.
 
 The discrete results above establish the two improvements and a bound for
 the capped architecture.
