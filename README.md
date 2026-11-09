@@ -4,33 +4,82 @@
 
 **Archived release v0.2.0 — DOI:** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
 
-## In short
+## Why it matters
 
-An R cell is a simple model of a pulse-driven unit, loosely inspired by
-neurons. It charges when pulses arrive, fires when it reaches a threshold,
-then goes through a protected recovery phase before it can fire again. It
-learns by adjusting two memories: how sensitive it is to each input, and how
-fast it recovers. Each memory can only change in its own phase: sensitivity
-while the cell is ready to fire, recovery while it is protected.
+Kernel R makes learning exactly predictable in a model of asynchronous cells
+with fabrication mismatch. In every complete run of the declared protocol,
+each cell's memory increments are the same across the allowed fabrication
+parameters, wire delays and legal orders of simultaneous events. Lean proves
+this from the cell's differential equations for chains of any finite length.
 
-We prove that a chain of R cells of any finite length, with independent fixed
-fabrication variations of up to ±10% and bounded wire delays, ends with exactly
-specified memory changes and passes on a rhythm with bounded timing variation.
-The guarantee covers every run of the declared protocol that is complete
-through its horizon, not only simulated ones, and every step of the proof is
-checked by the Lean proof assistant. Different parameter and delay choices can
-produce different firing dates; the exact equality of dates compares runs with
-the same parameters, birth data and router.
+During a full learning phase, the cell integrates a sensor's discharge between
+fixed charge thresholds. The fabrication rate cancels from the dose.
 
-A [separate general result](#beyond-chains-event-order-does-not-change-the-result)
-also shows that simultaneous-event order cannot change complete runs' physical
-endpoints or firing dates, beyond chain networks.
+- A complete ERROR phase adds `Δz = 8 × (0.1 − 0.025) = 0.6` to the port's
+  log-gain when the cell stays READY.
+- A complete MARK phase adds `Δb = (1 − 0.8) / 2 = 0.1` to the cell's
+  recovery rate when the cell stays protected.
 
-## The theorem
+These exact increments require positive energy and an open cap gate for the
+relevant memory throughout the phase. No external controller computes the
+learning updates. Under the declared protocol, a chain with independent
+fabrication variation of up to ±10% and bounded wire jitter ends with the same
+memory increments for every allowed choice of parameters and delays. Its
+output rhythm has bounded timing error.
 
-Lean statement: [`TrustedHeadline.every_finite_chain`](proof/lean/KernelR/TrustedHeadline.lean).
-Its meaning is fixed by an explicit, machine-checked list of definitions:
-the [trusted base](docs/TRUSTED_BASE.md).
+> **Scope of the robustness.** Each port's gain cap, sensor rates and sensor
+> input gain (`C, L_m, L_s, L_e, M`) may vary across cells and ports, with
+> values fixed in time. Thresholds and actuation factors are exact.
+
+## An R cell in one picture
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    READY --> FAST: q crosses 1 upward
+    FAST --> SLOW: q reaches 1/4 after one time unit
+    SLOW --> READY: q reaches 0.1
+    note right of READY
+      admits input pulses
+      ERROR sensor phases raise input gains here
+    end note
+    note right of SLOW
+      protected: admission closed
+      MARK sensor phases raise recovery b here
+    end note
+```
+
+The cell emits one pulse during FAST and keeps input admission closed in
+FAST and SLOW. Each of its three input ports has a sensor that sees raw pulses
+even during protection and cycles through READY → MARK → SILENT → ERROR → READY.
+The log-gain `z` can change while the main cell is READY. The recovery rate
+`b`, which governs SLOW decay, can change while the main cell is protected.
+See the [cell laws](model/CELL.md) and [glossary](docs/GLOSSARY.md).
+
+## The main result
+
+**In plain words.** Take a chain of any positive finite length. Choose its
+fabrication parameters independently within the ±10% or ±0.3% box and start
+every cell in READY, near its nominal resting values. Send each cell a
+preparation train, then drive the leaf with a regular rhythm. Each link
+delivers pulses with a delay in `[0.3, 0.4]`. The delay functions are fixed
+in advance and may vary over time, with summed jitter budgets at most 0.15.
+With these inputs fixed, the theorem gives the following guarantees.
+
+- **A complete run exists** in the model's upward-crossing semantics.
+- **Every complete run agrees** on the physical endpoint and each cell's
+  ordered firing dates, regardless of the legal order of simultaneous events.
+- **Each cell learns exactly.** Its active input log-gain ends at its birth
+  value + 2.4, and its recovery rate ends at its birth value + 0.3.
+- **The rhythm crosses the chain.** The root's output ends with at least eight
+  pulses at dates `τ + 4k + η_k`, with `|η_k| ≤ 0.15`.
+- **The chain ends READY.** At the horizon every main unit and sensor is READY,
+  each main charge is 0.1, and no pulse current or delivery remains.
+
+**Formally.** The Lean statement is
+[`TrustedHeadline.every_finite_chain`](proof/lean/KernelR/TrustedHeadline.lean),
+whose meaning is fixed by a machine-checked list of definitions, the
+[trusted base](docs/TRUSTED_BASE.md).
 
 > For every positive finite chain length N, every admissible source length K,
 > all independent fixed fabrication parameters and READY birth data, and every
@@ -40,168 +89,83 @@ the [trusted base](docs/TRUSTED_BASE.md).
 > complete through the same horizon under that router, has the same physical
 > endpoint and the same ordered firing dates in every cell.
 
-The theorem holds in the model's own semantics, where a cell fires on an
-actual upward crossing of its threshold, as well as in the native first-contact
-semantics. The construction starts with all cells born at time zero and keeps
-the actual continuous trajectories, pulse origins, deliveries and memory
-updates.
+The [finite-chain specification](model/CHAIN_PROTOCOL.md) gives the exact
+birth bounds, source length `K ≥ 4N + 12`, and delay assumptions. The
+[theorem guide](docs/UNIVERSAL_FINITE_CHAIN.md#result-every-finite-chain-with-explicit-scope)
+gives the detailed outcomes.
 
-## What it guarantees
-
-For every complete execution under the theorem's hypotheses:
-
-- **Learned memories.** Each cell's active input log-gain ends at its own
-  birth value + 2.4, and its recovery rate at its own birth value + 0.3.
-  Other gains keep their preparation memories.
-- **Transmitted cadence.** The root's output ends with a regular tail of
-  `K - 4N - 4 >= 8` pulses at dates `t_k = τ + 4k + η_k`, with
-  `|η_k| <= J <= 0.15`, so successive intervals lie in `[4 - 2J, 4 + 2J]`.
-- **Clean final state.** At `T = 160 + 4(K-1) + (11/10)(N-1) + 8`, every cell
-  and sensor is READY, each cell's charge is 0.1, no pulse current remains and
-  no delivery is pending.
-
-A corollary also realizes any prescribed sequence of bounded per-pulse wire
-errors on the actual sending firings, with delay functions built after the
-errors are given.
-
-## The protocol
-
-The [finite-chain specification](model/CHAIN_PROTOCOL.md) states the exact
-READY birth data, source schedules, fabrication boxes, and fixed delay bounds.
-The [cell laws](model/CELL.md) and [glossary](docs/GLOSSARY.md) define the model terms.
-
-## Beyond chains: event order does not change the result
-
-Lean also proves a general result for R's first-contact operational rules.
-For any finite number of cells, any fixed routing rule (including cycles),
-any finite input queue and any initial state within the
-[declared physical bounds](proof/lean/KernelR/HybridPhysicalInvariant.lean#L7-L11),
-two finite executions complete through the same time have the same physical
-state and exactly the same ordered firing dates in each cell. The compared
-runs share the same fixed parameters, initial state and routing rule.
-Parameters must satisfy the [declared fabrication bounds](proof/lean/KernelR/Hybrid.lean#L96-L103).
-
-Simultaneous events can be processed in different legal orders, and continuous
-motion can be divided into different steps. Neither changes these results.
-Only the list order of pending deliveries may differ.
-
-Here, [complete](proof/lean/KernelR/Hybrid.lean#L192-L193) means that the common
-final time has been reached, no event remains enabled and no delivery due by
-that time remains pending.
-
-This proves uniqueness when complete executions exist; it does not establish
-existence or indefinite progress for every network. The correspondence with
-the written model's upward-crossing rule is proved for the finite-chain
-protocol, not for arbitrary cyclic networks.
-
-Lean proofs: [same physical endpoint](proof/lean/KernelR/HybridUniversalExecution.lean#L21-L29)
-and [same firing dates](proof/lean/KernelR/HybridUniversalExecution.lean#L31-L43).
-See also the [threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings).
+The result holds both in the model's upward-crossing semantics and in Lean's
+native first-contact semantics, with the
+[correspondence between them](docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
+proved for this protocol. A corollary realizes any prescribed sequence of
+bounded per-pulse wire errors on the actual sending firings.
 
 ## What is not claimed
 
 - **Only complete executions.** The theorem compares executions complete
-  through the horizon T. For this same fixed finite-chain protocol, separate
-  [progress theorems](proof/lean/PROGRESS.md) extend every legal finite prefix
-  to later horizons. They also prove time divergence for infinite native runs
-  maximal under extension through a finite flow limit. An infinite list of
-  flow subdivisions alone need not have divergent time.
-- **Learning and cadence only for this protocol.** Those guarantees cover
-  finite directed chains with the declared inputs. Cyclic networks, noise or
-  drift during operation, and other protocol variants have their own
+  through the horizon. Separate [progress theorems](proof/lean/PROGRESS.md)
+  extend every legal finite prefix of this protocol to later horizons and prove
+  time divergence for infinite native runs maximal under extension at a finite
+  flow limit.
+- **Learning and cadence only for this protocol.** Cyclic networks, noise or
+  drift during operation, and other protocols have their own
   [coverage boundaries](proof/lean/N_CELL_COVERAGE.md).
-- **Learning-phase counts on the constructed run only.** On the constructed
-  execution, the memory changes come from exactly four complete ERROR phases
-  on the active port and three protected MARK phases summed over each cell's ports
-  ([counting theorem](docs/EXACT_DOSE_COUNTING.md)). The theorem transfers
-  the resulting memories to every complete execution, not these counts.
-- **A model, not a device.** Formal verification of the model does not
-  experimentally validate any physical hardware.
-- **The Reset Operator argument is separate.** The broader claim about
-  saturation when recovery cannot keep pace with forcing is not part of this
-  theorem.
+- **Dose counts on the constructed run only.** The
+  [counting theorem](docs/EXACT_DOSE_COUNTING.md) gives four ERROR phases on
+  the active port and three MARK phases across each cell's ports in the
+  constructed execution. The universal comparison transfers the resulting
+  memory increments to every complete execution.
+- **Thresholds held exact.** See the scope note above.
+- **A model, not a device.** Formal verification does not experimentally
+  validate any hardware.
+- **The Reset Operator argument is separate.** Its broader saturation claim
+  is not part of these theorems.
 
-## Recovery limits the output rate
+## Other proved results
 
-A [separate analytic theorem](docs/RESET_RATE_SATURATION.md) applies to any
-network topology and any supplied finite execution in both native and upward
-crossing semantics. If recovery stays below a positive bound β, two firings of
-the same cell are separated by at least `1 + log(5/2)/β`. Starting within the
-built-in recovery cap gives a uniform gap of approximately 1.83299 time units.
-
-For a window of duration L, the number of firings is at most
-`1 + L/(1 + log(5/2)/β)`. This limits sustained output cadence; it does not say
-that every excess input pulse is lost, or prove the broader Reset Operator
-argument. [Lean statement](proof/lean/KernelR/HybridResetRateCrossing.lean).
-
-## Separate result: when recovery stays at zero
-
-Lean also proves that a cell starting in SLOW with charge 1/4 and recovery
-zero cannot fire again while none of its sensors is in MARK during a
-positive-duration flow.
-Its charge and recovery stay fixed. This result holds directly in both
-semantics for any network size and router. A separate native corollary derives
-the missing-MARK condition from initially resting READY sensors, no active
-pulse and no later delivery to that cell.
-
-Zero recovery is allowed by the current physical bounds, although it is not
-the protocol's birth state. It can be repaired: an isolated fully exposed MARK
-phase raises it from zero to 0.1. The proofs construct complete locked
-executions through arbitrarily late finite horizons; they do not claim that
-every deficient cell remains silent despite learning, or prove the broader
-Reset Operator argument. See the [precise statements and validation](docs/RESET_ZERO_RECOVERY.md).
+| Result | Scope | Statement |
+|---|---|---|
+| **Event order does not matter.** Executions complete through the same horizon agree on the physical endpoint up to pending-list order, and on each cell's ordered firing dates. | Native semantics for any finite network, including cycles, with the same parameters, initial snapshot and fixed router, under the physical bounds. | [endpoint and dates](proof/lean/KernelR/HybridUniversalExecution.lean) |
+| **Recovery limits the output rate.** If recovery stays at most `β > 0`, two firings of a cell are at least `1 + log(5/2)/β` apart (about 1.833 at the built-in cap). A window of length L contains at most `1 + L/(1 + log(5/2)/β)` firings. | Any topology, both semantics. | [guide](docs/RESET_RATE_SATURATION.md) · [Lean](proof/lean/KernelR/HybridResetRateCrossing.lean) |
+| **Zero recovery can lock a cell.** A cell starting in SLOW with charge 1/4 and zero recovery cannot fire again while no sensor spends positive time in MARK. An isolated, fully exposed MARK phase can restore recovery to 0.1. | Any finite network and router. Lock in both semantics, conditional repair in native semantics. | [guide](docs/RESET_ZERO_RECOVERY.md) |
 
 ## How to check it
 
-The project pins **Lean 4.35.0** and **Mathlib v4.35.0**; dependency commits
-are recorded in [lake-manifest.json](proof/lean/lake-manifest.json). From the
-repository root:
+The project pins **Lean 4.35.0** and **Mathlib v4.35.0** ([lake-manifest.json](proof/lean/lake-manifest.json)).
 
 ```sh
-git rev-parse HEAD
 cd proof/lean
 lake exe cache get
-lake build KernelR.FixedDelayChainHeadline KernelR.CrossingChainHeadline
 lake build
 lake build Audit
 ```
 
-Latest recorded full validation: revision `05436400704dc7fc2126d12d38e93d899300363b`,
-[CI run 42212189044](https://github.com/HevisNico/kernel-R/actions/runs/42212189044).
-The complete Lean workflow passed, including the build, global axiom audit,
-trusted-base checks and regression controls. Its final report records
-**9,624 build jobs** (a cached replay of all default targets, including
-dependencies) and **29,330 project theorem declarations** audited, permitting
-only `propext`, `Classical.choice` and `Quot.sound`, with no admitted proofs
-or added project axioms. These measurements describe that revision. The run's
-`trusted-base-validation-05436400704dc7fc2126d12d38e93d899300363b` artifact
-contains the report and captured build/audit logs. Historical checkpoints
-remain in the [validation ledger](docs/VALIDATION_LEDGER.md#validation-and-checkpoint-discipline).
-
-[Exact Lean signatures and axiom outputs](docs/UNIVERSAL_FINITE_CHAIN.md#lean-headline-signatures-axioms-and-reproduction) ·
-[Fresh-checkout rebuild](proof/lean/README.md#rebuild-project-proofs-without-a-restored-project-cache).
+The audit checks every project theorem and allows only `propext`,
+`Classical.choice` and `Quot.sound`. The source checks reject `sorry`, added
+axiom declarations and `native_decide`. See the
+[recorded full validation](docs/VALIDATION_LEDGER.md#full-lean-validation-at-0543640),
+[exact signatures and axiom outputs](docs/UNIVERSAL_FINITE_CHAIN.md#lean-headline-signatures-axioms-and-reproduction), and
+[fresh-checkout rebuild instructions](proof/lean/README.md#rebuild-project-proofs-without-a-restored-project-cache).
 
 ## For reviewers
 
-Lean checks every proof. What needs human review is whether the definitions
-mean what the model says. Start with the
-[trusted-base reading path](REVIEW.md): the fidelity of the execution
-semantics (`CrossingExecution`) to the written model comes first.
+Lean checks every proof. Human review starts with whether `CrossingExecution`
+faithfully represents the written model. See the [reading path](REVIEW.md).
 
-## Going further
+## Repository map
 
-- [Detailed result, hypotheses and verification](docs/UNIVERSAL_FINITE_CHAIN.md)
-- [Model ↔ Lean: equations and operational semantics](docs/MODEL_LEAN_CORRESPONDENCE.md),
-  including the [threshold correspondence](docs/MODEL_LEAN_CORRESPONDENCE.md#threshold-contacts-and-upward-crossings)
-  between the native first-contact semantics and the model's upward
-  crossings, proved for this protocol
-- [Finite-chain proof construction](docs/FINITE_CHAIN_CONSTRUCTION.md)
-- [Explicit finite-chain router](proof/lean/KernelR/ExplicitFiniteChainRouter.lean)
-- [Fixed-delay construction](proof/lean/KernelR/HybridUniversalBirthCadenceChain.lean) ·
-  [indexed-error theorem](proof/lean/KernelR/UniversalChainHeadline.lean)
-- [Experiments and certificate replay](docs/EXPERIMENTS_AND_REPRODUCTION.md) · [Archive](archive/README.md)
-- [Dated provenance and scope](docs/PROVENANCE.md) ·
-  [release checklist](docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md)
+| Folder | Contents |
+|---|---|
+| [`model/`](model/README.md) | Cell laws and the finite-chain protocol |
+| [`proof/lean/`](proof/lean/README.md) | The verified Lean development, audit and regression controls |
+| [`docs/`](docs/UNIVERSAL_FINITE_CHAIN.md) | Theorem guides, model ↔ Lean correspondence, provenance, glossary |
+| [`research/`](research/README.md) | Robustness and reset-window research modules |
+| [`archive/`](archive/README.md) | Earlier experiments, certificates and specifications |
+
+Further: [proof construction](docs/FINITE_CHAIN_CONSTRUCTION.md) ·
+[explicit router](proof/lean/KernelR/ExplicitFiniteChainRouter.lean) ·
+[experiments and certificate replay](docs/EXPERIMENTS_AND_REPRODUCTION.md) ·
+[provenance](docs/PROVENANCE.md) · [release checklist](docs/RELEASE_UNIVERSAL_FINITE_CHAIN.md)
 
 ## Origin, AI assistance and license
 
@@ -211,9 +175,9 @@ This work draws inspiration from Nicolas Breuillaud's
 It is done with two AI assistants, **Claude** (Anthropic) and **ChatGPT**
 (OpenAI), under the direction of Nicolas Breuillaud. AI assists the
 construction of models, code, proofs and documentation. Lean checks the
-resulting proof terms against their definitions and hypotheses; that check
-does not experimentally validate the physical assumptions or establish every
-claim made in the repository.
+resulting proof terms against their definitions and hypotheses.
+That check does not experimentally validate the physical assumptions or
+establish every claim made in the repository.
 
 Source code is [MIT](LICENSE). Documents, proofs, data, certificates and other
 non-code material are CC BY 4.0 under [LICENSE-docs.md](LICENSE-docs.md).
