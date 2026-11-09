@@ -7,25 +7,37 @@ Everything is laid out as a finite causal network with fixed clocks. -/
 namespace RecursiveLearning.Native
 open KernelR.Hybrid
 
-/-- A trial reads the block that has two or three inputs. The certificate
-also identifies the reported bit with retention of both required blocks. -/
+/-- A trial includes a calibrated birth gain for its read port. Its
+certificate identifies the physical report with the declared retention test. -/
 structure AdaptiveTrial where
   lesson : Lesson
   testPractice : Bool
   passes : Bool
+  needs : Learner
+  birthGain : ℝ
+  nonpositive : birthGain ≤ 0
   capacity : lesson.preparation ≤ 4 ∧ lesson.practice ≤ 4
-  count : (lessonPorts lesson).count (trialPort testPractice) = if passes then 3 else 2
-  correct : (lesson.train ⟨3, 3⟩).retained = passes
+  gainTest : let gain := birthGain + (3 / 5 : ℝ) * (lessonPorts lesson).count (trialPort testPractice)
+    if passes then gain = 3 / 5 else gain ≤ 0
+  correct : (lesson.train needs).retained = passes
 
-def AdaptiveTrial.standard (practice passes : Bool) : AdaptiveTrial where
+noncomputable def AdaptiveTrial.standard (practice passes : Bool) : AdaptiveTrial where
   lesson := trialLesson practice passes
   testPractice := practice
   passes := passes
+  needs := ⟨3, 3⟩
+  birthGain := -(6 / 5)
+  nonpositive := by norm_num
   capacity := by cases practice <;> cases passes <;> decide
-  count := by
-    cases practice
-    · exact (lessonPorts_count (preparationTrial passes)).1
-    · exact (lessonPorts_count (practiceTrial passes)).2.1
+  gainTest := by
+    have count : (lessonPorts (trialLesson practice passes)).count (trialPort practice) =
+        if passes then 3 else 2 := by
+      cases practice
+      · exact (lessonPorts_count (preparationTrial passes)).1
+      · exact (lessonPorts_count (practiceTrial passes)).2.1
+    dsimp only
+    rw [count]
+    cases passes <;> norm_num
   correct := by cases practice <;> cases passes <;> decide
 
 noncomputable def AdaptiveTrial.tokens (trial : AdaptiveTrial) (clock : ℝ) : List (Delivery 1) :=
@@ -33,7 +45,7 @@ noncomputable def AdaptiveTrial.tokens (trial : AdaptiveTrial) (clock : ℝ) : L
 
 private noncomputable def AdaptiveTrial.receiver (trial : AdaptiveTrial) (origin clock : ℝ)
     (launched : Bool) : Snapshot 1 :=
-  { scheduledTrial clock trial.lesson (trialPort trial.testPractice) with
+  { scheduledTrial clock trial.lesson (trialPort trial.testPractice) trial.birthGain with
     time := origin
     pending := if launched then trial.tokens clock else [] }
 
@@ -57,8 +69,9 @@ private theorem trial_window_report {θ T clock origin} (trial : AdaptiveTrial) 
     exact ⟨⟨_, wait, done, positive⟩, by simp [Reports, ReportWindow.dates, Execution.emissionTimes, silent],
       by rw [deliveries]; rfl⟩
   | true =>
-    obtain ⟨run, fire, flag, window, dates, count⟩ := staged_lesson_read_exists box start.le finish
-      trial.lesson (trialPort trial.testPractice) trial.passes trial.capacity trial.count
+    obtain ⟨run, fire, flag, window, dates, count⟩ := staged_lesson_read_exists_of_gain box start.le finish
+      trial.lesson (trialPort trial.testPractice) trial.passes trial.capacity trial.birthGain
+      trial.nonpositive trial.gainTest
     have reports : Reports run.execution 0 (trialWindow clock) trial.passes := by
       unfold Reports ReportWindow.dates
       rw [dates]
@@ -126,7 +139,8 @@ private theorem append_trial_run {n θ θH ε T} {layout : ReportLayout n} {bits
     localRun.complete rfl [] contacts causal (List.Perm.of_eq queue)
   let e : Execution (prependParameters θH θ) (layout.appendTrial source trial).route
       (layout.appendTrial source trial).start _ := weave.execution
-  have hp := readout_learner_physical box clock trial.lesson (trialPort trial.testPractice)
+  have hp := readout_learner_physical_of_gain box clock trial.lesson (trialPort trial.testPractice)
+    trial.birthGain trial.nonpositive
   have hi : InitiallyBelowReady (trial.receiver origin clock false) := by
     intro i c ready
     cases c with
@@ -190,13 +204,13 @@ noncomputable def AdaptiveProgram.compile {n m} (p : AdaptiveProgram n m)
   | .trial prior source spec => (prior.compile input).appendTrial source spec
   | .commit prior source port lesson _ => (prior.compile input).appendBranch source port lesson
 
-noncomputable def AdaptiveProgram.eval {n m} (p : AdaptiveProgram n m)
+def AdaptiveProgram.eval {n m} (p : AdaptiveProgram n m)
     (input : Fin n → Bool) : Fin m → Bool :=
   match p with
   | .inputs => input
   | .andGate prior first rest =>
     let bits := prior.eval input
-    Fin.cases (decide (∀ i ∈ first :: rest, bits i = true)) bits
+    Fin.cases ((first :: rest).all bits) bits
   | .notGate prior source =>
     let bits := prior.eval input
     Fin.cases (!bits source) bits
@@ -208,7 +222,7 @@ noncomputable def AdaptiveProgram.eval {n m} (p : AdaptiveProgram n m)
 theorem AdaptiveProgram.trial_reports_retention {n m} (prior : AdaptiveProgram n m)
     (source : Fin m) (trial : AdaptiveTrial) (input : Fin n → Bool) :
     (prior.trial source trial).eval input 0 =
-      (prior.eval input source && (trial.lesson.train ⟨3, 3⟩).retained) := by
+      (prior.eval input source && (trial.lesson.train trial.needs).retained) := by
   rw [trial.correct]
   rfl
 
@@ -218,6 +232,10 @@ def AdaptiveProgram.initialParameters {n m} : AdaptiveProgram n m → (Fin m →
   | .notGate prior _, θ => prior.initialParameters (fun i => θ i.succ)
   | .trial prior _ _, θ => prior.initialParameters (fun i => θ i.succ)
   | .commit prior _ _ _ _, θ => prior.initialParameters (fun i => θ i.succ.succ)
+
+def GainsRetain (gain : Port → ℝ) (needs : Learner) : Prop :=
+  -(12 / 5 : ℝ) + (3 / 5 : ℝ) * needs.preparationLeft ≤ gain 0 ∧
+  -(12 / 5 : ℝ) + (3 / 5 : ℝ) * needs.practiceLeft ≤ gain 1
 
 /-- Observe every guarded action and later trial in the final execution.
 A launched trial receives its complete lesson plus one physical read.
@@ -236,6 +254,8 @@ def AdaptiveProgram.Effects {n m} (p : AdaptiveProgram n m) (input : Fin n → B
     receipts 0 = (if accepted then lesson.cost else 0) ∧
     receipts (0 : Fin (k + 1)).succ = (if accepted then 1 else 0) ∧
     (∀ p, gains (0 : Fin (k + 1)).succ p = if p = port ∧ accepted then 3 / 5 else 0) ∧
+    (∀ needs, GainsRetain (gains 0) needs ↔
+      ((if accepted then lesson else ⟨0, 0⟩).train needs).retained = true) ∧
     prior.Effects input (fun i => gains i.succ.succ) (fun i => receipts i.succ.succ)
 
 theorem AdaptiveProgram.initial_box {n m θ ε} (p : AdaptiveProgram n m)
@@ -306,11 +326,18 @@ theorem AdaptiveProgram.run {n m θ ε T} (p : AdaptiveProgram n m) {layout : Re
       (prior.compile_timed timed) (by
         change ((prior.andGate first rest).compile layout).last + 45 < T
         linarith)
-    have result : ∃ run : CompiledRun _ ((prior.andGate first rest).compile layout) T _,
+    let parameters := prependParameters (fun _ => θ 0) (fun i : Fin k => θ i.succ)
+    let oldBits := prior.eval bits
+    have gateBit : decide (∀ i ∈ first :: rest, oldBits i = true) =
+        (first :: rest).all oldBits := by
+      apply Bool.eq_iff_iff.mpr
+      simp [List.all_eq_true]
+    have result : ∃ run : CompiledRun parameters ((prior.andGate first rest).compile layout) T
+        (Fin.cases (decide (∀ i ∈ first :: rest, oldBits i = true)) oldBits),
         (prior.andGate first rest).Effects bits (fun i q => run.final.x i (.z q))
           (lessonReceipts run.execution.deliveries) :=
       ⟨head, carries_effects prior Fin.succ values receipts effects⟩
-    rw [prepend_parameters_all θ] at result
+    rw [show parameters = θ from prepend_parameters_all θ, gateBit] at result
     exact result
   | notGate prior source ih =>
     rename_i k
@@ -361,11 +388,14 @@ theorem AdaptiveProgram.run {n m θ ε T} (p : AdaptiveProgram n m) {layout : Re
         T (noActionReports (prior.eval bits)),
         (prior.commit source port lesson capacity).Effects bits (fun i q => run.final.x i (.z q))
           (lessonReceipts run.execution.deliveries) := by
-      refine ⟨head, lessonCount, creditCount, ?_,
+      refine ⟨head, lessonCount, creditCount, ?_, ?_,
         carries_effects prior (fun i => i.succ.succ) values receipts effects⟩
-      intro q
-      rw [same]
-      exact action.credit q
+      · intro q
+        rw [same]
+        exact action.credit q
+      · intro needs
+        rw [same]
+        exact action.lessonRetention needs
     rw [show parameters = θ from split_branch_parameters θ] at result
     exact result
 
