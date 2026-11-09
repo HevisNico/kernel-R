@@ -12,14 +12,14 @@ inductive CommitPlan (inputs : ℕ) : ℕ → Type
   | add {n} (prior : CommitPlan inputs n) (decision : Fin n) (port : Port) (lesson : Lesson)
       (capacity : lesson.preparation ≤ 4 ∧ lesson.practice ≤ 4) : CommitPlan inputs (n + 1 + 1)
 
-private noncomputable def ReportLayout.appendBranch {n} (layout : ReportLayout n)
+noncomputable def ReportLayout.appendBranch {n} (layout : ReportLayout n)
     (decision : Fin n) (port : Port) (lesson : Lesson) : ReportLayout (n + 1 + 1) :=
   let emptyWindow : ReportWindow := ⟨layout.last, layout.last⟩
   ⟨branchStart layout.start, branchRouter layout.route decision (layout.windows decision)
     (layout.last + 1) port lesson, Fin.cases emptyWindow (Fin.cases emptyWindow layout.windows),
     layout.last⟩
 
-private def noActionReports {n} (bits : Fin n → Bool) : Fin (n + 1 + 1) → Bool :=
+def noActionReports {n} (bits : Fin n → Bool) : Fin (n + 1 + 1) → Bool :=
   Fin.cases false (Fin.cases false bits)
 
 noncomputable def CommitPlan.compile {n m} (plan : CommitPlan n m) (layout : ReportLayout n) :
@@ -57,7 +57,7 @@ theorem CommitPlan.compile_last {n m} (plan : CommitPlan n m) (layout : ReportLa
   | none => rfl
   | add _ _ _ _ _ ih => exact ih
 
-private theorem append_branch_timed {n} {layout : ReportLayout n} (timed : layout.WellTimed)
+theorem append_branch_timed {n} {layout : ReportLayout n} (timed : layout.WellTimed)
     (decision : Fin n) (port : Port) (lesson : Lesson) :
     (layout.appendBranch decision port lesson).WellTimed := by
   refine ⟨timed.1, ?_⟩
@@ -92,7 +92,7 @@ private theorem empty_window_reports {n θ route s u} (e : @Execution n θ route
   rw [empty]
   rfl
 
-private theorem append_branch_run {n θ θC θL ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
+theorem append_branch_run {n θ θC θL ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
     (prior : CompiledRun θ layout T bits) (creditBox : @PhysicalBox 1 θC ε)
     (lessonBox : @PhysicalBox 1 θL ε) (decision : Fin n) (port : Port) (lesson : Lesson)
     (capacity : lesson.preparation ≤ 4 ∧ lesson.practice ≤ 4)
@@ -134,7 +134,7 @@ private theorem append_branch_run {n θ θC θL ε T} {layout : ReportLayout n} 
       branch_causal prior.causal decision port lesson margin⟩
   exact ⟨action, run, rfl, action.lessonReceipts, action.creditReceipts, action.previousReceipts⟩
 
-private theorem split_branch_parameters {n} (θ : Fin (n + 1 + 1) → Parameters) :
+theorem split_branch_parameters {n} (θ : Fin (n + 1 + 1) → Parameters) :
     prependParameters (fun _ => θ 0)
       (prependParameters (fun _ => θ (0 : Fin (n + 1)).succ) (fun i => θ i.succ.succ)) = θ := by
   funext i

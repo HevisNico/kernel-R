@@ -290,7 +290,9 @@ theorem compose_report_and {n θ θH ε route s u T read}
         (queueHead s (scheduledAndStart s.time read wires.length)) v),
       CompleteThrough e T ∧ (send.ContactsTransversal → e.ContactsTransversal) ∧
       Reports e 0 (counterWindow read) (decide (∀ wire ∈ wires, bits wire = true)) ∧
-      (∀ i, e.emissionTimes i.succ = send.emissionTimes i) := by
+      (∀ i, e.emissionTimes i.succ = send.emissionTimes i) ∧
+      (∀ i, v.x i.succ = u.x i) ∧
+      (∀ i, lessonReceipts e.deliveries i.succ = lessonReceipts send.deliveries i) := by
   classical
   let dates := receivedReportDates wires bits
   have count := reports_count wires bits
@@ -317,7 +319,7 @@ theorem compose_report_and {n θ θH ε route s u T read}
   have bitEq : decide (dates.length = wires.length) = decide (∀ wire ∈ wires, bits wire = true) := by
     exact decide_eq_decide.mpr count.2
   refine ⟨_, e, weave.complete done cell.complete, fun h => weave.contacts_transversal h cell.transverse,
-    ?_, weave.tail_emission_times⟩
+    ?_, weave.tail_emission_times, fun _ => rfl, CausalTraceBalance.tail_receipts weave.trace⟩
   rw [← bitEq]
   exact gateReport
 
@@ -349,7 +351,7 @@ theorem compose_report_nand {n θ θA θN ε route s u T read clock}
       Reports e 0 (notWindow clock) (!(decide (∀ wire ∈ wires, bits wire = true))) ∧
       (∀ i, e.emissionTimes i.succ.succ = send.emissionTimes i) := by
   classical
-  obtain ⟨_, counted, countedDone, _, countedReport, countedDates⟩ :=
+  obtain ⟨_, counted, countedDone, _, countedReport, countedDates, _, _⟩ :=
     compose_report_and send done andBox wires bits nonempty reports margin future gap beforeRead
       before (by linarith)
   have date : (queueHead s (scheduledAndStart s.time read wires.length)).time = s.time := rfl

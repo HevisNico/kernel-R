@@ -536,6 +536,29 @@ compiled circuit is feed-forward, with fixed clocks and one decision
 round. An inactive action receives neither a credit nor a lesson.
 Internal test cells can still receive partial input.
 
+## Several adaptive rounds
+
+[`compile_finite_adaptive_program`](AdaptiveRounds.lean) compiles a
+finite sequence of logic, trial launches and guarded credit or lesson
+actions. A later learner starts with an empty queue. An earlier report
+routes both the lesson and the read pulse to that learner. Its own
+readout can then feed a gate or launch another trial. In the
+[two-trial example](AdaptiveRounds.lean), a first trial can receive its
+full lesson, fail the readout, and leave the second trial with zero
+deliveries.
+
+The router and report windows are fixed across initial trial outcomes.
+Each activated trial receives its full lesson and one read pulse.
+Each skipped trial receives zero inputs. The credit and lesson counts
+of guarded actions remain exact across later stages. Complete
+upward-crossing executions from each initial state agree on the
+terminal observations, ordered firing dates and delivery multiset.
+
+The layout uses fresh cells for later trials and fixed absolute
+clocks. Trial lessons have at most four pulses per block. The block
+read by a trial has two or three pulses, with the trial's readout
+certified against the declared requirement of three pulses per block.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -554,7 +577,7 @@ builds this package with the pinned dependencies. Its default targets compile
 `NativeAcceptance`, `AcceptanceDispatch`, `SerialAcceptance`,
 `LearnerReadout`, `ReadoutSeries`, `LearnerConjunction`, `LearnerFanIn` and
 `ScheduledGates`, `ScheduledCircuit`, `ReportFormula`, `ScheduledCommit` and
-`ScheduledProgram`, and run
+`ScheduledProgram` and `AdaptiveRounds`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

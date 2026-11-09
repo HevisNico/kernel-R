@@ -113,7 +113,7 @@ theorem ReportCircuit.initial_box {n m θ ε} (c : ReportCircuit n m)
   | andGate _ _ _ ih => exact ih ⟨box.1, fun i => box.2 i.succ⟩
   | notGate _ _ ih => exact ih ⟨box.1, fun i => box.2 i.succ⟩
 
-private theorem append_and_timed {n} {layout : ReportLayout n} (timed : layout.WellTimed)
+theorem append_and_timed {n} {layout : ReportLayout n} (timed : layout.WellTimed)
     (parents : List (Fin n)) : (layout.appendAnd parents).WellTimed := by
   have lt : layout.last < (layout.appendAnd parents).last := by
     change layout.last < layout.last + 1 + 8 * (parents.length : ℝ) + 1
@@ -124,7 +124,7 @@ private theorem append_and_timed {n} {layout : ReportLayout n} (timed : layout.W
   | zero => exact le_rfl
   | succ i => exact (timed.2 i).trans lt.le
 
-private theorem append_not_timed {n} {layout : ReportLayout n} (timed : layout.WellTimed)
+theorem append_not_timed {n} {layout : ReportLayout n} (timed : layout.WellTimed)
     (i : Fin n) : (layout.appendNot i).WellTimed := by
   have lt : layout.last < (layout.appendNot i).last := by
     change layout.last < layout.last + 1 + 18
@@ -153,12 +153,12 @@ structure CompiledRun {m} (θ : Fin m → Parameters) (layout : ReportLayout m)
   initial : InitiallyBelowReady layout.start
   causal : StrictCausalRouter layout.route
 
-private theorem prepend_parameters_all {n} (θ : Fin (n + 1) → Parameters) :
+theorem prepend_parameters_all {n} (θ : Fin (n + 1) → Parameters) :
     prependParameters (fun _ => θ 0) (fun i => θ i.succ) = θ := by
   funext i
   cases i using Fin.cases <;> rfl
 
-private theorem prepend_initial_ready {n} {s : Snapshot n} {h : Snapshot 1} {Q}
+theorem prepend_initial_ready {n} {s : Snapshot n} {h : Snapshot 1} {Q}
     (tail : InitiallyBelowReady s) (head : InitiallyBelowReady h) :
     InitiallyBelowReady (s.prependQueued h Q) := by
   intro i c ready
@@ -176,12 +176,14 @@ private theorem and_initial (origin read : ℝ) (count : ℕ) :
   | b => exact False.elim h
   | energy => exact False.elim h
 
-private theorem append_and_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
+theorem append_and_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
     (prior : CompiledRun θ layout T bits) (box : @PhysicalBox 1 θH ε)
     (parents : List (Fin n)) (positiveArity : 0 < parents.length)
     (timed : layout.WellTimed) (horizon : (layout.appendAnd parents).last + 45 < T) :
-    Nonempty (CompiledRun (prependParameters θH θ) (layout.appendAnd parents) T
-      (Fin.cases (decide (∀ i ∈ parents, bits i = true)) bits)) := by
+    ∃ run : CompiledRun (prependParameters θH θ) (layout.appendAnd parents) T
+      (Fin.cases (decide (∀ i ∈ parents, bits i = true)) bits),
+      (∀ i, run.final.x i.succ = prior.final.x i) ∧
+      (∀ i, lessonReceipts run.execution.deliveries i.succ = lessonReceipts prior.execution.deliveries i) := by
   classical
   let slot := layout.last + 1
   let read := slot + 8 * parents.length
@@ -209,7 +211,7 @@ private theorem append_and_run {n θ θH ε T} {layout : ReportLayout n} {bits :
   have late (w : ReportWire n) (mem : w ∈ wires) : w.due + 15 / 2 < read := by
     have hi : w.due + 8 ≤ read := (and_wire_bounds mem).2.2
     linarith
-  obtain ⟨v, e, complete, transverse, gate, previous⟩ :=
+  obtain ⟨v, e, complete, transverse, gate, previous, values, receipts⟩ :=
     compose_report_and prior.execution prior.complete box wires assigned
       (by rw [length]; exact positiveArity) reports margin future (and_wires_gap _ _ _) late before
       (by rw [last] at horizon; linarith)
@@ -219,7 +221,7 @@ private theorem append_and_run {n θ θH ε T} {layout : ReportLayout n} {bits :
   refine ⟨⟨v, built, complete, transverse prior.positive, ?_,
     prepend_physical prior.physical ⟨phys.region, phys.gain_cap, phys.recovery_cap, phys.reserve⟩ _,
     prepend_initial_ready prior.initial (and_initial _ _ _),
-    prepend_routed_causal prior.causal (report_wire_contacts_strict margin)⟩⟩
+    prepend_routed_causal prior.causal (report_wire_contacts_strict margin)⟩, values, receipts⟩
   · intro i
     unfold Reports ReportWindow.dates
     cases i using Fin.cases with
@@ -234,11 +236,13 @@ private theorem append_and_run {n θ θH ε T} {layout : ReportLayout n} {bits :
       rw [previous]
       exact prior.reports i
 
-private theorem append_not_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
+theorem append_not_run {n θ θH ε T} {layout : ReportLayout n} {bits : Fin n → Bool}
     (prior : CompiledRun θ layout T bits) (box : @PhysicalBox 1 θH ε)
     (source : Fin n) (timed : layout.WellTimed) (horizon : (layout.appendNot source).last + 45 < T) :
-    Nonempty (CompiledRun (prependParameters θH θ) (layout.appendNot source) T
-      (Fin.cases (!bits source) bits)) := by
+    ∃ run : CompiledRun (prependParameters θH θ) (layout.appendNot source) T
+      (Fin.cases (!bits source) bits),
+      (∀ i, run.final.x i.succ = prior.final.x i) ∧
+      (∀ i, lessonReceipts run.execution.deliveries i.succ = lessonReceipts prior.execution.deliveries i) := by
   let clock := layout.last + 1
   have last : (layout.appendNot source).last = clock + 18 := rfl
   have margin : (layout.windows source).stop ≤ clock + 1 := by
@@ -253,7 +257,8 @@ private theorem append_not_run {n θ θH ε T} {layout : ReportLayout n} {bits :
   refine ⟨⟨_, e, done, weave.contacts_transversal prior.positive cell.transverse, ?_,
     prepend_physical prior.physical ⟨phys.region, phys.gain_cap, phys.recovery_cap, phys.reserve⟩ _,
     prepend_initial_ready prior.initial (lessonProbe_initial false clock),
-    prepend_routed_causal prior.causal (forward_report_strict source (layout.windows source) ?_)⟩⟩
+    prepend_routed_causal prior.causal (forward_report_strict source (layout.windows source) ?_)⟩,
+    fun _ => rfl, CausalTraceBalance.tail_receipts weave.trace⟩
   · intro i
     cases i using Fin.cases with
     | zero => exact gate
@@ -282,7 +287,7 @@ theorem ReportCircuit.run {n m θ ε T} (c : ReportCircuit n m) {layout : Report
       change (prior.compile layout).last + 1 + 8 * ((first :: rest).length : ℝ) + 1 + 45 < T at horizon
       linarith [show (0 : ℝ) ≤ ((first :: rest).length : ℝ) by positivity]
     obtain ⟨tail⟩ := ih input tailBox later
-    obtain ⟨built⟩ := append_and_run tail headBox (first :: rest) (by simp)
+    obtain ⟨built, _, _⟩ := append_and_run tail headBox (first :: rest) (by simp)
       (prior.compile_timed timed) horizon
     change Nonempty (CompiledRun θ ((prior.compile layout).appendAnd (first :: rest)) T _)
     rw [prepend_parameters_all θ] at built
@@ -295,7 +300,7 @@ theorem ReportCircuit.run {n m θ ε T} (c : ReportCircuit n m) {layout : Report
       change (prior.compile layout).last + 1 + 18 + 45 < T at horizon
       linarith
     obtain ⟨tail⟩ := ih input tailBox later
-    obtain ⟨built⟩ := append_not_run tail headBox source (prior.compile_timed timed) horizon
+    obtain ⟨built, _, _⟩ := append_not_run tail headBox source (prior.compile_timed timed) horizon
     change Nonempty (CompiledRun θ ((prior.compile layout).appendNot source) T _)
     rw [prepend_parameters_all θ] at built
     exact ⟨built⟩
@@ -334,19 +339,19 @@ theorem ReportCircuit.layout_last_mono {n m} (c : ReportCircuit n m) (layout : R
     change _ ≤ (prior.compile layout).last + 1 + 18
     linarith
 
-/-- The input execution can itself consist of real R learners. Their
-report bits are established by their delivered trials and physical reads. -/
-theorem ReportCircuit.run_with_learners {n m θ ε T} (c : ReportCircuit n m)
-    (box : @PhysicalBox m θ ε) (time : ℝ) (kinds passed : Fin n → Bool)
-    (horizon : (c.compile (learnerReportLayout time kinds passed)).last + 45 < T) :
-    Nonempty (CompiledRun θ (c.compile (learnerReportLayout time kinds passed)) T (c.eval passed)) := by
+theorem learner_report_layout_timed (time : ℝ) {n} (kinds passed : Fin n → Bool) :
+    (learnerReportLayout time kinds passed).WellTimed := by
+  refine ⟨?_, fun _ => le_rfl⟩
+  change (trialBankStart time kinds passed).time < time + 66
+  rw [trial_bank_clock]
+  linarith
+
+/-- Real learner reports supply the input contract of the compiler. -/
+theorem learner_report_run {n θ ε T} (box : @PhysicalBox n θ ε) (time : ℝ)
+    (kinds passed : Fin n → Bool) (later : time + 96 < T) :
+    Nonempty (CompiledRun θ (learnerReportLayout time kinds passed) T passed) := by
   let layout := learnerReportLayout time kinds passed
-  have later : time + 96 < T := by
-    have low := c.layout_last_mono layout
-    change time + 66 ≤ _ at low
-    linarith
-  have sourceBox := c.initial_box box
-  obtain ⟨bank⟩ := trial_bank_exists sourceBox later kinds passed
+  obtain ⟨bank⟩ := trial_bank_exists box later kinds passed
   have reports (i : Fin n) : Reports bank.execution i (layout.windows i) (passed i) := by
     unfold Reports ReportWindow.dates
     rw [bank.dates]
@@ -358,13 +363,20 @@ theorem ReportCircuit.run_with_learners {n m θ ε T} (c : ReportCircuit n m)
       have flag : passed i = true := by simpa [h] using (bank.flags i).symm
       obtain ⟨early, late⟩ := bank.window i F h
       simp [flag, layout, learnerReportLayout, ReportWindow.accepts, early.le, late]
-  let input : CompiledRun (initialParameters c θ) layout T passed :=
-    ⟨bank.final, bank.execution, bank.complete, bank.positive, reports,
-      trial_bank_physical sourceBox time kinds passed, trial_bank_initial time kinds passed, trial_bank_causal n⟩
-  apply c.run input box ?_ horizon
-  refine ⟨?_, fun _ => le_rfl⟩
-  change (trialBankStart time kinds passed).time < time + 66
-  rw [trial_bank_clock]
-  linarith
+  exact ⟨⟨bank.final, bank.execution, bank.complete, bank.positive, reports,
+    trial_bank_physical box time kinds passed, trial_bank_initial time kinds passed, trial_bank_causal n⟩⟩
+
+/-- The input execution can itself consist of real R learners. Their
+report bits are established by their delivered trials and physical reads. -/
+theorem ReportCircuit.run_with_learners {n m θ ε T} (c : ReportCircuit n m)
+    (box : @PhysicalBox m θ ε) (time : ℝ) (kinds passed : Fin n → Bool)
+    (horizon : (c.compile (learnerReportLayout time kinds passed)).last + 45 < T) :
+    Nonempty (CompiledRun θ (c.compile (learnerReportLayout time kinds passed)) T (c.eval passed)) := by
+  have later : time + 96 < T := by
+    have low := c.layout_last_mono (learnerReportLayout time kinds passed)
+    change time + 66 ≤ _ at low
+    linarith
+  obtain ⟨input⟩ := learner_report_run (c.initial_box box) time kinds passed later
+  exact c.run input box (learner_report_layout_timed time kinds passed) horizon
 
 end RecursiveLearning.Native
