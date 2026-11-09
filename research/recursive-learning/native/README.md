@@ -109,8 +109,28 @@ boxes are covered.
 `LessonProbeRun.reports_example_failure` matches the two outcomes of the
 discrete validation at its last preparation slot. The assay implements that
 varying slot. The earlier discrete lesson pulses are outside this assay.
-Joining this readout to the teacher's routed update and dispatching the next
-lesson in the network are the remaining steps.
+
+## The lesson and selector update in one execution
+
+The [routed lesson](RoutedLesson.lean) puts the teacher in cell 0 and the
+learner in cell 1. The initial network queue contains only the external
+lesson inputs. The router listens to learner FIREs at or after offset 17,
+when the readout pulse is admitted. An earlier preparation FIRE sends
+nothing to the teacher.
+
+- If preparation is present, the readout stays silent and the teacher's
+  selector log-gain stays at 0.
+- If preparation is omitted, the learner's actual readout FIRE schedules
+  exactly one delivery to the selector at its firing date plus the wire
+  delay. The teacher's selector log-gain reaches `3/5`.
+
+`routed_lesson_crossing_exists` constructs this history through offset 26.
+`RoutedLessonRun.every_complete` and `every_crossing_complete` give the
+same physical endpoint, FIREs and deliveries in every complete execution at that
+horizon. The result covers both fabrication boxes and delays in
+`[0.3, 0.4]`. The selector value now comes from the actual lesson and
+readout. Using it to choose and send the next lesson is the remaining
+network step.
 
 ## Verify
 
@@ -124,7 +144,8 @@ lake build
 
 The [dedicated CI workflow](../../../.github/workflows/recursive-learning.yml)
 builds this package with the pinned dependencies. Its default targets compile
-`NativeLearning`, `Feedback` and `LessonProbe`, and run [the axiom audit](NativeAudit.lean), which checks all
-imported declarations under `RecursiveLearning`, including private ones.
+`NativeLearning`, `Feedback`, `LessonProbe` and `RoutedLesson`, and run
+[the axiom audit](NativeAudit.lean), which checks all imported declarations
+under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
 and Mathlib pins come from the existing proof package.
