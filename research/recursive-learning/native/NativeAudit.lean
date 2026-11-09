@@ -1,6 +1,6 @@
 import Dispatch
 import CappedDispatch
-import ReadoutSeries
+import LearnerConjunction
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

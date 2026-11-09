@@ -6,7 +6,7 @@ FIRE jumps. The selector update wire is the only frozen intervention. -/
 namespace RecursiveLearning.Native
 open KernelR.Hybrid
 
-private structure LocalRun (θ : Fin 1 → Parameters) (start : Snapshot 1) (T : ℝ) where
+structure LocalRun (θ : Fin 1 → Parameters) (start : Snapshot 1) (T : ℝ) where
   final : Snapshot 1
   execution : Execution θ (fun _ _ => []) start final
   complete : CompleteThrough execution T
@@ -44,7 +44,7 @@ private theorem series_trial_future {clock practice third d}
     linarith
   · linarith [lesson_delivery_time member]
 
-private theorem staged_trial_exists {θ ε time clock T} (box : @PhysicalBox 1 θ ε)
+theorem staged_trial_exists {θ ε time clock T} (box : @PhysicalBox 1 θ ε)
     (later : time ≤ clock) (horizon : clock + 96 < T) (practice third : Bool) :
     ∃ (run : LocalRun θ {seriesTrial clock practice third with time := time} T) (fire : Option ℝ),
       fire.isSome = third ∧
@@ -102,17 +102,17 @@ private theorem silent {fire : Option ℝ} (h : fire.isSome = false) : fire = no
   | none => rfl
   | some F => simp at h
 
-private noncomputable def atCell {n} (sender : Fin n) (send : ℝ → List (Delivery 1)) : HeadRoutes n :=
+noncomputable def atCell {n} (sender : Fin n) (send : ℝ → List (Delivery 1)) : HeadRoutes n :=
   fun i F => if i = sender then send F else []
 
-private theorem atCell_strict {n} (sender : Fin n) {send : ℝ → List (Delivery 1)}
+theorem atCell_strict {n} (sender : Fin n) {send : ℝ → List (Delivery 1)}
     (strict : ∀ F d, d ∈ send F → F < d.due) : StrictHeadRoutes (atCell sender send) := by
   intro i F d member
   by_cases matchCell : i = sender
   · exact strict F d (by simpa [atCell, matchCell] using member)
   · simp [atCell, matchCell] at member
 
-private theorem atCell_inputs {n θ route s u} (e : @Execution n θ route s u)
+theorem atCell_inputs {n θ route s u} (e : @Execution n θ route s u)
     (i : Fin n) (send : ℝ → List (Delivery 1)) :
     e.headInputQueue (atCell i send) = (e.emissionTimes i).flatMap send := by
   unfold Execution.headInputQueue Execution.emissionTimes
@@ -122,10 +122,10 @@ private theorem atCell_inputs {n θ route s u} (e : @Execution n θ route s u)
     simp only [atCell] at ih
     by_cases h : event.1 = i <;> simp [atCell, h, ih]
 
-private noncomputable def fixedCalendar (gate : ℝ) (tokens : List (Delivery 1))
+noncomputable def fixedCalendar (gate : ℝ) (tokens : List (Delivery 1))
     (F : ℝ) : List (Delivery 1) := if F < gate then tokens else []
 
-private theorem fixedCalendar_strict {gate tokens} (future : ∀ d ∈ tokens, gate ≤ d.due) :
+theorem fixedCalendar_strict {gate tokens} (future : ∀ d ∈ tokens, gate ≤ d.due) :
     ∀ F d, d ∈ fixedCalendar gate tokens F → F < d.due := by
   intro F d member
   by_cases early : F < gate
@@ -133,7 +133,7 @@ private theorem fixedCalendar_strict {gate tokens} (future : ∀ d ∈ tokens, g
   · simp [fixedCalendar, early] at member
 
 /-- Initial head sources are separate from the proof-only future wires. -/
-private theorem stage_balance {n θ route s u} (e : @Execution n θ route s u)
+theorem stage_balance {n θ route s u} (e : @Execution n θ route s u)
     (h : Snapshot 1) (external : List (Delivery 1)) (contacts : HeadRoutes n)
     (pending : (external ++ e.headInputQueue contacts).Perm h.pending) :
     HeadQueueBalance e h
@@ -317,7 +317,7 @@ private theorem staged_practice_exists {θ ε time T} (box : @PhysicalBox 1 θ �
     obtain ⟨a,b⟩ := window F h
     constructor <;> linarith
 
-private noncomputable def queueHead {n} (s : Snapshot n) (h : Snapshot 1) : Snapshot (n + 1) :=
+noncomputable def queueHead {n} (s : Snapshot n) (h : Snapshot 1) : Snapshot (n + 1) :=
   s.prependQueued h (independentHeadQueue s h)
 
 private noncomputable def probeReceiver (time : ℝ) : Snapshot 1 :=
