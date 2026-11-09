@@ -1,4 +1,4 @@
-import LessonProbe
+import RoutedLesson
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

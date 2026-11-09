@@ -68,6 +68,7 @@ structure PortDose (θ : Fin 1 → Parameters) (route : Router 1)
   rawValid : RawValid final
   gain : ∀ p, final.x 0 (.z p) = start.x 0 (.z p) +
     (if p = port then 3 / 5 else 0)
+  recovery : final.x 0 .b = start.x 0 .b
   deliveries : execution.deliveries = [⟨0, port, due⟩]
   emissions : execution.ledger.emissions = []
 
@@ -101,6 +102,7 @@ theorem port_dose_exists {θ ε route start port due later}
       change CompleteThrough cycle.execution (due + 15 / 2)
       simpa only [show arrival.final.time = due from arrival.date] using cycle.complete
     pending := cycle.pending.trans arrival.pending
+    recovery := cycle.pulse.recovery_preserved.trans (arrival.recovery_preserved 0)
     ready := cycle.pulse.coordinates
     rawNone := cycle.pulse.raw_finished
     physical := cycle.physical
@@ -234,24 +236,29 @@ noncomputable def preparedTeacher (start : ℝ) : Snapshot 1 where
   raw := fun _ _ => none
   pending := feedbackQueue start
 
-theorem prepared_run_exists {θ ε route} (box : @PhysicalBox 1 θ ε) (start : ℝ) :
-    Nonempty (ScriptedRun θ route (preparedTeacher start)) := by
+theorem preparedTeacher_physical {θ ε} (box : @PhysicalBox 1 θ ε) (start : ℝ)
+    (queue : List (Delivery 1)) :
+    PhysicalInvariant θ {preparedTeacher start with pending := queue} := by
   have caps (i : Fin 1) (p : Port) : 1 ≤ (θ i).cap p := by
     have lower := (box.2 i p).1.1
     rcases box.1 with hε | hε
     all_goals rw [hε] at lower
     all_goals norm_num at lower
     all_goals linarith
-  have physical : PhysicalInvariant θ (preparedTeacher start) := by
-    refine ⟨?_,?_,?_,?_⟩
-    · intro i
-      norm_num [UpperRegion, preparedTeacher, auxUpper]
-    · intro i p
-      exact Real.log_nonneg (caps i p)
-    · intro i
-      norm_num [preparedTeacher]
-    · intro i
-      norm_num [preparedTeacher]
+  refine ⟨?_,?_,?_,?_⟩
+  · intro i
+    norm_num [UpperRegion, preparedTeacher, auxUpper]
+  · intro i p
+    exact Real.log_nonneg (caps i p)
+  · intro i
+    norm_num [preparedTeacher]
+  · intro i
+    norm_num [preparedTeacher]
+
+theorem prepared_run_exists {θ ε route} (box : @PhysicalBox 1 θ ε) (start : ℝ) :
+    Nonempty (ScriptedRun θ route (preparedTeacher start)) := by
+  have physical : PhysicalInvariant θ (preparedTeacher start) :=
+    preparedTeacher_physical box start (feedbackQueue start)
   have ready : ReadyCoordinates (preparedTeacher start) 0 := by
     exact ⟨rfl, by norm_num [preparedTeacher], fun _ =>
       ⟨rfl, by norm_num [preparedTeacher, RestBand]⟩⟩

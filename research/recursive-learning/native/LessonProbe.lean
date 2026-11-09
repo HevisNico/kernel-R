@@ -26,7 +26,7 @@ noncomputable def lessonProbeStart (prepared : Bool) (time : ℝ) : Snapshot 1 w
   raw := fun _ _ => none
   pending := lessonProbeQueue prepared time
 
-private theorem lessonProbe_physical {θ ε prepared time} (box : @PhysicalBox 1 θ ε) :
+theorem lessonProbe_physical {θ ε prepared time} (box : @PhysicalBox 1 θ ε) :
     PhysicalInvariant θ (lessonProbeStart prepared time) := by
   have cap (i : Fin 1) (p : Port) : 2 ≤ (θ i).cap p := by
     have lower := (box.2 i p).1.1
@@ -46,7 +46,7 @@ private theorem lessonProbe_ready (prepared : Bool) (time : ℝ) (i : Fin 1) :
     ReadyCoordinates (lessonProbeStart prepared time) i :=
   ⟨rfl, by norm_num [lessonProbeStart], fun _ => ⟨rfl, by norm_num [lessonProbeStart, RestBand]⟩⟩
 
-private theorem lessonProbe_initial (prepared : Bool) (time : ℝ) :
+theorem lessonProbe_initial (prepared : Bool) (time : ℝ) :
     InitiallyBelowReady (lessonProbeStart prepared time) := by
   intro i c ready
   cases c with
@@ -69,6 +69,7 @@ structure LessonProbeAdmission (θ : Fin 1 → Parameters) (prepared : Bool) (ti
   deliveries : execution.deliveries = lessonProbeQueue prepared time
   earlyEmissions : ∀ e ∈ execution.ledger.emissions, e.2 < time + 17
   logGain : final.x 0 (.z 0) = if prepared then 0 else 3 / 5
+  recovery : final.x 0 .b = if prepared then 9 / 50 else 2 / 25
 
 private theorem unprepared_admission_exists {θ ε} (box : @PhysicalBox 1 θ ε) (time : ℝ) :
     Nonempty (LessonProbeAdmission θ false time) := by
@@ -101,6 +102,7 @@ private theorem unprepared_admission_exists {θ ε} (box : @PhysicalBox 1 θ ε)
     deliveries := ?_
     earlyEmissions := ?_
     logGain := ?_
+    recovery := (probe.recovery_preserved 0).trans dose.recovery
   }⟩
   · rw [Execution.deliveries_append, dose.deliveries, probe.deliveries]
     rfl
@@ -208,6 +210,7 @@ private theorem prepared_admission_exists {θ ε} (box : @PhysicalBox 1 θ ε) (
     deliveries := ?_
     earlyEmissions := ?_
     logGain := ?_
+    recovery := ?_
   }⟩
   · simp only [head, tail, Execution.contactsTransversal_append, arrival.contacts_transversal,
       fire.contacts_transversal, fast.contacts_transversal, slow.contacts_transversal,
@@ -230,6 +233,10 @@ private theorem prepared_admission_exists {θ ε} (box : @PhysicalBox 1 θ ε) (
     change slow.final.x 0 (.z 0) = 0
     rw [slow.gains, fast.gains, fire.gain_preserved, arrival.gain_preserved]
     rfl
+  · rw [probe.recovery_preserved, cycle.recovery_gain]
+    change slow.final.x 0 .b + 1 / 10 = 9 / 50
+    rw [slow.recovery, fast.recovery, fire.recovery_preserved, arrival.recovery_preserved]
+    norm_num [start, lessonProbeStart]
 
 /-- From the same physical state, a different preparation calendar generates
     the two probe gains. No outcome or initial gain is selected by an oracle. -/
@@ -260,28 +267,32 @@ private theorem learnedProbe_gain :
     rw [Real.exp_log (by norm_num : (0 : ℝ) < 2)] at bound
     linarith
 
-structure LessonProbeRun (θ : Fin 1 → Parameters) (prepared : Bool) (time : ℝ) where
+structure LessonProbeRun (θ : Fin 1 → Parameters) (prepared : Bool) (time : ℝ)
+    (finish : ℝ := time + 18) where
   admission : LessonProbeAdmission θ prepared time
   final : Snapshot 1
   readout : Execution θ (fun _ _ => []) admission.final final
-  complete : CompleteThrough readout (time + 18)
+  complete : CompleteThrough readout finish
   transversal : readout.ContactsTransversal
   emissions : if prepared then readout.ledger.emissions = []
     else ∃ fire, readout.ledger.emissions = [(0, fire)]
+  earlyReadout : ∀ e ∈ readout.ledger.emissions, e.2 < time + 18
+  pendingEmpty : final.pending = []
 
-noncomputable def LessonProbeRun.execution {θ prepared time} (run : LessonProbeRun θ prepared time) :
+noncomputable def LessonProbeRun.execution {θ prepared time finish}
+    (run : LessonProbeRun θ prepared time finish) :
     Execution θ (fun _ _ => []) (lessonProbeStart prepared time) run.final :=
   run.admission.execution.append run.readout
 
-theorem LessonProbeRun.complete_execution {θ prepared time} (run : LessonProbeRun θ prepared time) :
-    CompleteThrough run.execution (time + 18) := run.complete
+theorem LessonProbeRun.complete_execution {θ prepared time finish} (run : LessonProbeRun θ prepared time finish) :
+    CompleteThrough run.execution finish := run.complete
 
-theorem LessonProbeRun.contacts_transversal {θ prepared time} (run : LessonProbeRun θ prepared time) :
+theorem LessonProbeRun.contacts_transversal {θ prepared time finish} (run : LessonProbeRun θ prepared time finish) :
     run.execution.ContactsTransversal :=
   (run.admission.execution.contactsTransversal_append run.readout).2
     ⟨run.admission.transversal, run.transversal⟩
 
-theorem LessonProbeRun.fires {θ prepared time} (run : LessonProbeRun θ prepared time) :
+theorem LessonProbeRun.fires {θ prepared time finish} (run : LessonProbeRun θ prepared time finish) :
     (∃ fire, (0, fire) ∈ run.readout.ledger.emissions) ↔ prepared = false := by
   cases prepared with
   | false =>
@@ -293,7 +304,7 @@ theorem LessonProbeRun.fires {θ prepared time} (run : LessonProbeRun θ prepare
 
 /-- A full run reports failure by a FIRE after the common readout delivery.
     Any earlier FIRE came from the preparation, before the readout window. -/
-theorem LessonProbeRun.reports_failure {θ prepared time} (run : LessonProbeRun θ prepared time) :
+theorem LessonProbeRun.reports_failure {θ prepared time finish} (run : LessonProbeRun θ prepared time finish) :
     (∃ fire, time + 17 ≤ fire ∧ (0, fire) ∈ run.execution.ledger.emissions) ↔ prepared = false := by
   constructor
   · rintro ⟨fire, after, emitted⟩
@@ -309,10 +320,66 @@ theorem LessonProbeRun.reports_failure {θ prepared time} (run : LessonProbeRun 
     · rw [LessonProbeRun.execution, Execution.emissions_append]
       exact List.mem_append_right _ emitted
 
-/-- Build the complete readout through a common horizon in both cases, using
-    the actual carried gain, charge, and recovery at admission. -/
-theorem lesson_probe_run_exists {θ ε} (box : @PhysicalBox 1 θ ε)
-    (prepared : Bool) (time : ℝ) : Nonempty (LessonProbeRun θ prepared time) := by
+/-- A quiet extension starts from the carried charge and energy and
+    preserves the current physical memories. -/
+theorem quiet_ready_tail_exists {θ : Fin 1 → Parameters} {s : Snapshot 1} {T : ℝ}
+    (later : s.time < T) (ready : ∀ i, ReadyCoordinates s i)
+    (rawNone : ∀ i p, s.raw i p = none) (empty : s.pending = []) :
+    ∃ e : Execution θ (fun _ _ => []) s (quietAt s T),
+      CompleteThrough e T ∧ e.ContactsTransversal ∧ e.ledger.emissions = [] ∧ e.deliveries = [] := by
+  have charge (i : Fin 1) : s.x i .q < 1 := by linarith [(ready i).charge.2]
+  have sensor (i : Fin 1) (p : Port) : s.x i (.m p) < 1 := by
+    linarith [((ready i).auxiliary p).2.2]
+  have noDue : ∀ d ∈ s.pending, T < d.due := by simp [empty]
+  let flow : Flow θ s (quietAt s T) :=
+    quietFlow s later (fun i => (ready i).ready) (fun i p => ((ready i).auxiliary p).1)
+      rawNone charge sensor (fun d hd => (noDue d hd).le)
+  obtain ⟨_, complete⟩ := quiet_complete_exists (θ := θ) (route := fun _ _ => []) s later
+    (fun i => (ready i).ready) (fun i p => ((ready i).auxiliary p).1) rawNone charge sensor noDue
+  exact ⟨.cons (.flow flow) (.nil _), complete, by simp, rfl, rfl⟩
+
+private theorem slow_readout_tail_exists {θ : Fin 1 → Parameters} {s : Snapshot 1} {T : ℝ}
+    (later : s.time < T) (short : T + 1 / 10 - s.time ≤ 8)
+    (slow : s.main 0 = .slow) (charge : s.x 0 .q = 1 / 4) (recovery : s.x 0 .b = 2 / 25)
+    (aux : ∀ i p, s.aux i p = .ready) (rest : ∀ p, RestBand (s.x 0 (.m p)))
+    (rawNone : ∀ i p, s.raw i p = none) (empty : s.pending = []) :
+    ∃ (final : Snapshot 1) (e : Execution θ (fun _ _ => []) s final),
+      CompleteThrough e T ∧ e.ContactsTransversal ∧ e.ledger.emissions = [] := by
+  let finish := T + 1 / 10
+  have positive : s.time < finish := by dsimp [finish]; linarith
+  have mainGuard (t : ℝ) (ht : t ∈ Set.Ico s.time finish) :
+      1 / 10 < s.x 0 .q * Real.exp (-s.x 0 .b * (t - s.time)) := by
+    rw [charge, recovery]
+    have attenuation : (1 / 2 : ℝ) ≤ Real.exp (-(2 / 25 : ℝ) * (t - s.time)) := by
+      have bound : Real.exp (-Real.log 2) ≤ Real.exp (-(2 / 25 : ℝ) * (t - s.time)) :=
+        Real.exp_le_exp.mpr (by
+          have elapsed : t - s.time ≤ 8 := by dsimp [finish] at ht; linarith [ht.2]
+          linarith [Real.log_two_gt_d9])
+      simpa [Real.exp_neg, Real.exp_log (by norm_num : (0 : ℝ) < 2), one_div] using bound
+    linarith
+  have otherSensor (i : Fin 1) (p : Port) : s.x i (.m p) < 1 := by
+    rw [Subsingleton.elim i 0]
+    linarith [(rest p).2]
+  let flow : Flow θ s (protectedMainEnd θ s 0 0 .slow .ready none finish) :=
+    protectedMainFlow s 0 0 .slow .ready none positive (Or.inr rfl) (Or.inl rfl)
+      slow (fun i hi => False.elim (hi (Subsingleton.elim i 0))) (aux 0 0) (fun i p _ => aux i p)
+      (rawNone 0 0) (fun i p _ => rawNone i p) (by simp)
+      (fun i hi => False.elim (hi (Subsingleton.elim i 0))) (fun i p _ => otherSensor i p)
+      (by intro t ht; simpa [protectedMainRate] using mainGuard t ht)
+      (by intro t ht
+          simp only [ite_true, rawInputScale, mul_zero, auxPulse_zero_eq_relax]
+          exact relax_lt (by norm_num) ht.1 (otherSensor 0 0) (by norm_num))
+      (by simp [empty])
+  let execution : Execution θ (fun _ _ => []) s _ := .cons (.flow flow) (.nil _)
+  obtain ⟨cut⟩ := execution.before_flow_cut_exists T later.le (by change T < T + 1 / 10; linarith)
+  exact ⟨cut.state, cut.cut, cut.complete,
+    cut.isPrefix.contacts_transversal (by simp [execution]),
+    (List.append_eq_nil_iff.mp cut.emissions.symm).1⟩
+
+/-- The learner remains complete until after the routed teacher dose can
+    finish. Its readout still reports only the original offset-17 probe. -/
+theorem lesson_probe_late_run_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (prepared : Bool) (time : ℝ) : Nonempty (LessonProbeRun θ prepared time (time + 26)) := by
   obtain ⟨admission⟩ := lesson_probe_admission_exists box prepared time
   have physical := admission.execution.physical_invariant box (lessonProbe_physical box)
   have date := admission.complete.1
@@ -329,27 +396,73 @@ theorem lesson_probe_run_exists {θ ε} (box : @PhysicalBox 1 θ ε)
       0 0 admission.ready strong admission.active admission.otherRaw noInput
     obtain ⟨fast⟩ := fire.mid_learned_fast_end_exists box (admission.ready 0) strong.2
       (fun p hp => admission.otherRaw 0 p (Or.inr hp)) noInput
-    obtain ⟨cut⟩ := fast.execution.before_flow_cut_exists (time + 18)
-      (by rw [fire.date, date]; linarith [fire.deadline])
-      (by rw [fast.date, fire.date, date]; linarith [fire.early])
-    have cutSilent := (List.append_eq_nil_iff.mp (cut.emissions.symm.trans fast.emissions)).1
-    refine ⟨⟨admission, cut.state, fire.execution.append cut.cut, cut.complete,
-      (Execution.contactsTransversal_append _ _).2
-        ⟨fire.contacts_transversal, cut.isPrefix.contacts_transversal fast.contacts_transversal⟩, ?_⟩⟩
-    refine ⟨fire.final.time, ?_⟩
-    rw [Execution.emissions_append, fire.emissions, cutSilent, List.append_nil]
-    exact congrArg (fun t => [(0, t)]) fire.date.symm
+    have fastDate : fast.final.time = time + 17 + fire.latency + 1 := by rw [fast.date, fire.date, date]
+    have fastRecovery : fast.final.x 0 .b = 2 / 25 := by
+      rw [fast.recovery, fire.recovery_preserved]
+      exact admission.recovery
+    have fastEmpty : fast.final.pending = [] := by
+      rw [fast.pending, fire.pending, admission.queue]
+      rfl
+    obtain ⟨final, slow, complete, slowTransverse, slowSilent⟩ :=
+      slow_readout_tail_exists (θ := θ) (T := time + 26)
+        (by rw [fastDate]; linarith [fire.deadline]) (by rw [fastDate]; linarith [fire.early])
+        fast.main_slow fast.charge fastRecovery fast.auxiliary fast.rest fast.raw_none fastEmpty
+    let readout := (fire.execution.append fast.execution).append slow
+    have emissions : readout.ledger.emissions = [(0, fire.final.time)] := by
+      simp [readout, Execution.emissions_append, fire.emissions, fast.emissions, slowSilent, fire.date]
+    refine ⟨⟨admission, final, readout, complete, ?_, ⟨_, emissions⟩, ?_,
+      readout.pending_empty_of_sources_due _ complete (by simp [admission.queue]) (fun _ _ => rfl)⟩⟩
+    · simp [readout, fire.contacts_transversal, fast.contacts_transversal, slowTransverse]
+    · intro e member
+      rw [emissions] at member
+      obtain rfl := List.mem_singleton.mp member
+      rw [fire.date, date]
+      linarith [fire.deadline]
   | true =>
     have gain : admission.final.x 0 (.z 0) = 0 := admission.logGain
     have logPos := Real.log_nonneg (show (1 : ℝ) ≤ 6 / 5 by norm_num)
     obtain ⟨response⟩ := weak_input_cycle_exists (route := fun _ _ => []) admission.final box
       physical admission.rawValid 0 0 admission.ready (by rw [gain]; norm_num)
       (by rw [gain]; linarith) admission.active admission.otherRaw (by simp [admission.queue])
-    obtain ⟨cut⟩ := response.execution.before_flow_cut_exists (time + 18)
-      (by rw [date]; linarith) (by rw [response.date, date]; linarith)
-    have silent := (List.append_eq_nil_iff.mp (cut.emissions.symm.trans response.emissions)).1
-    exact ⟨⟨admission, cut.state, cut.cut, cut.complete,
-      cut.isPrefix.contacts_transversal response.contacts_transversal, silent⟩⟩
+    have empty := response.pending.trans admission.queue
+    obtain ⟨wait, complete, transverse, silent, _⟩ := quiet_ready_tail_exists (θ := θ)
+      (T := time + 26) (by rw [response.date, date]; linarith)
+      (fun i => by simpa only [Subsingleton.elim i 0] using response.pulse.coordinates)
+      (fun i p => by simpa only [Subsingleton.elim i 0] using response.pulse.raw_finished p) empty
+    let readout := response.execution.append wait
+    have emissions : readout.ledger.emissions = [] := by
+      simp [readout, Execution.emissions_append, response.emissions, silent]
+    exact ⟨⟨admission, _, readout, complete,
+      (Execution.contactsTransversal_append _ _).2 ⟨response.contacts_transversal, transverse⟩,
+      emissions, by simp [emissions], empty⟩⟩
+
+/-- Recover the original probe horizon as a saturated prefix of the longer
+    run. Every readout FIRE is strictly before that cut. -/
+theorem lesson_probe_run_exists {θ ε} (box : @PhysicalBox 1 θ ε)
+    (prepared : Bool) (time : ℝ) : Nonempty (LessonProbeRun θ prepared time) := by
+  obtain ⟨run⟩ := lesson_probe_late_run_exists box prepared time
+  obtain ⟨cut⟩ := run.readout.before_flow_cut_exists (time + 18)
+    (by rw [run.admission.complete.1]; linarith)
+    (by rw [run.complete.1]; linarith)
+  have restSilent : cut.rest.ledger.emissions = [] := by
+    apply List.eq_nil_iff_forall_not_mem.mpr
+    intro event member
+    have emitted : event ∈ run.readout.ledger.emissions := by
+      rw [cut.emissions]
+      exact List.mem_append_right _ member
+    have after := (cut.rest.emission_time_bounds _ member).1
+    have clock := cut.flow.positive
+    rw [cut.date] at clock
+    linarith [run.earlyReadout event emitted]
+  have same : cut.cut.ledger.emissions = run.readout.ledger.emissions := by
+    rw [cut.emissions, restSilent, List.append_nil]
+  refine ⟨⟨run.admission, cut.state, cut.cut, cut.complete,
+    cut.isPrefix.contacts_transversal run.transversal, ?_, ?_,
+    cut.cut.pending_empty_of_sources_due _ cut.complete (by simp [run.admission.queue])
+      (fun _ _ => rfl)⟩⟩
+  · simpa only [same] using run.emissions
+  · rw [same]
+    exact run.earlyReadout
 
 /-- The two discrete lessons at the final preparation decision. The physical
     assay implements the varying slot and its readout. -/
