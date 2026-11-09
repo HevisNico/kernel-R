@@ -325,9 +325,9 @@ noncomputable def blindNeedTree : CalibratedTree HiddenNeed :=
     ⟨⟨3, 3⟩, true, lowPracticeTrial, fun _ => rfl, fun _ => rfl⟩
   let large : CalibratedProbe HiddenNeed :=
     ⟨⟨4, 3⟩, true, highPracticeTrial, fun _ => rfl, fun _ => rfl⟩
-  .ask prep
-    (.ask small (.leaf ⟨⟨3, 3⟩, 0, by decide⟩) (.leaf ⟨⟨3, 4⟩, 0, by decide⟩))
-    (.ask large (.leaf ⟨⟨4, 3⟩, 0, by decide⟩) (.leaf ⟨⟨4, 4⟩, 0, by decide⟩))
+  .ask (.lesson prep)
+    (.ask (.lesson small) (.leaf ⟨⟨3, 3⟩, 0, by decide⟩) (.leaf ⟨⟨3, 4⟩, 0, by decide⟩))
+    (.ask (.lesson large) (.leaf ⟨⟨4, 3⟩, 0, by decide⟩) (.leaf ⟨⟨4, 4⟩, 0, by decide⟩))
 
 theorem blind_need_tree_selects_minimum (h : HiddenNeed) :
     (blindNeedTree.select h).action.lesson = h.minimumLesson := by

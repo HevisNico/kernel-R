@@ -19,6 +19,46 @@ theorem CalibratedProbe.same_tokens {Profile} (probe : CalibratedProbe Profile) 
     (clock : ℝ) : (probe.trial a).tokens clock = (probe.trial b).tokens clock := by
   simp only [AdaptiveTrial.tokens, probe.sameLesson, probe.samePort]
 
+/-- A tree can use a certified two-block lesson or the native count
+threshold with a need-dependent birth gain. -/
+inductive TreeProbe (Profile : Type)
+  | lesson (probe : CalibratedProbe Profile)
+  | threshold (count : ℕ) (need : Profile → ℕ) (positive : ∀ h, 0 < need h)
+
+def TreeProbe.passes {Profile} (probe : TreeProbe Profile) (h : Profile) : Bool :=
+  match probe with
+  | .lesson test => (test.trial h).passes
+  | .threshold count need _ => decide (need h ≤ count)
+
+def TreeProbe.attempt {Profile n m} (probe : TreeProbe Profile) (h : Profile)
+    (base : AdaptiveProgram n m) (enable : Fin m) : AdaptiveProgram n (m + 1) :=
+  match probe with
+  | .lesson test => base.trial enable (test.trial h)
+  | .threshold count need pos => base.threshold enable (need h) count (pos h)
+
+theorem TreeProbe.same_plan {Profile n m} (probe : TreeProbe Profile) (a b : Profile)
+    {baseA baseB : AdaptiveProgram n m} (same : baseA.SamePlan baseB) (enable : Fin m) :
+    (probe.attempt a baseA enable).SamePlan (probe.attempt b baseB enable) := by
+  cases probe with
+  | lesson test => exact .trial same (test.same_tokens a b)
+  | threshold => exact .threshold same
+
+@[simp] theorem TreeProbe.eval_head {Profile n m} (probe : TreeProbe Profile) (h : Profile)
+    (base : AdaptiveProgram n m) (enable : Fin m) (input : Fin n → Bool) :
+    (probe.attempt h base enable).eval input 0 = (base.eval input enable && probe.passes h) := by
+  cases probe <;> rfl
+
+@[simp] theorem TreeProbe.eval_tail {Profile n m} (probe : TreeProbe Profile) (h : Profile)
+    (base : AdaptiveProgram n m) (enable i : Fin m) (input : Fin n → Bool) :
+    (probe.attempt h base enable).eval input i.succ = base.eval input i := by
+  cases probe <;> rfl
+
+theorem TreeProbe.previous_effects {Profile n m} (probe : TreeProbe Profile) (h : Profile)
+    (base : AdaptiveProgram n m) (enable : Fin m) {input gains receipts}
+    (effects : (probe.attempt h base enable).Effects input gains receipts) :
+    base.Effects input (fun i => gains i.succ) (fun i => receipts i.succ) := by
+  cases probe <;> exact effects.2
+
 structure TreeAction where
   lesson : Lesson
   creditPort : Port
@@ -26,7 +66,7 @@ structure TreeAction where
 
 inductive CalibratedTree (Profile : Type)
   | leaf (action : TreeAction)
-  | ask (probe : CalibratedProbe Profile) (yes no : CalibratedTree Profile)
+  | ask (probe : TreeProbe Profile) (yes no : CalibratedTree Profile)
 
 /-- Leaf indices are paths, so distinct leaves can carry the same lesson. -/
 inductive CalibratedTree.Leaf {Profile : Type} : CalibratedTree Profile → Type
@@ -43,23 +83,23 @@ def CalibratedTree.Leaf.action {Profile : Type} {tree : CalibratedTree Profile} 
 def CalibratedTree.Leaf.reached {Profile : Type} {tree : CalibratedTree Profile} :
     tree.Leaf → Profile → Bool
   | .here _, _ => true
-  | @CalibratedTree.Leaf.yes _ probe _ _ idx, h => (probe.trial h).passes && idx.reached h
-  | @CalibratedTree.Leaf.no _ probe _ _ idx, h => !(probe.trial h).passes && idx.reached h
+  | @CalibratedTree.Leaf.yes _ probe _ _ idx, h => probe.passes h && idx.reached h
+  | @CalibratedTree.Leaf.no _ probe _ _ idx, h => !probe.passes h && idx.reached h
 
 def CalibratedTree.select {Profile : Type} (h : Profile) :
     (tree : CalibratedTree Profile) → tree.Leaf
   | .leaf action => .here action
   | .ask probe yes no =>
-    if (probe.trial h).passes then .yes (yes.select h) else .no (no.select h)
+    if probe.passes h then .yes (yes.select h) else .no (no.select h)
 
 theorem CalibratedTree.Leaf.reached_iff {Profile : Type} {tree : CalibratedTree Profile}
     (l : tree.Leaf) (h : Profile) : l.reached h = true ↔ l = tree.select h := by
   induction l with
   | here => simp [CalibratedTree.Leaf.reached, CalibratedTree.select]
   | @yes probe _ _ l ih =>
-    cases pass : (probe.trial h).passes <;> simp [CalibratedTree.Leaf.reached, CalibratedTree.select, pass, ih]
+    cases pass : probe.passes h <;> simp [CalibratedTree.Leaf.reached, CalibratedTree.select, pass, ih]
   | @no probe _ _ l ih =>
-    cases pass : (probe.trial h).passes <;> simp [CalibratedTree.Leaf.reached, CalibratedTree.select, pass, ih]
+    cases pass : probe.passes h <;> simp [CalibratedTree.Leaf.reached, CalibratedTree.select, pass, ih]
 
 def TreeAction.Effect (action : TreeAction) (active : Bool)
     (lessonGain creditGain : Port → ℝ) (lessonCount creditCount : ℕ) : Prop :=
@@ -84,29 +124,31 @@ structure TreeExtension {Profile : Type} {n : ℕ} (base : Profile → AdaptiveP
       (gains (lessonCell l)) (gains (creditCell l)) (receipts (lessonCell l)) (receipts (creditCell l))
 
 private noncomputable def addQuestion {Profile : Type} {n : ℕ} (base : Profile → AdaptiveProgram 1 n)
-    (enable : Fin n) (probe : CalibratedProbe Profile) (h : Profile) : AdaptiveProgram 1 (n + 1 + 1 + 1) :=
-  let attempted := (base h).trial enable (probe.trial h)
+    (enable : Fin n) (probe : TreeProbe Profile) (h : Profile) : AdaptiveProgram 1 (n + 1 + 1 + 1) :=
+  let attempted := probe.attempt h (base h) enable
   let silent := attempted.notGate 0
   silent.andGate enable.succ.succ [0]
 
 private theorem question_plan {Profile : Type} {n : ℕ} {base : Profile → AdaptiveProgram 1 n}
-    (enable : Fin n) (probe : CalibratedProbe Profile)
+    (enable : Fin n) (probe : TreeProbe Profile)
     (same : ∀ a b, (base a).SamePlan (base b)) (a b : Profile) :
     (addQuestion base enable probe a).SamePlan (addQuestion base enable probe b) :=
-  .andGate (.notGate (.trial (same a b) (probe.same_tokens a b)))
+  .andGate (.notGate (probe.same_plan a b (same a b) enable))
 
 private theorem question_yes {Profile : Type} {n : ℕ} (base : Profile → AdaptiveProgram 1 n)
-    (enable : Fin n) (probe : CalibratedProbe Profile) (h : Profile) (input : Fin 1 → Bool) :
+    (enable : Fin n) (probe : TreeProbe Profile) (h : Profile) (input : Fin 1 → Bool) :
     (addQuestion base enable probe h).eval input ((0 : Fin (n + 1)).succ.succ) =
-      ((base h).eval input enable && (probe.trial h).passes) := rfl
+      ((base h).eval input enable && probe.passes h) := by
+  change (probe.attempt h (base h) enable).eval input 0 = _
+  exact probe.eval_head h (base h) enable input
 
 private theorem question_no {Profile : Type} {n : ℕ} (base : Profile → AdaptiveProgram 1 n)
-    (enable : Fin n) (probe : CalibratedProbe Profile) (h : Profile) (input : Fin 1 → Bool) :
+    (enable : Fin n) (probe : TreeProbe Profile) (h : Profile) (input : Fin 1 → Bool) :
     (addQuestion base enable probe h).eval input 0 =
-      ((base h).eval input enable && !(probe.trial h).passes) := by
+      ((base h).eval input enable && !probe.passes h) := by
   simp only [addQuestion, AdaptiveProgram.eval, Fin.cases_zero, Fin.cases_succ,
-    List.all_cons, List.all_nil, Bool.and_true]
-  cases (base h).eval input enable <;> cases (probe.trial h).passes <;> rfl
+    List.all_cons, List.all_nil, Bool.and_true, TreeProbe.eval_head, TreeProbe.eval_tail]
+  cases (base h).eval input enable <;> cases probe.passes h <;> rfl
 
 /-- Append the tree below a guard. A silent report only launches the
 negative branch if the trial itself was enabled. -/
@@ -134,12 +176,13 @@ noncomputable def CalibratedTree.append {Profile : Type} {n : ℕ}
     ⟨z.size, z.program, z.samePlan, fun i => z.carry (y.carry i.succ.succ.succ),
       (fun l => match l with | .yes l => z.carry (y.lessonCell l) | .no l => z.lessonCell l),
       (fun l => match l with | .yes l => z.carry (y.creditCell l) | .no l => z.creditCell l),
-      (fun h input i => (z.preserves h input _).trans ((y.preserves h input _).trans rfl)),
+      (fun h input i => (z.preserves h input _).trans ((y.preserves h input _).trans
+        (probe.eval_tail h (base h) enable i input))),
       by
         intro h input gains receipts effects
         obtain ⟨earlier, neg⟩ := z.accounts h input gains receipts effects
         obtain ⟨prev, pos⟩ := y.accounts h input _ _ earlier
-        refine ⟨prev.2, ?_⟩
+        refine ⟨probe.previous_effects h (base h) enable prev, ?_⟩
         intro l
         cases l with
         | yes l =>
@@ -217,7 +260,7 @@ theorem compile_calibrated_decision_tree {Profile : Type} {ε : ℝ} (tree : Cal
 
 /-- A balanced interval search. A span of s represents s + 1 candidate
 needs, and a nontrivial interval is cut at its midpoint. -/
-def bisectTree {Profile : Type} (probe : ℕ → CalibratedProbe Profile)
+def bisectTree {Profile : Type} (probe : ℕ → TreeProbe Profile)
     (action : ℕ → TreeAction) : ℕ → ℕ → ℕ → CalibratedTree Profile
   | 0, lo, _ => .leaf (action lo)
   | _ + 1, lo, 0 => .leaf (action lo)
@@ -227,9 +270,9 @@ def bisectTree {Profile : Type} (probe : ℕ → CalibratedProbe Profile)
     .ask (probe cut) (bisectTree probe action fuel lo left)
       (bisectTree probe action fuel (cut + 1) (span - left))
 
-theorem bisectTree_selects {Profile : Type} (probe : ℕ → CalibratedProbe Profile)
+theorem bisectTree_selects {Profile : Type} (probe : ℕ → TreeProbe Profile)
     (action : ℕ → TreeAction) (h : Profile) (need : ℕ)
-    (comparison : ∀ cut, ((probe cut).trial h).passes = decide (need ≤ cut))
+    (comparison : ∀ cut, (probe cut).passes h = decide (need ≤ cut))
     (fuel lo span : ℕ) (enough : span ≤ fuel) (lower : lo ≤ need) (upper : need ≤ lo + span) :
     ((bisectTree probe action fuel lo span).select h).action = action need := by
   induction fuel generalizing lo span with
@@ -253,14 +296,15 @@ theorem bisectTree_selects {Profile : Type} (probe : ℕ → CalibratedProbe Pro
 
 def needSearchTree {K : ℕ} (probe : ℕ → CalibratedProbe (Fin K))
     (action : ℕ → TreeAction) : CalibratedTree (Fin K) :=
-  bisectTree probe action (K - 1) 1 (K - 1)
+  bisectTree (fun cut => .lesson (probe cut)) action (K - 1) 1 (K - 1)
 
 theorem need_search_selects {K : ℕ} (probe : ℕ → CalibratedProbe (Fin K))
     (action : ℕ → TreeAction) (h : Fin K)
     (comparison : ∀ cut, ((probe cut).trial h).passes = decide (h.val + 1 ≤ cut)) :
     ((needSearchTree probe action).select h).action = action (h.val + 1) := by
   have within := h.isLt
-  exact bisectTree_selects probe action h (h.val + 1) comparison (K - 1) 1 (K - 1) le_rfl
+  exact bisectTree_selects (fun cut => .lesson (probe cut)) action h (h.val + 1) comparison
+    (K - 1) 1 (K - 1) le_rfl
     (by omega) (by omega)
 
 /-- A physical binary search, given calibrated comparisons with the pivots.
@@ -289,5 +333,66 @@ theorem compile_binary_need_search {K : ℕ} {ε : ℝ} (probe : ℕ → Calibra
   have reached : (tree.select h).reached h = true := ((tree.select h).reached_iff h).mpr rfl
   rw [reached, need_search_selects probe action h (comparison h)] at selected
   exact ⟨final, e, crossing, same, done, selected⟩
+
+
+/-- Profile i represents the single hidden need i + 1. Every pivot
+uses that same need to initialize its native threshold cell. -/
+def nativeNeedSearchTree (K : ℕ) (action : ℕ → TreeAction) : CalibratedTree (Fin K) :=
+  bisectTree (fun cut => .threshold cut (fun h : Fin K => h.val + 1) (fun _ => by omega))
+    action (K - 1) 1 (K - 1)
+
+theorem native_need_search_selects {K : ℕ} (action : ℕ → TreeAction) (h : Fin K) :
+    ((nativeNeedSearchTree K action).select h).action = action (h.val + 1) := by
+  have within := h.isLt
+  exact bisectTree_selects (fun cut => .threshold cut (fun h : Fin K => h.val + 1) (fun _ => by omega))
+    action h (h.val + 1) (fun _ => rfl) (K - 1) 1 (K - 1) le_rfl (by omega) (by omega)
+
+theorem native_need_search_same_compilation {K : ℕ} (positive : 0 < K)
+    (action : ℕ → TreeAction) (time : ℝ) (h : Fin K) :
+    ((nativeNeedSearchTree K action).layout time h).SameSources
+      ((nativeNeedSearchTree K action).layout time ⟨0, positive⟩) :=
+  (nativeNeedSearchTree K action).same_compilation time h ⟨0, positive⟩
+
+/-- Native binary search with no supplied pivot comparisons. The router
+is compiled from K and the actions. A profile supplies only the hidden
+need used in the birth calibration of each threshold cell. -/
+theorem compile_native_binary_need_search {K : ℕ} {ε : ℝ} (positive : 0 < K)
+    (action : ℕ → TreeAction) (time : ℝ) (h : Fin K)
+    (θ : Fin (nativeNeedSearchTree K action).compile.size → Parameters)
+    (box : PhysicalBox θ ε) :
+    let tree := nativeNeedSearchTree K action
+    let compiled := tree.layout time ⟨0, positive⟩
+    let start := (tree.layout time h).start
+    let T := compiled.last + 76
+    ∃ (final : Snapshot tree.compile.size) (e : Execution θ compiled.route start final)
+      (crossing : CrossingExecution θ compiled.route start final),
+      crossing.execution = e.toWeak ∧ CrossingCompleteThrough crossing T ∧
+      (action (h.val + 1)).Effect true
+        (fun p => final.x (tree.compile.lessonCell (tree.select h)) (.z p))
+        (fun p => final.x (tree.compile.creditCell (tree.select h)) (.z p))
+        (lessonReceipts e.deliveries (tree.compile.lessonCell (tree.select h)))
+        (lessonReceipts e.deliveries (tree.compile.creditCell (tree.select h))) ∧
+      (∀ l : tree.Leaf, l ≠ tree.select h → l.action.Effect false
+        (fun p => final.x (tree.compile.lessonCell l) (.z p))
+        (fun p => final.x (tree.compile.creditCell l) (.z p))
+        (lessonReceipts e.deliveries (tree.compile.lessonCell l))
+        (lessonReceipts e.deliveries (tree.compile.creditCell l))) ∧
+      ∀ v (other : CrossingExecution θ compiled.route start v), CrossingCompleteThrough other T →
+        ∃ native : Execution θ compiled.route start v, native.toWeak = other.execution ∧
+          v.ObservationalEq final ∧ native.deliveries.Perm e.deliveries ∧
+          ∀ i, other.execution.emissionTimes i = e.emissionTimes i := by
+  let tree := nativeNeedSearchTree K action
+  obtain ⟨final, e, crossing, same, done, effects, _, every⟩ :=
+    compile_calibrated_decision_tree tree ⟨0, positive⟩ time h θ box
+  have selected := effects (tree.select h)
+  have reached : (tree.select h).reached h = true := ((tree.select h).reached_iff h).mpr rfl
+  rw [reached, native_need_search_selects action h] at selected
+  refine ⟨final, e, crossing, same, done, selected, ?_, every⟩
+  intro l skipped
+  have missed : l.reached h = false := Bool.eq_false_iff.mpr
+    (fun reached => skipped ((l.reached_iff h).mp reached))
+  have effect := effects l
+  rw [missed] at effect
+  exact effect
 
 end RecursiveLearning.Native
