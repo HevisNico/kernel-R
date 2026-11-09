@@ -34,8 +34,8 @@ each sensor completes its own cycle under the existing [R dynamics](../../../mod
 [`prepared_crossing_run_exists`](NativeLearning.lean) gives a complete
 upward-crossing execution of the same history using its transverse contacts.
 
-The queue in this construction is supplied in advance. The `8 → 7 → 6` pulse
-count is the deployed lesson cost in the discrete experiment.
+The queue in this construction is supplied in advance. The later [serial
+experiment](#the-native-8--7--6-experiment) constructs the deployed lesson counts.
 
 ## One feedback pulse from an actual learner firing
 
@@ -296,9 +296,9 @@ upward-crossing execution runs through actual admission at the learner.
 
 The two credit gains belong to a separate memory cell in this design.
 The dispatch theorem contains the controller and receiver. Connecting a
-credit cell and feeding the previous round into this controller remain
-open, as does the full native `8 → 7 → 6` lesson sequence. Saturated
-recovery and the prepared ignition gain are initial conditions. From
+credit cell to this capped controller and reusing its read remain open.
+The serial experiment below uses a one-shot selector. Saturated recovery
+and the prepared ignition gain are initial conditions here. From
 `b = 0.08`, ten full MARK doses of 0.1 leave recovery at 1.08, so
 preparing the cap by MARK would require an eleventh protected section
 with the last dose cut short. No such preparation sequence is part of
@@ -339,10 +339,44 @@ state retains the skill for needs (3, 3). With two test inputs the
 receiver gets no lesson. The common test pulse is outside the six-pulse
 lesson count.
 
-The bank uses supplied lesson calendars. The acceptance construction
-releases a fixed proposal from a single native test. The full adaptive
-sequence still needs both commits joined to the native selector, with
-the candidate test and next proposal obtained from the preceding round.
+## The native 8 → 7 → 6 experiment
+
+[`native_eight_seven_six`](SerialAcceptance.lean) constructs a single
+complete upward-crossing execution of seven R cells. Only the baseline
+lesson, the first test and the selector's clock have external sources
+in the initial queue. The seven- and six-pulse lessons come from actual
+test firings. The construction holds in either fabrication box with
+independent fixed parameters for each cell.
+
+1. The first test writes one preparation credit and schedules the
+   seven-pulse lesson. It also launches the second test with two
+   default inputs.
+2. In the adaptive run, the first test sends one extra pulse to the
+   selector. The selector's own readout FIRE supplies the third input
+   to the second test.
+3. The second test fires, writes the practice credit on the same
+   credit cell and schedules the six-pulse lesson.
+
+| Configuration | Baseline deliveries | First improved lesson | Second improved lesson | Credit gains |
+|---|---:|---:|---:|---|
+| Adaptive | 8 | 7 | 6 | 0.6, 0.6 |
+| Selector update blocked | 8 | 7 | 0 | 0.6, 0 |
+
+Both runs start from the same physical snapshot. Blocking the single
+selector update leaves the second test with two inputs, so it rejects.
+The baseline and the seven-pulse lesson both meet needs (3, 3) in both
+runs. The six-pulse learner meets those needs in the adaptive run.
+At the stated horizon, all complete upward-crossing executions agree
+on the terminal physical state and the ordered firing dates of each
+cell. Complete first-contact executions deliver the same tokens up to
+permutation.
+
+The router contains the calendars for this particular experiment. The
+tests use separate cells for the decisive lesson slots. The lesson
+receipts exclude probes, clock inputs and credit deliveries. The
+selector is read once, and the low read can write to its sensor gain.
+A reusable selector and an adaptive rule for arbitrary lesson shapes
+are separate problems.
 
 ## Verify
 
@@ -359,7 +393,7 @@ builds this package with the pinned dependencies. Its default targets compile
 `NativeLearning`, `Feedback`, `LessonProbe`, `RoutedLesson`, `Dispatch`,
 `SelectorRead`, `SelectorPrecharge`, `TeacherReopen`, `TeacherStableClock`
 `CappedWorkRun`, `TeacherCappedCycle`, `CappedDispatch`, `NativeLesson`,
-`NativeAcceptance` and `AcceptanceDispatch`, and run
+`NativeAcceptance`, `AcceptanceDispatch` and `SerialAcceptance`, and run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

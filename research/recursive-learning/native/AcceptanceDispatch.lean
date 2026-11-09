@@ -12,29 +12,28 @@ noncomputable def acceptanceLessonStart (time : ℝ) (third : Bool) : Snapshot 2
   let tester := acceptanceStart time third
   tester.prependQueued (nativeLessonStart time ⟨0, 0⟩) (tester.pending.map Delivery.succ)
 
-private theorem acceptance_lesson_wait {θ : Fin 1 → Parameters} (time : ℝ) (lesson : Lesson) :
+theorem native_lesson_wait {θ : Fin 1 → Parameters} {time clock : ℝ} (later : time < clock) (lesson : Lesson) :
     ∃ e : Execution θ (fun _ _ => [])
-      { nativeLessonStart (time + 30) lesson with time := time }
-      (nativeLessonStart (time + 30) lesson),
+      { nativeLessonStart clock lesson with time := time }
+      (nativeLessonStart clock lesson),
       e.ContactsTransversal ∧ e.ledger.emissions = [] ∧ e.deliveries = [] := by
-  let v := nativeLessonStart (time + 30) lesson
+  let v := nativeLessonStart clock lesson
   let u : Snapshot 1 := {v with time := time}
-  have later : u.time < time + 30 := by change time < time + 30; linarith
-  have future : ∀ d ∈ u.pending, time + 30 ≤ d.due := by
+  have future : ∀ d ∈ u.pending, clock ≤ d.due := by
     intro d hd
-    change d ∈ lessonDeliveries (time + 30) (lessonPorts lesson) at hd
+    change d ∈ lessonDeliveries clock (lessonPorts lesson) at hd
     linarith [lesson_delivery_time hd]
-  let flow : Flow θ u (quietAt u (time + 30)) :=
+  let flow : Flow θ u (quietAt u clock) :=
     quietFlow u later (fun _ => rfl) (fun _ _ => rfl) (fun _ _ => rfl)
       (fun i => by change (1 / 10 : ℝ) < 1; norm_num)
       (fun i p => by change (1 / 40 : ℝ) < 1; norm_num) future
-  have wait : quietAt u (time + 30) = v := by
-    suffices vals : (quietAt u (time + 30)).x = v.x by
+  have wait : quietAt u clock = v := by
+    suffices vals : (quietAt u clock).x = v.x by
       change { v with x := _ } = v
       exact congrArg (fun x => {v with x := x}) vals
     funext i c
     cases c <;> simp [u, v, quietAt, quietValues, nativeLessonStart, preparedTeacher, relax]
-  have transport {target : Snapshot 1} (eq : quietAt u (time + 30) = target) :
+  have transport {target : Snapshot 1} (eq : quietAt u clock = target) :
       ∃ e : Execution θ (fun _ _ => []) u target,
         e.ContactsTransversal ∧ e.ledger.emissions = [] ∧ e.deliveries = [] := by
     cases eq
@@ -76,7 +75,7 @@ theorem native_acceptance_dispatches_lesson {θT θL ε} (testBox : @PhysicalBox
   obtain ⟨run⟩ := native_lesson_exists learnerBox (time + 30) candidate capacity'.1 capacity'.2
   obtain ⟨lessonRun, learnerComplete, lessonPositive, lessonCount, _, learns⟩ := run.finish_at after
   obtain ⟨waitLearner, initialPositive, _, initialSilent⟩ :=
-    acceptance_lesson_wait (θ := θL) time candidate
+    native_lesson_wait (θ := θL) (clock := time + 30) (by linarith) candidate
   let receiver := waitLearner.append lessonRun
   have sourceCount : receiver.deliveries.length = candidate.cost := by
     rw [Execution.deliveries_append, initialSilent, List.nil_append, lessonCount]

@@ -236,7 +236,7 @@ theorem CausalTraceBalance.head_receipts {n globalE globalD tailE tailD headE he
   rw [(perm.filter _).length_eq, List.filter_append, List.filter_map, List.filter_map]
   simp [Delivery.succ, Delivery.head, Function.comp_def]
 
-private theorem CausalTraceBalance.tail_receipts {n globalE globalD tailE tailD headE headD}
+theorem CausalTraceBalance.tail_receipts {n globalE globalD tailE tailD headE headD}
     (balance : @CausalTraceBalance n globalE globalD tailE tailD headE headD) (i : Fin n) :
     lessonReceipts globalD i.succ = lessonReceipts tailD i := by
   have perm : globalD.Perm (tailD.map Delivery.succ ++ headD.map Delivery.head) :=

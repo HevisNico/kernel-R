@@ -8,11 +8,11 @@ separate from the counted lesson inputs. -/
 namespace RecursiveLearning.Native
 open KernelR.Hybrid
 
-private def thresholdPorts (third : Bool) : List Port := if third then [0, 0, 0] else [0, 0]
+def thresholdPorts (third : Bool) : List Port := if third then [0, 0, 0] else [0, 0]
 
 noncomputable def acceptanceProbe (time : ℝ) : Delivery 1 := ⟨0, 0, time + 25⟩
 
-private noncomputable def acceptanceCounter (time : ℝ) (third : Bool) : Snapshot 1 :=
+noncomputable def acceptanceCounter (time : ℝ) (third : Bool) : Snapshot 1 :=
   { preparedTeacher time with
     x := fun i c => match c with
       | .z _ => -(6 / 5 : ℝ)

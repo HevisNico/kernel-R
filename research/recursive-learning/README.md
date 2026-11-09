@@ -75,17 +75,19 @@ read FIRE routes the next pulse to the selected learner port without
 changing the selector. Both stored values use the same absolute
 decoder. The controller's work port and the two credit memories must
 belong to separate cells in this design. Connecting the credit memory,
-preparing the controller within the network and iterating the native
-teaching loop remain open.
+preparing the capped controller within the network and reusing its
+read remain open.
 
 The [full-lesson trials](native/NativeLesson.lean) check the actual
 8-, 7- and 6-pulse lessons and two failing reductions in native R on
-fresh learners. A [native acceptance FIRE](native/NativeAcceptance.lean)
-can write a credit on a separate cell or
-[release all six pulses](native/AcceptanceDispatch.lean) of a supplied
-candidate to a fresh learner. These checks cover the physical lesson
-counts, retention and one acceptance gate. The two successive adaptive
-commits and the general credit bound are established in the discrete model.
+fresh learners. The [native serial experiment](native/SerialAcceptance.lean)
+joins both acceptance decisions and both credit writes in one
+upward-crossing execution. The first acceptance issues seven pulses.
+Its routed selector update enables the second acceptance, which issues
+six. Blocking just that update keeps the first credit and the seven-pulse
+lesson. The native result uses a one-shot selector and a fixed calendar
+for this example. The general credit bound above concerns the discrete
+architecture.
 
 ## Verify
 
