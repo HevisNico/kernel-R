@@ -371,9 +371,11 @@ on the terminal physical state and the ordered firing dates of each
 cell. Complete first-contact executions deliver the same tokens up to
 permutation.
 
-The router contains the calendars for this particular experiment. The
-tests use separate cells for the decisive lesson slots. The lesson
-receipts exclude probes, clock inputs and credit deliveries. The
+The router contains the calendars for this particular experiment.
+In this experiment the acceptance tests are counters fed by the routed
+calendar. They do not yet read the learners’ physical state. Feeding
+them from learner readouts is the next step. The lesson receipts
+exclude probes, clock inputs and credit deliveries. The
 selector is read once, and the low read can write to its sensor gain.
 A reusable selector and an adaptive rule for arbitrary lesson shapes
 are separate problems.
