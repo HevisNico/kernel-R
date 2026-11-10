@@ -884,6 +884,30 @@ FIREs through their first report. The full network decision contract
 and a hybrid execution semantics for the timed comparator have
 separate proof obligations.
 
+### Two-cell execution assembly
+
+[ParameterExecutionProduct.lean](ParameterExecutionProduct.lean) weaves
+two independent parameterized executions at a common clock. The joint
+queue retains both cells' deliveries, and the two FIRE lists retain
+their exact dates. Local completeness through the same horizon gives
+joint completeness.
+
+[CoincidenceReadTail.lean](CoincidenceReadTail.lean) proves that a
+trained-port FIRE cannot be followed by another FIRE in any legal
+finite continuation of the task. The read pulse ends before FAST can
+end. After pulse expiry the cell has no drive and any return to READY
+starts below FIRE.
+
+[CoincidenceNetworkContract.lean](CoincidenceNetworkContract.lean)
+derives the registered receiver decision at time 20 for every complete
+joint run, given two local witnesses complete through that horizon
+with the declared FIRE lists. The receiver uses the 0.35 wire delay
+and 20.35 arrival deadline. For the wrong-port case the file also
+bounds the gain during an ERROR overlap and the resulting READY
+charge from a drive envelope. The physical construction of the
+local complete witnesses, including the wrong-port trajectory,
+remains the outstanding step for the full separation theorem.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:

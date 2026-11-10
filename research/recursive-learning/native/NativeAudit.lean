@@ -4,6 +4,7 @@ import ReportFormula
 import BlindNeedSearch
 import PolicyReuse
 import TimedCurrentSeparation
+import CoincidenceNetworkContract
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000
@@ -12,7 +13,11 @@ open Lean Elab Command in
 run_cmd do
   let env ← getEnv
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
-  let inScope := fun name => (`RecursiveLearning).isPrefixOf (privateToUserName name)
+  let inScope := fun name =>
+    let userName := privateToUserName name
+    (`RecursiveLearning).isPrefixOf userName ||
+      [`KernelR.Hybrid.ParameterExecution.independentPair,
+        `KernelR.Hybrid.ParameterCompleteThrough.independentPair].contains userName
   let mut candidates : NameSet := {}
   for data in env.header.moduleData do
     for name in data.constNames do
