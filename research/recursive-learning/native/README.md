@@ -926,13 +926,18 @@ the coincidence test are applied to the emitted dates by the receiver
 contract.
 
 The combined theorem `coincidence_exit_001_separation` uses 100 µs per
-model unit, ±10% fabrication, exact ERROR entry and exit (0.1 and
-0.01), and ±3% FIRE threshold error. Native R satisfies the full
-receiver contract. For the reduced constant-current rule with ±10%
-current variation, one positive trial excludes every common current
-and duration, including settings that touch the gain cap. The proof
-uses the exact trained birth gain 1.2. The receiver is an observation
-of two native runs and the comparator uses the reduced READY equation.
+model unit, ±10% fabrication and ±3% FIRE threshold error. On each
+trained port, the ERROR entry can vary by up to 0.001 around 0.1 and
+the exit by up to 0.00025 around 0.01 (radius `e ≤ 0.01` in Lean).
+The other ports keep their nominal auxiliary thresholds. Native R
+satisfies the full receiver contract throughout this box.
+
+For the reduced constant-current rule with ±10% current variation, one
+positive trial with nominal ERROR endpoints excludes every common
+current and duration, including settings that touch the gain cap.
+Those endpoints belong to every admitted ERROR box. The proof uses
+the exact trained birth gain 1.2. The receiver is an observation of
+two native runs and the comparator uses the reduced READY equation.
 
 ## Verify
 

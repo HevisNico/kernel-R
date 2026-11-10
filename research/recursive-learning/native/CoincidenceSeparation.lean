@@ -165,16 +165,19 @@ theorem constant_current_registered_corner_rejects {current duration expiryL exp
   subst rDate
   exact constant_current_no_common_timing (wire := 7 / 20) l.1 r.2 ⟨fast, slow, hf, hs, skew⟩
 
-/-- At the primary time scale, with exact ERROR endpoints, the wide
-fabrication box and 3% FIRE error, native R realizes the decision contract.
-At a positive corner of that same box, no common setting of the reduced
-timer with 10% current error satisfies the receiver contract. -/
+/-- At the primary time scale, native R realizes the decision contract
+in the wide fabrication box, with 3% FIRE error and ERROR radius up to
+1% in `CoincidenceCellSpec`. The positive corner with nominal ERROR
+endpoints is included for every such radius. At that corner, no common
+setting of the reduced timer with 10% current error satisfies the
+receiver contract. -/
 theorem coincidence_exit_001_separation {θL θR : Fin 1 → Parameters}
     {gainsL gainsR : Port → ℝ} {trainedL testedL trainedR testedR : Port}
-    {offset jitterL jitterR : ℝ}
+    {offset jitterL jitterR e : ℝ}
     (boxL : PhysicalBox θL (1 / 10)) (boxR : PhysicalBox θR (1 / 10))
-    (left : CoincidenceCellSpec θL gainsL trainedL 0 (3 / 100))
-    (right : CoincidenceCellSpec θR gainsR trainedR 0 (3 / 100))
+    (errorRadius : e ∈ Icc (0 : ℝ) (1 / 100))
+    (left : CoincidenceCellSpec θL gainsL trainedL e (3 / 100))
+    (right : CoincidenceCellSpec θR gainsR trainedR e (3 / 100))
     (jitterLeft : |jitterL| ≤ 1 / 20) (jitterRight : |jitterR| ≤ 1 / 20)
     (offsets : offset = -(3 / 10) ∨ offset = 0 ∨ offset = 3 / 10) :
     CoincidenceFullContract θL θR gainsL gainsR trainedL testedL trainedR testedR
@@ -184,7 +187,7 @@ theorem coincidence_exit_001_separation {θL θR : Fin 1 → Parameters}
         ¬ TimedCurrentCornerAccepts current duration expiryL expiryR := by
   refine ⟨coincidence_exit_001_full_contract boxL boxR left right ?_
     jitterLeft jitterRight offsets, ?_⟩
-  · norm_num [Exit001TimingBox]
+  · exact Or.inl ⟨errorRadius.2, le_rfl⟩
   · intro current duration expiryL expiryR l r
     exact constant_current_registered_corner_rejects l r
 
