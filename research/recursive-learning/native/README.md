@@ -855,9 +855,34 @@ uses the declared uncertainties only.
 The execution theorem is for a single trained-port read through its
 first FIRE. A joint two-cell execution, wrong-port trials, the rest
 of the observation horizon, and a native receiver have separate
-proof obligations. The constant-current comparison remains numerical.
-A separation theorem would also need to rule out every allowed
-common setting of that comparator.
+proof obligations. The comparison below addresses the reduced timing contract.
+
+### Constant-current timing obstruction
+
+[TimedCurrentSeparation.lean](TimedCurrentSeparation.lean) uses the
+[registered constant-current rule](https://github.com/HevisNico/kernel-R/blob/1f04221262694383b1505a8d064f62903a85a34a/research/recursive-learning/COINCIDENCE_BENCHMARK.md#comparators)
+and the same `readyPulse` equation as the R latency theorem. In the
+reduced runner, a shared current and duration give a common dose
+`d = I * D`, scaled by each device's current multiplier and clipped at
+its realized gain cap. The runner requires silent training and positive
+reserve. The protocol requires the timer to finish by time 16.
+
+At 100 microseconds per unit, use the wide fabrication box, 10%
+current error, 3% FIRE error, ERROR entry 0.1 and exit 0.01. Put the
+high-current, high-cap, low-FIRE corner on the early read and reverse
+all three signs on the late read. The two reads are at 16.95 and
+17.05 with zero offset. Lean proves that for **every shared dose**
+this positive trial either lacks a report or has skew at least
+15 microseconds. The proof includes capped writes. For doses up to
+0.36 it rules out the slow report directly. Seven bounded dose
+intervals and one unbounded interval cover the remaining doses.
+
+This proves an obstruction for the constant-current **reduced**
+timing model, with eligible writes and a frozen learned gain
+while the read pulse is live. The native R result covers trained-port
+FIREs through their first report. The full network decision contract
+and a hybrid execution semantics for the timed comparator have
+separate proof obligations.
 
 ## Verify
 
