@@ -710,10 +710,31 @@ the same port fires. The high band is [2, 2.4] with the same 0.3 to 0.9
 firing window. Both reads tolerate a fixed main threshold in
 [0.95, 1.05] and either fabrication box.
 
-The bridge transfers the learned log-gain to the prepared readout
-state. Its input contract supplies completed exposed ERROR segments.
-A continuous execution from the learning pulses through sensor
-reopening and the subsequent read remains a separate construction.
+The dose and readout bounds above also apply to separately prepared
+states. The experiment below joins them in one trajectory.
+
+## Train and read the same port
+
+[ErrorReadHandoff.lean](ErrorReadHandoff.lean) starts with a READY cell
+whose selected sensor is already in ERROR, with no live input current.
+The sensor discharges from its realized upper charge to its realized
+lower charge under the original R equations. Both charges may differ
+from their nominal values by up to 5%. The gain and energy gates stay
+open, so the dose lies in [0.55, 0.65].
+
+At the lower charge, the sensor switches to READY. Its charge and every
+other continuous coordinate carry over. The cell waits under the native
+quiet flow and admits the single queued pulse on the same port, twelve
+time units after the experiment starts. The sensor reaches the readout's
+rest band through that flow. Starting at the actual delivery state, the
+trained port produces a transverse first FIRE 0.3 to 0.9 time units
+after arrival, for every fixed FIRE threshold in [0.95, 1.05] and either
+fabrication box. At the nominal ERROR exit and FIRE levels the whole
+joined trajectory is an execution of the original kernel.
+
+The supplied start has the main charge and other sensors at rest, and
+energy in [51, 100]. Constructing that ERROR state from a training pulse
+and extending the experiment to repeated training are separate tasks.
 
 ## Verify
 
