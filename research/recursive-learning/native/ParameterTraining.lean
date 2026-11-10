@@ -1,4 +1,5 @@
 import TrainingRead
+import ParameterFuturePort
 import KernelR.HybridParameterUniversalExecution
 
 /-! The existing estimates construct a trajectory of the fixed-parameter
@@ -181,21 +182,23 @@ private noncomputable def parameterRead {θ s p upper lower level}
   exact (parameterMarkSilent g config read.before_mark read.before_silent).append
     (.cons (.flow f) (.cons (.jump fire) (.nil _)))
 
+/-- Snapshot immediately before the scheduled read admission. -/
+noncomputable def ErrorReadHandoff.beforeRead {θ s p m lower level readTime}
+    (run : ErrorReadHandoff θ s p m lower level readTime) : Snapshot 1 :=
+  quietAt (setAux {s with time := run.span.stop, x := run.span.path run.span.stop}
+    0 p .ready) readTime
+
 private def parameterReadArrival {θ s p m lower level readTime}
     (run : ErrorReadHandoff θ s p m lower level readTime) :
     ParameterJump θ (fun _ _ => [])
-      (quietAt (setAux {s with time := run.span.stop, x := run.span.path run.span.stop}
-        0 p .ready) readTime) run.readStart := by
+      run.beforeRead run.readStart := by
   rw [run.read_start_eq]
   exact .arrive _ (errorReadDelivery p readTime) [] [] run.queued rfl (run.error_raw_empty p)
 
-private noncomputable def parameterHandoff {θ s p m upper lower level readTime}
+private noncomputable def parameterHandoffPrefix {θ s p m upper lower level readTime}
     (run : ErrorReadHandoff θ s p m lower level readTime)
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
-    (silent : ∀ t ∈ Icc run.decision.silent.final.time run.decision.stop,
-      upper < readyProtectedValues θ run.decision.silent.final 0 p .silent
-        (some run.readStart.time) t 0 (.m p)) :
-    ParameterExecution θ (fun _ _ => []) s run.decision.final := by
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
+    ParameterExecution θ (fun _ _ => []) s run.beforeRead := by
   let span := run.span
   let boundary : Snapshot 1 := {s with time := span.stop, x := span.path span.stop}
   let reopened := setAux boundary 0 p .ready
@@ -241,9 +244,17 @@ private noncomputable def parameterHandoff {θ s p m upper lower level readTime}
   }
   have reopen : ParameterJump θ (fun _ _ => []) boundary reopened :=
     .auxReady _ 0 p mode (by rw [config]; simpa [trainingThresholds] using span.charge_out)
-  exact .cons (.flow flow) (.cons (.jump reopen) (.cons (.flow wait)
-    (.cons (.jump (parameterReadArrival run))
-    (parameterRead run.decision config silent))))
+  exact .cons (.flow flow) (.cons (.jump reopen) (.cons (.flow wait) (.nil _)))
+
+private noncomputable def parameterHandoff {θ s p m upper lower level readTime}
+    (run : ErrorReadHandoff θ s p m lower level readTime)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (silent : ∀ t ∈ Icc run.decision.silent.final.time run.decision.stop,
+      upper < readyProtectedValues θ run.decision.silent.final 0 p .silent
+        (some run.readStart.time) t 0 (.m p)) :
+    ParameterExecution θ (fun _ _ => []) s run.decision.final := by
+  exact (parameterHandoffPrefix run config).append
+    (.cons (.jump (parameterReadArrival run)) (parameterRead run.decision config silent))
 
 /-- The estimates in the training certificate produce an execution of
 the realized-parameter semantics itself. -/
@@ -256,6 +267,16 @@ noncomputable def TrainingRead.parameterExecution {θ time gains p upper lower l
   exact .cons (.jump train) ((parameterMarkSilent run.silent config run.pre_mark run.pre_silent).append
     ((parameterTrainingTrace run.trace config).append
       (parameterHandoff run.handoff config run.read_silent_guard)))
+
+/-- Training and the quiet wait, ending just before the read delivery. -/
+noncomputable def TrainingRead.parameterPrefix {θ time gains p upper lower level delay}
+    (run : TrainingRead θ time gains p upper lower level delay)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
+    ParameterExecution θ (fun _ _ => []) (trainingStart time gains p delay) run.handoff.beforeRead := by
+  let train : ParameterJump θ (fun _ _ => []) (trainingStart time gains p delay) (trainingAdmitted time gains p delay) :=
+    .arrive _ (errorReadDelivery p time) [] [errorReadDelivery p (time + delay)] rfl rfl rfl
+  exact .cons (.jump train) ((parameterMarkSilent run.silent config run.pre_mark run.pre_silent).append
+    ((parameterTrainingTrace run.trace config).append (parameterHandoffPrefix run.handoff config)))
 
 /-- The first read FIRE is a complete horizon of the parameterized run.
 The sensor and raw pulse remain strictly between their adjacent events. -/
@@ -386,7 +407,7 @@ private theorem training_initial_invariant {θ time gains p delay}
   · intro i
     norm_num [trainingStart, toleranceStartOn]
 
-private theorem parameter_emissions_append {n θ route s u v}
+theorem parameter_emissions_append {n θ route s u v}
     (e : @ParameterExecution n θ route s u) (f : ParameterExecution θ route u v) :
     (e.append f).emissions = e.emissions ++ f.emissions := by
   induction e with
@@ -468,8 +489,40 @@ private theorem parameterHandoff_emissions {θ s p m upper lower level readTime}
     rw [run.read_start_eq]
     rfl
   unfold parameterHandoff
-  simp only [ParameterExecution.emissions_cons, ParameterMove.emissions,
-    parameterRead_emissions, labels, List.nil_append]
+  rw [parameter_emissions_append,
+    show (parameterHandoffPrefix run config).emissions = [] from rfl]
+  simp only [List.nil_append, ParameterExecution.emissions_cons, ParameterMove.emissions,
+    parameterRead_emissions]
+  rw [labels]
+  rfl
+
+private theorem parameterTrace_inputs {θ s u p upper lower level}
+    (trace : TrainingTrace θ p upper lower level s u)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
+    executionInputs (parameterTrainingTrace trace config) = [] := by
+  induction trace with
+  | nil => rfl
+  | silent leg rest ih => exact ih
+  | enter mode hit rest ih => exact ih
+  | expire active due rest ih => exact ih
+  | liveError leg rest ih => exact ih
+
+/-- Only the training input has been delivered at the end of the prefix. -/
+theorem TrainingRead.parameterPrefix_inputs {θ time gains p upper lower level delay}
+    (run : TrainingRead θ time gains p upper lower level delay)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
+    executionInputs (run.parameterPrefix config) = [errorReadDelivery p time] := by
+  simp only [TrainingRead.parameterPrefix, executionInputs, jumpInputs, executionInputs_append,
+    parameterTrace_inputs, parameterHandoffPrefix, parameterMarkSilent]
+  rfl
+
+theorem TrainingRead.parameterPrefix_emissions {θ time gains p upper lower level delay}
+    (run : TrainingRead θ time gains p upper lower level delay)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
+    (run.parameterPrefix config).emissions = [] := by
+  have labels := parameterMarkSilent_emissions run.silent config run.pre_mark run.pre_silent
+  simp only [TrainingRead.parameterPrefix, ParameterExecution.emissions_cons, ParameterMove.emissions,
+    parameter_emissions_append, labels, parameterTrace_emissions, parameterHandoffPrefix, List.nil_append]
   rfl
 
 /-- The constructed execution records one actual FIRE, at the read's

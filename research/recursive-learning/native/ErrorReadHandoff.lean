@@ -153,6 +153,7 @@ structure ErrorReadHandoff (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Por
   decision : TolerantSnapshotDecision θ readStart p true level
   read_charge_bound : readStart.x 0 .q ≤
     1 / 10 + (21 / 25) * Real.exp (-(1 / 2) * (readTime - (s.time + 8 / 25)))
+  other_gains_at_read : ∀ q ≠ p, readStart.x 0 (.z q) = s.x 0 (.z q)
 
 /-- The native delivery at the scheduled date. -/
 def ErrorReadHandoff.arrival {θ s p upper lower level readTime}
@@ -392,7 +393,7 @@ theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
   obtain ⟨read⟩ := tolerant_snapshot_readout (high := true) box physical readReady threshold
     (show 2 ≤ Real.exp (admitted.x 0 (.z p)) ∧ Real.exp (admitted.x 0 (.z p)) ≤ 13 / 5 by
       rw [got]; exact learnedGain)
-  refine ⟨⟨learned, span, rfl, ?_, ?_, raw, ?_, quiet, ?_, queue, admitted, rfl, rfl, readReady, got, read, ?_⟩⟩
+  refine ⟨⟨learned, span, rfl, ?_, ?_, raw, ?_, quiet, ?_, queue, admitted, rfl, rfl, readReady, got, read, ?_, ?_⟩⟩
   · intro t ht
     change errorTailValues θ s 0 p none t 0 .q < level
     rw [quiet_error_charge]
@@ -421,6 +422,10 @@ theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
     have h := mul_le_mul (show reopened.x 0 .q - 1 / 10 ≤ 21 / 25 by linarith)
       decay (Real.exp_pos _).le (by norm_num : (0 : ℝ) ≤ 21 / 25)
     linarith
+
+  · intro q neq
+    rw [preserved]
+    simp [reopened, path, setAux, errorTailValues, neq]
 
 /-- One full ERROR dose from a realized entry threshold, followed by
 the scheduled read. -/
