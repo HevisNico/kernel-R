@@ -724,17 +724,40 @@ open, so the dose lies in [0.55, 0.65].
 
 At the lower charge, the sensor switches to READY. Its charge and every
 other continuous coordinate carry over. The cell waits under the native
-quiet flow and admits the single queued pulse on the same port, twelve
-time units after the experiment starts. The sensor reaches the readout's
-rest band through that flow. Starting at the actual delivery state, the
-trained port produces a transverse first FIRE 0.3 to 0.9 time units
+quiet flow and admits the single queued pulse on the same port at a
+scheduled time at least twelve units after ERROR entry. Both the main
+charge and the sensor reach the readout's starting bands by decay.
+Starting at the actual delivery state, the trained port produces a
+transverse first FIRE 0.3 to 0.9 time units
 after arrival, for every fixed FIRE threshold in [0.95, 1.05] and either
 fabrication box. At the nominal ERROR exit and FIRE levels the whole
 joined trajectory is an execution of the original kernel.
 
-The supplied start has the main charge and other sensors at rest, and
-energy in [51, 100]. Constructing that ERROR state from a training pulse
-and extending the experiment to repeated training are separate tasks.
+The supplied ERROR state has main charge in [0.1, 0.9], other sensors at
+rest, and energy in [50, 100].
+
+## A complete training pulse followed by a read
+
+[TrainingRead.lean](TrainingRead.lean) starts before the first input,
+with one READY cell at rest and two canonical pulses queued on the same
+port, sixteen time units apart. The initial gain of that port is in
+[7/6, 1.2]. The first pulse drives the sensor
+through MARK and SILENT while the cell stays below its FIRE threshold.
+After the raw pulse expires, the sensor reaches its realized ERROR
+entry charge. The resulting snapshot supplies the learning and read
+trajectory above, including the residual main charge.
+
+The net log-gain increment from training is exactly
+`8 * (upper - lower)`. The second pulse produces a transverse first FIRE
+0.3 to 0.9 units after delivery. The two ERROR thresholds and the FIRE
+threshold each tolerate 5% error. All three nominal levels give a
+native R execution from before the first delivery through the read FIRE.
+
+The full ±0.3% fabrication box is covered. In the ±10% box the proof
+additionally requires the active port's SILENT decay rate to be at most
+2, which ensures raw expiry strictly precedes ERROR entry. ERROR entry
+with live current, repeated training, and recovery after the read FIRE
+remain outside this construction.
 
 ## Verify
 

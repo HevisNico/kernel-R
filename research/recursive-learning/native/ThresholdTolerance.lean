@@ -25,22 +25,28 @@ noncomputable def toleranceStartOn (time : ℝ) (gains : Port → ℝ) (port : P
   raw := fun _ p => if p = port then some time else none
   pending := []
 
-private theorem early_bound {G time t : ℝ} (upper : G ≤ 12 / 5)
+private theorem early_bound {initial G time t : ℝ} (charge : initial ≤ 27 / 250)
+    (upper : G ≤ 12 / 5)
     (start : time ≤ t) (stop : t ≤ time + 3 / 10) :
-    readyPulse (1 / 10) G time t ≤ 47 / 50 := by
+    readyPulse initial G time t ≤ 237 / 250 := by
   have nonneg := response_nonnegative (show 0 ≤ t - time by linarith)
   have responseBound := response_mid_early_upper (t := t - time) (by linarith) (by linarith)
   have gainBound := mul_le_mul_of_nonneg_right upper nonneg
   have bound := mul_le_mul_of_nonneg_left responseBound (by norm_num : (0 : ℝ) ≤ 12 / 5)
-  simp only [readyPulse, sub_self, zero_mul, add_zero]
+  have carry := decay_upper (show initial - 1 / 10 ≤ (1 / 125 : ℝ) by linarith)
+    (by norm_num) (by norm_num : (0 : ℝ) ≤ 1 / 2) (sub_nonneg.mpr start)
+  unfold readyPulse
   linarith
 
-private theorem strong_deadline {G time : ℝ} (lower : 2 ≤ G) :
-    (21 / 20 : ℝ) < readyPulse (1 / 10) G time (time + 9 / 10) := by
+private theorem strong_deadline {initial G time : ℝ} (charge : 1 / 10 ≤ initial)
+    (lower : 2 ≤ G) :
+    (21 / 20 : ℝ) < readyPulse initial G time (time + 9 / 10) := by
   have h := mul_le_mul_of_nonneg_right lower
     (response_nonnegative (by norm_num : (0 : ℝ) ≤ 9 / 10))
   have bound := response_emission_deadline
-  simp only [readyPulse, sub_self, zero_mul, add_zero, add_sub_cancel_left]
+  have carry := mul_nonneg (sub_nonneg.mpr charge)
+    (Real.exp_pos (-(1 / 2) * (9 / 10))).le
+  simp only [readyPulse, add_sub_cancel_left]
   linarith
 
 private def auxiliaryGuards (s : Snapshot 1) (values : Values 1) : Prop :=
@@ -72,11 +78,11 @@ structure TolerantLeg (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Port)
     auxiliaryGuards s (readyProtectedValues θ s 0 p .silent (some origin) t)
 
 /-- The actual snapshot after pulse admission, with the sensors in the
-rest band used by the MARK proof. Energy and recovery are supplied by
-the snapshot's physical invariant. -/
+rest band used by the MARK proof and the main charge in the accepted
+residual band. Energy and recovery come from the physical invariant. -/
 structure ReadoutReady (s : Snapshot 1) (p : Port) : Prop where
   main : ∀ i, s.main i = .ready
-  charge : s.x 0 .q = 1 / 10
+  charge : 1 / 10 ≤ s.x 0 .q ∧ s.x 0 .q ≤ 27 / 250
   aux : ∀ i q, s.aux i q = .ready
   rest : ∀ i q, RestBand (s.x i (.m q))
   raw : s.raw 0 p = some s.time
@@ -97,9 +103,9 @@ structure TolerantSnapshotDecision (θ : Fin 1 → Parameters) (s : Snapshot 1)
   stop : ℝ
   leg : TolerantLeg θ silent.final port s.time level stop
   scalar_guard : ∀ t ∈ Ico s.time stop,
-    readyPulse (1 / 10) (Real.exp (s.x 0 (.z port))) s.time t < level
+    readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z port))) s.time t < level
   charge : (readyProtectedEnd θ silent.final 0 port .silent (some s.time) stop).x 0 .q =
-    readyPulse (1 / 10) (Real.exp (s.x 0 (.z port))) s.time stop
+    readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z port))) s.time stop
   outcome :
     let endpoint := readyProtectedEnd θ silent.final 0 port .silent (some s.time) stop
     if high then
@@ -131,7 +137,7 @@ theorem tolerant_snapshot_readout {θ ε s port high level}
   let p := port
   let time := s.time
   let G := Real.exp (s.x 0 (.z p))
-  let q := readyPulse (1 / 10) G time
+  let q := readyPulse (s.x 0 .q) G time
   have amplitude : G ≤ 12 / 5 := by
     cases high
     · simp only [Bool.false_eq_true, ite_false] at gain
@@ -139,18 +145,17 @@ theorem tolerant_snapshot_readout {θ ε s port high level}
       linarith
     · exact gain.2
   have hEarly : ∀ t, time ≤ t → t ≤ time + 3 / 10 → q t < level :=
-    fun t ht hu => (early_bound amplitude ht hu).trans_lt (by linarith [threshold.1])
+    fun t ht hu => (early_bound ready.charge.2 amplitude ht hu).trans_lt (by linarith [threshold.1])
   have earlyStock : ∀ t, s.time ≤ t → t ≤ s.time + 1 / 10 →
       readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time t < 1 := by
     intro t ht hu
-    rw [ready.charge]
     change q t < 1
-    exact (early_bound amplitude ht (by linarith)).trans_lt (by norm_num)
+    exact (early_bound ready.charge.2 amplitude ht (by linarith)).trans_lt (by norm_num)
   have active := ready.raw
   have otherRaw := ready.otherRaw
   have mainBelow (i : Fin 1) : s.x i .q < 1 := by
-    rw [Subsingleton.elim i 0, ready.charge]
-    norm_num
+    rw [Subsingleton.elim i 0]
+    linarith [ready.charge.2]
   have auxBelow (i : Fin 1) (q : Port) : s.x i (.m q) < 1 := by
     have h := (ready.rest i q).2
     linarith
@@ -161,9 +166,9 @@ theorem tolerant_snapshot_readout {θ ε s port high level}
     intro t ht
     have he := f.flow.ready_single_pulse_solution 0 p s.time (ready.main 0) active
       (fun port h => otherRaw 0 port (Or.inr h)) (by rw [ready.aux]; decide) t ⟨ht.1, ht.2.le⟩
-    rw [he, ready.charge]
+    rw [he]
     simp only [sub_self, mul_zero, Real.exp_zero, mul_one]
-    change readyPulse (1 / 10) G time t < level
+    change q t < level
     exact hEarly t ht.1 (by linarith [ht.2, f.deadline])
   have secondBelow : ∀ t ∈ Ico f.final.time g.final.time, g.flow.path t 0 .q < level := by
     intro t ht
@@ -174,7 +179,6 @@ theorem tolerant_snapshot_readout {θ ε s port high level}
     have restart := f.protected_response_restart t
     change readyPulse (f.final.x 0 .q)
       (Real.exp (f.final.x 0 (.z p)) * Real.exp (-a * (f.final.time - s.time))) f.final.time t = readyPulse (s.x 0 .q) G time t at restart
-    rw [ready.charge] at restart
     rw [restart]
     have start : time + f.latency ≤ t := ht.1
     have stop : t < f.silentDate := ht.2
@@ -193,14 +197,14 @@ theorem tolerant_snapshot_readout {θ ε s port high level}
     cases high
     · have bound : G ≤ 6 / 5 := gain
       have below (t : ℝ) (ht : time ≤ t) : q t < level := by
-        have h := readyPulse_uniform_bound (initial := (1 / 10 : ℝ)) (amplitude := G)
-          (Q := 1 / 10) (G := 6 / 5) le_rfl le_rfl bound (by norm_num) ht
+        have h := readyPulse_uniform_bound (amplitude := G) (Q := 27 / 250) (G := 6 / 5)
+          ready.charge.2 (by norm_num) bound (by norm_num) ht
         change q t ≤ _ at h
         linarith [threshold.1]
       exact ⟨time + 9 / 10, by linarith, le_rfl, fun t ht => below t ht.1, rfl,
         below _ (by linarith)⟩
     · have strong : 2 ≤ G := gain.1
-      have above : level < q (time + 9 / 10) := threshold.2.trans_lt (strong_deadline strong)
+      have above : level < q (time + 9 / 10) := threshold.2.trans_lt (strong_deadline ready.charge.1 strong)
       have continuous : Continuous q :=
         continuous_iff_continuousAt.mpr (fun t => (readyPulse_derivative _ _ _ t).continuousAt)
       obtain ⟨stop, start, deadline, hit, prior⟩ := scalar_first_crossing continuous
@@ -216,7 +220,7 @@ theorem tolerant_snapshot_readout {θ ε s port high level}
   have live : stop < time + 1 := by linarith
   have qPath (t : ℝ) : path t 0 .q = q t := by
     simp only [path, readyProtectedValues, protectedRawAmplitude, ite_true]
-    rw [g.response_restart t, ready.charge]
+    exact g.response_restart t
   have rhs (t : ℝ) (ht : t ∈ Icc g.final.time stop) (i : Fin 1) (c : Coord) :
       field θ g.final (path t) t i c = readyProtectedRhs θ g.final 0 p .silent (some time) t i c :=
     readyProtected_field g.final 0 p .silent (some time) (Or.inr rfl)
@@ -321,7 +325,7 @@ theorem tolerant_port_readout {θ ε time gains port high level} (box : @Physica
     Nonempty (TolerantPortDecision θ time gains port high level) := by
   apply tolerant_snapshot_readout box (physical := ?_) (ready := ?_) threshold gain
   swap
-  · refine ⟨fun _ => rfl, rfl, fun _ _ => rfl, ?_, ?_, ?_, rfl⟩
+  · refine ⟨fun _ => rfl, by norm_num [toleranceStartOn], fun _ _ => rfl, ?_, ?_, ?_, rfl⟩
     · intro i p
       norm_num [RestBand, toleranceStartOn]
     · simp [toleranceStartOn]
