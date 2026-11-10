@@ -789,6 +789,28 @@ and the final log-gain increment is exactly `8 * (upper - lower)`.
 The proof uses the first-contact operational semantics. The constructed
 read FIRE is transverse.
 
+## Training with an ERROR exit near 0.01
+
+[ParameterTraining.lean](ParameterTraining.lean) proves
+`training_read_exit_001_every_complete` for an ERROR exit in
+`[0.00875, 0.01125]`. The ERROR entry remains in `[0.095, 0.105]`,
+the FIRE threshold in `[0.95, 1.05]`, and the trained port's birth gain
+in `[7/6, 1.2]`. The other guards are nominal. Both fabrication boxes
+are covered.
+
+A pulse trains the port at birth. A second pulse reads the same port
+18 time units later, allowing the sensor to settle into its original
+rest band. A complete run exists through the first FIRE. Every run
+complete through that horizon agrees on the endpoint and has exactly
+one FIRE, between 0.3 and 0.9 units after the read arrives. The final
+log-gain increment is `8 * (entry - exit)`, between 0.67 and 0.77.
+
+The same proof takes a variable exit and read delay through
+`training_read_every_complete_in_band`. The original 16-unit schedule
+and its theorem remain available. These theorems concern the single-cell
+task in the parameterized first-contact semantics. The two-cell
+coincidence benchmark uses a separate schedule and receiver contract.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:

@@ -151,6 +151,26 @@ theorem one_error_dose_gain {z upper lower : ℝ}
     norm_num at h
     exact h
 
+/-- The wide read band accepts every dose between the displayed endpoints. -/
+theorem wide_error_dose_gain {z upper lower : ℝ}
+    (dose : 11 / 20 ≤ 8 * (upper - lower) ∧ 8 * (upper - lower) ≤ 77 / 100)
+    (initial : 7 / 6 ≤ Real.exp z ∧ Real.exp z ≤ 6 / 5) :
+    2 ≤ Real.exp (z + 8 * (upper - lower)) ∧ Real.exp (z + 8 * (upper - lower)) ≤ 13 / 5 := by
+  have expUpper : Real.exp (77 / 100 : ℝ) ≤ 13 / 6 := by
+    have h := Real.exp_bound (x := (77 / 100 : ℝ)) (n := 8) (by norm_num) (by norm_num)
+    norm_num [Finset.sum_range_succ] at h
+    linarith [(abs_sub_le_iff.mp h).1]
+  rw [Real.exp_add]
+  constructor
+  · have h := mul_le_mul initial.1 (exp_dose_lower.trans (Real.exp_le_exp.mpr dose.1))
+      (by norm_num : (0 : ℝ) ≤ 12 / 7) (Real.exp_pos _).le
+    norm_num at h
+    exact h
+  · have h := mul_le_mul initial.2 ((Real.exp_le_exp.mpr dose.2).trans expUpper)
+      (Real.exp_pos _).le (by norm_num : (0 : ℝ) ≤ 6 / 5)
+    norm_num at h
+    exact h
+
 /-- A one-dose memory test on the same port. An untrained gain in
 [7/6, 1.2] reads silent. One exposed ERROR dose with each sensor
 endpoint within 5% of nominal makes the prepared read fire. -/

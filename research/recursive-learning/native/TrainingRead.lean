@@ -8,14 +8,14 @@ state. The construction covers every ordering of raw expiry and ERROR entry. -/
 namespace RecursiveLearning.Native
 open KernelR.Hybrid Set MeasureTheory
 
-noncomputable def trainingStart (time : ℝ) (gains : Port → ℝ) (p : Port) : Snapshot 1 :=
+noncomputable def trainingStart (time : ℝ) (gains : Port → ℝ) (p : Port) (delay : ℝ := 16) : Snapshot 1 :=
   { toleranceStartOn time gains p with
     raw := fun _ _ => none
-    pending := [errorReadDelivery p time, errorReadDelivery p (time + 16)] }
+    pending := [errorReadDelivery p time, errorReadDelivery p (time + delay)] }
 
-noncomputable def trainingAdmitted (time : ℝ) (gains : Port → ℝ) (p : Port) : Snapshot 1 :=
-  { setRaw (trainingStart time gains p) 0 p (some time) with
-    pending := [errorReadDelivery p (time + 16)] }
+noncomputable def trainingAdmitted (time : ℝ) (gains : Port → ℝ) (p : Port) (delay : ℝ := 16) : Snapshot 1 :=
+  { setRaw (trainingStart time gains p delay) 0 p (some time) with
+    pending := [errorReadDelivery p (time + delay)] }
 
 /-- A SILENT piece with a realized exit guard. The pulse origin, when
 present, is carried through unchanged. -/
@@ -77,19 +77,19 @@ noncomputable def TrainingTrace.nominalExecution {θ p lower s u}
 /-- A single trajectory from before training delivery through the read's
 first FIRE, with every continuous coordinate carried across each cut. -/
 structure TrainingRead (θ : Fin 1 → Parameters) (time : ℝ) (gains : Port → ℝ) (p : Port)
-    (upper lower level : ℝ) where
-  train : Jump (fun _ _ => []) (trainingStart time gains p) (trainingAdmitted time gains p)
-  mark : FirstInputMark θ (trainingAdmitted time gains p) 0 p
+    (upper lower level : ℝ) (delay : ℝ := 16) where
+  train : Jump (fun _ _ => []) (trainingStart time gains p delay) (trainingAdmitted time gains p delay)
+  mark : FirstInputMark θ (trainingAdmitted time gains p delay) 0 p
   silent : FirstInputSilent mark
   pre_mark : ∀ t ∈ Ico time (time + mark.latency), mark.flow.path t 0 .q < level
   pre_silent : ∀ t ∈ Ico mark.final.time silent.final.time, silent.flow.path t 0 .q < level
   errorStart : Snapshot 1
   trace : TrainingTrace θ p upper lower level silent.final errorStart
-  handoff : ErrorReadHandoff θ errorStart p (errorStart.x 0 (.m p)) lower level (time + 16)
+  handoff : ErrorReadHandoff θ errorStart p (errorStart.x 0 (.m p)) lower level (time + delay)
   read_silent_guard : ∀ t ∈ Icc handoff.decision.silent.final.time handoff.decision.stop,
     upper < readyProtectedValues θ handoff.decision.silent.final 0 p .silent
       (some handoff.readStart.time) t 0 (.m p)
-  read_date : handoff.readStart.time = time + 16
+  read_date : handoff.readStart.time = time + delay
   dose_from_birth : handoff.learned = gains p + 8 * (upper - lower)
 
 private theorem silentRateLower {θ ε} (box : @PhysicalBox 1 θ ε) (p : Port) :
@@ -109,7 +109,7 @@ private theorem silent_duration {θ ε upper} (box : @PhysicalBox 1 θ ε) (p : 
     (hi : |upper - 1 / 10| ≤ 1 / 200) :
     let r := (θ 0).ls p
     0 < Real.log ((4 / 5) / upper) / r ∧
-    Real.log ((4 / 5) / upper) / r < 3 ∧
+    Real.log ((4 / 5) / upper) / r < 9 / 5 ∧
     Real.log 8 / r - Real.log ((4 / 5) / upper) / r ≤ 3 / 100 := by
   dsimp only
   obtain ⟨hl, hu⟩ := abs_le.mp hi
@@ -234,18 +234,21 @@ private theorem makeSilentLeg {θ ε s p origin upper level stop}
 
 /-- The scheduled two-pulse task works for either full fabrication box.
 ERROR entry and pulse expiry are both realized at their actual dates. -/
-theorem training_read_exists {θ ε time gains p upper lower level}
+theorem training_read_exists_in_band {θ ε time gains p upper lower level delay}
     (box : @PhysicalBox 1 θ ε)
     (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
-    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800)
+    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : 7 / 800 ≤ lower)
+    (dose : 11 / 20 ≤ 8 * (upper - lower) ∧ 8 * (upper - lower) ≤ 77 / 100)
+    (delayMin : 16 ≤ delay)
+    (settled : |lower - 1 / 40| * Real.exp (-(1 / 2) * (delay - 3)) ≤ 1 / 100000)
     (gain : 7 / 6 ≤ Real.exp (gains p) ∧ Real.exp (gains p) ≤ 6 / 5)
     (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
-    Nonempty (TrainingRead θ time gains p upper lower level) := by
-  let s := trainingAdmitted time gains p
-  let d := errorReadDelivery p (time + 16)
+    Nonempty (TrainingRead θ time gains p upper lower level delay) := by
+  let s := trainingAdmitted time gains p delay
+  let d := errorReadDelivery p (time + delay)
   let route : Router 1 := fun _ _ => []
-  have train : Jump route (trainingStart time gains p) s :=
-    .arrive (trainingStart time gains p) (errorReadDelivery p time) [] [d] rfl rfl rfl
+  have train : Jump route (trainingStart time gains p delay) s :=
+    .arrive (trainingStart time gains p delay) (errorReadDelivery p time) [] [d] rfl rfl rfl
   have raw : s.raw 0 p = some s.time := by
     simp [s, trainingAdmitted, trainingStart, toleranceStartOn, setRaw]
   have otherRaw (i : Fin 1) (q : Port) (h : i ≠ 0 ∨ q ≠ p) : s.raw i q = none := by
@@ -260,6 +263,7 @@ theorem training_read_exists {θ ε time gains p upper lower level}
     linarith
   have ahead : ∀ v ∈ s.pending, s.time + 2 ≤ v.due := by
     norm_num [s, trainingAdmitted, trainingStart, toleranceStartOn, setRaw, errorReadDelivery]
+    linarith
   have below (t : ℝ) (ht : s.time ≤ t) (_ : t ≤ s.time + 1 / 10) :
       readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time t < 1 := by linarith [margin t ht]
   obtain ⟨f⟩ := first_input_mark_of_response_margin_until_exists s box 0 p
@@ -309,7 +313,7 @@ theorem training_read_exists {θ ε time gains p upper lower level}
     change s.time + 99 / 100 < g.final.time + Real.log 8 / rate at h
     dsimp only [T]
     linarith
-  have Tlate : T < time + 4 := by
+  have Tlate : T < time + 2 := by
     have before : g.final.time < time + 1 / 20 := gBefore
     dsimp only [T]
     linarith
@@ -317,7 +321,6 @@ theorem training_read_exists {θ ε time gains p upper lower level}
   have cutLate : cut ≤ s.time + 1 := min_le_right _ _
   have cutLe : cut ≤ T := min_le_left _ _
   obtain ⟨hi₁, hi₂⟩ := abs_le.mp hi
-  obtain ⟨lo₁, lo₂⟩ := abs_le.mp lo
   have up : 0 < upper := by linarith
   obtain ⟨_, sensorContact, sensorStrict⟩ :=
     protected_decay_schedule up (show upper < (4 / 5 : ℝ) by linarith) rp
@@ -376,7 +379,7 @@ theorem training_read_exists {θ ε time gains p upper lower level}
   have edgeRaw : edge.raw 0 p = some s.time := g.raw_active
   have edgePending : edge.pending = [d] := g.queue_preserved
   have finish (e : Snapshot 1) (trace : TrainingTrace θ p upper lower level g.final e)
-      (lead : e.time + 12 ≤ time + 16)
+      (lead : e.time ≤ time + 2)
       (em : e.main 0 = .ready) (ea : e.aux 0 p = .error)
       (eqBand : e.x 0 .q ∈ Icc (1 / 10) (47 / 50))
       (energy : 50 ≤ e.x 0 .energy ∧ e.x 0 .energy ≤ 100)
@@ -385,11 +388,11 @@ theorem training_read_exists {θ ε time gains p upper lower level}
       (eraw : ∀ q, e.raw 0 q = none) (queue : e.pending = [d])
       (b : e.x 0 .b = 2 / 25) (otherGain : ∀ q ≠ p, e.x 0 (.z q) = gains q)
       (balance : e.x 0 (.z p) + 8 * (e.x 0 (.m p) - lower) = gains p + 8 * (upper - lower)) :
-      Nonempty (TrainingRead θ time gains p upper lower level) := by
+      Nonempty (TrainingRead θ time gains p upper lower level delay) := by
     have output : 2 ≤ Real.exp (e.x 0 (.z p) + 8 * (e.x 0 (.m p) - lower)) ∧
-        Real.exp (e.x 0 (.z p) + 8 * (e.x 0 (.m p) - lower)) ≤ 12 / 5 := by
+        Real.exp (e.x 0 (.z p) + 8 * (e.x 0 (.m p) - lower)) ≤ 13 / 5 := by
       rw [balance]
-      exact one_error_dose_gain hi lo gain
+      exact wide_error_dose_gain dose gain
     have cap (q : Port) : e.x 0 (.z q) ≤ Real.log ((θ 0).cap q) := by
       by_cases h : q = p
       · subst q
@@ -402,8 +405,12 @@ theorem training_read_exists {θ ε time gains p upper lower level}
         linarith [leGain, output.2, box.epsilon_bounds.2]
       · rw [otherGain q h]
         exact caps q
+    have rest : |lower - 1 / 40| * Real.exp (-(1 / 2) * (time + delay - (e.time + 1))) ≤
+        1 / 100000 := by
+      apply le_trans _ settled
+      exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by linarith)) (abs_nonneg _)
     obtain ⟨h⟩ := error_read_handoff_of_gain box threshold es lo output cap
-      (by rw [b]; norm_num) energy em eqBand ea rfl other eraw lead queue
+      (by rw [b]; norm_num) energy em eqBand ea rfl other eraw (by linarith) rest queue
     refine ⟨⟨train, f, g, preMark, preSilent, e, trace, h, ?_, h.read_date, ?_⟩⟩
     · intro t ht
       let read := h.decision
@@ -431,10 +438,10 @@ theorem training_read_exists {θ ε time gains p upper lower level}
       refine ⟨?_, edgeOther q hq⟩
       simpa [e, setAux, hq, edge, readyProtectedEnd] using g.aux_other 0 q (Or.inr hq)
     have timeEq : e.time = T := same
-    obtain ⟨live⟩ := live_error_expiry (s := e) (origin := s.time) box threshold.1
-      (by rw [timeEq]; exact ⟨Tearly.le, early⟩) lo
+    obtain ⟨live⟩ := live_error_expiry (s := e) (origin := s.time) (lower := lower) box threshold.1
+      (by rw [timeEq]; exact ⟨Tearly.le, early⟩) (by linarith [dose.1])
       (by rw [eSensor]; constructor <;> linarith)
-      (by rw [eGain, eSensor]; exact (one_error_dose_gain hi lo gain).2)
+      (by rw [eGain, eSensor]; exact (wide_error_dose_gain dose gain).2)
       edgeCharge rawLeg.energy (g.main_ready 0) (by simp [e, setAux])
       eOther edgeRaw (fun q hq => g.raw_other 0 q (Or.inr hq))
       (by
@@ -459,7 +466,7 @@ theorem training_read_exists {θ ε time gains p upper lower level}
       · exact (raw_update_other boundary 0 p none 0 q (Or.inr hq)).trans (g.raw_other 0 q (Or.inr hq))
     apply finish expired
       (.silent rawLeg (.enter g.aux_silent entrySensor (.liveError live (.expire edgeRaw rfl (.nil _)))))
-      (by change time + 1 + 12 ≤ time + 16; linarith)
+      (by change time + 1 ≤ time + 2; linarith)
       (g.main_ready 0) (by change e.aux 0 p = .error; simp [e, setAux])
       live.charge live.energy
       ⟨live.above_lower, ?_⟩ expiredOther expiredRaw edgePending rfl
@@ -492,9 +499,9 @@ theorem training_read_exists {θ ε time gains p upper lower level}
         (queue : before.pending = [d])
         (b : before.x 0 .b = 2 / 25) (gainsBefore : ∀ q, before.x 0 (.z q) = gains q)
         (entered : TrainingTrace θ p upper lower level g.final (setAux before 0 p .error)) :
-        Nonempty (TrainingRead θ time gains p upper lower level) := by
+        Nonempty (TrainingRead θ time gains p upper lower level delay) := by
       let e := setAux before 0 p .error
-      apply finish e entered (by change before.time + 12 ≤ time + 16; rw [date]; linarith)
+      apply finish e entered (by change before.time ≤ time + 2; rw [date]; linarith)
         bm (by simp [e, setAux]) ⟨bc.1, bc.2.trans (by norm_num)⟩ en
         (by change lower < before.x 0 (.m p) ∧ before.x 0 (.m p) ≤ 21 / 200
             rw [sensorAt]; constructor <;> linarith)
@@ -535,7 +542,7 @@ theorem training_read_exists {θ ε time gains p upper lower level}
         g.aux_silent g.aux_other edgeOther (expiredRaw 0 p) (fun i q _ => expiredRaw i q)
         (by simp)
         (by intro v hv; change v ∈ s.pending at hv; simp [s, trainingAdmitted] at hv; subst v
-            change T ≤ time + 16; linarith)
+            change T ≤ time + delay; linarith)
         (fun t ht => qPath t ht.1)
         (by
           intro t h
@@ -559,5 +566,24 @@ noncomputable def TrainingRead.nominalExecution {θ time gains p}
     Execution θ (fun _ _ => []) (trainingStart time gains p) run.handoff.decision.final :=
   .cons (.jump run.train) ((run.silent.execution (fun _ _ => [])).append
     (run.trace.nominalExecution.append run.handoff.nominalExecution))
+
+/-- The original 16-unit training and read schedule. -/
+theorem training_read_exists {θ ε time gains p upper lower level}
+    (box : @PhysicalBox 1 θ ε)
+    (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
+    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800)
+    (gain : 7 / 6 ≤ Real.exp (gains p) ∧ Real.exp (gains p) ≤ 6 / 5)
+    (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
+    Nonempty (TrainingRead θ time gains p upper lower level) := by
+  obtain ⟨hi₁, hi₂⟩ := abs_le.mp hi
+  obtain ⟨lo₁, lo₂⟩ := abs_le.mp lo
+  apply training_read_exists_in_band box threshold hi (by linarith)
+    ⟨by linarith, by linarith⟩ (by norm_num) _ gain caps
+  have series := Real.sum_le_exp_of_nonneg (show (0 : ℝ) ≤ 13 / 2 by norm_num) 8
+  norm_num [Finset.sum_range_succ] at series
+  have decay : Real.exp (-(1 / 2) * (16 - 3 : ℝ)) ≤ 1 / 125 := by
+    rw [show -(1 / 2) * (16 - 3 : ℝ) = -(13 / 2) by norm_num, Real.exp_neg]
+    simpa only [one_div] using one_div_le_one_div_of_le (by norm_num) (show (125 : ℝ) ≤ Real.exp (13 / 2) by linarith)
+  exact (mul_le_mul lo decay (Real.exp_pos _).le (by norm_num)).trans (by norm_num)
 
 end RecursiveLearning.Native

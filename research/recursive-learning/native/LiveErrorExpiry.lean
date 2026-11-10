@@ -25,9 +25,9 @@ sensor is still above both its realized and nominal exit levels. -/
 theorem live_error_expiry {θ ε s p origin lower level}
     (box : @PhysicalBox 1 θ ε) (threshold : 19 / 20 ≤ level)
     (window : origin + 24 / 25 ≤ s.time ∧ s.time < origin + 1)
-    (lo : |lower - 1 / 40| ≤ 1 / 800)
+    (lo : lower < 1 / 20)
     (sensor : s.x 0 (.m p) ∈ Icc (19 / 200) (21 / 200))
-    (outputGain : Real.exp (s.x 0 (.z p) + 8 * (s.x 0 (.m p) - lower)) ≤ 12 / 5)
+    (outputGain : Real.exp (s.x 0 (.z p) + 8 * (s.x 0 (.m p) - lower)) ≤ 13 / 5)
     (charge : s.x 0 .q ∈ Icc (1 / 10) (217 / 250))
     (energy : 50 ≤ s.x 0 .energy ∧ s.x 0 .energy ≤ 100)
     (main : s.main 0 = .ready) (aux : s.aux 0 p = .error)
@@ -43,7 +43,6 @@ theorem live_error_expiry {θ ε s p origin lower level}
   let forcing := errorTailDrive θ s 0 p (some origin)
   have rp : 0 < r := (box.rates_positive 0 p).2.2
   have ru : r ≤ 11 := (box.coarse_upper 0 p).2.2.2.1
-  obtain ⟨l₁, l₂⟩ := abs_le.mp lo
   have mRange (t : ℝ) (ht : t ∈ Icc s.time T) : m t ∈ Icc (1 / 20) (21 / 200) := by
     have elapsed : t - s.time ≤ 1 / 25 := by linarith [ht.2]
     have hx := mul_le_mul ru elapsed (sub_nonneg.mpr ht.1) (by norm_num : (0 : ℝ) ≤ 11)
@@ -56,27 +55,34 @@ theorem live_error_expiry {θ ε s p origin lower level}
       linarith
     · exact decay_upper sensor.2 (by norm_num) rp.le (sub_nonneg.mpr ht.1)
   have gain (t : ℝ) (ht : t ∈ Icc s.time T) :
-      Real.exp (errorTailGain θ s 0 p t) ≤ 12 / 5 := by
+      Real.exp (errorTailGain θ s 0 p t) ≤ 13 / 5 := by
     refine (Real.exp_le_exp.mpr ?_).trans outputGain
     have hm := (mRange t ht).1
     change s.x 0 (.z p) + 8 * (s.x 0 (.m p) - m t) ≤ _
     linarith
-  have atten : rawInputScale (some origin) s.time ≤ 1 / 2 := by
+  have atten : rawInputScale (some origin) s.time ≤ 2 / 5 := by
+    have series := Real.sum_le_exp_of_nonneg (show (0 : ℝ) ≤ 1 by norm_num) 4
+    norm_num [Finset.sum_range_succ] at series
+    have expOne : (5 / 2 : ℝ) ≤ Real.exp 1 := by linarith
     calc
       _ ≤ Real.exp (-1) := Real.exp_le_exp.mpr (by
         dsimp [a]
         nlinarith [KernelR.log_four_bounds.1, window.1])
-      _ ≤ _ := Real.exp_neg_one_lt_half.le
+      _ ≤ _ := by
+        rw [Real.exp_neg]
+        have bound := one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 5 / 2) expOne
+        norm_num [one_div] at bound
+        exact bound
   have forceBound (t : ℝ) (ht : t ∈ Icc s.time T) :
       0 ≤ forcing t ∧ forcing t ≤ 42 / 25 := by
     have rawNonneg := rawInputScale_nonnegative (some origin) s.time
     have aPos : 0 ≤ a := by linarith [a_coarse_bounds.1]
     have expBound : Real.exp (-a * (t - s.time)) ≤ 1 := Real.exp_le_one_iff.mpr
       (by nlinarith [mul_nonneg aPos (sub_nonneg.mpr ht.1)])
-    have h := mul_le_mul (gain t ht) atten rawNonneg (by norm_num : (0 : ℝ) ≤ 12 / 5)
-    have h₂ := mul_le_mul h a_coarse_bounds.2.le aPos (by norm_num : (0 : ℝ) ≤ 12 / 5 * (1 / 2))
+    have h := mul_le_mul (gain t ht) atten rawNonneg (by norm_num : (0 : ℝ) ≤ 13 / 5)
+    have h₂ := mul_le_mul h a_coarse_bounds.2.le aPos (by norm_num : (0 : ℝ) ≤ 13 / 5 * (2 / 5))
     have h₃ := mul_le_mul h₂ expBound (Real.exp_pos _).le
-      (by norm_num : (0 : ℝ) ≤ 12 / 5 * (1 / 2) * (7 / 5))
+      (by norm_num : (0 : ℝ) ≤ 13 / 5 * (2 / 5) * (7 / 5))
     refine ⟨errorTailDrive_nonnegative s 0 p (some origin) t, ?_⟩
     dsimp [forcing, errorTailDrive]
     linarith

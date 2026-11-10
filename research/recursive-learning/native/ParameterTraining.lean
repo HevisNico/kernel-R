@@ -247,20 +247,20 @@ private noncomputable def parameterHandoff {θ s p m upper lower level readTime}
 
 /-- The estimates in the training certificate produce an execution of
 the realized-parameter semantics itself. -/
-noncomputable def TrainingRead.parameterExecution {θ time gains p upper lower level}
-    (run : TrainingRead θ time gains p upper lower level)
+noncomputable def TrainingRead.parameterExecution {θ time gains p upper lower level delay}
+    (run : TrainingRead θ time gains p upper lower level delay)
     (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
-    ParameterExecution θ (fun _ _ => []) (trainingStart time gains p) run.handoff.decision.final := by
-  let train : ParameterJump θ (fun _ _ => []) (trainingStart time gains p) (trainingAdmitted time gains p) :=
-    .arrive _ (errorReadDelivery p time) [] [errorReadDelivery p (time + 16)] rfl rfl rfl
+    ParameterExecution θ (fun _ _ => []) (trainingStart time gains p delay) run.handoff.decision.final := by
+  let train : ParameterJump θ (fun _ _ => []) (trainingStart time gains p delay) (trainingAdmitted time gains p delay) :=
+    .arrive _ (errorReadDelivery p time) [] [errorReadDelivery p (time + delay)] rfl rfl rfl
   exact .cons (.jump train) ((parameterMarkSilent run.silent config run.pre_mark run.pre_silent).append
     ((parameterTrainingTrace run.trace config).append
       (parameterHandoff run.handoff config run.read_silent_guard)))
 
 /-- The first read FIRE is a complete horizon of the parameterized run.
 The sensor and raw pulse remain strictly between their adjacent events. -/
-theorem TrainingRead.parameterComplete {θ time gains p upper lower level}
-    (run : TrainingRead θ time gains p upper lower level)
+theorem TrainingRead.parameterComplete {θ time gains p upper lower level delay}
+    (run : TrainingRead θ time gains p upper lower level delay)
     (config : (θ 0).thresholds = trainingThresholds p upper lower level)
     (fireFloor : 19 / 20 ≤ level) :
     ParameterCompleteThrough (run.parameterExecution config) run.handoff.decision.stop := by
@@ -331,10 +331,9 @@ theorem training_read_in_parameters {θ ε time gains p}
 private theorem training_threshold_bounds {θ : Fin 1 → Parameters} {p upper lower level}
     (config : (θ 0).thresholds = trainingThresholds p upper lower level)
     (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
-    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800) :
+    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : 0 ≤ lower) :
     ParameterThresholdBounds θ := by
   obtain ⟨h₁, h₂⟩ := abs_le.mp hi
-  obtain ⟨l₁, l₂⟩ := abs_le.mp lo
   constructor
   · intro i
     rw [Subsingleton.elim i 0, config]
@@ -371,9 +370,9 @@ private theorem training_threshold_bounds {θ : Fin 1 → Parameters} {p upper l
       linarith
     · norm_num [trainingThresholds, Function.update_of_ne h]
 
-private theorem training_initial_invariant {θ time gains p}
+private theorem training_initial_invariant {θ time gains p delay}
     (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
-    ParameterPhysicalInvariant θ (trainingStart time gains p) := by
+    ParameterPhysicalInvariant θ (trainingStart time gains p delay) := by
   constructor
   · intro i
     norm_num [trainingStart, toleranceStartOn]
@@ -475,8 +474,8 @@ private theorem parameterHandoff_emissions {θ s p m upper lower level readTime}
 
 /-- The constructed execution records one actual FIRE, at the read's
 first upward contact. -/
-theorem TrainingRead.parameterEmissionTimes {θ time gains p upper lower level}
-    (run : TrainingRead θ time gains p upper lower level)
+theorem TrainingRead.parameterEmissionTimes {θ time gains p upper lower level delay}
+    (run : TrainingRead θ time gains p upper lower level delay)
     (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
     (run.parameterExecution config).emissionTimes 0 = [run.handoff.decision.stop] := by
   have prefixLabels := parameterMarkSilent_emissions run.silent config run.pre_mark run.pre_silent
@@ -489,24 +488,64 @@ theorem TrainingRead.parameterEmissionTimes {θ time gains p upper lower level}
 /-- Every execution of the two-pulse task that is complete through the
 constructed read horizon has the same endpoint and the same single FIRE.
 The result uses the realized guards and the two full fabrication boxes. -/
-theorem TrainingRead.every_complete_run {θ ε time gains p upper lower level u}
-    (run : TrainingRead θ time gains p upper lower level)
+theorem TrainingRead.every_complete_run {θ ε time gains p upper lower level u delay}
+    (run : TrainingRead θ time gains p upper lower level delay)
     (config : (θ 0).thresholds = trainingThresholds p upper lower level)
     (box : @PhysicalBox 1 θ ε)
     (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
-    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800)
+    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : 0 ≤ lower)
     (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q))
-    (e : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p) u)
+    (e : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p delay) u)
     (complete : ParameterCompleteThrough e run.handoff.decision.stop) :
     u.ObservationalEq run.handoff.decision.final ∧
       e.emissionTimes 0 = [run.handoff.decision.stop] := by
   have bounds := training_threshold_bounds config threshold hi lo
-  have initial := training_initial_invariant (time := time) (p := p) caps
+  have initial := training_initial_invariant (time := time) (p := p) (delay := delay) caps
   have reference := run.parameterComplete config threshold.1
   refine ⟨(ParameterExecution.observational_unique box bounds e
     (run.parameterExecution config) initial complete reference).1, ?_⟩
   exact (e.emissionTimes_unique (run.parameterExecution config) box bounds initial
     complete reference 0).trans (run.parameterEmissionTimes config)
+
+/-- Existence and every-complete-run correctness of one training pulse
+followed by one read with a variable delay and ERROR exit. The bounds
+ensure gain headroom and that the sensor settles before the read. Every competing complete run is compared at the same horizon. -/
+theorem training_read_every_complete_in_band {θ ε time gains p delay}
+    (box : @PhysicalBox 1 θ ε)
+    (config : (θ 0).thresholds = trainingThresholds p ((θ 0).thresholds.error p)
+      ((θ 0).thresholds.auxReady p) (θ 0).thresholds.fire)
+    (threshold : 19 / 20 ≤ (θ 0).thresholds.fire ∧ (θ 0).thresholds.fire ≤ 21 / 20)
+    (hi : |(θ 0).thresholds.error p - 1 / 10| ≤ 1 / 200)
+    (lo : 7 / 800 ≤ (θ 0).thresholds.auxReady p)
+    (dose : 11 / 20 ≤ 8 * ((θ 0).thresholds.error p - (θ 0).thresholds.auxReady p) ∧
+      8 * ((θ 0).thresholds.error p - (θ 0).thresholds.auxReady p) ≤ 77 / 100)
+    (delayMin : 16 ≤ delay)
+    (settled : |(θ 0).thresholds.auxReady p - 1 / 40| *
+      Real.exp (-(1 / 2) * (delay - 3)) ≤ 1 / 100000)
+    (gain : 7 / 6 ≤ Real.exp (gains p) ∧ Real.exp (gains p) ≤ 6 / 5)
+    (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
+    ∃ T final,
+      time + delay + 3 / 10 < T ∧ T < time + delay + 9 / 10 ∧
+      (∃ e : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p delay) final,
+        ParameterCompleteThrough e T) ∧
+      ∀ {u} (e : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p delay) u),
+        ParameterCompleteThrough e T →
+        u.ObservationalEq final ∧ e.emissionTimes 0 = [T] ∧
+        u.x 0 (.z p) = gains p + 8 * ((θ 0).thresholds.error p - (θ 0).thresholds.auxReady p) := by
+  obtain ⟨run⟩ := training_read_exists_in_band (time := time) box threshold hi lo dose delayMin settled gain caps
+  have complete := run.parameterComplete config threshold.1
+  let decision := run.handoff.decision
+  have after := decision.outcome.1
+  have before := decision.outcome.2.1
+  rw [run.read_date] at after before
+  refine ⟨decision.stop, decision.final, after, before,
+    ⟨run.parameterExecution config, complete⟩, ?_⟩
+  intro u e done
+  obtain ⟨same, times⟩ := run.every_complete_run config box threshold hi (by linarith) caps e done
+  refine ⟨same, times, ?_⟩
+  rw [same.values]
+  change decision.silent.final.x 0 (.z p) = _
+  rw [decision.silent.gain_preserved, run.handoff.learned_at_read, run.dose_from_birth]
 
 /-- Existence and every-complete-run correctness of one training pulse
 followed by one read, for either fabrication box and the realized guard
@@ -536,10 +575,51 @@ theorem training_read_every_complete {θ ε time gains p}
   refine ⟨decision.stop, decision.final, after, before,
     ⟨run.parameterExecution config, complete⟩, ?_⟩
   intro u e done
-  obtain ⟨same, times⟩ := run.every_complete_run config box threshold hi lo caps e done
+  obtain ⟨same, times⟩ := run.every_complete_run config box threshold hi (by linarith [(abs_le.mp lo).1]) caps e done
   refine ⟨same, times, ?_⟩
   rw [same.values]
   change decision.silent.final.x 0 (.z p) = _
   rw [decision.silent.gain_preserved, run.handoff.learned_at_read, run.dose_from_birth]
+
+/-- Training and readout with the ERROR exit within 0.00125 of 0.01.
+The extra wait allows the sensor to return to the original rest band.
+The FIRE and ERROR entry thresholds still have their original 5% bands. -/
+theorem training_read_exit_001_every_complete {θ ε time gains p}
+    (box : @PhysicalBox 1 θ ε)
+    (config : (θ 0).thresholds = trainingThresholds p ((θ 0).thresholds.error p)
+      ((θ 0).thresholds.auxReady p) (θ 0).thresholds.fire)
+    (threshold : 19 / 20 ≤ (θ 0).thresholds.fire ∧ (θ 0).thresholds.fire ≤ 21 / 20)
+    (hi : |(θ 0).thresholds.error p - 1 / 10| ≤ 1 / 200)
+    (lo : |(θ 0).thresholds.auxReady p - 1 / 100| ≤ 1 / 800)
+    (gain : 7 / 6 ≤ Real.exp (gains p) ∧ Real.exp (gains p) ≤ 6 / 5)
+    (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
+    ∃ T final,
+      time + 18 + 3 / 10 < T ∧ T < time + 18 + 9 / 10 ∧
+      (∃ e : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p 18) final,
+        ParameterCompleteThrough e T) ∧
+      ∀ {u} (e : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p 18) u),
+        ParameterCompleteThrough e T →
+        u.ObservationalEq final ∧ e.emissionTimes 0 = [T] ∧
+        u.x 0 (.z p) = gains p + 8 * ((θ 0).thresholds.error p - (θ 0).thresholds.auxReady p) ∧
+        u.x 0 (.z p) - gains p ∈ Set.Icc (67 / 100) (77 / 100) := by
+  obtain ⟨hi₁, hi₂⟩ := abs_le.mp hi
+  obtain ⟨lo₁, lo₂⟩ := abs_le.mp lo
+  have series := Real.sum_le_exp_of_nonneg (show (0 : ℝ) ≤ 15 / 2 by norm_num) 15
+  norm_num [Finset.sum_range_succ] at series
+  have decay : Real.exp (-(1 / 2) * (18 - 3 : ℝ)) ≤ 1 / 1625 := by
+    rw [show -(1 / 2) * (18 - 3 : ℝ) = -(15 / 2) by norm_num, Real.exp_neg]
+    simpa only [one_div] using one_div_le_one_div_of_le (by norm_num) (show (1625 : ℝ) ≤ Real.exp (15 / 2) by linarith)
+  have offset : |(θ 0).thresholds.auxReady p - 1 / 40| ≤ 13 / 800 :=
+    abs_le.mpr ⟨by linarith, by linarith⟩
+  have rest : |(θ 0).thresholds.auxReady p - 1 / 40| *
+      Real.exp (-(1 / 2) * (18 - 3)) ≤ 1 / 100000 :=
+    (mul_le_mul offset decay (Real.exp_pos _).le (by norm_num)).trans (by norm_num)
+  obtain ⟨T, final, early, late, existsRun, allRuns⟩ :=
+    training_read_every_complete_in_band (time := time) box config threshold hi (by linarith)
+      ⟨by linarith, by linarith⟩ (by norm_num : (16 : ℝ) ≤ 18) rest gain caps
+  refine ⟨T, final, early, late, existsRun, ?_⟩
+  intro u e complete
+  obtain ⟨same, fire, learned⟩ := allRuns e complete
+  exact ⟨same, fire, learned, ⟨by linarith, by linarith⟩⟩
 
 end RecursiveLearning.Native
