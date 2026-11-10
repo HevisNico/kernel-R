@@ -3,7 +3,7 @@ import CappedDispatch
 import ReportFormula
 import BlindNeedSearch
 import PolicyReuse
-import ThresholdTolerance
+import TolerantErrorDose
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000
