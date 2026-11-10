@@ -9,7 +9,12 @@ Kernel R is a mathematical model of an asynchronous analog learning cell.
 Its Lean 4 proofs start from the cell's differential equations and establish
 what networks of these cells learn. The work is at the model stage.
 
-## The idea
+## The R cell
+
+While ready, an R cell charges in response to input pulses. When its
+charge crosses the firing threshold, it emits a pulse and enters a
+protected recovery phase. It learns each port's input gain while
+ready and its recovery rate while protected.
 
 Fabrication mismatch can make the same training pulse produce different
 updates in nominally identical devices. Kernel R couples a sensor's
@@ -22,7 +27,10 @@ and the gain remains below its cap, the increase in log-gain is
 
 The discharge rate changes how long the phase lasts and cancels from the
 update. The sensor itself ends the update at the exit threshold. With
-nominal thresholds 0.1 and 0.025, the increment is 0.6.
+nominal thresholds 0.1 and 0.025, the increment is 0.6. A full MARK phase
+while the cell stays protected adds 0.1 to its recovery rate at nominal
+thresholds, provided the learning gates stay open and the rate stays
+below its cap.
 
 See the [cell laws](model/CELL.md) and the [glossary](docs/GLOSSARY.md).
 
@@ -35,7 +43,10 @@ raises each cell's active input log-gain by 2.4 and its recovery rate by 0.3.
 The increments hold across independent fixed fabrication variation of up to
 ±10% and bounded wire jitter. For each fixed choice of parameters, birth
 data and delays, complete runs agree on each cell's ordered firing dates
-regardless of the legal order of simultaneous events.
+regardless of the legal order of simultaneous events. Lean constructs a
+complete run in both first-contact and upward-crossing semantics. The
+root ends with at least eight pulses, each within 0.15 model units of a
+period-four rhythm.
 
 Each cell first receives its own preparation train while the links are off,
 which writes three of a relay's four active-port doses. The links then open,
@@ -74,9 +85,11 @@ fraction of the larger dose.
 
 ### 4. Two cells learn a coincidence task
 
-Two cells each learn one of two ports. The receiver accepts exactly when
-both test ports match the training and the programmed input offset is zero.
-The benchmark timing is motivated by a published task.
+Two cells each learn one of two ports. At 100 µs per model unit, the
+receiver requires exactly one report from each cell by the deadline,
+with their arrivals less than 15 µs apart. Lean proves that this happens
+exactly when both test ports match the training and the programmed input
+offset is zero. The benchmark timing is motivated by a published task.
 
 - **Kernel R meets the full contract.** A complete run exists for each
   admissible trial and every complete run gives the expected decision.
@@ -100,9 +113,10 @@ quiet charge relaxation after training.
 The protocol was registered before the first sweep. At 100 µs per model
 unit in the wide fabrication box, the baseline R setting passed 16 of 36
 ERROR × FIRE boxes on the sampled points, the best tested constant-current
-timer passed 12, and the long timed discharge passed 27. The long discharge covered
-every tested box in which baseline R passed. The capped timer also passed
-all 36 boxes at the same scale in the narrow fabrication box.
+timer passed 12, and the long timed discharge passed 27. The long
+discharge covered every tested box in which baseline R passed. The capped
+timer also passed all 36 boxes at the same scale in the narrow fabrication
+box.
 
 R ends its write at a state threshold without a clock. In this sweep,
 the long timed discharge achieved the higher timing score. The
