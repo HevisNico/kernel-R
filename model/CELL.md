@@ -24,7 +24,6 @@ conditions belong to each protocol.
 | κ | 1/2 |
 | r (main rest charge) | 1/10 |
 | r_m (auxiliary rest charge) | 1/40 |
-| main and auxiliary thresholds | 1 |
 | actuation factors | 8 (gain), 1/2 (recovery) |
 | b_max | 11/10 |
 | energy pump | E′ = 10(100 − E) − W |
@@ -49,6 +48,21 @@ disturbances and received-amplitude variation.
 Here h(u) = a/(a − κ)·(e^(−κu) − e^(−au)) is the response of a READY charge to one canonical
 pulse.
 
+The [parameterized semantics](https://github.com/HevisNico/kernel-R/blob/ae69e06fa467ba7bf10c9b2f0989a481e9d863e3/proof/lean/KernelR/HybridParameterExecution.lean)
+stores the following fixed charge thresholds in `Parameters.thresholds`.
+The finite-chain theorem uses the nominal values. Rest charges r and r_m
+are separate constants in the READY equations.
+
+| Threshold | Transition | Nominal value |
+|---|---|---|
+| q_fire | Main READY → FAST | 1 |
+| q_fast | Main FAST → SLOW | 1/4 |
+| q_reopen | Main SLOW → READY | 1/10 |
+| m_mark,i | Sensor READY → MARK | 1 |
+| m_silent,i | Sensor MARK → SILENT | 4/5 |
+| m_error,i | Sensor SILENT → ERROR | 1/10 |
+| m_ready,i | Sensor ERROR → READY | 1/40 |
+
 ## State of a cell
 
 - the main charge q;
@@ -61,24 +75,28 @@ pulse.
 ## Main unit
 
 - **READY**, with admission open: q′ = κ(r − q) + Σ_i g_i p_i(t).
-- At the first upward crossing of q = 1, q is set to 1, admission closes and **FAST** begins:
-  q′ = −a·q. The cell emits p_F for exactly one time unit. FAST ends at q = 1/4, which takes
-  exactly 1 time unit.
-- **SLOW**: q′ = −b(t)·q, until the downward crossing q = r. READY then resumes with q = r exactly.
-  The return date is not prescribed: it follows from b.
+- At the first upward crossing of q = q_fire, admission closes and
+  **FAST** begins with q′ = −a·q. The cell emits p_F for exactly one time
+  unit. FAST ends at q = q_fast. With nominal thresholds FAST lasts
+  exactly one time unit.
+- **SLOW**: q′ = −b(t)·q until q reaches q_reopen from above. READY
+  resumes at that charge. The recovery dynamics determine the return date.
 - FAST and SLOW have the same admission and actuation gates.
+- When the main cell reopens, any input pulse still active on a port
+  immediately contributes its remaining current to the READY equation.
+  Its waveform keeps its original arrival time.
 
 ## Auxiliaries and plasticity
 
 Auxiliary i sees the raw current of its port even while the main unit is protected. While READY,
-m_i′ = κ(r_m − m_i) + M_i p_i. Its first upward crossing of 1 starts the cycle below. Each section
-ends exactly at the stated charge; at r_m the auxiliary is READY again.
+m_i′ = κ(r_m − m_i) + M_i p_i. Its first upward crossing of m_mark,i
+starts the cycle below. The auxiliary returns to READY at m_ready,i.
 
 | Mode | Equation | Ends at | Useful current |
 |---|---|---|---|
-| MARK | m_i′ = −L_m,i m_i | 4/5 | v_m,i = L_m,i m_i |
-| SILENT | m_i′ = −L_s,i m_i | 1/10 | 0 |
-| ERROR | m_i′ = −L_e,i m_i | r_m | v_e,i = L_e,i m_i |
+| MARK | m_i′ = −L_m,i m_i | m_silent,i | v_m,i = L_m,i m_i |
+| SILENT | m_i′ = −L_s,i m_i | m_error,i | 0 |
+| ERROR | m_i′ = −L_e,i m_i | m_ready,i | v_e,i = L_e,i m_i |
 
 While E > 0, the actuations are
 
@@ -87,9 +105,11 @@ While E > 0, the actuations are
 
 Both are monotone and are projected exactly onto their caps. The full-dose
 identities below require the energy gate to remain open and no cap contact:
-- A whole ERROR section received while the main unit is READY adds exactly Δz = 8(0.1 − 0.025) = 0.6,
-  whatever L_e,i is.
-- A whole MARK received under protection adds Δb = (1 − 0.8)/2 = 0.1.
+- A whole ERROR section while the main unit is READY adds
+  Δz = 8(m_error,i − m_ready,i), regardless of L_e,i. The nominal dose
+  is 0.6.
+- A whole MARK section under protection adds Δb = (m_mark,i − m_silent,i)/2.
+  The nominal dose is 0.1.
 - A partial reception contributes the integral over its true endpoints.
 
 The [whole-execution counting theorem](../docs/EXACT_DOSE_COUNTING.md) sums
@@ -124,6 +144,10 @@ all sensors initially READY.
 
 - Thresholds are first crossings within the current mode. Continuous states stay continuous at
   external arrivals.
+- Each port has one slot for an active raw pulse. A delivery due while
+  that slot is occupied blocks time from advancing past its due date.
+  If delivery and expiry coincide on that port, expiry frees the slot
+  before the delivery.
 - When enclosures do not fix an order, **every** compatible non-strict order must be covered.
   Equalities may belong to several zero-duration linearizations. No priority comes from a
   floating-point sort.
