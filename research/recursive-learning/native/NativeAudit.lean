@@ -3,8 +3,7 @@ import CappedDispatch
 import ReportFormula
 import BlindNeedSearch
 import PolicyReuse
-import TimedCurrentSeparation
-import CoincidenceLocalExecution
+import CoincidenceSeparation
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000
