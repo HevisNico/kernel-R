@@ -25,14 +25,46 @@ noncomputable def toleranceStartOn (time : ℝ) (gains : Port → ℝ) (port : P
   raw := fun _ p => if p = port then some time else none
   pending := []
 
+private theorem response_early_upper {t : ℝ} (ht : 0 ≤ t) (hu : t ≤ 3 / 10) :
+    response t ≤ 8 / 25 := by
+  have mono : StrictMonoOn response (Icc (0 : ℝ) (3 / 10)) := by
+    apply strictMonoOn_of_deriv_pos (convex_Icc _ _)
+      (fun v _ => (response_derivative v).continuousAt.continuousWithinAt)
+    intro v hv
+    have h := interior_subset hv
+    rw [(response_derivative v).deriv]
+    exact lt_of_lt_of_le (by norm_num) (response_derivative_lower h.1 (by linarith [h.2]))
+  apply (mono.monotoneOn ⟨ht, hu⟩ (by norm_num) hu).trans
+  have ha : (69 / 50 : ℝ) ≤ a ∧ a ≤ 1387 / 1000 := by
+    dsimp [a]
+    constructor <;> linarith [KernelR.log_four_bounds.1, KernelR.log_four_bounds.2]
+  have ratio : a / (a - 1 / 2) ≤ 11 / 7 :=
+    (div_le_iff₀ (by linarith [ha.1])).2 (by linarith [ha.1])
+  have slow : Real.exp (-(3 / 20 : ℝ)) ≤ 861 / 1000 := by
+    have h := Real.exp_bound (x := -(3 / 20 : ℝ)) (n := 6) (by norm_num) (by norm_num)
+    norm_num [Finset.sum_range_succ] at h
+    linarith [(abs_sub_le_iff.mp h).1]
+  have fast : (659 / 1000 : ℝ) ≤ Real.exp (-a * (3 / 10)) := by
+    have h := Real.exp_bound (x := -(4161 / 10000 : ℝ)) (n := 8) (by norm_num) (by norm_num)
+    norm_num [Finset.sum_range_succ] at h
+    exact (show (659 / 1000 : ℝ) ≤ Real.exp (-(4161 / 10000 : ℝ)) by
+      linarith [(abs_sub_le_iff.mp h).2]).trans (Real.exp_le_exp.mpr (by linarith [ha.2]))
+  have nonneg : 0 ≤ Real.exp (-(1 / 2 : ℝ) * (3 / 10)) - Real.exp (-a * (3 / 10)) :=
+    sub_nonneg.mpr (Real.exp_le_exp.mpr (by linarith [ha.1]))
+  unfold response
+  exact (mul_le_mul ratio (show Real.exp (-(1 / 2 : ℝ) * (3 / 10)) -
+    Real.exp (-a * (3 / 10)) ≤ 101 / 500 by
+      norm_num at slow fast ⊢
+      linarith) nonneg (by norm_num)).trans (by norm_num)
+
 private theorem early_bound {initial G time t : ℝ} (charge : initial ≤ 27 / 250)
-    (upper : G ≤ 12 / 5)
+    (upper : G ≤ 13 / 5)
     (start : time ≤ t) (stop : t ≤ time + 3 / 10) :
-    readyPulse initial G time t ≤ 237 / 250 := by
+    readyPulse initial G time t ≤ 47 / 50 := by
   have nonneg := response_nonnegative (show 0 ≤ t - time by linarith)
-  have responseBound := response_mid_early_upper (t := t - time) (by linarith) (by linarith)
+  have responseBound := response_early_upper (t := t - time) (by linarith) (by linarith)
   have gainBound := mul_le_mul_of_nonneg_right upper nonneg
-  have bound := mul_le_mul_of_nonneg_left responseBound (by norm_num : (0 : ℝ) ≤ 12 / 5)
+  have bound := mul_le_mul_of_nonneg_left responseBound (by norm_num : (0 : ℝ) ≤ 13 / 5)
   have carry := decay_upper (show initial - 1 / 10 ≤ (1 / 125 : ℝ) by linarith)
     (by norm_num) (by norm_num : (0 : ℝ) ≤ 1 / 2) (sub_nonneg.mpr start)
   unfold readyPulse
@@ -131,14 +163,14 @@ theorem tolerant_snapshot_readout {θ ε s port high level}
     (physical : PhysicalInvariant θ s) (ready : ReadoutReady s port)
     (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (gain : if high then
-      2 ≤ Real.exp (s.x 0 (.z port)) ∧ Real.exp (s.x 0 (.z port)) ≤ 12 / 5
+      2 ≤ Real.exp (s.x 0 (.z port)) ∧ Real.exp (s.x 0 (.z port)) ≤ 13 / 5
       else Real.exp (s.x 0 (.z port)) ≤ 6 / 5) :
     Nonempty (TolerantSnapshotDecision θ s port high level) := by
   let p := port
   let time := s.time
   let G := Real.exp (s.x 0 (.z p))
   let q := readyPulse (s.x 0 .q) G time
-  have amplitude : G ≤ 12 / 5 := by
+  have amplitude : G ≤ 13 / 5 := by
     cases high
     · simp only [Bool.false_eq_true, ite_false] at gain
       dsimp [G, p]
@@ -323,7 +355,7 @@ theorem tolerant_port_readout {θ ε time gains port high level} (box : @Physica
       else Real.exp (gains port) ≤ 6 / 5)
     (other : ∀ p, p ≠ port → Real.exp (gains p) ≤ 18 / 5) :
     Nonempty (TolerantPortDecision θ time gains port high level) := by
-  apply tolerant_snapshot_readout box (physical := ?_) (ready := ?_) threshold gain
+  apply tolerant_snapshot_readout box (physical := ?_) (ready := ?_) threshold ?_
   swap
   · refine ⟨fun _ => rfl, by norm_num [toleranceStartOn], fun _ _ => rfl, ?_, ?_, ?_, rfl⟩
     · intro i p
@@ -357,6 +389,10 @@ theorem tolerant_port_readout {θ ε time gains port high level} (box : @Physica
     norm_num [toleranceStartOn]
   · intro i
     norm_num [toleranceStartOn]
+
+  · cases high
+    · exact gain
+    · exact ⟨gain.1, gain.2.trans (by norm_num)⟩
 
 /-- Distinguish which of the two ports received one canonical input pulse. -/
 theorem tolerant_two_port_readout {θ ε time gains level} (box : @PhysicalBox 1 θ ε)

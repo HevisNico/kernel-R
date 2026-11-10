@@ -168,9 +168,9 @@ that relaxes naturally before the read. -/
 theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
     (box : @PhysicalBox 1 θ ε) (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (upperBounds : lower < upper ∧ upper ≤ 21 / 200)
-    (lo : |lower - 1 / 40| ≤ 1 / 800)
+    (lo : 7 / 800 ≤ lower)
     (outputGain : 2 ≤ Real.exp (s.x 0 (.z p) + 8 * (upper - lower)) ∧
-      Real.exp (s.x 0 (.z p) + 8 * (upper - lower)) ≤ 12 / 5)
+      Real.exp (s.x 0 (.z p) + 8 * (upper - lower)) ≤ 13 / 5)
     (gainCap : ∀ q, s.x 0 (.z q) ≤ Real.log ((θ 0).cap q))
     (recovery : 0 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 11 / 10)
     (energy : 50 ≤ s.x 0 .energy ∧ s.x 0 .energy ≤ 100)
@@ -178,6 +178,7 @@ theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
     (aux : s.aux 0 p = .error) (sensor : s.x 0 (.m p) = upper)
     (other : ∀ q, q ≠ p → s.aux 0 q = .ready ∧ s.x 0 (.m q) = 1 / 40)
     (raw : ∀ q, s.raw 0 q = none) (lead : s.time + 12 ≤ readTime)
+    (rest : |lower - 1 / 40| * Real.exp (-(1 / 2) * (readTime - (s.time + 1))) ≤ 1 / 100000)
     (queue : s.pending = [errorReadDelivery p readTime]) :
     Nonempty (ErrorReadHandoff θ s p upper lower level readTime) := by
   let r := (θ 0).le p
@@ -186,7 +187,6 @@ theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
   let learned := s.x 0 (.z p) + 8 * (upper - lower)
   have rpos : 0 < r := (box.rates_positive 0 p).2.2
   obtain ⟨above, upperBound⟩ := upperBounds
-  obtain ⟨lo₁, lo₂⟩ := abs_le.mp lo
   have lowerPos : 0 < lower := by linarith
   have upperPos : 0 < upper := by linarith
   have ratio : 1 < upper / lower := (lt_div_iff₀ lowerPos).2 (by linarith)
@@ -202,8 +202,11 @@ theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
           linarith [box.epsilon_bounds.2]) (by norm_num) (by linarith [a_coarse_bounds.1])
       norm_num at bound
       exact bound.trans param
-    have rat : upper / lower ≤ 5 := (div_le_iff₀ lowerPos).2 (by linarith)
-    have logBound := (Real.log_le_sub_one_of_pos (zero_lt_one.trans ratio)).trans (show upper / lower - 1 ≤ 4 by linarith)
+    have rat : upper / lower ≤ 12 := (div_le_iff₀ lowerPos).2 (by linarith)
+    have series := Real.sum_le_exp_of_nonneg (show (0 : ℝ) ≤ 3 by norm_num) 5
+    norm_num [Finset.sum_range_succ] at series
+    have expThree : (12 : ℝ) < Real.exp 3 := by linarith
+    have logBound := (Real.log_lt_iff_lt_exp (zero_lt_one.trans ratio)).2 (rat.trans_lt expThree)
     dsimp [stop]
     have h := (div_lt_iff₀ rpos).2 (show Real.log (upper / lower) < 1 * r by linarith)
     linarith
@@ -222,7 +225,7 @@ theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
     exact mul_lt_mul_of_pos_left (Real.exp_lt_exp.mpr (by nlinarith [mul_pos rpos (sub_pos.mpr ht)])) upperPos
   have sensorFloor (t : ℝ) (ht : t ≤ stop) : lower ≤ errorTailSensor θ s 0 p t :=
     ht.eq_or_lt.elim (fun h => h ▸ endpoint.ge) (fun h => (sensorAbove t h).le)
-  have learnedGain : 2 ≤ Real.exp learned ∧ Real.exp learned ≤ 12 / 5 := outputGain
+  have learnedGain : 2 ≤ Real.exp learned ∧ Real.exp learned ≤ 13 / 5 := outputGain
   have learnedCap : learned < Real.log ((θ 0).cap p) := by
     have h := (box.2 0 p).1.1
     change 4 * (1 - ε) ≤ (θ 0).cap p at h
@@ -336,9 +339,13 @@ theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
       rw [reopenedSensor]
       by_cases h : q = p
       · rw [ite_eq_left h]
-        have decay := quiet_decay_bound wait
+        have decay : Real.exp (-(1 / 2) * (d.due - reopened.time)) ≤
+            Real.exp (-(1 / 2) * (readTime - (s.time + 1))) := by
+          apply Real.exp_le_exp.mpr
+          change -(1 / 2) * (readTime - stop) ≤ _
+          linarith
         have nonneg := Real.exp_pos (-(1 / 2) * (d.due - reopened.time))
-        have bound := mul_le_mul lo decay nonneg.le (by norm_num : (0 : ℝ) ≤ 1 / 800)
+        have bound := (mul_le_mul_of_nonneg_left decay (abs_nonneg (lower - 1 / 40))).trans rest
         rw [← abs_of_nonneg nonneg.le, ← abs_mul] at bound
         obtain ⟨low, high⟩ := abs_le.mp bound
         constructor <;> dsimp [relax] <;> linarith
@@ -381,7 +388,7 @@ theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
       have h2 := mul_nonpos_of_nonpos_of_nonneg (sub_nonpos.mpr he.2) e0.le
       constructor <;> dsimp [relax] <;> linarith
   obtain ⟨read⟩ := tolerant_snapshot_readout (high := true) box physical readReady threshold
-    (show 2 ≤ Real.exp (admitted.x 0 (.z p)) ∧ Real.exp (admitted.x 0 (.z p)) ≤ 12 / 5 by
+    (show 2 ≤ Real.exp (admitted.x 0 (.z p)) ∧ Real.exp (admitted.x 0 (.z p)) ≤ 13 / 5 by
       rw [got]; exact learnedGain)
   refine ⟨⟨learned, span, rfl, ?_, ?_, raw, ?_, quiet, ?_, queue, admitted, rfl, rfl, readReady, got, read⟩⟩
   · intro t ht
@@ -422,8 +429,13 @@ theorem error_read_handoff {θ ε s p upper lower level readTime}
     obtain ⟨h₁, h₂⟩ := abs_le.mp hi
     obtain ⟨l₁, l₂⟩ := abs_le.mp lo
     constructor <;> linarith
-  exact error_read_handoff_of_gain box threshold bounds lo (one_error_dose_gain hi lo initialGain)
-    gainCap recovery energy main charge aux sensor other raw lead queue
+  have dose := one_error_dose_gain hi lo initialGain
+  have low : 7 / 800 ≤ lower := by linarith [(abs_le.mp lo).1]
+  have decay := quiet_decay_bound (start := s.time + 1) (finish := readTime) (by linarith)
+  have rest : |lower - 1 / 40| * Real.exp (-(1 / 2) * (readTime - (s.time + 1))) ≤ 1 / 100000 :=
+    (mul_le_mul lo decay (Real.exp_pos _).le (by norm_num)).trans (by norm_num)
+  exact error_read_handoff_of_gain box threshold bounds low ⟨dose.1, dose.2.trans (by norm_num)⟩
+    gainCap recovery energy main charge aux sensor other raw lead rest queue
 
 /-- At the nominal ERROR exit and FIRE thresholds the joined path is
 an execution of the original kernel, from the same supplied ERROR state. -/
