@@ -116,6 +116,11 @@ settings. The continuous optimization problem remains open.
 The [registered fourth-comparator run](LOWER_EXIT_RESULTS.md) evaluates
 exit 0.0025 under relative and inherited absolute threshold errors.
 
+## ERROR exit tradeoff
+
+The [registered absolute-error sweep](EXIT_TRADEOFF_RESULTS.md) plots the
+timing score and levels below the gain cap at four exit thresholds.
+
 ## Evidence and scope
 
 The reduced equations and constants are a Python transcription of the
