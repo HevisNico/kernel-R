@@ -21,12 +21,26 @@ inductive Coord where
   | q | m (p : Port) | z (p : Port) | b | energy
   deriving DecidableEq
 abbrev Values (n : ℕ) := Fin n → Coord → ℝ
+/-- Fixed charge thresholds. Per-port thresholds may vary independently.
+These govern the jumps, separately from the resting charges in the field. -/
+structure Thresholds where
+  fire : ℝ := 1
+  fastEnd : ℝ := 1 / 4
+  reopen : ℝ := 1 / 10
+  mark : Port → ℝ := fun _ => 1
+  silent : Port → ℝ := fun _ => 4 / 5
+  error : Port → ℝ := fun _ => 1 / 10
+  auxReady : Port → ℝ := fun _ => 1 / 40
+
+noncomputable abbrev Thresholds.nominal : Thresholds := {}
+
 structure Parameters where
   cap : Port → ℝ
   lm : Port → ℝ
   ls : Port → ℝ
   le : Port → ℝ
   inputGain : Port → ℝ
+  thresholds : Thresholds := Thresholds.nominal
 structure Delivery (n : ℕ) where
   cell : Fin n
   port : Port
@@ -117,6 +131,17 @@ def BirthState {n} (s : Snapshot n) : Prop :=
         s.x i (.m p) ≤ 1 / 40 + 1 / 100000))
 
 /-- Strict interior guards: reaching a section cannot be passed in the old mode. -/
+def ThresholdGuards {n} (levels : Fin n → Thresholds) (s : Snapshot n) (x : Values n) : Prop :=
+  (∀ i, match s.main i with
+    | .ready => x i .q < (levels i).fire
+    | .fast => (levels i).fastEnd < x i .q
+    | .slow => (levels i).reopen < x i .q) ∧
+  (∀ i p, match s.aux i p with
+    | .ready => x i (.m p) < (levels i).mark p
+    | .mark => (levels i).silent p < x i (.m p)
+    | .silent => (levels i).error p < x i (.m p)
+    | .error => (levels i).auxReady p < x i (.m p))
+
 def BeforeGuards {n} (s : Snapshot n) (x : Values n) : Prop :=
   (∀ i, match s.main i with
     | .ready => x i .q < 1
@@ -129,7 +154,7 @@ def BeforeGuards {n} (s : Snapshot n) (x : Values n) : Prop :=
     | .error => 1 / 40 < x i (.m p))
 
 /-- Integral ODEs apply to every prefix of a positive-duration flow. -/
-structure Flow {n} (θ : Fin n → Parameters) (s u : Snapshot n) where
+structure FlowDynamics {n} (θ : Fin n → Parameters) (s u : Snapshot n) where
   positive : s.time < u.time
   path : ℝ → Values n
   initial : path s.time = s.x
@@ -145,10 +170,14 @@ structure Flow {n} (θ : Fin n → Parameters) (s u : Snapshot n) where
     volume s.time u.time
   integral_eq : ∀ t ∈ Set.Icc s.time u.time, ∀ i c,
     path t i c = s.x i c + ∫ v in s.time..t, field θ s (path v) v i c
-  guards : ∀ t ∈ Set.Ico s.time u.time, BeforeGuards s (path t)
   raw_support : ∀ i p origin, s.raw i p = some origin →
     origin ≤ s.time ∧ u.time ≤ origin + 1
   pending_urgent : ∀ d ∈ s.pending, u.time ≤ d.due
+
+/-- Compatibility for the nominal protocol proofs. -/
+structure Flow {n} (θ : Fin n → Parameters) (s u : Snapshot n)
+    extends FlowDynamics θ s u where
+  guards : ∀ t ∈ Set.Ico s.time u.time, BeforeGuards s (path t)
 
 /-- All state updates below preserve physical coordinates and time. -/
 def setMain {n} (s : Snapshot n) (i : Fin n) (mode : MainMode) : Snapshot n :=

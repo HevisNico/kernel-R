@@ -9,6 +9,9 @@ open KernelR.Hybrid Set MeasureTheory
 structure LiveErrorExpiry (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Port)
     (origin lower level : ℝ) where
   flow : Flow θ s (errorTailEnd θ s 0 p (some origin) (origin + 1))
+  main : s.main 0 = .ready
+  mode : s.aux 0 p = .error
+  other_modes : ∀ q ≠ p, s.aux 0 q = .ready
   main_guard : ∀ t ∈ Ico s.time (origin + 1), flow.path t 0 .q < level
   sensor_guard : ∀ t ∈ Ico s.time (origin + 1), lower < flow.path t 0 (.m p)
   above_lower : lower < (errorTailEnd θ s 0 p (some origin) (origin + 1)).x 0 (.m p)
@@ -185,7 +188,7 @@ theorem live_error_expiry {θ ε s p origin lower level}
         cases h
     pending_urgent := pending
   }
-  refine ⟨⟨flow, ?_, ?_, ?_, chargeAt T ⟨window.2.le, le_rfl⟩, reserve T ⟨window.2.le, le_rfl⟩⟩⟩
+  refine ⟨⟨flow, main, aux, fun q h => (other q h).1, ?_, ?_, ?_, chargeAt T ⟨window.2.le, le_rfl⟩, reserve T ⟨window.2.le, le_rfl⟩⟩⟩
   · intro t ht
     change path t 0 .q < level
     linarith [(chargeAt t ⟨ht.1, ht.2.le⟩).2]

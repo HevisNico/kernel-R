@@ -761,6 +761,34 @@ Both full fabrication boxes are covered, ±0.3% and ±10%, with every
 parameter fixed independently in its declared interval. The construction
 covers one training pulse and one read through the first FIRE.
 
+## Thresholds in the parameters
+
+[HybridParameterExecution.lean](../../../proof/lean/KernelR/HybridParameterExecution.lean)
+uses the fixed charge guards stored in each cell's `Parameters`. The
+continuous equations, pulse origin and queue rules are shared with the
+nominal kernel. Flows and completion check the same realized guards as
+jumps.
+
+[ParameterTraining.lean](ParameterTraining.lean) places the two-pulse
+experiment in this semantics. Lean constructs a complete run through
+the read FIRE for every admissible choice in either full fabrication
+box, with the three tolerances above. The other charge guards are
+nominal. The experiment covers one training pulse and one read.
+
+[HybridParameterUniversalExecution.lean](../../../proof/lean/KernelR/HybridParameterUniversalExecution.lean)
+proves uniqueness for every complete finite run under the declared
+threshold and physical bounds, for any fixed finite network and router.
+Runs from the same state and with the same realized parameters agree
+at a common horizon on their physical endpoint and ordered per-cell
+FIRE dates. The pending list is compared up to permutation.
+
+For this two-pulse protocol, `training_read_every_complete` gives a
+complete run and the same outcome in every complete run through its
+read horizon. The recorded FIRE list contains just that read firing,
+and the final log-gain increment is exactly `8 * (upper - lower)`.
+The proof uses the first-contact operational semantics. The constructed
+read FIRE is transverse.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:

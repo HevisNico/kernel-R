@@ -104,6 +104,10 @@ def model_rule(name: str) -> tuple[str, str, str]:
         return "Model", "state-of-a-cell", "Equality support for the finite mode/coordinate types; no additional cell law."
     if tail in {"a", "response", "nominalGain", "InRelativeBox", "PhysicalBox"}:
         return "Model", "constants", "Fixed constants, canonical READY response and independent per-port fabrication boxes."
+    if tail in {"Thresholds", "Thresholds.nominal"}:
+        return "Model", "constants", "Charge guards stored in the parameters and their original nominal levels."
+    if tail == "FlowDynamics":
+        return "Model", "event-semantics", "Integral field, fixed discrete state, raw support and delivery urgency shared by both guard profiles."
     if tail == "BirthState":
         return "Protocol inputs", "birth-and-fabrication", "Common birth at zero, no RAW currents, main READY, declared 1e−5 charge/memory bands, reserve [50,100], and auxiliary rest/ERROR alternatives; the headline separately requires all auxiliaries READY."
     if tail == "PhysicalInvariant":
