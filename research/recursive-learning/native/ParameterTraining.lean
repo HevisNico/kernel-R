@@ -532,7 +532,10 @@ theorem training_read_every_complete_in_band {θ ε time gains p delay}
         ParameterCompleteThrough e T →
         u.ObservationalEq final ∧ e.emissionTimes 0 = [T] ∧
         u.x 0 (.z p) = gains p + 8 * ((θ 0).thresholds.error p - (θ 0).thresholds.auxReady p) := by
-  obtain ⟨run⟩ := training_read_exists_in_band (time := time) box threshold hi lo dose delayMin settled gain caps
+  have rest : |(θ 0).thresholds.auxReady p - 1 / 40| *
+      Real.exp (-(1 / 2) * (delay - 159 / 100)) ≤ 1 / 100000 :=
+    (mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by linarith)) (abs_nonneg _)).trans settled
+  obtain ⟨run⟩ := training_read_exists_in_band (time := time) box threshold hi lo dose delayMin rest gain caps
   have complete := run.parameterComplete config threshold.1
   let decision := run.handoff.decision
   have after := decision.outcome.1

@@ -811,6 +811,38 @@ and its theorem remain available. These theorems concern the single-cell
 task in the parameterized first-contact semantics. The two-cell
 coincidence benchmark uses a separate schedule and receiver contract.
 
+## Coincidence timing with an ERROR exit near 0.01
+
+[CoincidenceTiming.lean](CoincidenceTiming.lean) brackets the actual read
+FIRE using the charge at read, the learned gain, and the FIRE threshold.
+The lower time uses the largest charge and gain and the smallest
+threshold. The upper time uses the opposite bounds. The exponential
+estimates are proved over the reals in Lean.
+
+For birth gain 1.2 and a read at least 16.65 units after training,
+`training_read_exit_001_benchmark` gives one FIRE between 0.3485 and
+0.398 units after the read in every complete run through the first
+FIRE. Both fabrication boxes are covered. With radii `e` and `f`,
+the entry and exit tolerances are `0.1e` and `0.025e` around 0.1
+and 0.01 respectively, and the FIRE tolerance is `f` around 1.
+All other guards are nominal.
+
+| Maximum ERROR radius `e` | Maximum FIRE radius `f` |
+| ---: | ---: |
+| 1% | 3% |
+| 2% | 2% |
+| 3% | 1% |
+
+Lean counts 22 of the 36 registered grid points in these rectangles.
+For two trained-port reports, `coincidence_of_trained_latency`
+proves that a common wire delay and independent read jitter up to
+5 microseconds give a skew below 15 microseconds exactly at zero
+offset, among the offsets −30, 0 and +30 microseconds at 100
+microseconds per model unit. The timing theorem covers the two
+trained-port reads through their first FIRE. Wrong-port trials,
+the rest of the observation horizon, and a native receiver have
+separate proof obligations.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
