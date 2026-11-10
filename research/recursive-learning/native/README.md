@@ -775,10 +775,19 @@ the read FIRE for every admissible choice in either full fabrication
 box, with the three tolerances above. The other charge guards are
 nominal. The experiment covers one training pulse and one read.
 
-At nominal levels, [HybridParameterNominal.lean](../../../proof/lean/KernelR/HybridParameterNominal.lean)
-transfers the original endpoint and per-cell firing-time uniqueness
-theorem to the parameterized interface. Generalizing that uniqueness
-proof to perturbed guards is a separate step.
+[HybridParameterUniversalExecution.lean](../../../proof/lean/KernelR/HybridParameterUniversalExecution.lean)
+proves uniqueness for every complete finite run under the declared
+threshold and physical bounds, for any fixed finite network and router.
+Runs from the same state and with the same realized parameters agree
+at a common horizon on their physical endpoint and ordered per-cell
+FIRE dates. The pending list is compared up to permutation.
+
+For this two-pulse protocol, `training_read_every_complete` gives a
+complete run and the same outcome in every complete run through its
+read horizon. The recorded FIRE list contains just that read firing,
+and the final log-gain increment is exactly `8 * (upper - lower)`.
+The proof uses the first-contact operational semantics. The constructed
+read FIRE is transverse.
 
 ## Verify
 
