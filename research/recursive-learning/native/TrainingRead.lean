@@ -1,9 +1,9 @@
-import ErrorReadHandoff
+import LiveErrorExpiry
 import KernelR.HybridFirstInputError
 
 /-! A two-pulse experiment. Training starts from a READY cell at rest.
 The read is scheduled before the experiment and uses the actual learned
-state. This construction covers raw expiry strictly before ERROR entry. -/
+state. The construction covers every ordering of raw expiry and ERROR entry. -/
 
 namespace RecursiveLearning.Native
 open KernelR.Hybrid Set MeasureTheory
@@ -17,105 +17,219 @@ noncomputable def trainingAdmitted (time : ℝ) (gains : Port → ℝ) (p : Port
   { setRaw (trainingStart time gains p) 0 p (some time) with
     pending := [errorReadDelivery p (time + 16)] }
 
-noncomputable def trainingRawEnd (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Port)
-    {f : FirstInputMark θ s 0 p} (g : FirstInputSilent f) : Snapshot 1 :=
-  readyProtectedEnd θ g.final 0 p .silent (some s.time) (s.time + 1)
-
-noncomputable def trainingExpired (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Port)
-    {f : FirstInputMark θ s 0 p} (g : FirstInputSilent f) : Snapshot 1 :=
-  setRaw (trainingRawEnd θ s p g) 0 p none
-
-/-- The original SILENT field after expiry, with the realized ERROR entry
-guard. All coordinates use one trajectory from the actual expiry state. -/
-structure TrainingSilentTail (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Port)
-    (upper level stop : ℝ) where
+/-- A SILENT piece with a realized exit guard. The pulse origin, when
+present, is carried through unchanged. -/
+structure TrainingSilentLeg (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Port)
+    (origin : Option ℝ) (upper level stop : ℝ) where
   positive : s.time < stop
-  continuous : ∀ i c, ContinuousOn (fun t => readyProtectedValues θ s 0 p .silent none t i c)
+  continuous : ∀ i c, ContinuousOn (fun t => readyProtectedValues θ s 0 p .silent origin t i c)
     (Icc s.time stop)
   integrable : ∀ i c, IntervalIntegrable (fun t =>
-    field θ s (readyProtectedValues θ s 0 p .silent none t) t i c) volume s.time stop
+    field θ s (readyProtectedValues θ s 0 p .silent origin t) t i c) volume s.time stop
   integral : ∀ t ∈ Icc s.time stop, ∀ i c,
-    readyProtectedValues θ s 0 p .silent none t i c =
-      s.x i c + ∫ v in s.time..t, field θ s (readyProtectedValues θ s 0 p .silent none v) v i c
-  main_guard : ∀ t ∈ Ico s.time stop, readyProtectedValues θ s 0 p .silent none t 0 .q < level
-  sensor_guard : ∀ t ∈ Ico s.time stop, upper < readyProtectedValues θ s 0 p .silent none t 0 (.m p)
+    readyProtectedValues θ s 0 p .silent origin t i c =
+      s.x i c + ∫ v in s.time..t, field θ s (readyProtectedValues θ s 0 p .silent origin v) v i c
+  main_guard : ∀ t ∈ Ico s.time stop, readyProtectedValues θ s 0 p .silent origin t 0 .q < level
+  sensor_guard : ∀ t ∈ Ico s.time stop, upper < readyProtectedValues θ s 0 p .silent origin t 0 (.m p)
   other_guard : ∀ t ∈ Ico s.time stop, ∀ q ≠ p,
-    readyProtectedValues θ s 0 p .silent none t 0 (.m q) < 1
-  contact : readyProtectedValues θ s 0 p .silent none stop 0 (.m p) = upper
-  pending : ∀ d ∈ s.pending, stop < d.due
+    readyProtectedValues θ s 0 p .silent origin t 0 (.m q) < 1
+  raw_support : ∀ o, origin = some o → o ≤ s.time ∧ stop ≤ o + 1
+  pending : ∀ d ∈ s.pending, stop ≤ d.due
+  nominal : upper = 1 / 10 → level = 1 →
+    Flow θ s (readyProtectedEnd θ s 0 p .silent origin stop)
+  energy : 50 ≤ (readyProtectedEnd θ s 0 p .silent origin stop).x 0 .energy ∧
+    (readyProtectedEnd θ s 0 p .silent origin stop).x 0 .energy ≤ 100
 
-/-- A single trajectory from the admitted training pulse to the read's
-first FIRE. The two threshold changes are in the sensor's descending
-phases, and the read's main threshold is fixed throughout the task. -/
+/-- The portion between SILENT entry and the start of the no-current
+ERROR tail. Only the original mode update is used at the realized
+upper threshold. The expiry constructor removes the original raw tag. -/
+inductive TrainingTrace (θ : Fin 1 → Parameters) (p : Port) (upper lower level : ℝ) :
+    Snapshot 1 → Snapshot 1 → Type
+  | nil (s) : TrainingTrace θ p upper lower level s s
+  | silent {s u origin stop} (leg : TrainingSilentLeg θ s p origin upper level stop)
+      (rest : TrainingTrace θ p upper lower level (readyProtectedEnd θ s 0 p .silent origin stop) u) :
+      TrainingTrace θ p upper lower level s u
+  | enter {s u} (mode : s.aux 0 p = .silent) (contact : s.x 0 (.m p) = upper)
+      (rest : TrainingTrace θ p upper lower level (setAux s 0 p .error) u) :
+      TrainingTrace θ p upper lower level s u
+  | expire {s u origin} (active : s.raw 0 p = some origin) (due : s.time = origin + 1)
+      (rest : TrainingTrace θ p upper lower level (setRaw s 0 p none) u) :
+      TrainingTrace θ p upper lower level s u
+  | liveError {s u origin} (leg : LiveErrorExpiry θ s p origin lower level)
+      (rest : TrainingTrace θ p upper lower level (errorTailEnd θ s 0 p (some origin) (origin + 1)) u) :
+      TrainingTrace θ p upper lower level s u
+
+noncomputable def TrainingTrace.nominalExecution {θ p lower s u}
+    (trace : TrainingTrace θ p (1 / 10) lower 1 s u) :
+    Execution θ (fun _ _ => []) s u := by
+  induction trace with
+  | nil s => exact .nil s
+  | silent leg _ ih => exact .cons (.flow (leg.nominal rfl rfl)) ih
+  | enter mode contact _ ih => exact .cons (.jump (.error _ 0 p mode contact)) ih
+  | expire active due _ ih => exact .cons (.jump (.rawEnd _ 0 p _ active due)) ih
+  | liveError leg _ ih => exact .cons (.flow leg.flow) ih
+
+/-- A single trajectory from before training delivery through the read's
+first FIRE, with every continuous coordinate carried across each cut. -/
 structure TrainingRead (θ : Fin 1 → Parameters) (time : ℝ) (gains : Port → ℝ) (p : Port)
     (upper lower level : ℝ) where
   train : Jump (fun _ _ => []) (trainingStart time gains p) (trainingAdmitted time gains p)
   mark : FirstInputMark θ (trainingAdmitted time gains p) 0 p
   silent : FirstInputSilent mark
-  rawLeg : Flow θ silent.final (trainingRawEnd θ (trainingAdmitted time gains p) p silent)
-  expiry : Jump (fun _ _ => []) (trainingRawEnd θ (trainingAdmitted time gains p) p silent)
-    (trainingExpired θ (trainingAdmitted time gains p) p silent)
   pre_mark : ∀ t ∈ Ico time (time + mark.latency), mark.flow.path t 0 .q < level
   pre_silent : ∀ t ∈ Ico mark.final.time silent.final.time, silent.flow.path t 0 .q < level
-  pre_expiry : ∀ t ∈ Ico silent.final.time (time + 1),
-    rawLeg.path t 0 .q < level ∧ upper < rawLeg.path t 0 (.m p)
-  stop : ℝ
-  tail : TrainingSilentTail θ (trainingExpired θ (trainingAdmitted time gains p) p silent) p upper level stop
-  handoff : ErrorReadHandoff θ
-    (setAux (readyProtectedEnd θ (trainingExpired θ (trainingAdmitted time gains p) p silent)
-      0 p .silent none stop) 0 p .error) p upper lower level (time + 16)
+  errorStart : Snapshot 1
+  trace : TrainingTrace θ p upper lower level silent.final errorStart
+  handoff : ErrorReadHandoff θ errorStart p (errorStart.x 0 (.m p)) lower level (time + 16)
   read_silent_guard : ∀ t ∈ Icc handoff.decision.silent.final.time handoff.decision.stop,
     upper < readyProtectedValues θ handoff.decision.silent.final 0 p .silent
       (some handoff.readStart.time) t 0 (.m p)
   read_date : handoff.readStart.time = time + 16
   dose_from_birth : handoff.learned = gains p + 8 * (upper - lower)
 
-private theorem exp_two_bound : Real.exp 2 < (160 / 21 : ℝ) := by
-  rw [show (2 : ℝ) = 1 + 1 by norm_num, Real.exp_add]
-  have h : Real.exp 1 ≤ 11 / 4 := by linarith [Real.exp_one_lt_d9]
-  nlinarith [mul_le_mul h h (Real.exp_pos 1).le (by norm_num : (0 : ℝ) ≤ 11 / 4)]
-
-private theorem silent_above_upper {rate elapsed : ℝ} (rp : 0 ≤ rate)
-    (rateUpper : rate ≤ 2) (h : elapsed ≤ 1) :
-    (21 / 200 : ℝ) < (4 / 5 : ℝ) * Real.exp (-rate * elapsed) := by
-  have hx : -2 ≤ -rate * elapsed := by
-    have hmul := mul_le_mul_of_nonneg_left h rp
-    linarith
-  have he := Real.exp_le_exp.mpr hx
-  have low : (21 / 160 : ℝ) < Real.exp (-2) := by
-    rw [Real.exp_neg, ← one_div]
-    apply (lt_div_iff₀ (Real.exp_pos _)).2
-    linarith [exp_two_bound]
-  linarith
-
-/-- The small fabrication box guarantees expiry before either admissible
-ERROR entry level. The larger box can use the same result with this
-single extra upper bound on the active sensor's SILENT rate. -/
-theorem training_silent_rate_small_box {θ : Fin 1 → Parameters}
-    (box : @PhysicalBox 1 θ (3 / 1000)) (p : Port) : (θ 0).ls p ≤ 2 := by
-  have h := (box.2 0 p).2.2.1.2
-  change (θ 0).ls p ≤ Real.log 8 / (53 / 50) * (1 + 3 / 1000) at h
-  have logUpper : Real.log 8 ≤ 21 / 10 := by
-    rw [show (8 : ℝ) = 2 ^ 3 by norm_num, Real.log_pow]
-    norm_num
-    linarith [Real.log_two_lt_d9]
-  linarith
-
-private theorem training_silent_rate_lower {θ ε} (box : @PhysicalBox 1 θ ε) (p : Port) :
-    1 ≤ (θ 0).ls p := by
+private theorem silentRateLower {θ ε} (box : @PhysicalBox 1 θ ε) (p : Port) :
+    5 / 3 ≤ (θ 0).ls p := by
   have h := (box.2 0 p).2.2.1.1
   change Real.log 8 / (53 / 50) * (1 - ε) ≤ (θ 0).ls p at h
-  have logLower : (3 / 2 : ℝ) < Real.log 8 := log_eight_lower
+  have logLower : (2 : ℝ) ≤ Real.log 8 := by
+    rw [show (8 : ℝ) = 2 ^ 3 by norm_num, Real.log_pow]
+    norm_num
+    linarith [Real.log_two_gt_d9]
   have eps : (9 / 10 : ℝ) ≤ 1 - ε := by linarith [box.epsilon_bounds.2]
-  have hmul := mul_le_mul (show (3 / 2 : ℝ) / (53 / 50) ≤ Real.log 8 / (53 / 50) by linarith)
+  have hmul := mul_le_mul (show (2 : ℝ) / (53 / 50) ≤ Real.log 8 / (53 / 50) by linarith)
     eps (by norm_num) (by linarith)
   linarith
 
-/-- A scheduled pair of canonical pulses. The first stays below FIRE and
-raises the gain, and the second produces a transverse FIRE. Both ERROR
-endpoints and the main FIRE threshold may vary independently by 5%. -/
+private theorem silent_duration {θ ε upper} (box : @PhysicalBox 1 θ ε) (p : Port)
+    (hi : |upper - 1 / 10| ≤ 1 / 200) :
+    let r := (θ 0).ls p
+    0 < Real.log ((4 / 5) / upper) / r ∧
+    Real.log ((4 / 5) / upper) / r < 3 ∧
+    Real.log 8 / r - Real.log ((4 / 5) / upper) / r ≤ 3 / 100 := by
+  dsimp only
+  obtain ⟨hl, hu⟩ := abs_le.mp hi
+  have up : 0 < upper := by linarith
+  have rp := (box.rates_positive 0 p).2.1
+  have rlower := silentRateLower box p
+  have ratio : 1 < (4 / 5) / upper := (lt_div_iff₀ up).2 (by linarith)
+  have exp3 : (9 : ℝ) < Real.exp 3 := by
+    have h := Real.sum_le_exp_of_nonneg (show (0 : ℝ) ≤ 3 by norm_num) 4
+    norm_num [Finset.sum_range_succ] at h
+    linarith
+  have logUpper : Real.log ((4 / 5) / upper) < 3 :=
+    (Real.log_lt_iff_lt_exp (zero_lt_one.trans ratio)).2
+      (((div_le_iff₀ up).2 (by linarith) : (4 / 5) / upper ≤ 9).trans_lt exp3)
+  refine ⟨div_pos (Real.log_pos ratio) rp, (div_lt_iff₀ rp).2 (by linarith), ?_⟩
+  rw [← sub_div]
+  apply (div_le_iff₀ rp).2
+  have h : Real.log 8 - Real.log ((4 / 5) / upper) = Real.log (upper / (1 / 10)) := by
+    rw [Real.log_div (by norm_num) (ne_of_gt up), Real.log_div (ne_of_gt up) (by norm_num)]
+    have h8 : Real.log (4 / 5 : ℝ) - Real.log (1 / 10) = Real.log 8 := by
+      rw [← Real.log_div (by norm_num) (by norm_num)]
+      norm_num
+    linarith
+  rw [h]
+  have hlog := Real.log_le_sub_one_of_pos (div_pos up (by norm_num : (0 : ℝ) < 1 / 10))
+  linarith
+
+private theorem makeSilentLeg {θ ε s p origin upper level stop}
+    (box : @PhysicalBox 1 θ ε) (threshold : 19 / 20 ≤ level)
+    (positive : s.time < stop)
+    (main : ∀ i, s.main i = .ready) (mode : s.aux 0 p = .silent)
+    (other : ∀ i q, i ≠ 0 ∨ q ≠ p → s.aux i q = .ready)
+    (rest : ∀ q ≠ p, s.x 0 (.m q) = 1 / 40)
+    (raw : s.raw 0 p = origin) (otherRaw : ∀ i q, i ≠ 0 ∨ q ≠ p → s.raw i q = none)
+    (support : ∀ o, origin = some o → o ≤ s.time ∧ stop ≤ o + 1)
+    (pending : ∀ d ∈ s.pending, stop ≤ d.due)
+    (charge : ∀ t ∈ Icc s.time stop,
+      readyProtectedValues θ s 0 p .silent origin t 0 .q ∈ Icc (1 / 10) (217 / 250))
+    (sensor : ∀ t ∈ Ico s.time stop,
+      upper < readyProtectedValues θ s 0 p .silent origin t 0 (.m p))
+    (sensorIn : s.x 0 (.m p) ∈ Icc 0 (4 / 5))
+    (gain : Real.exp (s.x 0 (.z p)) ≤ 6 / 5)
+    (energy : 50 ≤ s.x 0 .energy ∧ s.x 0 .energy ≤ 100) :
+    Nonempty (TrainingSilentLeg θ s p origin upper level stop) := by
+  let path := readyProtectedValues θ s 0 p .silent origin
+  have fieldEq (t : ℝ) (ht : t ∈ Ico s.time stop) (i : Fin 1) (c : Coord) :
+      field θ s (path t) t i c = readyProtectedRhs θ s 0 p .silent origin t i c :=
+    readyProtected_field s 0 p .silent origin (Or.inr rfl) main mode other raw otherRaw t ht.1
+      (fun o h => ⟨(support o h).1, ht.2.trans_le (support o h).2⟩) i c
+  have qbound (t : ℝ) (ht : t ∈ Ico s.time stop) : path t 0 .q < level := by
+    linarith [(charge t ⟨ht.1, ht.2.le⟩).2]
+  have mbound (t : ℝ) (q : Port) (hq : q ≠ p) : path t 0 (.m q) < 1 := by
+    norm_num [path, readyProtectedValues, hq, rest q hq, relax]
+  refine ⟨⟨positive, ?_, ?_, ?_, qbound, sensor, fun t _ => mbound t, support, pending, ?_, ?_⟩⟩
+  · intro i c
+    exact (continuous_iff_continuousAt.mpr fun t =>
+      (readyProtectedValues_derivative (θ := θ) s 0 p .silent origin t i c).continuousAt).continuousOn
+  · intro i c
+    have hc := readyProtectedRhs_continuous (θ := θ) s 0 p .silent origin i c
+    apply (hc.intervalIntegrable s.time stop).congr_uIoo
+    intro t ht
+    rw [uIoo_of_lt positive] at ht
+    exact (fieldEq t ⟨ht.1.le, ht.2⟩ i c).symm
+  · intro t ht i c
+    have h := intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (fun v _ => readyProtectedValues_derivative (θ := θ) s 0 p .silent origin v i c)
+      ((readyProtectedRhs_continuous (θ := θ) s 0 p .silent origin i c).intervalIntegrable s.time t)
+    rw [readyProtectedValues_initial] at h
+    have eq : (∫ v in s.time..t, field θ s (path v) v i c) =
+        ∫ v in s.time..t, readyProtectedRhs θ s 0 p .silent origin v i c := by
+      apply intervalIntegral.integral_congr_Ioo_of_le ht.1
+      intro v hv
+      exact fieldEq v ⟨hv.1.le, hv.2.trans_le ht.2⟩ i c
+    rw [eq, h]
+    change path t i c = _
+    ring
+  · intro hu hl
+    exact readyProtectedFlow s 0 p .silent origin positive (Or.inr rfl) main mode other raw otherRaw support
+      (fun i => by rw [Subsingleton.elim i 0, ← congrFun (congrFun (readyProtectedValues_initial
+        (θ := θ) s 0 p .silent origin) 0) .q]; linarith [(charge s.time ⟨le_rfl, positive.le⟩).2])
+      (fun i q h => by rw [Subsingleton.elim i 0, rest q (h.resolve_left (not_not_intro (Subsingleton.elim i 0)))]; norm_num)
+      (fun t ht => by simpa only [path, readyProtectedValues, protectedRawAmplitude, ite_true, hl] using qbound t ht)
+      (fun t ht => by
+        simpa only [readyProtectedValues, and_self, ite_true, protectedReadyRate, reduceCtorEq, ite_false, hu]
+          using sensor t ht) pending
+  · let A := protectedRawAmplitude s 0 p origin 0
+    let r := (θ 0).ls p
+    let W := fun t => A * a * Real.exp (-a * (t - s.time)) +
+      r * s.x 0 (.m p) * Real.exp (-r * (t - s.time))
+    apply reserve_of_derivative positive.le (show Continuous W by dsimp [W]; fun_prop)
+      (energy := fun t => path t 0 .energy)
+    · intro t
+      simpa [path, W, A, r, readyProtectedRhs, protectedAuxCoeff, protectedReadyRate, sub_sub] using
+        readyProtectedValues_derivative (θ := θ) s 0 p .silent origin t 0 .energy
+    · rw [show path s.time = s.x from readyProtectedValues_initial _ _ _ _ _]
+      exact energy
+    · intro t ht
+      have aPos : 0 ≤ a := by linarith [a_coarse_bounds.1]
+      have rp := (box.rates_positive 0 p).2.1
+      have rawBound : rawInputScale origin s.time ≤ 1 := by
+        cases origin with
+        | none => norm_num [rawInputScale]
+        | some o =>
+          exact Real.exp_le_one_iff.mpr
+            (by nlinarith [mul_nonneg aPos (sub_nonneg.mpr (support o rfl).1)])
+      have ARange : 0 ≤ A ∧ A ≤ 6 / 5 := by
+        change 0 ≤ (if (0 : Fin 1) = 0 then _ else _) ∧ (if (0 : Fin 1) = 0 then _ else _) ≤ _
+        simp only [ite_true]
+        exact ⟨mul_nonneg (Real.exp_pos _).le (rawInputScale_nonnegative _ _),
+          by simpa using mul_le_mul gain rawBound (rawInputScale_nonnegative _ _) (by norm_num)⟩
+      have h₁ := decay_upper (mul_le_mul ARange.2 a_coarse_bounds.2.le aPos
+        (by norm_num : (0 : ℝ) ≤ 6 / 5)) (by norm_num) aPos (sub_nonneg.mpr ht.1)
+      have h₂ := decay_upper (mul_le_mul (box.coarse_upper 0 p).2.2.1 sensorIn.2 sensorIn.1
+        (by norm_num : (0 : ℝ) ≤ 3)) (by norm_num) rp.le (sub_nonneg.mpr ht.1)
+      dsimp [W]
+      constructor
+      · exact add_nonneg (mul_nonneg (mul_nonneg ARange.1 aPos) (Real.exp_pos _).le)
+          (mul_nonneg (mul_nonneg rp.le sensorIn.1) (Real.exp_pos _).le)
+      · linarith
+
+
+/-- The scheduled two-pulse task works for either full fabrication box.
+ERROR entry and pulse expiry are both realized at their actual dates. -/
 theorem training_read_exists {θ ε time gains p upper lower level}
-    (box : @PhysicalBox 1 θ ε) (rateUpper : (θ 0).ls p ≤ 2)
+    (box : @PhysicalBox 1 θ ε)
     (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800)
     (gain : 7 / 6 ≤ Real.exp (gains p) ∧ Real.exp (gains p) ≤ 6 / 5)
@@ -133,10 +247,10 @@ theorem training_read_exists {θ ε time gains p upper lower level}
     have hq := h.resolve_left (not_not_intro hi)
     simp [s, trainingAdmitted, trainingStart, setRaw, hi, hq]
   have margin (t : ℝ) (ht : s.time ≤ t) :
-      readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time t ≤ 9 / 10 := by
+      readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time t ≤ 217 / 250 := by
     have h := readyPulse_uniform_bound (initial := (1 / 10 : ℝ))
       (amplitude := Real.exp (gains p)) le_rfl le_rfl gain.2 (by norm_num) ht
-    change readyPulse (1 / 10) (Real.exp (gains p)) s.time t ≤ 9 / 10
+    change readyPulse (1 / 10) (Real.exp (gains p)) s.time t ≤ 217 / 250
     linarith
   have ahead : ∀ v ∈ s.pending, s.time + 2 ≤ v.due := by
     norm_num [s, trainingAdmitted, trainingStart, toleranceStartOn, setRaw, errorReadDelivery]
@@ -151,214 +265,15 @@ theorem training_read_exists {θ ε time gains p upper lower level}
     (by intro v hv; linarith [ahead v hv])
   obtain ⟨g⟩ := f.first_silent_of_response_margin_until_exists box below
     (by intro v hv; linarith [ahead v hv])
-  let edge := trainingRawEnd θ s p g
-  let expired := trainingExpired θ s p g
-  let rate := (θ 0).ls p
-  have rp : 0 < rate := (box.rates_positive 0 p).2.1
-  have gAfter : s.time ≤ g.final.time := by
-    change s.time ≤ s.time + f.latency + Real.log (5 / 4) / (θ 0).lm p
-    linarith [f.early, (box.aux_durations_positive 0 p).1]
-  have gBefore : g.final.time < s.time + 1 := by
-    change f.silentDate < s.time + 1
-    linarith [g.deadline]
-  have elapsed (t : ℝ) (ht : t ≤ s.time + 1) :
-      (21 / 200 : ℝ) < (4 / 5 : ℝ) * Real.exp (-rate * (t - g.final.time)) :=
-    silent_above_upper rp.le rateUpper (by linarith)
-  let rawFlow : Flow θ g.final edge :=
-    readyProtectedFlow g.final 0 p .silent (some s.time) gBefore (Or.inr rfl)
-      g.main_ready g.aux_silent g.aux_other g.raw_active g.raw_other
-      (by intro o h; obtain rfl := (Option.some.inj h).symm; exact ⟨gAfter, le_rfl⟩)
-      g.main_below g.aux_below
-      (by
-        intro t ht
-        rw [g.response_restart]
-        linarith [margin t (gAfter.trans ht.1)])
-      (by
-        intro t ht
-        simp only [protectedReadyRate, g.sensor_charge, reduceCtorEq, ite_false]
-        change 1 / 10 < (4 / 5 : ℝ) * Real.exp (-rate * (t - g.final.time))
-        linarith [elapsed t ht.2.le])
-      (by
-        intro v hv
-        have h := ahead v (g.queue_preserved ▸ hv)
-        linarith)
-  have expiry : Jump route edge expired := rawExpiryJump edge 0 p s.time g.raw_active rfl
-  have expiredMain : ∀ i, expired.main i = .ready := g.main_ready
-  have expiredSilent : expired.aux 0 p = .silent := g.aux_silent
-  have expiredOther : ∀ i q, i ≠ 0 ∨ q ≠ p → expired.aux i q = .ready := g.aux_other
-  have expiredRaw (i : Fin 1) (q : Port) : expired.raw i q = none := by
-    rw [Subsingleton.elim i 0]
-    by_cases h : q = p
-    · subst q; simp [expired, trainingExpired, setRaw]
-    · exact (raw_update_other edge 0 p none 0 q (Or.inr h)).trans (g.raw_other 0 q (Or.inr h))
-  have rawSensor (t : ℝ) : rawFlow.path t 0 (.m p) =
-      (4 / 5 : ℝ) * Real.exp (-rate * (t - g.final.time)) := by
-    change readyProtectedValues θ g.final 0 p .silent (some s.time) t 0 (.m p) = _
-    simp [readyProtectedValues, protectedReadyRate, g.sensor_charge, rate]
-  have sensorRawEnd : expired.x 0 (.m p) =
-      (4 / 5 : ℝ) * Real.exp (-rate * (s.time + 1 - g.final.time)) := rawSensor _
-  have expiredCharge : expired.x 0 .q = readyPulse (1 / 10) (Real.exp (gains p)) s.time (s.time + 1) := by
-    change readyPulse (g.final.x 0 .q)
-      (Real.exp (g.final.x 0 (.z p)) * rawInputScale (some s.time) g.final.time)
-      g.final.time (s.time + 1) = _
-    exact g.response_restart _
-  have chargeBand : expired.x 0 .q ∈ Icc (1 / 10) (9 / 10) := by
-    refine ⟨?_, ?_⟩
-    · rw [expiredCharge]
-      have h := mul_nonneg (Real.exp_pos (gains p)).le
-        (response_nonnegative (show 0 ≤ s.time + 1 - s.time by linarith))
-      simp only [readyPulse, sub_self, zero_mul, add_zero]
-      linarith
-    · rw [expiredCharge]
-      exact margin (s.time + 1) (by linarith)
-  have restOther (q : Port) (hq : q ≠ p) : expired.x 0 (.m q) = 1 / 40 := by
-    simp [expired, trainingExpired, trainingRawEnd, setRaw, readyProtectedEnd, readyProtectedValues,
-      FirstInputSilent.final, FirstInputMark.silentFinal, FirstInputMark.silentBefore,
-      FirstInputMark.final, setAux, readyInputEnd, readyInputValues, readyInputAuxAmplitude,
-      hq, s, trainingAdmitted, trainingStart, toleranceStartOn, relax, auxPulse, readyPulse]
-  obtain ⟨hi₁, hi₂⟩ := abs_le.mp hi
-  have upos : 0 < upper := by linarith
-  have aboveUpper : upper < expired.x 0 (.m p) := by
-    rw [sensorRawEnd]
-    linarith [elapsed (s.time + 1) le_rfl]
-  have expiredSensorUpper : expired.x 0 (.m p) ≤ 4 / 5 := by
-    rw [sensorRawEnd]
-    exact decay_upper le_rfl (by norm_num) rp.le (by linarith)
-  let stop := expired.time + Real.log (expired.x 0 (.m p) / upper) / rate
-  let path := readyProtectedValues θ expired 0 p .silent none
-  let beforeError := readyProtectedEnd θ expired 0 p .silent none stop
-  let errorStart := setAux beforeError 0 p .error
-  obtain ⟨decayPos, contact, strict⟩ := protected_decay_schedule upos aboveUpper rp
-  have duration : expired.time < stop := lt_add_of_pos_right _ decayPos
-  have dateBound : stop < s.time + 4 := by
-    have ratio : expired.x 0 (.m p) / upper ≤ 9 := (div_le_iff₀ upos).2 (by linarith)
-    have expLower : (9 : ℝ) < Real.exp 3 := by
-      have h := Real.sum_le_exp_of_nonneg (show (0 : ℝ) ≤ 3 by norm_num) 4
-      norm_num [Finset.sum_range_succ] at h
-      linarith
-    have logUpper : Real.log (expired.x 0 (.m p) / upper) < 3 := by
-      apply Real.exp_lt_exp.mp
-      rw [Real.exp_log (div_pos (upos.trans aboveUpper) upos)]
-      exact ratio.trans_lt expLower
-    have h := (div_lt_iff₀ rp).2 (show Real.log (expired.x 0 (.m p) / upper) < 3 * rate by
-      linarith [training_silent_rate_lower box p])
-    change s.time + 1 + _ < s.time + 4
-    linarith
-  have sensorPath (t : ℝ) :
-      path t 0 (.m p) = expired.x 0 (.m p) * Real.exp (-rate * (t - expired.time)) := by
-    simp [path, readyProtectedValues, protectedReadyRate, rate]
-  have contactAt : path stop 0 (.m p) = upper := by
-    rw [sensorPath, show stop - expired.time = Real.log (expired.x 0 (.m p) / upper) / rate by
-      dsimp [stop]; ring]
-    exact contact
-  have chargePath (t : ℝ) (ht : expired.time ≤ t) :
-      path t 0 .q ∈ Icc (1 / 10) (9 / 10) := by
-    simp only [path, readyProtectedValues, protectedRawAmplitude, ite_true, rawInputScale,
-      mul_zero, readyPulse_zero_eq_relax]
-    exact relax_mem_band (by norm_num) ht chargeBand (by norm_num)
-  have rhs (t : ℝ) (ht : expired.time ≤ t) (i : Fin 1) (c : Coord) :
-      field θ expired (path t) t i c = readyProtectedRhs θ expired 0 p .silent none t i c :=
-    readyProtected_field expired 0 p .silent none (Or.inr rfl) expiredMain expiredSilent
-      expiredOther (expiredRaw 0 p) (fun i q _ => expiredRaw i q) t ht (by simp) i c
-  let tail : TrainingSilentTail θ expired p upper level stop := {
-    positive := duration
-    continuous := fun i c => (continuous_iff_continuousAt.mpr fun t =>
-      (readyProtectedValues_derivative (θ := θ) expired 0 p .silent none t i c).continuousAt).continuousOn
-    integrable := by
-      intro i c
-      have hc := readyProtectedRhs_continuous (θ := θ) expired 0 p .silent none i c
-      apply (hc.intervalIntegrable expired.time stop).congr_uIoo
-      intro t ht
-      rw [uIoo_of_lt duration] at ht
-      exact (rhs t ht.1.le i c).symm
-    integral := by
-      intro t ht i c
-      have h := intervalIntegral.integral_eq_sub_of_hasDerivAt
-        (fun v _ => readyProtectedValues_derivative (θ := θ) expired 0 p .silent none v i c)
-        ((readyProtectedRhs_continuous (θ := θ) expired 0 p .silent none i c).intervalIntegrable expired.time t)
-      rw [readyProtectedValues_initial] at h
-      have eq : (∫ v in expired.time..t, field θ expired (path v) v i c) =
-          ∫ v in expired.time..t, readyProtectedRhs θ expired 0 p .silent none v i c := by
-        apply intervalIntegral.integral_congr_Ioo_of_le ht.1
-        intro v hv
-        exact rhs v hv.1.le i c
-      rw [eq, h]
-      change path t i c = _
-      ring
-    main_guard := fun t ht => by linarith [(chargePath t ht.1).2, threshold.1]
-    sensor_guard := by
-      intro t ht
-      change upper < path t 0 (.m p)
-      rw [sensorPath]
-      have before := ht.2
-      change t < stop at before
-      dsimp [stop] at before
-      exact strict _ (sub_nonneg.mpr ht.1) (by linarith)
-    other_guard := by
-      intro t _ q hq
-      norm_num [readyProtectedValues, hq, restOther q hq, relax]
-    contact := contactAt
-    pending := by
-      intro v hv
-      change v ∈ s.pending at hv
-      have hv' : v = d := by simpa [s, trainingAdmitted, d] using hv
-      subst v
-      change stop < s.time + 16
-      linarith
-  }
-  have prepared : PhysicalInvariant θ s := by
-    refine ⟨?_, ?_, ?_, ?_⟩
-    · intro i
-      norm_num [s, trainingAdmitted, trainingStart, toleranceStartOn, setRaw, auxUpper]
-    · intro i q
-      rw [Subsingleton.elim i 0]
-      exact caps q
-    · intro i
-      norm_num [s, trainingAdmitted, trainingStart, toleranceStartOn, setRaw]
-    · intro i
-      norm_num [s, trainingAdmitted, trainingStart, toleranceStartOn, setRaw]
-  let before : Execution θ route s expired :=
-    (g.execution route).append (.cons (.flow rawFlow) (.cons (.jump expiry) (.nil _)))
-  have energyStart := ((before.physical_invariant box prepared).reserve 0)
-  have energyEnd : 50 ≤ errorStart.x 0 .energy ∧ errorStart.x 0 .energy ≤ 100 := by
-    let work := fun t => rate * expired.x 0 (.m p) * Real.exp (-rate * (t - expired.time))
-    apply reserve_of_derivative duration.le (show Continuous work by dsimp [work]; fun_prop)
-      (energy := fun t => path t 0 .energy)
-    · intro t
-      simpa [path, readyProtectedValues, readyProtectedRhs, protectedRawAmplitude,
-        protectedAuxCoeff, protectedReadyRate, rawInputScale, work, rate] using
-        readyProtectedValues_derivative (θ := θ) expired 0 p .silent none t 0 .energy
-    · change path expired.time 0 .energy ∈ Icc (50 : ℝ) 100
-      rw [show path expired.time = expired.x from readyProtectedValues_initial _ _ _ _ _]
-      exact energyStart
-    · intro t ht
-      have h : Real.exp (-rate * (t - expired.time)) ≤ 1 := Real.exp_le_one_iff.mpr
-        (by nlinarith [mul_nonneg rp.le (sub_nonneg.mpr ht.1)])
-      have positive := mul_pos rp (upos.trans aboveUpper)
-      have hcoeff := mul_le_mul rateUpper expiredSensorUpper (upos.trans aboveUpper).le (by norm_num)
-      dsimp [work]
-      exact ⟨mul_nonneg positive.le (Real.exp_pos _).le,
-        (mul_le_mul_of_nonneg_left h positive.le).trans (by linarith)⟩
-  have startGain (q : Port) : errorStart.x 0 (.z q) = gains q := g.gain_preserved 0 q
-  obtain ⟨handoff⟩ := error_read_handoff (s := errorStart) box threshold hi lo
-    (by rw [startGain]; exact gain) (fun q => by rw [startGain]; exact caps q)
-    (by change (0 : ℝ) ≤ 2 / 25 ∧ (2 / 25 : ℝ) ≤ 11 / 10; norm_num)
-    energyEnd (expiredMain 0) (chargePath stop duration.le)
-    (by simp [errorStart, setAux]) contactAt
-    (fun q hq => by
-      refine ⟨?_, ?_⟩
-      · simpa [errorStart, setAux, beforeError, readyProtectedEnd, hq] using expiredOther 0 q (Or.inr hq)
-      · simp [errorStart, setAux, beforeError, readyProtectedEnd,
-          readyProtectedValues, hq, restOther q hq, relax])
-    (expiredRaw 0) (by change stop + 12 ≤ s.time + 16; linarith) rfl
-  refine ⟨⟨train, f, g, rawFlow, expiry, ?_, ?_, ?_, stop, tail, handoff, ?_, handoff.read_date, ?_⟩⟩
-  · intro t ht
+  have preMark : ∀ t ∈ Ico time (time + f.latency), f.flow.path t 0 .q < level := by
+    intro t ht
     have eq := f.flow.ready_single_pulse_solution 0 p s.time (f.main_ready 0) raw
       (fun q h => otherRaw 0 q (Or.inr h)) (by rw [f.aux_ready]; decide) t ⟨ht.1, ht.2.le⟩
     rw [eq]
     simp only [sub_self, mul_zero, Real.exp_zero, mul_one]
     linarith [margin t ht.1, threshold.1]
-  · intro t ht
+  have preSilent : ∀ t ∈ Ico f.final.time g.final.time, g.flow.path t 0 .q < level := by
+    intro t ht
     have hm : f.final.aux 0 p = .mark := by simp [FirstInputMark.final, setAux]
     have eq := g.flow.ready_single_pulse_solution 0 p s.time (f.main_ready 0) f.raw_active
       (fun q h => f.raw_other 0 q (Or.inr h)) (by rw [hm]; decide) t ⟨ht.1, ht.2.le⟩
@@ -371,95 +286,272 @@ theorem training_read_exists {θ ε time gains p upper lower level}
       have h : s.time + f.latency ≤ t := ht.1
       linarith [f.early]
     linarith [margin t ht', threshold.1]
-  · intro t ht
-    constructor
-    · change readyProtectedValues θ g.final 0 p .silent (some s.time) t 0 .q < level
-      simp only [readyProtectedValues, protectedRawAmplitude, ite_true]
-      rw [g.response_restart]
-      linarith [margin t (gAfter.trans ht.1), threshold.1]
-    · rw [rawSensor]
-      linarith [elapsed t ht.2.le]
-  · intro t ht
-    let read := handoff.decision
-    have after : handoff.readStart.time ≤ read.silent.final.time := by
-      change handoff.readStart.time ≤ handoff.readStart.time + read.mark.latency +
-        Real.log (5 / 4) / (θ 0).lm p
-      linarith [read.mark.early, (box.aux_durations_positive 0 p).1]
-    have deadline := read.outcome.2.1
-    have h := silent_above_upper (rate := rate) rp.le rateUpper
-      (show t - read.silent.final.time ≤ 1 by linarith [ht.2])
-    have eq : readyProtectedValues θ read.silent.final 0 p .silent
-        (some handoff.readStart.time) t 0 (.m p) =
-        (4 / 5 : ℝ) * Real.exp (-rate * (t - read.silent.final.time)) := by
-      simp [readyProtectedValues, protectedReadyRate, read.silent.sensor_charge, rate]
-    change upper < readyProtectedValues θ read.silent.final 0 p .silent
-      (some handoff.readStart.time) t 0 (.m p)
-    rw [eq]
+  let rate := (θ 0).ls p
+  let T := g.final.time + Real.log ((4 / 5) / upper) / rate
+  let expiry := s.time + 1
+  let cut := min T expiry
+  let edge := readyProtectedEnd θ g.final 0 p .silent (some s.time) cut
+  have rp : 0 < rate := (box.rates_positive 0 p).2.1
+  have gAfter : s.time ≤ g.final.time := by
+    change s.time ≤ s.time + f.latency + Real.log (5 / 4) / (θ 0).lm p
+    linarith [f.early, (box.aux_durations_positive 0 p).1]
+  have gBefore : g.final.time < s.time + 1 / 20 := g.deadline
+  obtain ⟨duration, durationUpper, shift⟩ := silent_duration box p hi
+  have Tpos : g.final.time < T := lt_add_of_pos_right _ duration
+  have Tearly : s.time + 24 / 25 < T := by
+    have h := (g.errorDate_bounds box).1
+    change s.time + 99 / 100 < g.final.time + Real.log 8 / rate at h
+    dsimp only [T]
     linarith
-  · have h := handoff.span.dose
-    rw [startGain] at h
+  have Tlate : T < time + 4 := by
+    have before : g.final.time < time + 1 / 20 := gBefore
+    dsimp only [T]
     linarith
+  have cutPos : g.final.time < cut := lt_min Tpos (by dsimp [expiry]; linarith)
+  have cutLate : cut ≤ s.time + 1 := min_le_right _ _
+  have cutLe : cut ≤ T := min_le_left _ _
+  obtain ⟨hi₁, hi₂⟩ := abs_le.mp hi
+  obtain ⟨lo₁, lo₂⟩ := abs_le.mp lo
+  have up : 0 < upper := by linarith
+  obtain ⟨_, sensorContact, sensorStrict⟩ :=
+    protected_decay_schedule up (show upper < (4 / 5 : ℝ) by linarith) rp
+  let sensor := fun t : ℝ => (4 / 5 : ℝ) * Real.exp (-rate * (t - g.final.time))
+  have atT : sensor T = upper := by
+    dsimp [sensor, T]
+    rw [add_sub_cancel_left]
+    exact sensorContact
+  have aboveT (t : ℝ) (hs : g.final.time ≤ t) (ht : t < T) : upper < sensor t := by
+    apply sensorStrict _ (sub_nonneg.mpr hs)
+    dsimp [T] at ht
+    linarith
+  have edgeSensor : edge.x 0 (.m p) = sensor cut := by
+    simp [edge, readyProtectedEnd, readyProtectedValues, protectedReadyRate, g.sensor_charge, rate, sensor]
+  have restSilent (q : Port) (hq : q ≠ p) : g.final.x 0 (.m q) = 1 / 40 := by
+    simp [FirstInputSilent.final, FirstInputMark.silentFinal, FirstInputMark.silentBefore,
+      readyProtectedEnd, readyProtectedValues, FirstInputMark.final, setAux,
+      readyInputEnd, readyInputValues, readyInputAuxAmplitude, hq, s, trainingAdmitted,
+      trainingStart, toleranceStartOn, setRaw, relax, auxPulse, readyPulse]
+  have scalarLower (t : ℝ) (ht : s.time ≤ t) :
+      1 / 10 ≤ readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time t := by
+    change 1 / 10 ≤ readyPulse (1 / 10) (Real.exp (gains p)) s.time t
+    have h := mul_nonneg (Real.exp_pos (gains p)).le (response_nonnegative (sub_nonneg.mpr ht))
+    simp only [readyPulse, sub_self, zero_mul, add_zero]
+    linarith
+  have rawCharge (t : ℝ) (ht : g.final.time ≤ t) :
+      readyProtectedValues θ g.final 0 p .silent (some s.time) t 0 .q ∈ Icc (1 / 10) (217 / 250) := by
+    simp only [readyProtectedValues, protectedRawAmplitude, ite_true]
+    rw [g.response_restart]
+    exact ⟨scalarLower t (gAfter.trans ht), margin t (gAfter.trans ht)⟩
+  have startPhysical : PhysicalInvariant θ s := by
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · intro i
+      norm_num [s, trainingAdmitted, trainingStart, toleranceStartOn, setRaw, auxUpper]
+    · intro i q
+      rw [Subsingleton.elim i 0]
+      exact caps q
+    · intro i
+      norm_num [s, trainingAdmitted, trainingStart, toleranceStartOn, setRaw]
+    · intro i
+      norm_num [s, trainingAdmitted, trainingStart, toleranceStartOn, setRaw]
+  have silentEnergy := ((g.execution route).physical_invariant box startPhysical).reserve 0
+  obtain ⟨rawLeg⟩ := makeSilentLeg box threshold.1 cutPos g.main_ready g.aux_silent g.aux_other
+    restSilent g.raw_active g.raw_other
+    (by intro o h; obtain rfl := (Option.some.inj h).symm; exact ⟨gAfter, cutLate⟩)
+    (by intro v hv; have h := ahead v (g.queue_preserved ▸ hv); linarith)
+    (fun t ht => rawCharge t ht.1)
+    (by
+      intro t ht
+      simp only [readyProtectedValues, and_self, ite_true, protectedReadyRate, g.sensor_charge]
+      exact aboveT t ht.1 (ht.2.trans_le cutLe))
+    (by rw [g.sensor_charge]; norm_num) (by rw [g.gain_preserved]; exact gain.2) silentEnergy
+  have edgeCharge : edge.x 0 .q ∈ Icc (1 / 10) (217 / 250) := rawCharge cut cutPos.le
+  have edgeOther (q : Port) (hq : q ≠ p) : edge.x 0 (.m q) = 1 / 40 := by
+    simp [edge, readyProtectedEnd, readyProtectedValues, hq, restSilent q hq, relax]
+  have edgeRaw : edge.raw 0 p = some s.time := g.raw_active
+  have edgePending : edge.pending = [d] := g.queue_preserved
+  have finish (e : Snapshot 1) (trace : TrainingTrace θ p upper lower level g.final e)
+      (lead : e.time + 12 ≤ time + 16)
+      (em : e.main 0 = .ready) (ea : e.aux 0 p = .error)
+      (eqBand : e.x 0 .q ∈ Icc (1 / 10) (47 / 50))
+      (energy : 50 ≤ e.x 0 .energy ∧ e.x 0 .energy ≤ 100)
+      (es : lower < e.x 0 (.m p) ∧ e.x 0 (.m p) ≤ 21 / 200)
+      (other : ∀ q ≠ p, e.aux 0 q = .ready ∧ e.x 0 (.m q) = 1 / 40)
+      (eraw : ∀ q, e.raw 0 q = none) (queue : e.pending = [d])
+      (b : e.x 0 .b = 2 / 25) (otherGain : ∀ q ≠ p, e.x 0 (.z q) = gains q)
+      (balance : e.x 0 (.z p) + 8 * (e.x 0 (.m p) - lower) = gains p + 8 * (upper - lower)) :
+      Nonempty (TrainingRead θ time gains p upper lower level) := by
+    have output : 2 ≤ Real.exp (e.x 0 (.z p) + 8 * (e.x 0 (.m p) - lower)) ∧
+        Real.exp (e.x 0 (.z p) + 8 * (e.x 0 (.m p) - lower)) ≤ 12 / 5 := by
+      rw [balance]
+      exact one_error_dose_gain hi lo gain
+    have cap (q : Port) : e.x 0 (.z q) ≤ Real.log ((θ 0).cap q) := by
+      by_cases h : q = p
+      · subst q
+        have hcap := (box.2 0 p).1.1
+        change 4 * (1 - ε) ≤ (θ 0).cap p at hcap
+        apply Real.exp_le_exp.mp
+        rw [Real.exp_log (box.cap_positive 0 p)]
+        have leGain := Real.exp_le_exp.mpr
+          (show e.x 0 (.z p) ≤ e.x 0 (.z p) + 8 * (e.x 0 (.m p) - lower) by linarith [es.1])
+        linarith [leGain, output.2, box.epsilon_bounds.2]
+      · rw [otherGain q h]
+        exact caps q
+    obtain ⟨h⟩ := error_read_handoff_of_gain box threshold es lo output cap
+      (by rw [b]; norm_num) energy em eqBand ea rfl other eraw lead queue
+    refine ⟨⟨train, f, g, preMark, preSilent, e, trace, h, ?_, h.read_date, ?_⟩⟩
+    · intro t ht
+      let read := h.decision
+      have deadline := read.outcome.2.1
+      let Tread := read.silent.final.time + Real.log ((4 / 5) / upper) / rate
+      have hdate := (read.silent.errorDate_bounds box).1
+      change h.readStart.time + 99 / 100 < read.silent.final.time + Real.log 8 / rate at hdate
+      have early : h.readStart.time + 24 / 25 < Tread := by dsimp [Tread]; linarith
+      have before : t < Tread := by
+        have ht' := ht.2
+        change t ≤ read.stop at ht'
+        linarith
+      change upper < readyProtectedValues θ read.silent.final 0 p .silent
+        (some h.readStart.time) t 0 (.m p)
+      simp only [readyProtectedValues, and_self, ite_true, protectedReadyRate, read.silent.sensor_charge]
+      exact sensorStrict _ (sub_nonneg.mpr ht.1) (by dsimp [Tread] at before; linarith)
+    · linarith [h.span.dose, balance]
+  by_cases early : T < expiry
+  · have same : cut = T := min_eq_left early.le
+    have entrySensor : edge.x 0 (.m p) = upper := by rw [edgeSensor, same, atT]
+    let e := setAux edge 0 p .error
+    have eSensor : e.x 0 (.m p) = upper := entrySensor
+    have eGain : e.x 0 (.z p) = gains p := g.gain_preserved 0 p
+    have eOther (q : Port) (hq : q ≠ p) : e.aux 0 q = .ready ∧ e.x 0 (.m q) = 1 / 40 := by
+      refine ⟨?_, edgeOther q hq⟩
+      simpa [e, setAux, hq, edge, readyProtectedEnd] using g.aux_other 0 q (Or.inr hq)
+    have timeEq : e.time = T := same
+    obtain ⟨live⟩ := live_error_expiry (s := e) (origin := s.time) box threshold.1
+      (by rw [timeEq]; exact ⟨Tearly.le, early⟩) lo
+      (by rw [eSensor]; constructor <;> linarith)
+      (by rw [eGain, eSensor]; exact (one_error_dose_gain hi lo gain).2)
+      edgeCharge rawLeg.energy (g.main_ready 0) (by simp [e, setAux])
+      eOther edgeRaw (fun q hq => g.raw_other 0 q (Or.inr hq))
+      (by
+        intro v hv
+        change v ∈ edge.pending at hv
+        have h := ahead v (g.queue_preserved ▸ hv)
+        linarith)
+    let boundary := errorTailEnd θ e 0 p (some s.time) expiry
+    let expired := setRaw boundary 0 p none
+    have em : expired.x 0 (.m p) = errorTailSensor θ e 0 p expiry := by
+      simp [expired, setRaw, boundary, errorTailEnd, errorTailValues]
+    have ez : expired.x 0 (.z p) = gains p + 8 * (upper - expired.x 0 (.m p)) := by
+      rw [em]
+      simp [expired, setRaw, boundary, errorTailEnd, errorTailValues, errorTailGain, eGain, eSensor]
+    have expiredOther (q : Port) (hq : q ≠ p) :
+        expired.aux 0 q = .ready ∧ expired.x 0 (.m q) = 1 / 40 := by
+      refine ⟨(eOther q hq).1, ?_⟩
+      simp [expired, setRaw, boundary, errorTailEnd, errorTailValues, hq, (eOther q hq).2, relax]
+    have expiredRaw (q : Port) : expired.raw 0 q = none := by
+      by_cases hq : q = p
+      · subst q; simp [expired, setRaw]
+      · exact (raw_update_other boundary 0 p none 0 q (Or.inr hq)).trans (g.raw_other 0 q (Or.inr hq))
+    apply finish expired
+      (.silent rawLeg (.enter g.aux_silent entrySensor (.liveError live (.expire edgeRaw rfl (.nil _)))))
+      (by change time + 1 + 12 ≤ time + 16; linarith)
+      (g.main_ready 0) (by change e.aux 0 p = .error; simp [e, setAux])
+      live.charge live.energy
+      ⟨live.above_lower, ?_⟩ expiredOther expiredRaw edgePending rfl
+      (fun q hq => by
+        simp [expired, setRaw, boundary, errorTailEnd, errorTailValues, hq,
+          show e.x 0 (.z q) = gains q from g.gain_preserved 0 q])
+      (by rw [ez]; ring)
+    rw [em]
+    apply decay_upper (by rw [eSensor]; linarith) (by norm_num)
+      (box.rates_positive 0 p).2.2.le
+    rw [timeEq]
+    exact sub_nonneg.mpr early.le
+  · have late : expiry ≤ T := le_of_not_gt early
+    have same : cut = expiry := min_eq_right late
+    let expired := setRaw edge 0 p none
+    have expiredDate : expired.time = expiry := same
+    have expiredRaw (i : Fin 1) (q : Port) : expired.raw i q = none := by
+      rw [Subsingleton.elim i 0]
+      by_cases hq : q = p
+      · subst q; simp [expired, setRaw]
+      · exact (raw_update_other edge 0 p none 0 q (Or.inr hq)).trans (g.raw_other 0 q (Or.inr hq))
+    have reach (before : Snapshot 1)
+        (date : before.time = T)
+        (bc : before.x 0 .q ∈ Icc (1 / 10) (217 / 250))
+        (en : 50 ≤ before.x 0 .energy ∧ before.x 0 .energy ≤ 100)
+        (sensorAt : before.x 0 (.m p) = upper)
+        (bm : before.main 0 = .ready)
+        (bo : ∀ q ≠ p, before.aux 0 q = .ready ∧ before.x 0 (.m q) = 1 / 40)
+        (br : ∀ q, before.raw 0 q = none)
+        (queue : before.pending = [d])
+        (b : before.x 0 .b = 2 / 25) (gainsBefore : ∀ q, before.x 0 (.z q) = gains q)
+        (entered : TrainingTrace θ p upper lower level g.final (setAux before 0 p .error)) :
+        Nonempty (TrainingRead θ time gains p upper lower level) := by
+      let e := setAux before 0 p .error
+      apply finish e entered (by change before.time + 12 ≤ time + 16; rw [date]; linarith)
+        bm (by simp [e, setAux]) ⟨bc.1, bc.2.trans (by norm_num)⟩ en
+        (by change lower < before.x 0 (.m p) ∧ before.x 0 (.m p) ≤ 21 / 200
+            rw [sensorAt]; constructor <;> linarith)
+        (fun q hq => ⟨by simpa [e, setAux, hq] using (bo q hq).1, (bo q hq).2⟩)
+        br queue b (fun q _ => gainsBefore q)
+      change before.x 0 (.z p) + 8 * (before.x 0 (.m p) - lower) = _
+      rw [gainsBefore, sensorAt]
+    by_cases equal : expiry = T
+    · have sensorAt : expired.x 0 (.m p) = upper := by
+        change edge.x 0 (.m p) = _
+        rw [edgeSensor, same, equal, atT]
+      exact reach expired (same.trans equal)
+        edgeCharge rawLeg.energy sensorAt (g.main_ready 0)
+        (fun q hq => ⟨g.aux_other 0 q (Or.inr hq), edgeOther q hq⟩) (expiredRaw 0) edgePending
+        rfl (g.gain_preserved 0)
+        (.silent rawLeg (.expire edgeRaw same (.enter g.aux_silent sensorAt (.nil _))))
+    · have ht : expired.time < T := by rw [expiredDate]; exact lt_of_le_of_ne late equal
+      let path := readyProtectedValues θ expired 0 p .silent none
+      let boundary := readyProtectedEnd θ expired 0 p .silent none T
+      have mPath (t : ℝ) : path t 0 (.m p) = sensor t := by
+        simp only [path, readyProtectedValues, and_self, ite_true, protectedReadyRate]
+        change edge.x 0 (.m p) * Real.exp (-rate * (t - expired.time)) = sensor t
+        rw [edgeSensor, same, expiredDate]
+        dsimp [sensor]
+        rw [mul_assoc, ← Real.exp_add]
+        congr 2
+        ring
+      have qPath (t : ℝ) (h : expired.time ≤ t) : path t 0 .q ∈ Icc (1 / 10) (217 / 250) := by
+        simp only [path, readyProtectedValues, protectedRawAmplitude, ite_true, rawInputScale,
+          mul_zero, readyPulse_zero_eq_relax]
+        exact relax_mem_band (by norm_num) h edgeCharge (by norm_num)
+      have sensorIn : expired.x 0 (.m p) ∈ Icc 0 (4 / 5) := by
+        change edge.x 0 (.m p) ∈ _
+        rw [edgeSensor, same]
+        exact ⟨mul_nonneg (by norm_num) (Real.exp_pos _).le,
+          decay_upper le_rfl (by norm_num) rp.le (by dsimp [expiry]; linarith)⟩
+      obtain ⟨tail⟩ := makeSilentLeg (s := expired) box threshold.1 ht g.main_ready
+        g.aux_silent g.aux_other edgeOther (expiredRaw 0 p) (fun i q _ => expiredRaw i q)
+        (by simp)
+        (by intro v hv; change v ∈ s.pending at hv; simp [s, trainingAdmitted] at hv; subst v
+            change T ≤ time + 16; linarith)
+        (fun t ht => qPath t ht.1)
+        (by
+          intro t h
+          change upper < path t 0 (.m p)
+          rw [mPath]
+          have after : expiry ≤ t := expiredDate ▸ h.1
+          exact aboveT t (by dsimp [expiry] at after; linarith) h.2)
+        sensorIn (by change Real.exp (gains p) ≤ _; exact gain.2) rawLeg.energy
+      have contact : boundary.x 0 (.m p) = upper := (mPath T).trans atT
+      exact reach boundary rfl
+        (qPath T ht.le) tail.energy contact (g.main_ready 0)
+        (fun q hq => ⟨g.aux_other 0 q (Or.inr hq), by
+          simp [boundary, readyProtectedEnd, readyProtectedValues, hq,
+            show expired.x 0 (.m q) = 1 / 40 from edgeOther q hq, relax]⟩)
+        (expiredRaw 0) edgePending rfl (g.gain_preserved 0)
+        (.silent rawLeg (.expire edgeRaw same (.silent tail (.enter g.aux_silent contact (.nil _)))))
 
-/-- The full small fabrication box needs no additional timing premise. -/
-theorem training_read_small_box {θ time gains p upper lower level}
-    (box : @PhysicalBox 1 θ (3 / 1000))
-    (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
-    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800)
-    (gain : 7 / 6 ≤ Real.exp (gains p) ∧ Real.exp (gains p) ≤ 6 / 5)
-    (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
-    Nonempty (TrainingRead θ time gains p upper lower level) :=
-  training_read_exists box (training_silent_rate_small_box box p) threshold hi lo gain caps
-
-/-- At all three nominal thresholds, the entire two-pulse trajectory
-embeds as an execution of the original kernel. -/
+/-- At nominal thresholds, the entire trajectory is a native R execution. -/
 noncomputable def TrainingRead.nominalExecution {θ time gains p}
     (run : TrainingRead θ time gains p (1 / 10) (1 / 40) 1) :
-    Execution θ (fun _ _ => []) (trainingStart time gains p) run.handoff.decision.final := by
-  let edge := trainingRawEnd θ (trainingAdmitted time gains p) p run.silent
-  let expired := trainingExpired θ (trainingAdmitted time gains p) p run.silent
-  let boundary := readyProtectedEnd θ expired 0 p .silent none run.stop
-  have mode : expired.aux 0 p = .silent := run.silent.aux_silent
-  let flow : Flow θ expired boundary := {
-    positive := run.tail.positive
-    path := readyProtectedValues θ expired 0 p .silent none
-    initial := readyProtectedValues_initial _ _ _ _ _
-    final := rfl
-    main_fixed := rfl
-    aux_fixed := rfl
-    raw_fixed := rfl
-    queue_fixed := rfl
-    continuous := run.tail.continuous
-    integrable := run.tail.integrable
-    mark_integrable := by intro i q; simp [markAct, show expired.main i = .ready from run.silent.main_ready i]
-    integral_eq := run.tail.integral
-    guards := by
-      intro t ht
-      constructor
-      · intro i
-        rw [Subsingleton.elim i 0, show expired.main 0 = .ready from run.silent.main_ready 0]
-        exact run.tail.main_guard t ht
-      · intro i q
-        rw [Subsingleton.elim i 0]
-        by_cases h : q = p
-        · subst q
-          rw [mode]
-          exact run.tail.sensor_guard t ht
-        · rw [show expired.aux 0 q = .ready from run.silent.aux_other 0 q (Or.inr h)]
-          exact run.tail.other_guard t ht q h
-    raw_support := by
-      intro i q origin h
-      rw [Subsingleton.elim i 0] at h
-      by_cases hq : q = p
-      · subst q
-        simp [expired, trainingExpired, setRaw] at h
-      · rw [show expired.raw 0 q = none from
-          (raw_update_other edge 0 p none 0 q (Or.inr hq)).trans (run.silent.raw_other 0 q (Or.inr hq))] at h
-        cases h
-    pending_urgent := fun d hd => (run.tail.pending d hd).le
-  }
-  let suffix := Execution.cons (.flow run.rawLeg) (.cons (.jump run.expiry)
-    (.cons (.flow flow) (.cons (.jump (.error boundary 0 p mode run.tail.contact))
-      run.handoff.nominalExecution)))
-  exact .cons (.jump run.train) ((run.silent.execution (fun _ _ => [])).append suffix)
+    Execution θ (fun _ _ => []) (trainingStart time gains p) run.handoff.decision.final :=
+  .cons (.jump run.train) ((run.silent.execution (fun _ _ => [])).append
+    (run.trace.nominalExecution.append run.handoff.nominalExecution))
 
 end RecursiveLearning.Native

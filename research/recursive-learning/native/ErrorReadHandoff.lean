@@ -7,35 +7,45 @@ the sensor reopening, the quiet wait and the delivery. -/
 namespace RecursiveLearning.Native
 open KernelR.Hybrid MeasureTheory Set
 
-private theorem quiet_error_field {θ : Fin 1 → Parameters} {s : Snapshot 1} {p t}
+/-- Identify the original field with the explicit ERROR path whenever
+the live current matches its retained origin and the gates are open. -/
+theorem error_path_field {θ : Fin 1 → Parameters} {s : Snapshot 1} {p t origin}
     (main : s.main 0 = .ready) (aux : s.aux 0 p = .error)
-    (other : ∀ q, q ≠ p → s.aux 0 q = .ready) (raw : ∀ q, s.raw 0 q = none)
-    (power : 0 < errorTailEnergy θ s 0 p none t)
+    (other : ∀ q, q ≠ p → s.aux 0 q = .ready) (raw : ∀ q ≠ p, s.raw 0 q = none)
+    (current_eq : current s 0 p t = rawInputScale origin s.time * a * Real.exp (-a * (t - s.time)))
+    (power : 0 < errorTailEnergy θ s 0 p origin t)
     (cap : errorTailGain θ s 0 p t < Real.log ((θ 0).cap p)) (c : Coord) :
-    field θ s (errorTailValues θ s 0 p none t) t 0 c = errorTailRhs θ s 0 p none t 0 c := by
-  have act (q : Port) : errorAct θ s (errorTailValues θ s 0 p none t) 0 q =
+    field θ s (errorTailValues θ s 0 p origin t) t 0 c = errorTailRhs θ s 0 p origin t 0 c := by
+  have currentAt (q : Port) : current s 0 q t =
+      if q = p then rawInputScale origin s.time * a * Real.exp (-a * (t - s.time)) else 0 := by
+    by_cases h : q = p
+    · subst q; simpa using current_eq
+    · simp [current, raw q h, h]
+  have act (q : Port) : errorAct θ s (errorTailValues θ s 0 p origin t) 0 q =
       if q = p then 8 * (θ 0).le p * errorTailSensor θ s 0 p t else 0 := by
     by_cases h : q = p
     · subst q; simp [errorAct, aux, main, errorTailValues, power, cap]
     · simp [errorAct, other q h, h]
   have drain (q : Port) :
-      (if s.aux 0 q = .ready then 0
-        else auxDrain (θ 0) (s.aux 0 q) q (errorTailValues θ s 0 p none t 0 (.m q))) =
+      (if s.aux 0 q = .ready then (θ 0).inputGain q * current s 0 q t
+        else auxDrain (θ 0) (s.aux 0 q) q (errorTailValues θ s 0 p origin t 0 (.m q))) =
       if q = p then (θ 0).le p * errorTailSensor θ s 0 p t else 0 := by
     by_cases h : q = p
     · subst q; simp [aux, auxDrain, errorTailValues]
-    · simp [other q h, h]
+    · simp [other q h, currentAt, h]
+  have driveEq : drive s (errorTailValues θ s 0 p origin t) 0 t =
+      errorTailDrive θ s 0 p origin t := by
+    simp [drive, currentAt, mul_ite, errorTailValues, errorTailDrive, mul_assoc]
   cases c with
-  | q => simp [field, main, drive, current, raw, errorTailRhs, errorTailDrive, rawInputScale]
+  | q => simp [field, main, driveEq, errorTailRhs]
   | m q =>
     by_cases h : q = p
     · subst q; simp [field, aux, auxDrain, errorTailValues, errorTailRhs]
-    · simp [field, other q h, current, raw, errorTailRhs, errorTailValues, h]
+    · simp [field, other q h, currentAt, errorTailRhs, errorTailValues, h]
   | z q => simp [field, act, errorTailRhs]
   | b => simp [field, markAct, main, errorTailRhs]
   | energy =>
-    simp [field, work, main, drive, current, raw, drain, act, markAct,
-      errorTailRhs, errorTailWork, errorTailDrive, rawInputScale]
+    simp [field, work, main, driveEq, drain, act, markAct, errorTailRhs, errorTailWork]
     ring
 
 private theorem quiet_error_charge {θ : Fin 1 → Parameters} {s : Snapshot 1} {p t} :
@@ -145,14 +155,16 @@ structure ErrorReadHandoff (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Por
 pulse reads it. The initial queue contains only that read pulse. Other
 sensors are at rest, and the main cell carries a subthreshold charge
 that relaxes naturally before the read. -/
-theorem error_read_handoff {θ ε s p upper lower level readTime}
+theorem error_read_handoff_of_gain {θ ε s p upper lower level readTime}
     (box : @PhysicalBox 1 θ ε) (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
-    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800)
-    (initialGain : 7 / 6 ≤ Real.exp (s.x 0 (.z p)) ∧ Real.exp (s.x 0 (.z p)) ≤ 6 / 5)
+    (upperBounds : lower < upper ∧ upper ≤ 21 / 200)
+    (lo : |lower - 1 / 40| ≤ 1 / 800)
+    (outputGain : 2 ≤ Real.exp (s.x 0 (.z p) + 8 * (upper - lower)) ∧
+      Real.exp (s.x 0 (.z p) + 8 * (upper - lower)) ≤ 12 / 5)
     (gainCap : ∀ q, s.x 0 (.z q) ≤ Real.log ((θ 0).cap q))
     (recovery : 0 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 11 / 10)
     (energy : 50 ≤ s.x 0 .energy ∧ s.x 0 .energy ≤ 100)
-    (main : s.main 0 = .ready) (charge : s.x 0 .q ∈ Icc (1 / 10) (9 / 10))
+    (main : s.main 0 = .ready) (charge : s.x 0 .q ∈ Icc (1 / 10) (47 / 50))
     (aux : s.aux 0 p = .error) (sensor : s.x 0 (.m p) = upper)
     (other : ∀ q, q ≠ p → s.aux 0 q = .ready ∧ s.x 0 (.m q) = 1 / 40)
     (raw : ∀ q, s.raw 0 q = none) (lead : s.time + 12 ≤ readTime)
@@ -163,7 +175,7 @@ theorem error_read_handoff {θ ε s p upper lower level readTime}
   let path := errorTailValues θ s 0 p none
   let learned := s.x 0 (.z p) + 8 * (upper - lower)
   have rpos : 0 < r := (box.rates_positive 0 p).2.2
-  obtain ⟨hi₁, hi₂⟩ := abs_le.mp hi
+  obtain ⟨above, upperBound⟩ := upperBounds
   obtain ⟨lo₁, lo₂⟩ := abs_le.mp lo
   have lowerPos : 0 < lower := by linarith
   have upperPos : 0 < upper := by linarith
@@ -200,8 +212,7 @@ theorem error_read_handoff {θ ε s p upper lower level readTime}
     exact mul_lt_mul_of_pos_left (Real.exp_lt_exp.mpr (by nlinarith [mul_pos rpos (sub_pos.mpr ht)])) upperPos
   have sensorFloor (t : ℝ) (ht : t ≤ stop) : lower ≤ errorTailSensor θ s 0 p t :=
     ht.eq_or_lt.elim (fun h => h ▸ endpoint.ge) (fun h => (sensorAbove t h).le)
-  have learnedGain : 2 ≤ Real.exp learned ∧ Real.exp learned ≤ 12 / 5 :=
-    one_error_dose_gain hi lo initialGain
+  have learnedGain : 2 ≤ Real.exp learned ∧ Real.exp learned ≤ 12 / 5 := outputGain
   have learnedCap : learned < Real.log ((θ 0).cap p) := by
     have h := (box.2 0 p).1.1
     change 4 * (1 - ε) ≤ (θ 0).cap p at h
@@ -220,8 +231,8 @@ theorem error_read_handoff {θ ε s p upper lower level readTime}
   have fieldEq (t : ℝ) (ht : t ∈ Icc s.time stop) (i : Fin 1) (c : Coord) :
       field θ s (path t) t i c = errorTailRhs θ s 0 p none t i c := by
     rw [Subsingleton.elim i 0]
-    exact quiet_error_field main aux (fun q h => (other q h).1) raw
-      (gates t ht).1 (gates t ht).2 c
+    exact error_path_field main aux (fun q h => (other q h).1) (fun q _ => raw q)
+      (by simp [current, raw, rawInputScale]) (gates t ht).1 (gates t ht).2 c
   let span : ExposedErrorSpan θ p (s.x 0 (.z p)) learned upper lower := {
     start := s
     stop := stop
@@ -279,8 +290,8 @@ theorem error_read_handoff {θ ε s p upper lower level readTime}
   have noneRaw (i : Fin 1) (q : Port) : reopened.raw i q = none := by
     rw [Subsingleton.elim i 0]
     exact raw q
-  have target : (1 / 10 : ℝ) ∈ Icc (1 / 10) (9 / 10) := by norm_num
-  have chargeBand (i : Fin 1) : reopened.x i .q ∈ Icc (1 / 10) (9 / 10) := by
+  have target : (1 / 10 : ℝ) ∈ Icc (1 / 10) (47 / 50) := by norm_num
+  have chargeBand (i : Fin 1) : reopened.x i .q ∈ Icc (1 / 10) (47 / 50) := by
     rw [Subsingleton.elim i 0]
     change errorTailValues θ s 0 p none stop 0 .q ∈ _
     rw [quiet_error_charge]
@@ -305,7 +316,7 @@ theorem error_read_handoff {θ ε s p upper lower level readTime}
       have h := chargeBand 0
       have decay := quiet_decay_bound wait
       have nonneg := Real.exp_pos (-(1 / 2) * (d.due - reopened.time))
-      have upper := mul_le_mul (show reopened.x 0 .q - 1 / 10 ≤ 4 / 5 by linarith [h.2])
+      have upper := mul_le_mul (show reopened.x 0 .q - 1 / 10 ≤ 21 / 25 by linarith [h.2])
         decay nonneg.le (by norm_num)
       have lower := mul_nonneg (sub_nonneg.mpr h.1) nonneg.le
       constructor <;> dsimp [relax] <;> linarith
@@ -383,6 +394,28 @@ theorem error_read_handoff {θ ε s p upper lower level readTime}
     change relax (1 / 2) (1 / 10) (reopened.x 0 .q) reopened.time t < level
     have h := relax_mem_band (by norm_num : (0 : ℝ) ≤ 1 / 2) (start := reopened.time) ht.1 (chargeBand 0) target
     linarith [threshold.1, h.2]
+
+/-- One full ERROR dose from a realized entry threshold, followed by
+the scheduled read. -/
+theorem error_read_handoff {θ ε s p upper lower level readTime}
+    (box : @PhysicalBox 1 θ ε) (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
+    (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : |lower - 1 / 40| ≤ 1 / 800)
+    (initialGain : 7 / 6 ≤ Real.exp (s.x 0 (.z p)) ∧ Real.exp (s.x 0 (.z p)) ≤ 6 / 5)
+    (gainCap : ∀ q, s.x 0 (.z q) ≤ Real.log ((θ 0).cap q))
+    (recovery : 0 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 11 / 10)
+    (energy : 50 ≤ s.x 0 .energy ∧ s.x 0 .energy ≤ 100)
+    (main : s.main 0 = .ready) (charge : s.x 0 .q ∈ Icc (1 / 10) (47 / 50))
+    (aux : s.aux 0 p = .error) (sensor : s.x 0 (.m p) = upper)
+    (other : ∀ q, q ≠ p → s.aux 0 q = .ready ∧ s.x 0 (.m q) = 1 / 40)
+    (raw : ∀ q, s.raw 0 q = none) (lead : s.time + 12 ≤ readTime)
+    (queue : s.pending = [errorReadDelivery p readTime]) :
+    Nonempty (ErrorReadHandoff θ s p upper lower level readTime) := by
+  have bounds : lower < upper ∧ upper ≤ 21 / 200 := by
+    obtain ⟨h₁, h₂⟩ := abs_le.mp hi
+    obtain ⟨l₁, l₂⟩ := abs_le.mp lo
+    constructor <;> linarith
+  exact error_read_handoff_of_gain box threshold bounds lo (one_error_dose_gain hi lo initialGain)
+    gainCap recovery energy main charge aux sensor other raw lead queue
 
 /-- At the nominal ERROR exit and FIRE thresholds the joined path is
 an execution of the original kernel, from the same supplied ERROR state. -/
