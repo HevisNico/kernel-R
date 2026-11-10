@@ -819,13 +819,15 @@ The lower time uses the largest charge and gain and the smallest
 threshold. The upper time uses the opposite bounds. The exponential
 estimates are proved over the reals in Lean.
 
-For birth gain 1.2 and a read at least 16.65 units after training,
-`training_read_exit_001_benchmark` gives one FIRE between 0.3485 and
-0.398 units after the read in every complete run through the first
-FIRE. Both fabrication boxes are covered. With radii `e` and `f`,
-the entry and exit tolerances are `0.1e` and `0.025e` around 0.1
-and 0.01 respectively, and the FIRE tolerance is `f` around 1.
-All other guards are nominal.
+`training_read_exit_001_benchmark` fixes the trained port's birth gain
+exactly at `exp (gains p) = 6/5`. This satisfies the earlier birth band
+`[7/6, 1.2]`. The timing certificate uses the exact value. With a
+read at least 16.65 units after training, it gives one FIRE between
+0.3485 and 0.398 units after the read in every run complete through
+the first FIRE. Both fabrication boxes are covered. With radii `e`
+and `f`, the entry and exit tolerances are `0.1e` and `0.025e`
+around 0.1 and 0.01 respectively, and the FIRE tolerance is `f`
+around 1. All other guards are nominal.
 
 | Maximum ERROR radius `e` | Maximum FIRE radius `f` |
 | ---: | ---: |
@@ -833,15 +835,29 @@ All other guards are nominal.
 | 2% | 2% |
 | 3% | 1% |
 
-Lean counts 22 of the 36 registered grid points in these rectangles.
-For two trained-port reports, `coincidence_of_trained_latency`
-proves that a common wire delay and independent read jitter up to
-5 microseconds give a skew below 15 microseconds exactly at zero
-offset, among the offsets −30, 0 and +30 microseconds at 100
-microseconds per model unit. The timing theorem covers the two
-trained-port reads through their first FIRE. Wrong-port trials,
-the rest of the observation horizon, and a native receiver have
-separate proof obligations.
+Lean counts 22 of the 36 registered grid points in these sufficient
+rectangles. At 100 microseconds per unit and nominal exit 0.01, these
+are exactly the same 22 ERROR/FIRE pairs that passed in the
+[recorded sweep](https://github.com/HevisNico/kernel-R/blob/8ff0540cab31f55831ffd3698b36bd2940c872d1/research/recursive-learning/coincidence/results/exit-tradeoff.csv.xz)
+at each of its three fabrication settings. The Lean count gives
+coverage on this grid. A full characterization of the passing region
+would also require proving where the timing contract fails.
+
+`coincidence_of_trained_latency` is an arithmetic lemma with two
+latency intervals as hypotheses. At 100 microseconds per unit,
+with a common wire delay and independent jitter of up to 5
+microseconds, the skew is at most 14.95 microseconds at zero
+offset and at least 15.05 microseconds at offsets of −30 or +30
+microseconds. These bounds give a certified margin of 0.05
+microseconds around the 15 microsecond aperture. The certificate
+uses the declared uncertainties only.
+
+The execution theorem is for a single trained-port read through its
+first FIRE. A joint two-cell execution, wrong-port trials, the rest
+of the observation horizon, and a native receiver have separate
+proof obligations. The constant-current comparison remains numerical.
+A separation theorem would also need to rule out every allowed
+common setting of that comparator.
 
 ## Verify
 
