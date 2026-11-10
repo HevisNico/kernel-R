@@ -902,11 +902,19 @@ starts below FIRE.
 derives the registered receiver decision at time 20 for every complete
 joint run, given two local witnesses complete through that horizon
 with the declared FIRE lists. The receiver uses the 0.35 wire delay
-and 20.35 arrival deadline. For the wrong-port case the file also
-bounds the gain during an ERROR overlap and the resulting READY
-charge from a drive envelope. The physical construction of the
-local complete witnesses, including the wrong-port trajectory,
-remains the outstanding step for the full separation theorem.
+and 20.35 arrival deadline.
+
+[CoincidenceLocalExecution.lean](CoincidenceLocalExecution.lean)
+constructs a complete wrong-port trial through time 20 with an empty
+FIRE list. It retains the actual training trajectory, retargets only
+the queued read and bounds the charge during the live-pulse overlap
+with ERROR. The wrong port uses its nominal auxiliary guards. The
+birth-gain, fabrication and threshold hypotheses of the 0.01 timing
+certificate cover the registered read dates from 16.65 to 17.35.
+
+The remaining physical step for the full separation is to construct
+the continuation from a trained-port FIRE to time 20. The no-extra-FIRE
+lemma already determines its report list given that continuation.
 
 ## Verify
 

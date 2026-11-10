@@ -93,6 +93,7 @@ structure TrainingRead (θ : Fin 1 → Parameters) (time : ℝ) (gains : Port �
   dose_from_birth : handoff.learned = gains p + 8 * (upper - lower)
   read_charge_bound : handoff.readStart.x 0 .q ≤
     1 / 10 + (21 / 25) * Real.exp (-(1 / 2) * (delay - 159 / 100))
+  other_gains_at_read : ∀ q ≠ p, handoff.readStart.x 0 (.z q) = gains q
 
 private theorem silentRateLower {θ ε} (box : @PhysicalBox 1 θ ε) (p : Port) :
     5 / 3 ≤ (θ 0).ls p := by
@@ -418,7 +419,7 @@ theorem training_read_exists_in_band {θ ε time gains p upper lower level delay
       exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by linarith)) (abs_nonneg _)
     obtain ⟨h⟩ := error_read_handoff_of_gain box threshold es lo output cap
       (by rw [b]; norm_num) energy em eqBand ea rfl other eraw (by linarith) rest queue
-    refine ⟨⟨train, f, g, preMark, preSilent, e, trace, h, ?_, h.read_date, ?_, ?_⟩⟩
+    refine ⟨⟨train, f, g, preMark, preSilent, e, trace, h, ?_, h.read_date, ?_, ?_, ?_⟩⟩
     · intro t ht
       let read := h.decision
       have deadline := read.outcome.2.1
@@ -437,6 +438,8 @@ theorem training_read_exists_in_band {θ ε time gains p upper lower level delay
     · linarith [h.span.dose, balance]
     · refine h.read_charge_bound.trans (add_le_add_right ?_ _)
       exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by linarith)) (by norm_num)
+    · intro q neq
+      exact (h.other_gains_at_read q neq).trans (otherGain q neq)
   by_cases early : T < expiry
   · have same : cut = T := min_eq_left early.le
     have entrySensor : edge.x 0 (.m p) = upper := by rw [edgeSensor, same, atT]

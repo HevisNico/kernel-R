@@ -212,12 +212,10 @@ private theorem corner_bounds {e f : ℝ} (box : Exit001TimingBox e f) :
     · norm_num
     · norm_num
 
-/-- The actual trained-port FIRE is in a common latency interval across
-either fabrication box and all three maximal timing rectangles. -/
-theorem training_read_exit_001_benchmark {θ ε time gains p delay e f}
+/-- Expose the constructed native trajectory and its certified read latency
+for continuations at the benchmark's common horizon. -/
+theorem training_read_exit_001_certificate {θ ε time gains p delay e f}
     (box : @PhysicalBox 1 θ ε)
-    (config : (θ 0).thresholds = trainingThresholds p ((θ 0).thresholds.error p)
-      ((θ 0).thresholds.auxReady p) (θ 0).thresholds.fire)
     (errors : Exit001TimingBox e f)
     (hi : |(θ 0).thresholds.error p - 1 / 10| ≤ e / 10)
     (lo : |(θ 0).thresholds.auxReady p - 1 / 100| ≤ e / 40)
@@ -225,12 +223,9 @@ theorem training_read_exit_001_benchmark {θ ε time gains p delay e f}
     (delayMin : 333 / 20 ≤ delay)
     (gain : Real.exp (gains p) = 6 / 5)
     (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
-    ∃ T final,
-      T - (time + delay) ∈ Icc (697 / 2000) (199 / 500) ∧
-      (∃ ex : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p delay) final,
-        ParameterCompleteThrough ex T) ∧
-      ∀ {u} (ex : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p delay) u),
-        ParameterCompleteThrough ex T → u.ObservationalEq final ∧ ex.emissionTimes 0 = [T] := by
+    ∃ run : TrainingRead θ time gains p ((θ 0).thresholds.error p)
+        ((θ 0).thresholds.auxReady p) (θ 0).thresholds.fire delay,
+      run.handoff.decision.stop - (time + delay) ∈ Icc (697 / 2000) (199 / 500) := by
   let upper := (θ 0).thresholds.error p
   let lower := (θ 0).thresholds.auxReady p
   let level := (θ 0).thresholds.fire
@@ -282,9 +277,39 @@ theorem training_read_exit_001_benchmark {θ ε time gains p delay e f}
     (show level ∈ Icc (1 - f) (1 + f) from ⟨by linarith [hfire.1], by linarith [hfire.2]⟩)
     (by norm_num) (by norm_num) corners.1 corners.2
   rw [run.read_date] at latency
+  exact ⟨run, latency⟩
+
+/-- The actual trained-port FIRE is in a common latency interval across
+either fabrication box and all three maximal timing rectangles. -/
+theorem training_read_exit_001_benchmark {θ ε time gains p delay e f}
+    (box : @PhysicalBox 1 θ ε)
+    (config : (θ 0).thresholds = trainingThresholds p ((θ 0).thresholds.error p)
+      ((θ 0).thresholds.auxReady p) (θ 0).thresholds.fire)
+    (errors : Exit001TimingBox e f)
+    (hi : |(θ 0).thresholds.error p - 1 / 10| ≤ e / 10)
+    (lo : |(θ 0).thresholds.auxReady p - 1 / 100| ≤ e / 40)
+    (fire : |(θ 0).thresholds.fire - 1| ≤ f)
+    (delayMin : 333 / 20 ≤ delay)
+    (gain : Real.exp (gains p) = 6 / 5)
+    (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
+    ∃ T final,
+      T - (time + delay) ∈ Icc (697 / 2000) (199 / 500) ∧
+      (∃ ex : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p delay) final,
+        ParameterCompleteThrough ex T) ∧
+      ∀ {u} (ex : ParameterExecution θ (fun _ _ => []) (trainingStart time gains p delay) u),
+        ParameterCompleteThrough ex T → u.ObservationalEq final ∧ ex.emissionTimes 0 = [T] := by
+  obtain ⟨run, latency⟩ := training_read_exit_001_certificate (time := time)
+    box errors hi lo fire delayMin gain caps
+  have eMax : e ≤ 3 / 100 := by rcases errors with h | h | h <;> linarith [h.1]
+  have fMax : f ≤ 3 / 100 := by rcases errors with h | h | h <;> linarith [h.2]
+  have hfire := abs_le.mp fire
+  have threshold : 19 / 20 ≤ (θ 0).thresholds.fire ∧ (θ 0).thresholds.fire ≤ 21 / 20 :=
+    ⟨by linarith [hfire.1], by linarith [hfire.2]⟩
+  have hi₅ : |(θ 0).thresholds.error p - 1 / 10| ≤ 1 / 200 := by linarith
+  have lo₀ : 0 ≤ (θ 0).thresholds.auxReady p := by linarith [(abs_le.mp lo).1]
   exact ⟨run.handoff.decision.stop, run.handoff.decision.final, latency,
     ⟨run.parameterExecution config, run.parameterComplete config threshold.1⟩,
-    fun ex complete => run.every_complete_run config box threshold hi₅ (by linarith [hlo.1]) caps ex complete⟩
+    fun ex complete => run.every_complete_run config box threshold hi₅ lo₀ caps ex complete⟩
 
 /-- At 100 microseconds per model unit, the two trained-port reports
 satisfy the registered 15 microsecond aperture exactly for zero offset.
