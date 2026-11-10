@@ -57,7 +57,7 @@ private theorem exp_bracket {x low high : ℝ} {n : ℕ} (hx : |x| ≤ 1) (hn : 
   have h := abs_le.mp (Real.exp_bound hx hn)
   exact ⟨by linarith [bounds.1, h.1], by linarith [bounds.2, h.2]⟩
 
-private theorem exp_bracket_10 {x low high : ℝ} (hx : |x| ≤ 1)
+theorem exp_bracket_10 {x low high : ℝ} (hx : |x| ≤ 1)
     (bounds :
       let sum := ∑ m ∈ Finset.range 10, x ^ m / m.factorial
       let err := |x| ^ 10 * (11 / (3628800 * 10))
@@ -67,7 +67,7 @@ private theorem exp_bracket_10 {x low high : ℝ} (hx : |x| ≤ 1)
   norm_num [Nat.factorial] at bounds ⊢
   exact bounds
 
-private theorem response_ratio_bounds :
+theorem response_ratio_bounds :
     a / (a - 1 / 2) ∈ Icc (156414 / 100000 : ℝ) (156415 / 100000) := by
   have aPos : 0 < a - 1 / 2 := by linarith [a_coarse_bounds.1]
   constructor
