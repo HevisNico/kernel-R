@@ -877,12 +877,11 @@ this positive trial either lacks a report or has skew at least
 0.36 it rules out the slow report directly. Seven bounded dose
 intervals and one unbounded interval cover the remaining doses.
 
-This proves an obstruction for the constant-current **reduced**
-timing model, with eligible writes and a frozen learned gain
-while the read pulse is live. The native R result covers trained-port
-FIREs through their first report. The full network decision contract
-and a hybrid execution semantics for the timed comparator have
-separate proof obligations.
+The obstruction applies to the constant-current **reduced** timing
+model with eligible writes, quiet relaxation after training, and a
+frozen learned gain during the read pulse. Its training endpoint charge
+lies in [0.1, 1.03]. The timed rule has no separate hybrid execution
+construction here.
 
 ### Two-cell execution assembly
 
@@ -912,9 +911,28 @@ with ERROR. The wrong port uses its nominal auxiliary guards. The
 birth-gain, fabrication and threshold hypotheses of the 0.01 timing
 certificate cover the registered read dates from 16.65 to 17.35.
 
-The remaining physical step for the full separation is to construct
-the continuation from a trained-port FIRE to time 20. The no-extra-FIRE
-lemma already determines its report list given that continuation.
+[CoincidenceProtectedTail.lean](CoincidenceProtectedTail.lean) advances
+a trained-port run to time 20 after its FIRE. The construction processes
+pulse expiry, FAST exit and sensor contacts in time order, including
+ties. SLOW remains above its reopening threshold through the horizon.
+
+[CoincidenceSeparation.lean](CoincidenceSeparation.lean) proves
+`coincidence_exit_001_full_contract` for two independent cells. A
+complete run exists for every admissible pair of read dates and ports.
+In every complete run each trained-port read gives exactly one report
+and each other read gives none. The receiver accepts exactly when both
+ports match the training and the offset is zero. The 0.35 delays and
+the coincidence test are applied to the emitted dates by the receiver
+contract.
+
+The combined theorem `coincidence_exit_001_separation` uses 100 µs per
+model unit, ±10% fabrication, exact ERROR entry and exit (0.1 and
+0.01), and ±3% FIRE threshold error. Native R satisfies the full
+receiver contract. For the reduced constant-current rule with ±10%
+current variation, one positive trial excludes every common current
+and duration, including settings that touch the gain cap. The proof
+uses the exact trained birth gain 1.2. The receiver is an observation
+of two native runs and the comparator uses the reduced READY equation.
 
 ## Verify
 
@@ -935,7 +953,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `LearnerReadout`, `ReadoutSeries`, `LearnerConjunction`, `LearnerFanIn` and
 `ScheduledGates`, `ScheduledCircuit`, `ReportFormula`, `ScheduledCommit` and
 `ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
-`BlindNeedSearch` and `ThresholdProbe`, and run
+`BlindNeedSearch`, `ThresholdProbe`, and the coincidence modules
+through `CoincidenceSeparation`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

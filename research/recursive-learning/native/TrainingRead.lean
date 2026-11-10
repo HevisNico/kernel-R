@@ -94,6 +94,7 @@ structure TrainingRead (θ : Fin 1 → Parameters) (time : ℝ) (gains : Port �
   read_charge_bound : handoff.readStart.x 0 .q ≤
     1 / 10 + (21 / 25) * Real.exp (-(1 / 2) * (delay - 159 / 100))
   other_gains_at_read : ∀ q ≠ p, handoff.readStart.x 0 (.z q) = gains q
+  recovery_at_read : handoff.readStart.x 0 .b = 2 / 25
 
 private theorem silentRateLower {θ ε} (box : @PhysicalBox 1 θ ε) (p : Port) :
     5 / 3 ≤ (θ 0).ls p := by
@@ -108,7 +109,7 @@ private theorem silentRateLower {θ ε} (box : @PhysicalBox 1 θ ε) (p : Port) 
     eps (by norm_num) (by linarith)
   linarith
 
-private theorem silent_duration {θ ε upper} (box : @PhysicalBox 1 θ ε) (p : Port)
+theorem training_silent_duration {θ ε upper} (box : @PhysicalBox 1 θ ε) (p : Port)
     (hi : |upper - 1 / 10| ≤ 1 / 200) :
     let r := (θ 0).ls p
     0 < Real.log ((4 / 5) / upper) / r ∧
@@ -313,7 +314,7 @@ theorem training_read_exists_in_band {θ ε time gains p upper lower level delay
     change s.time ≤ s.time + f.latency + Real.log (5 / 4) / (θ 0).lm p
     linarith [f.early, (box.aux_durations_positive 0 p).1]
   have gBefore : g.final.time < s.time + 1 / 20 := g.deadline
-  obtain ⟨duration, shift, shiftLate⟩ := silent_duration box p hi
+  obtain ⟨duration, shift, shiftLate⟩ := training_silent_duration box p hi
   have Tpos : g.final.time < T := lt_add_of_pos_right _ duration
   have Tearly : s.time + 24 / 25 < T := by
     have h := (g.errorDate_bounds box).1
@@ -419,7 +420,7 @@ theorem training_read_exists_in_band {θ ε time gains p upper lower level delay
       exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by linarith)) (abs_nonneg _)
     obtain ⟨h⟩ := error_read_handoff_of_gain box threshold es lo output cap
       (by rw [b]; norm_num) energy em eqBand ea rfl other eraw (by linarith) rest queue
-    refine ⟨⟨train, f, g, preMark, preSilent, e, trace, h, ?_, h.read_date, ?_, ?_, ?_⟩⟩
+    refine ⟨⟨train, f, g, preMark, preSilent, e, trace, h, ?_, h.read_date, ?_, ?_, ?_, h.recovery_at_read.trans b⟩⟩
     · intro t ht
       let read := h.decision
       have deadline := read.outcome.2.1

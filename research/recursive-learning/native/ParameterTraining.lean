@@ -349,7 +349,7 @@ theorem training_read_in_parameters {θ ε time gains p}
   obtain ⟨run⟩ := training_read_exists box threshold hi lo gain caps
   exact ⟨run, run.parameterComplete config threshold.1⟩
 
-private theorem training_threshold_bounds {θ : Fin 1 → Parameters} {p upper lower level}
+theorem training_threshold_bounds {θ : Fin 1 → Parameters} {p upper lower level}
     (config : (θ 0).thresholds = trainingThresholds p upper lower level)
     (threshold : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (hi : |upper - 1 / 10| ≤ 1 / 200) (lo : 0 ≤ lower) :
@@ -391,7 +391,7 @@ private theorem training_threshold_bounds {θ : Fin 1 → Parameters} {p upper l
       linarith
     · norm_num [trainingThresholds, Function.update_of_ne h]
 
-private theorem training_initial_invariant {θ time gains p delay}
+theorem training_initial_invariant {θ time gains p delay}
     (caps : ∀ q, gains q ≤ Real.log ((θ 0).cap q)) :
     ParameterPhysicalInvariant θ (trainingStart time gains p delay) := by
   constructor
