@@ -26,6 +26,11 @@ def Parameters.permutePorts (θ : Parameters) (σ : Equiv.Perm Port) : Parameter
   ls p := θ.ls (σ p)
   le p := θ.le (σ p)
   inputGain p := θ.inputGain (σ p)
+  thresholds := { θ.thresholds with
+    mark := fun p => θ.thresholds.mark (σ p)
+    silent := fun p => θ.thresholds.silent (σ p)
+    error := fun p => θ.thresholds.error (σ p)
+    auxReady := fun p => θ.thresholds.auxReady (σ p) }
 
 def permuteParameters {n} (θ : Fin n → Parameters) (σ : Equiv.Perm Port) : Fin n → Parameters :=
   fun i => (θ i).permutePorts σ

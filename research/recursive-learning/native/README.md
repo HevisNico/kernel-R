@@ -660,6 +660,285 @@ learned gain intact. At the low gain, both reads are silent and each
 writes a dose. The two-read guarantee therefore uses the declared
 initial low gain and its two remaining silent read slots.
 
+## A two-port readout with a tolerant FIRE threshold
+
+[ThresholdTolerance.lean](ThresholdTolerance.lean) proves a one-shot
+task for a single R cell. Starting just after admission of one canonical
+pulse, the cell reports which of two ports received it. On port 0, a
+gain at most 1.2 gives silence through time 0.9. On port 1, a gain in
+[2, 2.4] gives a transverse FIRE between times 0.3 and 0.9. Times are
+relative to admission. The two gains are fixed for the cell and may
+vary independently within those bounds. The unused third port has
+gain at most 3.6, which keeps the starting state within the physical
+gain caps for either fabrication box.
+
+The actual main FIRE threshold is a parameter in [0.95, 1.05].
+Fabrication parameters can independently take any values in either
+declared fabrication box. The prefix uses the original sensor MARK
+and SILENT events. The final READY flow satisfies the original
+integral field in every coordinate, with the main guard set to the
+chosen threshold. The FIRE applies the usual READY-to-FAST update.
+At threshold 1 the complete decision prefix embeds into an ordinary
+kernel execution. The stop time is unique among decision certificates
+with the same realized parameters, gains and threshold.
+
+The certificate ends at the first FIRE or the read deadline. The
+initial state and gain bounds are part of the task. Sensor thresholds,
+actuation factors and recovery guards retain their original values.
+Post-decision recovery and the training of these gains are outside
+the one-shot specification.
+
+## Error dose with inexact sensor endpoints
+
+[TolerantErrorDose.lean](TolerantErrorDose.lean) derives the dose from
+the original integral field for an exposed ERROR segment. If its
+realized entry and exit charges are `u` and `l`, the log-gain changes
+by exactly `8 * (u - l)`. The cap and energy gates must stay open
+and the main cell must stay READY. The sensor's decay rate cancels.
+
+With absolute charge errors `δhi` and `δlo` at the two endpoints, the
+dose is within `8 * (δhi + δlo)` of 0.6. After `k` segments with
+matching end and start log-gains, the worst-case error is at most
+`k * 8 * (δhi + δlo)`. If the two extremal gains lie in the reader's
+high band, a prepared read on that port fires.
+
+For a concrete one-dose memory test, the initial gain can be anywhere
+in [7/6, 1.2]. Independent relative errors of up to 5% in the nominal
+0.1 and 0.025 sensor endpoints put the dose in [0.55, 0.65]. The read
+of the initial gain is silent, and the read of the resulting gain on
+the same port fires. The high band is [2, 2.4] with the same 0.3 to 0.9
+firing window. Both reads tolerate a fixed main threshold in
+[0.95, 1.05] and either fabrication box.
+
+The dose and readout bounds above also apply to separately prepared
+states. The experiment below joins them in one trajectory.
+
+## Train and read the same port
+
+[ErrorReadHandoff.lean](ErrorReadHandoff.lean) starts with a READY cell
+whose selected sensor is already in ERROR, with no live input current.
+The sensor discharges from its realized upper charge to its realized
+lower charge under the original R equations. Both charges may differ
+from their nominal values by up to 5%. The gain and energy gates stay
+open, so the dose lies in [0.55, 0.65].
+
+At the lower charge, the sensor switches to READY. Its charge and every
+other continuous coordinate carry over. The cell waits under the native
+quiet flow and admits the single queued pulse on the same port at a
+scheduled time at least twelve units after ERROR entry. Both the main
+charge and the sensor reach the readout's starting bands by decay.
+Starting at the actual delivery state, the trained port produces a
+transverse first FIRE 0.3 to 0.9 time units
+after arrival, for every fixed FIRE threshold in [0.95, 1.05] and either
+fabrication box. At the nominal ERROR exit and FIRE levels the whole
+joined trajectory is an execution of the original kernel.
+
+The supplied ERROR state has main charge in [0.1, 0.94], other sensors at
+rest, and energy in [50, 100].
+
+## A complete training pulse followed by a read
+
+[TrainingRead.lean](TrainingRead.lean) starts before the first input,
+with one READY cell at rest and two canonical pulses queued on the same
+port, sixteen time units apart. The initial gain of that port is in
+[7/6, 1.2]. The first pulse drives the sensor
+through MARK and SILENT while the cell stays below its FIRE threshold.
+The sensor enters ERROR at its realized upper threshold, which can be
+before, at, or after expiry of the training pulse. If ERROR starts while
+the pulse is live, [LiveErrorExpiry.lean](LiveErrorExpiry.lean) proves
+that the current overlaps ERROR for at most 0.04 time units, the main
+charge stays below 0.94, and the sensor cannot reach its exit threshold
+before expiry. Expiry removes the raw tag and carries the charge, gain
+and energy into the rest of the ERROR phase.
+
+The net log-gain increment from training is exactly
+`8 * (upper - lower)`. The second pulse produces a transverse first FIRE
+0.3 to 0.9 units after delivery. The two ERROR thresholds and the FIRE
+threshold each tolerate 5% error. All three nominal levels give a
+native R execution from before the first delivery through the read FIRE.
+
+Both full fabrication boxes are covered, ±0.3% and ±10%, with every
+parameter fixed independently in its declared interval. The construction
+covers one training pulse and one read through the first FIRE.
+
+## Thresholds in the parameters
+
+[HybridParameterExecution.lean](../../../proof/lean/KernelR/HybridParameterExecution.lean)
+uses the fixed charge guards stored in each cell's `Parameters`. The
+continuous equations, pulse origin and queue rules are shared with the
+nominal kernel. Flows and completion check the same realized guards as
+jumps.
+
+[ParameterTraining.lean](ParameterTraining.lean) places the two-pulse
+experiment in this semantics. Lean constructs a complete run through
+the read FIRE for every admissible choice in either full fabrication
+box, with the three tolerances above. The other charge guards are
+nominal. The experiment covers one training pulse and one read.
+
+[HybridParameterUniversalExecution.lean](../../../proof/lean/KernelR/HybridParameterUniversalExecution.lean)
+proves uniqueness for every complete finite run under the declared
+threshold and physical bounds, for any fixed finite network and router.
+Runs from the same state and with the same realized parameters agree
+at a common horizon on their physical endpoint and ordered per-cell
+FIRE dates. The pending list is compared up to permutation.
+
+For this two-pulse protocol, `training_read_every_complete` gives a
+complete run and the same outcome in every complete run through its
+read horizon. The recorded FIRE list contains just that read firing,
+and the final log-gain increment is exactly `8 * (upper - lower)`.
+The proof uses the first-contact operational semantics. The constructed
+read FIRE is transverse.
+
+## Training with an ERROR exit near 0.01
+
+[ParameterTraining.lean](ParameterTraining.lean) proves
+`training_read_exit_001_every_complete` for an ERROR exit in
+`[0.00875, 0.01125]`. The ERROR entry remains in `[0.095, 0.105]`,
+the FIRE threshold in `[0.95, 1.05]`, and the trained port's birth gain
+in `[7/6, 1.2]`. The other guards are nominal. Both fabrication boxes
+are covered.
+
+A pulse trains the port at birth. A second pulse reads the same port
+18 time units later, allowing the sensor to settle into its original
+rest band. A complete run exists through the first FIRE. Every run
+complete through that horizon agrees on the endpoint and has exactly
+one FIRE, between 0.3 and 0.9 units after the read arrives. The final
+log-gain increment is `8 * (entry - exit)`, between 0.67 and 0.77.
+
+The same proof takes a variable exit and read delay through
+`training_read_every_complete_in_band`. The original 16-unit schedule
+and its theorem remain available. These theorems concern the single-cell
+task in the parameterized first-contact semantics. The two-cell
+coincidence benchmark uses a separate schedule and receiver contract.
+
+## Coincidence timing with an ERROR exit near 0.01
+
+[CoincidenceTiming.lean](CoincidenceTiming.lean) brackets the actual read
+FIRE using the charge at read, the learned gain, and the FIRE threshold.
+The lower time uses the largest charge and gain and the smallest
+threshold. The upper time uses the opposite bounds. The exponential
+estimates are proved over the reals in Lean.
+
+`training_read_exit_001_benchmark` fixes the trained port's birth gain
+exactly at `exp (gains p) = 6/5`. This satisfies the earlier birth band
+`[7/6, 1.2]`. The timing certificate uses the exact value. With a
+read at least 16.65 units after training, it gives one FIRE between
+0.3485 and 0.398 units after the read in every run complete through
+the first FIRE. Both fabrication boxes are covered. With radii `e`
+and `f`, the entry and exit tolerances are `0.1e` and `0.025e`
+around 0.1 and 0.01 respectively, and the FIRE tolerance is `f`
+around 1. All other guards are nominal.
+
+| Maximum ERROR radius `e` | Maximum FIRE radius `f` |
+| ---: | ---: |
+| 1% | 3% |
+| 2% | 2% |
+| 3% | 1% |
+
+Lean counts 22 of the 36 registered grid points in these sufficient
+rectangles. At 100 microseconds per unit and nominal exit 0.01, these
+are exactly the same 22 ERROR/FIRE pairs that passed in the
+[recorded sweep](https://github.com/HevisNico/kernel-R/blob/8ff0540cab31f55831ffd3698b36bd2940c872d1/research/recursive-learning/coincidence/results/exit-tradeoff.csv.xz)
+at each of its three fabrication settings. The Lean count gives
+coverage on this grid. A full characterization of the passing region
+would also require proving where the timing contract fails.
+
+`coincidence_of_trained_latency` is an arithmetic lemma with two
+latency intervals as hypotheses. At 100 microseconds per unit,
+with a common wire delay and independent jitter of up to 5
+microseconds, the skew is at most 14.95 microseconds at zero
+offset and at least 15.05 microseconds at offsets of −30 or +30
+microseconds. These bounds give a certified margin of 0.05
+microseconds around the 15 microsecond aperture. The certificate
+uses the declared uncertainties only.
+
+The execution theorem is for a single trained-port read through its
+first FIRE. A joint two-cell execution, wrong-port trials, the rest
+of the observation horizon, and a native receiver have separate
+proof obligations. The comparison below addresses the reduced timing contract.
+
+### Constant-current timing obstruction
+
+[TimedCurrentSeparation.lean](TimedCurrentSeparation.lean) uses the
+[registered constant-current rule](https://github.com/HevisNico/kernel-R/blob/1f04221262694383b1505a8d064f62903a85a34a/research/recursive-learning/COINCIDENCE_BENCHMARK.md#comparators)
+and the same `readyPulse` equation as the R latency theorem. In the
+reduced runner, a shared current and duration give a common dose
+`d = I * D`, scaled by each device's current multiplier and clipped at
+its realized gain cap. The runner requires silent training and positive
+reserve. The protocol requires the timer to finish by time 16.
+
+At 100 microseconds per unit, use the wide fabrication box, 10%
+current error, 3% FIRE error, ERROR entry 0.1 and exit 0.01. Put the
+high-current, high-cap, low-FIRE corner on the early read and reverse
+all three signs on the late read. The two reads are at 16.95 and
+17.05 with zero offset. Lean proves that for **every shared dose**
+this positive trial either lacks a report or has skew at least
+15 microseconds. The proof includes capped writes. For doses up to
+0.36 it rules out the slow report directly. Seven bounded dose
+intervals and one unbounded interval cover the remaining doses.
+
+The obstruction applies to the constant-current **reduced** timing
+model with eligible writes, quiet relaxation after training, and a
+frozen learned gain during the read pulse. Its training endpoint charge
+lies in [0.1, 1.03]. The timed rule has no separate hybrid execution
+construction here.
+
+### Two-cell execution assembly
+
+[ParameterExecutionProduct.lean](ParameterExecutionProduct.lean) weaves
+two independent parameterized executions at a common clock. The joint
+queue retains both cells' deliveries, and the two FIRE lists retain
+their exact dates. Local completeness through the same horizon gives
+joint completeness.
+
+[CoincidenceReadTail.lean](CoincidenceReadTail.lean) proves that a
+trained-port FIRE cannot be followed by another FIRE in any legal
+finite continuation of the task. The read pulse ends before FAST can
+end. After pulse expiry the cell has no drive and any return to READY
+starts below FIRE.
+
+[CoincidenceNetworkContract.lean](CoincidenceNetworkContract.lean)
+derives the registered receiver decision at time 20 for every complete
+joint run, given two local witnesses complete through that horizon
+with the declared FIRE lists. The receiver uses the 0.35 wire delay
+and 20.35 arrival deadline.
+
+[CoincidenceLocalExecution.lean](CoincidenceLocalExecution.lean)
+constructs a complete wrong-port trial through time 20 with an empty
+FIRE list. It retains the actual training trajectory, retargets only
+the queued read and bounds the charge during the live-pulse overlap
+with ERROR. The wrong port uses its nominal auxiliary guards. The
+birth-gain, fabrication and threshold hypotheses of the 0.01 timing
+certificate cover the registered read dates from 16.65 to 17.35.
+
+[CoincidenceProtectedTail.lean](CoincidenceProtectedTail.lean) advances
+a trained-port run to time 20 after its FIRE. The construction processes
+pulse expiry, FAST exit and sensor contacts in time order, including
+ties. SLOW remains above its reopening threshold through the horizon.
+
+[CoincidenceSeparation.lean](CoincidenceSeparation.lean) proves
+`coincidence_exit_001_full_contract` for two independent cells. A
+complete run exists for every admissible pair of read dates and ports.
+In every complete run each trained-port read gives exactly one report
+and each other read gives none. The receiver accepts exactly when both
+ports match the training and the offset is zero. The 0.35 delays and
+the coincidence test are applied to the emitted dates by the receiver
+contract.
+
+The combined theorem `coincidence_exit_001_separation` uses 100 µs per
+model unit, ±10% fabrication and ±3% FIRE threshold error. On each
+trained port, the ERROR entry can vary by up to 0.001 around 0.1 and
+the exit by up to 0.00025 around 0.01 (radius `e ≤ 0.01` in Lean).
+The other ports keep their nominal auxiliary thresholds. Native R
+satisfies the full receiver contract throughout this box.
+
+For the reduced constant-current rule with ±10% current variation, one
+positive trial with nominal ERROR endpoints excludes every common
+current and duration, including settings that touch the gain cap.
+Those endpoints belong to every admitted ERROR box. The proof uses
+the exact trained birth gain 1.2. The receiver is an observation of
+two native runs and the comparator uses the reduced READY equation.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -679,7 +958,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `LearnerReadout`, `ReadoutSeries`, `LearnerConjunction`, `LearnerFanIn` and
 `ScheduledGates`, `ScheduledCircuit`, `ReportFormula`, `ScheduledCommit` and
 `ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
-`BlindNeedSearch` and `ThresholdProbe`, and run
+`BlindNeedSearch`, `ThresholdProbe`, and the coincidence modules
+through `CoincidenceSeparation`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

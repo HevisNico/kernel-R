@@ -25,14 +25,16 @@ noncomputable def queued : Snapshot 1 := {{ resting 0 with pending := [token] }}
 example : Jump route queued {{ (setRaw queued 0 0 (some 0)) with pending := {out} }} := by
   exact Jump.arrive queued token [] [] rfl rfl rfl
 '''
-    cap = '''def pars : Fin 1 → Parameters := fun _ => ⟨fun _ => 1, fun _ => 1,
-  fun _ => 1, fun _ => 1, fun _ => 1⟩
+    cap = '''noncomputable def pars : Fin 1 → Parameters := fun _ =>
+  {{ cap := fun _ => 1, lm := fun _ => 1, ls := fun _ => 1,
+     le := fun _ => 1, inputGain := fun _ => 1 }}
 noncomputable def capped : Snapshot 1 := setAux (resting 0) 0 0 .error
 example : errorAct pars capped capped.x 0 0 = {dose} := by
   norm_num [errorAct, capped, pars, setAux, resting]
 '''
-    energy = '''def pars : Fin 1 → Parameters := fun _ => ⟨fun _ => 4, fun _ => 1,
-  fun _ => 1, fun _ => 1, fun _ => 1⟩
+    energy = '''noncomputable def pars : Fin 1 → Parameters := fun _ =>
+  {{ cap := fun _ => 4, lm := fun _ => 1, ls := fun _ => 1,
+     le := fun _ => 1, inputGain := fun _ => 1 }}
 noncomputable def emptyReserve : Snapshot 1 :=
   {{ (setAux (resting 0) 0 0 .error) with x := fun i c =>
       if c = .energy then 0 else (resting 0).x i c }}

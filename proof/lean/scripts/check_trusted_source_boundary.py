@@ -14,6 +14,8 @@ IMPORTS = {
     'import KernelR.HybridCrossingMemorySaturation',
     'import KernelR.HybridResetRateCrossing',
     'import KernelR.HybridZeroRecoveryCrossing',
+    'import KernelR.HybridParameterNominal',
+    'import KernelR.HybridParameterUniversalExecution',
 }
 NEW_MODULES = {f'proof/lean/KernelR/{name}.lean' for name in
                ['ExplicitFiniteChainRouter', 'TrustedHeadline', 'TrustedBaseChecker', 'TrustedBase']}
@@ -26,8 +28,23 @@ NEW_MODULES |= {
     'proof/lean/KernelR/HybridMemorySaturation.lean',
     'proof/lean/KernelR/HybridCrossingMemorySaturation.lean',
     'proof/lean/MemorySaturationAudit.lean',
+    'proof/lean/KernelR/HybridParameterExecution.lean',
+    'proof/lean/KernelR/HybridParameterNominal.lean',
+    'proof/lean/KernelR/HybridParameterJumpDiamond.lean',
+    'proof/lean/KernelR/HybridParameterPhysical.lean',
+    'proof/lean/KernelR/HybridParameterFlowUniqueness.lean',
+    'proof/lean/KernelR/HybridParameterTransport.lean',
+    'proof/lean/KernelR/HybridParameterJumpStripping.lean',
+    'proof/lean/KernelR/HybridParameterUniversalExecution.lean',
 }
 ENTRY = 'proof/lean/KernelR.lean'
+# Declared replacements for the threshold-parameter migration. All other
+# inherited Lean sources are still checked against the original base.
+MIGRATION_REPLACEMENTS = {
+    'proof/lean/KernelR/FutureControls.lean': '20373ccbdad7f53701a434fbdc2c77d7726f085e',
+    'proof/lean/KernelR/Hybrid.lean': '7a32c5e8dabbba911d7c28aa421514aa4f4e0590',
+    'proof/lean/KernelR/HybridPortPermutation.lean': 'a129c6f6283960e06aa1caf78cd8cc187b9bbf62',
+}
 
 
 def git(*args):
@@ -62,14 +79,16 @@ def main():
     for path, expected in old.items():
         if path == ENTRY:
             check_imports(git('show', f'{BASE}:{path}').decode(), (ROOT / path).read_text())
-        elif not (ROOT / path).is_file() or blob((ROOT / path).read_bytes()) != expected:
-            raise SystemExit('Existing Lean source changed or removed: ' + path)
+        else:
+            accepted = MIGRATION_REPLACEMENTS.get(path, expected)
+            if not (ROOT / path).is_file() or blob((ROOT / path).read_bytes()) != accepted:
+                raise SystemExit('Existing Lean source changed or removed: ' + path)
     current = {path.decode() for path in git('ls-files', '-z', 'proof/lean').split(b'\0')
                if path.endswith(b'.lean')}
     unexpected = current - old.keys() - NEW_MODULES
     if unexpected:
         raise SystemExit('Unexpected new Lean module: ' + ', '.join(sorted(unexpected)))
-    print(f'Existing Lean sources unchanged at base {BASE}; only declared imports/modules added.')
+    print(f'Lean source boundary checked at base {BASE} with the pinned replacements.')
 
 
 if __name__ == '__main__':
