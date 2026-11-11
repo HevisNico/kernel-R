@@ -1333,16 +1333,73 @@ trained cells.
   date 968, with wire delays 1 and 11/10. In every complete run, the
   third cell fires its read between 969.478 and 969.612.
 
+This theorem fixes three cells and the order of arrival at cell 2. The
+next modules remove both restrictions.
+
+### Read pulses in either order
+
+[FreeRead.lean](FreeRead.lean) separates the training of a cell from its
+read.
+
+- `rest_wait`: a cell at rest stays at rest for as long as no pulse
+  arrives. No gain moves.
+- `OpenCell`: a trained cell without its read pulses. Its hypotheses are
+  those of `TrainedCell` without the read dates. After `horizon` the
+  cell is trained and at rest.
+- `OpenCell.read`: two read pulses arrive after `horizon`, one on each
+  trained port, at most a quarter of a unit apart, **in either order**.
+  The cell fires its read later than 0.239 units after the first pulse
+  and no later than 0.256 units after the second. Every FIRE of training
+  comes before `horizon`, which is a fixed date.
+
+### Composition along forward wires
+
+[AcyclicNetwork.lean](AcyclicNetwork.lean) proves one composition theorem
+for every network whose wires go from a cell to a cell of higher index.
+
+`acyclic_network` takes, for each cell, a description of its FIRE dates
+that may mention the FIRE dates of the cells before it. Its hypothesis is
+local: a cell fed by cells that follow their descriptions has a run to
+rest that follows its own. The pulses it receives are computed from the
+router by `incoming`. The conclusion is global: the network has a
+complete run, every cell follows its description, and the FIRE dates are
+the same in every complete run. The cells are treated one after the
+other, in index order, and `routed_execution` weaves their runs.
+
+### Networks of trained cells of any depth
+
+[WiredNetwork.lean](WiredNetwork.lean) applies the composition theorem to
+trained cells.
+
+- `ReadInput`: each of the two read pulses of a cell comes from a source
+  at a fixed date, or from the read FIRE of an earlier cell through a
+  wire with a positive delay.
+- `trained_wired_network`: any number of cells, any wiring of that kind.
+  The hypothesis `admissible` says that, whenever the earlier cells fire
+  their reads in their windows, the two read pulses of a cell arrive
+  after its training and at most a quarter of a unit apart. Their order
+  is free. In every complete run, each cell fires its read later than
+  0.239 units after its first read pulse and no later than 0.256 units
+  after its second, after the FIRE events of its own training.
+- `trained_chain_witness`: for every `n`, a chain of `n` copies of the
+  explicit cell. A source reads the first cell at date 968. The read
+  FIRE of each cell reads the two ports of the next one, one unit later.
+  In every complete run, each cell fires its read between 1.239 and
+  1.256 units after the cell before it.
+
 Limits:
 
-- **Two layers, three cells.** A cascade of any depth is not stated.
-- **Order of arrival at cell 2.** The pulse from cell 0 must arrive no
-  later than the pulse from cell 1, by at most a quarter of a unit. The
-  wire delays are chosen so that the windows guarantee it.
+- **Width of the windows.** The theorem bounds each read FIRE inside a
+  window of 0.017 units plus the distance between the two arrivals. On a
+  path where the two ports of a cell are fed by different cells, the
+  windows widen with the depth, and the hypothesis `admissible` needs
+  them to stay within a quarter of a unit. In the chain both ports of a
+  cell are fed by the same FIRE, so the depth is free.
 - **Gates.** Each wire carries the FIRE events after a fixed date only.
-- **The decision tree of the binary search** is not rebuilt on this
-  composition. It also needs report windows and a way to act on the
-  silence of a probe.
+  That date is the end of the training of the sending cell.
+- **Every read pulse arrives.** A cell that may or may not receive a
+  read pulse is not covered by `trained_wired_network`. The composition
+  theorem `acyclic_network` covers it, given the one-cell description.
 
 ## Common threshold offset and reaction delay
 
@@ -1412,7 +1469,8 @@ builds this package with the pinned dependencies. Its default targets compile
 through `CoincidenceSeparation`, `StopLearningLatency`,
 `NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep`,
 `TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence`,
-`OffsetAndDelay`, `FamilyProduct`, `RoutedProduct` and `Cascade`. The
+`OffsetAndDelay`, `FamilyProduct`, `RoutedProduct`, `Cascade`,
+`FreeRead`, `AcyclicNetwork` and `WiredNetwork`. The
 default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.

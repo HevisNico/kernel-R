@@ -17,6 +17,9 @@ import OffsetAndDelay
 import FamilyProduct
 import RoutedProduct
 import Cascade
+import FreeRead
+import AcyclicNetwork
+import WiredNetwork
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000
