@@ -355,13 +355,15 @@ theorem silentEnd_silent {θ : Fin 1 → Parameters} {s : Snapshot 1} {M : Port 
       s.x 0 (.m q) * Real.exp (-(θ 0).ls q * (H - s.time)) := by
   simp [silentEnd, h]
 
-/-- A driven state whose sensor contacts are planned up to the horizon
-`H`. The main charge stays below the FIRE level before `H`, every live
-pulse outlasts `H`, and every busy sensor is SILENT, above its ERROR
-entry threshold, at `H`. -/
-structure Plan (θ : Fin 1 → Parameters) (s : Snapshot 1) (M : Port → ℝ) (H level : ℝ) : Prop where
+/-- A driven state whose sensor contacts are planned. Up to the horizon
+`H` the main charge stays below the FIRE level, the live pulses last and
+no delivery is due. A busy sensor that is SILENT stays above its ERROR
+entry threshold up to the later date `K`. -/
+structure Plan (θ : Fin 1 → Parameters) (s : Snapshot 1) (M : Port → ℝ) (H K level : ℝ) :
+    Prop where
   driven : Driven s
   time : s.time ≤ H
+  horizon : H ≤ K
   fire : (θ 0).thresholds.fire = level
   mark : ∀ q, (θ 0).thresholds.mark q = 1
   silent : ∀ q, (θ 0).thresholds.silent q = 4 / 5
@@ -370,26 +372,43 @@ structure Plan (θ : Fin 1 → Parameters) (s : Snapshot 1) (M : Port → ℝ) (
   pending : ∀ d ∈ s.pending, H ≤ d.due
   quiet : ∀ q, s.aux 0 q = .ready → s.raw 0 q = none → s.x 0 (.m q) < 1
   ready : ∀ q, s.aux 0 q = .ready → s.raw 0 q ≠ none →
-    s.time ≤ M q ∧ M q + decayTime 1 (4 / 5) ((θ 0).lm q) < H ∧
-    (∀ t ∈ Ico s.time (M q), drivenSensor θ s q t < 1) ∧ drivenSensor θ s q (M q) = 1
-  marked : ∀ q, s.aux 0 q = .mark → 4 / 5 ≤ s.x 0 (.m q) ∧
-    s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q) < H
+    s.time ≤ M q ∧ (∀ t ∈ Ico s.time (M q), drivenSensor θ s q t < 1) ∧
+    drivenSensor θ s q (M q) = 1
+  marked : ∀ q, s.aux 0 q = .mark → 4 / 5 ≤ s.x 0 (.m q)
   silenced : ∀ q, s.aux 0 q = .silent → 0 ≤ s.x 0 (.m q)
-  above : ∀ q, Busy s q → (θ 0).thresholds.error q < silentEnd θ s M q H
+  above : ∀ q, Busy s q → (θ 0).thresholds.error q < silentEnd θ s M q K
+
+/-- Every busy sensor is SILENT before the date `H`. -/
+structure Complete (θ : Fin 1 → Parameters) (s : Snapshot 1) (M : Port → ℝ) (H : ℝ) : Prop where
+  ready : ∀ q, s.aux 0 q = .ready → s.raw 0 q ≠ none →
+    M q + decayTime 1 (4 / 5) ((θ 0).lm q) < H
+  marked : ∀ q, s.aux 0 q = .mark →
+    s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q) < H
 
 /-- Two states on the same driven timeline. -/
-structure DSame (θ : Fin 1 → Parameters) (s s' : Snapshot 1) (M : Port → ℝ) (H : ℝ) : Prop where
-  charge : readyPulse (s'.x 0 .q) (drivenAmplitude s') s'.time H =
-    readyPulse (s.x 0 .q) (drivenAmplitude s) s.time H
+structure DSame (θ : Fin 1 → Parameters) (s s' : Snapshot 1) (M : Port → ℝ) : Prop where
+  charge : ∀ t, readyPulse (s'.x 0 .q) (drivenAmplitude s') s'.time t =
+    readyPulse (s.x 0 .q) (drivenAmplitude s) s.time t
   raw : s'.raw = s.raw
   queue : s'.pending = s.pending
   gains : ∀ q, s'.x 0 (.z q) = s.x 0 (.z q)
   recovery : s'.x 0 .b = s.x 0 .b
   busy : ∀ q, Busy s' q ↔ Busy s q
-  ends : ∀ q, Busy s q → silentEnd θ s' M q H = silentEnd θ s M q H
-  idle : ∀ q, ¬ Busy s q → drivenSensor θ s' q H = drivenSensor θ s q H
+  ends : ∀ q, Busy s q → ∀ T, silentEnd θ s' M q T = silentEnd θ s M q T
+  idle : ∀ q, ¬ Busy s q → ∀ t, drivenSensor θ s' q t = drivenSensor θ s q t
 
-/-- The state at the horizon. -/
+theorem DSame.refl (θ : Fin 1 → Parameters) (s : Snapshot 1) (M : Port → ℝ) : DSame θ s s M :=
+  ⟨fun _ => rfl, rfl, rfl, fun _ => rfl, rfl, fun _ => Iff.rfl, fun _ _ _ => rfl, fun _ _ _ => rfl⟩
+
+theorem DSame.trans {θ : Fin 1 → Parameters} {s s' s'' : Snapshot 1} {M : Port → ℝ}
+    (h : DSame θ s s' M) (k : DSame θ s' s'' M) : DSame θ s s'' M :=
+  ⟨fun t => (k.charge t).trans (h.charge t), k.raw.trans h.raw, k.queue.trans h.queue,
+    fun q => (k.gains q).trans (h.gains q), k.recovery.trans h.recovery,
+    fun q => (k.busy q).trans (h.busy q),
+    fun q hq T => (k.ends q ((h.busy q).mpr hq) T).trans (h.ends q hq T),
+    fun q hq t => (k.idle q (fun hb => hq ((h.busy q).mp hb)) t).trans (h.idle q hq t)⟩
+
+/-- The state at the horizon, with every busy sensor SILENT. -/
 structure DrivenEnd (θ : Fin 1 → Parameters) (s : Snapshot 1) (M : Port → ℝ) (H : ℝ)
     (u : Snapshot 1) : Prop where
   time : u.time = H
@@ -403,18 +422,18 @@ structure DrivenEnd (θ : Fin 1 → Parameters) (s : Snapshot 1) (M : Port → �
   idle : ∀ q, ¬ Busy s q → u.aux 0 q = .ready ∧ u.x 0 (.m q) = drivenSensor θ s q H
 
 theorem DrivenEnd.of_same {θ : Fin 1 → Parameters} {s s' u : Snapshot 1} {M : Port → ℝ} {H : ℝ}
-    (h : DSame θ s s' M H) (e : DrivenEnd θ s' M H u) : DrivenEnd θ s M H u :=
-  ⟨e.time, e.main, e.charge.trans h.charge, e.raw.trans h.raw, e.queue.trans h.queue,
+    (h : DSame θ s s' M) (e : DrivenEnd θ s' M H u) : DrivenEnd θ s M H u :=
+  ⟨e.time, e.main, e.charge.trans (h.charge H), e.raw.trans h.raw, e.queue.trans h.queue,
     fun q => (e.gains q).trans (h.gains q), e.recovery.trans h.recovery,
     fun q hq => by
       obtain ⟨mode, value⟩ := e.busy q ((h.busy q).mpr hq)
-      exact ⟨mode, value.trans (h.ends q hq)⟩,
+      exact ⟨mode, value.trans (h.ends q hq H)⟩,
     fun q hq => by
       obtain ⟨mode, value⟩ := e.idle q (fun hb => hq ((h.busy q).mp hb))
-      exact ⟨mode, value.trans (h.idle q hq)⟩⟩
+      exact ⟨mode, value.trans (h.idle q hq H)⟩⟩
 
 theorem drivenSensor_congr {θ : Fin 1 → Parameters} {s s' : Snapshot 1} {q : Port}
-    (hx : s'.x = s.x) (ht : s'.time = s.time) (hr : s'.raw = s.raw)
+    (hx : s'.x = s.x) (ht : s'.time = s.time) (hr : s'.raw 0 q = s.raw 0 q)
     (ha : s'.aux 0 q = s.aux 0 q) : drivenSensor θ s' q = drivenSensor θ s q := by
   funext t
   unfold drivenSensor sensorRate rawScale
@@ -430,21 +449,23 @@ theorem rawScale_none {s : Snapshot 1} {q : Port} (h : s.raw 0 q = none) : rawSc
   simp [rawScale, h, rawInputScale]
 
 /-- The cell flows up to any date that precedes its pending contacts. -/
-theorem plan_advance {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H level τ : ℝ}
-    (box : @PhysicalBox 1 θ ε) (plan : Plan θ s M H level) (lt : s.time < τ) (le : τ ≤ H)
+theorem plan_advance {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H K level τ : ℝ}
+    (box : @PhysicalBox 1 θ ε) (plan : Plan θ s M H K level) (lt : s.time < τ) (le : τ ≤ H)
     (ready : ∀ q, s.aux 0 q = .ready → s.raw 0 q ≠ none → τ ≤ M q)
     (marked : ∀ q, s.aux 0 q = .mark →
       τ ≤ s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q)) :
-    Nonempty (ParameterFlow θ s (drivenAt θ s τ)) ∧ Plan θ (drivenAt θ s τ) M H level ∧
-      DSame θ s (drivenAt θ s τ) M H := by
+    Nonempty (ParameterFlow θ s (drivenAt θ s τ)) ∧ Plan θ (drivenAt θ s τ) M H K level ∧
+      DSame θ s (drivenAt θ s τ) M ∧
+      ∀ H', Complete θ s M H' → Complete θ (drivenAt θ s τ) M H' := by
   have date : (drivenAt θ s τ).time = τ := rfl
   have value (q : Port) : (drivenAt θ s τ).x 0 (.m q) = drivenSensor θ s q τ := rfl
-  have endEq (q : Port) : silentEnd θ (drivenAt θ s τ) M q H = silentEnd θ s M q H := by
+  have endEq (q : Port) (T : ℝ) :
+      silentEnd θ (drivenAt θ s τ) M q T = silentEnd θ s M q T := by
     have rates := box.rates_positive 0 q
     rcases hm : s.aux 0 q with _ | _ | _ | _
     · rw [silentEnd_ready (s := drivenAt θ s τ) hm, silentEnd_ready hm]
     · rw [silentEnd_mark (s := drivenAt θ s τ) hm, silentEnd_mark hm, value, drivenSensor_mark hm,
-        decayTime_shift (lt_of_lt_of_le (by norm_num) (plan.marked q hm).1) (by norm_num) rates.1,
+        decayTime_shift (lt_of_lt_of_le (by norm_num) (plan.marked q hm)) (by norm_num) rates.1,
         date]
       congr 2
       ring
@@ -480,10 +501,10 @@ theorem plan_advance {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H level τ : �
           · rw [drivenSensor_ready hm, rawScale_none hr, mul_zero, auxPulse_zero_eq_relax]
             exact relax_lt_one ht₁ (plan.quiet q hm hr)
           · have live : s.raw 0 q ≠ none := by rw [hr]; simp
-            exact (plan.ready q hm live).2.2.1 t ⟨ht₁, ht₂.trans_le (ready q hm live)⟩
+            exact (plan.ready q hm live).2.1 t ⟨ht₁, ht₂.trans_le (ready q hm live)⟩
         · show (θ 0).thresholds.silent q < drivenSensor θ s q t
           rw [plan.silent, drivenSensor_mark hm]
-          exact decay_above (lt_of_lt_of_le (by norm_num) (plan.marked q hm).1) (by norm_num)
+          exact decay_above (lt_of_lt_of_le (by norm_num) (plan.marked q hm)) (by norm_num)
             rates.1 (by linarith [marked q hm])
         · show (θ 0).thresholds.error q < drivenSensor θ s q t
           have ab := plan.above q (Or.inl (by rw [hm]; decide))
@@ -491,58 +512,62 @@ theorem plan_advance {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H level τ : �
           rw [drivenSensor_silent hm]
           refine lt_of_lt_of_le ab (mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr ?_)
             (plan.silenced q hm))
-          nlinarith [mul_nonneg rates.2.1.le (sub_nonneg.mpr (ht₂.le.trans le))]
+          nlinarith [mul_nonneg rates.2.1.le
+            (sub_nonneg.mpr ((ht₂.le.trans le).trans plan.horizon))]
         · exact absurd hm (plan.driven.no_error q) }
-  refine ⟨⟨flow⟩, ?_, ⟨drivenCharge_at θ s τ H, rfl, rfl, fun _ => rfl, rfl, fun _ => Iff.rfl,
-    fun q _ => endEq q, fun q _ => drivenSensor_at θ s τ q H⟩⟩
-  exact {
-    driven := ⟨plan.driven.main, plan.driven.no_error⟩
-    time := le
-    fire := plan.fire
-    mark := plan.mark
-    silent := plan.silent
-    charge := fun t ht => by
-      show readyPulse ((drivenAt θ s τ).x 0 .q) (drivenAmplitude (drivenAt θ s τ)) τ t < level
-      rw [drivenCharge_at]
-      exact plan.charge t ⟨lt.le.trans ht.1, ht.2⟩
-    raw := fun q o h => ⟨(plan.raw q o h).1.trans lt.le, (plan.raw q o h).2⟩
-    pending := plan.pending
-    quiet := fun q hm hr => by
-      rw [value, drivenSensor_ready (s := s) hm, rawScale_none (s := s) hr, mul_zero,
-        auxPulse_zero_eq_relax]
-      exact relax_lt_one lt.le (plan.quiet q hm hr)
-    ready := fun q hm hr => by
-      obtain ⟨_, before, below, contact⟩ := plan.ready q hm hr
-      refine ⟨ready q hm hr, before, fun t ht => ?_, ?_⟩
-      · rw [drivenSensor_at]
-        exact below t ⟨lt.le.trans ht.1, ht.2⟩
-      · rw [drivenSensor_at]
-        exact contact
-    marked := fun q hm => by
-      have rates := box.rates_positive 0 q
-      obtain ⟨floor, before⟩ := plan.marked q hm
-      have pos : 0 < s.x 0 (.m q) := lt_of_lt_of_le (by norm_num) floor
-      rw [value, drivenSensor_mark (s := s) hm]
-      refine ⟨decay_ge pos (by norm_num) rates.1 (by linarith [marked q hm]), ?_⟩
-      rw [decayTime_shift pos (by norm_num) rates.1]
-      show τ + _ < H
-      linarith
-    silenced := fun q hm => by
-      rw [value, drivenSensor_silent (s := s) hm]
-      exact mul_nonneg (plan.silenced q hm) (Real.exp_pos _).le
-    above := fun q hb => by
-      rw [endEq]
-      exact plan.above q hb }
+  refine ⟨⟨flow⟩, ?_, ⟨fun t => drivenCharge_at θ s τ t, rfl, rfl, fun _ => rfl, rfl,
+    fun _ => Iff.rfl, fun q _ T => endEq q T, fun q _ t => drivenSensor_at θ s τ q t⟩, ?_⟩
+  · exact {
+      driven := ⟨plan.driven.main, plan.driven.no_error⟩
+      time := le
+      horizon := plan.horizon
+      fire := plan.fire
+      mark := plan.mark
+      silent := plan.silent
+      charge := fun t ht => by
+        show readyPulse ((drivenAt θ s τ).x 0 .q) (drivenAmplitude (drivenAt θ s τ)) τ t < level
+        rw [drivenCharge_at]
+        exact plan.charge t ⟨lt.le.trans ht.1, ht.2⟩
+      raw := fun q o h => ⟨(plan.raw q o h).1.trans lt.le, (plan.raw q o h).2⟩
+      pending := plan.pending
+      quiet := fun q hm hr => by
+        rw [value, drivenSensor_ready (s := s) hm, rawScale_none (s := s) hr, mul_zero,
+          auxPulse_zero_eq_relax]
+        exact relax_lt_one lt.le (plan.quiet q hm hr)
+      ready := fun q hm hr => by
+        obtain ⟨_, below, contact⟩ := plan.ready q hm hr
+        refine ⟨ready q hm hr, fun t ht => ?_, ?_⟩
+        · rw [drivenSensor_at]
+          exact below t ⟨lt.le.trans ht.1, ht.2⟩
+        · rw [drivenSensor_at]
+          exact contact
+      marked := fun q hm => by
+        have rates := box.rates_positive 0 q
+        have pos : 0 < s.x 0 (.m q) := lt_of_lt_of_le (by norm_num) (plan.marked q hm)
+        rw [value, drivenSensor_mark (s := s) hm]
+        exact decay_ge pos (by norm_num) rates.1 (by linarith [marked q hm])
+      silenced := fun q hm => by
+        rw [value, drivenSensor_silent (s := s) hm]
+        exact mul_nonneg (plan.silenced q hm) (Real.exp_pos _).le
+      above := fun q hb => by
+        rw [endEq]
+        exact plan.above q hb }
+  · intro H' complete
+    refine ⟨complete.ready, fun q hm => ?_⟩
+    have rates := box.rates_positive 0 q
+    have pos : 0 < s.x 0 (.m q) := lt_of_lt_of_le (by norm_num) (plan.marked q hm)
+    rw [value, drivenSensor_mark (s := s) hm, decayTime_shift pos (by norm_num) rates.1]
+    show τ + _ < H'
+    linarith [complete.marked q hm]
 
 /-- A sensor contact changes the mode of one busy sensor only. -/
-theorem plan_step {θ : Fin 1 → Parameters} {s : Snapshot 1} {M : Port → ℝ} {H level : ℝ}
-    {q : Port} {mode : AuxMode} (plan : Plan θ s M H level) (busy : Busy s q)
+theorem plan_step {θ : Fin 1 → Parameters} {s : Snapshot 1} {M : Port → ℝ} {H K level : ℝ}
+    {q : Port} {mode : AuxMode} (plan : Plan θ s M H K level) (busy : Busy s q)
     (new : mode = .mark ∨ mode = .silent)
-    (marked : mode = .mark → 4 / 5 ≤ s.x 0 (.m q) ∧
-      s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q) < H)
+    (marked : mode = .mark → 4 / 5 ≤ s.x 0 (.m q))
     (silenced : mode = .silent → 0 ≤ s.x 0 (.m q))
-    (endQ : silentEnd θ (setAux s 0 q mode) M q H = silentEnd θ s M q H) :
-    Plan θ (setAux s 0 q mode) M H level ∧ DSame θ s (setAux s 0 q mode) M H := by
+    (endQ : ∀ T, silentEnd θ (setAux s 0 q mode) M q T = silentEnd θ s M q T) :
+    Plan θ (setAux s 0 q mode) M H K level ∧ DSame θ s (setAux s 0 q mode) M := by
   have hs' := setAux_same s q mode
   have other (q' : Port) (h : q' ≠ q) := setAux_other s mode h
   have notReady : mode ≠ .ready := by rcases new with rfl | rfl <;> decide
@@ -563,6 +588,7 @@ theorem plan_step {θ : Fin 1 → Parameters} {s : Snapshot 1} {M : Port → ℝ
         · subst q'; rw [hs']; rcases new with rfl | rfl <;> decide
         · rw [other q' h]; exact plan.driven.no_error q'⟩
       time := plan.time
+      horizon := plan.horizon
       fire := plan.fire
       mark := plan.mark
       silent := plan.silent
@@ -592,15 +618,32 @@ theorem plan_step {θ : Fin 1 → Parameters} {s : Snapshot 1} {M : Port → ℝ
         · subst q'; rw [endQ]; exact plan.above q busy
         · rw [silentEnd_congr (s := s) (s' := setAux s 0 q mode) rfl rfl (other q' h)]
           exact plan.above q' ((busyIff q').mp hb) }
-  · exact ⟨rfl, rfl, rfl, fun _ => rfl, rfl, busyIff,
-      fun q' _ => by
+  · exact ⟨fun _ => rfl, rfl, rfl, fun _ => rfl, rfl, busyIff,
+      fun q' _ T => by
         by_cases h : q' = q
-        · subst q'; exact endQ
-        · exact silentEnd_congr (s := s) (s' := setAux s 0 q mode) rfl rfl (other q' h) H,
-      fun q' hb => by
+        · subst q'; exact endQ T
+        · exact silentEnd_congr (s := s) (s' := setAux s 0 q mode) rfl rfl (other q' h) T,
+      fun q' hb t => by
         by_cases h : q' = q
         · subst q'; exact absurd busy hb
         · rw [sensorOther q' h]⟩
+
+theorem complete_step {θ : Fin 1 → Parameters} {s : Snapshot 1} {M : Port → ℝ} {H : ℝ}
+    {q : Port} {mode : AuxMode} (complete : Complete θ s M H)
+    (new : mode = .mark ∨ mode = .silent)
+    (marked : mode = .mark →
+      s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q) < H) :
+    Complete θ (setAux s 0 q mode) M H := by
+  have hs' := setAux_same s q mode
+  have other (q' : Port) (h : q' ≠ q) := setAux_other s mode h
+  have notReady : mode ≠ .ready := by rcases new with rfl | rfl <;> decide
+  refine ⟨fun q' hm hr => ?_, fun q' hm => ?_⟩
+  · by_cases h : q' = q
+    · subst q'; rw [hs'] at hm; exact absurd hm notReady
+    · rw [other q' h] at hm; exact complete.ready q' hm hr
+  · by_cases h : q' = q
+    · subst q'; rw [hs'] at hm; exact marked hm
+    · rw [other q' h] at hm; exact complete.marked q' hm
 
 /-- The sensor contacts still ahead: two for a READY sensor under a live
 pulse, one for a sensor in MARK. -/
@@ -624,56 +667,142 @@ theorem planCount_setAux_lt {s : Snapshot 1} {q : Port} {mode : AuxMode}
       exact le_rfl
   · exact ⟨q, Finset.mem_univ q, h⟩
 
-theorem plan_mark {θ : Fin 1 → Parameters} {s : Snapshot 1} {M : Port → ℝ} {H level : ℝ}
-    {q : Port} (plan : Plan θ s M H level) (hm : s.aux 0 q = .ready) (hr : s.raw 0 q ≠ none)
+theorem plan_mark {θ : Fin 1 → Parameters} {s : Snapshot 1} {M : Port → ℝ} {H K level : ℝ}
+    {q : Port} (plan : Plan θ s M H K level) (hm : s.aux 0 q = .ready) (hr : s.raw 0 q ≠ none)
     (due : M q = s.time) :
-    Runs θ s (setAux s 0 q .mark) 0 ∧ Plan θ (setAux s 0 q .mark) M H level ∧
-      DSame θ s (setAux s 0 q .mark) M H ∧ planCount (setAux s 0 q .mark) < planCount s := by
-  obtain ⟨_, before, _, contact⟩ := plan.ready q hm hr
+    Runs θ s (setAux s 0 q .mark) 0 ∧ Plan θ (setAux s 0 q .mark) M H K level ∧
+      DSame θ s (setAux s 0 q .mark) M ∧ planCount (setAux s 0 q .mark) < planCount s ∧
+      ∀ H', Complete θ s M H' → Complete θ (setAux s 0 q .mark) M H' := by
+  obtain ⟨_, _, contact⟩ := plan.ready q hm hr
   rw [due, drivenSensor_ready hm, auxPulse_initial] at contact
   have hs' := setAux_same s q .mark
-  have endQ : silentEnd θ (setAux s 0 q .mark) M q H = silentEnd θ s M q H := by
+  have endQ (T : ℝ) : silentEnd θ (setAux s 0 q .mark) M q T = silentEnd θ s M q T := by
     rw [silentEnd_mark hs', silentEnd_ready hm]
     show (4 / 5 : ℝ) * Real.exp (-(θ 0).ls q *
-      (H - (s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q)))) = _
+      (T - (s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q)))) = _
     rw [contact, due]
   obtain ⟨plan', same⟩ := plan_step (mode := .mark) plan (Or.inr hr) (Or.inl rfl)
-    (fun _ => ⟨by rw [contact]; norm_num, by rw [contact, ← due]; exact before⟩)
-    (fun h => by cases h) endQ
-  refine ⟨Runs.jump (.mark s 0 q hm (by rw [plan.mark]; exact contact)) rfl, plan', same, ?_⟩
-  apply planCount_setAux_lt
-  obtain ⟨o, ho⟩ := Option.ne_none_iff_exists'.mp hr
-  simp [planWeight, hs', hm, ho, rawCount]
+    (fun _ => by rw [contact]; norm_num) (fun h => by cases h) endQ
+  refine ⟨Runs.jump (.mark s 0 q hm (by rw [plan.mark]; exact contact)) rfl, plan', same, ?_, ?_⟩
+  · apply planCount_setAux_lt
+    obtain ⟨o, ho⟩ := Option.ne_none_iff_exists'.mp hr
+    simp [planWeight, hs', hm, ho, rawCount]
+  · intro H' complete
+    exact complete_step complete (Or.inl rfl)
+      (fun _ => by rw [contact, ← due]; exact complete.ready q hm hr)
 
-theorem plan_silent {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H level : ℝ} {q : Port}
-    (box : @PhysicalBox 1 θ ε) (plan : Plan θ s M H level) (hm : s.aux 0 q = .mark)
+theorem plan_silent {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H K level : ℝ} {q : Port}
+    (box : @PhysicalBox 1 θ ε) (plan : Plan θ s M H K level) (hm : s.aux 0 q = .mark)
     (due : decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q) = 0) :
-    Runs θ s (setAux s 0 q .silent) 0 ∧ Plan θ (setAux s 0 q .silent) M H level ∧
-      DSame θ s (setAux s 0 q .silent) M H ∧ planCount (setAux s 0 q .silent) < planCount s := by
-  have pos : 0 < s.x 0 (.m q) := lt_of_lt_of_le (by norm_num) (plan.marked q hm).1
+    Runs θ s (setAux s 0 q .silent) 0 ∧ Plan θ (setAux s 0 q .silent) M H K level ∧
+      DSame θ s (setAux s 0 q .silent) M ∧ planCount (setAux s 0 q .silent) < planCount s ∧
+      ∀ H', Complete θ s M H' → Complete θ (setAux s 0 q .silent) M H' := by
+  have pos : 0 < s.x 0 (.m q) := lt_of_lt_of_le (by norm_num) (plan.marked q hm)
   have contact : s.x 0 (.m q) = 4 / 5 :=
     decayTime_zero pos (by norm_num) (box.rates_positive 0 q).1 due
   have hs' := setAux_same s q .silent
-  have endQ : silentEnd θ (setAux s 0 q .silent) M q H = silentEnd θ s M q H := by
+  have endQ (T : ℝ) : silentEnd θ (setAux s 0 q .silent) M q T = silentEnd θ s M q T := by
     rw [silentEnd_silent hs', silentEnd_mark hm, due, add_zero]
     show s.x 0 (.m q) * _ = _
     rw [contact]
     rfl
   obtain ⟨plan', same⟩ := plan_step (mode := .silent) plan (Or.inl (by rw [hm]; decide))
     (Or.inr rfl) (fun h => by cases h) (fun _ => pos.le) endQ
-  refine ⟨Runs.jump (.silent s 0 q hm (by rw [plan.silent]; exact contact)) rfl, plan', same, ?_⟩
-  apply planCount_setAux_lt
-  simp [planWeight, hs', hm]
+  refine ⟨Runs.jump (.silent s 0 q hm (by rw [plan.silent]; exact contact)) rfl, plan', same,
+    ?_, ?_⟩
+  · apply planCount_setAux_lt
+    simp [planWeight, hs', hm]
+  · intro H' complete
+    exact complete_step complete (Or.inr rfl) (fun h => by cases h)
 
 theorem drivenSensor_initial (θ : Fin 1 → Parameters) (s : Snapshot 1) (q : Port) :
     drivenSensor θ s q s.time = s.x 0 (.m q) :=
   congrFun (congrFun (drivenValues_initial θ s) 0) (.m q)
 
+/-- A sensor with a contact ahead. -/
+def HasEvent (s : Snapshot 1) (q : Port) : Prop :=
+  (s.aux 0 q = .ready ∧ s.raw 0 q ≠ none) ∨ s.aux 0 q = .mark
+
+/-- The date of its next contact. -/
+noncomputable def eventDate (θ : Fin 1 → Parameters) (s : Snapshot 1) (M : Port → ℝ)
+    (q : Port) : ℝ :=
+  if s.aux 0 q = .ready then M q
+  else s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q)
+
+theorem event_min (θ : Fin 1 → Parameters) (s : Snapshot 1) (M : Port → ℝ)
+    (some : ∃ q, HasEvent s q) :
+    ∃ q, HasEvent s q ∧ ∀ q', HasEvent s q' → eventDate θ s M q ≤ eventDate θ s M q' := by
+  classical
+  let events : Finset Port := Finset.univ.filter (fun q => HasEvent s q)
+  obtain ⟨q₀, h₀⟩ := some
+  obtain ⟨q, hq, least⟩ := Finset.exists_min_image events (eventDate θ s M)
+    ⟨q₀, Finset.mem_filter.mpr ⟨Finset.mem_univ _, h₀⟩⟩
+  exact ⟨q, (Finset.mem_filter.mp hq).2,
+    fun q' h' => least q' (Finset.mem_filter.mpr ⟨Finset.mem_univ _, h'⟩)⟩
+
+/-- The earliest pending contact, taken as one move. -/
+theorem plan_event {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H K level : ℝ} {q : Port}
+    (box : @PhysicalBox 1 θ ε) (plan : Plan θ s M H K level) (hq : HasEvent s q)
+    (least : ∀ q', HasEvent s q' → eventDate θ s M q ≤ eventDate θ s M q')
+    (before : eventDate θ s M q < H) :
+    ∃ s₂, Runs θ s s₂ 0 ∧ Plan θ s₂ M H K level ∧ DSame θ s s₂ M ∧
+      planCount s₂ < planCount s ∧ ∀ H', Complete θ s M H' → Complete θ s₂ M H' := by
+  have rates := box.rates_positive 0 q
+  have readyLe (q' : Port) (hm : s.aux 0 q' = .ready) (hr : s.raw 0 q' ≠ none) :
+      eventDate θ s M q ≤ M q' := by
+    have h := least q' (Or.inl ⟨hm, hr⟩)
+    simpa [eventDate, hm] using h
+  have markLe (q' : Port) (hm : s.aux 0 q' = .mark) :
+      eventDate θ s M q ≤ s.time + decayTime (s.x 0 (.m q')) (4 / 5) ((θ 0).lm q') := by
+    have h := least q' (Or.inr hm)
+    simpa [eventDate, hm] using h
+  have dateReady (hm : s.aux 0 q = .ready) : eventDate θ s M q = M q := by simp [eventDate, hm]
+  have dateMark (hm : s.aux 0 q = .mark) : eventDate θ s M q =
+      s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q) := by simp [eventDate, hm]
+  have startLe : s.time ≤ eventDate θ s M q := by
+    rcases hq with ⟨hm, hr⟩ | hm
+    · rw [dateReady hm]
+      exact (plan.ready q hm hr).1
+    · rw [dateMark hm]
+      linarith [decayTime_nonneg (by norm_num) rates.1 (plan.marked q hm)]
+  obtain ⟨s₁, pre, plan₁, same₁, count₁, keep₁, due⟩ :
+      ∃ s₁, Runs θ s s₁ 0 ∧ Plan θ s₁ M H K level ∧ DSame θ s s₁ M ∧
+        planCount s₁ = planCount s ∧ (∀ H', Complete θ s M H' → Complete θ s₁ M H') ∧
+        ((s₁.aux 0 q = .ready ∧ s₁.raw 0 q ≠ none ∧ M q = s₁.time) ∨
+          (s₁.aux 0 q = .mark ∧
+            decayTime (s₁.x 0 (.m q)) (4 / 5) ((θ 0).lm q) = 0)) := by
+    rcases startLe.eq_or_lt with now | later
+    · refine ⟨s, Runs.nil s, plan, DSame.refl θ s M, rfl, fun _ c => c, ?_⟩
+      rcases hq with ⟨hm, hr⟩ | hm
+      · exact Or.inl ⟨hm, hr, by rw [← dateReady hm]; exact now.symm⟩
+      · refine Or.inr ⟨hm, ?_⟩
+        rw [dateMark hm] at now
+        linarith
+    · obtain ⟨⟨flow⟩, plan₁, same, keep⟩ := plan_advance box plan later before.le readyLe markLe
+      refine ⟨drivenAt θ s (eventDate θ s M q), Runs.flow flow, plan₁, same, rfl, keep, ?_⟩
+      rcases hq with ⟨hm, hr⟩ | hm
+      · exact Or.inl ⟨hm, hr, (dateReady hm).symm⟩
+      · refine Or.inr ⟨hm, ?_⟩
+        show decayTime (drivenSensor θ s q (eventDate θ s M q)) (4 / 5) ((θ 0).lm q) = 0
+        rw [drivenSensor_mark hm, decayTime_shift
+          (lt_of_lt_of_le (by norm_num) (plan.marked q hm)) (by norm_num) rates.1, dateMark hm]
+        ring
+  rcases due with ⟨hm, hr, d⟩ | ⟨hm, d⟩
+  · obtain ⟨jump, plan₂, same₂, less, keep₂⟩ := plan_mark plan₁ hm hr d
+    exact ⟨_, pre.append jump, plan₂, same₁.trans same₂, by omega,
+      fun H' c => keep₂ H' (keep₁ H' c)⟩
+  · obtain ⟨jump, plan₂, same₂, less, keep₂⟩ := plan_silent box plan₁ hm d
+    exact ⟨_, pre.append jump, plan₂, same₁.trans same₂, by omega,
+      fun H' c => keep₂ H' (keep₁ H' c)⟩
+
 /-- Without pending contact the cell flows to the horizon. -/
-theorem plan_finish {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H level : ℝ}
-    (box : @PhysicalBox 1 θ ε) (plan : Plan θ s M H level)
-    (noReady : ∀ q, s.aux 0 q = .ready → s.raw 0 q = none) (noMark : ∀ q, s.aux 0 q ≠ .mark) :
+theorem plan_finish {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H K level : ℝ}
+    (box : @PhysicalBox 1 θ ε) (plan : Plan θ s M H K level) (none : ¬ ∃ q, HasEvent s q) :
     ∃ u, Runs θ s u 0 ∧ DrivenEnd θ s M H u := by
+  have noReady (q : Port) (hm : s.aux 0 q = .ready) : s.raw 0 q = Option.none := by
+    by_contra hr
+    exact none ⟨q, Or.inl ⟨hm, hr⟩⟩
+  have noMark (q : Port) : s.aux 0 q ≠ .mark := fun hm => none ⟨q, Or.inr hm⟩
   have modeOf (q : Port) (hb : Busy s q) : s.aux 0 q = .silent := by
     rcases hm : s.aux 0 q with _ | _ | _ | _
     · rcases hb with h | h
@@ -694,7 +823,7 @@ theorem plan_finish {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H level : ℝ}
       simp
     · intro q hb
       exact ⟨idleOf q hb, by rw [← now, drivenSensor_initial]⟩
-  · obtain ⟨⟨flow⟩, _, _⟩ := plan_advance box plan later le_rfl
+  · obtain ⟨⟨flow⟩, _, _, _⟩ := plan_advance box plan later le_rfl
       (fun q hm hr => absurd (noReady q hm) hr) (fun q hm => absurd hm (noMark q))
     refine ⟨drivenAt θ s H, Runs.flow flow, ⟨rfl, plan.driven.main, rfl, rfl, rfl, fun _ => rfl,
       rfl, ?_, ?_⟩⟩
@@ -709,90 +838,58 @@ theorem plan_finish {θ ε} {s : Snapshot 1} {M : Port → ℝ} {H level : ℝ}
 number of live pulses, the cell runs to the horizon. The MARK and SILENT
 entries of the sensors are taken in their time order, whatever it is. No
 gain and no recovery rate changes, and the main charge sums the pulses. -/
-theorem driven_run_exists {θ ε} (box : @PhysicalBox 1 θ ε) (M : Port → ℝ) (H level : ℝ)
-    (s : Snapshot 1) (plan : Plan θ s M H level) :
+theorem driven_run_exists {θ ε} (box : @PhysicalBox 1 θ ε) (M : Port → ℝ) (H K level : ℝ)
+    (s : Snapshot 1) (plan : Plan θ s M H K level) (complete : Complete θ s M H) :
     ∃ u, Runs θ s u 0 ∧ DrivenEnd θ s M H u := by
   generalize hn : planCount s = n
   induction n using Nat.strong_induction_on generalizing s with
   | _ n ih =>
-    classical
-    by_cases idle : (∀ q, s.aux 0 q = .ready → s.raw 0 q = none) ∧ ∀ q, s.aux 0 q ≠ .mark
-    · exact plan_finish box plan idle.1 idle.2
-    · let date : Port → ℝ := fun q =>
-        if s.aux 0 q = .ready then M q
-        else s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q)
-      let events : Finset Port := Finset.univ.filter
-        (fun q => (s.aux 0 q = .ready ∧ s.raw 0 q ≠ none) ∨ s.aux 0 q = .mark)
-      have member (q : Port) (h : (s.aux 0 q = .ready ∧ s.raw 0 q ≠ none) ∨ s.aux 0 q = .mark) :
-          q ∈ events := Finset.mem_filter.mpr ⟨Finset.mem_univ q, h⟩
-      have nonempty : events.Nonempty := by
-        by_contra hne
-        rw [Finset.not_nonempty_iff_eq_empty] at hne
-        have no (q : Port) :
-            ¬ ((s.aux 0 q = .ready ∧ s.raw 0 q ≠ none) ∨ s.aux 0 q = .mark) := by
-          intro h
-          have mem := member q h
-          rw [hne] at mem
-          exact absurd mem (Finset.notMem_empty q)
-        exact idle ⟨fun q hm => by_contra fun hr => no q (Or.inl ⟨hm, hr⟩),
-          fun q hm => no q (Or.inr hm)⟩
-      obtain ⟨q, hq, least⟩ := Finset.exists_min_image events date nonempty
-      have hq' := (Finset.mem_filter.mp hq).2
+    by_cases some : ∃ q, HasEvent s q
+    · obtain ⟨q, hq, least⟩ := event_min θ s M some
       have rates := box.rates_positive 0 q
-      have readyLe (q' : Port) (hm : s.aux 0 q' = .ready) (hr : s.raw 0 q' ≠ none) :
-          date q ≤ M q' := by
-        have h := least q' (member q' (Or.inl ⟨hm, hr⟩))
-        simpa [date, hm] using h
-      have markLe (q' : Port) (hm : s.aux 0 q' = .mark) :
-          date q ≤ s.time + decayTime (s.x 0 (.m q')) (4 / 5) ((θ 0).lm q') := by
-        have h := least q' (member q' (Or.inr hm))
-        simpa [date, hm] using h
-      have dateReady (hm : s.aux 0 q = .ready) : date q = M q := by simp [date, hm]
-      have dateMark (hm : s.aux 0 q = .mark) :
-          date q = s.time + decayTime (s.x 0 (.m q)) (4 / 5) ((θ 0).lm q) := by simp [date, hm]
-      have startLe : s.time ≤ date q := by
-        rcases hq' with ⟨hm, hr⟩ | hm
-        · rw [dateReady hm]
-          exact (plan.ready q hm hr).1
-        · rw [dateMark hm]
-          linarith [decayTime_nonneg (by norm_num) rates.1 (plan.marked q hm).1]
-      have beforeH : date q < H := by
-        rcases hq' with ⟨hm, hr⟩ | hm
-        · rw [dateReady hm]
-          have span := decayTime_nonneg (x := 1) (thr := 4 / 5) (by norm_num) rates.1 (by norm_num)
-          linarith [(plan.ready q hm hr).2.1]
-        · rw [dateMark hm]
-          exact (plan.marked q hm).2
-      obtain ⟨s₁, pre, plan₁, same₁, count₁, due⟩ :
-          ∃ s₁, Runs θ s s₁ 0 ∧ Plan θ s₁ M H level ∧ DSame θ s s₁ M H ∧
-            planCount s₁ = planCount s ∧
-            ((s₁.aux 0 q = .ready ∧ s₁.raw 0 q ≠ none ∧ M q = s₁.time) ∨
-              (s₁.aux 0 q = .mark ∧
-                decayTime (s₁.x 0 (.m q)) (4 / 5) ((θ 0).lm q) = 0)) := by
-        rcases startLe.eq_or_lt with now | later
-        · refine ⟨s, Runs.nil s, plan, ⟨rfl, rfl, rfl, fun _ => rfl, rfl, fun _ => Iff.rfl,
-            fun _ _ => rfl, fun _ _ => rfl⟩, rfl, ?_⟩
-          rcases hq' with ⟨hm, hr⟩ | hm
-          · exact Or.inl ⟨hm, hr, by rw [← dateReady hm]; exact now.symm⟩
-          · refine Or.inr ⟨hm, ?_⟩
-            rw [dateMark hm] at now
-            linarith
-        · obtain ⟨⟨flow⟩, plan₁, same⟩ := plan_advance box plan later beforeH.le readyLe markLe
-          refine ⟨drivenAt θ s (date q), Runs.flow flow, plan₁, same, rfl, ?_⟩
-          rcases hq' with ⟨hm, hr⟩ | hm
-          · exact Or.inl ⟨hm, hr, (dateReady hm).symm⟩
-          · refine Or.inr ⟨hm, ?_⟩
-            show decayTime (drivenSensor θ s q (date q)) (4 / 5) ((θ 0).lm q) = 0
-            rw [drivenSensor_mark hm, decayTime_shift
-              (lt_of_lt_of_le (by norm_num) (plan.marked q hm).1) (by norm_num) rates.1,
-              dateMark hm]
-            ring
-      rcases due with ⟨hm, hr, d⟩ | ⟨hm, d⟩
-      · obtain ⟨jump, plan₂, same₂, less⟩ := plan_mark plan₁ hm hr d
-        obtain ⟨u, run, done⟩ := ih _ (by omega) _ plan₂ rfl
-        exact ⟨u, pre.append (jump.append run), (done.of_same same₂).of_same same₁⟩
-      · obtain ⟨jump, plan₂, same₂, less⟩ := plan_silent box plan₁ hm d
-        obtain ⟨u, run, done⟩ := ih _ (by omega) _ plan₂ rfl
-        exact ⟨u, pre.append (jump.append run), (done.of_same same₂).of_same same₁⟩
+      have before : eventDate θ s M q < H := by
+        rcases hq with ⟨hm, hr⟩ | hm
+        · have span := decayTime_nonneg (x := 1) (thr := 4 / 5) (by norm_num) rates.1 (by norm_num)
+          simp only [eventDate, hm, ite_true]
+          linarith [complete.ready q hm hr]
+        · have ne : s.aux 0 q ≠ .ready := by rw [hm]; decide
+          simp only [eventDate, ne, ite_false]
+          exact complete.marked q hm
+      obtain ⟨s₂, pre, plan₂, same, less, keep⟩ := plan_event box plan hq least before
+      obtain ⟨u, run, done⟩ := ih _ (by omega) _ plan₂ (keep H complete) rfl
+      exact ⟨u, pre.append run, done.of_same same⟩
+    · exact plan_finish box plan some
+
+/-- The driven period up to a date at which sensors may still be on
+their way. The contacts due before `H` are taken in their time order. The
+plan holds again at `H`, for any later horizon. -/
+theorem driven_until_exists {θ ε} (box : @PhysicalBox 1 θ ε) (M : Port → ℝ) (H K level : ℝ)
+    (s : Snapshot 1) (plan : Plan θ s M H K level) :
+    ∃ u, Runs θ s u 0 ∧ u.time = H ∧ Plan θ u M H K level ∧ DSame θ s u M ∧
+      ∀ H', Complete θ s M H' → Complete θ u M H' := by
+  generalize hn : planCount s = n
+  induction n using Nat.strong_induction_on generalizing s with
+  | _ n ih =>
+    by_cases due : ∃ q, HasEvent s q ∧ eventDate θ s M q < H
+    · obtain ⟨q₀, h₀, before₀⟩ := due
+      obtain ⟨q, hq, least⟩ := event_min θ s M ⟨q₀, h₀⟩
+      obtain ⟨s₂, pre, plan₂, same, less, keep⟩ :=
+        plan_event box plan hq least ((least q₀ h₀).trans_lt before₀)
+      obtain ⟨u, run, date, planEnd, sameEnd, keepEnd⟩ := ih _ (by omega) _ plan₂ rfl
+      exact ⟨u, pre.append run, date, planEnd, same.trans sameEnd,
+        fun H' c => keepEnd H' (keep H' c)⟩
+    · have late (q : Port) (hq : HasEvent s q) : H ≤ eventDate θ s M q := by
+        by_contra h
+        exact due ⟨q, hq, not_le.mp h⟩
+      rcases plan.time.eq_or_lt with now | later
+      · exact ⟨s, Runs.nil s, now, plan, DSame.refl θ s M, fun _ c => c⟩
+      · obtain ⟨⟨flow⟩, planEnd, same, keep⟩ := plan_advance box plan later le_rfl
+          (fun q hm hr => by
+            have h := late q (Or.inl ⟨hm, hr⟩)
+            simpa [eventDate, hm] using h)
+          (fun q hm => by
+            have h := late q (Or.inr hm)
+            simpa [eventDate, hm] using h)
+        exact ⟨drivenAt θ s H, Runs.flow flow, rfl, planEnd, same, keep⟩
 
 end RecursiveLearning.Native
