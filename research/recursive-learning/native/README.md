@@ -1003,6 +1003,44 @@ What they assume and do not prove:
   which a silent pulse writes an increment and a firing pulse writes none.
 - The pulse shape is canonical.
 
+## Native training that stops at the first FIRE
+
+[NativeStopLearning.lean](NativeStopLearning.lean) constructs the
+stopping rule as an execution of the kernel, at nominal thresholds. It
+reuses the existing weak-pulse and learned-FIRE constructions and adds no
+definition to the kernel.
+
+- `silent_slot_exists`: a pulse on a port whose gain is at most `7/6`
+  leaves the cell silent and writes the full dose `3/5` on that port.
+- `firing_slot_exists`: a pulse on a port whose gain lies in
+  `[9/5, 11/5]` makes the cell fire once, between the pulse and one unit
+  later. No gain changes and the recovery rate stays at `2/25`.
+
+In both cases the cell is READY again 23 units after the pulse.
+
+`native_stop_training_of_target` chains these over a train of pulses at
+least 24 units apart. Suppose `n` doses bring the gain of the port into
+`[9/5, 21/10]`. Then for any train of at least `n` pulses, the first `n`
+are silent, every later one makes the cell fire, and the final log-gain
+is the start value plus `3/5 * n`. The other gains and the recovery rate
+are unchanged, and the number of FIREs is the number of pulses minus `n`.
+
+The number `n` is not fixed by the protocol. It depends on the start
+gain, and two cells that need different numbers of doses end in the same
+band `[9/5, 21/10]` after the same pulse train.
+
+Scope:
+
+- **Covered start gains.** A start gain `g` is covered when `g * exp(3n/5)`
+  lies in `[9/5, 21/10]` for some `n`. That is a band of width about 0.15
+  in log-gain out of each period of 0.6. The other start gains pass
+  through gains between `7/6` and `9/5`, where no existing construction
+  applies. The firing limit, about 1.61, lies in that gap.
+- **Nominal thresholds and the nominal dose.** The FIRE threshold is 1.
+  Small doses and inexact thresholds are not covered.
+- **One port.** The joint read of two trained ports is proved for the
+  read equation only, in `StopLearningLatency.lean`.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -1023,7 +1061,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `ScheduledGates`, `ScheduledCircuit`, `ReportFormula`, `ScheduledCommit` and
 `ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
 `BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
-through `CoincidenceSeparation`, and `StopLearningLatency`. The default targets also run
+through `CoincidenceSeparation`, `StopLearningLatency` and
+`NativeStopLearning`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
