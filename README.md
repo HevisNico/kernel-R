@@ -3,7 +3,7 @@
 [![Lean proof checks](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml/badge.svg)](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml)
 [![Recursive learning proofs](https://github.com/HevisNico/kernel-R/actions/workflows/recursive-learning.yml/badge.svg)](https://github.com/HevisNico/kernel-R/actions/workflows/recursive-learning.yml)
 
-**Current release** [v0.3.0](https://github.com/HevisNico/kernel-R/releases/tag/v0.3.0) · **Zenodo archive (all versions)** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
+**Current release** [v0.4.0](https://github.com/HevisNico/kernel-R/releases/tag/v0.4.0) · **Zenodo archive (all versions)** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
 
 Kernel R is a mathematical model of an asynchronous analog learning cell.
 Its Lean 4 proofs start from the cell's differential equations and establish
@@ -166,7 +166,9 @@ same firing dates in each cell.
 - **With trained cells.** Two cells with their own parameters, start
   gains and firing levels are trained as in result 2. Their two read
   FIRE dates are closer than 0.15 units exactly when the two cells are
-  read at the same date, among offsets of −0.3, 0 and +0.3 units.
+  read at the same date, among offsets of −0.3, 0 and +0.3 units. The
+  decision still holds when each cell acts with its own lag, for lags
+  within 3/100 of a unit of each other.
 - **Against a fixed-current write.** On a registered timing task, Kernel
   R gives the expected decision in every complete run. A write that
   applies a fixed current for a fixed time fails one admissible trial
@@ -175,6 +177,7 @@ same firing dates in each cell.
   level within ±3%; it is not redone with trained cells.
 
 [`trained_coincidence_network`](research/recursive-learning/native/TrainedCoincidence.lean) ·
+[`trained_network_lag`](research/recursive-learning/native/ReadLag.lean) ·
 [`coincidence_exit_001_separation`](research/recursive-learning/native/CoincidenceSeparation.lean)
 
 ### 6. A network finds a hidden number

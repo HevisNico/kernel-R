@@ -5,16 +5,15 @@ publish a release.
 
 ## Before publishing
 
-1. Merge the stacked pull requests into `main` in order, each after the
-   Lean and recursive-learning workflows pass on its final revision.
-2. Merge this documentation pull request last.
-3. Check the workflows on the resulting `main` commit and record that
-   exact commit as the release target.
-4. Update the "Current release" line of the main README to v0.4.0.
-5. Update `CITATION.cff`, which still names version 0.2.0: title,
-   version and release date.
-6. Create the release as a draft against the recorded commit, with the
-   text below, and add the commit hash to its links.
+1. Check that the Lean and recursive-learning workflows pass on the
+   `main` commit that contains this file, and record that exact commit
+   as the release target.
+2. Check the release date in `CITATION.cff` against the day of
+   publication.
+3. Create the release as a draft against the recorded commit, with the
+   tag `v0.4.0` and the text below, and add the commit hash to its
+   links.
+4. After publication, check that the Zenodo archive has the new version.
 
 ## Draft release text
 
@@ -49,6 +48,11 @@ capacitors by Noack et al.
   of the network, the two read FIRE dates are closer than 0.15 units
   exactly when the two cells are read at the same date, among offsets of
   −0.3, 0 and +0.3 units. Lean theorem `trained_coincidence_network`.
+- **A lag in each cell.** In a circuit a pulse acts a little after it
+  arrives. A lag that is the same for every pulse of a cell shifts its
+  FIRE dates by that lag. The decision above still holds when the lags
+  of the cells lie within 3/100 of a unit of each other. Lean theorems
+  `trained_dates_decide_lag` and `trained_network_lag`.
 
 **Networks**
 
@@ -116,6 +120,7 @@ delay between the two read pulses, and the receiver aperture is 15 µs.
 | `SearchActions.lean` | A search that ends by a lesson |
 | `BisectionSearch.lean` | The tree of every depth |
 | `SuccessiveSearch.lean` | The successive approximation of every depth |
+| `ReadLag.lean` | The coincidence decision with a lag in each cell |
 
 All are in `research/recursive-learning/native/`. Its
 [README](../research/recursive-learning/native/README.md#map-of-the-stop-learning-results)
@@ -174,7 +179,7 @@ lake build
 ```
 
 The build runs the axiom audit over every declaration of the package:
-5739 declarations, including 3523 theorems. The new theorems depend only
+5741 declarations, including 3525 theorems. The new theorems depend only
 on `propext`, `Classical.choice` and `Quot.sound`.
 
 ### AI assistance
