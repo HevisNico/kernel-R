@@ -939,6 +939,53 @@ Those endpoints belong to every admitted ERROR box. The proof uses
 the exact trained birth gain 1.2. The receiver is an observation of
 two native runs and the comparator uses the reduced READY equation.
 
+## Read latency after training that stops at the first FIRE
+
+[StopLearningLatency.lean](StopLearningLatency.lean) studies the READY
+read equation of a rested cell. It does not build a hybrid execution.
+
+A training pulse of relative amplitude `c` acts on the main charge as a
+canonical pulse at gain `c * gain`. In R, a training pulse that makes
+the cell fire writes nothing, because the cell is protected during the
+sensor's ERROR phase. Training by weakened pulses therefore stops at the
+first FIRE. `StoppedTraining gain c fire d` describes that state: the
+current gain fires on a weakened pulse, and the gain before the last
+increment, of at most `d` in log-gain, did not.
+
+`stopped_read_response` gives the response level `h(t)` reached at the
+FIRE of a later full-amplitude read:
+
+```text
+c * exp(-d) * h(1)  <  h(t)  ≤  c * h(1)
+```
+
+The gain and the FIRE threshold do not appear. The increments may be
+unequal and inexact, as long as each is positive and at most `d`.
+`stopped_read_latency` turns the two levels into a latency window, and
+`stopped_read_skew` bounds the latency difference of two cells by the
+width of that window, whatever their gains and FIRE thresholds.
+`stopped_read_exists` shows that a cell which fires on a weakened pulse
+fires on a full one.
+
+For `c = 2/3` and `d = 1/20`, `stopped_read_latency_two_thirds` gives a
+read FIRE between 0.355 and 0.385 model units after the pulse, and
+`stopped_read_skew_two_thirds` a difference below 0.03 units between two
+cells. The coincidence theorem uses a window of 0.0495 units and needs
+an exact birth gain and a FIRE threshold within ±3%.
+
+The stopping rule is the stop-learning principle of Brader et al.,
+which Noack et al. implement in switched capacitors. These theorems
+state its consequence for the R read equation.
+
+What they assume and do not prove:
+
+- The cell is at its rest charge 0.1 before each training pulse and
+  before the read.
+- The amplitude ratio `c` is exact and the same for every cell.
+- The stopped state is taken as a hypothesis. The training loop is not
+  constructed in the kernel, whose pulses have a fixed amplitude.
+- The pulse shape is canonical.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -958,8 +1005,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `LearnerReadout`, `ReadoutSeries`, `LearnerConjunction`, `LearnerFanIn` and
 `ScheduledGates`, `ScheduledCircuit`, `ReportFormula`, `ScheduledCommit` and
 `ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
-`BlindNeedSearch`, `ThresholdProbe`, and the coincidence modules
-through `CoincidenceSeparation`. The default targets also run
+`BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
+through `CoincidenceSeparation`, and `StopLearningLatency`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
