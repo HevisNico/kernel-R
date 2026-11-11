@@ -86,20 +86,21 @@ theorem incoming_total {n : ℕ} (route : Router n) (dates : Fin n → List ℝ)
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl (fun i _ => split_cells _)
 
-/-- Composition along forward wires. Each cell `j` has a rested start,
-its own parameters in the fabrication box and a description `Spec j` of
-its FIRE dates, which can mention the FIRE dates of the cells before it.
+/-- Composition along forward wires, with the final states. Each cell
+`j` has a rested start, its own parameters in the fabrication box, a
+description `Spec j` of its FIRE dates, which can mention the FIRE dates
+of the cells before it, and a description `Final j` of its final state.
 If every cell, fed by cells that follow their descriptions, has a run to
-rest that follows its own, then the network has a complete run, every
-cell follows its description, and the FIRE dates are the same in every
-complete run. -/
-theorem acyclic_network {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Parameters} {ε T rest : ℝ}
+rest that follows its own, then the network has a complete run in which
+every cell follows its descriptions. In every complete run the FIRE
+dates and the final values of every cell are those of that run. -/
+theorem acyclic_network_states {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Parameters} {ε T rest : ℝ}
     {level : Fin n → ℝ} (route : Router n) (causal : ∀ i t d, d ∈ route i t → t < d.due)
     (forward : ∀ i t d, d ∈ route i t → i < d.cell)
     (s : Fin n → Snapshot 1) (start : ∀ i, (s i).time = T)
     (box : ∀ i, @PhysicalBox 1 (θ i) ε) (config : ∀ i, CellConfig (θ i) (level i))
     (fire : ∀ i, 19 / 20 ≤ level i ∧ level i ≤ 21 / 20) (state : ∀ i, RestState (θ i) (s i))
-    (Spec : Fin n → (Fin n → List ℝ) → Prop)
+    (Spec : Fin n → (Fin n → List ℝ) → Prop) (Final : Fin n → Snapshot 1 → Prop)
     (past : ∀ (j : Fin n) (dates dates' : Fin n → List ℝ),
       (∀ i, i ≤ j → dates i = dates' i) → Spec j dates → Spec j dates')
     (cellRun : ∀ (dates : Fin n → List ℝ) (j : Fin n), (∀ i, i < j → Spec i dates) →
@@ -107,21 +108,21 @@ theorem acyclic_network {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Parame
         (P : Multiset (Delivery 1)) =
           ((s j).pending : Multiset (Delivery 1)) + incoming route dates j ∧
         Reach (θ j) (requeued (s j) P) u out count ∧ RestState (θ j) u ∧ u.time = rest ∧
-        u.pending = [] ∧ Spec j (Function.update dates j out)) :
-    ∃ dates : Fin n → List ℝ,
-      (∀ j, Spec j dates) ∧
-      (∃ (u : Snapshot n) (ref : ParameterExecution (familyParameters θ) route
-        (Snapshot.family T s) u), ParameterCompleteThrough ref rest) ∧
-      ∀ {u : Snapshot n} (ex : ParameterExecution (familyParameters θ) route
-        (Snapshot.family T s) u), ParameterCompleteThrough ex rest →
-        ∀ i, ex.emissionTimes i = dates i := by
+        u.pending = [] ∧ Spec j (Function.update dates j out) ∧ Final j u) :
+    ∃ (dates : Fin n → List ℝ) (u : Fin n → Snapshot 1),
+      (∀ j, Spec j dates) ∧ (∀ j, Final j (u j)) ∧
+      (∃ ref : ParameterExecution (familyParameters θ) route
+        (Snapshot.family T s) (Snapshot.family rest u), ParameterCompleteThrough ref rest) ∧
+      ∀ {w : Snapshot n} (ex : ParameterExecution (familyParameters θ) route
+        (Snapshot.family T s) w), ParameterCompleteThrough ex rest →
+        (∀ i, ex.emissionTimes i = dates i) ∧ ∀ i c, w.x i c = (u i).x 0 c := by
   -- The FIRE dates, cell after cell.
   have build : ∀ m, m ≤ n → ∃ dates : Fin n → List ℝ, ∀ j : Fin n, j.val < m →
       ∃ (P : List (Delivery 1)) (u : Snapshot 1) (count : ℕ),
         (P : Multiset (Delivery 1)) =
           ((s j).pending : Multiset (Delivery 1)) + incoming route dates j ∧
         Reach (θ j) (requeued (s j) P) u (dates j) count ∧ RestState (θ j) u ∧ u.time = rest ∧
-        u.pending = [] ∧ Spec j dates := by
+        u.pending = [] ∧ Spec j dates ∧ Final j u := by
     intro m
     induction m with
     | zero => exact fun _ => ⟨fun _ => [], fun j hj => absurd hj (Nat.not_lt_zero _)⟩
@@ -129,9 +130,9 @@ theorem acyclic_network {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Parame
       intro hm
       obtain ⟨dates, good⟩ := ih (Nat.le_of_succ_le hm)
       let j : Fin n := ⟨m, hm⟩
-      obtain ⟨P, u, out, count, hP, reach, rested, date, pend, spec⟩ :=
+      obtain ⟨P, u, out, count, hP, reach, rested, date, pend, spec, fin⟩ :=
         cellRun dates j (fun i hi => by
-          obtain ⟨_, _, _, _, _, _, _, _, sp⟩ := good i hi
+          obtain ⟨_, _, _, _, _, _, _, _, sp, _⟩ := good i hi
           exact sp)
       have same (i : Fin n) (hi : i ≤ j) :
           incoming route (Function.update dates j out) i = incoming route dates i :=
@@ -139,17 +140,17 @@ theorem acyclic_network {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Parame
       refine ⟨Function.update dates j out, fun i hi => ?_⟩
       rcases Nat.lt_succ_iff_lt_or_eq.mp hi with lt | eq
       · have ne : i ≠ j := ne_of_lt lt
-        obtain ⟨P', u', count', hP', reach', rested', date', pend', spec'⟩ := good i lt
+        obtain ⟨P', u', count', hP', reach', rested', date', pend', spec', fin'⟩ := good i lt
         rw [same i (le_of_lt lt), Function.update_of_ne ne]
         exact ⟨P', u', count', hP', reach', rested', date', pend',
           past i dates _ (fun k hk =>
-            (Function.update_of_ne (ne_of_lt (lt_of_le_of_lt hk lt)) _ _).symm) spec'⟩
+            (Function.update_of_ne (ne_of_lt (lt_of_le_of_lt hk lt)) _ _).symm) spec', fin'⟩
       · have ij : i = j := Fin.ext eq
         subst ij
         rw [same j le_rfl, Function.update_self]
-        exact ⟨P, u, count, hP, reach, rested, date, pend, spec⟩
+        exact ⟨P, u, count, hP, reach, rested, date, pend, spec, fin⟩
   obtain ⟨dates, good⟩ := build n le_rfl
-  choose P u count hP reach rested date pend spec using fun j => good j j.isLt
+  choose P u count hP reach rested date pend spec fin using fun j => good j j.isLt
   let sLoc : Fin n → Snapshot 1 := fun j => requeued (s j) (P j)
   have balance : (familyQueue sLoc : Multiset (Delivery n)) =
       (familyQueue s : Multiset (Delivery n)) + promised route dates := by
@@ -185,8 +186,49 @@ theorem acyclic_network {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Parame
   have birth : ParameterPhysicalInvariant (familyParameters θ) (Snapshot.family T s) :=
     ⟨fun i => (inv i).charge 0, fun i p => (inv i).sensor 0 p, fun i p => (inv i).gain 0 p,
       fun i => (inv i).recovery 0, fun i => (inv i).reserve 0⟩
-  refine ⟨dates, spec, ⟨_, E', complete⟩, ?_⟩
-  intro w ex done i
-  rw [ex.emissionTimes_unique E' boxAll bounds birth done complete i, times' i]
+  refine ⟨dates, u, spec, fin, ⟨E', complete⟩, ?_⟩
+  intro w ex done
+  refine ⟨fun i => ?_, fun i c => ?_⟩
+  · rw [ex.emissionTimes_unique E' boxAll bounds birth done complete i, times' i]
+  · have same := (ParameterExecution.observational_unique boxAll bounds E' ex birth complete
+      done).1.values
+    exact (congrFun (congrFun same i) c).symm
+
+/-- Composition along forward wires. Each cell `j` has a rested start,
+its own parameters in the fabrication box and a description `Spec j` of
+its FIRE dates, which can mention the FIRE dates of the cells before it.
+If every cell, fed by cells that follow their descriptions, has a run to
+rest that follows its own, then the network has a complete run, every
+cell follows its description, and the FIRE dates are the same in every
+complete run. -/
+theorem acyclic_network {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Parameters} {ε T rest : ℝ}
+    {level : Fin n → ℝ} (route : Router n) (causal : ∀ i t d, d ∈ route i t → t < d.due)
+    (forward : ∀ i t d, d ∈ route i t → i < d.cell)
+    (s : Fin n → Snapshot 1) (start : ∀ i, (s i).time = T)
+    (box : ∀ i, @PhysicalBox 1 (θ i) ε) (config : ∀ i, CellConfig (θ i) (level i))
+    (fire : ∀ i, 19 / 20 ≤ level i ∧ level i ≤ 21 / 20) (state : ∀ i, RestState (θ i) (s i))
+    (Spec : Fin n → (Fin n → List ℝ) → Prop)
+    (past : ∀ (j : Fin n) (dates dates' : Fin n → List ℝ),
+      (∀ i, i ≤ j → dates i = dates' i) → Spec j dates → Spec j dates')
+    (cellRun : ∀ (dates : Fin n → List ℝ) (j : Fin n), (∀ i, i < j → Spec i dates) →
+      ∃ (P : List (Delivery 1)) (u : Snapshot 1) (out : List ℝ) (count : ℕ),
+        (P : Multiset (Delivery 1)) =
+          ((s j).pending : Multiset (Delivery 1)) + incoming route dates j ∧
+        Reach (θ j) (requeued (s j) P) u out count ∧ RestState (θ j) u ∧ u.time = rest ∧
+        u.pending = [] ∧ Spec j (Function.update dates j out)) :
+    ∃ dates : Fin n → List ℝ,
+      (∀ j, Spec j dates) ∧
+      (∃ (u : Snapshot n) (ref : ParameterExecution (familyParameters θ) route
+        (Snapshot.family T s) u), ParameterCompleteThrough ref rest) ∧
+      ∀ {u : Snapshot n} (ex : ParameterExecution (familyParameters θ) route
+        (Snapshot.family T s) u), ParameterCompleteThrough ex rest →
+        ∀ i, ex.emissionTimes i = dates i := by
+  obtain ⟨dates, u, spec, _, ⟨ref, complete⟩, all⟩ :=
+    acyclic_network_states pos (θ := θ) (ε := ε) (level := level) route causal forward s start
+      box config fire state Spec (fun _ _ => True) past (fun dates j below => by
+        obtain ⟨P, u, out, count, h⟩ := cellRun dates j below
+        exact ⟨P, u, out, count, h.1, h.2.1, h.2.2.1, h.2.2.2.1, h.2.2.2.2.1, h.2.2.2.2.2,
+          trivial⟩)
+  exact ⟨dates, spec, ⟨_, ref, complete⟩, fun ex done => (all ex done).1⟩
 
 end RecursiveLearning.Native

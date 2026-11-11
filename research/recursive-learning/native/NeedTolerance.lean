@@ -187,7 +187,7 @@ theorem trained_search_band_witness (m : ℕ) (z : Fin 3 → ℝ)
         (signalRoute searchWitness.lo searchWitness.hi searchWitness.inputs)
         (Snapshot.family 0 (searchWitness.start (fun κ => probeAt (z κ)) (fun _ => witnessSource)))
         u), ParameterCompleteThrough ex 1150 → ∀ i, ex.emissionTimes i = dates i := by
-  obtain ⟨dates, yes, no, _, ref, all⟩ :=
+  obtain ⟨dates, _, yes, no, _, _, _, ref, all⟩ :=
     trained_search (by norm_num : 0 < 6) searchWitness searchWitness_sound
       (searchWitness_consistent m) (θp := fun _ _ => witnessParameters)
       (θg := fun _ _ => witnessParameters) (sp := fun κ => probeAt (z κ))
@@ -199,6 +199,8 @@ theorem trained_search_band_witness (m : ℕ) (z : Fin 3 → ℝ)
     funext j
     cases searchWitness.role j <;> rfl
   rw [same] at ref all
-  exact ⟨dates, yes 0, no 0, yes 1, no 1, yes 2, no 2, ref, all⟩
+  obtain ⟨run, complete⟩ := ref
+  exact ⟨dates, yes 0, no 0, yes 1, no 1, yes 2, no 2, ⟨_, run, complete⟩,
+    fun ex done => (all ex done).1⟩
 
 end RecursiveLearning.Native

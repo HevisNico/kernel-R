@@ -153,6 +153,66 @@ theorem signal_incoming {n : ℕ} {lo hi : Fin n → ℝ} {inputs : Fin n → Li
     rw [one]
     cases hb : bit w.sender <;> simp [hb]
 
+/-- A network of report windows, with the final states and the pulses
+sent. Cell `j` has a rested start, a window `(lo j, hi j]`, input wires
+from earlier cells and a bit `bit j`. Every wire delivers after the
+window of its sender. The hypothesis is local: when cell `j` receives
+the pulses of the wires whose senders have a true bit, it has a run to
+rest whose FIRE dates carry `bit j` and satisfy `Q j`, and whose final
+state satisfies `Final j`. Then the network has a complete run in which
+every cell carries its bit and ends in such a state. The pulses sent to
+a cell by the FIRE events of that run are those of the wires whose
+senders have a true bit. In every complete run the FIRE dates and the
+final values of every cell are those of that run. -/
+theorem signal_network_states {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Parameters} {ε T rest : ℝ}
+    {level : Fin n → ℝ} (lo hi : Fin n → ℝ) (inputs : Fin n → List (Wire n))
+    (wires : ∀ j, ∀ w ∈ inputs j, w.sender < j ∧ hi w.sender < w.date)
+    (s : Fin n → Snapshot 1) (start : ∀ i, (s i).time = T)
+    (box : ∀ i, @PhysicalBox 1 (θ i) ε) (config : ∀ i, CellConfig (θ i) (level i))
+    (fire : ∀ i, 19 / 20 ≤ level i ∧ level i ≤ 21 / 20) (state : ∀ i, RestState (θ i) (s i))
+    (bit : Fin n → Bool) (Q : Fin n → List ℝ → Prop) (Final : Fin n → Snapshot 1 → Prop)
+    (cellRun : ∀ j, ∃ (P : List (Delivery 1)) (u : Snapshot 1) (l : List ℝ) (count : ℕ),
+      (P : Multiset (Delivery 1)) = ((s j).pending : Multiset (Delivery 1)) +
+        ((received inputs bit j : List (Delivery 1)) : Multiset (Delivery 1)) ∧
+      Reach (θ j) (requeued (s j) P) u l count ∧ RestState (θ j) u ∧ u.time = rest ∧
+      u.pending = [] ∧ Signal (lo j) (hi j) l (bit j) ∧ Q j l ∧ Final j u) :
+    ∃ (dates : Fin n → List ℝ) (u : Fin n → Snapshot 1),
+      (∀ j, Signal (lo j) (hi j) (dates j) (bit j) ∧ Q j (dates j)) ∧ (∀ j, Final j (u j)) ∧
+      (∀ j, incoming (signalRoute lo hi inputs) dates j =
+        ((received inputs bit j : List (Delivery 1)) : Multiset (Delivery 1))) ∧
+      (∃ ref : ParameterExecution (familyParameters θ) (signalRoute lo hi inputs)
+        (Snapshot.family T s) (Snapshot.family rest u), ParameterCompleteThrough ref rest) ∧
+      ∀ {w : Snapshot n} (ex : ParameterExecution (familyParameters θ)
+        (signalRoute lo hi inputs) (Snapshot.family T s) w), ParameterCompleteThrough ex rest →
+        (∀ i, ex.emissionTimes i = dates i) ∧ ∀ i c, w.x i c = (u i).x 0 c := by
+  have causal : ∀ i t d, d ∈ signalRoute lo hi inputs i t → t < d.due := by
+    intro i t d hd
+    obtain ⟨before, w, hw, from_, due⟩ := mem_signalRoute hd
+    have late := (wires d.cell w hw).2
+    rw [from_] at late
+    rw [due]
+    linarith
+  have forward : ∀ i t d, d ∈ signalRoute lo hi inputs i t → i < d.cell := by
+    intro i t d hd
+    obtain ⟨_, w, hw, from_, _⟩ := mem_signalRoute hd
+    exact from_ ▸ (wires d.cell w hw).1
+  obtain ⟨dates, u, spec, fin, ref, all⟩ :=
+    acyclic_network_states pos (θ := θ) (ε := ε) (T := T) (rest := rest) (level := level)
+      (signalRoute lo hi inputs) causal forward s start box config fire state
+      (fun j dates => Signal (lo j) (hi j) (dates j) (bit j) ∧ Q j (dates j)) Final
+      (fun j dates dates' agree spec => by rw [← agree j le_rfl]; exact spec)
+      (fun dates j below => by
+        obtain ⟨P, u, l, count, hP, reach, rested, date, pend, signal, extra, fin⟩ := cellRun j
+        refine ⟨P, u, l, count, ?_, reach, rested, date, pend, ?_, fin⟩
+        · rw [signal_incoming (fun k w hw => (wires k w hw).1) bit dates j
+            (fun i hi => (below i hi).1)]
+          exact hP
+        · rw [Function.update_self]
+          exact ⟨signal, extra⟩)
+  exact ⟨dates, u, spec, fin,
+    fun j => signal_incoming (fun k w hw => (wires k w hw).1) bit dates j (fun i _ => (spec i).1),
+    ref, all⟩
+
 /-- A network of report windows. Cell `j` has a rested start, a window
 `(lo j, hi j]`, input wires from earlier cells and a bit `bit j`. Every
 wire delivers after the window of its sender. The hypothesis is local:
@@ -179,28 +239,12 @@ theorem signal_network {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Paramet
       ∀ {u : Snapshot n} (ex : ParameterExecution (familyParameters θ)
         (signalRoute lo hi inputs) (Snapshot.family T s) u), ParameterCompleteThrough ex rest →
         ∀ i, ex.emissionTimes i = dates i := by
-  have causal : ∀ i t d, d ∈ signalRoute lo hi inputs i t → t < d.due := by
-    intro i t d hd
-    obtain ⟨before, w, hw, from_, due⟩ := mem_signalRoute hd
-    have late := (wires d.cell w hw).2
-    rw [from_] at late
-    rw [due]
-    linarith
-  have forward : ∀ i t d, d ∈ signalRoute lo hi inputs i t → i < d.cell := by
-    intro i t d hd
-    obtain ⟨_, w, hw, from_, _⟩ := mem_signalRoute hd
-    exact from_ ▸ (wires d.cell w hw).1
-  exact acyclic_network pos (θ := θ) (ε := ε) (T := T) (rest := rest) (level := level)
-    (signalRoute lo hi inputs) causal forward s start box config fire state
-    (fun j dates => Signal (lo j) (hi j) (dates j) (bit j) ∧ Q j (dates j))
-    (fun j dates dates' agree spec => by rw [← agree j le_rfl]; exact spec)
-    (fun dates j below => by
-      obtain ⟨P, u, l, count, hP, reach, rested, date, pend, signal, extra⟩ := cellRun j
-      refine ⟨P, u, l, count, ?_, reach, rested, date, pend, ?_⟩
-      · rw [signal_incoming (fun k w hw => (wires k w hw).1) bit dates j
-          (fun i hi => (below i hi).1)]
-        exact hP
-      · rw [Function.update_self]
-        exact ⟨signal, extra⟩)
+  obtain ⟨dates, u, spec, _, _, ⟨ref, complete⟩, all⟩ :=
+    signal_network_states pos (θ := θ) (ε := ε) (level := level) lo hi inputs wires s start box
+      config fire state bit Q (fun _ _ => True) (fun j => by
+        obtain ⟨P, u, l, count, h⟩ := cellRun j
+        exact ⟨P, u, l, count, h.1, h.2.1, h.2.2.1, h.2.2.2.1, h.2.2.2.2.1, h.2.2.2.2.2.1,
+          h.2.2.2.2.2.2, trivial⟩)
+  exact ⟨dates, spec, ⟨_, ref, complete⟩, fun ex done => (all ex done).1⟩
 
 end RecursiveLearning.Native

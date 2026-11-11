@@ -25,6 +25,7 @@ import SignalNetwork
 import SearchCells
 import TrainedSearch
 import NeedTolerance
+import SearchActions
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

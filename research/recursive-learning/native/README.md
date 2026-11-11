@@ -1488,14 +1488,23 @@ FIRE of the probe in its report window. A no is a late FIRE of the gate.
 Each answer sends the pulses of the questions it leads to.
 
 - `trained_search`: any number of nodes, any forest. Every probe has
-  the same need `m`, with its own parameters, start gain, dose and FIRE
-  level. Every gate is trained by its own pulse trains before its clock
-  pulse. For every `m`, the network has a complete run, and in every
-  complete run the probe of a node fires in its report window exactly
-  when the node is reached and `m` is at most its count, the gate of a
-  node fires late exactly when the node is reached and `m` is larger
-  than its count, and the probe of a node that is not reached never
-  fires. The FIRE dates are the same in every complete run.
+  its own need, parameters, start gain, dose and FIRE level. Every gate
+  is trained by its own pulse trains before its clock pulse. The network
+  has a complete run, and in every complete run:
+  - the probe of a node fires in its report window exactly when the
+    node is reached and its need is at most its count;
+  - the gate of a node fires late exactly when the node is reached and
+    its need is larger than its count;
+  - the probe of a node that is not reached never fires;
+  - the gain of a probe ends one dose higher for each pulse of its
+    question, up to its need, when its node is reached, and unchanged
+    otherwise;
+  - the pulses sent to the probe of a child are its question when the
+    child is reached, and none otherwise.
+
+  The FIRE dates and the final values are the same in every complete
+  run. A search for one hidden need `m` is the case where every probe
+  has the need `m`.
 - `trained_search_witness`: a binary search over the needs 1 to 4, with
   three questions and six explicit cells. The root asks `m ≤ 2`. After a
   yes, node 1 asks `m ≤ 1`. After a no, node 2 asks `m ≤ 3`. The theorem
@@ -1518,9 +1527,9 @@ Limits:
 - **The gates are trained in advance,** whatever the need. Only the
   probes are trained on demand: a probe that is not reached receives no
   pulse.
-- **The answers are not committed.** The nominal decision tree of
-  `CalibratedDecisionTree` ends each branch by a lesson and a credit,
-  with their costs. This search stops at the answers.
+- **Lessons at the leaves** are treated in `SearchActions` below. The
+  credit of the nominal decision tree of `CalibratedDecisionTree` is not
+  rebuilt.
 - **The witness has two levels.** `trained_search` covers any depth. A
   family of layouts of every depth is not built.
 
@@ -1563,6 +1572,42 @@ Limits:
   A dose that drifts from pulse to pulse is not covered.
 - **The witness varies the start gains only.** Its doses and FIRE
   levels are those of the explicit cell.
+
+### A search that ends by a lesson
+
+[SearchActions.lean](SearchActions.lean) adds an action to the binary
+search. The composition theorems now also give the final state of each
+cell (`acyclic_network_states`, `signal_network_states`) and the pulses
+that the FIRE events of a run send to each cell.
+
+A lesson is a node like the others: its probe is the learner, and its
+question is the lesson. `actionSearch` has seven nodes and fourteen
+cells. Nodes 0 to 2 are the three questions. Node `m + 2` is reached
+exactly when the need is `m`, and its lesson has `m + 1` pulses.
+
+`search_action_witness`: every probe has its own start gain, anywhere
+within 3/125 of the centre of the band of need `m`. For every need `m`
+from 1 to 4, in every complete run:
+
+- the learner of node `m + 2` receives `m + 1` pulses. Its gain ends
+  exactly `m` doses higher, which is its firing gain, and its last pulse
+  makes it fire in its report window;
+- the three other learners receive no pulse from the network, keep their
+  gain and never fire.
+
+The search therefore spends on the learners only the lesson of the need
+it found.
+
+Limits:
+
+- **Pulses are counted per learner.** The pulses of the sources, of the
+  questions and of the training of the gates are not added into one
+  cost.
+- **One pulse more than the need.** The last pulse of the lesson writes
+  nothing and fires. A lesson of exactly `m` pulses would leave the
+  learner at its firing gain without a FIRE.
+- **Each lesson node has a gate** that is trained and not used.
+- **Four needs.** The witness has three questions and four lessons.
 
 ## Common threshold offset and reaction delay
 
@@ -1634,8 +1679,8 @@ through `CoincidenceSeparation`, `StopLearningLatency`,
 `TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence`,
 `OffsetAndDelay`, `SelfCalibratedProbe`, `FamilyProduct`, `RoutedProduct`, `Cascade`,
 `FreeRead`, `AcyclicNetwork`, `WiredNetwork`, `SignalNetwork`,
-`SearchCells`, `TrainedSearch` and `NeedTolerance`. The
-default targets also run
+`SearchCells`, `TrainedSearch`, `NeedTolerance` and `SearchActions`.
+The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
