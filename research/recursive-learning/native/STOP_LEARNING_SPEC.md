@@ -88,13 +88,15 @@ exactly at 1/10. The tail after the FIRE is `refractory_run_exists`,
 which takes the pending events in their time order. The count of FIRE
 events is left to E.
 
-**C. Training loop.** From a `RestState` and a train of pulses at least
-22 units apart on port `p`, there is an execution in which every silent
-pulse writes a full dose and every firing pulse writes nothing. A pulse
-that fires thanks to a residual rest charge may be followed by one more
-silent pulse. With enough pulses the last ones all fire from the exact
-rest charge. The final gain is the start gain times `exp(d × n)`, where
-`n` is the number of silent pulses.
+**C. Training loop. Proved** as `training_loop_exists` and
+`stop_training_exists`. From a `RestState` and a train of pulses at
+least 22 units apart on port `p`, there is an execution in which every
+silent pulse writes a full dose and every firing pulse writes nothing.
+A pulse that fires thanks to a residual rest charge may be followed by
+one more silent pulse. If `r` doses reach a gain that always fires and
+the train has at least `2 r + 2` pulses, the final gain fires from the
+exact rest charge, and the gain one dose below it was silent unless no
+dose was written.
 
 **D. Joint read.** After C on two ports, one pulse on each port at the
 same time makes the cell fire at a latency in the window of
@@ -119,6 +121,7 @@ has the same endpoint and the same FIRE dates as the constructed one.
   [Refractory.lean](Refractory.lean).
 - Step B in the regime above, for any gain:
   [FiringStep.lean](FiringStep.lean).
+- The loop C for every start gain: [TrainingLoop.lean](TrainingLoop.lean).
 
 ## Reusable constructions
 

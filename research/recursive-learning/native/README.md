@@ -1132,6 +1132,36 @@ nothing. Neither theorem assumes a gain band.
 The count of FIRE events and the agreement of every complete run are not
 stated yet.
 
+### The training loop, for every start gain
+
+[TrainingLoop.lean](TrainingLoop.lean) chains the two steps over a train
+of pulses on one port, at least 22 units apart.
+
+- `training_step_exists` joins the two steps. No hypothesis on the gain
+  remains: a silent pulse always leaves room for one more dose under the
+  cap (`silent_room`).
+- `training_loop_exists` builds the execution through the whole train.
+  Its conclusion is a `Trained` record: for each pulse, whether it was
+  silent and wrote one dose, or fired and wrote nothing.
+- `stop_training_exists` is the stopping rule. If `r` doses bring the
+  start gain to a value that always fires, and the train has at least
+  `2 r + 2` pulses, then the final gain fires from the exact rest charge
+  1/10, and it equals the start gain times `exp(k × dose)` for some `k`
+  at most the number of pulses. Unless no dose was written, the gain one
+  dose below the final one was silent from a rest charge within `10⁻⁴`
+  above 1/10.
+
+The factor 2 has a physical cause. A pulse may fire only thanks to the
+residual rest charge left by the previous silent pulse. The next pulse
+starts from the exact rest charge and may then be silent once more.
+After a FIRE from the exact rest charge, every later pulse fires
+(`Trained.stable`).
+
+The final state is the hypothesis of the read-latency theorem with a
+residual rest charge, `stopped_read_response_residual`: the read latency
+then depends on neither the start gain nor the FIRE level. The link is
+not assembled yet for a two-port read as an execution.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -1153,8 +1183,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
 `BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
 through `CoincidenceSeparation`, `StopLearningLatency`,
-`NativeStopLearning`, `SilentStep`, `Refractory` and `FiringStep`. The
-default targets also run
+`NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep` and
+`TrainingLoop`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

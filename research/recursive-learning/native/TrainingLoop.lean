@@ -1,0 +1,274 @@
+import FiringStep
+
+/-! The training loop. Each pulse of a train either stays below the FIRE
+level and writes one dose, or reaches it and writes nothing. With enough
+pulses the gain stops at a value that fires from the exact rest charge. -/
+
+namespace RecursiveLearning.Native
+open KernelR.Hybrid Set MeasureTheory
+
+theorem response_one_lower : 11 / 20 ≤ response 1 := by
+  have expBound : Real.exp (-(1 / 2 : ℝ)) ∈ Icc (606530 / 1000000 : ℝ) 1 :=
+    exp_bracket_10 (by norm_num) (by norm_num [Finset.sum_range_succ])
+  unfold response
+  rw [mul_one, mul_one, exp_neg_a]
+  have h := mul_le_mul response_ratio_bounds.1 (sub_le_sub_right expBound.1 (1 / 4))
+    (by norm_num) (by linarith [response_ratio_bounds.1])
+  linarith
+
+/-- A pulse at `gain` from the rest charge `charge` reaches `level`. -/
+def PulseFires (charge gain level : ℝ) : Prop :=
+  ∃ τ ∈ Icc (0 : ℝ) 1, level ≤ readyPulse charge gain 0 τ
+
+theorem readyPulse_shift (charge gain start t : ℝ) :
+    readyPulse charge gain start t = readyPulse charge gain 0 (t - start) := by
+  simp [readyPulse]
+
+theorem pulseFires_iff {charge gain level start : ℝ} :
+    (∃ t ∈ Icc start (start + 1), level ≤ readyPulse charge gain start t) ↔
+      PulseFires charge gain level := by
+  constructor
+  · rintro ⟨t, ht, h⟩
+    exact ⟨t - start, ⟨by linarith [ht.1], by linarith [ht.2]⟩, by rwa [← readyPulse_shift]⟩
+  · rintro ⟨τ, hτ, h⟩
+    refine ⟨start + τ, ⟨by linarith [hτ.1], by linarith [hτ.2]⟩, ?_⟩
+    rw [readyPulse_shift, add_sub_cancel_left]
+    exact h
+
+theorem not_pulseFires {charge gain level : ℝ} (start : ℝ)
+    (h : ¬ PulseFires charge gain level) :
+    ∀ t ∈ Icc start (start + 1), readyPulse charge gain start t < level := by
+  intro t ht
+  by_contra hn
+  exact h (pulseFires_iff.mp ⟨t, ht, not_lt.mp hn⟩)
+
+theorem pulseFires_of_peak {charge gain level : ℝ} (hc : 1 / 10 ≤ charge)
+    (peak : level ≤ 1 / 10 + gain * response 1) : PulseFires charge gain level := by
+  refine ⟨1, ⟨by norm_num, le_rfl⟩, ?_⟩
+  have decay := mul_nonneg (sub_nonneg.mpr hc) (Real.exp_pos (-(1 / 2) * (1 - 0))).le
+  simp only [readyPulse, sub_zero] at decay ⊢
+  linarith
+
+/-- A silent pulse leaves room for one more dose under the gain cap. -/
+theorem silent_room {charge z level upper lower : ℝ} (hc : 1 / 10 ≤ charge)
+    (fire : level ≤ 21 / 20) (bounds : 1 / 200 ≤ lower ∧ lower < upper ∧ upper ≤ 2 / 25)
+    (silent : ¬ PulseFires charge (Real.exp z) level) :
+    Real.exp (z + 8 * (upper - lower)) ≤ 7 / 2 := by
+  have below : 1 / 10 + Real.exp z * response 1 < level := by
+    by_contra h
+    exact silent (pulseFires_of_peak hc (not_lt.mp h))
+  have drive := mul_le_mul_of_nonneg_left response_one_lower (Real.exp_pos z).le
+  have gain : Real.exp z ≤ 19 / 11 := by linarith
+  have two : Real.exp (3 / 5 : ℝ) ∈ Icc (0 : ℝ) 2 :=
+    exp_bracket_10 (by norm_num) (by norm_num [Finset.sum_range_succ])
+  have dose : Real.exp (8 * (upper - lower)) ≤ 2 :=
+    (Real.exp_le_exp.mpr (by linarith [bounds.1, bounds.2.2])).trans two.2
+  rw [Real.exp_add]
+  have product := mul_le_mul gain dose (Real.exp_pos _).le (by norm_num)
+  linarith
+
+/-- One training pulse on a rested cell, whatever its gain. -/
+theorem training_step_exists {θ ε s p upper lower level rest} {later : List (Delivery 1)}
+    (box : @PhysicalBox 1 θ ε)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
+    (entry : 7 / 100 ≤ upper ∧ upper ≤ 2 / 25) (exit : 1 / 200 ≤ lower ∧ lower < upper)
+    (state : RestState θ s) (recovery : 7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10)
+    (queue : s.pending = (⟨0, p, s.time⟩ : Delivery 1) :: later)
+    (wait : s.time + 22 ≤ rest) (laterDue : ∀ d ∈ later, rest ≤ d.due) :
+    ∃ u, Nonempty (ParameterExecution θ (fun _ _ => []) s u) ∧ RestState θ u ∧ u.time = rest ∧
+      u.pending = later ∧ (∀ q ≠ p, u.x 0 (.z q) = s.x 0 (.z q)) ∧ u.x 0 .b = s.x 0 .b ∧
+      ((¬ PulseFires (s.x 0 .q) (Real.exp (s.x 0 (.z p))) level ∧
+          u.x 0 (.z p) = s.x 0 (.z p) + 8 * (upper - lower)) ∨
+        (PulseFires (s.x 0 .q) (Real.exp (s.x 0 (.z p))) level ∧
+          u.x 0 (.z p) = s.x 0 (.z p) ∧ u.x 0 .q = 1 / 10)) := by
+  by_cases h : PulseFires (s.x 0 .q) (Real.exp (s.x 0 (.z p))) level
+  · obtain ⟨u, run, rested, date, pend, gains, b, charge⟩ :=
+      firing_step_exists box config fire entry exit state recovery queue wait laterDue
+        (pulseFires_iff.mpr h)
+    exact ⟨u, run, rested, date, pend, fun q _ => gains q, b, Or.inr ⟨h, gains p, charge⟩⟩
+  · obtain ⟨u, run, rested, date, pend, learned, others, b⟩ :=
+      silent_step_exists box config fire entry exit state queue wait laterDue
+        (not_pulseFires s.time h)
+        (silent_room state.charge.1 fire.2 ⟨exit.1, exit.2, entry.2⟩ h)
+    exact ⟨u, run, rested, date, pend, others, b, Or.inl ⟨h, learned⟩⟩
+
+/-- The effect of a train of pulses on the rest charge and the log-gain
+of the pulsed port. A firing pulse leaves the exact rest charge. -/
+inductive Trained (level dose : ℝ) : ℕ → ℝ → ℝ → ℝ → ℝ → Prop
+  | done (q z : ℝ) : Trained level dose 0 q z q z
+  | silent {n : ℕ} {q₀ z₀ q₁ q z : ℝ} (quiet : ¬ PulseFires q₀ (Real.exp z₀) level)
+      (band : 1 / 10 ≤ q₁ ∧ q₁ ≤ 1 / 10 + 1 / 10000)
+      (rest : Trained level dose n q₁ (z₀ + dose) q z) : Trained level dose (n + 1) q₀ z₀ q z
+  | fire {n : ℕ} {q₀ z₀ q z : ℝ} (fired : PulseFires q₀ (Real.exp z₀) level)
+      (rest : Trained level dose n (1 / 10) z₀ q z) : Trained level dose (n + 1) q₀ z₀ q z
+
+/-- The gain moves by a whole number of doses, at most one per pulse. -/
+theorem Trained.gain {level dose : ℝ} {n : ℕ} {q₀ z₀ q z : ℝ}
+    (h : Trained level dose n q₀ z₀ q z) : ∃ k : ℕ, k ≤ n ∧ z = z₀ + k * dose := by
+  induction h with
+  | done q z => exact ⟨0, le_rfl, by simp⟩
+  | silent quiet band rest ih =>
+    obtain ⟨k, hk, e⟩ := ih
+    exact ⟨k + 1, by omega, by rw [e]; push_cast; ring⟩
+  | fire fired rest ih =>
+    obtain ⟨k, hk, e⟩ := ih
+    exact ⟨k, by omega, e⟩
+
+/-- Once a pulse fires from the exact rest charge, every later pulse
+fires and the gain stays. -/
+theorem Trained.stable {level dose : ℝ} {n : ℕ} {q₀ z₀ q z : ℝ}
+    (h : Trained level dose n q₀ z₀ q z) (exact : q₀ = 1 / 10)
+    (fires : PulseFires q₀ (Real.exp z₀) level) : q = 1 / 10 ∧ z = z₀ := by
+  induction h with
+  | done q z => exact ⟨exact, rfl⟩
+  | silent quiet band rest ih => exact absurd fires quiet
+  | fire fired rest ih => exact ih rfl (exact ▸ fires)
+
+/-- With enough pulses the training stops: the final gain fires from the
+exact rest charge. `r` bounds the number of doses needed to reach a gain
+that always fires. -/
+theorem Trained.stops {level dose Z : ℝ} {n : ℕ} {q₀ z₀ q z : ℝ}
+    (limit : ∀ c w, 1 / 10 ≤ c → Z ≤ w → PulseFires c (Real.exp w) level)
+    (h : Trained level dose n q₀ z₀ q z) :
+    ∀ r : ℕ, Z ≤ z₀ + r * dose → 1 / 10 ≤ q₀ →
+      ((q₀ = 1 / 10 ∧ 2 * r + 1 ≤ n) ∨ 2 * r + 2 ≤ n) →
+      q = 1 / 10 ∧ PulseFires (1 / 10) (Real.exp z) level := by
+  induction h with
+  | done q z =>
+    intro r _ _ count
+    rcases count with ⟨_, c⟩ | c <;> omega
+  | @silent n q₀ z₀ q₁ q z quiet band rest ih =>
+    intro r reach charge count
+    rcases r with _ | r
+    · exact absurd (limit q₀ z₀ charge (by simpa using reach)) quiet
+    · refine ih r ?_ band.1 (Or.inr (by rcases count with ⟨_, c⟩ | c <;> omega))
+      push_cast at reach
+      linarith
+  | @fire n q₀ z₀ q z fired rest ih =>
+    intro r reach charge count
+    rcases count with ⟨exact, c⟩ | c
+    · obtain ⟨hq, hz⟩ := rest.stable rfl (exact ▸ fired)
+      exact ⟨hq, by rw [hz]; exact exact ▸ fired⟩
+    · exact ih r reach le_rfl (Or.inl ⟨rfl, by omega⟩)
+
+/-- Unless no dose was written, the gain one dose below the final one
+was silent from some rest charge in the band. -/
+theorem Trained.last_silent {level dose : ℝ} {n : ℕ} {q₀ z₀ q z : ℝ}
+    (h : Trained level dose n q₀ z₀ q z) (band₀ : 1 / 10 ≤ q₀ ∧ q₀ ≤ 1 / 10 + 1 / 10000) :
+    z = z₀ ∨ ∃ c, 1 / 10 ≤ c ∧ c ≤ 1 / 10 + 1 / 10000 ∧
+      ¬ PulseFires c (Real.exp (z - dose)) level := by
+  induction h with
+  | done q z => exact Or.inl rfl
+  | @silent n q₀ z₀ q₁ q z quiet band rest ih =>
+    rcases ih band with e | found
+    · exact Or.inr ⟨q₀, band₀.1, band₀.2, by rw [e, add_sub_cancel_right]; exact quiet⟩
+    · exact Or.inr found
+  | fire fired rest ih => exact ih ⟨le_rfl, by norm_num⟩
+
+/-- Pulse dates at least 22 units apart, the last one at least 22 units
+before the horizon. -/
+def Spaced (start : ℝ) : List ℝ → ℝ → Prop
+  | [], horizon => start + 22 ≤ horizon
+  | D :: rest, horizon => start + 22 ≤ D ∧ Spaced D rest horizon
+
+theorem Spaced.later {horizon : ℝ} : ∀ {dates : List ℝ} {start : ℝ},
+    Spaced start dates horizon → ∀ D ∈ dates, start + 22 ≤ D
+  | [], _, _, D, hD => by cases hD
+  | D₀ :: rest, start, h, D, hD => by
+    rcases List.mem_cons.mp hD with rfl | hmem
+    · exact h.1
+    · have next := Spaced.later h.2 D hmem
+      linarith [h.1]
+
+/-- A train of training pulses on one port, as an execution. Every pulse
+is accounted for: it is silent and writes one dose, or it fires and
+writes nothing. -/
+theorem training_loop_exists {θ ε p upper lower level}
+    (box : @PhysicalBox 1 θ ε)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
+    (entry : 7 / 100 ≤ upper ∧ upper ≤ 2 / 25) (exit : 1 / 200 ≤ lower ∧ lower < upper) :
+    ∀ (dates : List ℝ) (s : Snapshot 1) (horizon : ℝ), RestState θ s →
+      7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10 →
+      s.pending = (⟨0, p, s.time⟩ : Delivery 1) :: dates.map (fun D => (⟨0, p, D⟩ : Delivery 1)) →
+      Spaced s.time dates horizon →
+      ∃ u, Nonempty (ParameterExecution θ (fun _ _ => []) s u) ∧ RestState θ u ∧
+        u.time = horizon ∧ u.pending = [] ∧ (∀ q ≠ p, u.x 0 (.z q) = s.x 0 (.z q)) ∧
+        u.x 0 .b = s.x 0 .b ∧
+        Trained level (8 * (upper - lower)) (dates.length + 1) (s.x 0 .q) (s.x 0 (.z p))
+          (u.x 0 .q) (u.x 0 (.z p)) := by
+  intro dates
+  induction dates with
+  | nil =>
+    intro s horizon state recovery queue spaced
+    obtain ⟨u, run, rested, date, pend, others, b, outcome⟩ :=
+      training_step_exists (later := []) box config fire entry exit state recovery queue spaced
+        (by intro d hd; cases hd)
+    refine ⟨u, run, rested, date, pend, others, b, ?_⟩
+    rcases outcome with ⟨quiet, learned⟩ | ⟨fired, same, charge⟩
+    · rw [learned]
+      exact .silent quiet rested.charge (.done _ _)
+    · rw [same, charge]
+      exact .fire fired (.done _ _)
+  | cons D ds ih =>
+    intro s horizon state recovery queue spaced
+    obtain ⟨u, ⟨run⟩, rested, date, pend, others, b, outcome⟩ :=
+      training_step_exists (rest := D)
+        (later := (⟨0, p, D⟩ : Delivery 1) :: ds.map (fun D => (⟨0, p, D⟩ : Delivery 1)))
+        box config fire entry exit state recovery queue spaced.1
+        (by
+          intro d hd
+          rcases List.mem_cons.mp hd with rfl | hm
+          · exact le_rfl
+          · obtain ⟨D', hD', rfl⟩ := List.mem_map.mp hm
+            have next := Spaced.later spaced.2 D' hD'
+            show D ≤ D'
+            linarith)
+    obtain ⟨v, ⟨next⟩, rested', date', pend', others', b', trained⟩ :=
+      ih u horizon rested (by rw [b]; exact recovery) (by rw [pend, date])
+        (by rw [date]; exact spaced.2)
+    refine ⟨v, ⟨run.append next⟩, rested', date', pend',
+      fun q hq => (others' q hq).trans (others q hq), b'.trans b, ?_⟩
+    rcases outcome with ⟨quiet, learned⟩ | ⟨fired, same, charge⟩
+    · rw [learned] at trained
+      exact .silent quiet rested.charge trained
+    · rw [same, charge] at trained
+      exact .fire fired trained
+
+/-- Training that stops by itself, for any start gain. `r` doses bring
+the gain to a value that always fires, and the train has at least
+`2 r + 2` pulses. The final gain fires from the exact rest charge. Unless
+no dose was written, the gain one dose below it was silent. -/
+theorem stop_training_exists {θ ε p upper lower level} {dates : List ℝ} {s : Snapshot 1}
+    {horizon : ℝ} (box : @PhysicalBox 1 θ ε)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
+    (entry : 7 / 100 ≤ upper ∧ upper ≤ 2 / 25) (exit : 1 / 200 ≤ lower ∧ lower < upper)
+    (state : RestState θ s) (recovery : 7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10)
+    (queue : s.pending =
+      (⟨0, p, s.time⟩ : Delivery 1) :: dates.map (fun D => (⟨0, p, D⟩ : Delivery 1)))
+    (spaced : Spaced s.time dates horizon) (r : ℕ)
+    (reach : level ≤ 1 / 10 + Real.exp (s.x 0 (.z p) + r * (8 * (upper - lower))) * response 1)
+    (enough : 2 * r + 2 ≤ dates.length + 1) :
+    ∃ u, Nonempty (ParameterExecution θ (fun _ _ => []) s u) ∧ RestState θ u ∧
+      u.time = horizon ∧ u.pending = [] ∧ (∀ q ≠ p, u.x 0 (.z q) = s.x 0 (.z q)) ∧
+      u.x 0 .b = s.x 0 .b ∧ u.x 0 .q = 1 / 10 ∧
+      (∃ k : ℕ, k ≤ dates.length + 1 ∧
+        u.x 0 (.z p) = s.x 0 (.z p) + k * (8 * (upper - lower))) ∧
+      PulseFires (1 / 10) (Real.exp (u.x 0 (.z p))) level ∧
+      (u.x 0 (.z p) = s.x 0 (.z p) ∨ ∃ c, 1 / 10 ≤ c ∧ c ≤ 1 / 10 + 1 / 10000 ∧
+        ¬ PulseFires c (Real.exp (u.x 0 (.z p) - 8 * (upper - lower))) level) := by
+  obtain ⟨u, run, rested, date, pend, others, b, trained⟩ :=
+    training_loop_exists box config fire entry exit dates s horizon state recovery queue spaced
+  have limit : ∀ c w, 1 / 10 ≤ c → s.x 0 (.z p) + r * (8 * (upper - lower)) ≤ w →
+      PulseFires c (Real.exp w) level := by
+    intro c w hc hw
+    apply pulseFires_of_peak hc
+    have grow := mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr hw) response_one_pos.le
+    linarith
+  obtain ⟨charge, fires⟩ := trained.stops limit r le_rfl state.charge.1 (Or.inr enough)
+  exact ⟨u, run, rested, date, pend, others, b, charge, trained.gain, fires,
+    trained.last_silent state.charge⟩
+
+end RecursiveLearning.Native
