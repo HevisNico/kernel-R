@@ -140,7 +140,11 @@ reports the timing and memory-capacity trade-off for lower exit thresholds.
   or two cells. The [exact counting theorem](docs/EXACT_DOSE_COUNTING.md)
   uses nominal thresholds.
 - **Exact quantities.** Actuation factors are exact. The coincidence
-  theorem uses a trained-port birth gain of exactly 1.2.
+  theorem uses a trained-port birth gain of exactly 1.2 and a FIRE
+  threshold within ±3%. These are modelling choices. No circuit evidence
+  supports them as worst-case bounds, and a per-cell gain error would
+  widen the read latency window that the receiver relies on. See the
+  [implementation assumptions](model/IMPLEMENTATION_ASSUMPTIONS.md).
 - **Receiver.** The coincidence receiver is a decision rule on the
   two cells' emitted dates.
 - **Complete runs.** Theorems compare runs complete through a horizon.
