@@ -21,6 +21,9 @@ import Cascade
 import FreeRead
 import AcyclicNetwork
 import WiredNetwork
+import SignalNetwork
+import SearchCells
+import TrainedSearch
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000
