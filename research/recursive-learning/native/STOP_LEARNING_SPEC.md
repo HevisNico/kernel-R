@@ -77,8 +77,7 @@ chosen date `rest`, at least 22 units later: if the pulse leaves the main
 charge below `F` throughout the pulse, and the gain after one dose is at
 most 7/2, there is an execution that ends in a `RestState` at `rest`,
 adds exactly `8 * (u − l)` to the log-gain of port `p`, and changes no
-other gain and no recovery rate. Uniqueness of complete runs is left to
-E.
+other gain and no recovery rate. The run has no FIRE event.
 
 **B. Firing step. Proved** as `firing_step_exists`. Same setting, with a
 recovery rate between 7/100 and 1/10: if the main charge reaches `F` at
@@ -86,7 +85,7 @@ some time of the pulse, there is an execution that ends in a `RestState`
 at `rest`, with no gain and no recovery rate changed and the main charge
 exactly at 1/10. The tail after the FIRE is `refractory_run_exists`,
 which takes the pending events in their time order. The count of FIRE
-events is left to E.
+events is one.
 
 **C. Training loop. Proved** as `training_loop_exists` and
 `stop_training_exists`. From a `RestState` and a train of pulses at
@@ -102,9 +101,10 @@ dose was written.
 same time makes the cell fire at a latency in the window of
 `stopped_pair_read_latency`, widened for the residual rest charge.
 
-**E. Every complete run.** By the uniqueness theorem of the
-parameterized semantics, every run complete through the same horizon
-has the same endpoint and the same FIRE dates as the constructed one.
+**E. Every complete run. Proved for the training** as `rest_run_unique`,
+and included in `stop_training_exists`: every run complete through the
+horizon ends in the same state as the constructed one, with the same
+number of FIRE events. The joint read D is not covered yet.
 
 ## What is already proved
 

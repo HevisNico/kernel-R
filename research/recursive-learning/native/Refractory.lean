@@ -705,7 +705,7 @@ theorem restSensor_congr {θ : Fin 1 → Parameters} {s s' : Snapshot 1} {q : Po
 theorem jump_fast_end {θ : Fin 1 → Parameters} {s : Snapshot 1}
     (sched : Scheduled θ s) (ord : Ordered θ s) (hm : s.main 0 = .fast)
     (due : mainNext θ s = s.time) :
-    Nonempty (ParameterJump θ (fun _ _ => []) s (setMain s 0 .slow)) ∧
+    Runs θ s (setMain s 0 .slow) 0 ∧
       Scheduled θ (setMain s 0 .slow) ∧ Ordered θ (setMain s 0 .slow) ∧
       remaining (setMain s 0 .slow) < remaining s ∧ Same θ s (setMain s 0 .slow) := by
   have apos : 0 < a := by linarith [a_coarse_bounds.1]
@@ -720,7 +720,7 @@ theorem jump_fast_end {θ : Fin 1 → Parameters} {s : Snapshot 1}
     rw [mainReopen_slow hs', mainNext_slow hs', mainReopen_fast hm, due]
     show s.time + decayTime (s.x 0 .q) _ (s.x 0 .b) = _
     rw [contact]
-  refine ⟨⟨.fastEnd s 0 hm contact⟩, ?_, ?_, ?_, ⟨reopenEq, fun _ _ => rfl, fun _ => rfl, rfl, rfl⟩⟩
+  refine ⟨Runs.jump (.fastEnd s 0 hm contact) rfl, ?_, ?_, ?_, ⟨reopenEq, fun _ _ => rfl, fun _ => rfl, rfl, rfl⟩⟩
   · exact {
       refractory := ⟨by rw [hs']; decide, sched.refractory.no_mark, sched.refractory.ready_raw⟩
       main_levels := sched.main_levels
@@ -749,7 +749,7 @@ theorem jump_fast_end {θ : Fin 1 → Parameters} {s : Snapshot 1}
 theorem jump_reopen {θ ε} {s : Snapshot 1} (box : @PhysicalBox 1 θ ε)
     (sched : Scheduled θ s) (ord : Ordered θ s) (hm : s.main 0 = .slow)
     (due : mainNext θ s = s.time) :
-    ∃ u, Nonempty (ParameterExecution θ (fun _ _ => []) s u) ∧ RefractoryEnd θ s u := by
+    ∃ u, Runs θ s u 0 ∧ RefractoryEnd θ s u := by
   have zero : decayTime (s.x 0 .q) (θ 0).thresholds.reopen (s.x 0 .b) = 0 := by
     rw [mainNext_slow hm] at due
     linarith
@@ -769,7 +769,7 @@ theorem jump_reopen {θ ε} {s : Snapshot 1} (box : @PhysicalBox 1 θ ε)
       have lt := (ord.raw q o h).1
       rw [reopenNow] at lt
       linarith [(sched.raw q o h).2]
-  refine ⟨setMain s 0 .ready, ⟨.cons (.jump (.reopen s 0 hm contact)) (.nil _)⟩,
+  refine ⟨setMain s 0 .ready, Runs.jump (.reopen s 0 hm contact) rfl,
     ⟨reopenNow.symm, by simp [setMain], contact, allReady, noRaw, fun _ => rfl, rfl, rfl,
       fun q => ?_⟩⟩
   show s.x 0 (.m q) = _
@@ -778,7 +778,7 @@ theorem jump_reopen {θ ε} {s : Snapshot 1} (box : @PhysicalBox 1 θ ε)
 theorem jump_error {θ ε} {s : Snapshot 1} {q : Port} (box : @PhysicalBox 1 θ ε)
     (sched : Scheduled θ s) (ord : Ordered θ s) (hm : s.aux 0 q = .silent)
     (due : sensorNext θ s q = s.time) :
-    Nonempty (ParameterJump θ (fun _ _ => []) s (setAux s 0 q .error)) ∧
+    Runs θ s (setAux s 0 q .error) 0 ∧
       Scheduled θ (setAux s 0 q .error) ∧ Ordered θ (setAux s 0 q .error) ∧
       remaining (setAux s 0 q .error) < remaining s ∧ Same θ s (setAux s 0 q .error) := by
   obtain ⟨lpos, lle, llt, mark⟩ := sched.levels q
@@ -798,7 +798,7 @@ theorem jump_error {θ ε} {s : Snapshot 1} {q : Port} (box : @PhysicalBox 1 θ 
   have readyOther (q' : Port) (h : q' ≠ q) :
       sensorReady θ (setAux s 0 q .error) q' = sensorReady θ s q' :=
     sensorReady_congr rfl rfl (other q' h)
-  refine ⟨⟨.error s 0 q hm contact⟩, ?_, ?_, ?_, ⟨rfl, ?_, fun _ => rfl, rfl, rfl⟩⟩
+  refine ⟨Runs.jump (.error s 0 q hm contact) rfl, ?_, ?_, ?_, ⟨rfl, ?_, fun _ => rfl, rfl, rfl⟩⟩
   · exact {
       refractory := ⟨sched.refractory.main,
         fun q' => by
@@ -866,7 +866,7 @@ theorem jump_error {θ ε} {s : Snapshot 1} {q : Port} (box : @PhysicalBox 1 θ 
 theorem jump_ready {θ ε} {s : Snapshot 1} {q : Port} (box : @PhysicalBox 1 θ ε)
     (sched : Scheduled θ s) (ord : Ordered θ s) (hm : s.aux 0 q = .error)
     (due : sensorNext θ s q = s.time) :
-    Nonempty (ParameterJump θ (fun _ _ => []) s (setAux s 0 q .ready)) ∧
+    Runs θ s (setAux s 0 q .ready) 0 ∧
       Scheduled θ (setAux s 0 q .ready) ∧ Ordered θ (setAux s 0 q .ready) ∧
       remaining (setAux s 0 q .ready) < remaining s ∧ Same θ s (setAux s 0 q .ready) := by
   obtain ⟨lpos, lle, llt, mark⟩ := sched.levels q
@@ -888,7 +888,7 @@ theorem jump_ready {θ ε} {s : Snapshot 1} {q : Port} (box : @PhysicalBox 1 θ 
   have readyOther (q' : Port) (h : q' ≠ q) :
       sensorReady θ (setAux s 0 q .ready) q' = sensorReady θ s q' :=
     sensorReady_congr rfl rfl (other q' h)
-  refine ⟨⟨.auxReady s 0 q hm contact⟩, ?_, ?_, ?_, ⟨rfl, ?_, fun _ => rfl, rfl, rfl⟩⟩
+  refine ⟨Runs.jump (.auxReady s 0 q hm contact) rfl, ?_, ?_, ?_, ⟨rfl, ?_, fun _ => rfl, rfl, rfl⟩⟩
   · exact {
       refractory := ⟨sched.refractory.main,
         fun q' => by
@@ -957,13 +957,13 @@ theorem jump_ready {θ ε} {s : Snapshot 1} {q : Port} (box : @PhysicalBox 1 θ 
 theorem jump_raw_end {θ : Fin 1 → Parameters} {s : Snapshot 1} {q : Port} {o : ℝ}
     (sched : Scheduled θ s) (ord : Ordered θ s) (active : s.raw 0 q = some o)
     (due : o + 1 = s.time) :
-    Nonempty (ParameterJump θ (fun _ _ => []) s (setRaw s 0 q none)) ∧
+    Runs θ s (setRaw s 0 q none) 0 ∧
       Scheduled θ (setRaw s 0 q none) ∧ Ordered θ (setRaw s 0 q none) ∧
       remaining (setRaw s 0 q none) < remaining s ∧ Same θ s (setRaw s 0 q none) := by
   have hs' : (setRaw s 0 q none).raw 0 q = none := by simp [setRaw]
   have other (q' : Port) (h : q' ≠ q) : (setRaw s 0 q none).raw 0 q' = s.raw 0 q' :=
     raw_update_other s 0 q none 0 q' (Or.inr h)
-  refine ⟨⟨.rawEnd s 0 q o active due.symm⟩, ?_, ?_, ?_, ⟨rfl, fun _ _ => rfl, fun _ => rfl, rfl, rfl⟩⟩
+  refine ⟨Runs.jump (.rawEnd s 0 q o active due.symm) rfl, ?_, ?_, ?_, ⟨rfl, fun _ _ => rfl, fun _ => rfl, rfl, rfl⟩⟩
   · exact {
       refractory := ⟨sched.refractory.main, sched.refractory.no_mark,
         fun q' hr => by
@@ -1048,18 +1048,18 @@ whatever that order is. No gain and no recovery rate changes, and each
 sensor ends on its own explicit relaxation. -/
 theorem refractory_run_exists {θ ε} (box : @PhysicalBox 1 θ ε) (s : Snapshot 1)
     (sched : Scheduled θ s) (ord : Ordered θ s) :
-    ∃ u, Nonempty (ParameterExecution θ (fun _ _ => []) s u) ∧ RefractoryEnd θ s u := by
+    ∃ u, Runs θ s u 0 ∧ RefractoryEnd θ s u := by
   generalize hn : remaining s = n
   induction n using Nat.strong_induction_on generalizing s with
   | _ n ih =>
     obtain ⟨τ, after, main, sensor, raw, which⟩ := next_event box sched
-    obtain ⟨s₁, ⟨pre⟩, sched₁, ord₁, count₁, same₁, due⟩ :
-        ∃ s₁, Nonempty (ParameterExecution θ (fun _ _ => []) s s₁) ∧ Scheduled θ s₁ ∧
+    obtain ⟨s₁, pre, sched₁, ord₁, count₁, same₁, due⟩ :
+        ∃ s₁, Runs θ s s₁ 0 ∧ Scheduled θ s₁ ∧
           Ordered θ s₁ ∧ remaining s₁ = remaining s ∧ Same θ s s₁ ∧
           (mainNext θ s₁ = s₁.time ∨ (∃ q, s₁.aux 0 q ≠ .ready ∧ sensorNext θ s₁ q = s₁.time) ∨
             ∃ q o, s₁.raw 0 q = some o ∧ o + 1 = s₁.time) := by
       rcases after.eq_or_lt with now | later
-      · refine ⟨s, ⟨.nil s⟩, sched, ord, rfl, ⟨rfl, fun _ _ => rfl, fun _ => rfl, rfl, rfl⟩, ?_⟩
+      · refine ⟨s, Runs.nil s, sched, ord, rfl, ⟨rfl, fun _ _ => rfl, fun _ => rfl, rfl, rfl⟩, ?_⟩
         rw [now]
         rcases which with h | ⟨q, hq, h⟩ | ⟨q, o, hr, h⟩
         · exact Or.inl h.symm
@@ -1067,13 +1067,13 @@ theorem refractory_run_exists {θ ε} (box : @PhysicalBox 1 θ ε) (s : Snapshot
         · exact Or.inr (Or.inr ⟨q, o, hr, h.symm⟩)
       · obtain ⟨⟨flow⟩, sched₁, ord₁⟩ := advance box sched ord later main sensor raw
         obtain ⟨same, mainEq, sensorEq⟩ := advance_same box sched τ
-        refine ⟨refractoryAt θ s τ, ⟨.cons (.flow flow) (.nil _)⟩, sched₁, ord₁, rfl, same, ?_⟩
+        refine ⟨refractoryAt θ s τ, Runs.flow flow, sched₁, ord₁, rfl, same, ?_⟩
         rcases which with h | ⟨q, hq, h⟩ | ⟨q, o, hr, h⟩
         · exact Or.inl (mainEq.trans h.symm)
         · exact Or.inr (Or.inl ⟨q, hq, (sensorEq q hq).1.trans h.symm⟩)
         · exact Or.inr (Or.inr ⟨q, o, hr, h.symm⟩)
-    have step : (∃ u, Nonempty (ParameterExecution θ (fun _ _ => []) s₁ u) ∧ RefractoryEnd θ s₁ u) ∨
-        ∃ s₂, Nonempty (ParameterJump θ (fun _ _ => []) s₁ s₂) ∧ Scheduled θ s₂ ∧ Ordered θ s₂ ∧
+    have step : (∃ u, Runs θ s₁ u 0 ∧ RefractoryEnd θ s₁ u) ∨
+        ∃ s₂, Runs θ s₁ s₂ 0 ∧ Scheduled θ s₂ ∧ Ordered θ s₂ ∧
           remaining s₂ < remaining s₁ ∧ Same θ s₁ s₂ := by
       rcases due with h | ⟨q, hq, h⟩ | ⟨q, o, hr, h⟩
       · rcases hm : s₁.main 0 with _ | _ | _
@@ -1086,9 +1086,9 @@ theorem refractory_run_exists {θ ε} (box : @PhysicalBox 1 θ ε) (s : Snapshot
         · exact Or.inr ⟨_, jump_error box sched₁ ord₁ hm h⟩
         · exact Or.inr ⟨_, jump_ready box sched₁ ord₁ hm h⟩
       · exact Or.inr ⟨_, jump_raw_end sched₁ ord₁ hr h⟩
-    rcases step with ⟨u, ⟨run⟩, done⟩ | ⟨s₂, ⟨jump⟩, sched₂, ord₂, less, same₂⟩
-    · exact ⟨u, ⟨pre.append run⟩, done.of_same same₁⟩
-    · obtain ⟨u, ⟨run⟩, done⟩ := ih (remaining s₂) (by omega) s₂ sched₂ ord₂ rfl
-      exact ⟨u, ⟨pre.append (.cons (.jump jump) run)⟩, (done.of_same same₂).of_same same₁⟩
+    rcases step with ⟨u, run, done⟩ | ⟨s₂, jump, sched₂, ord₂, less, same₂⟩
+    · exact ⟨u, pre.append run, done.of_same same₁⟩
+    · obtain ⟨u, run, done⟩ := ih (remaining s₂) (by omega) s₂ sched₂ ord₂ rfl
+      exact ⟨u, pre.append (jump.append run), (done.of_same same₂).of_same same₁⟩
 
 end RecursiveLearning.Native

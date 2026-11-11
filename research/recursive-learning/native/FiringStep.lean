@@ -190,7 +190,7 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
     (wait : s.time + 22 ≤ rest) (laterDue : ∀ d ∈ later, rest ≤ d.due)
     (fires : ∃ t ∈ Icc s.time (s.time + 1),
       level ≤ readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time t) :
-    ∃ u, Nonempty (ParameterExecution θ (fun _ _ => []) s u) ∧ RestState θ u ∧ u.time = rest ∧
+    ∃ u, Runs θ s u 1 ∧ RestState θ u ∧ u.time = rest ∧
       u.pending = later ∧ (∀ q, u.x 0 (.z q) = s.x 0 (.z q)) ∧ u.x 0 .b = s.x 0 .b ∧
       u.x 0 .q = 1 / 10 := by
   -- The first contact with the FIRE level.
@@ -214,7 +214,7 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
   -- Admission, MARK and SILENT entry.
   let d : Delivery 1 := ⟨0, p, s.time⟩
   let admitted : Snapshot 1 := { (setRaw s d.cell d.port (some s.time)) with pending := [] ++ later }
-  have arrive : ParameterJump θ (fun _ _ => []) s admitted :=
+  let arrive : ParameterJump θ (fun _ _ => []) s admitted :=
     .arrive s d [] later queue rfl (state.raw p)
   have gainBound := rest_gain_bound box state p
   have start : ∀ t, admitted.time ≤ t → t ≤ admitted.time + 1 / 10 →
@@ -345,7 +345,7 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
     exact relax_restBand gtf.le (restSilent q hq)
   let fired : Snapshot 1 := { (setMain edge 0 .fast) with
     pending := edge.pending ++ (fun (_ : Fin 1) (_ : ℝ) => ([] : List (Delivery 1))) 0 edge.time }
-  have fireJump : ParameterJump θ (fun _ _ => []) edge fired :=
+  let fireJump : ParameterJump θ (fun _ _ => []) edge fired :=
     .fire edge 0 (g.main_ready 0) (by rw [config]; exact edgeCharge)
   have thrFast : (θ 0).thresholds.fastEnd = 1 / 4 := by rw [config]; rfl
   have thrReopen : (θ 0).thresholds.reopen = 1 / 10 := by rw [config]; rfl
@@ -452,7 +452,7 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
       have h := laterDue v (firedPending v hv)
       linarith [fastT.2, slowT.2] }
   -- The refractory period, then the quiet wait.
-  obtain ⟨u₁, ⟨run⟩, fin⟩ := refractory_run_exists box fired sched ord
+  obtain ⟨u₁, run, fin⟩ := refractory_run_exists box fired sched ord
   have time₁ : u₁.time = mainReopen θ fired := fin.time
   have charge₁ : u₁.x 0 .q = 1 / 10 := fin.charge.trans thrReopen
   have reopenLate : mainReopen θ fired < rest := by
@@ -515,14 +515,15 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
     · rw [restSensor_ready (firedAuxO q h), relax_relax]
       exact relax_restBand (show tf ≤ rest by linarith) (edgeOther q h)
   have bounds := low_threshold_bounds config fire (by linarith [entry.1]) (by linarith [exit.1])
-  let whole : ParameterExecution θ (fun _ _ => []) s u :=
-    .cons (.jump arrive) ((parameterMarkSilent g config preMark preSilent).append
-      (.cons (.flow (parameterSilentLeg leg config)) (.cons (.jump fireJump)
-        (run.append (.cons (.flow waitFlow) (.nil _))))))
+  have counted : Runs θ s u 1 :=
+    (Runs.jump arrive rfl).append ((runs_mark_silent g config preMark preSilent).append
+      ((Runs.flow (parameterSilentLeg leg config)).append ((Runs.jump fireJump rfl).append
+        (run.append (Runs.flow waitFlow)))))
+  obtain ⟨whole, _⟩ := id counted
   have inv := ParameterExecution.physical_invariant whole bounds box state.physical
   have uB : u.x 0 .b = s.x 0 .b := fin.recovery.trans firedB
   have uGains (q : Port) : u.x 0 (.z q) = s.x 0 (.z q) := fin.gains q
-  refine ⟨u, ⟨whole⟩, ⟨fin.main, fin.aux, fin.raw, ⟨uCharge.ge, uCharge.le.trans (by norm_num)⟩,
+  refine ⟨u, counted, ⟨fin.main, fin.aux, fin.raw, ⟨uCharge.ge, uCharge.le.trans (by norm_num)⟩,
     uSensors, ?_, inv.reserve 0, ?_⟩, rfl, ?_, uGains, uB, uCharge⟩
   · rw [uB]
     exact ⟨by linarith [recovery.1], by linarith [recovery.2]⟩

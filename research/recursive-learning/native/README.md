@@ -1078,8 +1078,8 @@ level is above 1. The flows are therefore built directly with realized
 guards (`silent_leg_of_margin`, `quietDynamics`) and do not go through
 the nominal kernel.
 
-The construction does not yet show that every complete run agrees with
-it. The firing step, the loop and the joint read remain.
+The agreement of every complete run with the construction is stated
+once, for the whole training, in `TrainingLoop.lean`.
 
 ### The refractory period for any order of events
 
@@ -1129,8 +1129,8 @@ Together the two steps cover every pulse on a rested cell: it either
 stays below the FIRE level and writes one dose, or reaches it and writes
 nothing. Neither theorem assumes a gain band.
 
-The count of FIRE events and the agreement of every complete run are not
-stated yet.
+The run has exactly one FIRE event. The silent step and the refractory
+period have none. Each construction carries its count (`Runs`).
 
 ### The training loop, for every start gain
 
@@ -1156,6 +1156,13 @@ residual rest charge left by the previous silent pulse. The next pulse
 starts from the exact rest charge and may then be silent once more.
 After a FIRE from the exact rest charge, every later pulse fires
 (`Trained.stable`).
+
+Every run agrees with the constructed one. `rest_run_unique` applies
+the uniqueness theorem of the parameterized semantics: any run from the
+same rested start that is complete through the horizon ends in the same
+state, with the same number of FIRE events. `stop_training_exists`
+includes that statement, and each pulse is either one of its `k` doses
+or one of its `f` FIRE events.
 
 The final state is the hypothesis of the read-latency theorem with a
 residual rest charge, `stopped_read_response_residual`: the read latency

@@ -9,6 +9,54 @@ realized thresholds of the cell. -/
 namespace RecursiveLearning.Native
 open KernelR.Hybrid Set MeasureTheory
 
+theorem execution_emissions_append {n θ route} {s u v : Snapshot n}
+    (e : ParameterExecution θ route s u) (f : ParameterExecution θ route u v) :
+    (e.append f).emissions = e.emissions ++ f.emissions := by
+  induction e with
+  | nil _ => rfl
+  | cons m rest ih => simp [ParameterExecution.append, ih]
+
+/-- An execution of the single cell from `s` to `u` with exactly `n`
+FIRE events. -/
+def Runs (θ : Fin 1 → Parameters) (s u : Snapshot 1) (n : ℕ) : Prop :=
+  ∃ e : ParameterExecution θ (fun _ _ => []) s u, e.emissions.length = n
+
+theorem Runs.nil {θ : Fin 1 → Parameters} (s : Snapshot 1) : Runs θ s s 0 := ⟨.nil s, rfl⟩
+
+theorem Runs.flow {θ : Fin 1 → Parameters} {s u : Snapshot 1} (f : ParameterFlow θ s u) :
+    Runs θ s u 0 := ⟨.cons (.flow f) (.nil _), rfl⟩
+
+theorem Runs.jump {θ : Fin 1 → Parameters} {s u : Snapshot 1} {n : ℕ}
+    (j : ParameterJump θ (fun _ _ => []) s u) (h : j.emissions.length = n) : Runs θ s u n :=
+  ⟨.cons (.jump j) (.nil _), by simpa [ParameterExecution.emissions] using h⟩
+
+theorem Runs.append {θ : Fin 1 → Parameters} {s u v : Snapshot 1} {n m : ℕ}
+    (first : Runs θ s u n) (second : Runs θ u v m) : Runs θ s v (n + m) := by
+  obtain ⟨e, he⟩ := first
+  obtain ⟨f, hf⟩ := second
+  exact ⟨e.append f, by rw [execution_emissions_append, List.length_append, he, hf]⟩
+
+theorem runs_mark_silent {θ : Fin 1 → Parameters} {s : Snapshot 1} {p upper lower level}
+    {f : FirstInputMark θ s 0 p} (g : FirstInputSilent f)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (first : ∀ t ∈ Ico s.time (s.time + f.latency), f.flow.path t 0 .q < level)
+    (second : ∀ t ∈ Ico f.final.time g.final.time, g.flow.path t 0 .q < level) :
+    Runs θ s g.final 0 := ⟨parameterMarkSilent g config first second, rfl⟩
+
+theorem runs_training_trace {θ p upper lower level s u}
+    (trace : TrainingTrace θ p upper lower level s u)
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level) : Runs θ s u 0 := by
+  refine ⟨parameterTrainingTrace trace config, ?_⟩
+  have empty : (parameterTrainingTrace trace config).emissions = [] := by
+    induction trace with
+    | nil s => rfl
+    | silent leg _ ih => exact ih
+    | enter mode contact _ ih => exact ih
+    | expire active due _ ih => exact ih
+    | liveError leg _ ih => exact ih
+  rw [empty]
+  rfl
+
 /-- A READY sensor without input relaxes toward its rest charge and stays
 below the MARK threshold. -/
 theorem relax_lt_one {initial start t : ℝ} (ht : start ≤ t) (below : initial < 1) :
@@ -501,7 +549,7 @@ theorem silent_write_exists {θ ε e p upper lower level rest}
     (other : ∀ q, q ≠ p → e.aux 0 q = .ready ∧ RestBand (e.x 0 (.m q)))
     (raw : ∀ q, e.raw 0 q = none) (wait : e.time + 20 ≤ rest)
     (pending : ∀ d ∈ e.pending, rest ≤ d.due) :
-    ∃ u, Nonempty (ParameterExecution θ (fun _ _ => []) e u) ∧ RestState θ u ∧ u.time = rest ∧
+    ∃ u, Runs θ e u 0 ∧ RestState θ u ∧ u.time = rest ∧
       u.pending = e.pending ∧ u.x 0 (.z p) = e.x 0 (.z p) + 8 * (upper - lower) ∧
       (∀ q ≠ p, u.x 0 (.z q) = e.x 0 (.z q)) ∧ u.x 0 .b = e.x 0 .b := by
   let r := (θ 0).le p
@@ -649,7 +697,7 @@ theorem silent_write_exists {θ ε e p upper lower level rest}
       linarith
   }
   let reopened := setAux boundary 0 p .ready
-  have reopen : ParameterJump θ (fun _ _ => []) boundary reopened :=
+  let reopen : ParameterJump θ (fun _ _ => []) boundary reopened :=
     .auxReady _ 0 p aux (by rw [config]; simpa [trainingThresholds] using chargeOut)
   have ready (i : Fin 1) : reopened.main i = .ready := by
     rw [Subsingleton.elim i 0]
@@ -719,7 +767,7 @@ theorem silent_write_exists {θ ε e p upper lower level rest}
     by_cases h : q = p
     · subst q; rw [gainOut]; exact learnedCap.le
     · rw [otherGain q h]; exact caps q
-  exact ⟨u, ⟨.cons (.flow flow) (.cons (.jump reopen) (.cons (.flow waitFlow) (.nil _)))⟩,
+  exact ⟨u, (Runs.flow flow).append ((Runs.jump reopen rfl).append (Runs.flow waitFlow)),
     ⟨ready 0, sensors 0, noneRaw 0, uCharge, uSensors, recovery, uEnergy, uCaps⟩,
     rfl, rfl, gainOut, otherGain, rfl⟩
 
@@ -737,12 +785,12 @@ theorem silent_step_exists {θ ε s p upper lower level rest} {later : List (Del
     (silent : ∀ t ∈ Icc s.time (s.time + 1),
       readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time t < level)
     (room : Real.exp (s.x 0 (.z p) + 8 * (upper - lower)) ≤ 7 / 2) :
-    ∃ u, Nonempty (ParameterExecution θ (fun _ _ => []) s u) ∧ RestState θ u ∧ u.time = rest ∧
+    ∃ u, Runs θ s u 0 ∧ RestState θ u ∧ u.time = rest ∧
       u.pending = later ∧ u.x 0 (.z p) = s.x 0 (.z p) + 8 * (upper - lower) ∧
       (∀ q ≠ p, u.x 0 (.z q) = s.x 0 (.z q)) ∧ u.x 0 .b = s.x 0 .b := by
   let d : Delivery 1 := ⟨0, p, s.time⟩
   let admitted : Snapshot 1 := { (setRaw s d.cell d.port (some s.time)) with pending := [] ++ later }
-  have arrive : ParameterJump θ (fun _ _ => []) s admitted :=
+  let arrive : ParameterJump θ (fun _ _ => []) s admitted :=
     .arrive s d [] later queue rfl (state.raw p)
   have gainBound : Real.exp (s.x 0 (.z p)) ≤ 22 / 5 := by
     have cap := (box.2 0 p).1.2
@@ -807,7 +855,7 @@ theorem silent_step_exists {θ ε s p upper lower level rest} {later : List (Del
       (start := s.time + 1) (by norm_num) run.after_pulse.le ⟨pulseLow, le_rfl⟩ ⟨le_rfl, pulseLow⟩
     rw [show e.x 0 .q = _ from run.charge]
     exact ⟨h.1, h.2.trans_lt pulseHigh⟩
-  obtain ⟨u, ⟨write⟩, rested, date, queueOut, learned, others, recovery⟩ :=
+  obtain ⟨u, write, rested, date, queueOut, learned, others, recovery⟩ :=
     silent_write_exists (e := e) (rest := rest) box config ⟨exit.1, exit.2, entry.2⟩
       (by rw [gains p]; exact room) (fun q => by rw [gains q]; exact state.caps q)
       (by rw [show e.x 0 .b = s.x 0 .b from run.recovery]; exact state.recovery)
@@ -822,9 +870,9 @@ theorem silent_step_exists {θ ε s p upper lower level rest} {later : List (Del
         have h : v ∈ run.before.pending := hv
         rw [run.queue] at h
         simpa [admitted] using h))
-  refine ⟨u, ⟨.cons (.jump arrive)
-    ((parameterMarkSilent run.silent config run.pre_mark run.pre_silent).append
-      ((parameterTrainingTrace run.trace config).append write))⟩, rested, date, ?_, ?_, ?_, ?_⟩
+  refine ⟨u, (Runs.jump arrive rfl).append
+    ((runs_mark_silent run.silent config run.pre_mark run.pre_silent).append
+      ((runs_training_trace run.trace config).append write)), rested, date, ?_, ?_, ?_, ?_⟩
   · rw [queueOut]
     change run.before.pending = later
     rw [run.queue]
