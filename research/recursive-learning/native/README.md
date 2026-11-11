@@ -1513,7 +1513,8 @@ Limits:
   through its window. A delay line that would keep the jitter of the
   FIRE is not used.
 - **One need for all probes.** Each probe is a separate cell. The
-  hypothesis gives them the same need `m`.
+  hypothesis gives them the same need `m`. The next module derives it
+  from fabrication tolerances.
 - **The gates are trained in advance,** whatever the need. Only the
   probes are trained on demand: a probe that is not reached receives no
   pulse.
@@ -1522,6 +1523,46 @@ Limits:
   with their costs. This search stops at the answers.
 - **The witness has two levels.** `trained_search` covers any depth. A
   family of layouts of every depth is not built.
+
+### The need of a probe, from fabrication tolerances
+
+[NeedTolerance.lean](NeedTolerance.lean) replaces the hypothesis of a
+common need by a tolerance on each probe.
+
+A nominal design has a FIRE level `level₀` and a dose `d₀`. The start
+gains that need exactly `m` doses form a band, one dose wide.
+`needCentre level₀ d₀ m` is its centre.
+
+- `needIs_of_tolerance`: a real probe has its start log-gain within `a`
+  of that centre, its dose within `b` of `d₀` and its FIRE level within
+  `ℓ` of `level₀`. If
+
+  ```text
+  a + m * b + 20/17 * ℓ + 1/8000 < d₀ / 2
+  ```
+
+  then the probe needs exactly `m` doses. Probes that satisfy this for
+  the same `m` have the same need, whatever their own gains, doses and
+  FIRE levels.
+- `trained_search_band_witness`: the binary search over four needs, with
+  each of the three probes at its own start gain, anywhere within 3/125
+  of the centre of the band. The dose is 1/20, so the band is used on
+  96% of its width.
+
+The error on the dose is multiplied by `m`: each dose adds its own
+error before the read. With a perfect start gain and FIRE level, needs
+up to `M` are separated when `M * b + 1/8000 < d₀ / 2`. For a dose of
+1/20 known to 1%, that is needs up to 49. The term `1/8000` covers the
+residual rest charge.
+
+Limits:
+
+- **A sufficient condition.** The inequality is not shown to be
+  necessary.
+- **The same error at every dose.** The dose of a probe is one number.
+  A dose that drifts from pulse to pulse is not covered.
+- **The witness varies the start gains only.** Its doses and FIRE
+  levels are those of the explicit cell.
 
 ## Common threshold offset and reaction delay
 
@@ -1593,7 +1634,7 @@ through `CoincidenceSeparation`, `StopLearningLatency`,
 `TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence`,
 `OffsetAndDelay`, `SelfCalibratedProbe`, `FamilyProduct`, `RoutedProduct`, `Cascade`,
 `FreeRead`, `AcyclicNetwork`, `WiredNetwork`, `SignalNetwork`,
-`SearchCells` and `TrainedSearch`. The
+`SearchCells`, `TrainedSearch` and `NeedTolerance`. The
 default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
