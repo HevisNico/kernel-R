@@ -321,6 +321,13 @@ theorem trained_wired_network {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → 
 
 /-! ### The hypotheses are satisfiable at every depth -/
 
+/-- The explicit cell with its two pulse trains and no read pulse. -/
+noncomputable def witnessSource : Snapshot 1 :=
+  { witnessStart with
+    pending := (⟨0, 0, 0⟩ : Delivery 1) ::
+      ((train 0 21).map (fun D => (⟨0, 0, D⟩ : Delivery 1)) ++
+        (⟨0, 1, 484⟩ : Delivery 1) :: (train 484 21).map (fun D => (⟨0, 1, D⟩ : Delivery 1))) }
+
 /-- The explicit cell without its read pulses is an open cell. -/
 theorem openCell_witness : OpenCell (fun _ => witnessParameters) (1 / 10) witnessSource 0 1
     (2 / 25) (59 / 800) (2 / 25) (59 / 800) 1 (train 0 21) (train 484 21) 484 968 10 10 :=

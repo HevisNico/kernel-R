@@ -17,7 +17,6 @@ import OffsetAndDelay
 import SelfCalibratedProbe
 import FamilyProduct
 import RoutedProduct
-import Cascade
 import FreeRead
 import AcyclicNetwork
 import WiredNetwork
@@ -25,6 +24,9 @@ import SignalNetwork
 import SearchCells
 import TrainedSearch
 import NeedTolerance
+import SearchActions
+import BisectionSearch
+import SuccessiveSearch
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

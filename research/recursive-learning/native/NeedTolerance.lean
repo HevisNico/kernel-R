@@ -164,10 +164,19 @@ theorem probeCell_band (m : ℕ) {z : ℝ} (band : |z - needCentre 1 (1 / 20) m|
         (by norm_num) (by norm_num) (by norm_num) band (by norm_num) (by norm_num)
         (by norm_num) }
 
-/-- The binary search over the needs 1 to 4, with start gains off the
-lattice. Each of the three probes has its own start gain, anywhere within
-3/125 of the centre of the band of need `m`. The conclusions are those of
-`trained_search_witness`. -/
+/-- A binary search over the needs 1 to 4, with six explicit cells and
+start gains off the lattice. Each of the three probes has its own start
+gain, anywhere within 3/125 of the centre of the band of need `m`. For
+every need `m`, in every complete run:
+
+- the root probe fires in its report window exactly when `m ≤ 2`, and
+  the root gate fires late exactly when `2 < m`;
+- the probe of node 1 fires in its window exactly when `m ≤ 1`, and its
+  gate fires late exactly when `m = 2`;
+- the probe of node 2 fires in its window exactly when `m = 3`, and its
+  gate fires late exactly when `3 < m`.
+
+The pair of answers separates the needs 1, 2, 3 and 4 or more. -/
 theorem trained_search_band_witness (m : ℕ) (z : Fin 3 → ℝ)
     (band : ∀ κ, |z κ - needCentre 1 (1 / 20) m| ≤ 3 / 125) :
     ∃ dates : Fin 6 → List ℝ,
@@ -187,7 +196,7 @@ theorem trained_search_band_witness (m : ℕ) (z : Fin 3 → ℝ)
         (signalRoute searchWitness.lo searchWitness.hi searchWitness.inputs)
         (Snapshot.family 0 (searchWitness.start (fun κ => probeAt (z κ)) (fun _ => witnessSource)))
         u), ParameterCompleteThrough ex 1150 → ∀ i, ex.emissionTimes i = dates i := by
-  obtain ⟨dates, yes, no, _, ref, all⟩ :=
+  obtain ⟨dates, _, yes, no, _, _, _, ref, all⟩ :=
     trained_search (by norm_num : 0 < 6) searchWitness searchWitness_sound
       (searchWitness_consistent m) (θp := fun _ _ => witnessParameters)
       (θg := fun _ _ => witnessParameters) (sp := fun κ => probeAt (z κ))
@@ -199,6 +208,8 @@ theorem trained_search_band_witness (m : ℕ) (z : Fin 3 → ℝ)
     funext j
     cases searchWitness.role j <;> rfl
   rw [same] at ref all
-  exact ⟨dates, yes 0, no 0, yes 1, no 1, yes 2, no 2, ref, all⟩
+  obtain ⟨run, complete⟩ := ref
+  exact ⟨dates, yes 0, no 0, yes 1, no 1, yes 2, no 2, ⟨_, run, complete⟩,
+    fun ex done => (all ex done).1⟩
 
 end RecursiveLearning.Native
