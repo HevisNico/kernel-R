@@ -8,6 +8,7 @@ import StopLearningLatency
 import NativeStopLearning
 import SilentStep
 import Refractory
+import FiringStep
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

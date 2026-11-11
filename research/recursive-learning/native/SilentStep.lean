@@ -34,7 +34,7 @@ theorem silent_leg_of_margin {θ ε s p origin upper level stop}
     (raw : s.raw 0 p = origin) (otherRaw : ∀ i q, i ≠ 0 ∨ q ≠ p → s.raw i q = none)
     (support : ∀ o, origin = some o → o ≤ s.time ∧ stop ≤ o + 1)
     (pending : ∀ d ∈ s.pending, stop ≤ d.due)
-    (charge : ∀ t ∈ Icc s.time stop,
+    (charge : ∀ t ∈ Ico s.time stop,
       readyProtectedValues θ s 0 p .silent origin t 0 .q < level)
     (sensor : ∀ t ∈ Ico s.time stop,
       upper < readyProtectedValues θ s 0 p .silent origin t 0 (.m p))
@@ -48,7 +48,7 @@ theorem silent_leg_of_margin {θ ε s p origin upper level stop}
     readyProtected_field s 0 p .silent origin (Or.inr rfl) main mode other raw otherRaw t ht.1
       (fun o h => ⟨(support o h).1, ht.2.trans_le (support o h).2⟩) i c
   have qbound (t : ℝ) (ht : t ∈ Ico s.time stop) : path t 0 .q < level :=
-    charge t ⟨ht.1, ht.2.le⟩
+    charge t ht
   have mbound (t : ℝ) (ht : s.time ≤ t) (q : Port) (hq : q ≠ p) : path t 0 (.m q) < 1 := by
     have value : path t 0 (.m q) = relax (1 / 2) (1 / 40) (s.x 0 (.m q)) s.time t := by
       simp [path, readyProtectedValues, hq]
@@ -80,7 +80,7 @@ theorem silent_leg_of_margin {θ ε s p origin upper level stop}
     ring
   · intro hu hl
     have startCharge : s.x 0 .q < 1 := by
-      have h := charge s.time ⟨le_rfl, positive.le⟩
+      have h := charge s.time ⟨le_rfl, positive⟩
       rw [show readyProtectedValues θ s 0 p .silent origin s.time 0 .q = s.x 0 .q from
         congrFun (congrFun (readyProtectedValues_initial (θ := θ) s 0 p .silent origin) 0) .q,
         hl] at h
@@ -332,7 +332,7 @@ theorem silent_entry_exists {θ ε s p upper lower level}
       have h := ahead v (show v ∈ s.pending from hv)
       dsimp only [expiry]
       linarith)
-    (fun t ht => by rw [rawCharge t]; exact margin t ⟨gAfter.trans ht.1, ht.2⟩)
+    (fun t ht => by rw [rawCharge t]; exact margin t ⟨gAfter.trans ht.1, ht.2.le⟩)
     (by
       intro t ht
       simp only [readyProtectedValues, and_self, ite_true, protectedReadyRate, g.sensor_charge]

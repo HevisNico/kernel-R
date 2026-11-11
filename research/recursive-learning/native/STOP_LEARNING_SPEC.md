@@ -80,16 +80,21 @@ adds exactly `8 * (u − l)` to the log-gain of port `p`, and changes no
 other gain and no recovery rate. Uniqueness of complete runs is left to
 E.
 
-**B. Firing step.** Same setting: if the main charge reaches `F` during
-the pulse, there is an execution complete through `D + 23` that ends in
-a `RestState`, has exactly one FIRE at the first crossing, and changes
-no gain and no recovery rate.
+**B. Firing step. Proved** as `firing_step_exists`. Same setting, with a
+recovery rate between 7/100 and 1/10: if the main charge reaches `F` at
+some time of the pulse, there is an execution that ends in a `RestState`
+at `rest`, with no gain and no recovery rate changed and the main charge
+exactly at 1/10. The tail after the FIRE is `refractory_run_exists`,
+which takes the pending events in their time order. The count of FIRE
+events is left to E.
 
-**C. Training loop.** From a `RestState` and a train of pulses 24 units
-apart on port `p`, there is an execution in which some pulse is the
-first to fire, every earlier pulse wrote a full dose, and every later
-pulse fires and writes nothing. The final gain is the start gain times
-`exp(d × n)` for that `n`.
+**C. Training loop.** From a `RestState` and a train of pulses at least
+22 units apart on port `p`, there is an execution in which every silent
+pulse writes a full dose and every firing pulse writes nothing. A pulse
+that fires thanks to a residual rest charge may be followed by one more
+silent pulse. With enough pulses the last ones all fire from the exact
+rest charge. The final gain is the start gain times `exp(d × n)`, where
+`n` is the number of silent pulses.
 
 **D. Joint read.** After C on two ports, one pulse on each port at the
 same time makes the cell fire at a latency in the window of
@@ -110,6 +115,10 @@ has the same endpoint and the same FIRE dates as the constructed one.
   [NativeStopLearning.lean](NativeStopLearning.lean).
 - Step A in the regime above, for any gain:
   [SilentStep.lean](SilentStep.lean).
+- The refractory period for any order of events:
+  [Refractory.lean](Refractory.lean).
+- Step B in the regime above, for any gain:
+  [FiringStep.lean](FiringStep.lean).
 
 ## Reusable constructions
 

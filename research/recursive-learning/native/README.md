@@ -1109,6 +1109,29 @@ gains, recovery rate and queue.
 The theorem is the common tail of the firing training step and of a read
 on several ports.
 
+### A firing training step
+
+[FiringStep.lean](FiringStep.lean) proves `firing_step_exists`, in the
+same regime and from the same `RestState` as the silent step. The
+hypothesis is the negation of the silent one: at some time of the pulse
+the main charge of the rested cell reaches the realized FIRE level. The
+recovery rate lies between 7/100 and 1/10.
+
+The construction takes the first contact with the FIRE level, which
+happens while the pulsed sensor is SILENT, fires there, and hands the
+state to `refractory_run_exists`. The ERROR phase of the sensor then
+falls inside the refractory period, whatever its order with the end of
+FAST. The conclusion is an execution that ends in a `RestState` at any
+chosen date at least 22 units after the pulse, with every gain and the
+recovery rate unchanged and the main charge exactly at 1/10.
+
+Together the two steps cover every pulse on a rested cell: it either
+stays below the FIRE level and writes one dose, or reaches it and writes
+nothing. Neither theorem assumes a gain band.
+
+The count of FIRE events and the agreement of every complete run are not
+stated yet.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -1130,8 +1153,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
 `BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
 through `CoincidenceSeparation`, `StopLearningLatency`,
-`NativeStopLearning`, `SilentStep` and `Refractory`. The default targets
-also run
+`NativeStopLearning`, `SilentStep`, `Refractory` and `FiringStep`. The
+default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
