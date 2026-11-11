@@ -16,7 +16,7 @@ noncomputable def trainingThresholds (p : Port) (upper lower level : ℝ) : Thre
     error := Function.update Thresholds.nominal.error p upper
     auxReady := Function.update Thresholds.nominal.auxReady p lower }
 
-private theorem guards_ready {θ : Fin 1 → Parameters} {s : Snapshot 1} {x : Values 1}
+theorem guards_ready {θ : Fin 1 → Parameters} {s : Snapshot 1} {x : Values 1}
     {p upper lower level} (config : (θ 0).thresholds = trainingThresholds p upper lower level)
     (main : s.main 0 = .ready) (charge : x 0 .q < level)
     (sensor : ∀ q, match s.aux 0 q with
@@ -35,7 +35,7 @@ private theorem guards_ready {θ : Fin 1 → Parameters} {s : Snapshot 1} {x : V
     cases mode : s.aux 0 q <;>
       simpa [mode, config, trainingThresholds, Thresholds.nominal, Function.update_apply] using h
 
-private theorem native_aux_guards {s : Snapshot 1} {x : Values 1} {p : Port} {upper lower : ℝ}
+theorem native_aux_guards {s : Snapshot 1} {x : Values 1} {p : Port} {upper lower : ℝ}
     (stock : BeforeGuards s x)
     (silent : s.aux 0 p = .silent → upper < x 0 (.m p))
     (error : s.aux 0 p = .error → lower < x 0 (.m p)) :
@@ -51,7 +51,7 @@ private theorem native_aux_guards {s : Snapshot 1} {x : Values 1} {p : Port} {up
     cases mode : s.aux 0 p <;> simp_all
   · cases mode : s.aux 0 q <;> simpa [mode, hq] using h
 
-private noncomputable def parameterMarkSilent {θ : Fin 1 → Parameters} {s : Snapshot 1}
+noncomputable def parameterMarkSilent {θ : Fin 1 → Parameters} {s : Snapshot 1}
     {p upper lower level}
     {f : FirstInputMark θ s 0 p} (g : FirstInputSilent f)
     (config : (θ 0).thresholds = trainingThresholds p upper lower level)
@@ -77,7 +77,7 @@ private noncomputable def parameterMarkSilent {θ : Fin 1 → Parameters} {s : S
     .silent _ 0 p mode (by rw [config]; exact g.threshold)
   exact .cons (.flow f₁) (.cons (.jump mark) (.cons (.flow f₂) (.cons (.jump silent) (.nil _))))
 
-private noncomputable def parameterSilentLeg {θ s p origin upper level stop}
+noncomputable def parameterSilentLeg {θ s p origin upper level stop}
     (leg : TrainingSilentLeg θ s p origin upper level stop) {lower}
     (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
     ParameterFlow θ s (readyProtectedEnd θ s 0 p .silent origin stop) where
@@ -110,7 +110,7 @@ private noncomputable def parameterSilentLeg {θ s p origin upper level stop}
       cases h
   pending_urgent := leg.pending
 
-private noncomputable def parameterTrainingTrace {θ p upper lower level s u}
+noncomputable def parameterTrainingTrace {θ p upper lower level s u}
     (trace : TrainingTrace θ p upper lower level s u)
     (config : (θ 0).thresholds = trainingThresholds p upper lower level) :
     ParameterExecution θ (fun _ _ => []) s u := by
