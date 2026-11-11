@@ -81,7 +81,13 @@ That gives a larger dose (0.72 at nominal thresholds) and a longer
 discharge. The same absolute threshold errors account for a smaller
 fraction of the larger dose.
 
-[`training_read_every_complete` and `training_read_exit_001_every_complete`](research/recursive-learning/native/ParameterTraining.lean)
+Two refinements separate what changes the dose from what does not. A
+shift common to both ERROR thresholds, up to 4% of the entry level,
+leaves the increment unchanged. A fixed reaction delay `d` after each
+threshold crossing moves the increment by at most `2.4 × d`.
+
+[`training_read_every_complete` and `training_read_exit_001_every_complete`](research/recursive-learning/native/ParameterTraining.lean) ·
+[`training_read_common_offset` and `training_read_reaction_delay`](research/recursive-learning/native/OffsetAndDelay.lean)
 
 ### 4. Two cells learn a coincidence task
 
