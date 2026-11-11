@@ -429,4 +429,89 @@ theorem stopped_pair_read_skew {g₁ g₂ h₁ h₂ fire fire' t t' : ℝ}
   obtain ⟨lo', hi'⟩ := stopped_pair_read_latency pos₃ pos₄ third fourth read'
   exact abs_lt.mpr ⟨by linarith, by linarith⟩
 
+/-! ### A rest charge that is close to its nominal value
+
+Between pulses the main charge relaxes toward `1/10` without reaching it.
+The window keeps its form, with a factor that tends to one with the
+residual charge. -/
+
+/-- The READY response from a charge `q0` to one pulse arriving at time zero. -/
+theorem readyPulse_from (q0 gain t : ℝ) :
+    readyPulse q0 gain 0 t =
+      1 / 10 + (q0 - 1 / 10) * Real.exp (-(1 / 2) * t) + gain * response t := by
+  simp [readyPulse]
+
+/-- Training stopped at gain `gain` and relative amplitude `c`, seen from
+rest charges within `δ` above `1/10`. The current gain fired from the
+charge `qFire`, and the gain before the last increment, of at most `d`,
+stayed silent from the charge `qSilent`. A later full-amplitude read from
+the charge `qRead` reaches a response level between two bounds in which
+neither the gain nor the charges appear. -/
+theorem stopped_read_response_residual {gain c fire d δ x qFire qSilent qRead tFire t : ℝ}
+    (cPos : 0 < c) (gainPos : 0 < gain) (margin : 1 / 10 + δ < fire)
+    (fireCharge : qFire ∈ Icc (1 / 10) (1 / 10 + δ))
+    (silentCharge : 1 / 10 ≤ qSilent) (readCharge : qRead ∈ Icc (1 / 10) (1 / 10 + δ))
+    (increment : x ≤ d)
+    (fireTime : tFire ∈ Icc (0 : ℝ) 1)
+    (fired : fire ≤ readyPulse qFire (c * gain) 0 tFire)
+    (silent : readyPulse qSilent (c * (gain * Real.exp (-x))) 0 1 < fire)
+    (read : FirstPulseReport qRead gain fire t) :
+    c * Real.exp (-d) * response 1 * (fire - 1 / 10 - δ) < response t * (fire - 1 / 10) ∧
+    response t * (fire - 1 / 10 - δ) ≤ c * response 1 * (fire - 1 / 10) := by
+  have peak : 0 < response 1 := response_one_pos
+  have rise := response_strictMono_pulse.monotoneOn fireTime
+    (show (1 : ℝ) ∈ Icc (0 : ℝ) 1 from ⟨zero_le_one, le_rfl⟩) fireTime.2
+  have decayFire : (qFire - 1 / 10) * Real.exp (-(1 / 2) * tFire) ≤ δ := by
+    have unit : Real.exp (-(1 / 2) * tFire) ≤ 1 :=
+      Real.exp_le_one_iff.mpr (by linarith [fireTime.1])
+    nlinarith [fireCharge.1, fireCharge.2, Real.exp_pos (-(1 / 2) * tFire)]
+  have decaySilent : 0 ≤ (qSilent - 1 / 10) * Real.exp (-(1 / 2) * (1 : ℝ)) :=
+    mul_nonneg (by linarith) (Real.exp_pos _).le
+  have decayRead : 0 ≤ (qRead - 1 / 10) * Real.exp (-(1 / 2) * t) ∧
+      (qRead - 1 / 10) * Real.exp (-(1 / 2) * t) ≤ δ := by
+    have unit : Real.exp (-(1 / 2) * t) ≤ 1 :=
+      Real.exp_le_one_iff.mpr (by linarith [read.live.1])
+    exact ⟨mul_nonneg (by linarith [readCharge.1]) (Real.exp_pos _).le,
+      by nlinarith [readCharge.1, readCharge.2, Real.exp_pos (-(1 / 2) * t)]⟩
+  have hit := read.hit
+  rw [readyPulse_from] at fired silent hit
+  have scaled := mul_le_mul_of_nonneg_left rise (mul_nonneg cPos.le gainPos.le)
+  -- the three facts, as bounds on gain times a response level
+  have top : fire - 1 / 10 - δ ≤ c * gain * response 1 := by linarith
+  have bottom : c * (gain * Real.exp (-x)) * response 1 < fire - 1 / 10 := by linarith
+  have level : fire - 1 / 10 - δ ≤ gain * response t ∧ gain * response t ≤ fire - 1 / 10 := by
+    constructor <;> linarith [decayRead.1, decayRead.2]
+  have decay : Real.exp (-d) ≤ Real.exp (-x) := Real.exp_le_exp.mpr (by linarith)
+  have gap : 0 < fire - 1 / 10 - δ := by linarith
+  have levelNonneg : 0 ≤ response t := response_nonnegative read.live.1
+  constructor
+  · -- c e^{-d} h(1) (F - 1/10 - δ) ≤ c e^{-x} h(1) * (gain h(t)) < (F - 1/10) * h(t) after dividing by gain
+    have first : c * Real.exp (-d) * response 1 ≤ c * Real.exp (-x) * response 1 :=
+      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left decay cPos.le) peak.le
+    have lowPos : 0 ≤ c * Real.exp (-x) * response 1 :=
+      mul_nonneg (mul_nonneg cPos.le (Real.exp_pos _).le) peak.le
+    have chain : gain * (c * Real.exp (-x) * response 1 * (fire - 1 / 10 - δ)) <
+        gain * (response t * (fire - 1 / 10)) := by
+      have a₁ : c * Real.exp (-x) * response 1 * (fire - 1 / 10 - δ) ≤
+          c * Real.exp (-x) * response 1 * (gain * response t) :=
+        mul_le_mul_of_nonneg_left level.1 lowPos
+      have a₂ : gain * (c * Real.exp (-x) * response 1) * (gain * response t) ≤
+          (fire - 1 / 10) * (gain * response t) :=
+        mul_le_mul_of_nonneg_right (by linarith) (mul_nonneg gainPos.le levelNonneg)
+      have strict : gain * (c * Real.exp (-x) * response 1) < fire - 1 / 10 := by linarith
+      nlinarith [mul_pos gainPos gap, mul_nonneg gainPos.le levelNonneg]
+    have core := lt_of_mul_lt_mul_left chain gainPos.le
+    have widen : c * Real.exp (-d) * response 1 * (fire - 1 / 10 - δ) ≤
+        c * Real.exp (-x) * response 1 * (fire - 1 / 10 - δ) :=
+      mul_le_mul_of_nonneg_right first gap.le
+    exact widen.trans_lt core
+  · have chain : gain * (response t * (fire - 1 / 10 - δ)) ≤
+        gain * (c * response 1 * (fire - 1 / 10)) := by
+      have a₁ : gain * response t * (fire - 1 / 10 - δ) ≤ (fire - 1 / 10) * (fire - 1 / 10 - δ) :=
+        mul_le_mul_of_nonneg_right level.2 gap.le
+      have a₂ : (fire - 1 / 10) * (fire - 1 / 10 - δ) ≤ (fire - 1 / 10) * (c * gain * response 1) :=
+        mul_le_mul_of_nonneg_left top (by linarith)
+      nlinarith
+    exact le_of_mul_le_mul_left chain gainPos
+
 end RecursiveLearning.Native

@@ -993,6 +993,13 @@ increments between a positive lower bound and `d`, starting from a gain
 whose pulse is silent. Some pulse is the first to fire, every earlier
 pulse was silent, and the cell is then in the stopped state.
 
+**A rest charge that is only close to nominal.** Between pulses the main
+charge relaxes toward 0.1 without reaching it.
+`stopped_read_response_residual` takes rest charges within `δ` above
+0.1, at the firing pulse, at the last silent pulse and at the read. The
+window keeps its form, with the two levels multiplied by factors that
+tend to one with `δ`. The gain and the charges do not appear in it.
+
 What they assume and do not prove:
 
 - The cell is at its rest charge 0.1 before each training pulse and
@@ -1040,6 +1047,9 @@ Scope:
   Small doses and inexact thresholds are not covered.
 - **One port.** The joint read of two trained ports is proved for the
   read equation only, in `StopLearningLatency.lean`.
+
+The [specification](STOP_LEARNING_SPEC.md) states the regime and the
+theorems that remain for every start gain to be covered with small doses.
 
 ## Verify
 
