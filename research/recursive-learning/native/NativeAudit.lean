@@ -10,6 +10,7 @@ import SilentStep
 import Refractory
 import FiringStep
 import TrainingLoop
+import Driven
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

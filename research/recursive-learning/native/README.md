@@ -1180,6 +1180,22 @@ final gains fire from the exact rest charge, each is at most one dose
 above a silent gain unless no dose was written on it, and every complete
 run agrees with the constructed one.
 
+### The driven period before a FIRE
+
+[Driven.lean](Driven.lean) is the counterpart of `Refractory.lean` for
+the time before a FIRE. While the main cell is READY and no sensor is in
+ERROR, no gain is written. The main charge follows the sum of the live
+pulses weighted by their gains, and each sensor follows its own pulse or
+its own decay. `drivenDynamics` is that explicit flow for any number of
+live pulses.
+
+`driven_run_exists` runs the cell to a chosen horizon. The MARK and
+SILENT entries of the sensors are taken in their time order by
+induction, so two pulses on two ports need no assumption on which sensor
+moves first. The hypothesis is a `Plan`: the main charge stays below the
+FIRE level before the horizon, every live pulse outlasts it, and every
+busy sensor is SILENT above its ERROR entry threshold at the horizon.
+
 The final state is the hypothesis of the read-latency theorem with a
 residual rest charge, `stopped_read_response_residual`: the read latency
 then depends on neither the start gains nor the FIRE level. The read of
@@ -1206,8 +1222,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
 `BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
 through `CoincidenceSeparation`, `StopLearningLatency`,
-`NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep` and
-`TrainingLoop`. The default targets also run
+`NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep`,
+`TrainingLoop` and `Driven`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
