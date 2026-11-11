@@ -1321,9 +1321,115 @@ nine kinds of jump to the network.
   explicit cell satisfy the hypotheses. Every cell fires its read in its
   window and any two cells are accepted together.
 
-The cells are independent: no cell sends a pulse to another. A network
-in which the FIRE of one trained cell drives another needs a routed
-composition in the parameterized semantics, which does not exist yet.
+In this module the cells are independent: no cell sends a pulse to
+another. The next two modules add wires.
+
+### Wires between cells
+
+[RoutedProduct.lean](RoutedProduct.lean) composes cells joined by wires,
+in the parameterized semantics.
+
+Each cell keeps a one-cell run with an empty router. In that run its
+queue already holds the pulses that other cells will send it. In the
+network a pulse enters the queue only at the FIRE that sends it.
+`routed_execution` weaves the one-cell runs into one run of the routed
+network. Its hypotheses are:
+
+- every wire has a strictly positive delay;
+- the queues balance at the start: the queues of the cells are the queue
+  of the network plus what the FIRE dates of the cells will send.
+
+The proof keeps that balance as a multiset equation through every move.
+A FIRE moves its deliveries from the promised side to the queue. An
+arrival finds its delivery in the queue, because every delivery still
+promised is due later. Each cell keeps its ordered FIRE dates. The one-
+cell theorems of the earlier modules are used unchanged.
+
+### A cascade of trained cells
+
+[Cascade.lean](Cascade.lean) is the first network with wires between
+trained cells.
+
+- `trained_cascade`: cells 0 and 1 are trained and read by source
+  pulses. Their read FIREs travel on two wires to the two ports of cell
+  2, which is trained by its own source pulses. The router has a gate on
+  each wire, so the FIRE events of training send nothing. In every
+  complete run of the three-cell network, cell 2 fires its read later
+  than 0.239 units after the pulse from cell 0 arrives and no later than
+  0.256 units after the pulse from cell 1 arrives. The hypothesis on
+  cell 2 is stated for every pair of arrival dates that the windows of
+  cells 0 and 1 allow.
+- `trained_cascade_witness`: three copies of the explicit cell, read at
+  date 968, with wire delays 1 and 11/10. In every complete run, the
+  third cell fires its read between 969.478 and 969.612.
+
+This theorem fixes three cells and the order of arrival at cell 2. The
+next modules remove both restrictions.
+
+### Read pulses in either order
+
+[FreeRead.lean](FreeRead.lean) separates the training of a cell from its
+read.
+
+- `rest_wait`: a cell at rest stays at rest for as long as no pulse
+  arrives. No gain moves.
+- `OpenCell`: a trained cell without its read pulses. Its hypotheses are
+  those of `TrainedCell` without the read dates. After `horizon` the
+  cell is trained and at rest.
+- `OpenCell.read`: two read pulses arrive after `horizon`, one on each
+  trained port, at most a quarter of a unit apart, **in either order**.
+  The cell fires its read later than 0.239 units after the first pulse
+  and no later than 0.256 units after the second. Every FIRE of training
+  comes before `horizon`, which is a fixed date.
+
+### Composition along forward wires
+
+[AcyclicNetwork.lean](AcyclicNetwork.lean) proves one composition theorem
+for every network whose wires go from a cell to a cell of higher index.
+
+`acyclic_network` takes, for each cell, a description of its FIRE dates
+that may mention the FIRE dates of the cells before it. Its hypothesis is
+local: a cell fed by cells that follow their descriptions has a run to
+rest that follows its own. The pulses it receives are computed from the
+router by `incoming`. The conclusion is global: the network has a
+complete run, every cell follows its description, and the FIRE dates are
+the same in every complete run. The cells are treated one after the
+other, in index order, and `routed_execution` weaves their runs.
+
+### Networks of trained cells of any depth
+
+[WiredNetwork.lean](WiredNetwork.lean) applies the composition theorem to
+trained cells.
+
+- `ReadInput`: each of the two read pulses of a cell comes from a source
+  at a fixed date, or from the read FIRE of an earlier cell through a
+  wire with a positive delay.
+- `trained_wired_network`: any number of cells, any wiring of that kind.
+  The hypothesis `admissible` says that, whenever the earlier cells fire
+  their reads in their windows, the two read pulses of a cell arrive
+  after its training and at most a quarter of a unit apart. Their order
+  is free. In every complete run, each cell fires its read later than
+  0.239 units after its first read pulse and no later than 0.256 units
+  after its second, after the FIRE events of its own training.
+- `trained_chain_witness`: for every `n`, a chain of `n` copies of the
+  explicit cell. A source reads the first cell at date 968. The read
+  FIRE of each cell reads the two ports of the next one, one unit later.
+  In every complete run, each cell fires its read between 1.239 and
+  1.256 units after the cell before it.
+
+Limits:
+
+- **Width of the windows.** The theorem bounds each read FIRE inside a
+  window of 0.017 units plus the distance between the two arrivals. On a
+  path where the two ports of a cell are fed by different cells, the
+  windows widen with the depth, and the hypothesis `admissible` needs
+  them to stay within a quarter of a unit. In the chain both ports of a
+  cell are fed by the same FIRE, so the depth is free.
+- **Gates.** Each wire carries the FIRE events after a fixed date only.
+  That date is the end of the training of the sending cell.
+- **Every read pulse arrives.** A cell that may or may not receive a
+  read pulse is not covered by `trained_wired_network`. The composition
+  theorem `acyclic_network` covers it, given the one-cell description.
 
 ## Common threshold offset and reaction delay
 
@@ -1393,7 +1499,9 @@ builds this package with the pinned dependencies. Its default targets compile
 through `CoincidenceSeparation`, `StopLearningLatency`,
 `NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep`,
 `TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence`,
-`OffsetAndDelay`, `SelfCalibratedProbe` and `FamilyProduct`. The default targets also run
+`OffsetAndDelay`, `SelfCalibratedProbe`, `FamilyProduct`, `RoutedProduct`, `Cascade`,
+`FreeRead`, `AcyclicNetwork` and `WiredNetwork`. The
+default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
