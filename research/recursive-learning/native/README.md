@@ -977,13 +977,30 @@ The stopping rule is the stop-learning principle of Brader et al.,
 which Noack et al. implement in switched capacitors. These theorems
 state its consequence for the R read equation.
 
+**The ratio from two ports.** The kernel adds the currents of the ports,
+so the amplitude ratio need not come from the pulses. Train two ports
+separately with canonical pulses until each makes the cell fire, then
+read with one pulse on each port at the same time. `stopped_pair` shows
+that the pair is in the stopped state at relative amplitude one half.
+The ratio is exact because it counts ports. With increments of at most
+`1/20`, `stopped_pair_read_latency` gives a read FIRE between 0.239 and
+0.256 model units, and `stopped_pair_read_skew` a difference below 0.017
+units between two cells, whatever their four gains and two FIRE
+thresholds.
+
+**Training ends.** `training_stops` takes any sequence of log-gain
+increments between a positive lower bound and `d`, starting from a gain
+whose pulse is silent. Some pulse is the first to fire, every earlier
+pulse was silent, and the cell is then in the stopped state.
+
 What they assume and do not prove:
 
 - The cell is at its rest charge 0.1 before each training pulse and
   before the read.
-- The amplitude ratio `c` is exact and the same for every cell.
-- The stopped state is taken as a hypothesis. The training loop is not
-  constructed in the kernel, whose pulses have a fixed amplitude.
+- For a ratio taken from the pulses, `c` is exact and the same for every
+  cell. For two ports, the two read pulses arrive at the same instant.
+- The sequence of gains is given. No hybrid execution is constructed in
+  which a silent pulse writes an increment and a firing pulse writes none.
 - The pulse shape is canonical.
 
 ## Verify

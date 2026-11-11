@@ -241,4 +241,192 @@ theorem stopped_read_skew_two_thirds {gain₁ gain₂ fire₁ fire₂ t₁ t₂ 
   norm_num at h
   exact h
 
+/-! ### The amplitude ratio from two ports, and the end of training
+
+The kernel adds the currents of the ports. Two ports trained separately by
+canonical pulses, then read by one pulse on each at the same time, behave
+as one port trained at relative amplitude one half. -/
+
+theorem silent_of_peak {gain c fire : ℝ} (amplitude : 0 ≤ c * gain)
+    (peak : 1 / 10 + c * gain * response 1 < fire) : SilentPulse gain c fire := by
+  intro t ht
+  rw [readyPulse_at_rest]
+  have mono := response_strictMono_pulse.monotoneOn ht
+    (show (1 : ℝ) ∈ Icc (0 : ℝ) 1 from ⟨zero_le_one, le_rfl⟩) ht.2
+  have scaled := mul_le_mul_of_nonneg_left mono amplitude
+  linarith
+
+theorem firing_of_peak {gain c fire : ℝ} (peak : fire ≤ 1 / 10 + c * gain * response 1) :
+    FiringPulse gain c fire :=
+  ⟨1, ⟨zero_le_one, le_rfl⟩, by rw [readyPulse_at_rest]; exact peak⟩
+
+theorem silent_of_not_firing {gain c fire : ℝ} (quiet : ¬ FiringPulse gain c fire) :
+    SilentPulse gain c fire := by
+  intro t ht
+  by_contra reached
+  exact quiet ⟨t, ht, not_lt.mp reached⟩
+
+theorem not_firing_of_silent {gain c fire : ℝ} (silent : SilentPulse gain c fire) :
+    ¬ FiringPulse gain c fire := by
+  rintro ⟨t, ht, reached⟩
+  exact absurd (silent t ht) (not_lt.mpr reached)
+
+/-- Two ports, each stopped under canonical training pulses, form together a
+port stopped at relative amplitude one half. -/
+theorem stopped_pair {g₁ g₂ fire d : ℝ} (pos₁ : 0 < g₁) (pos₂ : 0 < g₂)
+    (first : StoppedTraining g₁ 1 fire d) (second : StoppedTraining g₂ 1 fire d) :
+    StoppedTraining (g₁ + g₂) (1 / 2) fire d := by
+  obtain ⟨fired₁, x₁, positive₁, max₁, silent₁⟩ := first
+  obtain ⟨fired₂, x₂, _, max₂, silent₂⟩ := second
+  have top₁ := fired₁.peak (by linarith)
+  have top₂ := fired₂.peak (by linarith)
+  have low₁ := silent₁.peak
+  have low₂ := silent₂.peak
+  have peak : 0 < response 1 := response_one_pos
+  refine ⟨firing_of_peak (by linarith), max x₁ x₂, lt_max_of_lt_left positive₁,
+    max_le max₁ max₂, ?_⟩
+  have decay₁ : Real.exp (-(max x₁ x₂)) ≤ Real.exp (-x₁) :=
+    Real.exp_le_exp.mpr (by linarith [le_max_left x₁ x₂])
+  have decay₂ : Real.exp (-(max x₁ x₂)) ≤ Real.exp (-x₂) :=
+    Real.exp_le_exp.mpr (by linarith [le_max_right x₁ x₂])
+  have part₁ : g₁ * Real.exp (-(max x₁ x₂)) * response 1 ≤ g₁ * Real.exp (-x₁) * response 1 :=
+    mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left decay₁ pos₁.le) peak.le
+  have part₂ : g₂ * Real.exp (-(max x₁ x₂)) * response 1 ≤ g₂ * Real.exp (-x₂) * response 1 :=
+    mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left decay₂ pos₂.le) peak.le
+  apply silent_of_peak
+  · exact mul_nonneg (by norm_num) (mul_nonneg (by linarith) (Real.exp_pos _).le)
+  · linarith
+
+/-- Training by pulses of relative amplitude `c` stops. If each increment of
+log-gain lies between `dMin > 0` and `d`, and the first pulse is silent,
+some pulse is the first to fire, every earlier pulse was silent, and the
+cell is then in the stopped state. -/
+theorem training_stops {g x : ℕ → ℝ} {c fire dMin d : ℝ}
+    (cPos : 0 < c) (start : 0 < g 0) (minPos : 0 < dMin)
+    (step : ∀ n, g (n + 1) = g n * Real.exp (x n))
+    (bounds : ∀ n, dMin ≤ x n ∧ x n ≤ d)
+    (silent : SilentPulse (g 0) c fire) :
+    ∃ n, StoppedTraining (g (n + 1)) c fire d ∧ ∀ m ≤ n, SilentPulse (g m) c fire := by
+  classical
+  have peak : 0 < response 1 := response_one_pos
+  have positive : ∀ n, 0 < g n := by
+    intro n
+    induction n with
+    | zero => exact start
+    | succ k ih => rw [step k]; exact mul_pos ih (Real.exp_pos _)
+  have growth : ∀ n, g 0 ≤ g n ∧ g 0 + (n : ℝ) * (g 0 * dMin) ≤ g n := by
+    intro n
+    induction n with
+    | zero => simp
+    | succ k ih =>
+      have factor : 1 + dMin ≤ Real.exp (x k) := by
+        linarith [Real.add_one_le_exp (x k), (bounds k).1]
+      have scaled := mul_le_mul_of_nonneg_left factor (positive k).le
+      have floor := mul_le_mul_of_nonneg_right ih.1 minPos.le
+      rw [step k]
+      push_cast
+      constructor <;> nlinarith [mul_pos start minPos]
+  have eventually : ∃ n, FiringPulse (g n) c fire := by
+    obtain ⟨N, hN⟩ := exists_nat_gt ((fire - 1 / 10) / (c * response 1) / (g 0 * dMin))
+    have large : (fire - 1 / 10) / (c * response 1) < (N : ℝ) * (g 0 * dMin) :=
+      (div_lt_iff₀ (mul_pos start minPos)).mp hN
+    have reach : (fire - 1 / 10) / (c * response 1) ≤ g N := by
+      linarith [(growth N).2, start]
+    have scaled := mul_le_mul_of_nonneg_left reach (mul_pos cPos peak).le
+    have cancel : c * response 1 * ((fire - 1 / 10) / (c * response 1)) = fire - 1 / 10 := by
+      have hc : c ≠ 0 := cPos.ne'
+      have hr : response 1 ≠ 0 := peak.ne'
+      field_simp
+    exact ⟨N, firing_of_peak (by linarith)⟩
+  have nonzero : Nat.find eventually ≠ 0 := by
+    intro zero
+    have fired := Nat.find_spec eventually
+    rw [zero] at fired
+    exact not_firing_of_silent silent fired
+  obtain ⟨k, hk⟩ := Nat.exists_eq_succ_of_ne_zero nonzero
+  have before : ∀ m ≤ k, SilentPulse (g m) c fire := by
+    intro m hm
+    exact silent_of_not_firing (Nat.find_min eventually (by omega))
+  have fired : FiringPulse (g (k + 1)) c fire := by
+    have h := Nat.find_spec eventually
+    rwa [hk] at h
+  refine ⟨k, ?_, before⟩
+  rw [step k] at fired ⊢
+  exact stopped_of_last_step (before k le_rfl) fired
+    (lt_of_lt_of_le minPos (bounds k).1) (bounds k).2
+
+private theorem response_pair_low : response (239 / 1000) ≤ 26496 / 100000 := by
+  have slow : Real.exp (-(1 / 2 : ℝ) * (239 / 1000)) ≤ 887365 / 1000000 := by
+    have h : Real.exp (-(239 / 2000 : ℝ)) ∈ Icc (0 : ℝ) (887365 / 1000000) :=
+      exp_bracket_10 (by norm_num) (by norm_num [Finset.sum_range_succ])
+    convert h.2 using 2
+    norm_num
+  have fast : (717972 / 1000000 : ℝ) ≤ Real.exp (-a * (239 / 1000)) := by
+    have h : Real.exp (-(138629437 / 100000000 : ℝ) * (239 / 1000)) ∈
+        Icc (717972 / 1000000 : ℝ) 1 :=
+      exp_bracket_10 (by norm_num) (by norm_num [Finset.sum_range_succ])
+    exact h.1.trans (Real.exp_le_exp.mpr (by dsimp [a]; linarith [KernelR.log_four_bounds.2]))
+  have nonneg : 0 ≤ Real.exp (-(1 / 2 : ℝ) * (239 / 1000)) - Real.exp (-a * (239 / 1000)) :=
+    sub_nonneg.mpr (Real.exp_le_exp.mpr (by linarith [a_coarse_bounds.1]))
+  unfold response
+  exact (mul_le_mul response_ratio_bounds.2 (show Real.exp (-(1 / 2 : ℝ) * (239 / 1000)) -
+    Real.exp (-a * (239 / 1000)) ≤ 169393 / 1000000 by linarith)
+    nonneg (by norm_num)).trans (by norm_num)
+
+private theorem response_pair_high : (27935 / 100000 : ℝ) ≤ response (32 / 125) := by
+  have slow : (879853 / 1000000 : ℝ) ≤ Real.exp (-(1 / 2) * (32 / 125)) := by
+    have h : Real.exp (-(16 / 125 : ℝ)) ∈ Icc (879853 / 1000000 : ℝ) 1 :=
+      exp_bracket_10 (by norm_num) (by norm_num [Finset.sum_range_succ])
+    convert h.1 using 2
+    norm_num
+  have fast : Real.exp (-a * (32 / 125)) ≤ 70125 / 100000 := by
+    have h : Real.exp (-(138629436 / 100000000 : ℝ) * (32 / 125)) ∈
+        Icc (0 : ℝ) (70125 / 100000) :=
+      exp_bracket_10 (by norm_num) (by norm_num [Finset.sum_range_succ])
+    exact (Real.exp_le_exp.mpr (by dsimp [a]; linarith [KernelR.log_four_bounds.1])).trans h.2
+  have ratioNonneg : 0 ≤ a / (a - 1 / 2) :=
+    (by norm_num : (0 : ℝ) ≤ 156414 / 100000).trans response_ratio_bounds.1
+  unfold response
+  exact (by norm_num : (27935 / 100000 : ℝ) ≤ (156414 / 100000) * (178603 / 1000000)).trans
+    (mul_le_mul response_ratio_bounds.1 (show (178603 / 1000000 : ℝ) ≤
+      Real.exp (-(1 / 2) * (32 / 125)) - Real.exp (-a * (32 / 125)) by linarith)
+      (by norm_num) ratioNonneg)
+
+private theorem window_half :
+    response (239 / 1000) ≤ (1 / 2) * Real.exp (-(1 / 20 : ℝ)) * response 1 ∧
+    (1 / 2) * response 1 ≤ response (32 / 125) := by
+  have step : Real.exp (-(1 / 20 : ℝ)) ∈ Icc (95122 / 100000 : ℝ) 1 :=
+    exp_bracket_10 (by norm_num) (by norm_num [Finset.sum_range_succ])
+  have peak := response_one_bounds
+  have product : (95122 / 100000 : ℝ) * (55766 / 100000) ≤
+      Real.exp (-(1 / 20 : ℝ)) * response 1 :=
+    mul_le_mul step.1 peak.1 (by norm_num) (Real.exp_pos _).le
+  constructor
+  · rw [mul_assoc]
+    linarith [response_pair_low]
+  · linarith [response_pair_high, peak.2]
+
+/-- Two ports trained separately by canonical pulses, with increments of at
+most `1/20`, and read together: the cell fires between 0.239 and 0.256
+model units after the two read pulses, for any gains and FIRE threshold. -/
+theorem stopped_pair_read_latency {g₁ g₂ fire t : ℝ} (pos₁ : 0 < g₁) (pos₂ : 0 < g₂)
+    (first : StoppedTraining g₁ 1 fire (1 / 20)) (second : StoppedTraining g₂ 1 fire (1 / 20))
+    (read : FirstPulseReport (1 / 10) (g₁ + g₂) fire t) :
+    t ∈ Ioc (239 / 1000 : ℝ) (32 / 125) :=
+  stopped_read_latency (by norm_num) (by linarith) (stopped_pair pos₁ pos₂ first second) read
+    ⟨by norm_num, by norm_num⟩ ⟨by norm_num, by norm_num⟩ window_half.1 window_half.2
+
+/-- Two such cells differ in read latency by less than 0.017 model units,
+whatever their four gains and two FIRE thresholds. -/
+theorem stopped_pair_read_skew {g₁ g₂ h₁ h₂ fire fire' t t' : ℝ}
+    (pos₁ : 0 < g₁) (pos₂ : 0 < g₂) (pos₃ : 0 < h₁) (pos₄ : 0 < h₂)
+    (first : StoppedTraining g₁ 1 fire (1 / 20)) (second : StoppedTraining g₂ 1 fire (1 / 20))
+    (third : StoppedTraining h₁ 1 fire' (1 / 20)) (fourth : StoppedTraining h₂ 1 fire' (1 / 20))
+    (read : FirstPulseReport (1 / 10) (g₁ + g₂) fire t)
+    (read' : FirstPulseReport (1 / 10) (h₁ + h₂) fire' t') :
+    |t - t'| < 17 / 1000 := by
+  obtain ⟨lo, hi⟩ := stopped_pair_read_latency pos₁ pos₂ first second read
+  obtain ⟨lo', hi'⟩ := stopped_pair_read_latency pos₃ pos₄ third fourth read'
+  exact abs_lt.mpr ⟨by linarith, by linarith⟩
+
 end RecursiveLearning.Native
