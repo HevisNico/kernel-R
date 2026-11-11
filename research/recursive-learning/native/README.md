@@ -1641,21 +1641,75 @@ a complete tree of `2 ^ k - 1` questions that separates the needs 1 to
 - `bisection_search_witness`: explicit cells for every `k`, each probe
   at its own start gain inside the band of need `m`.
 
+This tree has one probe and one gate for each node, and its run lasts
+`k (22 * 2 ^ k + 26)` units. The next module keeps the same questions
+with one probe and one gate for each depth.
+
+### A binary search by successive approximation
+
+[SuccessiveSearch.lean](SuccessiveSearch.lean) builds the search of
+depth `k` with `2 k + 1` cells: a probe and a gate for each depth below
+`k`, and the learner.
+
+The weight of depth `t` is `2 ^ (k - 1 - t)`. The probe of depth `t` has
+its own block of that many pulses, from sources. Each earlier gate that
+answered no sends a block of its own weight. The count of the question
+of depth `t` is therefore the middle of the interval that remains
+(`probeDates_count`), and the probe answers yes exactly when the need is
+at most that count. No question has to be selected: only its count
+changes.
+
+A block sent by a gate goes to all the later probes at the same dates,
+and the own blocks of all the probes are sent together at the start.
+`probeDates_spaced` shows that the pulses of each probe stay 22 units
+apart, whatever the answers.
+
+- `successive_search`: every probe has the need `m`, with its own
+  parameters, start gain, dose and FIRE level. Every gate is trained
+  before the date 1000. In every complete run the probe of depth `t`
+  fires in its report window exactly when `m` is at most its count, the
+  gate of depth `t` fires late exactly when `m` is above it, and the
+  gain of each probe ends one dose higher for each pulse of its
+  question, up to its need.
+- `successive_digits`: for `1 ≤ m ≤ 2 ^ k`, the weights of the gates
+  that fire late add up to `m - 1`. The gates give the binary digits of
+  `m - 1`.
+- `sar_learner`: the last stage has the weight 1. Its question counts
+  exactly `m` training pulses. It is the learner: its gain ends exactly
+  `m` doses higher and its read pulse makes it fire.
+- `sar_cost`: the counts of the `k` questions add up to at most
+  `k (m - 1) + 2 ^ k - 1`.
+- `sar_duration`: the run ends at the date `1003 + 33 * 2 ^ k + 25 k`.
+- `successive_search_witness`: explicit cells for every `k ≥ 1`. Each
+  probe has its own start gain, within 1/100 of the centre of the band
+  of need `m`, and its own ERROR thresholds, hence its own dose, within
+  `1 / (100 * 2 ^ k)` of 1/20. The dose error allowed shrinks as
+  `2 ^ -k`, as `needIs_of_tolerance` requires.
+
+Compared with the tree of the previous section, for the same `2 ^ k`
+needs:
+
+```text
+                    tree of BisectionSearch     successive approximation
+cells               2 (2^k - 1)                 2 k + 1
+end of the run      1000 + k (22 * 2^k + 26)    1003 + 33 * 2^k + 25 k
+lesson              none                        the last stage
+```
+
 Limits:
 
-- **Duration.** The run lasts `k (22 * 2 ^ k + 26)` units. A question
-  with `c` pulses takes `22 c` units, and the counts go up to `2 ^ k`.
-  The search saves questions and pulses sent to probes, not time.
-- **Pulses on the path.** The `k` probes of the path receive their
-  questions. Their counts add up to at most `k 2 ^ k`, and their sum
-  is not computed.
-- **Size.** The tree has `2 ^ k - 1` probes and as many gates. Every
-  gate is trained, whatever the need.
-- **Tolerance at depth `k`.** With an inexact dose, the condition of
-  `needIs_of_tolerance` limits the needs that can be separated. The
-  witness has an exact dose.
-- **No lesson at the leaves.** The lessons of `SearchActions` are not
-  attached to this family.
+- **Duration.** One question of count `c` takes `22 c` units, and the
+  first question has `2 ^ (k - 1)` pulses. The run cannot be shorter
+  than `22 * 2 ^ (k - 1)` units with these probes. It lasts about three
+  times that.
+- **Wires.** A gate of weight `w` has `w` wires to each later probe. The
+  network has few cells and many wires.
+- **Every probe is asked.** No pulse is saved by the answers: each
+  question is sent, with a count that depends on them.
+- **The gates are trained in advance.** There are `k` of them.
+- **Dose precision.** Separating `2 ^ k` needs asks for a dose error
+  below about `d₀ / 2 ^ (k + 1)`. This is a property of the probes, not
+  of the network.
 
 ## Common threshold offset and reaction delay
 
@@ -1727,8 +1781,8 @@ through `CoincidenceSeparation`, `StopLearningLatency`,
 `TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence`,
 `OffsetAndDelay`, `SelfCalibratedProbe`, `FamilyProduct`, `RoutedProduct`, `Cascade`,
 `FreeRead`, `AcyclicNetwork`, `WiredNetwork`, `SignalNetwork`,
-`SearchCells`, `TrainedSearch`, `NeedTolerance`, `SearchActions` and
-`BisectionSearch`. The default targets also run
+`SearchCells`, `TrainedSearch`, `NeedTolerance`, `SearchActions`,
+`BisectionSearch` and `SuccessiveSearch`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
