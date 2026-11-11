@@ -1267,6 +1267,37 @@ Limits of these statements:
 - **Circuit quantities.** Gain mismatch and FIRE level are covered. The
   pulse amplitude, the unit response and the thresholds other than FIRE
   and the two ERROR levels are those of the model.
+### A count probe that calibrates itself
+
+[SelfCalibratedProbe.lean](SelfCalibratedProbe.lean) links the training
+loop to the count probe of the search results.
+
+In `threshold_count_probe_crossing` a hidden need `m` is encoded in an
+exact birth log-gain, `−0.6 (m − 1)`, with the nominal dose 0.6. Here
+the need is a property of the cell. `NeedIs level dose z₀ m` says that
+the port needs `m` doses before a pulse makes the cell fire: below `m`
+doses no pulse fires, from `m` doses on every pulse fires, for any rest
+charge within `10⁻⁴` above 1/10. `needIs_of_peaks` derives it from two
+inequalities on the gain ladder. The start gains it excludes are those
+within `10⁻⁴` of a firing boundary.
+
+- `Trained.counts`: with a known need, a train of `n` pulses writes
+  exactly `min n m` doses, and every other pulse fires.
+- `self_calibrated_probe_exists`: a port receives `n` training pulses
+  and then one read pulse. The read pulse makes the cell fire exactly
+  when `m ≤ n`. The start gain is any real number with that need, the
+  dose is the one its two ERROR thresholds give, and the FIRE level lies
+  between 19/20 and 21/20. Every complete run has the same end state and
+  the same number of FIRE events.
+
+This is the comparison that each pivot of the binary search performs,
+without a birth gain on a lattice. It is proved for one cell with no
+outgoing wire, in the parameterized semantics. The compiled decision
+tree of `CalibratedDecisionTree.lean` is a routed network in the nominal
+semantics, and it still uses the earlier probe. Replacing its probe needs
+the training steps with a router and a routed composition in the
+parameterized semantics. Neither exists yet.
+
 ## Common threshold offset and reaction delay
 
 [OffsetAndDelay.lean](OffsetAndDelay.lean) refines the one-pulse training
@@ -1334,8 +1365,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
 through `CoincidenceSeparation`, `StopLearningLatency`,
 `NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep`,
-`TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence` and
-`OffsetAndDelay`. The default targets also run
+`TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence`,
+`OffsetAndDelay` and `SelfCalibratedProbe`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
