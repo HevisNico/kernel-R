@@ -6,6 +6,7 @@ import PolicyReuse
 import CoincidenceSeparation
 import StopLearningLatency
 import NativeStopLearning
+import SilentStep
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000
