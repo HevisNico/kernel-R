@@ -165,11 +165,12 @@ theorem error_duration_bound {θ ε} (box : @PhysicalBox 1 θ ε) (p : Port) {up
   unfold decayTime
   exact (div_lt_iff₀ rpos).2 (by linarith)
 
-/-- One firing training step. A pulse that brings the main charge of a
-rested cell to its realized FIRE level makes the cell fire, and the cell
-returns to rest with every gain and the recovery rate unchanged. Its main
-charge is then exactly at its rest value. -/
-theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Delivery 1)}
+/-- One firing step, with its date. A pulse that brings the main charge
+of a rested cell to its realized FIRE level makes the cell fire once, at
+the first date `tf` at which the pulse response reaches that level. The
+cell returns to rest with every gain and the recovery rate unchanged.
+Its main charge is then exactly at its rest value. -/
+theorem firing_step_dated {θ ε s p upper lower level rest} {later : List (Delivery 1)}
     (box : @PhysicalBox 1 θ ε)
     (config : PortConfig θ p upper lower level)
     (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
@@ -179,7 +180,11 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
     (wait : s.time + 22 ≤ rest) (laterDue : ∀ d ∈ later, rest ≤ d.due)
     (fires : ∃ t ∈ Icc s.time (s.time + 1),
       level ≤ readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time t) :
-    ∃ u, Runs θ s u 1 ∧ RestState θ u ∧ u.time = rest ∧
+    ∃ u tf, (∃ e : ParameterExecution θ (fun _ _ => []) s u, e.emissions = [(0, tf)]) ∧
+      s.time + 1 / 10 < tf ∧ tf ≤ s.time + 1 ∧
+      readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time tf = level ∧
+      (∀ t ∈ Ico s.time tf, readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time t < level) ∧
+      RestState θ u ∧ u.time = rest ∧
       u.pending = later ∧ (∀ q, u.x 0 (.z q) = s.x 0 (.z q)) ∧ u.x 0 .b = s.x 0 .b ∧
       u.x 0 .q = 1 / 10 := by
   -- The first contact with the FIRE level.
@@ -492,15 +497,24 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
     · rw [restSensor_ready (firedAuxO q h), relax_relax]
       exact relax_restBand (show tf ≤ rest by linarith) (edgeOther q h)
   have bounds := low_threshold_bounds config fire
-  have counted : Runs θ s u 1 :=
+  have pre : Runs θ s edge 0 :=
     (Runs.jump arrive rfl).append ((runs_mark_silent g config preMark preSilent).append
-      ((Runs.flow (portSilentLeg leg config)).append ((Runs.jump fireJump rfl).append
-        (run.append (Runs.flow waitFlow)))))
-  obtain ⟨whole, _⟩ := id counted
+      (Runs.flow (portSilentLeg leg config)))
+  have post : Runs θ fired u 0 := run.append (Runs.flow waitFlow)
+  obtain ⟨e₁, quiet₁⟩ := pre
+  obtain ⟨e₂, quiet₂⟩ := post
+  let whole := e₁.append (.cons (.jump fireJump) e₂)
+  have emitted : whole.emissions = [(0, tf)] := by
+    show (e₁.append (.cons (.jump fireJump) e₂)).emissions = [(0, tf)]
+    rw [execution_emissions_append, List.length_eq_zero_iff.mp quiet₁]
+    show [] ++ (fireJump.emissions ++ e₂.emissions) = [(0, tf)]
+    rw [List.length_eq_zero_iff.mp quiet₂]
+    rfl
   have inv := ParameterExecution.physical_invariant whole bounds box state.physical
   have uB : u.x 0 .b = s.x 0 .b := fin.recovery.trans firedB
   have uGains (q : Port) : u.x 0 (.z q) = s.x 0 (.z q) := fin.gains q
-  refine ⟨u, counted, ⟨fin.main, fin.aux, fin.raw, ⟨uCharge.ge, uCharge.le.trans (by norm_num)⟩,
+  refine ⟨u, tf, ⟨whole, emitted⟩, late, tfLe, hit, first,
+    ⟨fin.main, fin.aux, fin.raw, ⟨uCharge.ge, uCharge.le.trans (by norm_num)⟩,
     uSensors, ?_, inv.reserve 0, ?_⟩, rfl, ?_, uGains, uB, uCharge⟩
   · rw [uB]
     exact ⟨by linarith [recovery.1], by linarith [recovery.2]⟩
@@ -511,5 +525,26 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
     rw [fin.queue]
     show ([] ++ later) ++ ([] : List (Delivery 1)) = later
     simp
+
+/-- One firing training step. A pulse that brings the main charge of a
+rested cell to its realized FIRE level makes the cell fire, and the cell
+returns to rest with every gain and the recovery rate unchanged. Its main
+charge is then exactly at its rest value. -/
+theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Delivery 1)}
+    (box : @PhysicalBox 1 θ ε)
+    (config : PortConfig θ p upper lower level)
+    (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
+    (entry : 7 / 100 ≤ upper ∧ upper ≤ 2 / 25) (exit : 1 / 200 ≤ lower ∧ lower < upper)
+    (state : RestState θ s) (recovery : 7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10)
+    (queue : s.pending = (⟨0, p, s.time⟩ : Delivery 1) :: later)
+    (wait : s.time + 22 ≤ rest) (laterDue : ∀ d ∈ later, rest ≤ d.due)
+    (fires : ∃ t ∈ Icc s.time (s.time + 1),
+      level ≤ readyPulse (s.x 0 .q) (Real.exp (s.x 0 (.z p))) s.time t) :
+    ∃ u, Runs θ s u 1 ∧ RestState θ u ∧ u.time = rest ∧
+      u.pending = later ∧ (∀ q, u.x 0 (.z q) = s.x 0 (.z q)) ∧ u.x 0 .b = s.x 0 .b ∧
+      u.x 0 .q = 1 / 10 := by
+  obtain ⟨u, tf, ⟨e, emitted⟩, _, _, _, _, rested⟩ :=
+    firing_step_dated box config fire entry exit state recovery queue wait laterDue fires
+  exact ⟨u, ⟨e, by rw [emitted]; rfl⟩, rested⟩
 
 end RecursiveLearning.Native
