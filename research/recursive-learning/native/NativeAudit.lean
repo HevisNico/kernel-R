@@ -14,6 +14,7 @@ import Driven
 import JointRead
 import TrainedCoincidence
 import OffsetAndDelay
+import SelfCalibratedProbe
 import FamilyProduct
 import RoutedProduct
 import Cascade
