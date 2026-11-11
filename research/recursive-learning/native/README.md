@@ -1081,6 +1081,34 @@ the nominal kernel.
 The construction does not yet show that every complete run agrees with
 it. The firing step, the loop and the joint read remain.
 
+### The refractory period for any order of events
+
+[Refractory.lean](Refractory.lean) treats the cell after a FIRE. While
+the main cell is in FAST or SLOW and no sensor is in MARK, the main
+charge and each sensor evolve on their own: the input current reaches
+neither, no gain is written and the recovery rate is constant.
+`refractoryDynamics` is the explicit flow of that regime, for any number
+of busy sensors.
+
+`refractory_run_exists` turns it into an execution of the parameterized
+semantics. From a refractory state it runs to the reopening of the main
+cell. The pending events are the end of FAST, the ERROR entry and exit
+of each busy sensor and the end of each live pulse. They are taken in
+their time order by induction on their number, so no order and no tie
+between them is assumed. The hypotheses are:
+
+- each threshold is positive and below the one that precedes it;
+- every busy sensor is READY again, and every pulse has ended, before
+  the main cell reopens;
+- a pulse ends before its sensor reopens.
+
+The conclusion gives the reopening date, the main charge at its reopen
+threshold, every sensor READY on an explicit relaxation, and unchanged
+gains, recovery rate and queue.
+
+The theorem is the common tail of the firing training step and of a read
+on several ports.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -1102,7 +1130,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
 `BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
 through `CoincidenceSeparation`, `StopLearningLatency`,
-`NativeStopLearning` and `SilentStep`. The default targets also run
+`NativeStopLearning`, `SilentStep` and `Refractory`. The default targets
+also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
