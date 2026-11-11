@@ -30,7 +30,7 @@ removes two causes of this.
 Everything below is a theorem checked by a computer, or a numerical
 result marked as such.
 
-## Today, in one table
+## The results in one table
 
 | What a cell or a network does | Holds for | Theorem |
 |---|---|---|

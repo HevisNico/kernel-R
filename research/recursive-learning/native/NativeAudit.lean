@@ -27,6 +27,7 @@ import NeedTolerance
 import SearchActions
 import BisectionSearch
 import SuccessiveSearch
+import ReadLag
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000
