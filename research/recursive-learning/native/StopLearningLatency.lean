@@ -406,6 +406,19 @@ theorem window_half :
     linarith [response_pair_low]
   · linarith [response_pair_high, peak.2]
 
+
+/-- A gain that reaches the FIRE level alone, while one dose of at most
+1/20 below it did not, reaches it later than 0.355 units after the start
+of the pulse: the response at 0.355 is below `exp(-1/20)` times its peak. -/
+theorem window_alone : response (71 / 200) ≤ Real.exp (-(1 / 20 : ℝ)) * response 1 := by
+  have step : Real.exp (-(1 / 20 : ℝ)) ∈ Icc (95122 / 100000 : ℝ) 1 :=
+    exp_bracket_10 (by norm_num) (by norm_num [Finset.sum_range_succ])
+  have peak := response_one_bounds
+  have product : (95122 / 100000 : ℝ) * (55766 / 100000) ≤
+      Real.exp (-(1 / 20 : ℝ)) * response 1 :=
+    mul_le_mul step.1 peak.1 (by norm_num) (Real.exp_pos _).le
+  linarith [response_low_point]
+
 /-- Two ports trained separately by canonical pulses, with increments of at
 most `1/20`, and read together: the cell fires between 0.239 and 0.256
 model units after the two read pulses, for any gains and FIRE threshold. -/

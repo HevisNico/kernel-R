@@ -6,6 +6,10 @@ One full exposed ERROR section adds `3/5` to its port, which represents one
 credit or sets the selector. The encoding is relative to that port's starting
 log-gain.
 
+Training that stops by itself, networks of trained cells and searches
+built with them are summarized in the
+[map of the stop-learning results](#map-of-the-stop-learning-results).
+
 ## What Lean checks
 
 [`encodes_iff_counts`](NativeLearning.lean) applies to any native execution
@@ -939,6 +943,57 @@ Those endpoints belong to every admitted ERROR box. The proof uses
 the exact trained birth gain 1.2. The receiver is an observation of
 two native runs and the comparator uses the reduced READY equation.
 
+## Map of the stop-learning results
+
+The sections from here to [Verify](#verify) form one line of work:
+training that stops by itself, from one pulse to networks and searches.
+No gain and no FIRE level is set by hand in it. This map lists the
+strongest statement at each level. The sections below follow the order
+in which the theorems were proved, so some of them state an earlier and
+weaker form.
+
+| Level | Statement | Theorem | File |
+|---|---|---|---|
+| one pulse | a silent pulse writes one dose, a firing pulse writes nothing and its date is known | `silent_step_exists`, `firing_step_dated` | `SilentStep`, `FiringStep` |
+| one port | training stops by itself for every start gain | `stop_training_exists` | `TrainingLoop` |
+| one port | the need of a port, and its tolerance to fabrication | `self_calibrated_probe_exists`, `needIs_of_tolerance` | `SelfCalibratedProbe`, `NeedTolerance` |
+| one cell | two trained ports read in either order: the FIRE comes later than 0.239 units after the first pulse and no later than 0.256 after the second | `OpenCell.read` | `FreeRead` |
+| one cell | one read pulse fires late, two fire early | `OpenCell.read_one` | `SearchCells` |
+| composition | cells joined by wires, from one-cell runs | `routed_execution` | `RoutedProduct` |
+| composition | forward wires: complete run, unique FIRE dates and final values | `acyclic_network_states` | `AcyclicNetwork` |
+| composition | report windows and pulses at fixed dates | `signal_network_states` | `SignalNetwork` |
+| network | any number of trained cells joined by wires | `trained_wired_network` | `WiredNetwork` |
+| search | a forest of questions, with final gains and pulses sent | `trained_search` | `TrainedSearch` |
+| search | a lesson after the last answer | `search_action_witness` | `SearchActions` |
+| search | `k` questions asked out of `2 ^ k - 1` | `bisection_search` | `BisectionSearch` |
+| search | `2 k + 1` cells for `2 ^ k` needs, with the learner | `successive_search` | `SuccessiveSearch` |
+
+Earlier forms that the table replaces:
+
+- `TrainedCell` and `trained_read_exists` hold the read pulses in the
+  queue of the cell, in a fixed order. `OpenCell` and `OpenCell.read`
+  take them from anywhere, in either order. `TrainedCell` is still used
+  by the two-cell and `n`-cell contracts without wires
+  (`trained_coincidence_network`, `trained_network`).
+- `acyclic_network` and `signal_network` are the two composition
+  theorems without the final states. They are corollaries.
+
+The regime, common to every statement of the table:
+
+| Quantity | Hypothesis |
+|---|---|
+| FIRE level | in `[0.95, 1.05]`, one value per cell |
+| ERROR entry threshold | in `[0.07, 0.08]`, one value per port |
+| ERROR exit threshold | at least `0.005`, below the entry |
+| dose `8 * (entry - exit)` | positive; at most `1/20` for the read windows |
+| recovery rate at the start | in `[0.07, 0.1]` |
+| pulses on one cell | at least 22 units apart |
+| other parameters | anywhere in the fabrication box, 0.3% or 10% |
+| wires | positive delay, or fixed dates after the window of the sender |
+
+Every network statement gives a complete run and proves that every
+complete run has the same FIRE dates.
+
 ## Read latency after training that stops at the first FIRE
 
 [StopLearningLatency.lean](StopLearningLatency.lean) studies the READY
@@ -1297,6 +1352,397 @@ tree of `CalibratedDecisionTree.lean` is a routed network in the nominal
 semantics, and it still uses the earlier probe. Replacing its probe needs
 the training steps with a router and a routed composition in the
 parameterized semantics. Neither exists yet.
+### Networks of any number of trained cells
+
+[FamilyProduct.lean](FamilyProduct.lean) removes the limit of two cells.
+
+The earlier product, `ParameterExecution.independentPair`, weaves two
+one-cell executions. Here `Snapshot.family` is the state of a network of
+`n` cells, each with its own parameters, and `family_execution` weaves
+`n` one-cell executions with common start and end dates into one
+execution of that network. Each cell keeps its ordered FIRE dates. The
+proof takes the next jump of any cell when there is one, and otherwise
+cuts every flow at the earliest flow end. `family_jump` lifts each of the
+nine kinds of jump to the network.
+
+- `trained_network`: for any positive `n`, `n` trained cells with their
+  own parameters, start gains, FIRE levels, pulse trains and read dates.
+  In every complete run of the network, the last FIRE of each cell is
+  its read FIRE, later than 0.239 units after its first read pulse and
+  no later than 0.256 units after its second. For any two cells read
+  with an offset of −0.3, 0 or +0.3 units, the two dates are closer than
+  3/20 exactly when the offset is zero.
+- `trained_network_witness`: for any positive `n`, `n` copies of the
+  explicit cell satisfy the hypotheses. Every cell fires its read in its
+  window and any two cells are accepted together.
+
+In this module the cells are independent: no cell sends a pulse to
+another. The next modules add wires.
+
+### Wires between cells
+
+[RoutedProduct.lean](RoutedProduct.lean) composes cells joined by wires,
+in the parameterized semantics.
+
+Each cell keeps a one-cell run with an empty router. In that run its
+queue already holds the pulses that other cells will send it. In the
+network a pulse enters the queue only at the FIRE that sends it.
+`routed_execution` weaves the one-cell runs into one run of the routed
+network. Its hypotheses are:
+
+- every wire has a strictly positive delay;
+- the queues balance at the start: the queues of the cells are the queue
+  of the network plus what the FIRE dates of the cells will send.
+
+The proof keeps that balance as a multiset equation through every move.
+A FIRE moves its deliveries from the promised side to the queue. An
+arrival finds its delivery in the queue, because every delivery still
+promised is due later. Each cell keeps its ordered FIRE dates. The one-
+cell theorems of the earlier modules are used unchanged.
+
+### Read pulses in either order
+
+[FreeRead.lean](FreeRead.lean) separates the training of a cell from its
+read.
+
+- `rest_wait`: a cell at rest stays at rest for as long as no pulse
+  arrives. No gain moves.
+- `OpenCell`: a trained cell without its read pulses. Its hypotheses are
+  those of `TrainedCell` without the read dates. After `horizon` the
+  cell is trained and at rest.
+- `OpenCell.read`: two read pulses arrive after `horizon`, one on each
+  trained port, at most a quarter of a unit apart, **in either order**.
+  The cell fires its read later than 0.239 units after the first pulse
+  and no later than 0.256 units after the second. Every FIRE of training
+  comes before `horizon`, which is a fixed date.
+
+### Composition along forward wires
+
+[AcyclicNetwork.lean](AcyclicNetwork.lean) proves one composition theorem
+for every network whose wires go from a cell to a cell of higher index.
+
+`acyclic_network` takes, for each cell, a description of its FIRE dates
+that may mention the FIRE dates of the cells before it. Its hypothesis is
+local: a cell fed by cells that follow their descriptions has a run to
+rest that follows its own. The pulses it receives are computed from the
+router by `incoming`. The conclusion is global: the network has a
+complete run, every cell follows its description, and the FIRE dates are
+the same in every complete run. The cells are treated one after the
+other, in index order, and `routed_execution` weaves their runs.
+
+### Networks of trained cells of any depth
+
+[WiredNetwork.lean](WiredNetwork.lean) applies the composition theorem to
+trained cells.
+
+- `ReadInput`: each of the two read pulses of a cell comes from a source
+  at a fixed date, or from the read FIRE of an earlier cell through a
+  wire with a positive delay.
+- `trained_wired_network`: any number of cells, any wiring of that kind.
+  The hypothesis `admissible` says that, whenever the earlier cells fire
+  their reads in their windows, the two read pulses of a cell arrive
+  after its training and at most a quarter of a unit apart. Their order
+  is free. In every complete run, each cell fires its read later than
+  0.239 units after its first read pulse and no later than 0.256 units
+  after its second, after the FIRE events of its own training.
+- `trained_chain_witness`: for every `n`, a chain of `n` copies of the
+  explicit cell. A source reads the first cell at date 968. The read
+  FIRE of each cell reads the two ports of the next one, one unit later.
+  In every complete run, each cell fires its read between 1.239 and
+  1.256 units after the cell before it.
+
+Limits:
+
+- **Width of the windows.** The theorem bounds each read FIRE inside a
+  window of 0.017 units plus the distance between the two arrivals. On a
+  path where the two ports of a cell are fed by different cells, the
+  windows widen with the depth, and the hypothesis `admissible` needs
+  them to stay within a quarter of a unit. In the chain both ports of a
+  cell are fed by the same FIRE, so the depth is free.
+- **Gates.** Each wire carries the FIRE events after a fixed date only.
+  That date is the end of the training of the sending cell.
+- **Every read pulse arrives.** A cell that may or may not receive a
+  read pulse is not covered by `trained_wired_network`. The next modules
+  cover it.
+
+### Report windows in the parameterized semantics
+
+[SignalNetwork.lean](SignalNetwork.lean) is the parameterized counterpart
+of the report windows of the scheduled circuits.
+
+Each cell has a window `(lo, hi]`. A FIRE in the window is a signal. A
+signal sends pulses at fixed dates to later cells, as a `ReportWire`
+does in the nominal circuits. `Signal lo hi l b` says that the FIRE dates
+`l` carry the bit `b`: for a true bit the last FIRE is in the window and
+the others are before it, for a false bit every FIRE is before the
+window.
+
+`signal_network` takes a bit for each cell. Its hypothesis is local: a
+cell that receives the pulses of the wires whose senders have a true bit
+has a run to rest that carries its own bit. The conclusion is a complete
+run of the network in which every cell carries its bit, with the same
+FIRE dates in every complete run. A cell may receive all, some or none
+of its pulses.
+
+### The two cells of a search
+
+[SearchCells.lean](SearchCells.lean) describes two cells alone.
+
+- `ProbeCell.asked`: a probe cell receives a train of pulses and a read
+  pulse. It fires on the read pulse exactly when its hidden need is at
+  most the number of training pulses. That FIRE comes within one unit
+  after the read pulse, and every FIRE of training comes more than one
+  unit before it. `ProbeCell.idle`: a probe that receives nothing never
+  fires.
+- `OpenCell.read_one`: a trained cell read by one pulse fires later than
+  0.355 units after it. Read by two pulses it fires before 0.256 units
+  (`OpenCell.read`). The date of the FIRE therefore tells whether the
+  second pulse was there. This is how the silence of a probe becomes a
+  FIRE: the gate cell is read by a clock pulse, and by the report of the
+  probe when there is one. Its late FIRE means that the probe was
+  silent.
+
+Two earlier theorems are refined for this. `firing_step_dated` in
+[FiringStep.lean](FiringStep.lean) gives the date of the FIRE of a firing
+step: the first date at which the pulse response reaches the FIRE level.
+`window_alone` in [StopLearningLatency.lean](StopLearningLatency.lean)
+bounds the response at 0.355 units below `exp(-1/20)` times its peak.
+
+### A search by questions with trained cells
+
+[TrainedSearch.lean](TrainedSearch.lean) builds a decision tree on the
+composition theorem, with trained cells only.
+
+Each node asks one question: is the hidden need `m` at most the number
+of training pulses of this node? A node has a probe cell and a gate
+cell. A `SearchLayout` gives the parent of each node with the answer
+that leads to it, the dates of each question and the order of the
+cells. The questions of the roots are started by sources. A yes is a
+FIRE of the probe in its report window. A no is a late FIRE of the gate.
+Each answer sends the pulses of the questions it leads to.
+
+- `trained_search`: any number of nodes, any forest. Every probe has
+  its own need, parameters, start gain, dose and FIRE level. Every gate
+  is trained by its own pulse trains before its clock pulse. The network
+  has a complete run, and in every complete run:
+  - the probe of a node fires in its report window exactly when the
+    node is reached and its need is at most its count;
+  - the gate of a node fires late exactly when the node is reached and
+    its need is larger than its count;
+  - the probe of a node that is not reached never fires;
+  - the gain of a probe ends one dose higher for each pulse of its
+    question, up to its need, when its node is reached, and unchanged
+    otherwise;
+  - the pulses sent to the probe of a child are its question when the
+    child is reached, and none otherwise.
+
+  The FIRE dates and the final values are the same in every complete
+  run. A search for one hidden need `m` is the case where every probe
+  has the need `m`.
+- `searchWitness`: a layout with three questions over the needs 1 to
+  4. The root asks `m ≤ 2`. After a yes, node 1 asks `m ≤ 1`. After a
+  no, node 2 asks `m ≤ 3`. The two answers separate 1, 2, 3 and 4 or
+  more. Its explicit cells are in `NeedTolerance` below.
+
+No gain and no FIRE level is set by hand in this search. The need is the
+number of doses that each probe's own gain, dose and FIRE level require
+(`NeedIs`). The gates are trained by stop-learning.
+
+Limits:
+
+- **Fixed dates.** A signal releases pulses at preset dates, as the
+  report wires of the nominal circuits do. A FIRE date is read only
+  through its window. A delay line that would keep the jitter of the
+  FIRE is not used.
+- **One need for all probes.** Each probe is a separate cell. The
+  hypothesis gives them the same need `m`. The next module derives it
+  from fabrication tolerances.
+- **The gates are trained in advance,** whatever the need. Only the
+  probes are trained on demand: a probe that is not reached receives no
+  pulse.
+- **Lessons at the leaves** are treated in `SearchActions` below. The
+  credit of the nominal decision tree of `CalibratedDecisionTree` is not
+  rebuilt.
+- **The witness has two levels.** `trained_search` covers any depth.
+  `BisectionSearch` below builds a layout of every depth.
+
+### The need of a probe, from fabrication tolerances
+
+[NeedTolerance.lean](NeedTolerance.lean) replaces the hypothesis of a
+common need by a tolerance on each probe.
+
+A nominal design has a FIRE level `level₀` and a dose `d₀`. The start
+gains that need exactly `m` doses form a band, one dose wide.
+`needCentre level₀ d₀ m` is its centre.
+
+- `needIs_of_tolerance`: a real probe has its start log-gain within `a`
+  of that centre, its dose within `b` of `d₀` and its FIRE level within
+  `ℓ` of `level₀`. If
+
+  ```text
+  a + m * b + 20/17 * ℓ + 1/8000 < d₀ / 2
+  ```
+
+  then the probe needs exactly `m` doses. Probes that satisfy this for
+  the same `m` have the same need, whatever their own gains, doses and
+  FIRE levels.
+- `trained_search_band_witness`: the layout `searchWitness`, with
+  each of the three probes at its own start gain, anywhere within 3/125
+  of the centre of the band. The dose is 1/20, so the band is used on
+  96% of its width.
+
+The error on the dose is multiplied by `m`: each dose adds its own
+error before the read. With a perfect start gain and FIRE level, needs
+up to `M` are separated when `M * b + 1/8000 < d₀ / 2`. For a dose of
+1/20 known to 1%, that is needs up to 49. The term `1/8000` covers the
+residual rest charge.
+
+Limits:
+
+- **A sufficient condition.** The inequality is not shown to be
+  necessary.
+- **The same error at every dose.** The dose of a probe is one number.
+  A dose that drifts from pulse to pulse is not covered.
+- **The witness varies the start gains only.** Its doses and FIRE
+  levels are those of the explicit cell.
+
+### A search that ends by a lesson
+
+[SearchActions.lean](SearchActions.lean) adds an action to the binary
+search. The composition theorems now also give the final state of each
+cell (`acyclic_network_states`, `signal_network_states`) and the pulses
+that the FIRE events of a run send to each cell.
+
+A lesson is a node like the others: its probe is the learner, and its
+question is the lesson. `actionSearch` has seven nodes and fourteen
+cells. Nodes 0 to 2 are the three questions. Node `m + 2` is reached
+exactly when the need is `m`, and its lesson has `m + 1` pulses.
+
+`search_action_witness`: every probe has its own start gain, anywhere
+within 3/125 of the centre of the band of need `m`. For every need `m`
+from 1 to 4, in every complete run:
+
+- the learner of node `m + 2` receives `m + 1` pulses. Its gain ends
+  exactly `m` doses higher, which is its firing gain, and its last pulse
+  makes it fire in its report window;
+- the three other learners receive no pulse from the network, keep their
+  gain and never fire.
+
+The search therefore spends on the learners only the lesson of the need
+it found.
+
+Limits:
+
+- **Pulses are counted per learner.** The pulses of the sources, of the
+  questions and of the training of the gates are not added into one
+  cost.
+- **One pulse more than the need.** The last pulse of the lesson writes
+  nothing and fires. A lesson of exactly `m` pulses would leave the
+  learner at its firing gain without a FIRE.
+- **Each lesson node has a gate** that is trained and not used.
+- **Four needs.** The witness has three questions and four lessons.
+  The search of every depth below has no lesson at its leaves.
+
+### A binary search of every depth
+
+[BisectionSearch.lean](BisectionSearch.lean) builds, for every `k ≥ 1`,
+a complete tree of `2 ^ k - 1` questions that separates the needs 1 to
+`2 ^ k`, with `2 (2 ^ k - 1)` cells.
+
+- `heapSearch`: the nodes are numbered as in a heap. The children of
+  node `i` are `2 i + 1` after a yes and `2 i + 2` after a no. Cell
+  `2 ν` is the probe of node `ν` and cell `2 ν + 1` is its gate.
+  `heapSearch_sound` reduces the soundness of the layout to its dates.
+- `exOf`, `loOf`, `midOf`: node `i` has the interval of needs
+  `(loOf k i, loOf k i + 2 ^ exOf k i]`. Its question counts `midOf k i`
+  pulses, the middle of the interval. A yes keeps the lower half and a
+  no keeps the upper half (`bisect_child`).
+- `bisectPlan`: the nodes of one depth share their dates. A depth lasts
+  `22 * 2 ^ k + 26` units, enough for the longest question.
+- `bisection_search`: every probe has the need `m`, between 1 and
+  `2 ^ k`, with its own parameters. In every complete run the probe of a
+  node fires in its report window exactly when `m` lies in the lower
+  half of its interval, and its gate fires late exactly when `m` lies in
+  the upper half. A probe outside the path `bisectPath k m` receives no
+  question: it never fires and its gain does not move.
+- `bisect_reached_iff`: the nodes whose interval holds `m` are the `k`
+  nodes of the path, one at each depth. The run therefore asks `k`
+  questions out of `2 ^ k - 1`.
+- `bisect_last`: the node asked at depth `k - 1` has an interval of two
+  needs. Its probe answers yes exactly for the first and its gate
+  answers no exactly for the second. The last answer gives `m`.
+- `bisection_search_witness`: explicit cells for every `k`, each probe
+  at its own start gain inside the band of need `m`.
+
+This tree has one probe and one gate for each node, and its run lasts
+`k (22 * 2 ^ k + 26)` units. The next module keeps the same questions
+with one probe and one gate for each depth.
+
+### A binary search by successive approximation
+
+[SuccessiveSearch.lean](SuccessiveSearch.lean) builds the search of
+depth `k` with `2 k + 1` cells: a probe and a gate for each depth below
+`k`, and the learner.
+
+The weight of depth `t` is `2 ^ (k - 1 - t)`. The probe of depth `t` has
+its own block of that many pulses, from sources. Each earlier gate that
+answered no sends a block of its own weight. The count of the question
+of depth `t` is therefore the middle of the interval that remains
+(`probeDates_count`), and the probe answers yes exactly when the need is
+at most that count. No question has to be selected: only its count
+changes.
+
+A block sent by a gate goes to all the later probes at the same dates,
+and the own blocks of all the probes are sent together at the start.
+`probeDates_spaced` shows that the pulses of each probe stay 22 units
+apart, whatever the answers.
+
+- `successive_search`: every probe has the need `m`, with its own
+  parameters, start gain, dose and FIRE level. Every gate is trained
+  before the date 1000. In every complete run the probe of depth `t`
+  fires in its report window exactly when `m` is at most its count, the
+  gate of depth `t` fires late exactly when `m` is above it, and the
+  gain of each probe ends one dose higher for each pulse of its
+  question, up to its need.
+- `successive_digits`: for `1 ≤ m ≤ 2 ^ k`, the weights of the gates
+  that fire late add up to `m - 1`. The gates give the binary digits of
+  `m - 1`.
+- `approx_learner`: the last stage has the weight 1. Its question counts
+  exactly `m` training pulses. It is the learner: its gain ends exactly
+  `m` doses higher and its read pulse makes it fire.
+- `approx_cost`: the counts of the `k` questions add up to at most
+  `k (m - 1) + 2 ^ k - 1`.
+- `approx_duration`: the run ends at the date `1003 + 33 * 2 ^ k + 25 k`.
+- `successive_search_witness`: explicit cells for every `k ≥ 1`. Each
+  probe has its own start gain, within 1/100 of the centre of the band
+  of need `m`, and its own ERROR thresholds, hence its own dose, within
+  `1 / (100 * 2 ^ k)` of 1/20. The dose error allowed shrinks as
+  `2 ^ -k`, as `needIs_of_tolerance` requires.
+
+Compared with the tree of the previous section, for the same `2 ^ k`
+needs:
+
+```text
+                    tree of BisectionSearch     successive approximation
+cells               2 (2^k - 1)                 2 k + 1
+end of the run      1000 + k (22 * 2^k + 26)    1003 + 33 * 2^k + 25 k
+lesson              none                        the last stage
+```
+
+Limits:
+
+- **Duration.** One question of count `c` takes `22 c` units, and the
+  first question has `2 ^ (k - 1)` pulses. The run cannot be shorter
+  than `22 * 2 ^ (k - 1)` units with these probes. It lasts about three
+  times that.
+- **Wires.** A gate of weight `w` has `w` wires to each later probe. The
+  network has few cells and many wires.
+- **Every probe is asked.** No pulse is saved by the answers: each
+  question is sent, with a count that depends on them.
+- **The gates are trained in advance.** There are `k` of them.
+- **Dose precision.** Separating `2 ^ k` needs asks for a dose error
+  below about `d₀ / 2 ^ (k + 1)`. This is a property of the probes, not
+  of the network.
 
 ## Common threshold offset and reaction delay
 
@@ -1366,7 +1812,10 @@ builds this package with the pinned dependencies. Its default targets compile
 through `CoincidenceSeparation`, `StopLearningLatency`,
 `NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep`,
 `TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence`,
-`OffsetAndDelay` and `SelfCalibratedProbe`. The default targets also run
+`OffsetAndDelay`, `SelfCalibratedProbe`, `FamilyProduct`, `RoutedProduct`,
+`FreeRead`, `AcyclicNetwork`, `WiredNetwork`, `SignalNetwork`,
+`SearchCells`, `TrainedSearch`, `NeedTolerance`, `SearchActions`,
+`BisectionSearch` and `SuccessiveSearch`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
