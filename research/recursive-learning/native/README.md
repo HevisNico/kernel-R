@@ -963,6 +963,7 @@ weaker form.
 | composition | forward wires: complete run, unique FIRE dates and final values | `acyclic_network_states` | `AcyclicNetwork` |
 | composition | report windows and pulses at fixed dates | `signal_network_states` | `SignalNetwork` |
 | network | any number of trained cells joined by wires | `trained_wired_network` | `WiredNetwork` |
+| network | the coincidence decision with a settling lag in each cell | `trained_network_lag` | `ReadLag` |
 | search | a forest of questions, with final gains and pulses sent | `trained_search` | `TrainedSearch` |
 | search | a lesson after the last answer | `search_action_witness` | `SearchActions` |
 | search | `k` questions asked out of `2 ^ k - 1` | `bisection_search` | `BisectionSearch` |
@@ -1744,6 +1745,32 @@ Limits:
   below about `d₀ / 2 ^ (k + 1)`. This is a property of the probes, not
   of the network.
 
+### A lag between a pulse and its effect
+
+[ReadLag.lean](ReadLag.lean) treats one departure of a circuit from the
+model. The element that applies a gain takes a short time to settle, so
+a pulse acts on the main charge a little after it arrives. A lag that is
+the same for every pulse of a cell shifts every FIRE date of that cell
+by that lag, and changes nothing else.
+
+- `trained_dates_decide_lag`: the two read FIRE dates of the coincidence
+  decision are observed later than the model gives them, each by the lag
+  of its cell. If the two lags differ by at most 3/100 of a unit, the
+  observed dates are closer than 3/20 exactly when the two cells are
+  read at the same date.
+- `trained_network_lag`: the same for any number of trained cells, each
+  with its own lag, in every complete run.
+
+In the wired networks and the searches a common lag adds to the delay of
+each wire, which those theorems already leave free.
+
+Limits:
+
+- **One lag per cell.** A lag that depends on the pulse, on the port or
+  on the slope of the charge is not covered.
+- **A statement on dates.** The lag is applied to the FIRE dates of the
+  model. A semantics in which a pulse acts late is not constructed.
+
 ## Common threshold offset and reaction delay
 
 [OffsetAndDelay.lean](OffsetAndDelay.lean) refines the one-pulse training
@@ -1815,7 +1842,8 @@ through `CoincidenceSeparation`, `StopLearningLatency`,
 `OffsetAndDelay`, `SelfCalibratedProbe`, `FamilyProduct`, `RoutedProduct`,
 `FreeRead`, `AcyclicNetwork`, `WiredNetwork`, `SignalNetwork`,
 `SearchCells`, `TrainedSearch`, `NeedTolerance`, `SearchActions`,
-`BisectionSearch` and `SuccessiveSearch`. The default targets also run
+`BisectionSearch`, `SuccessiveSearch` and `ReadLag`. The default targets
+also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

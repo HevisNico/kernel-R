@@ -32,6 +32,18 @@ The rate independence of the dose is therefore a limit. It holds to the
 extent that the reaction delay is short against the ERROR phase, which
 lasts 0.15 model units at nominal values.
 
+## A pulse acts after a lag
+
+The model applies the gain of a port to a pulse at the instant it
+arrives. A circuit element that applies a gain takes a short time to
+settle, so the pulse acts on the main charge a little later. A lag that
+is the same for every pulse of a cell shifts the FIRE dates of that cell
+and nothing else. The coincidence decision then depends on the
+difference between the lags of two cells:
+[`trained_dates_decide_lag`](../research/recursive-learning/native/ReadLag.lean)
+allows 3/100 of a unit. A lag that depends on the pulse or on the port
+is not covered.
+
 ## The log-gain is a voltage measured against temperature
 
 The model stores a log-gain `z` and applies the gain `exp(z)`. An
