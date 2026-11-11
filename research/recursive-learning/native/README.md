@@ -1267,6 +1267,50 @@ Limits of these statements:
 - **Circuit quantities.** Gain mismatch and FIRE level are covered. The
   pulse amplitude, the unit response and the thresholds other than FIRE
   and the two ERROR levels are those of the model.
+## Common threshold offset and reaction delay
+
+[OffsetAndDelay.lean](OffsetAndDelay.lean) refines the one-pulse training
+theorem in two ways. Both use the parameterized first-contact semantics
+and the sixteen-unit schedule. The FIRE threshold lies in `[0.95, 1.05]`,
+the trained port's birth gain in `[7/6, 1.2]`, the other guards are
+nominal, and both fabrication boxes are covered.
+
+**A common shift cancels.** Write the realized ERROR entry as
+`0.1 + δ + a` and the exit as `0.025 + δ + b`. With `|δ| ≤ 0.004` and
+`|a|, |b| ≤ 0.001`, `training_read_common_offset` gives a complete run,
+and in every complete run the log-gain increment is `0.6 + 8 * (a - b)`.
+The common shift `δ` does not appear. It may reach 4% of the entry level
+and 16% of the exit level. With `a = b = 0`,
+`training_read_pure_common_offset` gives exactly `0.6` for `|δ| ≤ 0.005`.
+
+The earlier theorems bound each endpoint separately. This one separates
+the part of the error that the two endpoints share from the part they do
+not. Only the second part changes the dose. A cell that detects both
+endpoints with one comparator has mostly shared error.
+
+**A reaction delay bounds the dose.** Suppose the cell reacts a fixed
+time `d` after each ERROR endpoint crossing. The sensor keeps decaying
+during that time, at the SILENT rate `ls` before the entry and at the
+ERROR rate `le` before the exit. The realized endpoints are then
+`0.1 * exp(-ls * d)` and `0.025 * exp(-le * d)`. For `0 ≤ d ≤ 0.01`,
+`training_read_reaction_delay` gives a complete run, and in every
+complete run the increment `Δz` satisfies
+
+```text
+-0.8 * ls * d  ≤  Δz - 0.6  ≤  0.2 * le * d        and        |Δz - 0.6| ≤ 2.4 * d
+```
+
+The exact increment is `8 * (0.1 * exp(-ls * d) - 0.025 * exp(-le * d))`.
+With a reaction delay the dose depends on the discharge rates, and the
+dependence vanishes linearly with `d`. The nominal ERROR phase lasts 0.15
+model units, so `d = 0.01` is about 7% of it.
+
+The delay is represented through the realized thresholds.
+`delayedLevel_of_decay` shows that an exponential decay which meets a
+level reaches `level * exp(-rate * d)` after a further time `d`. The
+semantics still jumps at guard equality. A semantics with delayed jumps
+is not constructed, and the delay is the same at both endpoints and
+fixed in time.
 
 ## Verify
 
@@ -1290,8 +1334,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
 through `CoincidenceSeparation`, `StopLearningLatency`,
 `NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep`,
-`TrainingLoop`, `Driven`, `JointRead` and `TrainedCoincidence`. The
-default targets also run
+`TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence` and
+`OffsetAndDelay`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
