@@ -145,7 +145,13 @@ That gives a larger dose (0.72 at nominal thresholds) and a longer
 discharge. The same absolute threshold errors account for a smaller
 fraction of the larger dose.
 
-[`training_read_every_complete` and `training_read_exit_001_every_complete`](research/recursive-learning/native/ParameterTraining.lean)
+Two refinements separate what changes the dose from what does not. A
+shift common to both ERROR thresholds, up to 4% of the entry level,
+leaves the increment unchanged. A fixed reaction delay `d` after each
+threshold crossing moves the increment by at most `2.4 × d`.
+
+[`training_read_every_complete` and `training_read_exit_001_every_complete`](research/recursive-learning/native/ParameterTraining.lean) ·
+[`training_read_common_offset` and `training_read_reaction_delay`](research/recursive-learning/native/OffsetAndDelay.lean)
 
 ### 4. Two cells learn a coincidence task
 
@@ -225,7 +231,11 @@ a single level.
   or two cells. The [exact counting theorem](docs/EXACT_DOSE_COUNTING.md)
   uses nominal thresholds.
 - **Exact quantities.** Actuation factors are exact. The coincidence
-  theorem uses a trained-port birth gain of exactly 1.2.
+  theorem uses a trained-port birth gain of exactly 1.2 and a FIRE
+  threshold within ±3%. These are modelling choices. No circuit evidence
+  supports them as worst-case bounds, and a per-cell gain error would
+  widen the read latency window that the receiver relies on. See the
+  [implementation assumptions](model/IMPLEMENTATION_ASSUMPTIONS.md).
 - **Receiver.** The coincidence receiver is a decision rule on the
   two cells' emitted dates.
 - **Complete runs.** Theorems compare runs complete through a horizon.
