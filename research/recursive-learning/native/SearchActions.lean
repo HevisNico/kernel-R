@@ -59,10 +59,10 @@ theorem actionSearch_consistent (m : ℕ) :
 
 /-- For a need from 1 to 4, the lesson reached is the lesson of that
 need, and its question has that many training pulses. -/
-theorem action_selected {m : ℕ} (lo : 1 ≤ m) (hi : m ≤ 4) (κ : Fin 7) (lesson : 3 ≤ κ.val) :
+theorem action_selected {m : ℕ} (lo : 1 ≤ m) (hi : m ≤ 4) (κ : Fin 7) (leaf : 3 ≤ κ.val) :
     actionReached m κ = decide (κ.val = m + 2) ∧
       (κ.val = m + 2 → (actionSearch.plan κ).count = m) := by
-  interval_cases m <;> fin_cases κ <;> simp [actionSearch, actionReached, Question.count] at lesson ⊢
+  interval_cases m <;> fin_cases κ <;> simp [actionSearch, actionReached, Question.count] at leaf ⊢
 
 /-- A binary search that ends by a lesson, with fourteen explicit cells.
 Every probe has its own start gain, anywhere within 3/125 of the centre
@@ -85,9 +85,9 @@ theorem search_action_witness (m : ℕ) (lo : 1 ≤ m) (hi : m ≤ 4) (z : Fin 7
         (u (actionSearch.probe κ)).x 0 (.z 0) = z κ + m * (8 * (2 / 25 - 59 / 800)) ∧
         incoming (signalRoute actionSearch.lo actionSearch.hi actionSearch.inputs) dates
           (actionSearch.probe κ) =
-          ((lesson 0 (actionSearch.plan κ).first (actionSearch.plan κ).dates
+          ((questionPulses 0 (actionSearch.plan κ).first (actionSearch.plan κ).dates
             (actionSearch.plan κ).read : List (Delivery 1)) : Multiset (Delivery 1)) ∧
-        (lesson 0 (actionSearch.plan κ).first (actionSearch.plan κ).dates
+        (questionPulses 0 (actionSearch.plan κ).first (actionSearch.plan κ).dates
           (actionSearch.plan κ).read).length = m + 1) ∧
       (∀ κ : Fin 7, 3 ≤ κ.val → κ.val ≠ m + 2 →
         dates (actionSearch.probe κ) = [] ∧
@@ -117,10 +117,10 @@ theorem search_action_witness (m : ℕ) (lo : 1 ≤ m) (hi : m ≤ 4) (z : Fin 7
     funext j
     cases actionSearch.role j <;> rfl
   rw [same] at ref all
-  have child (κ : Fin 7) (lesson : 3 ≤ κ.val) :
+  have child (κ : Fin 7) (leaf : 3 ≤ κ.val) :
       ∃ π b, actionSearch.parent κ = some (π, b) := by
-    fin_cases κ <;> simp [actionSearch] at lesson ⊢
-  refine ⟨dates, u, fun κ hκ => ?_, fun κ lesson other => ?_, ref, all⟩
+    fin_cases κ <;> simp [actionSearch] at leaf ⊢
+  refine ⟨dates, u, fun κ hκ => ?_, fun κ leaf other => ?_, ref, all⟩
   · obtain ⟨reached, count⟩ := action_selected lo hi κ (by omega)
     have here : actionReached m κ = true := by rw [reached]; simpa using hκ
     obtain ⟨π, b, hp⟩ := child κ (by omega)
@@ -134,13 +134,13 @@ theorem search_action_witness (m : ℕ) (lo : 1 ≤ m) (hi : m ≤ 4) (z : Fin 7
     · have steps : min (m + 1) m = m := by omega
       rw [steps] at gain
       exact gain
-    · rw [lesson_length]
+    · rw [questionPulses_length]
       have c := count hκ
       unfold Question.count at c
       omega
-  · obtain ⟨reached, _⟩ := action_selected lo hi κ lesson
+  · obtain ⟨reached, _⟩ := action_selected lo hi κ leaf
     have away : actionReached m κ = false := by rw [reached]; simpa using other
-    obtain ⟨π, b, hp⟩ := child κ lesson
+    obtain ⟨π, b, hp⟩ := child κ leaf
     have gain := gains κ
     have pulses := sent κ π b hp
     rw [away] at gain pulses

@@ -429,4 +429,15 @@ theorem routed_execution {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Param
         rw [balance]
         simp [promised]
 
+theorem familyQueue_empty {n : ℕ} {u : Fin n → Snapshot 1} (h : ∀ i, (u i).pending = []) :
+    familyQueue u = [] := by
+  simp [familyQueue, h]
+
+theorem execution_cast {n : ℕ} {θ : Fin n → Parameters} {route : Router n}
+    {a a' b b' : Snapshot n} (ha : a = a') (hb : b = b') (E : ParameterExecution θ route a b) :
+    ∃ E' : ParameterExecution θ route a' b', ∀ i, E'.emissionTimes i = E.emissionTimes i := by
+  subst ha
+  subst hb
+  exact ⟨E, fun _ => rfl⟩
+
 end RecursiveLearning.Native

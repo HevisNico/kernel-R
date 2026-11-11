@@ -6,6 +6,10 @@ One full exposed ERROR section adds `3/5` to its port, which represents one
 credit or sets the selector. The encoding is relative to that port's starting
 log-gain.
 
+Training that stops by itself, networks of trained cells and searches
+built with them are summarized in the
+[map of the stop-learning results](#map-of-the-stop-learning-results).
+
 ## What Lean checks
 
 [`encodes_iff_counts`](NativeLearning.lean) applies to any native execution
@@ -939,6 +943,57 @@ Those endpoints belong to every admitted ERROR box. The proof uses
 the exact trained birth gain 1.2. The receiver is an observation of
 two native runs and the comparator uses the reduced READY equation.
 
+## Map of the stop-learning results
+
+The sections from here to [Verify](#verify) form one line of work:
+training that stops by itself, from one pulse to networks and searches.
+No gain and no FIRE level is set by hand in it. This map lists the
+strongest statement at each level. The sections below follow the order
+in which the theorems were proved, so some of them state an earlier and
+weaker form.
+
+| Level | Statement | Theorem | File |
+|---|---|---|---|
+| one pulse | a silent pulse writes one dose, a firing pulse writes nothing and its date is known | `silent_step_exists`, `firing_step_dated` | `SilentStep`, `FiringStep` |
+| one port | training stops by itself for every start gain | `stop_training_exists` | `TrainingLoop` |
+| one port | the need of a port, and its tolerance to fabrication | `self_calibrated_probe_exists`, `needIs_of_tolerance` | `SelfCalibratedProbe`, `NeedTolerance` |
+| one cell | two trained ports read in either order: the FIRE comes later than 0.239 units after the first pulse and no later than 0.256 after the second | `OpenCell.read` | `FreeRead` |
+| one cell | one read pulse fires late, two fire early | `OpenCell.read_one` | `SearchCells` |
+| composition | cells joined by wires, from one-cell runs | `routed_execution` | `RoutedProduct` |
+| composition | forward wires: complete run, unique FIRE dates and final values | `acyclic_network_states` | `AcyclicNetwork` |
+| composition | report windows and pulses at fixed dates | `signal_network_states` | `SignalNetwork` |
+| network | any number of trained cells joined by wires | `trained_wired_network` | `WiredNetwork` |
+| search | a forest of questions, with final gains and pulses sent | `trained_search` | `TrainedSearch` |
+| search | a lesson after the last answer | `search_action_witness` | `SearchActions` |
+| search | `k` questions asked out of `2 ^ k - 1` | `bisection_search` | `BisectionSearch` |
+| search | `2 k + 1` cells for `2 ^ k` needs, with the learner | `successive_search` | `SuccessiveSearch` |
+
+Earlier forms that the table replaces:
+
+- `TrainedCell` and `trained_read_exists` hold the read pulses in the
+  queue of the cell, in a fixed order. `OpenCell` and `OpenCell.read`
+  take them from anywhere, in either order. `TrainedCell` is still used
+  by the two-cell and `n`-cell contracts without wires
+  (`trained_coincidence_network`, `trained_network`).
+- `acyclic_network` and `signal_network` are the two composition
+  theorems without the final states. They are corollaries.
+
+The regime, common to every statement of the table:
+
+| Quantity | Hypothesis |
+|---|---|
+| FIRE level | in `[0.95, 1.05]`, one value per cell |
+| ERROR entry threshold | in `[0.07, 0.08]`, one value per port |
+| ERROR exit threshold | at least `0.005`, below the entry |
+| dose `8 * (entry - exit)` | positive; at most `1/20` for the read windows |
+| recovery rate at the start | in `[0.07, 0.1]` |
+| pulses on one cell | at least 22 units apart |
+| other parameters | anywhere in the fabrication box, 0.3% or 10% |
+| wires | positive delay, or fixed dates after the window of the sender |
+
+Every network statement gives a complete run and proves that every
+complete run has the same FIRE dates.
+
 ## Read latency after training that stops at the first FIRE
 
 [StopLearningLatency.lean](StopLearningLatency.lean) studies the READY
@@ -1322,7 +1377,7 @@ nine kinds of jump to the network.
   window and any two cells are accepted together.
 
 In this module the cells are independent: no cell sends a pulse to
-another. The next two modules add wires.
+another. The next modules add wires.
 
 ### Wires between cells
 
@@ -1344,27 +1399,6 @@ A FIRE moves its deliveries from the promised side to the queue. An
 arrival finds its delivery in the queue, because every delivery still
 promised is due later. Each cell keeps its ordered FIRE dates. The one-
 cell theorems of the earlier modules are used unchanged.
-
-### A cascade of trained cells
-
-[Cascade.lean](Cascade.lean) is the first network with wires between
-trained cells.
-
-- `trained_cascade`: cells 0 and 1 are trained and read by source
-  pulses. Their read FIREs travel on two wires to the two ports of cell
-  2, which is trained by its own source pulses. The router has a gate on
-  each wire, so the FIRE events of training send nothing. In every
-  complete run of the three-cell network, cell 2 fires its read later
-  than 0.239 units after the pulse from cell 0 arrives and no later than
-  0.256 units after the pulse from cell 1 arrives. The hypothesis on
-  cell 2 is stated for every pair of arrival dates that the windows of
-  cells 0 and 1 allow.
-- `trained_cascade_witness`: three copies of the explicit cell, read at
-  date 968, with wire delays 1 and 11/10. In every complete run, the
-  third cell fires its read between 969.478 and 969.612.
-
-This theorem fixes three cells and the order of arrival at cell 2. The
-next modules remove both restrictions.
 
 ### Read pulses in either order
 
@@ -1505,11 +1539,10 @@ Each answer sends the pulses of the questions it leads to.
   The FIRE dates and the final values are the same in every complete
   run. A search for one hidden need `m` is the case where every probe
   has the need `m`.
-- `trained_search_witness`: a binary search over the needs 1 to 4, with
-  three questions and six explicit cells. The root asks `m ≤ 2`. After a
-  yes, node 1 asks `m ≤ 1`. After a no, node 2 asks `m ≤ 3`. The theorem
-  holds for every `m`, and the two answers separate 1, 2, 3 and 4 or
-  more.
+- `searchWitness`: a layout with three questions over the needs 1 to
+  4. The root asks `m ≤ 2`. After a yes, node 1 asks `m ≤ 1`. After a
+  no, node 2 asks `m ≤ 3`. The two answers separate 1, 2, 3 and 4 or
+  more. Its explicit cells are in `NeedTolerance` below.
 
 No gain and no FIRE level is set by hand in this search. The need is the
 number of doses that each probe's own gain, dose and FIRE level require
@@ -1553,7 +1586,7 @@ gains that need exactly `m` doses form a band, one dose wide.
   then the probe needs exactly `m` doses. Probes that satisfy this for
   the same `m` have the same need, whatever their own gains, doses and
   FIRE levels.
-- `trained_search_band_witness`: the binary search over four needs, with
+- `trained_search_band_witness`: the layout `searchWitness`, with
   each of the three probes at its own start gain, anywhere within 3/125
   of the centre of the band. The dose is 1/20, so the band is used on
   96% of its width.
@@ -1674,12 +1707,12 @@ apart, whatever the answers.
 - `successive_digits`: for `1 ≤ m ≤ 2 ^ k`, the weights of the gates
   that fire late add up to `m - 1`. The gates give the binary digits of
   `m - 1`.
-- `sar_learner`: the last stage has the weight 1. Its question counts
+- `approx_learner`: the last stage has the weight 1. Its question counts
   exactly `m` training pulses. It is the learner: its gain ends exactly
   `m` doses higher and its read pulse makes it fire.
-- `sar_cost`: the counts of the `k` questions add up to at most
+- `approx_cost`: the counts of the `k` questions add up to at most
   `k (m - 1) + 2 ^ k - 1`.
-- `sar_duration`: the run ends at the date `1003 + 33 * 2 ^ k + 25 k`.
+- `approx_duration`: the run ends at the date `1003 + 33 * 2 ^ k + 25 k`.
 - `successive_search_witness`: explicit cells for every `k ≥ 1`. Each
   probe has its own start gain, within 1/100 of the centre of the band
   of need `m`, and its own ERROR thresholds, hence its own dose, within
@@ -1779,7 +1812,7 @@ builds this package with the pinned dependencies. Its default targets compile
 through `CoincidenceSeparation`, `StopLearningLatency`,
 `NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep`,
 `TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence`,
-`OffsetAndDelay`, `SelfCalibratedProbe`, `FamilyProduct`, `RoutedProduct`, `Cascade`,
+`OffsetAndDelay`, `SelfCalibratedProbe`, `FamilyProduct`, `RoutedProduct`,
 `FreeRead`, `AcyclicNetwork`, `WiredNetwork`, `SignalNetwork`,
 `SearchCells`, `TrainedSearch`, `NeedTolerance`, `SearchActions`,
 `BisectionSearch` and `SuccessiveSearch`. The default targets also run

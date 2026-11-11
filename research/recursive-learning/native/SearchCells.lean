@@ -21,7 +21,7 @@ theorem quiet_times {θ : Fin 1 → Parameters} {s u : Snapshot 1}
 
 /-- The pulses of one question: a first training pulse, the later
 training pulses and the read pulse, all on the port `p`. -/
-def lesson (p : Port) (first : ℝ) (dates : List ℝ) (read : ℝ) : List (Delivery 1) :=
+def questionPulses (p : Port) (first : ℝ) (dates : List ℝ) (read : ℝ) : List (Delivery 1) :=
   (⟨0, p, first⟩ : Delivery 1) ::
     (dates.map (fun D => (⟨0, p, D⟩ : Delivery 1)) ++ [(⟨0, p, read⟩ : Delivery 1)])
 
@@ -49,14 +49,14 @@ theorem ProbeCell.asked {θ ε s p upper lower level m}
     (cell : ProbeCell θ ε s p upper lower level m) {first read rest : ℝ} {dates : List ℝ}
     (start : s.time ≤ first) (spaced : Spaced first dates (read - 1)) (wait : read + 22 ≤ rest) :
     ∃ (u : Snapshot 1) (l : List ℝ) (count : ℕ),
-      Reach θ (requeued s (lesson p first dates read)) u l count ∧ RestState θ u ∧
+      Reach θ (requeued s (questionPulses p first dates read)) u l count ∧ RestState θ u ∧
       u.time = rest ∧ u.pending = [] ∧
       Signal (read - 1) (read + 1) l (decide (m ≤ dates.length + 1)) ∧
       u.x 0 (.z p) =
         s.x 0 (.z p) + ((min (dates.length + 2) m : ℕ) : ℝ) * (8 * (upper - lower)) := by
   have far := Spaced.horizon_later spaced
   obtain ⟨w₀, ⟨e₀, quiet₀⟩, rested₀, date₀, pend₀, gains₀, b₀, _⟩ :=
-    rest_wait (s := requeued s (lesson p first dates read)) cell.config cell.fire.1
+    rest_wait (s := requeued s (questionPulses p first dates read)) cell.config cell.fire.1
       (cell.state.requeued _) start (by
         intro d hd
         rcases List.mem_cons.mp hd with rfl | hd

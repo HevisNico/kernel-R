@@ -31,34 +31,34 @@ structure Question where
 def Question.count (π : Question) : ℕ := π.dates.length + 1
 
 /-- The wires that carry one question from the cell `i`. -/
-def lessonWires {n : ℕ} (i : Fin n) (p : Port) (π : Question) : List (Wire n) :=
+def questionWires {n : ℕ} (i : Fin n) (p : Port) (π : Question) : List (Wire n) :=
   (⟨i, p, π.first⟩ : Wire n) ::
     (π.dates.map (fun D => (⟨i, p, D⟩ : Wire n)) ++ [(⟨i, p, π.read⟩ : Wire n)])
 
-theorem lessonWires_received {n : ℕ} (bit : Fin n → Bool) (i : Fin n) (p : Port) (π : Question) :
-    ((lessonWires i p π).filter (fun w => bit w.sender)).map Wire.pulse =
-      if bit i then lesson p π.first π.dates π.read else [] := by
+theorem questionWires_received {n : ℕ} (bit : Fin n → Bool) (i : Fin n) (p : Port) (π : Question) :
+    ((questionWires i p π).filter (fun w => bit w.sender)).map Wire.pulse =
+      if bit i then questionPulses p π.first π.dates π.read else [] := by
   cases hb : bit i
-  · have none : (lessonWires i p π).filter (fun w => bit w.sender) = [] := by
+  · have none : (questionWires i p π).filter (fun w => bit w.sender) = [] := by
       apply List.filter_eq_nil_iff.mpr
       intro w hw
       have from_ : w.sender = i := by
-        simp only [lessonWires, List.mem_cons, List.mem_append, List.mem_map,
+        simp only [questionWires, List.mem_cons, List.mem_append, List.mem_map,
           List.not_mem_nil, or_false] at hw
         rcases hw with rfl | ⟨D, _, rfl⟩ | rfl <;> rfl
       simp [from_, hb]
     rw [none]
     rfl
-  · have all : (lessonWires i p π).filter (fun w => bit w.sender) = lessonWires i p π := by
+  · have all : (questionWires i p π).filter (fun w => bit w.sender) = questionWires i p π := by
       apply List.filter_eq_self.mpr
       intro w hw
       have from_ : w.sender = i := by
-        simp only [lessonWires, List.mem_cons, List.mem_append, List.mem_map,
+        simp only [questionWires, List.mem_cons, List.mem_append, List.mem_map,
           List.not_mem_nil, or_false] at hw
         rcases hw with rfl | ⟨D, _, rfl⟩ | rfl <;> rfl
       simp [from_, hb]
     rw [all]
-    simp [lessonWires, lesson, Wire.pulse, Function.comp_def]
+    simp [questionWires, questionPulses, Wire.pulse, Function.comp_def]
 
 /-- The layout of a search: the role of each cell, the probe and the gate
 of each node, the parent of each node with the answer that leads to it,
@@ -89,7 +89,7 @@ def inputsOf : Role N → List (Wire n)
   | .probe κ =>
     match L.enabler κ with
     | none => []
-    | some i => lessonWires i (L.probePort κ) (L.plan κ)
+    | some i => questionWires i (L.probePort κ) (L.plan κ)
   | .gate κ =>
     (⟨L.probe κ, L.reportPort κ, (L.plan κ).clock⟩ : Wire n) ::
       match L.enabler κ with
@@ -126,7 +126,7 @@ in the queues at the start. -/
 def startOf (sp sg : Fin N → Snapshot 1) : Role N → Snapshot 1
   | .probe κ => requeued (sp κ)
       (match L.parent κ with
-        | none => lesson (L.probePort κ) (L.plan κ).first (L.plan κ).dates (L.plan κ).read
+        | none => questionPulses (L.probePort κ) (L.plan κ).first (L.plan κ).dates (L.plan κ).read
         | some _ => [])
   | .gate κ => requeued (sg κ) ((sg κ).pending ++
       (match L.parent κ with
@@ -196,7 +196,7 @@ theorem probe_total {T rest : ℝ} {horizon : Fin N → ℝ} (sound : L.Sound T 
     (L.startOf sp sg (.probe κ)).pending ++
       ((L.inputsOf (.probe κ)).filter (fun w => L.bit reached need w.sender)).map Wire.pulse =
       if reached κ then
-        lesson (L.probePort κ) (L.plan κ).first (L.plan κ).dates (L.plan κ).read
+        questionPulses (L.probePort κ) (L.plan κ).first (L.plan κ).dates (L.plan κ).read
       else [] := by
   cases hp : L.parent κ with
   | none =>
@@ -209,7 +209,7 @@ theorem probe_total {T rest : ℝ} {horizon : Fin N → ℝ} (sound : L.Sound T 
     obtain ⟨π, b⟩ := a
     obtain ⟨i, en, bi, _⟩ := enabler_child sound rule hp
     simp only [startOf, requeued, inputsOf, en, hp, List.nil_append]
-    rw [lessonWires_received, bi]
+    rw [questionWires_received, bi]
 
 /-- The pulses of a gate: its training queue, its clock pulse when its
 node is reached, and the report of its probe when the answer is yes. -/
@@ -360,19 +360,19 @@ theorem search_gate_run {N n : ℕ} {L : SearchLayout N n} {T rest ε : ℝ} {ho
       · intro t ht
         linarith [early t ht]
 
-theorem mem_lessonWires {n : ℕ} {i : Fin n} {p : Port} {π : Question} {w : Wire n}
-    (h : w ∈ lessonWires i p π) (spaced : Spaced π.first π.dates (π.read - 1)) :
+theorem mem_questionWires {n : ℕ} {i : Fin n} {p : Port} {π : Question} {w : Wire n}
+    (h : w ∈ questionWires i p π) (spaced : Spaced π.first π.dates (π.read - 1)) :
     w.sender = i ∧ π.first ≤ w.date := by
-  simp only [lessonWires, List.mem_cons, List.mem_append, List.mem_map, List.not_mem_nil,
+  simp only [questionWires, List.mem_cons, List.mem_append, List.mem_map, List.not_mem_nil,
     or_false] at h
   rcases h with rfl | ⟨D, hD, rfl⟩ | rfl
   · exact ⟨rfl, le_rfl⟩
   · exact ⟨rfl, by have next := Spaced.later spaced D hD; show π.first ≤ D; linarith⟩
   · exact ⟨rfl, by have far := Spaced.horizon_later spaced; show π.first ≤ π.read; linarith⟩
 
-theorem lesson_length (p : Port) (first : ℝ) (dates : List ℝ) (read : ℝ) :
-    (lesson p first dates read).length = dates.length + 2 := by
-  simp [lesson]
+theorem questionPulses_length (p : Port) (first : ℝ) (dates : List ℝ) (read : ℝ) :
+    (questionPulses p first dates read).length = dates.length + 2 := by
+  simp [questionPulses]
 
 /-- The final state of a cell in the search. The gain of a probe has
 received one dose for each pulse of its question, up to its need, when
@@ -435,7 +435,7 @@ theorem trained_search {N n : ℕ} (pos : 0 < n) (L : SearchLayout N n) {T rest 
       (∀ κ π b, L.parent κ = some (π, b) →
         incoming (signalRoute L.lo L.hi L.inputs) dates (L.probe κ) =
           if reached κ then
-            ((lesson (L.probePort κ) (L.plan κ).first (L.plan κ).dates (L.plan κ).read :
+            ((questionPulses (L.probePort κ) (L.plan κ).first (L.plan κ).dates (L.plan κ).read :
               List (Delivery 1)) : Multiset (Delivery 1))
           else 0) ∧
       (∃ ref : ParameterExecution
@@ -494,7 +494,7 @@ theorem trained_search {N n : ℕ} (pos : 0 < n) (L : SearchLayout N n) {T rest 
         obtain ⟨π, b⟩ := a
         obtain ⟨i, en, _, which⟩ := SearchLayout.enabler_child sound rule hp
         simp only [SearchLayout.inputsOf, en] at hw'
-        obtain ⟨from_, date⟩ := mem_lessonWires hw' (sound.spaced κ)
+        obtain ⟨from_, date⟩ := mem_questionWires hw' (sound.spaced κ)
         obtain ⟨lt, hi⟩ := child κ π b (Or.inl hr) hp i which
         rw [from_]
         exact ⟨lt, by linarith⟩
@@ -576,77 +576,7 @@ theorem trained_search {N n : ℕ} (pos : 0 < n) (L : SearchLayout N n) {T rest 
     rw [sound.roleProbe, total]
     cases reached κ <;> rfl
 
-/-! ### The hypotheses are satisfiable: a binary search over four needs -/
-
-/-- A rested probe cell whose port needs `m` doses. Its start gain is
-`m` doses of 1/20 below the gain that just reaches the FIRE level. -/
-noncomputable def needStart (m : ℕ) : Snapshot 1 where
-  time := 0
-  x := fun _ c => match c with
-    | .q => 1 / 10
-    | .m _ => 1 / 40
-    | .z _ => Real.log ((9 / 10) / response 1) - m * (1 / 20)
-    | .b => 2 / 25
-    | .energy => 100
-  main := fun _ => .ready
-  aux := fun _ _ => .ready
-  raw := fun _ _ => none
-  pending := []
-
-theorem probeCell_witness (m : ℕ) :
-    ProbeCell (fun _ => witnessParameters) (1 / 10) (needStart m) 0 (2 / 25) (59 / 800) 1 m := by
-  have c := trainedCell_witness
-  have rPos := response_one_pos
-  have rLow := response_one_lower
-  have gPos : (0 : ℝ) < (9 / 10) / response 1 := div_pos (by norm_num) rPos
-  have peak : Real.exp (Real.log ((9 / 10) / response 1)) * response 1 = 9 / 10 := by
-    rw [Real.exp_log gPos]
-    field_simp
-  have dose : (8 : ℝ) * (2 / 25 - 59 / 800) = 1 / 20 := by norm_num
-  exact {
-    box := c.box
-    config := c.config₁
-    fire := c.fire
-    entry := c.entry₁
-    exit := c.exit₁
-    state := {
-      main := rfl
-      aux := fun _ => rfl
-      raw := fun _ => rfl
-      charge := by show (1 / 10 : ℝ) ≤ 1 / 10 ∧ (1 / 10 : ℝ) ≤ 1 / 10 + 1 / 10000; norm_num
-      sensors := fun _ => by
-        show (1 / 40 - 1 / 100000 : ℝ) ≤ 1 / 40 ∧ (1 / 40 : ℝ) ≤ 1 / 40 + 1 / 100000
-        norm_num
-      recovery := by show (0 : ℝ) ≤ 2 / 25 ∧ (2 / 25 : ℝ) ≤ 11 / 10; norm_num
-      energy := by show (50 : ℝ) ≤ 100 ∧ (100 : ℝ) ≤ 100; norm_num
-      caps := fun _ => by
-        show Real.log ((9 / 10) / response 1) - m * (1 / 20) ≤ Real.log 4
-        have small : (9 / 10) / response 1 ≤ 4 := by
-          rw [div_le_iff₀ rPos]
-          linarith
-        have steps : (0 : ℝ) ≤ m * (1 / 20) := by positivity
-        linarith [Real.log_le_log gPos small] }
-    recovery := by show (7 / 100 : ℝ) ≤ 2 / 25 ∧ (2 / 25 : ℝ) ≤ 1 / 10; norm_num
-    need := by
-      show NeedIs 1 (8 * (2 / 25 - 59 / 800))
-        (Real.log ((9 / 10) / response 1) - m * (1 / 20)) m
-      rw [dose]
-      apply needIs_of_peaks (by norm_num)
-      · intro k hk
-        have form : Real.log ((9 / 10) / response 1) - (m : ℝ) * (1 / 20) + k * (1 / 20) =
-            Real.log ((9 / 10) / response 1) + -(1 / 20) := by
-          rw [← hk]
-          push_cast
-          ring
-        rw [form, Real.exp_add, mul_right_comm, peak]
-        have step : Real.exp (-(1 / 20 : ℝ)) ≤ 20 / 21 := by
-          rw [Real.exp_neg, inv_le_comm₀ (Real.exp_pos _) (by norm_num)]
-          linarith [Real.add_one_le_exp (1 / 20 : ℝ)]
-        linarith
-      · have form : Real.log ((9 / 10) / response 1) - (m : ℝ) * (1 / 20) + m * (1 / 20) =
-            Real.log ((9 / 10) / response 1) := by ring
-        rw [form, peak]
-        norm_num }
+/-! ### A layout with three questions -/
 
 /-- A search with three questions. The root asks whether the need is at
 most 2. After a yes, node 1 asks whether it is at most 1. After a no,
@@ -686,50 +616,5 @@ def searchReached (m : ℕ) : Fin 3 → Bool := ![true, decide (m ≤ 2), decide
 theorem searchWitness_consistent (m : ℕ) : searchWitness.Consistent (searchReached m) (fun _ => m) := by
   intro κ
   fin_cases κ <;> simp [searchWitness, searchReached, Question.count]
-
-/-- A binary search over the needs 1 to 4, with six explicit cells. For
-every need `m`, in every complete run:
-
-- the root probe fires in its report window exactly when `m ≤ 2`, and
-  the root gate fires late exactly when `2 < m`;
-- the probe of node 1 fires in its window exactly when `m ≤ 1`, and its
-  gate fires late exactly when `m = 2`;
-- the probe of node 2 fires in its window exactly when `m = 3`, and its
-  gate fires late exactly when `3 < m`.
-
-The pair of answers separates the needs 1, 2, 3 and 4 or more. -/
-theorem trained_search_witness (m : ℕ) :
-    ∃ dates : Fin 6 → List ℝ,
-      Signal (1045 - 1) (1045 + 1) (dates 0) (decide (m ≤ 2)) ∧
-      Signal (1047 + 71 / 200) (1047 + 1) (dates 1) (decide (2 < m)) ∧
-      Signal (1073 - 1) (1073 + 1) (dates 2) (decide (m ≤ 2) && decide (m ≤ 1)) ∧
-      Signal (1075 + 71 / 200) (1075 + 1) (dates 3) (decide (m ≤ 2) && decide (1 < m)) ∧
-      Signal (1117 - 1) (1117 + 1) (dates 4) (decide (2 < m) && decide (m ≤ 3)) ∧
-      Signal (1119 + 71 / 200) (1119 + 1) (dates 5) (decide (2 < m) && decide (3 < m)) ∧
-      (∃ (u : Snapshot 6) (ref : ParameterExecution
-        (familyParameters (fun (_ : Fin 6) (_ : Fin 1) => witnessParameters))
-        (signalRoute searchWitness.lo searchWitness.hi searchWitness.inputs)
-        (Snapshot.family 0 (searchWitness.start (fun _ => needStart m) (fun _ => witnessSource)))
-        u), ParameterCompleteThrough ref 1150) ∧
-      ∀ {u : Snapshot 6} (ex : ParameterExecution
-        (familyParameters (fun (_ : Fin 6) (_ : Fin 1) => witnessParameters))
-        (signalRoute searchWitness.lo searchWitness.hi searchWitness.inputs)
-        (Snapshot.family 0 (searchWitness.start (fun _ => needStart m) (fun _ => witnessSource)))
-        u), ParameterCompleteThrough ex 1150 → ∀ i, ex.emissionTimes i = dates i := by
-  obtain ⟨dates, _, yes, no, _, _, _, ref, all⟩ :=
-    trained_search (by norm_num : 0 < 6) searchWitness searchWitness_sound
-      (searchWitness_consistent m) (θp := fun _ _ => witnessParameters)
-      (θg := fun _ _ => witnessParameters) (sp := fun _ => needStart m)
-      (sg := fun _ => witnessSource) (fun _ => probeCell_witness m) (fun _ => openCell_witness)
-      (fun _ => rfl) (fun _ => rfl)
-  have same : (fun j => SearchLayout.pick (fun (_ : Fin 3) (_ : Fin 1) => witnessParameters)
-      (fun _ _ => witnessParameters) (searchWitness.role j)) =
-      fun (_ : Fin 6) (_ : Fin 1) => witnessParameters := by
-    funext j
-    cases searchWitness.role j <;> rfl
-  rw [same] at ref all
-  obtain ⟨run, complete⟩ := ref
-  exact ⟨dates, yes 0, no 0, yes 1, no 1, yes 2, no 2, ⟨_, run, complete⟩,
-    fun ex done => (all ex done).1⟩
 
 end RecursiveLearning.Native

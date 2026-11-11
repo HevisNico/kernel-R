@@ -164,10 +164,19 @@ theorem probeCell_band (m : ℕ) {z : ℝ} (band : |z - needCentre 1 (1 / 20) m|
         (by norm_num) (by norm_num) (by norm_num) band (by norm_num) (by norm_num)
         (by norm_num) }
 
-/-- The binary search over the needs 1 to 4, with start gains off the
-lattice. Each of the three probes has its own start gain, anywhere within
-3/125 of the centre of the band of need `m`. The conclusions are those of
-`trained_search_witness`. -/
+/-- A binary search over the needs 1 to 4, with six explicit cells and
+start gains off the lattice. Each of the three probes has its own start
+gain, anywhere within 3/125 of the centre of the band of need `m`. For
+every need `m`, in every complete run:
+
+- the root probe fires in its report window exactly when `m ≤ 2`, and
+  the root gate fires late exactly when `2 < m`;
+- the probe of node 1 fires in its window exactly when `m ≤ 1`, and its
+  gate fires late exactly when `m = 2`;
+- the probe of node 2 fires in its window exactly when `m = 3`, and its
+  gate fires late exactly when `3 < m`.
+
+The pair of answers separates the needs 1, 2, 3 and 4 or more. -/
 theorem trained_search_band_witness (m : ℕ) (z : Fin 3 → ℝ)
     (band : ∀ κ, |z κ - needCentre 1 (1 / 20) m| ≤ 3 / 125) :
     ∃ dates : Fin 6 → List ℝ,

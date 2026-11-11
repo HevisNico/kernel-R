@@ -1,4 +1,4 @@
-import Cascade
+import RoutedProduct
 
 /-! A trained cell whose read pulses are not in its own queue. The cell
 trains its two ports from its own pulse trains, then waits at rest. The
