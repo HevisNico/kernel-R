@@ -534,10 +534,10 @@ theorem family_execution {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Param
 
 /-- A network of rested cells with empty queues has no move left. -/
 theorem family_complete {n : ℕ} {θ : Fin n → Fin 1 → Parameters} {T : ℝ}
-    {u : Fin n → Snapshot 1} {level : Fin n → ℝ} {s : Snapshot n}
+    {u : Fin n → Snapshot 1} {level : Fin n → ℝ} {s : Snapshot n} {route : Router n}
     (cell : ∀ i, CellConfig (θ i) (level i)) (fire : ∀ i, 19 / 20 ≤ level i)
     (rested : ∀ i, RestState (θ i) (u i)) (empty : ∀ i, (u i).pending = [])
-    (E : ParameterExecution (familyParameters θ) (fun _ _ => []) s (Snapshot.family T u)) :
+    (E : ParameterExecution (familyParameters θ) route s (Snapshot.family T u)) :
     ParameterCompleteThrough E T := by
   have guards (i : Fin n) : ThresholdGuards (fun j => (θ i j).thresholds) (u i) (u i).x :=
     cell_guards_rest (cell i) (rested i).main
@@ -563,13 +563,14 @@ theorem TrainedCell.run_rest {θ ε s p₁ p₂ u₁ l₁ u₂ l₂ level dates�
     (cell : TrainedCell θ ε s p₁ p₂ u₁ l₁ u₂ l₂ level dates₁ dates₂ middle read₁ read₂ rest r₁ r₂) :
     ∃ (u : Snapshot 1) (tf : ℝ) (training : List ℝ) (count : ℕ),
       read₁ + 239 / 1000 < tf ∧ tf ≤ read₂ + 32 / 125 ∧
-      Reach θ s u (training ++ [tf]) count ∧ RestState θ u ∧ u.time = rest ∧ u.pending = [] := by
-  obtain ⟨u, tf, training, after, before, ⟨e, times⟩, rested, date, pend, _, _, _⟩ :=
+      Reach θ s u (training ++ [tf]) count ∧ RestState θ u ∧ u.time = rest ∧ u.pending = [] ∧
+      ∀ t ∈ training, t ≤ read₁ := by
+  obtain ⟨u, tf, training, after, before, ⟨e, times⟩, rested, date, pend, _, _, _, early⟩ :=
     trained_read_exists cell.box cell.distinct cell.config₁ cell.config₂ cell.fire cell.entry₁
       cell.exit₁ cell.entry₂ cell.exit₂ cell.dose₁ cell.dose₂ cell.state cell.recovery cell.queue
       cell.spaced₁ cell.spaced₂ cell.order cell.wait cell.below₁ cell.below₂ r₁ r₂ cell.reach₁
       cell.reach₂ cell.enough₁ cell.enough₂
-  exact ⟨u, tf, training, e.moveCount, after, before, ⟨e, times, rfl⟩, rested, date, pend⟩
+  exact ⟨u, tf, training, e.moveCount, after, before, ⟨e, times, rfl⟩, rested, date, pend, early⟩
 
 /-- A network of any number of trained cells. Each cell has its own
 parameters in the fabrication box, its own start gains, its own FIRE
@@ -595,7 +596,7 @@ theorem trained_network {n : ℕ} (pos : 0 < n) {θ : Fin n → Fin 1 → Parame
       ∀ {u : Snapshot n} (ex : ParameterExecution (familyParameters θ) (fun _ _ => [])
         (Snapshot.family T s) u), ParameterCompleteThrough ex rest →
         ∀ i, ex.emissionTimes i = training i ++ [tf i] := by
-  choose u tf training count after before reach rested date pend using
+  choose u tf training count after before reach rested date pend _ using
     fun i => (cells i).run_rest
   obtain ⟨E, times⟩ := family_execution pos _ T rest s u (fun i => training i ++ [tf i]) count
     rfl reach start date

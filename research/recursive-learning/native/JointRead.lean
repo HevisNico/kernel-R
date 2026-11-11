@@ -805,6 +805,22 @@ theorem stopped_staggered_read {θ ε p₁ p₂ u₁ l₁ u₂ l₂ level rest D
   rw [← ParameterExecution.emissionTimes_unique e other box bounds state.physical done complete 0]
   simp [ParameterExecution.emissionTimes, he]
 
+/-- A FIRE of an execution happens no later than its end. -/
+theorem emissionTimes_le {n θ route} {s u : Snapshot n} (e : ParameterExecution θ route s u)
+    (i : Fin n) : ∀ t ∈ e.emissionTimes i, t ≤ u.time := by
+  induction e with
+  | nil => intro t ht; simp [ParameterExecution.emissionTimes, ParameterExecution.emissions] at ht
+  | cons m rest ih =>
+    intro t ht
+    unfold ParameterExecution.emissionTimes at ht ih
+    simp only [ParameterExecution.emissions_cons, List.filter_append, List.map_append,
+      List.mem_append] at ht
+    rcases ht with ht | ht
+    · obtain ⟨event, mem, rfl⟩ := List.mem_map.mp ht
+      rw [m.emission_time event (List.mem_filter.mp mem).1]
+      exact m.time_monotone.trans rest.time_monotone
+    · exact ih t ht
+
 theorem emissionTimes_append {θ : Fin 1 → Parameters} {s u v : Snapshot 1}
     (e : ParameterExecution θ (fun _ _ => []) s u) (f : ParameterExecution θ (fun _ _ => []) u v) :
     (e.append f).emissionTimes 0 = e.emissionTimes 0 ++ f.emissionTimes 0 := by
@@ -847,9 +863,10 @@ theorem trained_read_exists {θ ε p₁ p₂ u₁ l₁ u₂ l₂ level}
       RestState θ u ∧ u.time = rest ∧ u.pending = [] ∧
       (∃ k : ℕ, k ≤ dates₁.length + 1 ∧ u.x 0 (.z p₁) = s.x 0 (.z p₁) + k * (8 * (u₁ - l₁))) ∧
       (∃ k : ℕ, k ≤ dates₂.length + 1 ∧ u.x 0 (.z p₂) = s.x 0 (.z p₂) + k * (8 * (u₂ - l₂))) ∧
-      ∀ (v : Snapshot 1) (other : ParameterExecution θ (fun _ _ => []) s v),
+      (∀ (v : Snapshot 1) (other : ParameterExecution θ (fun _ _ => []) s v),
         ParameterCompleteThrough other rest →
-        u.ObservationalEq v ∧ other.emissionTimes 0 = training ++ [tf] := by
+        u.ObservationalEq v ∧ other.emissionTimes 0 = training ++ [tf]) ∧
+      ∀ t ∈ training, t ≤ read₁ := by
   obtain ⟨m, f, ⟨e₁, _⟩, rested, date, pend, charge, b, _, gain₁, gain₂, fires₁, fires₂, last₁,
       last₂, _⟩ :=
     two_port_training_exists
@@ -875,8 +892,12 @@ theorem trained_read_exists {θ ε p₁ p₂ u₁ l₁ u₂ l₂ level}
     congr 1
     simp [ParameterExecution.emissionTimes, emitted]
   rw [date] at afterFirst
+  have early : ∀ t ∈ e₁.emissionTimes 0, t ≤ read₁ := by
+    intro t ht
+    rw [← date]
+    exact emissionTimes_le e₁ 0 t ht
   refine ⟨u, tf, e₁.emissionTimes 0, afterFirst, beforeSecond, ⟨e₁.append e₂, times⟩,
-    restedEnd, dateEnd, pendEnd, ?_, ?_, ?_⟩
+    restedEnd, dateEnd, pendEnd, ?_, ?_, ?_, early⟩
   · obtain ⟨k, hk, e⟩ := gain₁
     exact ⟨k, hk, by rw [gains, e]⟩
   · obtain ⟨k, hk, e⟩ := gain₂

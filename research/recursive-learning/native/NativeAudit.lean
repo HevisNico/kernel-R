@@ -16,6 +16,7 @@ import TrainedCoincidence
 import OffsetAndDelay
 import FamilyProduct
 import RoutedProduct
+import Cascade
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000
