@@ -1196,10 +1196,46 @@ moves first. The hypothesis is a `Plan`: the main charge stays below the
 FIRE level before the horizon, every live pulse outlasts it, and every
 busy sensor is SILENT above its ERROR entry threshold at the horizon.
 
-The final state is the hypothesis of the read-latency theorem with a
-residual rest charge, `stopped_read_response_residual`: the read latency
-then depends on neither the start gains nor the FIRE level. The read of
-the two ports as an execution is the remaining step.
+### The joint read, and training and read in one execution
+
+[JointRead.lean](JointRead.lean) reads two ports at the same instant.
+
+- `fire_rest_exists` is the FIRE and the return to rest with any number
+  of SILENT sensors. It uses `refractory_run_exists`.
+- `joint_read_exists`: if the two pulses together bring the main charge
+  of a rested cell to the FIRE level, the cell fires exactly once, at
+  the first contact, and returns to rest with every gain unchanged. The
+  date of the FIRE is part of the statement (`Emits`), and the latency is
+  the first-contact time of the scalar read equation at the sum of the
+  two gains.
+- `stopped_joint_read`: when each gain fires alone from the exact rest
+  charge and was silent one dose below, with doses of at most 1/20, the
+  joint read fires between 0.239 and 0.256 units after the pulses. Every
+  complete run fires at that same date.
+- `trained_read_exists` is the whole experiment in one execution. Two
+  ports start from gains that do not fire. Each is trained by its own
+  train of pulses until it stops by itself, then one pulse on each port
+  reads the cell. The read latency lies in the same window, whatever the
+  start gains and the FIRE level between 19/20 and 21/20. Every complete
+  run has the same FIRE dates and the same end state.
+
+This replaces the two hand-set hypotheses of the earlier coincidence
+result, an exact birth gain and a FIRE level within 3%, by a training
+rule that absorbs both.
+
+Limits of these statements:
+
+- **Simultaneous read pulses.** The two read pulses arrive at the same
+  instant. No bound is proved yet when they do not.
+- **One cell.** The network contract of `CoincidenceNetworkContract` is
+  not restated with these theorems.
+- **Doses of at most 1/20 for the window.** The training theorems hold
+  for any dose up to 3/5. The window constants are for doses up to 1/20.
+- **Recovery rate between 7/100 and 1/10**, sensors within `10⁻⁵` of
+  their rest charge, pulses at least 22 units apart.
+- **Circuit quantities.** Gain mismatch and FIRE level are covered. The
+  pulse amplitude, the unit response and the thresholds other than FIRE
+  and the two ERROR levels are those of the model.
 
 ## Verify
 
@@ -1223,7 +1259,7 @@ builds this package with the pinned dependencies. Its default targets compile
 `BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
 through `CoincidenceSeparation`, `StopLearningLatency`,
 `NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep`,
-`TrainingLoop` and `Driven`. The default targets also run
+`TrainingLoop`, `Driven` and `JointRead`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

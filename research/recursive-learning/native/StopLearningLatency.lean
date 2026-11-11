@@ -392,7 +392,7 @@ private theorem response_pair_high : (27935 / 100000 : ℝ) ≤ response (32 / 1
       Real.exp (-(1 / 2) * (32 / 125)) - Real.exp (-a * (32 / 125)) by linarith)
       (by norm_num) ratioNonneg)
 
-private theorem window_half :
+theorem window_half :
     response (239 / 1000) ≤ (1 / 2) * Real.exp (-(1 / 20 : ℝ)) * response 1 ∧
     (1 / 2) * response 1 ≤ response (32 / 125) := by
   have step : Real.exp (-(1 / 20 : ℝ)) ∈ Icc (95122 / 100000 : ℝ) 1 :=

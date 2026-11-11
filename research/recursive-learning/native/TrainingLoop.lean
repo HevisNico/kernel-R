@@ -340,7 +340,7 @@ from the exact rest charge, and each is at most one dose above a silent
 gain unless no dose was written on it. Every complete run agrees with
 the constructed one. -/
 theorem two_port_training_exists {θ ε p₁ p₂ u₁ l₁ u₂ l₂ level}
-    {dates₁ dates₂ : List ℝ} {s : Snapshot 1} {middle horizon : ℝ}
+    {dates₁ dates₂ : List ℝ} {s : Snapshot 1} {middle horizon : ℝ} {tail : List (Delivery 1)}
     (box : @PhysicalBox 1 θ ε) (distinct : p₁ ≠ p₂)
     (config₁ : PortConfig θ p₁ u₁ l₁ level) (config₂ : PortConfig θ p₂ u₂ l₂ level)
     (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
@@ -349,13 +349,14 @@ theorem two_port_training_exists {θ ε p₁ p₂ u₁ l₁ u₂ l₂ level}
     (state : RestState θ s) (recovery : 7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10)
     (queue : s.pending = (⟨0, p₁, s.time⟩ : Delivery 1) ::
       (dates₁.map (fun D => (⟨0, p₁, D⟩ : Delivery 1)) ++
-        (⟨0, p₂, middle⟩ : Delivery 1) :: dates₂.map (fun D => (⟨0, p₂, D⟩ : Delivery 1))))
+        (⟨0, p₂, middle⟩ : Delivery 1) ::
+          (dates₂.map (fun D => (⟨0, p₂, D⟩ : Delivery 1)) ++ tail)))
     (spaced₁ : Spaced s.time dates₁ middle) (spaced₂ : Spaced middle dates₂ horizon)
-    (r₁ r₂ : ℕ)
+    (tailDue : ∀ d ∈ tail, horizon ≤ d.due) (r₁ r₂ : ℕ)
     (reach₁ : level ≤ 1 / 10 + Real.exp (s.x 0 (.z p₁) + r₁ * (8 * (u₁ - l₁))) * response 1)
     (reach₂ : level ≤ 1 / 10 + Real.exp (s.x 0 (.z p₂) + r₂ * (8 * (u₂ - l₂))) * response 1)
     (enough₁ : 2 * r₁ + 2 ≤ dates₁.length + 1) (enough₂ : 2 * r₂ + 2 ≤ dates₂.length + 1) :
-    ∃ u f, Runs θ s u f ∧ RestState θ u ∧ u.time = horizon ∧ u.pending = [] ∧
+    ∃ u f, Runs θ s u f ∧ RestState θ u ∧ u.time = horizon ∧ u.pending = tail ∧
       u.x 0 .q = 1 / 10 ∧ u.x 0 .b = s.x 0 .b ∧
       (∀ q, q ≠ p₁ → q ≠ p₂ → u.x 0 (.z q) = s.x 0 (.z q)) ∧
       (∃ k : ℕ, k ≤ dates₁.length + 1 ∧ u.x 0 (.z p₁) = s.x 0 (.z p₁) + k * (8 * (u₁ - l₁))) ∧
@@ -366,9 +367,9 @@ theorem two_port_training_exists {θ ε p₁ p₂ u₁ l₁ u₂ l₂ level}
         ¬ PulseFires c (Real.exp (u.x 0 (.z p₁) - 8 * (u₁ - l₁))) level) ∧
       (u.x 0 (.z p₂) = s.x 0 (.z p₂) ∨ ∃ c, 1 / 10 ≤ c ∧ c ≤ 1 / 10 + 1 / 10000 ∧
         ¬ PulseFires c (Real.exp (u.x 0 (.z p₂) - 8 * (u₂ - l₂))) level) ∧
-      ∀ (v : Snapshot 1) (other : ParameterExecution θ (fun _ _ => []) s v),
+      (tail = [] → ∀ (v : Snapshot 1) (other : ParameterExecution θ (fun _ _ => []) s v),
         ParameterCompleteThrough other horizon →
-        u.ObservationalEq v ∧ other.emissions.length = f := by
+        u.ObservationalEq v ∧ other.emissions.length = f) := by
   obtain ⟨m, f₁, run₁, rested₁, date₁, pend₁, others₁, b₁, _, ⟨k₁, count₁, gain₁⟩, fires₁,
       last₁, _⟩ :=
     stop_training_exists box config₁ fire entry₁ exit₁ state recovery queue spaced₁
@@ -376,17 +377,21 @@ theorem two_port_training_exists {θ ε p₁ p₂ u₁ l₁ u₂ l₂ level}
         intro d hd
         rcases List.mem_cons.mp hd with rfl | hm
         · exact le_rfl
-        · obtain ⟨D', hD', rfl⟩ := List.mem_map.mp hm
-          have next := Spaced.later spaced₂ D' hD'
-          show middle ≤ D'
-          linarith)
+        · rcases List.mem_append.mp hm with hmap | htail
+          · obtain ⟨D', hD', rfl⟩ := List.mem_map.mp hmap
+            have next := Spaced.later spaced₂ D' hD'
+            show middle ≤ D'
+            linarith
+          · have last := Spaced.horizon_later spaced₂
+            have due := tailDue d htail
+            linarith)
       r₁ reach₁ enough₁
   have keep₂ : m.x 0 (.z p₂) = s.x 0 (.z p₂) := others₁ p₂ (Ne.symm distinct)
   obtain ⟨u, f₂, run₂, rested₂, date₂, pend₂, others₂, b₂, charge₂, ⟨k₂, count₂, gain₂⟩, fires₂,
       last₂, _⟩ :=
-    stop_training_exists (tail := []) box config₂ fire entry₂ exit₂ rested₁
-      (by rw [b₁]; exact recovery) (by rw [pend₁, date₁, List.append_nil]) (by rw [date₁]; exact spaced₂)
-      (by intro d hd; cases hd) r₂ (by rw [keep₂]; exact reach₂) enough₂
+    stop_training_exists (tail := tail) box config₂ fire entry₂ exit₂ rested₁
+      (by rw [b₁]; exact recovery) (by rw [pend₁, date₁]) (by rw [date₁]; exact spaced₂)
+      tailDue r₂ (by rw [keep₂]; exact reach₂) enough₂
   have keep₁ : u.x 0 (.z p₁) = m.x 0 (.z p₁) := others₂ p₁ distinct
   refine ⟨u, f₁ + f₂, run₁.append run₂, rested₂, date₂, pend₂, charge₂, b₂.trans b₁, ?_,
     ⟨k₁, by omega, by rw [keep₁, gain₁]⟩, ⟨k₂, by omega, by rw [gain₂, keep₂]⟩,
@@ -397,8 +402,8 @@ theorem two_port_training_exists {θ ε p₁ p₂ u₁ l₁ u₂ l₂ level}
     exact last₁
   · rw [← keep₂]
     exact last₂
-  · intro v other complete
-    exact rest_run_unique box config₂ fire state (run₁.append run₂) rested₂ pend₂ other
-      (date₂ ▸ complete)
+  · intro none v other complete
+    exact rest_run_unique box config₂ fire state (run₁.append run₂) rested₂ (pend₂.trans none)
+      other (date₂ ▸ complete)
 
 end RecursiveLearning.Native

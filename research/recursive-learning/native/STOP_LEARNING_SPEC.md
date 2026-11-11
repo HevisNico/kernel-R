@@ -99,14 +99,18 @@ the train has at least `2 r + 2` pulses, the final gain fires from the
 exact rest charge, and the gain one dose below it was silent unless no
 dose was written.
 
-**D. Joint read.** After C on two ports, one pulse on each port at the
-same time makes the cell fire at a latency in the window of
-`stopped_pair_read_latency`, widened for the residual rest charge.
+**D. Joint read. Proved** as `joint_read_exists`, `stopped_joint_read`
+and `trained_read_exists`, for two read pulses that arrive at the same
+instant. The phase before the FIRE is `driven_run_exists`, which takes
+the MARK and SILENT entries of the two sensors in their time order.
+After C on two ports with doses of at most 1/20, the cell fires between
+0.239 and 0.256 units after the read pulses.
 
 **E. Every complete run. Proved for the training** as `rest_run_unique`,
 and included in `stop_training_exists`: every run complete through the
 horizon ends in the same state as the constructed one, with the same
-number of FIRE events. The joint read D is not covered yet.
+number of FIRE events. `trained_read_exists` states it for training and
+read together, with the FIRE dates.
 
 ## What is already proved
 
