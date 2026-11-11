@@ -1530,8 +1530,8 @@ Limits:
 - **Lessons at the leaves** are treated in `SearchActions` below. The
   credit of the nominal decision tree of `CalibratedDecisionTree` is not
   rebuilt.
-- **The witness has two levels.** `trained_search` covers any depth. A
-  family of layouts of every depth is not built.
+- **The witness has two levels.** `trained_search` covers any depth.
+  `BisectionSearch` below builds a layout of every depth.
 
 ### The need of a probe, from fabrication tolerances
 
@@ -1608,6 +1608,54 @@ Limits:
   learner at its firing gain without a FIRE.
 - **Each lesson node has a gate** that is trained and not used.
 - **Four needs.** The witness has three questions and four lessons.
+  The search of every depth below has no lesson at its leaves.
+
+### A binary search of every depth
+
+[BisectionSearch.lean](BisectionSearch.lean) builds, for every `k ≥ 1`,
+a complete tree of `2 ^ k - 1` questions that separates the needs 1 to
+`2 ^ k`, with `2 (2 ^ k - 1)` cells.
+
+- `heapSearch`: the nodes are numbered as in a heap. The children of
+  node `i` are `2 i + 1` after a yes and `2 i + 2` after a no. Cell
+  `2 ν` is the probe of node `ν` and cell `2 ν + 1` is its gate.
+  `heapSearch_sound` reduces the soundness of the layout to its dates.
+- `exOf`, `loOf`, `midOf`: node `i` has the interval of needs
+  `(loOf k i, loOf k i + 2 ^ exOf k i]`. Its question counts `midOf k i`
+  pulses, the middle of the interval. A yes keeps the lower half and a
+  no keeps the upper half (`bisect_child`).
+- `bisectPlan`: the nodes of one depth share their dates. A depth lasts
+  `22 * 2 ^ k + 26` units, enough for the longest question.
+- `bisection_search`: every probe has the need `m`, between 1 and
+  `2 ^ k`, with its own parameters. In every complete run the probe of a
+  node fires in its report window exactly when `m` lies in the lower
+  half of its interval, and its gate fires late exactly when `m` lies in
+  the upper half. A probe outside the path `bisectPath k m` receives no
+  question: it never fires and its gain does not move.
+- `bisect_reached_iff`: the nodes whose interval holds `m` are the `k`
+  nodes of the path, one at each depth. The run therefore asks `k`
+  questions out of `2 ^ k - 1`.
+- `bisect_last`: the node asked at depth `k - 1` has an interval of two
+  needs. Its probe answers yes exactly for the first and its gate
+  answers no exactly for the second. The last answer gives `m`.
+- `bisection_search_witness`: explicit cells for every `k`, each probe
+  at its own start gain inside the band of need `m`.
+
+Limits:
+
+- **Duration.** The run lasts `k (22 * 2 ^ k + 26)` units. A question
+  with `c` pulses takes `22 c` units, and the counts go up to `2 ^ k`.
+  The search saves questions and pulses sent to probes, not time.
+- **Pulses on the path.** The `k` probes of the path receive their
+  questions. Their counts add up to at most `k 2 ^ k`, and their sum
+  is not computed.
+- **Size.** The tree has `2 ^ k - 1` probes and as many gates. Every
+  gate is trained, whatever the need.
+- **Tolerance at depth `k`.** With an inexact dose, the condition of
+  `needIs_of_tolerance` limits the needs that can be separated. The
+  witness has an exact dose.
+- **No lesson at the leaves.** The lessons of `SearchActions` are not
+  attached to this family.
 
 ## Common threshold offset and reaction delay
 
@@ -1679,8 +1727,8 @@ through `CoincidenceSeparation`, `StopLearningLatency`,
 `TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence`,
 `OffsetAndDelay`, `SelfCalibratedProbe`, `FamilyProduct`, `RoutedProduct`, `Cascade`,
 `FreeRead`, `AcyclicNetwork`, `WiredNetwork`, `SignalNetwork`,
-`SearchCells`, `TrainedSearch`, `NeedTolerance` and `SearchActions`.
-The default targets also run
+`SearchCells`, `TrainedSearch`, `NeedTolerance`, `SearchActions` and
+`BisectionSearch`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
