@@ -9,12 +9,70 @@ Kernel R is a mathematical model of an asynchronous analog learning cell.
 Its Lean 4 proofs start from the cell's differential equations and establish
 what networks of these cells learn. The work is at the model stage.
 
+## In plain words
+
+Analog chips can learn with very little energy, but two chips built from
+the same design never behave quite alike. Train them the same way and
+they end up with different memories.
+
+Kernel R is a design for a small learning unit, called a cell, that
+removes one cause of this. A cell learns by letting a small charge drain
+between two fixed levels. How much it learns depends only on those two
+levels. A slower cell takes longer and learns the same amount.
+
+This repository contains no chip. It contains the cell's equations and
+proofs, checked by a computer, of what cells and small networks do.
+
+**What the design gains**
+
+- **The amount learned ignores the discharge rate.** A ±10% spread in
+  that rate changes how long learning takes and leaves its result alone.
+- **No clock and no controller.** The sensor ends each update itself
+  when its charge reaches the lower level.
+- **One chip, one behaviour.** Simultaneous events can be processed in
+  any legal order without changing the outcome.
+- **It composes.** Chains of any length learn the same amounts on every
+  chip within the declared variation.
+- **It beats the standard write on a timing task.** Two cells detect that
+  two signals arrive together. A write that applies a fixed current for a
+  fixed time provably fails that task under the same variation.
+
+| Word | Meaning here |
+|---|---|
+| Pulse | A short input signal lasting one time unit |
+| Port | One of a cell's three inputs |
+| Gain | How strongly a port's pulses charge the cell. This is the memory |
+| Threshold | A charge level that triggers a change of phase |
+| ERROR phase | The part of a sensor's discharge that raises a gain |
+| Complete run | An execution with no pending event left at its end time |
+
+The sections below state each result with its exact conditions.
+
 ## The R cell
 
 While ready, an R cell charges in response to input pulses. When its
 charge crosses the firing threshold, it emits a pulse and enters a
 protected recovery phase. It learns each port's input gain while
 ready and its recovery rate while protected.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    READY --> FAST: charge crosses the FIRE threshold
+    FAST --> SLOW: one time unit later
+    SLOW --> READY: charge returns to rest
+    note right of READY
+      admits input pulses
+      ERROR phases raise input gains here
+    end note
+    note right of SLOW
+      protected, admission closed
+      MARK phases raise the recovery rate here
+    end note
+```
+
+Each input port has a sensor that sees every pulse and cycles through
+READY, MARK, SILENT and ERROR.
 
 Fabrication mismatch can make the same training pulse produce different
 updates in nominally identical devices. Kernel R couples a sensor's
@@ -37,6 +95,8 @@ See the [cell laws](model/CELL.md) and the [glossary](docs/GLOSSARY.md).
 ## What is proved
 
 ### 1. Chains of any finite length learn the same increments
+
+*Every cell in a chain ends up with the same amount learned, on every chip.*
 
 Under the [chain protocol](model/CHAIN_PROTOCOL.md), every complete run
 raises each cell's active input log-gain by 2.4 and its recovery rate by 0.3.
@@ -61,6 +121,8 @@ charges, log-gains and recovery rate.
 
 ### 2. Thresholds are parameters, and runs stay unique
 
+*Even with imperfect thresholds, a given chip has only one possible behaviour.*
+
 Charge thresholds are fields of each cell's parameters. For any finite
 network, under the declared physical and threshold bounds, compare two
 finite first-contact runs from the same initial snapshot with the same
@@ -73,6 +135,8 @@ same ordered firing dates in each cell.
 
 ### 3. One training pulse and one read tolerate threshold error
 
+*One pulse is enough to teach a cell, and the lesson survives threshold error.*
+
 A single cell trained by one pulse fires on a later read of the same port
 in every run complete through the certified read horizon. With the ERROR
 exit centered at 0.025, the theorem allows ±5% on both ERROR thresholds and
@@ -81,9 +145,17 @@ That gives a larger dose (0.72 at nominal thresholds) and a longer
 discharge. The same absolute threshold errors account for a smaller
 fraction of the larger dose.
 
-[`training_read_every_complete` and `training_read_exit_001_every_complete`](research/recursive-learning/native/ParameterTraining.lean)
+Two refinements separate what changes the dose from what does not. A
+shift common to both ERROR thresholds, up to 4% of the entry level,
+leaves the increment unchanged. A fixed reaction delay `d` after each
+threshold crossing moves the increment by at most `2.4 × d`.
+
+[`training_read_every_complete` and `training_read_exit_001_every_complete`](research/recursive-learning/native/ParameterTraining.lean) ·
+[`training_read_common_offset` and `training_read_reaction_delay`](research/recursive-learning/native/OffsetAndDelay.lean)
 
 ### 4. Two cells learn a coincidence task
+
+*Two cells detect that two signals arrive together. A fixed-current write cannot.*
 
 Two cells each learn one of two ports. At 100 µs per model unit, the
 receiver requires exactly one report from each cell by the deadline,
@@ -142,21 +214,46 @@ constant-current timer of result 4 is not redone with trained cells.
 
 ## What the benchmark showed
 
-The protocol was registered before the first sweep. At 100 µs per model
-unit in the wide fabrication box, the baseline R setting passed 16 of 36
-ERROR × FIRE boxes on the sampled points, the best tested constant-current
-timer passed 12, and the long timed discharge passed 27. The long
-discharge covered every tested box in which baseline R passed. The capped
-timer also passed all 36 boxes at the same scale in the narrow fabrication
-box.
+*Writing the memory from the sensor's own discharge beat the standard
+constant-current write. Ending that discharge at a threshold did it
+without a clock.*
 
-R ends its write at a state threshold without a clock. In this sweep,
-the long timed discharge achieved the higher timing score. The
-[exit-threshold sweep](research/recursive-learning/coincidence/EXIT_TRADEOFF_RESULTS.md)
-reports the timing and memory-capacity trade-off for lower exit thresholds.
+The protocol and its predictions were registered before the sweeps. Each
+score counts passing combinations of ERROR and FIRE threshold error, out
+of 36, at 100 µs per model unit in the wide (±10%) fabrication box. The
+constant-current row uses ±10% current error. These are numerical results
+on 625 sampled points.
+
+| Write rule | Needs a clock | Score |
+|---|---|---:|
+| Constant current, best tested setting | yes | 12 |
+| Timed discharge, same duration as R (0.15) | yes | 8 |
+| **Kernel R**, exit 0.025 | no | 16 |
+| **Kernel R**, exit 0.01 | no | 22 |
+| **Kernel R**, exit 0.0025 | no | 23 |
+| Timed discharge, 0.4 or longer | yes | 27 |
+
+- **Discharge against constant current.** Every Kernel R setting scores
+  above the best tested constant-current write. Result 4 turns one of
+  these cases into a theorem covering every constant-current setting.
+- **Threshold against timer, at equal duration.** Kernel R passes 16
+  cases where a timer of the same length passes 8. The timer cuts slow
+  devices short and the threshold waits for them.
+- **Threshold against a long timer.** A timer long enough for the slowest
+  device reaches 27. Kernel R reaches 22 to 23 with a lower exit and no
+  timer. The remaining gap comes from the error of the exit threshold,
+  which the timed write does not have.
+- **Cost of a lower exit.** The ERROR phase lengthens from 0.15 to between
+  0.25 and 0.40 model units, and the nominal number of levels below the
+  gain cap falls from three to two.
+
+A constant-current write that saturates at the gain cap passes all 36
+cases when caps are held within ±0.3%, and 12 in the wide box. It stores
+a single level.
 
 [protocol](research/recursive-learning/COINCIDENCE_BENCHMARK.md) ·
-[numerical results](research/recursive-learning/coincidence/RESULTS.md)
+[numerical results](research/recursive-learning/coincidence/RESULTS.md) ·
+[exit-threshold sweep](research/recursive-learning/coincidence/EXIT_TRADEOFF_RESULTS.md)
 
 ## Scope
 
@@ -166,10 +263,14 @@ reports the timing and memory-capacity trade-off for lower exit thresholds.
   in one or two cells. The [exact counting theorem](docs/EXACT_DOSE_COUNTING.md)
   uses nominal thresholds.
 - **Exact quantities.** Actuation factors are exact. Result 4 uses a
-  trained-port birth gain of exactly 1.2. Result 5 does not, but its
-  pulse amplitude, unit response, MARK and SILENT levels are those of the
-  model, its recovery rate lies between 0.07 and 0.10, and its pulses
-  are at least 22 units apart.
+  trained-port birth gain of exactly 1.2 and a FIRE threshold within
+  ±3%. These are modelling choices, and no circuit evidence supports them
+  as worst-case bounds. Result 5 removes both: its start gains are free
+  and its FIRE level lies anywhere between 0.95 and 1.05. Its pulse
+  amplitude, unit response, MARK and SILENT levels are still those of
+  the model, its recovery rate lies between 0.07 and 0.10, and its
+  pulses are at least 22 units apart. See the
+  [implementation assumptions](model/IMPLEMENTATION_ASSUMPTIONS.md).
 - **Receiver.** The coincidence receiver is a decision rule on the
   two cells' emitted dates.
 - **Complete runs.** Theorems compare runs complete through a horizon.
