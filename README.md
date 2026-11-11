@@ -108,6 +108,38 @@ quiet charge relaxation after training.
 [`coincidence_exit_001_separation`](research/recursive-learning/native/CoincidenceSeparation.lean) ·
 [module guide](research/recursive-learning/native/README.md#coincidence-timing-with-an-error-exit-near-001)
 
+### 5. Training that stops by itself replaces the hand-set gain
+
+Result 4 assumes a trained-port birth gain of exactly 1.2 and a FIRE
+level within ±3%. Here neither is set by hand. Each port receives a train
+of identical pulses. A pulse that leaves the cell silent writes one dose,
+and a pulse that makes it fire writes nothing, because the write phase
+then falls inside the refractory period. Training therefore stops by
+itself at a gain that depends on the cell's own FIRE level.
+
+- **One cell.** Two ports start from any gains that do not fire. After
+  training, one pulse on each port reads the cell, the second up to a
+  quarter of a unit after the first. The cell fires later than 0.239
+  units after the first read pulse and no later than 0.256 units after
+  the second, for every FIRE level between 0.95 and 1.05 and ±10%
+  fabrication. Every complete run has the same FIRE dates.
+- **Two cells.** Each cell has its own parameters, start gains and FIRE
+  level. In every complete run of the two-cell network, the two read
+  FIRE dates are closer than 0.15 units exactly when the two cells are
+  read at the same date, among offsets of −0.3, 0 and +0.3 units.
+- **A witness.** An explicit cell and schedule satisfy every hypothesis.
+
+The dose of each port is set by its two ERROR thresholds, with a dose of
+at most 1/20 for the stated window. The ERROR entry threshold is lowered
+to between 0.07 and 0.08, so that the write starts after the pulse has
+ended. The proofs handle the sensor contacts and the end of the
+refractory period in whatever order they occur. The comparison with a
+constant-current timer of result 4 is not redone with trained cells.
+
+[`trained_read_exists`](research/recursive-learning/native/JointRead.lean) ·
+[`trained_coincidence_network` and `trained_coincidence_witness`](research/recursive-learning/native/TrainedCoincidence.lean) ·
+[module guide](research/recursive-learning/native/README.md#a-silent-training-step-for-any-gain)
+
 ## What the benchmark showed
 
 The protocol was registered before the first sweep. At 100 µs per model
@@ -130,11 +162,14 @@ reports the timing and memory-capacity trade-off for lower exit thresholds.
 
 - **A mathematical model.** Hardware measurements would be needed for
   experimental validation.
-- **Small tasks.** The tolerant learning results cover one dose in one
-  or two cells. The [exact counting theorem](docs/EXACT_DOSE_COUNTING.md)
+- **Small tasks.** The tolerant learning results cover one or two ports
+  in one or two cells. The [exact counting theorem](docs/EXACT_DOSE_COUNTING.md)
   uses nominal thresholds.
-- **Exact quantities.** Actuation factors are exact. The coincidence
-  theorem uses a trained-port birth gain of exactly 1.2.
+- **Exact quantities.** Actuation factors are exact. Result 4 uses a
+  trained-port birth gain of exactly 1.2. Result 5 does not, but its
+  pulse amplitude, unit response, MARK and SILENT levels are those of the
+  model, its recovery rate lies between 0.07 and 0.10, and its pulses
+  are at least 22 units apart.
 - **Receiver.** The coincidence receiver is a decision rule on the
   two cells' emitted dates.
 - **Complete runs.** Theorems compare runs complete through a horizon.
