@@ -190,16 +190,23 @@ then falls inside the refractory period. Training therefore stops by
 itself at a gain that depends on the cell's own FIRE level.
 
 - **One cell.** Two ports start from any gains that do not fire. After
-  training, one pulse on each port reads the cell, the second up to a
-  quarter of a unit after the first. The cell fires later than 0.239
-  units after the first read pulse and no later than 0.256 units after
-  the second, for every FIRE level between 0.95 and 1.05 and ±10%
+  training, one pulse on each port reads the cell, in either order, at
+  most a quarter of a unit apart. The cell fires later than 0.239 units
+  after the first read pulse and no later than 0.256 units after the
+  second, for every FIRE level between 0.95 and 1.05 and ±10%
   fabrication. Every complete run has the same FIRE dates.
 - **Two cells.** Each cell has its own parameters, start gains and FIRE
   level. In every complete run of the two-cell network, the two read
   FIRE dates are closer than 0.15 units exactly when the two cells are
   read at the same date, among offsets of −0.3, 0 and +0.3 units.
-- **A witness.** An explicit cell and schedule satisfy every hypothesis.
+- **Networks.** Any number of trained cells can be joined by wires that
+  go forward. One composition theorem turns the description of each cell
+  alone into a complete run of the network, and proves that every
+  complete run has the same FIRE dates and the same final values. A
+  chain of `n` trained cells, each read by the FIRE of the one before
+  it, is proved for every `n`.
+- **A witness.** Explicit cells and schedules satisfy the hypotheses of
+  each theorem.
 
 The dose of each port is set by its two ERROR thresholds, with a dose of
 at most 1/20 for the stated window. The ERROR entry threshold is lowered
@@ -208,9 +215,52 @@ ended. The proofs handle the sensor contacts and the end of the
 refractory period in whatever order they occur. The comparison with a
 constant-current timer of result 4 is not redone with trained cells.
 
-[`trained_read_exists`](research/recursive-learning/native/JointRead.lean) ·
-[`trained_coincidence_network` and `trained_coincidence_witness`](research/recursive-learning/native/TrainedCoincidence.lean) ·
-[module guide](research/recursive-learning/native/README.md#a-silent-training-step-for-any-gain)
+[`OpenCell.read`](research/recursive-learning/native/FreeRead.lean) ·
+[`trained_coincidence_network`](research/recursive-learning/native/TrainedCoincidence.lean) ·
+[`acyclic_network_states`](research/recursive-learning/native/AcyclicNetwork.lean) ·
+[`trained_wired_network` and `trained_chain_witness`](research/recursive-learning/native/WiredNetwork.lean) ·
+[map of the results](research/recursive-learning/native/README.md#map-of-the-stop-learning-results)
+
+### 6. A binary search for a hidden need, with trained cells only
+
+A port needs `m` doses before a pulse makes its cell fire. That need is
+a property of the cell: its start gain, its dose and its FIRE level. A
+probe cell that receives `c` training pulses and then a read pulse fires
+on the read exactly when `m ≤ c`. This replaces the exact birth gain of
+the count probe in the
+[adaptive teaching loop](research/recursive-learning/native/README.md#a-threshold-probe-with-excess-pulses).
+
+- **Acting on silence.** A trained cell read by one pulse fires later
+  than 0.355 units after it. Read by two pulses it fires before 0.256
+  units. A gate cell read by a clock pulse, and by the report of a probe
+  when there is one, therefore fires late exactly when the probe was
+  silent.
+- **A tree of questions.** For every `k`, a tree of `2^k − 1` questions
+  separates the needs 1 to `2^k`. A run asks `k` of them, one at each
+  depth, and the probes off that path receive no pulse.
+- **Successive approximation.** The same search runs with `2k + 1`
+  cells: one probe and one gate for each depth, and a learner. Each gate
+  that answers no adds its binary weight to the later questions. The
+  gates give the binary digits of `m − 1`, the learner receives exactly
+  `m` training pulses, and the run ends at the date
+  `1003 + 33 · 2^k + 25k`.
+- **Tolerance.** A probe keeps the need `m` when the errors `a` on its
+  start log-gain, `b` on its dose and `ℓ` on its FIRE level satisfy
+  `a + m·b + (20/17)·ℓ + 1/8000 < d₀/2`, for a nominal dose `d₀`. The
+  dose error counts `m` times. For a dose of 1/20 known to 1%, needs up
+  to 49 are separated.
+
+A FIRE inside a report window releases pulses at preset dates, as in the
+scheduled circuits of the adaptive-teaching results. A FIRE date is read
+only through its window.
+
+[`self_calibrated_probe_exists`](research/recursive-learning/native/SelfCalibratedProbe.lean) ·
+[`signal_network_states`](research/recursive-learning/native/SignalNetwork.lean) ·
+[`trained_search`](research/recursive-learning/native/TrainedSearch.lean) ·
+[`bisection_search`](research/recursive-learning/native/BisectionSearch.lean) ·
+[`successive_search` and `successive_search_witness`](research/recursive-learning/native/SuccessiveSearch.lean) ·
+[`needIs_of_tolerance`](research/recursive-learning/native/NeedTolerance.lean) ·
+[map of the results](research/recursive-learning/native/README.md#map-of-the-stop-learning-results)
 
 ## What the benchmark showed
 
@@ -259,18 +309,25 @@ a single level.
 
 - **A mathematical model.** Hardware measurements would be needed for
   experimental validation.
-- **Small tasks.** The tolerant learning results cover one or two ports
-  in one or two cells. The [exact counting theorem](docs/EXACT_DOSE_COUNTING.md)
-  uses nominal thresholds.
+- **Small tasks.** The networks and searches of results 5 and 6 hold at
+  every size, on tasks that stay elementary: a coincidence decision and
+  the search for one integer. The
+  [exact counting theorem](docs/EXACT_DOSE_COUNTING.md) uses nominal
+  thresholds.
 - **Exact quantities.** Actuation factors are exact. Result 4 uses a
   trained-port birth gain of exactly 1.2 and a FIRE threshold within
   ±3%. These are modelling choices, and no circuit evidence supports them
-  as worst-case bounds. Result 5 removes both: its start gains are free
-  and its FIRE level lies anywhere between 0.95 and 1.05. Its pulse
-  amplitude, unit response, MARK and SILENT levels are still those of
-  the model, its recovery rate lies between 0.07 and 0.10, and its
-  pulses are at least 22 units apart. See the
+  as worst-case bounds. Results 5 and 6 remove both: their start gains
+  are free and their FIRE levels lie anywhere between 0.95 and 1.05.
+  Their pulse amplitude, unit response, MARK and SILENT levels are still
+  those of the model, their recovery rates lie between 0.07 and 0.10,
+  and their pulses are at least 22 units apart. See the
   [implementation assumptions](model/IMPLEMENTATION_ASSUMPTIONS.md).
+- **Clocked wires.** In result 6 a signal releases pulses at preset
+  dates. This hides a clocked register in the wire. A cell that would
+  resynchronize a pulse is not built.
+- **Dose precision.** Separating `2^k` needs asks for a dose error below
+  about `d₀ / 2^(k+1)`.
 - **Receiver.** The coincidence receiver is a decision rule on the
   two cells' emitted dates.
 - **Complete runs.** Theorems compare runs complete through a horizon.
