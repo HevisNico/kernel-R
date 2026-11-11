@@ -1297,6 +1297,33 @@ tree of `CalibratedDecisionTree.lean` is a routed network in the nominal
 semantics, and it still uses the earlier probe. Replacing its probe needs
 the training steps with a router and a routed composition in the
 parameterized semantics. Neither exists yet.
+### Networks of any number of trained cells
+
+[FamilyProduct.lean](FamilyProduct.lean) removes the limit of two cells.
+
+The earlier product, `ParameterExecution.independentPair`, weaves two
+one-cell executions. Here `Snapshot.family` is the state of a network of
+`n` cells, each with its own parameters, and `family_execution` weaves
+`n` one-cell executions with common start and end dates into one
+execution of that network. Each cell keeps its ordered FIRE dates. The
+proof takes the next jump of any cell when there is one, and otherwise
+cuts every flow at the earliest flow end. `family_jump` lifts each of the
+nine kinds of jump to the network.
+
+- `trained_network`: for any positive `n`, `n` trained cells with their
+  own parameters, start gains, FIRE levels, pulse trains and read dates.
+  In every complete run of the network, the last FIRE of each cell is
+  its read FIRE, later than 0.239 units after its first read pulse and
+  no later than 0.256 units after its second. For any two cells read
+  with an offset of −0.3, 0 or +0.3 units, the two dates are closer than
+  3/20 exactly when the offset is zero.
+- `trained_network_witness`: for any positive `n`, `n` copies of the
+  explicit cell satisfy the hypotheses. Every cell fires its read in its
+  window and any two cells are accepted together.
+
+The cells are independent: no cell sends a pulse to another. A network
+in which the FIRE of one trained cell drives another needs a routed
+composition in the parameterized semantics, which does not exist yet.
 
 ## Common threshold offset and reaction delay
 
@@ -1366,7 +1393,7 @@ builds this package with the pinned dependencies. Its default targets compile
 through `CoincidenceSeparation`, `StopLearningLatency`,
 `NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep`,
 `TrainingLoop`, `Driven`, `JointRead`, `TrainedCoincidence`,
-`OffsetAndDelay` and `SelfCalibratedProbe`. The default targets also run
+`OffsetAndDelay`, `SelfCalibratedProbe` and `FamilyProduct`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

@@ -15,6 +15,7 @@ import JointRead
 import TrainedCoincidence
 import OffsetAndDelay
 import SelfCalibratedProbe
+import FamilyProduct
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000
