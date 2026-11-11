@@ -1051,6 +1051,36 @@ Scope:
 The [specification](STOP_LEARNING_SPEC.md) states the regime and the
 theorems that remain for every start gain to be covered with small doses.
 
+### A silent training step for any gain
+
+[SilentStep.lean](SilentStep.lean) proves the first of those theorems,
+`silent_step_exists`, in the parameterized semantics. The ERROR entry
+threshold of the trained port lies between 7/100 and 2/25. SILENT then
+lasts longer than the pulse for every cell of either fabrication box
+(`low_entry_silent_duration`), so the write starts with no input current
+left.
+
+The start state is any `RestState`: main charge within `10⁻⁴` above 0.1,
+sensors in their rest band, gains under their caps, any admissible
+recovery rate and energy reserve. The hypotheses on the pulse are:
+
+- the main charge stays below the realized FIRE level, between 19/20 and
+  21/20, for the whole pulse;
+- the gain after one dose stays at most 7/2.
+
+No gain band is assumed. The conclusion is an execution that ends in a
+`RestState` at any chosen date at least 22 units after the pulse. The
+log-gain of the pulsed port has moved by exactly `8 × (entry − exit)`.
+The other gains and the recovery rate are unchanged.
+
+The main charge may exceed 1 during the pulse when the realized FIRE
+level is above 1. The flows are therefore built directly with realized
+guards (`silent_leg_of_margin`, `quietDynamics`) and do not go through
+the nominal kernel.
+
+The construction does not yet show that every complete run agrees with
+it. The firing step, the loop and the joint read remain.
+
 ## Verify
 
 Run from the repository root with Lean 4.35.0 available:
@@ -1071,8 +1101,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `ScheduledGates`, `ScheduledCircuit`, `ReportFormula`, `ScheduledCommit` and
 `ScheduledProgram`, `AdaptiveRounds`, `CalibratedDecisionTree` and
 `BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
-through `CoincidenceSeparation`, `StopLearningLatency` and
-`NativeStopLearning`. The default targets also run
+through `CoincidenceSeparation`, `StopLearningLatency`,
+`NativeStopLearning` and `SilentStep`. The default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports

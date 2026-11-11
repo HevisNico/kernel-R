@@ -24,8 +24,8 @@ Thresholds of the trained port, other guards nominal:
 
 | Threshold | Value | Consequence |
 |---|---|---|
-| ERROR entry `u` | 2/25 | SILENT lasts between 1.067 and 1.304 units in the ±10% box |
-| ERROR exit `l` | `u − d/8` | Full dose `d`. For `d = 1/20`, `l = 59/800` |
+| ERROR entry `u` | in `[7/100, 2/25]` | SILENT lasts between 1 and 1.55 units in the ±10% box |
+| ERROR exit `l` | `u − d/8`, at least 1/200 | Full dose `d`. For `u = 2/25` and `d = 1/20`, `l = 59/800` |
 | FIRE `F` | in `[19/20, 21/20]` | FAST lasts between 0.963 and 1.035 units |
 
 Timeline of one pulse arriving at time 0 on port `p`:
@@ -35,8 +35,8 @@ Timeline of one pulse arriving at time 0 on port `p`:
 | Sensor MARK contact | before 0.05 |
 | Sensor SILENT entry | before 0.075 |
 | Pulse expiry | 1 |
-| Sensor ERROR entry | between 1.08 and 1.38 |
-| Sensor ERROR exit | at most 0.01 later |
+| Sensor ERROR entry | after 1, before 1.6 |
+| Sensor ERROR exit | at most 0.375 later |
 | FIRE, if any | in `(0.05, 1]` |
 | FAST end, if fired | FIRE + 0.963 to FIRE + 1.035 |
 | Return to READY, if fired | about 11.5 units after FAST end, at recovery rate 2/25 |
@@ -45,34 +45,40 @@ The write happens in the ERROR phase. If the cell has fired it is in
 FAST or SLOW during that phase, so nothing is written. The MARK phase
 ends before any FIRE, so the recovery rate never changes.
 
-Pulses are at least 24 units apart. After a silent pulse the sensor
-relaxes from `l` to its rest charge within `10⁻⁶`, and the main charge
-to within `2 × 10⁻⁵` of 0.1.
+Pulses are at least 22 units apart after a silent pulse. The sensor then
+relaxes from `l` to its rest band, and the main charge to within `10⁻⁴`
+of 0.1.
 
 ## Invariant between pulses
 
 ```lean
 structure RestState (θ : Fin 1 → Parameters) (s : Snapshot 1) : Prop where
   main : s.main 0 = .ready
-  charge : s.x 0 .q ∈ Icc (1 / 10) (1 / 10 + 1 / 10000)
-  sensors : ∀ q, s.aux 0 q = .ready ∧ RestBand (s.x 0 (.m q))
+  aux : ∀ q, s.aux 0 q = .ready
   raw : ∀ q, s.raw 0 q = none
-  recovery : s.x 0 .b = 2 / 25
-  reserve : 50 ≤ s.x 0 .energy ∧ s.x 0 .energy ≤ 100
+  charge : 1 / 10 ≤ s.x 0 .q ∧ s.x 0 .q ≤ 1 / 10 + 1 / 10000
+  sensors : ∀ q, RestBand (s.x 0 (.m q))
+  recovery : 0 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 11 / 10
+  energy : 50 ≤ s.x 0 .energy ∧ s.x 0 .energy ≤ 100
   caps : ∀ q, s.x 0 (.z q) ≤ Real.log ((θ 0).cap q)
 ```
+
+This is the definition in [SilentStep.lean](SilentStep.lean). The firing
+step may need a narrower condition on the recovery rate.
 
 ## Theorems to prove
 
 All in `ParameterExecution θ (fun _ _ => [])`, for either fabrication
 box, with `(θ 0).thresholds = trainingThresholds p u l F`.
 
-**A. Silent step.** From a `RestState`, with one pulse due at `D` on port
-`p` and later deliveries at least 24 units after it: if the pulse leaves
-the main charge below `F` throughout the pulse, and the dose fits under
-the gain cap, there is an execution complete through `D + 23` that ends
-in a `RestState`, has no FIRE, adds exactly `8 * (u − l)` to the log-gain
-of port `p`, and changes no other gain.
+**A. Silent step. Proved** as `silent_step_exists`. From a `RestState`
+with one pulse due now on port `p` and later deliveries at or after a
+chosen date `rest`, at least 22 units later: if the pulse leaves the main
+charge below `F` throughout the pulse, and the gain after one dose is at
+most 7/2, there is an execution that ends in a `RestState` at `rest`,
+adds exactly `8 * (u − l)` to the log-gain of port `p`, and changes no
+other gain and no recovery rate. Uniqueness of complete runs is left to
+E.
 
 **B. Firing step.** Same setting: if the main charge reaches `F` during
 the pulse, there is an execution complete through `D + 23` that ends in
@@ -102,6 +108,8 @@ has the same endpoint and the same FIRE dates as the constructed one.
 - Steps A and B at nominal thresholds and nominal dose, for gains at
   most 7/6 and gains in `[9/5, 11/5]`:
   [NativeStopLearning.lean](NativeStopLearning.lean).
+- Step A in the regime above, for any gain:
+  [SilentStep.lean](SilentStep.lean).
 
 ## Reusable constructions
 
@@ -116,7 +124,7 @@ has the same endpoint and the same FIRE dates as the constructed one.
 
 ## Open choices
 
-- The recovery from SLOW takes about 11.5 units. The 24-unit spacing is
-  kept from the existing modules and could be shortened.
+- The recovery from SLOW takes about 11.5 units. The spacing after a
+  firing pulse is not fixed yet.
 - A dose of 1/20 needs about 14 silent pulses from a gain of 1.2. The
   theorems should hold for any dose `d` in a stated range.
