@@ -70,7 +70,7 @@ theorem silent_room {charge z level upper lower : ℝ} (hc : 1 / 10 ≤ charge)
 /-- One training pulse on a rested cell, whatever its gain. -/
 theorem training_step_exists {θ ε s p upper lower level rest} {later : List (Delivery 1)}
     (box : @PhysicalBox 1 θ ε)
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (config : PortConfig θ p upper lower level)
     (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (entry : 7 / 100 ≤ upper ∧ upper ≤ 2 / 25) (exit : 1 / 200 ≤ lower ∧ lower < upper)
     (state : RestState θ s) (recovery : 7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10)
@@ -184,30 +184,38 @@ theorem Spaced.later {horizon : ℝ} : ∀ {dates : List ℝ} {start : ℝ},
     · have next := Spaced.later h.2 D hmem
       linarith [h.1]
 
+theorem Spaced.horizon_later {horizon : ℝ} : ∀ {dates : List ℝ} {start : ℝ},
+    Spaced start dates horizon → start + 22 ≤ horizon
+  | [], _, h => h
+  | _ :: _, _, h => by
+    have next := Spaced.horizon_later h.2
+    linarith [h.1]
+
 /-- A train of training pulses on one port, as an execution. Every pulse
 is accounted for: it is silent and writes one dose, or it fires and
 writes nothing. -/
 theorem training_loop_exists {θ ε p upper lower level}
     (box : @PhysicalBox 1 θ ε)
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (config : PortConfig θ p upper lower level)
     (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (entry : 7 / 100 ≤ upper ∧ upper ≤ 2 / 25) (exit : 1 / 200 ≤ lower ∧ lower < upper) :
-    ∀ (dates : List ℝ) (s : Snapshot 1) (horizon : ℝ), RestState θ s →
-      7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10 →
-      s.pending = (⟨0, p, s.time⟩ : Delivery 1) :: dates.map (fun D => (⟨0, p, D⟩ : Delivery 1)) →
-      Spaced s.time dates horizon →
+    ∀ (dates : List ℝ) (s : Snapshot 1) (horizon : ℝ) (tail : List (Delivery 1)),
+      RestState θ s → 7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10 →
+      s.pending = (⟨0, p, s.time⟩ : Delivery 1) ::
+        (dates.map (fun D => (⟨0, p, D⟩ : Delivery 1)) ++ tail) →
+      Spaced s.time dates horizon → (∀ d ∈ tail, horizon ≤ d.due) →
       ∃ u f, Runs θ s u f ∧ RestState θ u ∧
-        u.time = horizon ∧ u.pending = [] ∧ (∀ q ≠ p, u.x 0 (.z q) = s.x 0 (.z q)) ∧
+        u.time = horizon ∧ u.pending = tail ∧ (∀ q ≠ p, u.x 0 (.z q) = s.x 0 (.z q)) ∧
         u.x 0 .b = s.x 0 .b ∧
         Trained level (8 * (upper - lower)) (dates.length + 1) f (s.x 0 .q) (s.x 0 (.z p))
           (u.x 0 .q) (u.x 0 (.z p)) := by
   intro dates
   induction dates with
   | nil =>
-    intro s horizon state recovery queue spaced
+    intro s horizon tail state recovery queue spaced tailDue
     obtain ⟨u, rested, date, pend, others, b, outcome⟩ :=
-      training_step_exists (later := []) box config fire entry exit state recovery queue spaced
-        (by intro d hd; cases hd)
+      training_step_exists (later := tail) box config fire entry exit state recovery queue spaced
+        tailDue
     rcases outcome with ⟨quiet, run, learned⟩ | ⟨fired, run, same, charge⟩
     · refine ⟨u, 0, run, rested, date, pend, others, b, ?_⟩
       rw [learned]
@@ -216,22 +224,27 @@ theorem training_loop_exists {θ ε p upper lower level}
       rw [same, charge]
       exact .fire fired (.done _ _)
   | cons D ds ih =>
-    intro s horizon state recovery queue spaced
+    intro s horizon tail state recovery queue spaced tailDue
     obtain ⟨u, rested, date, pend, others, b, outcome⟩ :=
       training_step_exists (rest := D)
-        (later := (⟨0, p, D⟩ : Delivery 1) :: ds.map (fun D => (⟨0, p, D⟩ : Delivery 1)))
+        (later := (⟨0, p, D⟩ : Delivery 1) ::
+          (ds.map (fun D => (⟨0, p, D⟩ : Delivery 1)) ++ tail))
         box config fire entry exit state recovery queue spaced.1
         (by
           intro d hd
           rcases List.mem_cons.mp hd with rfl | hm
           · exact le_rfl
-          · obtain ⟨D', hD', rfl⟩ := List.mem_map.mp hm
-            have next := Spaced.later spaced.2 D' hD'
-            show D ≤ D'
-            linarith)
+          · rcases List.mem_append.mp hm with hmap | htail
+            · obtain ⟨D', hD', rfl⟩ := List.mem_map.mp hmap
+              have next := Spaced.later spaced.2 D' hD'
+              show D ≤ D'
+              linarith
+            · have last := Spaced.horizon_later spaced.2
+              have due := tailDue d htail
+              linarith)
     obtain ⟨v, f, next, rested', date', pend', others', b', trained⟩ :=
-      ih u horizon rested (by rw [b]; exact recovery) (by rw [pend, date])
-        (by rw [date]; exact spaced.2)
+      ih u horizon tail rested (by rw [b]; exact recovery) (by rw [pend, date])
+        (by rw [date]; exact spaced.2) tailDue
     rcases outcome with ⟨quiet, run, learned⟩ | ⟨fired, run, same, charge⟩
     · refine ⟨v, 0 + f, run.append next, rested', date', pend',
         fun q hq => (others' q hq).trans (others q hq), b'.trans b, ?_⟩
@@ -245,12 +258,12 @@ theorem training_loop_exists {θ ε p upper lower level}
 
 /-- A rested cell with an empty queue has no move left at its date. -/
 theorem RestState.complete {θ : Fin 1 → Parameters} {p upper lower level} {s u : Snapshot 1}
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (config : PortConfig θ p upper lower level)
     (fire : 19 / 20 ≤ level) (e : ParameterExecution θ (fun _ _ => []) s u)
     (rested : RestState θ u) (empty : u.pending = []) : ParameterCompleteThrough e u.time := by
   refine ⟨rfl, ?_, by simp [empty]⟩
   apply u.no_parameter_jump
-  · apply guards_ready config rested.main (by linarith [rested.charge.2])
+  · apply port_guards config rested.main (by linarith [rested.charge.2])
     intro q
     simp only [rested.aux q]
     exact lt_of_le_of_lt (rested.sensors q).2 (by norm_num)
@@ -264,15 +277,15 @@ that ends at rest with an empty queue: same final state and same number
 of FIRE events. -/
 theorem rest_run_unique {θ ε p upper lower level} {s u v : Snapshot 1} {n : ℕ}
     (box : @PhysicalBox 1 θ ε)
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
-    (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20) (entry : 0 ≤ upper) (exit : 0 ≤ lower)
+    (config : PortConfig θ p upper lower level)
+    (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (start : RestState θ s) (run : Runs θ s u n) (rested : RestState θ u)
     (empty : u.pending = []) (other : ParameterExecution θ (fun _ _ => []) s v)
     (complete : ParameterCompleteThrough other u.time) :
     u.ObservationalEq v ∧ other.emissions.length = n := by
   obtain ⟨e, count⟩ := run
   have h := ParameterExecution.observational_unique box
-    (low_threshold_bounds config fire entry exit) e other start.physical
+    (low_threshold_bounds config fire) e other start.physical
     (rested.complete config fire.1 e empty) complete
   exact ⟨h.1, by rw [← h.2.length_eq, count]⟩
 
@@ -284,29 +297,30 @@ no dose was written, the gain one dose below it was silent. The run has
 Every run complete through the horizon ends in the same state with the
 same number of FIRE events. -/
 theorem stop_training_exists {θ ε p upper lower level} {dates : List ℝ} {s : Snapshot 1}
-    {horizon : ℝ} (box : @PhysicalBox 1 θ ε)
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    {horizon : ℝ} {tail : List (Delivery 1)} (box : @PhysicalBox 1 θ ε)
+    (config : PortConfig θ p upper lower level)
     (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (entry : 7 / 100 ≤ upper ∧ upper ≤ 2 / 25) (exit : 1 / 200 ≤ lower ∧ lower < upper)
     (state : RestState θ s) (recovery : 7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10)
-    (queue : s.pending =
-      (⟨0, p, s.time⟩ : Delivery 1) :: dates.map (fun D => (⟨0, p, D⟩ : Delivery 1)))
-    (spaced : Spaced s.time dates horizon) (r : ℕ)
+    (queue : s.pending = (⟨0, p, s.time⟩ : Delivery 1) ::
+      (dates.map (fun D => (⟨0, p, D⟩ : Delivery 1)) ++ tail))
+    (spaced : Spaced s.time dates horizon) (tailDue : ∀ d ∈ tail, horizon ≤ d.due) (r : ℕ)
     (reach : level ≤ 1 / 10 + Real.exp (s.x 0 (.z p) + r * (8 * (upper - lower))) * response 1)
     (enough : 2 * r + 2 ≤ dates.length + 1) :
     ∃ u f, Runs θ s u f ∧ RestState θ u ∧
-      u.time = horizon ∧ u.pending = [] ∧ (∀ q ≠ p, u.x 0 (.z q) = s.x 0 (.z q)) ∧
+      u.time = horizon ∧ u.pending = tail ∧ (∀ q ≠ p, u.x 0 (.z q) = s.x 0 (.z q)) ∧
       u.x 0 .b = s.x 0 .b ∧ u.x 0 .q = 1 / 10 ∧
       (∃ k : ℕ, k + f = dates.length + 1 ∧
         u.x 0 (.z p) = s.x 0 (.z p) + k * (8 * (upper - lower))) ∧
       PulseFires (1 / 10) (Real.exp (u.x 0 (.z p))) level ∧
       (u.x 0 (.z p) = s.x 0 (.z p) ∨ ∃ c, 1 / 10 ≤ c ∧ c ≤ 1 / 10 + 1 / 10000 ∧
         ¬ PulseFires c (Real.exp (u.x 0 (.z p) - 8 * (upper - lower))) level) ∧
-      ∀ (v : Snapshot 1) (other : ParameterExecution θ (fun _ _ => []) s v),
+      (tail = [] → ∀ (v : Snapshot 1) (other : ParameterExecution θ (fun _ _ => []) s v),
         ParameterCompleteThrough other horizon →
-        u.ObservationalEq v ∧ other.emissions.length = f := by
+        u.ObservationalEq v ∧ other.emissions.length = f) := by
   obtain ⟨u, f, run, rested, date, pend, others, b, trained⟩ :=
-    training_loop_exists box config fire entry exit dates s horizon state recovery queue spaced
+    training_loop_exists box config fire entry exit dates s horizon tail state recovery queue
+      spaced tailDue
   have limit : ∀ c w, 1 / 10 ≤ c → s.x 0 (.z p) + r * (8 * (upper - lower)) ≤ w →
       PulseFires c (Real.exp w) level := by
     intro c w hc hw
@@ -316,8 +330,75 @@ theorem stop_training_exists {θ ε p upper lower level} {dates : List ℝ} {s :
   obtain ⟨charge, fires⟩ := trained.stops limit r le_rfl state.charge.1 (Or.inr enough)
   refine ⟨u, f, run, rested, date, pend, others, b, charge, trained.gain, fires,
     trained.last_silent state.charge, ?_⟩
-  intro v other complete
-  exact rest_run_unique box config fire (by linarith [entry.1]) (by linarith [exit.1]) state run
-    rested pend other (date ▸ complete)
+  intro none v other complete
+  exact rest_run_unique box config fire state run rested (pend.trans none) other
+    (date ▸ complete)
+
+/-- Two ports of one cell, trained one after the other. Each port has its
+own realized ERROR thresholds, so its own dose. Both final gains fire
+from the exact rest charge, and each is at most one dose above a silent
+gain unless no dose was written on it. Every complete run agrees with
+the constructed one. -/
+theorem two_port_training_exists {θ ε p₁ p₂ u₁ l₁ u₂ l₂ level}
+    {dates₁ dates₂ : List ℝ} {s : Snapshot 1} {middle horizon : ℝ}
+    (box : @PhysicalBox 1 θ ε) (distinct : p₁ ≠ p₂)
+    (config₁ : PortConfig θ p₁ u₁ l₁ level) (config₂ : PortConfig θ p₂ u₂ l₂ level)
+    (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
+    (entry₁ : 7 / 100 ≤ u₁ ∧ u₁ ≤ 2 / 25) (exit₁ : 1 / 200 ≤ l₁ ∧ l₁ < u₁)
+    (entry₂ : 7 / 100 ≤ u₂ ∧ u₂ ≤ 2 / 25) (exit₂ : 1 / 200 ≤ l₂ ∧ l₂ < u₂)
+    (state : RestState θ s) (recovery : 7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10)
+    (queue : s.pending = (⟨0, p₁, s.time⟩ : Delivery 1) ::
+      (dates₁.map (fun D => (⟨0, p₁, D⟩ : Delivery 1)) ++
+        (⟨0, p₂, middle⟩ : Delivery 1) :: dates₂.map (fun D => (⟨0, p₂, D⟩ : Delivery 1))))
+    (spaced₁ : Spaced s.time dates₁ middle) (spaced₂ : Spaced middle dates₂ horizon)
+    (r₁ r₂ : ℕ)
+    (reach₁ : level ≤ 1 / 10 + Real.exp (s.x 0 (.z p₁) + r₁ * (8 * (u₁ - l₁))) * response 1)
+    (reach₂ : level ≤ 1 / 10 + Real.exp (s.x 0 (.z p₂) + r₂ * (8 * (u₂ - l₂))) * response 1)
+    (enough₁ : 2 * r₁ + 2 ≤ dates₁.length + 1) (enough₂ : 2 * r₂ + 2 ≤ dates₂.length + 1) :
+    ∃ u f, Runs θ s u f ∧ RestState θ u ∧ u.time = horizon ∧ u.pending = [] ∧
+      u.x 0 .q = 1 / 10 ∧ u.x 0 .b = s.x 0 .b ∧
+      (∀ q, q ≠ p₁ → q ≠ p₂ → u.x 0 (.z q) = s.x 0 (.z q)) ∧
+      (∃ k : ℕ, k ≤ dates₁.length + 1 ∧ u.x 0 (.z p₁) = s.x 0 (.z p₁) + k * (8 * (u₁ - l₁))) ∧
+      (∃ k : ℕ, k ≤ dates₂.length + 1 ∧ u.x 0 (.z p₂) = s.x 0 (.z p₂) + k * (8 * (u₂ - l₂))) ∧
+      PulseFires (1 / 10) (Real.exp (u.x 0 (.z p₁))) level ∧
+      PulseFires (1 / 10) (Real.exp (u.x 0 (.z p₂))) level ∧
+      (u.x 0 (.z p₁) = s.x 0 (.z p₁) ∨ ∃ c, 1 / 10 ≤ c ∧ c ≤ 1 / 10 + 1 / 10000 ∧
+        ¬ PulseFires c (Real.exp (u.x 0 (.z p₁) - 8 * (u₁ - l₁))) level) ∧
+      (u.x 0 (.z p₂) = s.x 0 (.z p₂) ∨ ∃ c, 1 / 10 ≤ c ∧ c ≤ 1 / 10 + 1 / 10000 ∧
+        ¬ PulseFires c (Real.exp (u.x 0 (.z p₂) - 8 * (u₂ - l₂))) level) ∧
+      ∀ (v : Snapshot 1) (other : ParameterExecution θ (fun _ _ => []) s v),
+        ParameterCompleteThrough other horizon →
+        u.ObservationalEq v ∧ other.emissions.length = f := by
+  obtain ⟨m, f₁, run₁, rested₁, date₁, pend₁, others₁, b₁, _, ⟨k₁, count₁, gain₁⟩, fires₁,
+      last₁, _⟩ :=
+    stop_training_exists box config₁ fire entry₁ exit₁ state recovery queue spaced₁
+      (by
+        intro d hd
+        rcases List.mem_cons.mp hd with rfl | hm
+        · exact le_rfl
+        · obtain ⟨D', hD', rfl⟩ := List.mem_map.mp hm
+          have next := Spaced.later spaced₂ D' hD'
+          show middle ≤ D'
+          linarith)
+      r₁ reach₁ enough₁
+  have keep₂ : m.x 0 (.z p₂) = s.x 0 (.z p₂) := others₁ p₂ (Ne.symm distinct)
+  obtain ⟨u, f₂, run₂, rested₂, date₂, pend₂, others₂, b₂, charge₂, ⟨k₂, count₂, gain₂⟩, fires₂,
+      last₂, _⟩ :=
+    stop_training_exists (tail := []) box config₂ fire entry₂ exit₂ rested₁
+      (by rw [b₁]; exact recovery) (by rw [pend₁, date₁, List.append_nil]) (by rw [date₁]; exact spaced₂)
+      (by intro d hd; cases hd) r₂ (by rw [keep₂]; exact reach₂) enough₂
+  have keep₁ : u.x 0 (.z p₁) = m.x 0 (.z p₁) := others₂ p₁ distinct
+  refine ⟨u, f₁ + f₂, run₁.append run₂, rested₂, date₂, pend₂, charge₂, b₂.trans b₁, ?_,
+    ⟨k₁, by omega, by rw [keep₁, gain₁]⟩, ⟨k₂, by omega, by rw [gain₂, keep₂]⟩,
+    by rw [keep₁]; exact fires₁, fires₂, ?_, ?_, ?_⟩
+  · intro q h₁ h₂
+    exact (others₂ q h₂).trans (others₁ q h₁)
+  · rw [keep₁]
+    exact last₁
+  · rw [← keep₂]
+    exact last₂
+  · intro v other complete
+    exact rest_run_unique box config₂ fire state (run₁.append run₂) rested₂ pend₂ other
+      (date₂ ▸ complete)
 
 end RecursiveLearning.Native

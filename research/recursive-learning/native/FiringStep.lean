@@ -50,44 +50,33 @@ theorem ParameterExecution.physical_invariant {n θ ε route} {s u : Snapshot n}
     | jump j => exact ih (j.physical_invariant hs)
 
 theorem low_threshold_bounds {θ : Fin 1 → Parameters} {p upper lower level}
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
-    (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20) (entry : 0 ≤ upper) (exit : 0 ≤ lower) :
-    ParameterThresholdBounds θ := by
+    (config : PortConfig θ p upper lower level)
+    (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20) : ParameterThresholdBounds θ := by
   constructor
   · intro i
-    rw [Subsingleton.elim i 0, config]
-    change level ≤ 11 / 10
+    rw [Subsingleton.elim i 0, config.fire]
     linarith [fire.2]
   · intro i
-    rw [Subsingleton.elim i 0, config]
-    norm_num [trainingThresholds]
+    rw [Subsingleton.elim i 0, config.fastEnd]
+    norm_num
   · intro i
-    rw [Subsingleton.elim i 0, config]
-    change (1 / 4 : ℝ) < level
+    rw [Subsingleton.elim i 0, config.fastEnd, config.fire]
     linarith [fire.1]
   · intro i
-    rw [Subsingleton.elim i 0, config]
-    norm_num [trainingThresholds]
+    rw [Subsingleton.elim i 0, config.reopen]
+    norm_num
   · intro i q
-    rw [Subsingleton.elim i 0, config]
-    norm_num [trainingThresholds]
+    rw [Subsingleton.elim i 0, config.mark]
+    norm_num
   · intro i q
-    rw [Subsingleton.elim i 0, config]
-    norm_num [trainingThresholds]
+    rw [Subsingleton.elim i 0, config.silent]
+    norm_num
   · intro i q
-    rw [Subsingleton.elim i 0, config]
-    by_cases h : q = p
-    · subst q
-      simp only [trainingThresholds, Function.update_self]
-      exact entry
-    · norm_num [trainingThresholds, Function.update_of_ne h]
+    rw [Subsingleton.elim i 0]
+    linarith [(config.ordered q).1, (config.ordered q).2.1]
   · intro i q
-    rw [Subsingleton.elim i 0, config]
-    by_cases h : q = p
-    · subst q
-      simp only [trainingThresholds, Function.update_self]
-      exact exit
-    · norm_num [trainingThresholds, Function.update_of_ne h]
+    rw [Subsingleton.elim i 0]
+    exact (config.ordered q).1.le
 
 theorem RestState.physical {θ : Fin 1 → Parameters} {s : Snapshot 1} (h : RestState θ s) :
     ParameterPhysicalInvariant θ s := by
@@ -182,7 +171,7 @@ returns to rest with every gain and the recovery rate unchanged. Its main
 charge is then exactly at its rest value. -/
 theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Delivery 1)}
     (box : @PhysicalBox 1 θ ε)
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (config : PortConfig θ p upper lower level)
     (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (entry : 7 / 100 ≤ upper ∧ upper ≤ 2 / 25) (exit : 1 / 200 ≤ lower ∧ lower < upper)
     (state : RestState θ s) (recovery : 7 / 100 ≤ s.x 0 .b ∧ s.x 0 .b ≤ 1 / 10)
@@ -346,18 +335,11 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
   let fired : Snapshot 1 := { (setMain edge 0 .fast) with
     pending := edge.pending ++ (fun (_ : Fin 1) (_ : ℝ) => ([] : List (Delivery 1))) 0 edge.time }
   let fireJump : ParameterJump θ (fun _ _ => []) edge fired :=
-    .fire edge 0 (g.main_ready 0) (by rw [config]; exact edgeCharge)
-  have thrFast : (θ 0).thresholds.fastEnd = 1 / 4 := by rw [config]; rfl
-  have thrReopen : (θ 0).thresholds.reopen = 1 / 10 := by rw [config]; rfl
-  have thrMark (q : Port) : (θ 0).thresholds.mark q = 1 := by rw [config]; rfl
-  have thrErrorP : (θ 0).thresholds.error p = upper := by
-    rw [config]; simp [trainingThresholds]
-  have thrErrorO (q : Port) (h : q ≠ p) : (θ 0).thresholds.error q = 1 / 10 := by
-    rw [config]; simp [trainingThresholds, Function.update_of_ne h]
-  have thrReadyP : (θ 0).thresholds.auxReady p = lower := by
-    rw [config]; simp [trainingThresholds]
-  have thrReadyO (q : Port) (h : q ≠ p) : (θ 0).thresholds.auxReady q = 1 / 40 := by
-    rw [config]; simp [trainingThresholds, Function.update_of_ne h]
+    .fire edge 0 (g.main_ready 0) (by rw [config.fire]; exact edgeCharge)
+  have thrFast := config.fastEnd
+  have thrReopen := config.reopen
+  have thrErrorP := config.error
+  have thrReadyP := config.auxReady
   have firedMain : fired.main 0 = .fast := by simp [fired, setMain]
   have firedAuxP : fired.aux 0 p = .silent := g.aux_silent
   have firedAuxO (q : Port) (h : q ≠ p) : fired.aux 0 q = .ready := g.aux_other 0 q (Or.inr h)
@@ -383,13 +365,8 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
         · subst q; rw [firedAuxP] at hr; cases hr
         · exact firedRawO q h⟩
     main_levels := by rw [thrReopen, thrFast]; norm_num
-    levels := fun q => by
-      by_cases h : q = p
-      · subst q
-        rw [thrReadyP, thrErrorP, thrMark]
-        exact ⟨by linarith [exit.1], exit.2.le, by linarith [entry.2], le_rfl⟩
-      · rw [thrReadyO q h, thrErrorO q h, thrMark]
-        norm_num
+    levels := fun q => ⟨(config.ordered q).1, (config.ordered q).2.1, (config.ordered q).2.2,
+      (config.mark q).ge⟩
     recovery := by rw [firedB]; linarith [recovery.1]
     fast := fun _ => by rw [thrFast, firedCharge]; linarith [fire.1]
     slow := fun h => by rw [firedMain] at h; cases h
@@ -481,7 +458,7 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
     guards := by
       intro t ht
       have ht₁ : u₁.time ≤ t := ht.1
-      apply guards_ready config fin.main
+      apply port_guards config fin.main
       · change relax (1 / 2) (1 / 10) (u₁.x 0 .q) u₁.time t < level
         rw [charge₁]
         have flat : relax (1 / 2) (1 / 10) (1 / 10) u₁.time t = 1 / 10 := by simp [relax]
@@ -514,10 +491,10 @@ theorem firing_step_exists {θ ε s p upper lower level rest} {later : List (Del
       refine ⟨?_, ?_⟩ <;> dsimp only [relax] <;> linarith
     · rw [restSensor_ready (firedAuxO q h), relax_relax]
       exact relax_restBand (show tf ≤ rest by linarith) (edgeOther q h)
-  have bounds := low_threshold_bounds config fire (by linarith [entry.1]) (by linarith [exit.1])
+  have bounds := low_threshold_bounds config fire
   have counted : Runs θ s u 1 :=
     (Runs.jump arrive rfl).append ((runs_mark_silent g config preMark preSilent).append
-      ((Runs.flow (parameterSilentLeg leg config)).append ((Runs.jump fireJump rfl).append
+      ((Runs.flow (portSilentLeg leg config)).append ((Runs.jump fireJump rfl).append
         (run.append (Runs.flow waitFlow)))))
   obtain ⟨whole, _⟩ := id counted
   have inv := ParameterExecution.physical_invariant whole bounds box state.physical

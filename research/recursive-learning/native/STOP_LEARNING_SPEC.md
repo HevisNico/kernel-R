@@ -69,7 +69,9 @@ step may need a narrower condition on the recovery rate.
 ## Theorems to prove
 
 All in `ParameterExecution θ (fun _ _ => [])`, for either fabrication
-box, with `(θ 0).thresholds = trainingThresholds p u l F`.
+box, with `PortConfig θ p u l F`. That condition constrains the ERROR
+levels of port `p` only, so one cell can satisfy it for several ports.
+`two_port_training_exists` trains two ports in one execution.
 
 **A. Silent step. Proved** as `silent_step_exists`. From a `RestState`
 with one pulse due now on port `p` and later deliveries at or after a

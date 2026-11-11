@@ -36,26 +36,135 @@ theorem Runs.append {θ : Fin 1 → Parameters} {s u v : Snapshot 1} {n m : ℕ}
   obtain ⟨f, hf⟩ := second
   exact ⟨e.append f, by rw [execution_emissions_append, List.length_append, he, hf]⟩
 
+/-- The thresholds seen by a pulse on port `p`. The main thresholds and
+the MARK and SILENT levels are nominal. Port `p` enters ERROR at `upper`
+and leaves it at `lower`. The other ports keep any ordered ERROR levels,
+so one cell can satisfy this for several ports. -/
+structure PortConfig (θ : Fin 1 → Parameters) (p : Port) (upper lower level : ℝ) : Prop where
+  fire : (θ 0).thresholds.fire = level
+  fastEnd : (θ 0).thresholds.fastEnd = 1 / 4
+  reopen : (θ 0).thresholds.reopen = 1 / 10
+  mark : ∀ q, (θ 0).thresholds.mark q = 1
+  silent : ∀ q, (θ 0).thresholds.silent q = 4 / 5
+  error : (θ 0).thresholds.error p = upper
+  auxReady : (θ 0).thresholds.auxReady p = lower
+  ordered : ∀ q, 0 < (θ 0).thresholds.auxReady q ∧
+    (θ 0).thresholds.auxReady q ≤ (θ 0).thresholds.error q ∧ (θ 0).thresholds.error q < 1
+
+/-- The single-port configuration of the earlier modules is an instance. -/
+theorem PortConfig.of_training {θ : Fin 1 → Parameters} {p upper lower level}
+    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (bounds : 0 < lower ∧ lower ≤ upper ∧ upper < 1) : PortConfig θ p upper lower level := by
+  refine ⟨by rw [config]; rfl, by rw [config]; rfl, by rw [config]; rfl,
+    fun q => by rw [config]; rfl, fun q => by rw [config]; rfl,
+    by rw [config]; simp [trainingThresholds], by rw [config]; simp [trainingThresholds],
+    fun q => ?_⟩
+  rw [config]
+  by_cases h : q = p
+  · subst q
+    simp only [trainingThresholds, Function.update_self]
+    exact bounds
+  · norm_num [trainingThresholds, Function.update_of_ne h]
+
+theorem port_guards {θ : Fin 1 → Parameters} {s : Snapshot 1} {x : Values 1}
+    {p upper lower level} (config : PortConfig θ p upper lower level)
+    (main : s.main 0 = .ready) (charge : x 0 .q < level)
+    (sensor : ∀ q, match s.aux 0 q with
+      | .ready => x 0 (.m q) < 1
+      | .mark => 4 / 5 < x 0 (.m q)
+      | .silent => q = p ∧ upper < x 0 (.m q)
+      | .error => q = p ∧ lower < x 0 (.m q)) :
+    ThresholdGuards (fun i => (θ i).thresholds) s x := by
+  constructor
+  · intro i
+    rw [Subsingleton.elim i 0]
+    simpa [main, config.fire] using charge
+  · intro i q
+    rw [Subsingleton.elim i 0]
+    cases mode : s.aux 0 q
+    · simpa [mode, config.mark] using sensor q
+    · simpa [mode, config.silent] using sensor q
+    · have h : q = p ∧ upper < x 0 (.m q) := by simpa [mode] using sensor q
+      obtain ⟨rfl, h⟩ := h
+      simpa [config.error] using h
+    · have h : q = p ∧ lower < x 0 (.m q) := by simpa [mode] using sensor q
+      obtain ⟨rfl, h⟩ := h
+      simpa [config.auxReady] using h
+
+theorem port_aux_guards {s : Snapshot 1} {x : Values 1} {p : Port} {upper lower : ℝ}
+    (stock : BeforeGuards s x) (others : ∀ q ≠ p, s.aux 0 q = .ready)
+    (silent : s.aux 0 p = .silent → upper < x 0 (.m p))
+    (error : s.aux 0 p = .error → lower < x 0 (.m p)) :
+    ∀ q, match s.aux 0 q with
+      | .ready => x 0 (.m q) < 1
+      | .mark => 4 / 5 < x 0 (.m q)
+      | .silent => q = p ∧ upper < x 0 (.m q)
+      | .error => q = p ∧ lower < x 0 (.m q) := by
+  intro q
+  have h := stock.2 0 q
+  by_cases hq : q = p
+  · subst q
+    cases mode : s.aux 0 p <;> simp_all
+  · simpa [others q hq] using h
+
 theorem runs_mark_silent {θ : Fin 1 → Parameters} {s : Snapshot 1} {p upper lower level}
     {f : FirstInputMark θ s 0 p} (g : FirstInputSilent f)
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (config : PortConfig θ p upper lower level)
     (first : ∀ t ∈ Ico s.time (s.time + f.latency), f.flow.path t 0 .q < level)
     (second : ∀ t ∈ Ico f.final.time g.final.time, g.flow.path t 0 .q < level) :
-    Runs θ s g.final 0 := ⟨parameterMarkSilent g config first second, rfl⟩
+    Runs θ s g.final 0 := by
+  let f₁ : ParameterFlow θ s (readyInputEnd θ s 0 p (s.time + f.latency)) := {
+    toFlowDynamics := f.flow.toFlowDynamics
+    guards := fun t ht => port_guards config (f.main_ready 0) (first t ht)
+      (port_aux_guards (f.flow.guards t ht) (fun q _ => f.aux_ready 0 q)
+        (by rw [f.aux_ready]; simp) (by rw [f.aux_ready]; simp)) }
+  have mode : f.final.aux 0 p = .mark := by simp [FirstInputMark.final, setAux]
+  have others : ∀ q ≠ p, f.final.aux 0 q = .ready := fun q hq => by
+    simp [FirstInputMark.final, setAux, readyInputEnd, hq, f.aux_ready]
+  let f₂ : ParameterFlow θ f.final f.silentBefore := {
+    toFlowDynamics := g.flow.toFlowDynamics
+    guards := fun t ht => port_guards config (f.main_ready 0) (second t ht)
+      (port_aux_guards (g.flow.guards t ht) others (by rw [mode]; simp) (by rw [mode]; simp)) }
+  let mark : ParameterJump θ (fun _ _ => [])
+      (readyInputEnd θ s 0 p (s.time + f.latency)) f.final :=
+    .mark _ 0 p (f.aux_ready 0 p) (by rw [config.mark]; exact f.sensor_threshold)
+  let silent : ParameterJump θ (fun _ _ => []) f.silentBefore g.final :=
+    .silent _ 0 p mode (by rw [config.silent]; exact g.threshold)
+  exact (Runs.flow f₁).append ((Runs.jump mark rfl).append
+    ((Runs.flow f₂).append (Runs.jump silent rfl)))
 
-theorem runs_training_trace {θ p upper lower level s u}
-    (trace : TrainingTrace θ p upper lower level s u)
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level) : Runs θ s u 0 := by
-  refine ⟨parameterTrainingTrace trace config, ?_⟩
-  have empty : (parameterTrainingTrace trace config).emissions = [] := by
-    induction trace with
-    | nil s => rfl
-    | silent leg _ ih => exact ih
-    | enter mode contact _ ih => exact ih
-    | expire active due _ ih => exact ih
-    | liveError leg _ ih => exact ih
-  rw [empty]
-  rfl
+noncomputable def portSilentLeg {θ s p origin upper level stop}
+    (leg : TrainingSilentLeg θ s p origin upper level stop) {lower}
+    (config : PortConfig θ p upper lower level) :
+    ParameterFlow θ s (readyProtectedEnd θ s 0 p .silent origin stop) where
+  positive := leg.positive
+  path := readyProtectedValues θ s 0 p .silent origin
+  initial := readyProtectedValues_initial _ _ _ _ _
+  final := rfl
+  main_fixed := rfl
+  aux_fixed := rfl
+  raw_fixed := rfl
+  queue_fixed := rfl
+  continuous := leg.continuous
+  integrable := leg.integrable
+  integral_eq := leg.integral
+  mark_integrable := by intro i q; simp [markAct, leg.main]
+  guards := by
+    intro t ht
+    apply port_guards config (leg.main 0) (leg.main_guard t ht)
+    intro q
+    by_cases hq : q = p
+    · subst q
+      simpa [leg.mode] using leg.sensor_guard t ht
+    · simpa [leg.other_modes q hq] using leg.other_guard t ht q hq
+  raw_support := by
+    intro i q o h
+    by_cases address : i = 0 ∧ q = p
+    · obtain ⟨rfl, rfl⟩ := address
+      exact leg.raw_support o (leg.raw.symm.trans h)
+    · rw [leg.other_raw i q (by tauto)] at h
+      cases h
+  pending_urgent := leg.pending
 
 /-- A READY sensor without input relaxes toward its rest charge and stays
 below the MARK threshold. -/
@@ -260,7 +369,7 @@ structure SilentEntry (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Port)
   pre_mark : ∀ t ∈ Ico s.time (s.time + mark.latency), mark.flow.path t 0 .q < level
   pre_silent : ∀ t ∈ Ico mark.final.time silent.final.time, silent.flow.path t 0 .q < level
   before : Snapshot 1
-  trace : TrainingTrace θ p upper lower level silent.final (setAux before 0 p .error)
+  run : Runs θ silent.final (setAux before 0 p .error) 0
   after_pulse : s.time + 1 < before.time
   deadline : before.time < s.time + 8 / 5
   main : before.main 0 = .ready
@@ -280,8 +389,8 @@ structure SilentEntry (θ : Fin 1 → Parameters) (s : Snapshot 1) (p : Port)
 pulsed sensor to its ERROR entry threshold after the pulse has ended. The
 start state is any admitted pulse on a rested cell. -/
 theorem silent_entry_exists {θ ε s p upper lower level}
-    (box : @PhysicalBox 1 θ ε) (physical : PhysicalInvariant θ s)
-    (threshold : 19 / 20 ≤ level)
+    (box : @PhysicalBox 1 θ ε) (config : PortConfig θ p upper lower level)
+    (physical : PhysicalInvariant θ s) (threshold : 19 / 20 ≤ level)
     (entry : 7 / 100 ≤ upper ∧ upper ≤ 2 / 25)
     (main : ∀ i, s.main i = .ready) (aux : ∀ i q, s.aux i q = .ready)
     (raw : s.raw 0 p = some s.time) (otherRaw : ∀ i q, i ≠ 0 ∨ q ≠ p → s.raw i q = none)
@@ -452,7 +561,11 @@ theorem silent_entry_exists {θ ε s p upper lower level}
     pre_mark := preMark
     pre_silent := preSilent
     before := boundary
-    trace := .silent rawLeg (.expire edgeRaw rfl (.silent tail (.enter g.aux_silent contact (.nil _))))
+    run := (Runs.flow (portSilentLeg rawLeg config)).append
+      ((Runs.jump (.rawEnd edge 0 p s.time edgeRaw rfl) rfl).append
+        ((Runs.flow (portSilentLeg tail config)).append
+          (Runs.jump (.error boundary 0 p g.aux_silent (by rw [config.error]; exact contact))
+            rfl)))
     after_pulse := late
     deadline := Tlate
     main := g.main_ready 0
@@ -537,7 +650,7 @@ enters ERROR with no input current. Its gain moves by eight times the
 distance between the two realized thresholds, whatever its ERROR rate. -/
 theorem silent_write_exists {θ ε e p upper lower level rest}
     (box : @PhysicalBox 1 θ ε)
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (config : PortConfig θ p upper lower level)
     (bounds : 1 / 200 ≤ lower ∧ lower < upper ∧ upper ≤ 2 / 25)
     (room : Real.exp (e.x 0 (.z p) + 8 * (upper - lower)) ≤ 7 / 2)
     (caps : ∀ q, e.x 0 (.z q) ≤ Real.log ((θ 0).cap q))
@@ -679,7 +792,7 @@ theorem silent_write_exists {θ ε e p upper lower level rest}
       intro t ht
       have ht₁ : e.time ≤ t := ht.1
       have ht₂ : t < stop := ht.2
-      apply guards_ready config main ((qBand t ht₁).2.trans_lt charge.2)
+      apply port_guards config main ((qBand t ht₁).2.trans_lt charge.2)
       intro q
       by_cases eq : q = p
       · subst q
@@ -698,7 +811,7 @@ theorem silent_write_exists {θ ε e p upper lower level rest}
   }
   let reopened := setAux boundary 0 p .ready
   let reopen : ParameterJump θ (fun _ _ => []) boundary reopened :=
-    .auxReady _ 0 p aux (by rw [config]; simpa [trainingThresholds] using chargeOut)
+    .auxReady _ 0 p aux (by rw [config.auxReady]; exact chargeOut)
   have ready (i : Fin 1) : reopened.main i = .ready := by
     rw [Subsingleton.elim i 0]
     exact main
@@ -723,7 +836,7 @@ theorem silent_write_exists {θ ε e p upper lower level rest}
     guards := by
       intro t ht
       have ht₁ : stop ≤ t := ht.1
-      apply guards_ready config (ready 0)
+      apply port_guards config (ready 0)
       · change relax (1 / 2) (1 / 10) (path stop 0 .q) stop t < level
         have h := relax_mem_band (rate := 1 / 2) (target := 1 / 10) (by norm_num) ht₁
           (qBand stop duration.le) ⟨le_rfl, charge.1⟩
@@ -776,7 +889,7 @@ the realized FIRE level takes a rested cell back to rest with the gain of
 the pulsed port moved by one dose. Nothing else is assumed of the gain. -/
 theorem silent_step_exists {θ ε s p upper lower level rest} {later : List (Delivery 1)}
     (box : @PhysicalBox 1 θ ε)
-    (config : (θ 0).thresholds = trainingThresholds p upper lower level)
+    (config : PortConfig θ p upper lower level)
     (fire : 19 / 20 ≤ level ∧ level ≤ 21 / 20)
     (entry : 7 / 100 ≤ upper ∧ upper ≤ 2 / 25) (exit : 1 / 200 ≤ lower ∧ lower < upper)
     (state : RestState θ s)
@@ -825,7 +938,7 @@ theorem silent_step_exists {θ ε s p upper lower level rest} {later : List (Del
     · intro i; rw [Subsingleton.elim i 0]; exact state.recovery.2
     · intro i; rw [Subsingleton.elim i 0]; exact state.energy
   obtain ⟨run⟩ := silent_entry_exists (s := admitted) (p := p) (upper := upper) (lower := lower)
-    (level := level) box physical fire.1 entry
+    (level := level) box config physical fire.1 entry
     (fun i => by rw [Subsingleton.elim i 0]; exact state.main)
     (fun i q => by rw [Subsingleton.elim i 0]; exact state.aux q)
     (by simp [admitted, setRaw, d])
@@ -872,7 +985,7 @@ theorem silent_step_exists {θ ε s p upper lower level rest} {later : List (Del
         simpa [admitted] using h))
   refine ⟨u, (Runs.jump arrive rfl).append
     ((runs_mark_silent run.silent config run.pre_mark run.pre_silent).append
-      ((runs_training_trace run.trace config).append write)), rested, date, ?_, ?_, ?_, ?_⟩
+      (run.run.append write)), rested, date, ?_, ?_, ?_, ?_⟩
   · rw [queueOut]
     change run.before.pending = later
     rw [run.queue]

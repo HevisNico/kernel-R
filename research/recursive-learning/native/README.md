@@ -1164,10 +1164,26 @@ state, with the same number of FIRE events. `stop_training_exists`
 includes that statement, and each pulse is either one of its `k` doses
 or one of its `f` FIRE events.
 
+### Two ports of one cell
+
+The thresholds are no longer required to equal a single-port
+configuration. `PortConfig θ p upper lower level` states what a pulse on
+port `p` needs: nominal main, MARK and SILENT levels, the realized FIRE
+level, and the two ERROR levels of port `p`. The other ports keep any
+ordered ERROR levels, so one cell satisfies it for several ports, each
+with its own dose. `PortConfig.of_training` recovers the single-port
+configuration of the earlier modules.
+
+`two_port_training_exists` trains two ports one after the other in one
+execution. The second train waits in the queue during the first. Both
+final gains fire from the exact rest charge, each is at most one dose
+above a silent gain unless no dose was written on it, and every complete
+run agrees with the constructed one.
+
 The final state is the hypothesis of the read-latency theorem with a
 residual rest charge, `stopped_read_response_residual`: the read latency
-then depends on neither the start gain nor the FIRE level. The link is
-not assembled yet for a two-port read as an execution.
+then depends on neither the start gains nor the FIRE level. The read of
+the two ports as an execution is the remaining step.
 
 ## Verify
 
