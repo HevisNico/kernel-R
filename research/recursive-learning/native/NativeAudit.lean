@@ -12,6 +12,7 @@ import FiringStep
 import TrainingLoop
 import Driven
 import JointRead
+import TrainedCoincidence
 import Lean.Util.CollectAxioms
 
 set_option maxHeartbeats 8000000

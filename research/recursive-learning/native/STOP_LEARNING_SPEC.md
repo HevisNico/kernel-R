@@ -99,12 +99,17 @@ the train has at least `2 r + 2` pulses, the final gain fires from the
 exact rest charge, and the gain one dose below it was silent unless no
 dose was written.
 
-**D. Joint read. Proved** as `joint_read_exists`, `stopped_joint_read`
-and `trained_read_exists`, for two read pulses that arrive at the same
-instant. The phase before the FIRE is `driven_run_exists`, which takes
-the MARK and SILENT entries of the two sensors in their time order.
-After C on two ports with doses of at most 1/20, the cell fires between
-0.239 and 0.256 units after the read pulses.
+**D. Joint read. Proved** as `staggered_read_exists`,
+`stopped_staggered_read` and `trained_read_exists`. The second read pulse
+arrives up to a quarter of a unit after the first. The phase before the
+FIRE is `driven_until_exists` then `driven_run_exists`, which take the
+MARK and SILENT entries of the two sensors in their time order. After C
+on two ports with doses of at most 1/20, the cell fires later than 0.239
+units after the first read pulse and no later than 0.256 units after the
+second.
+
+**F. Network contract. Proved** as `trained_coincidence_network`, with an
+explicit witness of its hypotheses, `trained_coincidence_witness`.
 
 **E. Every complete run. Proved for the training** as `rest_run_unique`,
 and included in `stop_training_exists`: every run complete through the

@@ -1189,50 +1189,81 @@ pulses weighted by their gains, and each sensor follows its own pulse or
 its own decay. `drivenDynamics` is that explicit flow for any number of
 live pulses.
 
-`driven_run_exists` runs the cell to a chosen horizon. The MARK and
-SILENT entries of the sensors are taken in their time order by
-induction, so two pulses on two ports need no assumption on which sensor
-moves first. The hypothesis is a `Plan`: the main charge stays below the
-FIRE level before the horizon, every live pulse outlasts it, and every
-busy sensor is SILENT above its ERROR entry threshold at the horizon.
+A `Plan` states what holds up to a horizon: the main charge stays below
+the FIRE level, the live pulses last, no delivery is due, and a SILENT
+sensor stays above its ERROR entry threshold. Two theorems run it.
 
-### The joint read, and training and read in one execution
+- `driven_until_exists` runs to a date at which sensors may still be on
+  their way. The plan holds again there, so a new pulse can be admitted.
+- `driven_run_exists` runs to a horizon by which every busy sensor is
+  SILENT.
 
-[JointRead.lean](JointRead.lean) reads two ports at the same instant.
+In both, the MARK and SILENT entries of the sensors are taken in their
+time order by induction. Two pulses on two ports need no assumption on
+which sensor moves first.
+
+### The read of two ports, and training and read in one execution
+
+[JointRead.lean](JointRead.lean) reads two ports. The second read pulse
+arrives up to a quarter of a unit after the first, or at the same
+instant.
 
 - `fire_rest_exists` is the FIRE and the return to rest with any number
   of SILENT sensors. It uses `refractory_run_exists`.
-- `joint_read_exists`: if the two pulses together bring the main charge
-  of a rested cell to the FIRE level, the cell fires exactly once, at
-  the first contact, and returns to rest with every gain unchanged. The
-  date of the FIRE is part of the statement (`Emits`), and the latency is
-  the first-contact time of the scalar read equation at the sum of the
-  two gains.
-- `stopped_joint_read`: when each gain fires alone from the exact rest
-  charge and was silent one dose below, with doses of at most 1/20, the
-  joint read fires between 0.239 and 0.256 units after the pulses. Every
-  complete run fires at that same date.
+- `staggered_read_exists`: if the first pulse alone stays below the FIRE
+  level until the second arrives, and the two together reach it later,
+  the cell fires exactly once, at the first contact, and returns to rest
+  with every gain unchanged. The date of the FIRE is part of the
+  statement (`Emits`).
+- `stopped_staggered_read`: when each gain fires alone from the exact
+  rest charge and was silent one dose below, with doses of at most 1/20,
+  the FIRE comes later than 0.239 units after the first read pulse and
+  no later than 0.256 units after the second. Every complete run fires
+  at that same date.
 - `trained_read_exists` is the whole experiment in one execution. Two
   ports start from gains that do not fire. Each is trained by its own
   train of pulses until it stops by itself, then one pulse on each port
-  reads the cell. The read latency lies in the same window, whatever the
+  reads the cell. The read FIRE lies in the same window, whatever the
   start gains and the FIRE level between 19/20 and 21/20. Every complete
   run has the same FIRE dates and the same end state.
 
+### The coincidence decision of two trained cells
+
+[TrainedCoincidence.lean](TrainedCoincidence.lean) restates the network
+contract of `CoincidenceNetworkContract` with trained cells.
+
+- `TrainedCell` gathers the hypotheses on one cell: its parameters in
+  the fabrication box, its thresholds, its rested start, its two pulse
+  trains and its two read pulses.
+- `trained_coincidence_network`: two such cells form a two-cell network.
+  Each has its own parameters, its own start gains and its own FIRE
+  level. The right cell is read 0.3 units before, at the same date as, or
+  0.3 units after the left one, and within each cell the second read
+  pulse is at most 1/10 after the first. In every complete run of the
+  network, each cell's last FIRE is its read FIRE, and the two dates are
+  closer than 3/20 exactly when the two cells are read at the same date.
+- `trainedCell_witness` and `trained_coincidence_witness`: an explicit
+  cell and an explicit schedule satisfy every hypothesis. The cell is
+  nominal with ERROR thresholds 2/25 and 59/800, start gains 6/5 and two
+  trains of 22 pulses. The contract is therefore not vacuous.
+
 This replaces the two hand-set hypotheses of the earlier coincidence
 result, an exact birth gain and a FIRE level within 3%, by a training
-rule that absorbs both.
+rule that absorbs both. The earlier result also showed that no setting
+of a constant-current timer meets the same receiver contract at its
+registered corner. That comparison is not redone here.
 
 Limits of these statements:
 
-- **Simultaneous read pulses.** The two read pulses arrive at the same
-  instant. No bound is proved yet when they do not.
-- **One cell.** The network contract of `CoincidenceNetworkContract` is
-  not restated with these theorems.
+- **Order of the read pulses.** In each cell the pulse on the first
+  trained port arrives no later than the pulse on the second, by at most
+  a quarter of a unit, and by at most 1/10 for the network decision.
 - **Doses of at most 1/20 for the window.** The training theorems hold
   for any dose up to 3/5. The window constants are for doses up to 1/20.
 - **Recovery rate between 7/100 and 1/10**, sensors within `10⁻⁵` of
   their rest charge, pulses at least 22 units apart.
+- **Two independent cells.** The network has no wire between the cells.
+  The receiver that compares the two FIRE dates is outside the model.
 - **Circuit quantities.** Gain mismatch and FIRE level are covered. The
   pulse amplitude, the unit response and the thresholds other than FIRE
   and the two ERROR levels are those of the model.
@@ -1259,7 +1290,8 @@ builds this package with the pinned dependencies. Its default targets compile
 `BlindNeedSearch`, `ThresholdProbe`, the coincidence modules
 through `CoincidenceSeparation`, `StopLearningLatency`,
 `NativeStopLearning`, `SilentStep`, `Refractory`, `FiringStep`,
-`TrainingLoop`, `Driven` and `JointRead`. The default targets also run
+`TrainingLoop`, `Driven`, `JointRead` and `TrainedCoincidence`. The
+default targets also run
 [the axiom audit](NativeAudit.lean), which checks all imported declarations
 under `RecursiveLearning`, including private ones.
 Unexpected axioms and admitted proofs fail the build. The underlying R imports
