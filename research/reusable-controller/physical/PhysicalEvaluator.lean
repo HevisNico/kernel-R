@@ -11,3 +11,4 @@ import PhysicalEvaluator.PeakMeasurement
 import PhysicalEvaluator.MeasurementBridge
 import PhysicalEvaluator.CampaignData
 import PhysicalEvaluator.CampaignExample
+import PhysicalEvaluator.AsymmetricData

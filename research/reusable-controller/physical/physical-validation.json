@@ -1,8 +1,28 @@
 {
   "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
   "positive_build": true,
-  "axiom_audit": "info: PhysicalAudit.lean:7:0: Physical audit passed: 8063 declarations, 5268 theorems, 171 modules.",
+  "axiom_audit": "info: PhysicalAudit.lean:7:0: Physical audit passed: 8853 declarations, 5934 theorems, 174 modules.",
   "negative_controls": [
+    {
+      "mutation": "asymmetric_nonstrict_silence",
+      "rejected": true,
+      "check": "PhysicalEvaluator/Asymmetric.lean"
+    },
+    {
+      "mutation": "asymmetric_weaken_fire_room",
+      "rejected": true,
+      "check": "PhysicalEvaluator/Asymmetric.lean"
+    },
+    {
+      "mutation": "asymmetric_omit_endpoint_error",
+      "rejected": true,
+      "check": "PhysicalEvaluator/Asymmetric.lean"
+    },
+    {
+      "mutation": "asymmetric_reverse_fire_deficit",
+      "rejected": true,
+      "check": "PhysicalEvaluator/Asymmetric.lean"
+    },
     {
       "mutation": "omit_second_campaign_residual",
       "rejected": true,
@@ -154,16 +174,19 @@
     "PhysicalEvaluator/CampaignBridge.lean": "027131ad305b05d86b555ab124eb0bc6ad47932c4d2737ea28fcc032c0effee2",
     "PhysicalEvaluator/CampaignData.lean": "da0d56fddca478cab5432d81f01c61f75b2cc5510abe414ffe4c16de3eb7c7b2",
     "PhysicalEvaluator/CampaignExample.lean": "2406dd40996381e2f6f9cc826287d9673eaf9f3cc04153217ae2869f32a1bae3",
-    "PhysicalEvaluator.lean": "7e70cae408ce6e76bf4cd9f1f0a74d92af162ee3592090ffc82dd15300efc6d2",
-    "PhysicalAudit.lean": "fc9839673e2941736bd5fa5d2cc24ba58db6b4bf7e6cd579599c858c3ae93b64",
+    "PhysicalEvaluator/Asymmetric.lean": "9fb86441c9a730f795f651c85c8ddaa7560ea2809e06b1904e8d2fed70a6c330",
+    "PhysicalEvaluator/AsymmetricData.lean": "588256d97b18d8eee6d150bd1c9675eed0fa7c2d65b4fcfca94df97db0806697",
+    "PhysicalEvaluator.lean": "2dd66fd7011495c0505b63204fce24689badc023c61e74b5382fcfecfb61023d",
+    "PhysicalAudit.lean": "df0dd2ed825e494d2a277617bcb4d28586f9ff0abf0e16cdca8ff6c7cad1793c",
     "Trace.lean": "457d5341247d4b99f58347afcb0734c09a5823019eefa64d1b40a924738481c0",
     "lakefile.toml": "0ed865355fdaa9feda87b993264f1dc74e8c58d4b96d485f91778353d7933b36",
     "lake-manifest.json": "72e719632edde1e781eb88aea35e05f785b945ee9274b799b98143f3e5385566",
     "lean-toolchain": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
-    "verify_physical.py": "f706c3327fe1eadb403ce70570d8c539d7cf717a8bfd2180db0e9def26317b3e",
+    "verify_physical.py": "7bcf9f08aa683d54bbed781d7cd95a2fd38d4981a7de9577798ddde05a0eebe2",
     "evidence_check.py": "dac6091abf746a24d3c58cd04e9a9e3840cc4461e02adaa41323fbe1a910c96f",
     "gain_check.py": "e2d4cfb669031daeb7d9f10a236890dd7f6123750b36cd72e86209a9859d7209",
     "campaign_check.py": "cab0107f8314ac6ecf61dad45da0ec7b754b20d3e947d306c11b573c94891fc0",
+    "asymmetric_check.py": "24735ef47e1f7d9b362932d487193400293bbd5ed9ab98cf7127eced9bb44756",
     "evidence/calibration.json": "a36f0ef3d5f50d0484e174c4cc7b2a83c71254ff4e9cdb271b57ce3dfb9d4094",
     "evidence/ports.csv": "2672a491db07e2dfe96ac78d6209c6b96aef300a4b0e562096927a323fb7a642",
     "evidence/predictions.csv": "c13b9631e711d5e48c8cff6598aa183cdc3e5df0f4ba7a7af8cb6873631fbde9",
@@ -182,6 +205,7 @@
     "../ReusableController/Selection.lean": "64b24be569789568cd0e16d531bf76a5ae92aa97f9567f8e165f13406224235d",
     "../lakefile.toml": "94b8943a5c8b3dcb690e1cbf86abef895f1a5d973bc769e55d0ef477fe1ee096",
     "../../recursive-learning/native/Search/VariableNeedTolerance.lean": "dedf018e0a57b9f8d9678c1f96ba7d6b4cf9da39dd9e6f6150ed026b5574a30a",
+    "../../recursive-learning/native/Search/AsymmetricNeedTolerance.lean": "5bf169e885b587ff0648502bc61c88ed948fbb0051e0f331066f7c9befd4c8f9",
     "../../recursive-learning/native/Search/NeedTolerance.lean": "b1ec1ccef762549214ceeb9f7c7d04ea69f8f720ca637bd3fe069bcf81b5b623",
     "../../recursive-learning/native/lakefile.toml": "33a0284eeb76724f357e790c8b090b3d5b7300c50b85cc99cca3cdad9402a948",
     "../../recursive-learning/RecursiveLearning/Model.lean": "7d33506811a35bdb5b8ad697b9aa693b6b5dbfe684eb455cc5de782fded84795"

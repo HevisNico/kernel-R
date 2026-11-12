@@ -2,8 +2,8 @@
 
 [Back to the native package](../README.md)
 
-The folder has eight Lean modules. `VariableNeedTolerance` extends the
-scalar tolerance contract; the other seven implement the count probes,
+The folder has nine Lean modules. `VariableNeedTolerance` and
+`AsymmetricNeedTolerance` extend the scalar tolerance contract; the other seven implement the count probes,
 search cells, fixed-dose tolerance and compiled searches described below.
 
 ## A count probe that calibrates itself
@@ -186,6 +186,24 @@ per-step error bound is needed for this form.
 at each write, each within `b` of `d₀`. It derives the cumulative budget
 `B = m*b` and the same need contract. `needAlong_of_step_tolerance` states
 the corresponding condition on successive gain differences.
+
+[AsymmetricNeedTolerance.lean](AsymmetricNeedTolerance.lean) generalizes the
+cumulative rule with separate directional bounds. Before `m`, only an upper
+cumulative error `BSilent` is needed; at `m`, only a lower error `BFire` is
+needed. Initial bounds `aSilent` and `aFire` may also differ. The sufficient
+conditions are
+
+```text
+aSilent + BSilent + (20/17)*ell + 1/8000 < d0/2
+aFire   + BFire   + (20/17)*ell          <= d0/2.
+```
+
+The nominal dose is nonnegative. FIRE permits equality and needs no allowance
+for the largest resting charge. The old symmetric condition is recovered by
+`needAlong_of_symmetric_cumulative_via_asymmetric`. The theorem retains its
+explicit post-target gain premise; `NeedAlong.finite_readings_shape` exports
+the exact finite observation pattern for downstream decoding. This theorem and
+rule A1 were published before the first directional campaign recount.
 
 These are scalar gain-sequence results. They do not construct native
 executions with varying ERROR doses, infer gain from a circuit peak, or

@@ -78,6 +78,65 @@ physical detection envelopes. All 37 numerical entries use measured `eps3`;
 none silently constructs those remaining physical premises. The chain is
 connected conditionally, not an unconditional physical closed-loop theorem.
 
+## Directional rule A1: 57 ports, original 37 retained
+
+[ASYMMETRIC_PROTOCOL.md](ASYMMETRIC_PROTOCOL.md) and the new scalar theorem were
+published in commit `8b11a5f5d2b6843bc6ca1f9ff0b82c30fa99f19d` **before the first
+directional eligibility calculation**. This is a new retrospective rule; it
+does not retroactively preregister the original test cohort.
+
+The theorem requires an upper cumulative bound only before `m`, and a lower
+bound only at `m`. The separate sufficient conditions are
+
+```text
+aSilent + BSilent + (20/17)*ell + 1/8000 < d0/2
+aFire   + BFire   + (20/17)*ell          <= d0/2.
+```
+
+The FIRE condition permits equality and does not need the largest-rest-charge
+penalty. The old symmetric theorem is recovered as a corollary.
+[Asymmetric.lean](PhysicalEvaluator/Asymmetric.lean) proves the finite
+certificate, exact first-FIRE decoding and controller contract directly from
+these conditions. Every old finite envelope certificate embeds in it without
+changing its observations or adding a physical hypothesis.
+
+[asymmetric_check.py](asymmetric_check.py) follows the frozen A1 formula:
+initial centering remains unchanged; only the cumulative budget is split by
+direction and read index. It retains all applicable kappa errors, both endpoint
+errors, the measured `eps3`, rest/steering checks and threshold bounds. Count
+agreement is an outcome, not an eligibility filter. The full
+[200-port table](asymmetric-ports.csv) reports both rooms and exclusion reasons.
+
+The result is **57 numerically eligible ports, 20 added, zero original ports
+lost, zero count contradictions**. [AsymmetricData.lean](PhysicalEvaluator/AsymmetricData.lean)
+checks all 57 padded rational gates in Lean. The original `CampaignData` and
+its 37-entry report are unchanged. The previously excluded `t6004` preparation
+port now passes A1, while its failed symmetric gate remains recorded; these
+are different rules, not a revision of the old result.
+
+This improves the sufficient scalar criterion. It does not discharge noisy-run
+transfer, fitted-offset interpretation, FIRE reconstruction, rest-state or
+physical detection-envelope premises. The same conditional boundary remains.
+
+## Planned numerical and noisy-repeat checks
+
+[STEP_STUDY_PROTOCOL.md](STEP_STUDY_PROTOCOL.md) freezes six nominal/calibration
+cases at maximum steps 200/100/50 ns, with duplicate baselines: 24 runs.
+**NOT_STARTED:** the pinned ngspice executable and PDK are unavailable here.
+A successful comparison would measure sensitivity to step refinement, not
+prove an absolute integration-error bound.
+
+[REPETITION_PROTOCOL.md](REPETITION_PROTOCOL.md) freezes the original 37 ports
+at 100 repeats each: 3,500 complete cell trains and 3,700 eligible-port
+observations. [repetition_plan.py](repetition_plan.py) checks complete ledgers
+and computes one-sided Clopper–Pearson bounds per port, with Bonferroni bounds
+for simultaneous coverage. It keeps count agreement and residual success
+separate and never treats all 3,700 observations as iid. Its synthetic tests
+validate the analyzer only. The [readiness report](repetition-readiness.json)
+records **NOT_STARTED**, with missing runtime, reproducible noise injection
+and physical endpoint extraction explicitly listed. No new circuit run or
+noisy error measurement is claimed.
+
 ## Why the derived tolerance is zero
 
 The analog error budget is
@@ -392,6 +451,9 @@ python3 evidence_check.py --check --report evidence-validation.json
 python3 gain_check.py --check --report gain-validation.json
 git fetch --no-tags --depth=1 origin 7ded279f103dab5beb6c1c671f1acbdf4cff18c0
 python3 campaign_check.py --check --report campaign-validation.json
+git fetch --no-tags --depth=1 origin 8b11a5f5d2b6843bc6ca1f9ff0b82c30fa99f19d
+python3 asymmetric_check.py --check --report asymmetric-validation.json
+python3 -m unittest test_asymmetric_check test_repetition_plan
 python3 verify_physical.py --report physical-validation.json
 lake env lean Trace.lean
 ```
@@ -403,7 +465,9 @@ records twelve data mutations; [gain-validation.json](gain-validation.json)
 records six readout-data mutations and generated/source hashes;
 [campaign-validation.json](campaign-validation.json) records six campaign-data
 mutations, the complete eligible-port list and snapshot provenance;
-[physical-validation.json](physical-validation.json) records twenty-six semantic
+[physical-validation.json](physical-validation.json) records thirty semantic
 proof mutations and source hashes. Parser/import failures never count as
-successful rejection. CI reproduces the build, all four verifiers and the
-replay, preserving their reports.
+successful rejection. CI reproduces the build, all five verifiers, the 16
+directional/statistical tests, repetition readiness and the original replay,
+preserving their reports. Neither the original replay nor synthetic repetition
+records constitute a newly executed physical loop.

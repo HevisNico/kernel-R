@@ -18,6 +18,8 @@ includes a pinned-data replay and states the remaining physical transfer gaps.
 It now imports measured per-port `eps3` budgets for all 37 eligible ports from
 the amended #109 campaign. Their numerical gates are checked in Lean; transfer
 to noisy reads and physical detection envelopes remain explicit premises.
+The separately published directional rule A1 admits 57 ports, including all
+37 original entries, under the same physical transfer conditions.
 
 ## Algorithm and scope
 

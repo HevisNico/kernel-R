@@ -20,7 +20,8 @@ FILES = ['Counts.lean', 'Envelope.lean', 'Controller.lean', 'RecordedData.lean',
          'RecordedBridge.lean', 'Replay.lean', 'LogIntervals.lean', 'MeasuredGains.lean',
          'Readout.lean', 'RecordedGains.lean', 'ReadoutBridge.lean', 'IdealExample.lean',
          'PeakError.lean', 'PeakBridge.lean', 'PeakMeasurement.lean', 'MeasurementBridge.lean',
-         'CampaignBridge.lean', 'CampaignData.lean', 'CampaignExample.lean']
+         'CampaignBridge.lean', 'CampaignData.lean', 'CampaignExample.lean',
+         'Asymmetric.lean', 'AsymmetricData.lean']
 
 
 def command(args, cwd=HERE, env=None, timeout=180):
@@ -32,10 +33,11 @@ def hashes():
     paths = [HERE / 'PhysicalEvaluator' / f for f in FILES]
     paths += [HERE / f for f in ['PhysicalEvaluator.lean', 'PhysicalAudit.lean', 'Trace.lean',
               'lakefile.toml', 'lake-manifest.json', 'lean-toolchain', 'verify_physical.py',
-              'evidence_check.py', 'gain_check.py', 'campaign_check.py']]
+              'evidence_check.py', 'gain_check.py', 'campaign_check.py', 'asymmetric_check.py']]
     paths += sorted((HERE / 'evidence').iterdir())
     paths += sorted((CONTROLLER / 'ReusableController').glob('*.lean'))
     paths += [CONTROLLER / 'lakefile.toml', NATIVE / 'Search/VariableNeedTolerance.lean',
+              NATIVE / 'Search/AsymmetricNeedTolerance.lean',
               NATIVE / 'Search/NeedTolerance.lean', NATIVE / 'lakefile.toml',
               NATIVE.parent / 'RecursiveLearning/Model.lean']
     return {os.path.relpath(p, HERE): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
@@ -81,6 +83,18 @@ def main():
     search = os.pathsep.join(str((HERE / x).resolve()) for x in search.strip().split(os.pathsep))
     original = {f: (HERE / 'PhysicalEvaluator' / f).read_text() for f in FILES}
     mutations = [
+        ('asymmetric_nonstrict_silence', 'Asymmetric.lean', lambda s: replace_once(s,
+            'silenceRoom : aSilent + BSilent + 20 / 17 * ell + 1 / 8000 < dose0 / 2',
+            'silenceRoom : aSilent + BSilent + 20 / 17 * ell + 1 / 8000 ≤ dose0 / 2'), None),
+        ('asymmetric_weaken_fire_room', 'Asymmetric.lean', lambda s: replace_once(s,
+            'fireRoom : aFire + BFire + 20 / 17 * ell ≤ dose0 / 2',
+            'fireRoom : aFire + BFire + 20 / 17 * ell ≤ dose0'), None),
+        ('asymmetric_omit_endpoint_error', 'Asymmetric.lean', lambda s: replace_once(s,
+            'BSilent := entry.baseBSilent + 2 * entry.epsilon',
+            'BSilent := entry.baseBSilent + entry.epsilon'), None),
+        ('asymmetric_reverse_fire_deficit', 'Asymmetric.lean', lambda s: replace_once(s,
+            'referenceGain 0 + (m : ℝ) * entry.dose0 - referenceGain (Fin.last m) ≤ entry.baseBFire',
+            'referenceGain (Fin.last m) - referenceGain 0 - (m : ℝ) * entry.dose0 ≤ entry.baseBFire'), None),
         ('omit_second_campaign_residual', 'CampaignBridge.lean', lambda s: replace_once(s,
             'entry.baseB + 2 * entry.epsilon := by',
             'entry.baseB + entry.epsilon := by'), None),
