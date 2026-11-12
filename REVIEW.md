@@ -127,3 +127,23 @@ allowance. The arbitrary-network crossing result follows directly from weak
 paths, not from a protocol-scoped correspondence. No arbitrary-queue progress
 or loss of all excess inputs is inferred. The broader Reset Operator thesis
 remains separate.
+
+## Trained cells, networks and searches (v0.4.0)
+
+These results are in
+[`research/recursive-learning/native/`](research/recursive-learning/native/README.md#map-of-the-stop-learning-results),
+outside the trusted base of `proof/lean`. They reuse its kernel definitions
+unchanged. Review first the regime in
+[STOP_LEARNING_SPEC.md](research/recursive-learning/native/STOP_LEARNING_SPEC.md):
+the thresholds of the trained port, the 22-unit pulse spacing and the
+`RestState` invariant between pulses.
+
+Then check that each headline theorem quantifies over every complete run,
+not only the constructed one (`stop_training_exists`, `trained_read_exists`,
+`trained_coincidence_network`), and that its hypotheses are met by the named
+witnesses (`trainedCell_witness`, `trained_chain_witness`,
+`successive_search_witness`). In the searches, a wire that releases pulses
+at preset dates stands for a clocked register that is not built from cells;
+the [limits](docs/RELEASE_V0_4_0.md#limits) list this and the other modelling
+choices. The [validation ledger](docs/VALIDATION_LEDGER.md#native-package-audit-v040)
+records the axiom audit of the package.

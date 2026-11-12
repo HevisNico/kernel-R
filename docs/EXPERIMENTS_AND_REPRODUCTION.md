@@ -162,9 +162,12 @@ source. Use `--adaptive-results` to package a newly validated adaptive run.
 The pinned download has its own immutable identity, and the CI verification
 command is recorded in [the archive guide](../archive/reciprocal/downloads/README.md).
 
-Optional viewer QA uses Node.js and the committed `package-lock.json`:
+Optional viewer QA uses Node.js and the committed
+[`archive/reciprocal/package-lock.json`](../archive/reciprocal/package-lock.json).
+Run it from `archive/reciprocal/`:
 
 ```sh
+cd archive/reciprocal
 npm ci
 npm run check:viewer
 ```
@@ -177,6 +180,7 @@ For the browser check, install the Chromium version selected by the locked
 Playwright dependency, then run:
 
 ```sh
+cd archive/reciprocal
 npx playwright install chromium
 npm run check:browser
 ```
