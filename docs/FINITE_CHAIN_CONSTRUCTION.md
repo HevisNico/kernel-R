@@ -88,7 +88,7 @@ The three public headline axiom profiles contain only `propext`,
 `Classical.choice` and `Quot.sound`. The [validation ledger](VALIDATION_LEDGER.md)
 records the successful complete frozen-source build and global audit.
 The reviewed universal proof modules are included in this checkout. The
-[historical release checklist](RELEASE_UNIVERSAL_FINITE_CHAIN.md)
+[historical release checklist](RELEASE_V0_2_0.md)
 records the v0.2.0 integration and publication scope; later local validation is
 recorded in the [current ledger](VALIDATION_LEDGER.md#validation-and-checkpoint-discipline).
 

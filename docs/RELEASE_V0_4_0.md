@@ -1,21 +1,11 @@
 # Kernel R v0.4.0: stop-learning training, networks and searches
 
-Draft release text and checklist. This file does not create a tag or
-publish a release.
+**Published release notes for v0.4.0.** Released on 2026-11-11 from commit
+[`5d47261`](https://github.com/HevisNico/kernel-R/commit/5d47261412a582f6b96ec139b67e406884d406cc), tag
+[`v0.4.0`](https://github.com/HevisNico/kernel-R/releases/tag/v0.4.0). The text
+below is the release text. Counts and limits describe that commit.
 
-## Before publishing
-
-1. Check that the Lean and recursive-learning workflows pass on the
-   `main` commit that contains this file, and record that exact commit
-   as the release target.
-2. Check the release date in `CITATION.cff` against the day of
-   publication.
-3. Create the release as a draft against the recorded commit, with the
-   tag `v0.4.0` and the text below, and add the commit hash to its
-   links.
-4. After publication, check that the Zenodo archive has the new version.
-
-## Draft release text
+## Release text
 
 ### Summary
 
@@ -178,9 +168,15 @@ lake exe cache get
 lake build
 ```
 
-The build runs the axiom audit over every declaration of the package:
-5741 declarations, including 3525 theorems. The new theorems depend only
-on `propext`, `Classical.choice` and `Quot.sound`.
+The build runs the axiom audit over every declaration in the
+`RecursiveLearning` namespace that the package imports: the native
+package, the discrete model it depends on, private declarations and the
+auxiliary declarations Lean generates (equation lemmas, `match` and proof
+helpers). At this commit it reports 5741 declarations, including 3525
+theorems. The sources of the native package state 943 theorems and
+lemmas directly; the difference is generated declarations and the parent
+package. Every audited declaration depends only on `propext`,
+`Classical.choice` and `Quot.sound`.
 
 ### AI assistance
 

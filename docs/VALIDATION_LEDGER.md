@@ -358,7 +358,7 @@ stops new work; the branch, validated commits and this ledger provide the
 restart point. No push, PR publication or merge is performed without the user’s
 explicit instruction. The [historical PR description](../archive/plans/UNIVERSAL_EXECUTION_PR.md)
 records the reviewed universal proof change; the current
-[release checklist](RELEASE_UNIVERSAL_FINITE_CHAIN.md) does not
+[release checklist](RELEASE_V0_2_0.md) does not
 authorize an automatic merge or release publication.
 
 ## Recovery-limited firing rate local validation
@@ -391,3 +391,31 @@ The dependency caches were reused. These are local checks, not a fresh
 external-dependency rebuild or the entire CI workflow. The new paired suite
 is included in CI; the unchanged historical negative suites retain their
 existing CI stages. See [scope](RESET_RATE_SATURATION.md).
+
+## Native package audit (v0.4.0)
+
+Release commit: `5d47261412a582f6b96ec139b67e406884d406cc` (tag `v0.4.0`).
+The sources of `research/recursive-learning/native/` are identical at
+`8e63786`, the main commit that precedes the release merge; the release merge
+changes only documentation and metadata.
+
+The "Recursive learning Lean proofs" workflow on `8e63786`
+(run [43102068383](https://github.com/HevisNico/kernel-R/actions/runs/43102068383))
+built the native package with Lean 4.35.0 and Mathlib v4.35.0. Its
+`NativeAudit` target reports:
+
+> RecursiveLearning audit passed for 5741 declarations, including 3525 theorems.
+
+The audit covers every imported declaration whose name lies in the
+`RecursiveLearning` namespace, private and generated declarations included
+(equation lemmas, `match` and proof helpers), plus two named
+`KernelR.Hybrid` declarations defined in the package. Each depends only on
+`propext`, `Classical.choice` and `Quot.sound`. The native sources state 943
+`theorem` or `lemma` declarations directly; the rest of the count is
+generated declarations and the parent `recursive-learning` package.
+
+The kernel definitions in `proof/lean` are unchanged by this release, and
+its trusted-base record is not regenerated. The "Kernel R Lean proofs" run
+on the release commit
+([43114103132](https://github.com/HevisNico/kernel-R/actions/runs/43114103132))
+passed.

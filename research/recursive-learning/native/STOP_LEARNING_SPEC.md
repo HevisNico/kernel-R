@@ -1,9 +1,14 @@
 # Specification: native stop-learning with small doses
 
-This note fixes what remains to be proved for the stop-learning result
-to hold for every start gain, in the existing parameterized semantics.
-It states the regime, the invariant between pulses, and the theorems to
-prove. Nothing here is proved unless a section says so.
+**Status.** This note was written as a specification, before the
+proofs. Every theorem it lists, A to F below, is now proved; each section
+names the Lean declarations. The note is kept as the statement of the
+regime and the invariant between pulses that those theorems use. The
+[map of the stop-learning results](README.md#map-of-the-stop-learning-results)
+lists the strongest statement at each level.
+
+It fixed what had to be proved for the stop-learning result to hold for
+every start gain, in the existing parameterized semantics.
 
 ## Why a new regime
 
@@ -66,7 +71,7 @@ structure RestState (θ : Fin 1 → Parameters) (s : Snapshot 1) : Prop where
 This is the definition in [SilentStep.lean](SilentStep.lean). The firing
 step may need a narrower condition on the recovery rate.
 
-## Theorems to prove
+## Theorems (all proved)
 
 All in `ParameterExecution θ (fun _ _ => [])`, for either fabrication
 box, with `PortConfig θ p u l F`. That condition constrains the ERROR
@@ -117,7 +122,7 @@ horizon ends in the same state as the constructed one, with the same
 number of FIRE events. `trained_read_exists` states it for training and
 read together, with the FIRE dates.
 
-## What is already proved
+## Proved before the training loop
 
 - The latency window, for the read equation at exact rest:
   [StopLearningLatency.lean](StopLearningLatency.lean).
@@ -145,9 +150,12 @@ read together, with the FIRE dates.
 | Pulse expiry, FAST end and sensor contacts in time order after a FIRE | `CoincidenceProtectedTail.lean`, written for a latency between 0.35 and 0.40 |
 | Uniqueness of complete runs | `ParameterExecution.observational_unique` |
 
-## Open choices
+## Open choices at the time of writing
 
 - The recovery from SLOW takes about 11.5 units. The spacing after a
-  firing pulse is not fixed yet.
+  firing pulse was not fixed yet. *Resolved:* the theorems use pulses at
+  least 22 units apart.
 - A dose of 1/20 needs about 14 silent pulses from a gain of 1.2. The
-  theorems should hold for any dose `d` in a stated range.
+  theorems should hold for any dose `d` in a stated range. *Resolved:*
+  the training theorems hold for doses up to 3/5; the read windows are
+  stated for doses of at most 1/20.

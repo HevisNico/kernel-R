@@ -6,9 +6,14 @@ One full exposed ERROR section adds `3/5` to its port, which represents one
 credit or sets the selector. The encoding is relative to that port's starting
 log-gain.
 
-Training that stops by itself, networks of trained cells and searches
-built with them are summarized in the
-[map of the stop-learning results](#map-of-the-stop-learning-results).
+> **Start here.** Training that stops by itself, networks of trained
+> cells and searches built with them are summarized in the
+> [map of the stop-learning results](#map-of-the-stop-learning-results),
+> which names the strongest statement at each level. The
+> [v0.4.0 release notes](../../../docs/RELEASE_V0_4_0.md) give the short
+> version, and [STOP_LEARNING_SPEC.md](STOP_LEARNING_SPEC.md) states the
+> regime. The sections below this one describe the earlier native memory
+> of the teaching loop.
 
 ## What Lean checks
 
