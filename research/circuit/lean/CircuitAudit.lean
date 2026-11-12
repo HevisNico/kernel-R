@@ -25,7 +25,7 @@ run_cmd do
         checked := checked + 1
         if info.isTheorem then theorems := theorems + 1
   if modules != roots.size then throwError "Only {modules} bridge modules found"
-  if theorems < 26 then throwError "Only {theorems} bridge theorems found"
+  if theorems < 69 then throwError "Only {theorems} bridge theorems found"
   logInfo m!"Circuit bridge audit passed: {checked} declarations in {modules} modules (coverage, including generated auxiliaries)."
 
 #print axioms KernelR.Circuit.ChargeWindow.balance
@@ -41,6 +41,7 @@ run_cmd do
 #print axioms KernelR.Circuit.design_dose_below_read_budget
 #print axioms KernelR.Circuit.common_offset_cancels
 #print axioms KernelR.Circuit.accumulated_error
+#print axioms KernelR.Circuit.ChargeWindow.local_slope_step
 #print axioms KernelR.Circuit.ChargeWindow.actual_dose_error
 #print axioms KernelR.Circuit.ChargeWindow.actual_protected_drift
 #print axioms KernelR.Circuit.leaky_response_error

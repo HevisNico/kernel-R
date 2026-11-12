@@ -42,6 +42,37 @@ theorem ChargeWindow.calibration_step_error {s t} (w : ChargeWindow s t)
   simp only [ChargeWindow.logGainStep]
   exact abs_le.mpr ⟨by nlinarith, by nlinarith⟩
 
+/-- A local slope bound replaces the affine law. `g` is the log-gain as a
+function of the stored voltage `V`, and `β` a fitted slope. If the secant of
+`g` between the two endpoint voltages is within `ε` of `-β`, the true step
+differs from the storage-derived step by at most `ε` times the voltage step:
+the error is proportional to the step, not a constant per endpoint. If also
+`ε ≤ β` and the voltage does not rise, the gain does not fall. The storage
+coordinate may carry any constant offset. This concerns the two endpoints of
+one fixed gain law; it says nothing of the path between them, of a pulse, or
+of a law that also moves with the operating point. -/
+theorem ChargeWindow.local_slope_step {s t} (w : ChargeWindow s t)
+    {g V : ℝ → ℝ} {β Cf ε : ℝ} (cap : 0 < Cf)
+    (storage : w.storageCharge s - w.storageCharge t = Cf * (V s - V t))
+    (secant : |g (V t) - g (V s) + β * (V t - V s)| ≤ ε * |V t - V s|) :
+    |g (V t) - g (V s) - w.logGainStep (β / Cf)| ≤ ε * |V t - V s| ∧
+      (ε ≤ β → V t ≤ V s → 0 ≤ g (V t) - g (V s)) := by
+  have step : w.logGainStep (β / Cf) = β * (V s - V t) := by
+    simp only [ChargeWindow.logGainStep]
+    rw [storage]
+    field_simp
+  constructor
+  · have same : g (V t) - g (V s) - β * (V s - V t) = g (V t) - g (V s) + β * (V t - V s) := by ring
+    rw [step, same]
+    exact secant
+  · intro slope down
+    have width : |V t - V s| = V s - V t := by
+      rw [abs_of_nonpos (by linarith)]
+      ring
+    rw [width] at secant
+    have lower := (abs_le.mp secant).1
+    nlinarith [mul_nonneg (sub_nonneg.mpr slope) (sub_nonneg.mpr down)]
+
 /-- Compose current-transfer error with calibration error to control the
 true log-gain increment, not just the capacitor proxy. -/
 theorem ChargeWindow.actual_dose_error {s t} (w : ChargeWindow s t)

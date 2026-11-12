@@ -2,7 +2,7 @@
 
 This package starts the formal connection between the circuit of PR #103
 and Kernel R. It uses integral charge balances, with an optional constructor
-from the existing `KernelR.Doses.drain_integral` theorem. It proves a
+from the existing `KernelR.drain_integral` theorem. It proves a
 charge-to-dose correspondence and explicit
 error budgets. It does **not** prove that the transistor netlist satisfies
 the hypotheses, or identify a SPICE run with a kernel execution. The
@@ -121,6 +121,11 @@ therefore remains necessary.
 ## From a dose budget to a first contact
 
 `CircuitRobustness.lean` allows bounded error in the affine gain calibration.
+`ChargeWindow.local_slope_step` replaces the affine law by a local slope: if the
+secant of the log-gain law between the two endpoint voltages is within `epsilon`
+of `-beta`, the calibration error of a step is at most `epsilon` times the
+voltage step, and the gain does not fall when the voltage does not rise and
+`epsilon <= beta`. It concerns two endpoints of one fixed gain law.
 The true log-gain step then differs from the sensor-derived dose by at most
 `k * eta + epsilon_start + epsilon_end`. Protection has the corresponding
 retention bound. A uniform parasitic-current bound `J` gives a charge budget
@@ -246,13 +251,16 @@ or calibration arithmetic, not four additional scientific contributions.
 modules (`Search.VariableNeedTolerance`, `Training.WideDoseRead`). It checks
 every declaration, including generated auxiliaries, and rejects dependencies
 on axioms other than `propext`, `Classical.choice` and `Quot.sound`. Declaration
-counts report audit coverage, not a count of independent results. No simulated
+counts report audit coverage, not a count of independent results. The audit
+requires the 69 theorems it finds today, generated auxiliaries included, and
+the native audit its 75 modules. No simulated
 sample is inserted as an axiom. The native audit also imports both new modules.
 
 The negative controls require rejection of an added project axiom, an
 admitted proof, a latency bound with the threshold-error term removed,
 a variable-dose budget without its accumulation factor, a circuit budget
-without sensor-dose uncertainty, and reuse of the
+without sensor-dose uncertainty, a local calibration error that is not
+proportional to the whole step, and reuse of the
 old pair-window lower date at dose 0.06. They temporarily edit the relevant
 Lean modules, restore them in a `finally` block and rebuild the original sources. Run them without concurrent edits or builds
 in the same checkout. CI runs the build, audit and these controls.

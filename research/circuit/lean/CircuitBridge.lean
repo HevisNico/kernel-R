@@ -3,7 +3,7 @@ import KernelR.Doses
 /-! A conditional, observable-level bridge from capacitor charge balance to
 the ERROR dose of Kernel R. This file does not formalize SKY130 devices,
 certify SPICE traces, or construct a hybrid execution. Charge is in coulombs;
-the positive coefficient k converts a decrease of storage charge to log-gain.
+the nonnegative coefficient k converts a decrease of storage charge to log-gain.
 For constant feedback capacitance Cf and inverse-voltage gain slope beta,
 k = beta / Cf. The affine log-gain law is a calibration assumption. -/
 

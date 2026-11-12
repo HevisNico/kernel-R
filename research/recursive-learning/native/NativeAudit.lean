@@ -115,6 +115,6 @@ run_cmd do
         throwError "Unexpected axiom {ax} in {name}"
     checked := checked + 1
     if info.isTheorem then theorems := theorems + 1
-  if modules < 73 then throwError "Only {modules} project modules found"
+  if modules < 75 then throwError "Only {modules} project modules found"
   if theorems == 0 then throwError "No project theorems found"
   logInfo m!"Native audit passed for {checked} declarations from {modules} modules, including {theorems} theorems."
