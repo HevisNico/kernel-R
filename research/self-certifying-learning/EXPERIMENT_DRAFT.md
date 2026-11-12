@@ -26,6 +26,14 @@ The remaining protocol must choose numerical distributions, sensor behavior,
 phase switching, baselines and costs; no empirical results are being
 retrospectively preregistered here.
 
+[EPOCHS.md](EPOCHS.md) now fixes admission and accounting for supplied
+finite-lived contracts: complete-phase deadline coverage, a common handoff
+reserve, explicit switching credit and refusal when no offer qualifies.
+A checked two-contract trajectory includes rejection of an expired candidate.
+The experiment still needs an offer-generation policy based on its sensor
+model; the checked example does not establish adaptive performance or
+perpetual availability of honest offers.
+
 ## Objective
 
 Compare the cost of maintaining a scalar task under leakage while retaining

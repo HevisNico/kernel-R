@@ -9,3 +9,6 @@ import SelfCertifyingLearning.Controller
 import SelfCertifyingLearning.Repair
 import SelfCertifyingLearning.ClosedLoop
 import SelfCertifyingLearning.RepairPlant
+import SelfCertifyingLearning.Epochs
+import SelfCertifyingLearning.EpochSafety
+import SelfCertifyingLearning.EpochExamples

@@ -128,9 +128,11 @@ adaptive comparison or transistor-level evidence.
 
 ## Remaining work
 
-The adaptive supervisor and conservative fallback now have a guarded
-handoff theorem, but there is no implemented policy that learns valid future
-envelopes, chooses when to reconfigure them, and proves all switching costs.
-The next physical bridge must derive actual dose, timing, saturation, sensor
-and leakage guarantees. The current model does not prove those properties
-of R, a continuous-time circuit, or fabricated hardware.
+[EPOCHS.md](EPOCHS.md) now supplies executable selection of finite-lived
+contract offers, explicit switching charges, and a service theorem over the
+composed calendar timeline. It still assumes that honest future envelopes
+are supplied: learning them, ensuring timely affordable renewals and modeling
+real sensing/dispatch delays remain open. The next physical bridge must
+derive actual dose, timing, saturation, sensor and leakage guarantees. These
+properties have not been established for R, continuous-time circuitry or
+fabricated hardware by this package.

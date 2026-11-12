@@ -56,6 +56,21 @@ MUTATIONS = [
     ("zero_time_write", "ClosedLoop", "| .write => c.latency\n", "| .write => 0\n"),
     ("handoff_without_buffer", "ClosedLoop", "(Controller.visit g c.guard slew c.maxWait anchor reading).delay = some delay", "(Controller.visit g c.service slew c.maxWait anchor reading).delay = some delay"),
     ("deliver_dose_early", "RepairPlant", "if t < c.latency then", "if t + 1 < c.latency then"),
+    ("expiry_at_dispatch_only", "Epochs", "offer.issued ≤ cursor.now ∧ cursor.now + span cursor offer ≤ offer.expires ∧", "offer.issued ≤ cursor.now ∧ cursor.now ≤ offer.expires ∧"),
+    ("accept_future_issuance", "Epochs", "offer.issued ≤ cursor.now ∧ cursor.now + span cursor offer ≤ offer.expires ∧", "True ∧ cursor.now + span cursor offer ≤ offer.expires ∧"),
+    ("weaken_service_on_switch", "Epochs", "decide (offer.config.Valid ∧ offer.config.service = policy.service ∧", "decide (offer.config.Valid ∧ offer.config.service ≤ policy.service ∧"),
+    ("spend_next_phase_buffer", "Epochs", "policy.handoff ≤ endpoint cursor offer ∧ charge cursor offer ≤ cursor.credit)", "True ∧ charge cursor offer ≤ cursor.credit)"),
+    ("admit_unfunded_reconfiguration", "Epochs", "policy.handoff ≤ endpoint cursor offer ∧ charge cursor offer ≤ cursor.credit)", "policy.handoff ≤ endpoint cursor offer ∧ True)"),
+    ("erase_switch_charge", "Epochs", "deficit offer.config (entry cursor offer) - cursor.debt\n", "0\n"),
+    ("refund_spent_switch_credit", "Epochs", "cursor.credit - charge cursor offer⟩", "cursor.credit⟩"),
+    ("reset_terminal_debt", "Epochs", "deficit offer.config (endpoint cursor offer), cursor.credit - charge cursor offer⟩", "0, cursor.credit - charge cursor offer⟩"),
+    ("insert_unaccounted_time_gap", "Epochs", "⟨cursor.now + span cursor offer, endpoint cursor offer,", "⟨cursor.now + span cursor offer + 1, endpoint cursor offer,"),
+    ("zero_decision_phase", "Epochs", "offer.config.Ready (entry cursor offer) ∧ 0 < offer.decisions ∧", "offer.config.Ready (entry cursor offer) ∧ 0 ≤ offer.decisions ∧"),
+    ("hide_refusal_as_completion", "Epochs", "| none => .blocked cursor", "| none => .complete cursor"),
+    ("omit_switching_from_global_balance", "Epochs", "plan.finish.debt + plan.writes ≤ cursor.debt + plan.switchCost + plan.leakBudget := by", "plan.finish.debt + plan.writes ≤ cursor.debt + plan.leakBudget := by"),
+    ("reuse_relative_origin_between_epochs", "EpochSafety", "(fun t => state (cursor.now + t)) ∧ Realizes state tail", "(fun t => state t) ∧ Realizes state tail"),
+    ("skip_reference_dose_verification", "EpochExamples", "decide (action = .write →\n      min (c.capacity : Int) (state 0 - (c.loss : Int) + (c.dose : Int)) ≤ state c.latency)", "true"),
+
 
 
 ]
@@ -81,7 +96,7 @@ def hygiene():
     files = sorted(PROJECT.glob("*.lean"))
     root_imports = set((ROOT / "SelfCertifyingLearning.lean").read_text().splitlines())
     expected = {"import SelfCertifyingLearning." + p.stem for p in files}
-    if root_imports != expected or len(files) != 11:
+    if root_imports != expected or len(files) != 14:
         raise RuntimeError("Root module must import exactly every maintained proof module")
     manifest = json.loads((ROOT / "lake-manifest.json").read_text())
     if manifest["packages"] or "[[require]]" in (ROOT / "lakefile.toml").read_text():

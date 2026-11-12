@@ -9,9 +9,10 @@ task while preserving its ability to detect and repair the next failure.
 This checkpoint proves discrete ingredients and implements an observation-level
 supervisor: interval-based search reopening and a fresh, maximal admissible
 probe delay. A conservative fallback now closes the delayed repair/scheduling
-loop under a fixed full-duration loss ceiling. Physical parameter identification,
-search inside an epoch and adaptive envelope switching remain open. There is
-no claim of a new universal principle.
+loop under a fixed full-duration loss ceiling. A finite-lived contract coordinator
+now selects supplied offers, preserves handoff reserve and pays reconfiguration
+debt across phases. Producing honest future contracts from physical observations
+and search inside an epoch remain open. There is no novelty claim.
 
 ## What is checked
 
@@ -34,6 +35,10 @@ no claim of a new universal principle.
 | A generated wait/write loop preserves service and bounds writes and elapsed time | `execution_safe`, `write_bound`, `clock_accounting` in [ClosedLoop](SelfCertifyingLearning/ClosedLoop.lean) | Starts with a repair buffer; ceiling must hold throughout all waits and writes |
 | A guarded observation window can hand off to the fallback | `guarded_visit_handoff` in [ClosedLoop](SelfCertifyingLearning/ClosedLoop.lean) | Schedule against service plus repair-time loss; next phase needs its own envelope |
 | The transition contracts have an executable plant witness | `simulate_realizes`, `simulated_service` in [RepairPlant](SelfCertifyingLearning/RepairPlant.lean) | Finite discrete execution, worst-case leakage, end-delivered dose and saturation; no hardware claim |
+| Contract selection checks completion deadlines, handoff reserve and switching credit | `select_sound`, `select_exists` in [Epochs](SelfCertifyingLearning/Epochs.lean) | First admissible supplied offer, including fallbacks; explicit refusal if none qualify |
+| Renewal preserves debt and reconfiguration is paid once | `global_balance`, `switch_budget`, `same_config_no_charge` in [Epochs](SelfCertifyingLearning/Epochs.lean) | Sum of existing phase ledgers; finite abstract switching allowance, not assumed physical variation |
+| Admitted phases compose on one calendar timeline | `composed_safe` in [EpochSafety](SelfCertifyingLearning/EpochSafety.lean) | Fixed service floor and sound transition laws; guarantee stops at a blocked boundary |
+| A contract switch has a concrete checked trajectory | `reference_realizes`, `reference_safe` in [EpochExamples](SelfCertifyingLearning/EpochExamples.lean) | An expired candidate is rejected, a prudent fallback is selected and all phase laws are checked |
 | Shared observations cannot certify a property false in a compatible world | `indistinguishable_cannot_accept` in [Deadline](SelfCertifyingLearning/Deadline.lean) | Information limit for any sound observation-only checker |
 
 All potentials, counts, damage bounds and disturbance budgets are natural
@@ -76,7 +81,9 @@ write-only episode. A concrete executable plant realizes its contracts.
 
 The observation supervisor can hand off to this loop when it preserves that
 buffer. A fixed loss ceiling for the entire fallback epoch is still required;
-the code does not infer future physical bounds or automate safe reconfiguration.
+the code does not infer future physical bounds. [EPOCHS.md](EPOCHS.md) now
+specifies checked selection and composition across supplied finite-lived
+contracts, including a reconfiguration budget and explicit blocked outcomes.
 
 ## Counterexamples are part of the result
 
@@ -110,20 +117,20 @@ No package download is required after Lean itself is installed. The
 checks the same distribution digest as the repository's existing installer.
 It builds, audits and runs the controls without requesting a Mathlib cache.
 
-[Audit](Audit.lean) examines every declaration originating in the twelve
+[Audit](Audit.lean) examines every declaration originating in the fifteen
 project modules, including private and generated declarations and names
 outside the project namespace. Only `propext`, `Classical.choice` and
 `Quot.sound` are allowed; project axioms and admitted proofs are rejected.
 The source inventory check requires every proof module to be imported.
 
-[verify.py](verify.py) compiles the unmodified module before each of thirty-six
+[verify.py](verify.py) compiles the unmodified module before each of fifty
 semantic mutations. A parser/import/name failure or timeout is not a
 successful rejection. Three further controls test unused external-namespace
 and private axioms and an admitted theorem against the compiled audit.
 The report records current source hashes and the actual audit output.
 
 The [recorded local checkpoint](validation.json) records the current standalone
-build, audited declaration/theorem counts, twelve project modules, thirty-six
+build, audited declaration/theorem counts, fifteen project modules, fifty
 paired semantic controls and three audit controls. Generated helpers are
 included in declaration counts. CI at the published commit is a separate
 check; this local record does not predict it.
@@ -140,10 +147,10 @@ build is a separate CI gate; this package does not import or rebuild it.
 2. Implement search and its stored decisions inside each epoch. Reopening
    accounting is now proved for the interval monitor, but it does not bound
    search work, safety refusals or periodic certificate renewals.
-3. Automate switching between fresh observation policies and the conservative
-   delayed-repair fallback, with valid envelopes, admission checks and costs
-   at every switch. The fallback and guarded handoff are now proved; adaptive
-   selection of their physical contracts is not.
+3. Produce honest finite-lived contract offers from observations and renew
+   them early enough to ensure continuation. Selection, calendar composition
+   and budgeted reconfiguration are now proved; perpetual availability of an
+   affordable offer and finite sensing/dispatch costs are not.
 4. Fix the discrete comparison in [EXPERIMENT_DRAFT.md](EXPERIMENT_DRAFT.md)
    before running it. No adaptive experiment is run in this checkpoint.
 5. Instantiate the contracts in R or another physical model without

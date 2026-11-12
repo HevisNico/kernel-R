@@ -31,6 +31,6 @@ run_cmd do
         throwError "Unexpected axiom {ax} in {name}"
     checked := checked + 1
     if info.isTheorem then theorems := theorems + 1
-  if modules != 12 then throwError "Expected twelve project modules, found {modules}"
+  if modules != 15 then throwError "Expected fifteen project modules, found {modules}"
   if theorems == 0 then throwError "No project theorems found"
   logInfo m!"SelfCertifyingLearning audit: {checked} declarations, {theorems} theorems, {modules} modules."

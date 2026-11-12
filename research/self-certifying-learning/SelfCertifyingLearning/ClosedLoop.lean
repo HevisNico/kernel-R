@@ -97,6 +97,12 @@ def final (c : Config) : Nat → Nat → Nat
   | 0, lower => lower
   | n + 1, lower => final c n (next c lower (choose c lower))
 
+theorem final_ready {c : Config} (valid : c.Valid) (n : Nat) {lower : Nat}
+    (ready : c.Ready lower) : c.Ready (final c n lower) := by
+  induction n generalizing lower with
+  | zero => exact ready
+  | succ n ih => exact ih (next_ready valid ready)
+
 def clock (c : Config) : Nat → Nat → Nat
   | 0, _ => 0
   | n + 1, lower => duration c (choose c lower) + clock c n (next c lower (choose c lower))
