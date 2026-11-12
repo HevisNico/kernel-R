@@ -44,7 +44,9 @@ audit declaration counts measure coverage, not scientific contributions.
 The [fixed need-tolerance test rule](NEED_TEST_PROTOCOL.md) records the
 qualification criteria, required measurements and failure reporting before
 any new campaign. The existing 200-port analysis is retrospective; the rule
-does not turn it into a preregistered experiment.
+does not turn it into a preregistered experiment. The reproducible
+[need-budget diagnostic](NEED_BUDGET.md) retains all 200 ports and reports
+the remaining disagreement instead of tuning a budget to exclude it.
 
 ## Results
 

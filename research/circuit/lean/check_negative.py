@@ -9,6 +9,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parent
 TIMING = ROOT / "CircuitTiming.lean"
+NEED = ROOT / "CircuitNeed.lean"
 VARIABLE = ROOT.parents[1] / "recursive-learning/native/Search/VariableNeedTolerance.lean"
 WIDE = ROOT.parents[1] / "recursive-learning/native/Training/WideDoseRead.lean"
 
@@ -31,7 +32,7 @@ def main():
     bound = "|root - nominal| ≤ (ε + δ) / speed"
     if original.count(bound) != 2:
         raise RuntimeError("Update the latency mutation for the current theorem statements")
-    originals = {p: p.read_text() for p in (TIMING, VARIABLE, WIDE)}
+    originals = {p: p.read_text() for p in (TIMING, VARIABLE, WIDE, NEED)}
     dose_room = "a + m * b + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2"
     if originals[VARIABLE].count(dose_room) != 2:
         raise RuntimeError("Update the variable-dose mutation for the current statements")
@@ -46,6 +47,9 @@ def main():
         ("omitted dose accumulation factor", VARIABLE,
          originals[VARIABLE].replace(dose_room, "a + b + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2", 1),
          "error: Search/VariableNeedTolerance.lean"),
+        ("omitted sensor-dose uncertainty", NEED,
+         originals[NEED].replace("m * (k * η + σ + e)", "m * (k * η + e)", 1),
+         "error: CircuitNeed.lean"),
         ("old pair window with dose 0.06", WIDE,
          originals[WIDE].replace("59 / 250", "239 / 1000").replace("59 / 500", "239 / 2000"),
          "error: Training/WideDoseRead.lean"),

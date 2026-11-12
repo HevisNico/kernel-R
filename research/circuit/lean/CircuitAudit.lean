@@ -58,3 +58,5 @@ run_cmd do
 
 #print axioms RecursiveLearning.Native.stopped_read_latency_two_thirds_wide
 #print axioms RecursiveLearning.Native.stopped_read_skew_two_thirds_wide
+
+#print axioms KernelR.Circuit.needAlong_of_circuit_tolerances

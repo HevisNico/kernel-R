@@ -81,18 +81,22 @@ a + m * b + (20/17) * ell + 1/8000 < d0/2.
 ```
 
 The proof bounds cumulative doses between constant ladders and applies
-`needIs_of_tolerance`. `CircuitNeed.lean` composes this with `dose_error`:
-if each sensor window represents nominal dose `d0` and its transferred-charge
-residual is at most `eta`, use `b = k * eta`. The gain increments must match
-the window increments and remain nonnegative. With an additional linkage
-error `e`, including calibration or inter-window drift, use `b = k * eta + e`.
-An error in the sensor-derived nominal dose must likewise be budgeted;
-it is not implied to vanish by the circuit measurements.
+`needIs_of_tolerance`. The general circuit corollary,
+`needAlong_of_circuit_tolerances`, composes this with `dose_error`. It allows
+sensor-dose error `abs(k * (Qs(start)-Qs(stop)) - d0) <= sigma`, transferred-charge
+residual at most `eta`, and additional linkage error `e`, including calibration
+or inter-window drift. Use **`b = k * eta + sigma + e`**. The gain increments
+must remain nonnegative. `sigma` is a deterministic bound, not a noise
+standard deviation. The earlier exact-sensor corollaries remain available as
+special cases; exact nominal sensor dose is no longer required by the general result.
 
 This proves a variable-dose **scalar need**. It does not replace the
 fixed-dose `Trained`, `Runs` or compiled-network execution constructors.
 The campaign's 190 exact counts out of 200 ports are empirical comparisons,
 not assumptions or certificates of the theorem's tolerance inequalities.
+The [fixed test rule](../NEED_TEST_PROTOCOL.md) and
+[retrospective 200-port diagnostic](../NEED_BUDGET.md) distinguish missing
+physical bounds from the exploratory peak-based calculation.
 
 ## Ideal read windows up to dose 0.06
 
@@ -220,7 +224,8 @@ sample is inserted as an axiom. The native audit also imports both new modules.
 
 The negative controls require rejection of an added project axiom, an
 admitted proof, a latency bound with the threshold-error term removed,
-a variable-dose budget without its accumulation factor, and reuse of the
+a variable-dose budget without its accumulation factor, a circuit budget
+without sensor-dose uncertainty, and reuse of the
 old pair-window lower date at dose 0.06. They temporarily edit the relevant
 Lean modules, restore them in a `finally` block and rebuild the original sources. Run them without concurrent edits or builds
 in the same checkout. CI runs the build, audit and these controls.

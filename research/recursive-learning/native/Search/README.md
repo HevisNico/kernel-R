@@ -166,8 +166,9 @@ it is exactly `NeedIs`. `needAlong_of_step_tolerance` takes actual gain
 increments and requires their budgets to include inter-window drift.
 
 The circuit corollaries in [CircuitNeed.lean](../../../circuit/lean/CircuitNeed.lean)
-use `b = k * eta` for a charge-residual bound `eta`, with exact calibration
-and state linkage, or `b = k * eta + e` for an additional linkage error `e`.
+use `b = k * eta + sigma + e` for charge residual `eta`, sensor-dose
+uncertainty `sigma`, and additional calibration/inter-window linkage error
+`e`. The earlier exact-sensor versions are retained as special cases.
 These are scalar read contracts; variable-dose hybrid execution and network
 composition remain separate obligations.
 
