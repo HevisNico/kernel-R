@@ -160,7 +160,8 @@ every port. One port of 200 stops after 1 silent pulse.
   campaign had started. GitHub received the same file in a private
   repository at 07:22:56 UTC, and the first results at 08:55:13 UTC.
   Whoever has read access to that repository can check it; a reader
-  without it cannot. The record is in
+  without it cannot. The author gives that access on request. The
+  record, and whom to ask, are in
   [`PREDICTION_PROVENANCE.md`](PREDICTION_PROVENANCE.md).
 - **The predictions are not blind.** The file says what was known when
   it was written.

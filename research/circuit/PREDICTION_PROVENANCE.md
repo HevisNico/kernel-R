@@ -60,6 +60,12 @@ git rev-parse HEAD:research/circuit/PREDICTION.md
 sha256sum research/circuit/PREDICTION.md
 ```
 
+## To consult the private repository
+
+Ask the author, Nicolas Breuillaud. Open an issue on this repository,
+or write to the GitHub account `HevisNico`. Read access to the private
+repository is given on request, for the time of the check.
+
 ## What this shows, and what it does not
 
 - **It shows** that the predictions, the netlist and the list of runs
@@ -68,7 +74,6 @@ sha256sum research/circuit/PREDICTION.md
 - **It does not show** that no run had been made before 07:22:56. That
   stays a statement of the author.
 - **It is not public.** A reader without access to the private
-  repository cannot check any of this. The owner of that repository can
-  give read access, or make it public.
+  repository cannot check any of this.
 - **The predictions are not blind.** `PREDICTION.md` lists what was
   known when it was written.
