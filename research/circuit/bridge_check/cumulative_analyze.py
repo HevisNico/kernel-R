@@ -100,7 +100,9 @@ def main():
     cum = [r for r in out if "cumulative_room" in r]
     cbest = max(cum, key=lambda r: r["cumulative_room"]) if cum else None
     S = dict(rule="CUMULATIVE_PROTOCOL.md", beta_per_V=beta, epsilon_per_V=eps, b_parts=parts, b=b, ports=len(out),
-             per_write=dict(evaluated=len(ev), positive_room=sum(r["per_write_room"] > 0 for r in ev), largest_term_counts=dominant,
+             per_write=dict(evaluated=len(ev), positive_room=sum(r["per_write_room"] > 0 for r in ev),
+                            positive_room_count_disagrees=[f"{r['run']} port {r['port']}" for r in ev if r["per_write_room"] > 0 and r["count_agrees"] != "True"],
+                            largest_term_counts=dominant,
                             closest=dict(run=best["run"], port=best["port"], room=best["per_write_room"], m=best["m"], a=best["a"],
                                          b_over_b_max=best["b_over_b_max"]),
                             median_b_over_b_max=statistics.median(finite) if finite else None,
@@ -119,12 +121,14 @@ def main():
          "## Part 1. Which term makes the per-write budget fail", "",
          f"`b = k*eta + sigma + e`, measured on the nominal replays: {parts['k_eta']:.2e} + {parts['sigma']:.2e} + ({parts['linkage']:.2e} + {parts['calibration']:.2e}) = **{b:.5f}** per write. "
          f"The local calibration error is {parts['calibration'] / b:.0%} of it and the transfer residual {parts['k_eta'] / b:.0%}. `d0/2` is about {statistics.median(r['half_d0'] for r in ev):.4f}.", "",
-         f"- Ports evaluated: {len(ev)} of {len(out)}. Positive room: **{S['per_write']['positive_room']}**.",
+         f"- Ports evaluated: {len(ev)} of {len(out)}. Positive room under these estimates: **{S['per_write']['positive_room']}**, "
+         f"of which the count disagrees on {len(S['per_write']['positive_room_count_disagrees'])}. This is not a certificate.",
          "- Largest term of the budget: " + ", ".join(f"`{k}` on {v} ports" for k, v in sorted(dominant.items(), key=lambda kv: -kv[1])) + ".",
-         f"- Port closest to a positive room: `{best['run']}`, port {best['port']}, with `m` = {best['m']}, `a` = {best['a']:.5f}, `m*b` = {best['m_times_b']:.5f}, room {best['per_write_room']:+.5f}. "
-         + (f"Its `b` would have to be divided by {best['b_over_b_max']:.2f}." if best["b_over_b_max"] else "No `b` gives it a positive room."),
-         f"- For the median port `b` would have to be divided by {S['per_write']['median_b_over_b_max']:.1f}. "
-         f"On {S['per_write']['ports_where_no_b_suffices']} ports no `b` suffices: `a` alone exceeds what `d0/2` leaves.", "",
+         f"- Port with the largest room: `{best['run']}`, port {best['port']}, with `m` = {best['m']}, `a` = {best['a']:.5f}, `m*b` = {best['m_times_b']:.5f}, room {best['per_write_room']:+.5f}. "
+         + (f"Its `b` could be {1 / best['b_over_b_max']:.1f} times larger." if best["b_over_b_max"] else "No `b` gives it a positive room."),
+         f"- For the median port `b` would have to be divided by {S['per_write']['median_b_over_b_max']:.1f}: from {b:.4f} to {b / S['per_write']['median_b_over_b_max']:.4f} per write, "
+         f"{b / S['per_write']['median_b_over_b_max'] / statistics.median(r['d0'] for r in ev):.0%} of a dose. "
+         f"On {S['per_write']['ports_where_no_b_suffices']} port no `b` suffices: `a` alone exceeds what `d0/2` leaves.", "",
          "| m | Ports | `m*b` | Median `a` | Median room | Largest room | Median `b_max` | `b / b_max`, median |", "|---|---|---|---|---|---|---|---|"]
     for m in sorted(by_m):
         g = by_m[m]
