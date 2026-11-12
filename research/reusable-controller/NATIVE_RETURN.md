@@ -3,9 +3,10 @@
 The native [SelectorReturn.lean](../recursive-learning/native/Teaching/SelectorReturn.lean)
 constructs a continuation after either selector read outcome. This closes
 the return sub-obligation, not the whole reusable-round milestone.
-The subsequent [finite re-preparation proof](NATIVE_REPREPARE.md) closes the
-minimal M2 continuation and its input count under explicit initial-resource
-assumptions. This document records the narrower return result.
+The subsequent [finite re-preparation proof](NATIVE_REPREPARE.md) supplies
+another sub-obligation, with its input count under explicit initial-resource
+assumptions. The [recurrent construction](NATIVE_ROUNDS.md) addresses the
+full M2 reuse definition. This document records the narrower return result.
 
 ## Constructed, checked statements
 

@@ -87,13 +87,21 @@ router between proof fragments is not a solution.
 The [native return checkpoint](NATIVE_RETURN.md) now constructs the read's
 FAST/SLOW continuation to rest for positive recovery. It preserves the gains,
 recovery and sensor rest bands and inherits the native physical invariant.
-The [minimal M2 continuation](NATIVE_REPREPARE.md) now constructs real
+The [finite re-preparation checkpoint](NATIVE_REPREPARE.md) constructs real
 re-preparation from that rest boundary to the next admitted read for either
 selector value. It charges exactly three new deliveries, preserves the gains
 and uses one fixed router across the finite execution. The external ignition
 token is present in the initial queue; initial gains and recovery are prepared
-resources. Autonomous repeated cycles and native implementation of M1 remain
-open. The next discrete adaptive-search milestone has not started.
+resources. This existential finite checkpoint did not close M2.
+
+The [recurrent native construction](NATIVE_ROUNDS.md) now provides a preserved
+quiet boundary, a fixed period of 32 for every admissible supplied delay,
+every finite `n` under one router, and the same behavior for every complete
+execution. The actual full programme includes the first read arrival and
+costs exactly `3*n+1` deliveries. It uses an externally supplied finite
+ignition calendar and prepared resources; native implementation of M1 and
+preparation from birth remain open. The adaptive-search milestone has not
+started and remains behind the M2 validation gate.
 
 ## Reproduce
 

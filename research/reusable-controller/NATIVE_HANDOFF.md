@@ -3,9 +3,11 @@
 This is a specification and source review, **not a proved native controller bridge**.
 The reference is Kernel R commit `518852d237dd4d45eda2c2b85aaad2e592bfdf89`.
 The [read-to-rest checkpoint](NATIVE_RETURN.md) and
-[finite re-preparation proof](NATIVE_REPREPARE.md) close the minimal M2
-continuation with three new input deliveries and explicit prepared resources.
-This is not autonomous multi-round reuse or a realization of M1.
+[finite re-preparation proof](NATIVE_REPREPARE.md) were necessary sub-obligations,
+not a closure of reuse. The [recurrent construction](NATIVE_ROUNDS.md) now
+proves a preserved boundary, fixed calendar, arbitrary finite iteration and
+universal complete-run behavior. It remains distinct from a native realization
+of M1 and from an unbounded autonomous scheduler.
 
 ## Why the existing cycle cannot simply be iterated
 
@@ -50,15 +52,16 @@ Preparation from birth would be a separate theorem.
 |---|---|
 | Read-to-rest continuation | Constructed for both values with positive recovery, quiet sensors and an empty queue; see [the checked scope](NATIVE_RETURN.md). Initial preparation and physical invariants remain explicit |
 | Re-preparation | Constructed for either selector value with one initially queued ignition and two routed inputs; exactly three new deliveries; see [scope and assumptions](NATIVE_REPREPARE.md) |
-| Fixed-router reuse | Distinguish ignition, work, read and feedback events for multiple rounds without replacing the router or predetermining the validation outcomes |
+| Fixed-router selector reuse | Constructed for every finite count under one periodic router, preserving the actual future queue; see [M2](NATIVE_ROUNDS.md). Physical validation feedback is not connected |
 | Acceptance and rejection | Actual learner reports decide whether the candidate is committed; rejection keeps the accepted lesson and permits the other coordinate |
 | Decode refinement | The decoded native endpoints implement `round`, with an explicit map for unavailable decrements and halting |
 | Cost refinement | Bound native proposals, validation, reports, memory writes and reset in the units chosen for `work`; identify fresh-resource costs |
-| Iteration | Compose the native rounds under the same router, with an explicit resource budget and complete witnesses |
+| Selector iteration | Constructed with `3*n` deliveries, or `3*n+1` with the actual initial read arrival; complete native/crossing witnesses and universal endpoint/FIRE guarantees |
+| Controller iteration | Connect selector cycles, validation, acceptance and retained lesson updates under one router; this does not follow from selector iteration alone |
 
 The discrete convergence theorem does not discharge any row of this table.
-The native return and re-preparation proofs discharge the first two rows
-under their stated premises, for a finite externally initialized programme.
+The native return, re-preparation and recurrence proofs discharge their
+selector rows under the explicit prepared-resource and finite-calendar premises.
 Finite complete witnesses must precede a universal comparison claim; comparing
 only complete runs is not an existence or progress argument. Threshold-contact
 and geometric-crossing hypotheses must be retained when using that semantics.
@@ -80,5 +83,7 @@ learned search strategies, recurrent-network learning, or transistor-level
 correspondence. The next discrete milestone is a search controller that
 adjusts its own search rule under an immutable evaluator, validated adoption,
 preserved invariants and explicit budgets. It remains separate from the open
-native refinement obligations above. See the [next gate](NATIVE_REPREPARE.md#next-gate-adaptive-search-still-discrete)
+native refinement obligations above. See the [next gate](NATIVE_REPREPARE.md#adaptive-search-stays-behind-the-reuse-gate)
 for the cost and inexact-evaluation conditions that must not be assumed away.
+M2 validation must cover all four reuse obligations in [NATIVE_ROUNDS.md](NATIVE_ROUNDS.md)
+before that next milestone starts.

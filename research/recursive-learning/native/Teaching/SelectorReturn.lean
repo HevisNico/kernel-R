@@ -62,6 +62,9 @@ structure QuietMainReturn (θ : Fin 1 → Parameters) (route : Router 1) (s : Sn
   execution : Execution θ route s final
   transverse : execution.ContactsTransversal
   later : s.time < final.time
+  date : final.time = s.time + if s.main 0 = .fast then
+    Real.log (s.x 0 .q / (1 / 4)) / a + Real.log (5 / 2) / s.x 0 .b
+    else slowReopenDuration s 0
   ready : ReadyCoordinates final 0
   quiet : QuietSensors final
   charge : final.x 0 .q = 1 / 10
@@ -115,6 +118,7 @@ theorem quiet_slow_return_exists {θ route s} (quiet : QuietSensors s)
   refine ⟨{
     final := final, execution := e, transverse := by trivial
     later := later, ready := ⟨readyFinal, ?_, quietFinal.auxiliary⟩
+    date := by simp [final, setMain, before, frozenWorkEnd, T, slow]
     quiet := quietFinal, charge := chargeFinal, gains := fun _ => rfl, recovery := rfl
     emissions := rfl, deliveries := rfl
     complete := quiet_return_complete e quietFinal readyFinal chargeFinal }⟩
@@ -147,6 +151,16 @@ theorem quiet_fast_return_exists {θ route s} (quiet : QuietSensors s)
     final := tail.final, execution := e
     transverse := (Execution.contactsTransversal_append _ _).2 ⟨by trivial, tail.transverse⟩
     later := later.trans tail.later, ready := tail.ready, quiet := tail.quiet, charge := tail.charge
+    date := by
+      rw [tail.date]
+      have slowMode : slow.main 0 = .slow := by simp [slow, setMain]
+      rw [slowMode]
+      simp only [reduceCtorEq, ite_false]
+      change T + Real.log (before.x 0 .q / (1 / 10)) / s.x 0 .b = _
+      rw [root, fast]
+      norm_num
+      dsimp [T]
+      ring
     gains := tail.gains, recovery := tail.recovery
     emissions := by rw [Execution.emissions_append, tail.emissions]; rfl
     deliveries := by rw [Execution.deliveries_append, tail.deliveries]; rfl

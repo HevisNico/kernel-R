@@ -1,11 +1,12 @@
-# M2: finite native re-preparation with counted inputs
+# Finite native re-preparation checkpoint
 
 [SelectorReprepare.lean](../recursive-learning/native/Teaching/SelectorReprepare.lean)
 constructs a native read, return to rest and re-preparation, preserving the
-stored selector. This closes the **minimal M2 scope**: real re-preparation
-inputs and their pulse cost for a prepared controller. It works for either
-selector value. It does not implement the discrete controller or autonomous
-multi-round reuse.
+stored selector, with real re-preparation inputs and their pulse cost for a
+prepared controller. It works for either selector value. **This checkpoint
+does not close M2:** it lacks a prescribed restart calendar and a recurrent
+boundary theorem. The subsequent [reusable-round construction](NATIVE_ROUNDS.md)
+addresses those obligations. Neither implements the discrete search controller.
 
 ## One execution, one fixed router
 
@@ -102,7 +103,11 @@ compiled objects are preserved. The [validation record](native-reprepare-validat
 records source hashes and the focused audit; CI rebuilds the whole native
 package and repeats both the return and re-preparation controls.
 
-## Next gate: adaptive search, still discrete
+## Adaptive search stays behind the reuse gate
+
+Before any adaptive-search work, M2 requires invariant preservation, a fixed
+calendar, an `n`-round physical recurrence and universal complete-run behavior.
+The proofs and validation for that stricter scope are in [NATIVE_ROUNDS.md](NATIVE_ROUNDS.md).
 
 M1's fixed search rule has not been changed. The next milestone may adjust
 step, coordinate order or stopping from recorded trials, while leaving the

@@ -7,6 +7,7 @@ on:
       - research/recursive-learning/**
       - research/reusable-controller/verify_native_return.py
       - research/reusable-controller/verify_native_reprepare.py
+      - research/reusable-controller/verify_native_rounds.py
       - proof/lean/**
       - .github/workflows/recursive-learning.yml
       - .github/actions/build-lean/**
@@ -15,6 +16,7 @@ on:
       - research/recursive-learning/**
       - research/reusable-controller/verify_native_return.py
       - research/reusable-controller/verify_native_reprepare.py
+      - research/reusable-controller/verify_native_rounds.py
       - proof/lean/**
       - .github/workflows/recursive-learning.yml
       - .github/actions/build-lean/**
@@ -57,4 +59,11 @@ jobs:
         with:
           name: native-reprepare-validation
           path: ${{ runner.temp }}/native-reprepare-validation.json
+          if-no-files-found: error
+      - name: Reject recurrent native round mutations
+        run: python -B research/reusable-controller/verify_native_rounds.py --report "$RUNNER_TEMP/native-rounds-validation.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-rounds-validation
+          path: ${{ runner.temp }}/native-rounds-validation.json
           if-no-files-found: error
