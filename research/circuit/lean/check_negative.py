@@ -40,6 +40,9 @@ def main():
     dose_room = "a + m * b + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2"
     if originals[VARIABLE].count(dose_room) != 2:
         raise RuntimeError("Update the variable-dose mutation for the current statements")
+    cumulative_room = "a + B + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2"
+    if originals[VARIABLE].count(cumulative_room) != 1:
+        raise RuntimeError("Update the cumulative-budget mutation for the current statement")
     controls = [
         ("project axiom", TIMING, original + "\naxiom CircuitNegativeAxiom : False\n",
          "Unexpected project axiom"),
@@ -50,6 +53,9 @@ def main():
          "error: CircuitTiming.lean"),
         ("omitted dose accumulation factor", VARIABLE,
          originals[VARIABLE].replace(dose_room, "a + b + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2", 1),
+         "error: Search/VariableNeedTolerance.lean"),
+        ("omitted cumulative budget", VARIABLE,
+         originals[VARIABLE].replace(cumulative_room, "a + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2", 1),
          "error: Search/VariableNeedTolerance.lean"),
         ("omitted sensor-dose uncertainty", NEED,
          originals[NEED].replace("m * (k * η + σ + e)", "m * (k * η + e)", 1),

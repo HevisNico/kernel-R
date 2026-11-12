@@ -25,7 +25,7 @@ run_cmd do
         checked := checked + 1
         if info.isTheorem then theorems := theorems + 1
   if modules != roots.size then throwError "Only {modules} bridge modules found"
-  if theorems < 69 then throwError "Only {theorems} bridge theorems found"
+  if theorems < 70 then throwError "Only {theorems} bridge theorems found"
   logInfo m!"Circuit bridge audit passed: {checked} declarations in {modules} modules (coverage, including generated auxiliaries)."
 
 #print axioms KernelR.Circuit.ChargeWindow.balance
@@ -50,6 +50,7 @@ run_cmd do
 #print axioms KernelR.Circuit.robust_first_crossing_with_latency
 #print axioms KernelR.Circuit.current_error_first_crossing
 #print axioms KernelR.Circuit.grazing_contact_counterexample
+#print axioms RecursiveLearning.Native.needAlong_of_cumulative_tolerance
 #print axioms RecursiveLearning.Native.needAlong_of_variable_doses
 #print axioms KernelR.Circuit.needAlong_of_circuit_residual
 #print axioms KernelR.Circuit.needAlong_of_circuit_residual_and_handoff

@@ -80,7 +80,13 @@ The sufficient budget is unchanged:
 a + m * b + (20/17) * ell + 1/8000 < d0/2.
 ```
 
-The proof bounds cumulative doses between constant ladders and applies
+`needAlong_of_cumulative_tolerance` is the finer statement: if every cumulated
+gain up to the m-th write is within `B` of the nominal ladder,
+`abs(z(n) - z(0) - n*d0) <= B` for `n <= m`, the gain does not fall below its
+m-th value afterwards, and `a + B + (20/17)*ell + 1/8000 < d0/2`, the need is
+`m`. Nothing is assumed of a single step, so errors of opposite signs may
+cancel. The variable-dose theorem is its corollary with `B = m*b`. The proof
+compares the sequence with two exact ladders and applies
 `needIs_of_tolerance`. The general circuit corollary,
 `needAlong_of_circuit_tolerances`, composes this with `dose_error`. It allows
 sensor-dose error `abs(k * (Qs(start)-Qs(stop)) - d0) <= sigma`, transferred-charge
@@ -257,13 +263,14 @@ modules (`Search.VariableNeedTolerance`, `Training.WideDoseRead`). It checks
 every declaration, including generated auxiliaries, and rejects dependencies
 on axioms other than `propext`, `Classical.choice` and `Quot.sound`. Declaration
 counts report audit coverage, not a count of independent results. The audit
-requires the 69 theorems it finds today, generated auxiliaries included, and
+requires the theorems it finds today, generated auxiliaries included, and
 the native audit its 75 modules. No simulated
 sample is inserted as an axiom. The native audit also imports both new modules.
 
 The negative controls require rejection of an added project axiom, an
 admitted proof, a latency bound with the threshold-error term removed,
-a variable-dose budget without its accumulation factor, a circuit budget
+a variable-dose budget without its accumulation factor, a cumulative budget
+without its term `B`, a circuit budget
 without sensor-dose uncertainty, a local calibration error that is not
 proportional to the whole step, and reuse of the
 old pair-window lower date at dose 0.06. They temporarily edit the relevant

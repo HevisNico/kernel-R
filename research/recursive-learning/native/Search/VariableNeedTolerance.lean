@@ -26,9 +26,41 @@ theorem pulseFires_mono_logGain {c z w level : ℝ} (order : z ≤ w)
   have drive := mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr order) (response_nonnegative ht.1)
   linarith
 
+/-- A budget on cumulated doses. Only the distance of each cumulated gain to
+the nominal ladder matters, up to the m-th write, and the gain must not fall
+below its m-th value afterwards. Nothing is assumed of a single step, so
+errors of opposite signs may cancel. -/
+theorem needAlong_of_cumulative_tolerance {level level₀ d₀ a B ℓ : ℝ} {m : ℕ}
+    (z : ℕ → ℝ) (fire : 19 / 20 ≤ level) (fire₀ : 19 / 20 ≤ level₀)
+    (after : ∀ n, m ≤ n → z m ≤ z n)
+    (gain : |z 0 - needCentre level₀ d₀ m| ≤ a)
+    (cumulative : ∀ n, n ≤ m → |z n - z 0 - n * d₀| ≤ B)
+    (levelTol : |level - level₀| ≤ ℓ)
+    (room : a + B + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2) :
+    NeedAlong level z m := by
+  have BPos : 0 ≤ B := (abs_nonneg _).trans (cumulative 0 (Nat.zero_le m))
+  have aPos : 0 ≤ a := (abs_nonneg _).trans gain
+  have ellPos : 0 ≤ ℓ := (abs_nonneg _).trans levelTol
+  have dPos : 0 ≤ d₀ := by linarith
+  obtain ⟨gLo, gHi⟩ := abs_le.mp gain
+  have ladderRoom : a + B + (m : ℝ) * 0 + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2 := by
+    rw [mul_zero, add_zero]
+    exact room
+  have upperNeed := needIs_of_tolerance (dose := d₀) (z₀ := z 0 + B) (a := a + B) (b := 0)
+    fire fire₀ dPos (abs_le.mpr ⟨by linarith, by linarith⟩) (by simp) levelTol ladderRoom
+  have lowerNeed := needIs_of_tolerance (dose := d₀) (z₀ := z 0 - B) (a := a + B) (b := 0)
+    fire fire₀ dPos (abs_le.mpr ⟨by linarith, by linarith⟩) (by simp) levelTol ladderRoom
+  constructor
+  · intro n hn c lo hi actual
+    have h := abs_le.mp (cumulative n hn.le)
+    exact upperNeed.1 n hn c lo hi (pulseFires_mono_logGain (by linarith [h.2]) actual)
+  · intro n hn c lo hi
+    have h := abs_le.mp (cumulative m le_rfl)
+    exact pulseFires_mono_logGain (by linarith [h.1, after n hn]) (lowerNeed.2 m le_rfl c lo hi)
+
 /-- The original tolerance budget also covers independently varying doses.
-The upper and lower constant ladders bound every cumulative sum, and the
-existing needIs_of_tolerance theorem supplies their common need. -/
+It is the cumulative budget with `B = m * b`: a bound `b` on every step
+bounds every cumulated sum up to the m-th write by `m * b`. -/
 theorem needAlong_of_variable_doses {level level₀ d₀ z₀ a b ℓ : ℝ} {m : ℕ}
     (dose : ℕ → ℝ)
     (fire : 19 / 20 ≤ level) (fire₀ : 19 / 20 ≤ level₀)
@@ -39,35 +71,27 @@ theorem needAlong_of_variable_doses {level level₀ d₀ z₀ a b ℓ : ℝ} {m 
     (room : a + m * b + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2) :
     NeedAlong level (fun n => z₀ + ∑ j ∈ Finset.range n, dose j) m := by
   have bPos : 0 ≤ b := (abs_nonneg _).trans (doseTol 0)
-  have aPos : 0 ≤ a := (abs_nonneg _).trans gain
-  have ellPos : 0 ≤ ℓ := (abs_nonneg _).trans levelTol
-  have mb : 0 ≤ (m : ℝ) * b := mul_nonneg (Nat.cast_nonneg m) bPos
-  have dPos : 0 ≤ d₀ := by linarith
-  have lowerTol : |max 0 (d₀ - b) - d₀| ≤ b := by
-    rcases le_total 0 (d₀ - b) with h | h
-    · rw [max_eq_right h]
-      exact abs_le.mpr ⟨by linarith, by linarith⟩
-    · rw [max_eq_left h]
-      exact abs_le.mpr ⟨by linarith, by linarith⟩
-  have upperNeed := needIs_of_tolerance (dose := d₀ + b) fire fire₀ (by positivity)
-    gain (show |d₀ + b - d₀| ≤ b by simpa using (abs_of_nonneg bPos).le) levelTol room
-  have lowerNeed := needIs_of_tolerance (dose := max 0 (d₀ - b)) fire fire₀
-    (le_max_left _ _) gain lowerTol levelTol room
-  have bounds (n : ℕ) :
-      n * max 0 (d₀ - b) ≤ ∑ j ∈ Finset.range n, dose j ∧
-      (∑ j ∈ Finset.range n, dose j) ≤ n * (d₀ + b) := by
+  have bounds (n : ℕ) : |(∑ j ∈ Finset.range n, dose j) - n * d₀| ≤ n * b := by
     induction n with
     | zero => simp
     | succ n ih =>
       have h := abs_le.mp (doseTol n)
-      have low : max 0 (d₀ - b) ≤ dose n := max_le (dosePos n) (by linarith [h.1])
+      have i := abs_le.mp ih
       simp only [Finset.sum_range_succ, Nat.cast_add, Nat.cast_one]
-      exact ⟨by nlinarith [ih.1], by nlinarith [ih.2, h.2]⟩
-  constructor
-  · intro n hn c lo hi actual
-    exact upperNeed.1 n hn c lo hi (pulseFires_mono_logGain (by linarith [(bounds n).2]) actual)
-  · intro n hn c lo hi
-    exact pulseFires_mono_logGain (by linarith [(bounds n).1]) (lowerNeed.2 n hn c lo hi)
+      exact abs_le.mpr ⟨by nlinarith [h.1, i.1], by nlinarith [h.2, i.2]⟩
+  apply needAlong_of_cumulative_tolerance (B := m * b) _ fire fire₀ ?_ ?_ ?_ levelTol room
+  · intro n hn
+    have grow : ∑ j ∈ Finset.range m, dose j ≤ ∑ j ∈ Finset.range n, dose j :=
+      Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_subset_range.mpr hn) (fun j _ _ => dosePos j)
+    linarith
+  · simpa using gain
+  · intro n hn
+    have scale : (n : ℝ) * b ≤ m * b := mul_le_mul_of_nonneg_right (Nat.cast_le.mpr hn) bPos
+    have same : z₀ + ∑ j ∈ Finset.range n, dose j - (z₀ + ∑ j ∈ Finset.range 0, dose j) - n * d₀ =
+        (∑ j ∈ Finset.range n, dose j) - n * d₀ := by
+      simp
+    rw [same]
+    exact (bounds n).trans scale
 
 /-- Equivalent form for a contiguous sequence of actual log-gain states.
 The step budget must include every change between two tested states. -/
