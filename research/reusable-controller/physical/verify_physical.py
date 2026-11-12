@@ -19,7 +19,7 @@ NATIVE = CONTROLLER.parent / 'recursive-learning/native'
 FILES = ['Counts.lean', 'Envelope.lean', 'Controller.lean', 'RecordedData.lean',
          'RecordedBridge.lean', 'Replay.lean', 'LogIntervals.lean', 'MeasuredGains.lean',
          'Readout.lean', 'RecordedGains.lean', 'ReadoutBridge.lean', 'IdealExample.lean',
-         'PeakError.lean', 'PeakBridge.lean', 'PeakMeasurement.lean']
+         'PeakError.lean', 'PeakBridge.lean', 'PeakMeasurement.lean', 'MeasurementBridge.lean']
 
 
 def command(args, cwd=HERE, env=None, timeout=180):
@@ -128,6 +128,14 @@ def main():
         ('weaken_peak_residual_limit', 'PeakBridge.lean', lambda s: replace_once(s,
             'epsilonAdmissible : epsilonPeak ≤ 7 / 100010',
             'epsilonAdmissible : epsilonPeak ≤ 1 / 10000'), None),
+        ('weaken_charge_sensor_accuracy', 'MeasurementBridge.lean', lambda s: replace_once(s,
+            'chargeError : ∀ k, |trueC k - C k| ≤ 1 / 10000000',
+            'chargeError : ∀ k, |trueC k - C k| ≤ 1 / 1000000'), None),
+        ('weaken_measurement_model_budget', 'MeasurementBridge.lean', lambda s: replace_once(s,
+            'correctedPeak (trueQ k) (trueC k) (duration k) (kappa k)| ≤ 1 / 50000',
+            'correctedPeak (trueQ k) (trueC k) (duration k) (kappa k)| ≤ 1 / 10000'), None),
+        ('disconnect_rest_charge_from_sensor', 'MeasurementBridge.lean', lambda s: replace_once(s,
+            'charge := w.trueC', 'charge := fun _ => 1 / 10'), None),
     ]
     results = []
     for name, changed, mutate, audit_marker in mutations:

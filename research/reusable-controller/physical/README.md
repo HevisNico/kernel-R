@@ -42,6 +42,7 @@ merging PR #107; no prior result or certification script is changed.
 | [ReadoutBridge.lean](PhysicalEvaluator/ReadoutBridge.lean) | Those inferred bounds discharge the true-gain premises after paying an explicit readout residual | True normalized gain differs from the inferred gain by at most `1e-4`, plus rest-state and detection envelopes |
 | [PeakMeasurement.lean](PhysicalEvaluator/PeakMeasurement.lean) | Peak and initial-charge measurement errors propagate to a corrected-amplitude budget, together with a separate model residual | Supplied measurement-error bounds and physical/model discrepancy |
 | [PeakError.lean](PhysicalEvaluator/PeakError.lean), [PeakBridge.lean](PhysicalEvaluator/PeakBridge.lean) | Amplitude error becomes a log-gain error and feeds the recorded controller contract | A physical corrected-amplitude residual within the proved admissible budget |
+| [MeasurementBridge.lean](PhysicalEvaluator/MeasurementBridge.lean) | Raw readout vectors and declared sensor/model budgets derive both the amplitude residual and the actual resting-charge band | Supplied peak, charge and model-error bounds, plus physical detection envelopes |
 | [Controller.lean](PhysicalEvaluator/Controller.lean) | Derived feasibility precision, exact computed-cost precision, Ready, retained reference-cost non-degradation and budgets | Fixed two-block benchmark and declared resource accounting |
 
 `FiniteProbeCertificate m` contains only `m+1` samples. It has no exact-count
@@ -218,6 +219,51 @@ supplied model residual, or a separate correction budget where applicable.
 The theorem does not estimate those errors from count agreement. No #109
 data or empirical residual bound is introduced by this checkpoint.
 
+### Recorded sensor-to-controller entry
+
+The generated projection now retains exact `Q`, `C`, `Duration` and `Kappa`
+vectors for each port, in addition to the inferred gains. `Q` uses `q_peak`
+on silent reads and `q_tc` on the first FIRE. Lean proves their readout
+identity, positivity of the logarithm argument and equality of the corrected
+peak to `exp(reportedGain)`. The read values come from the pinned CSV,
+`Kappa` from its pinned calibration JSON, and `Duration` from the declared
+`1/2` or `3/8` read protocol. No independent handwritten numeric table of
+readings is introduced.
+
+For each of the twelve samples, Lean also checks:
+
+- `Duration >= 0` and `exp(Kappa) <= 11/10`;
+- `0.1 <= C - 1e-7` and `C + 1e-7 <= 0.1001`.
+
+The latter is a margin in the recorded values, not a calibration of the charge
+sensor. If its actual error is bounded by `1e-7`, that margin implies the true
+resting charge belongs to the required band.
+
+`RecordedMeasurementPremises` supplies actual gain, actual sampled `Q` and
+actual resting charge, with the following illustrative bounds:
+
+| Supplied physical premise | Bound |
+|---|---:|
+| Peak / early-read measurement error | `1e-5` |
+| Initial-charge measurement error | `1e-7` |
+| Scalar-model discrepancy at those actual readings | `2e-5` |
+
+The model discrepancy still includes any unproved timing and calibration
+effects. **These three numbers are admissible hypotheses, not measured errors
+or established sensor specifications.** Their composition is checked exactly:
+
+```text
+2e-5 + (11/10) * (1e-5 + 1e-7) = 3111/100000000 < 7/100010.
+```
+
+`measurement_controller_contract` connects those premises to the recorded
+two-level controller. It derives the corrected-amplitude residual, the
+log-gain bound and the actual resting-charge band. None of those three is a
+separate input field in this entry. The same actual charge is used in the
+measurement-error bound and in both physical detection-envelope premises.
+Those detection implications remain supplied physical obligations. No claim
+is made that the simulated circuit realizes this particular error ledger.
+
 [Replay.lean](PhysicalEvaluator/Replay.lean) actually runs two policies from
 lesson `(10,9)`, with overhead one and twenty lesson uses per episode:
 
@@ -283,8 +329,8 @@ The module audit checks all declarations in imported project modules,
 including private/generated/unused declarations, permitting only `propext`,
 `Classical.choice` and `Quot.sound`. [evidence-validation.json](evidence-validation.json)
 records twelve data mutations; [gain-validation.json](gain-validation.json)
-records four readout-data mutations and generated/source hashes;
-[physical-validation.json](physical-validation.json) records twenty semantic
+records six readout-data mutations and generated/source hashes;
+[physical-validation.json](physical-validation.json) records twenty-three semantic
 proof mutations and source hashes. Parser/import failures never count as
 successful rejection. CI reproduces the build, all three verifiers and the
 replay, preserving their reports.

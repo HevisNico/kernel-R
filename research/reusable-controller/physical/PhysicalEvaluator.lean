@@ -8,3 +8,4 @@ import PhysicalEvaluator.IdealExample
 import PhysicalEvaluator.ReadoutBridge
 import PhysicalEvaluator.PeakBridge
 import PhysicalEvaluator.PeakMeasurement
+import PhysicalEvaluator.MeasurementBridge
