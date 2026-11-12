@@ -171,6 +171,33 @@ same-leak assumption is explicit; uncertainty in the leak rate needs a
 separate bound. No numerical value of `epsilon`, `delta` or `speed` for
 the transistor circuit is certified here.
 
+## Hypothesis status before instrumented replay
+
+Categories distinguish finite recorded evidence from a uniform physical guarantee.
+The [public rest diagnostic](../bridge_check/REST_PROTOCOL.md) starts with the
+missing pre-pulse state; its criteria and run list are committed before simulation.
+
+| Hypothesis or observable | Category | Evidence and remaining obligation |
+|---|---|---|
+| Transfer residual `eta` per write window | New measurement required | The five ammeter runs bound protected transferred charge, not the difference between integrator charge and sensor charge loss in each write window. Both sides must be recorded on the same trace. |
+| Sensor dose tolerance `sigma` | New measurement required | Entry/exit times are saved, but sensor voltages at those times are absent from the old summary CSVs. |
+| Log-gain calibration and `k` | New measurement required | The nominal 31.8 mV slope is not a bound over stored voltage, input current, drain voltage, temperature and mismatch. Independent sweeps and dynamic checks are needed. |
+| Inter-window gain drift `e` | New measurement required | Stored-voltage averages are present. Their differences include read noise and do not isolate true inter-window log-gain drift. |
+| Sign of recorded silent-write storage steps | Verified in available data | All 824 silent active-port steps in the 100 mismatch/noise runs are positive (1.106 to 1.558 mV). This verifies a voltage proxy, not `stepPos` for calibrated gain. |
+| `stepPos` for actual log-gain | New measurement required | Needs a calibrated monotone gain law and endpoint/linkage errors; protected or idle steps are not silently treated as writes. |
+| Rest band `[0.1,0.1001]` at pulse start | New measurement required | `vq_min` is a whole-period minimum, not the initial state. The declared coordinate requires `Vq` in `[1.24995,1.25]` V just before admission. |
+| Digital event ordering at saved resolution | Verified in available data | All 2,000 active training pulses in the mismatch/noise runs have ordered window entry/exit; all 1,176 firing pulses have latch FIRE before entry. This does not prove the analog contact-to-latch relationship or exclude unsaved glitches. |
+| Detailed timing margins and pulse-by-pulse drift proxies | Checkable from existing data | CSV times and stored voltages permit descriptive bounds at the runner's resolution; extraction cannot establish missing analog signals. |
+| Scalar read equation, threshold error and strict timing margins | New measurement required | The waveform, comparator input crossing, latch delay, effective threshold and admitted-current error must be bounded together. A DC gain fit alone is insufficient. |
+| Ideal read-window applicability | Verified in available data: limitation | The cold dose near 0.052 fits 0.06, but the joint latency near 0.267 is outside `(0.236,0.256]`. Preserve this discrepancy. |
+| Rest state and physical cause of the original noisy `mc_2064` trace | Out of scope of the saved summaries | No pre-pulse waveform was retained, and the mismatch seed does not reproduce the noise. New replays are separate evidence. |
+| All future pulses under unrestricted noise; full transistor-to-kernel proof | Out of scope of finite simulation | Sample maxima are not uniform bounds, and numerical solver output is not a formal refinement proof. |
+
+The storage capacitor is between `sum` and `Vmem`. Its signed charge coordinate
+is `Cf * (Vmem - Vsum)`, not `Cf * Vmem` without a fixed-summing-node assumption.
+Summing-node motion belongs in calibration/linkage error. A switch ammeter also
+misses other summing-node currents; it cannot by itself establish storage balance.
+
 ## What is still a circuit obligation
 
 1. Bound the **analog transferred charge**, including leakage, charge
