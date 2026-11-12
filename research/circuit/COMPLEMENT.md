@@ -44,6 +44,15 @@ P1 to P5 are judged again on each sample, as written. The verdicts of the campai
 - If the joint reads followed a normal law, a sigma measured on 20 runs would be uncertain by about 16%. Resampling the 20 runs of the campaign gives a wider interval: see the intervals in `VERDICTS.md`.
 - The 60 joint reads of the replays together: sigma 0.00089, from 0.26545 to 0.26960.
 
+### P2 on all the samples together
+
+- 80 runs in 4 samples. Sigma inside a sample, the samples pooled: 0.00101.
+- If every read follows one normal law: 95% interval from 0.00087 to 0.00120; one-sided 95% upper bound 0.00117, for a limit of 0.0012.
+- With that sigma, a sample of 20 runs shows a sigma above 0.0012 about one time in 9.
+- To know a sigma within 10% at 95%, about 190 runs are needed.
+- Reserve: the variance of the largest sample is 4.2 times that of the smallest. Under one normal law, 4 samples of 20 differ that much with a probability of 1.4%. The interval above may therefore be too narrow.
+- The verdict of the campaign on P2 stays as written: fails. The samples together put the sigma below the limit, with a small margin, under the reserve above.
+
 ## The two noisy refresh runs, repeated
 
 The campaign has one run of each. They are run again four times each, with the same options. P14 and P17 are judged again on each run, as written.

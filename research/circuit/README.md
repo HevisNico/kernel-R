@@ -72,13 +72,18 @@ Measured 0.00128 on 20 runs. Every read is inside the predicted range.
 - Twenty runs do not fix this sigma well. Resampling the 20 runs gives
   a 95% interval from 0.00068 to 0.00166. The limit of 0.0012 is inside
   it.
-- Three more samples of the same 20 runs, made after the campaign,
-  give 0.00062, 0.00106 and 0.00097. P2 holds on these three and fails
-  on the campaign. Their 60 reads together have a sigma of 0.00089.
-  See [`COMPLEMENT.md`](COMPLEMENT.md).
-- The sigma moves from 0.0006 to 0.0013 between samples of 20 runs.
-  The limit of 0.0012 was set too close to it. The verdict of the
-  campaign as written stays: fails.
+- Three more samples of the same 20 runs, made after the campaign and
+  declared as a complement, give 0.00062, 0.00106 and 0.00097. P2 holds
+  on these three and fails on the campaign.
+- On the 80 runs the sigma is 0.00101. If the reads follow one normal
+  law, its 95% interval goes from 0.00087 to 0.00120, and its one-sided
+  95% upper bound is 0.00117. With that sigma, a sample of 20 runs
+  shows more than 0.0012 about one time in nine.
+- Reserve: the four samples differ more than one normal law makes
+  likely, with a probability of 1.4%. The interval may be too narrow.
+- The verdict as written stays: fails. The complement puts the sigma
+  below the limit, with a small margin. A limit within 10% of a sigma
+  asks for about 190 runs, not 20. See [`COMPLEMENT.md`](COMPLEMENT.md).
 
 **P6. Number of silent pulses with mismatch.** Predicted 2 to 8 on
 every port. One port of 200 stops after 1 silent pulse.

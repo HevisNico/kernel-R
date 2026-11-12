@@ -101,9 +101,9 @@ def against(x):
 class Campaign:
     """Every run of the plan, with its state."""
 
-    def __init__(self, res):
+    def __init__(self, res, plan=None):
         self.res = res
-        self.plan = [j[0] for j in jobs]
+        self.plan = list(plan) if plan is not None else [j[0] for j in jobs]
         self.state = {}        # run -> (state, reason); state is complete, missing, failed, left out or unreadable
         self.raw = {}          # rows of every run that produced a readable result
         self.rows = {}         # rows of the runs used in the statistics
@@ -133,7 +133,7 @@ class Campaign:
                 continue
             self.rows[name] = rows
             self.state[name] = ("complete", "")
-        self.extra = sorted(set(os.path.basename(p)[:-4] for p in glob.glob(res + "/*.csv")) - set(self.plan))
+        self.extra = sorted(set(os.path.basename(p)[:-4] for p in glob.glob(res + "/*.csv")) - set(self.plan) - {"summary"})
 
     def series(self, prefix):
         return [n for n in self.plan if n.startswith(prefix)]
@@ -639,6 +639,36 @@ def analyse(res):
 VR0 = 1.25                         # V, rest level of the main capacitor (cell.spice)
 
 
+def port_swings(cv):
+    """For each port of a cell that stops: its count of silent pulses, its swing at the first pulse, the swing at which the cell
+    fires, and the log-gain it gains at each silent pulse. The swing is the rest level minus the lowest level of the main capacitor."""
+    fire = [VR0 - x["vq_min"] for x in cv["rows"] if x["fired"] and x["port"] in (1, 2)]
+    if not fire:
+        return []
+    trip = statistics.median(fire)                 # swing at which this cell fires
+    out = []
+    for q in (0, 1):
+        p = cv["p"][q]
+        sw = [VR0 - v for v in p["vq_min"]]
+        if not p["stopped"] or not sw or min(sw) <= 0 or trip <= 0:
+            continue
+        out.append(dict(run=cv["name"], port=q + 1, n=p["silent"], s1=sw[0], trip=trip, joint=cv["joint"],
+                        d=[math.log(sw[i + 1] / sw[i]) for i in range(p["silent"] - 1)],
+                        other=cv["p"][1 - q]["silent"] if cv["p"][1 - q]["stopped"] else None))
+    return out
+
+
+def start_gaps(ports):
+    """Adds to each port its start gap in its own doses and the count that this gap predicts. Returns the mean dose in log-gain, or None."""
+    dm = mean([x for p in ports for x in p["d"]])
+    if not dm:
+        return None
+    for p in ports:
+        p["gap"] = math.log(p["trip"] / p["s1"]) / (mean(p["d"]) or dm)
+        p["pred"] = max(0, math.ceil(p["gap"]))
+    return dm
+
+
 def observations(c):
     """Measures made after the campaign on its results. They are not predictions.
 
@@ -646,24 +676,7 @@ def observations(c):
     swing is the rest level minus the lowest level of the main capacitor in the period."""
     lines, O = [], {}
 
-    def ports_of(name):
-        if name not in c.rows:
-            return []
-        cv = cell_view(name, c.rows[name])
-        fire = [VR0 - x["vq_min"] for x in cv["rows"] if x["fired"] and x["port"] in (1, 2)]
-        if not fire:
-            return []
-        trip = statistics.median(fire)                 # swing at which this cell fires
-        out = []
-        for q in (0, 1):
-            p = cv["p"][q]
-            sw = [VR0 - v for v in p["vq_min"]]
-            if not p["stopped"] or not sw or min(sw) <= 0 or trip <= 0:
-                continue
-            out.append(dict(run=name, port=q + 1, n=p["silent"], s1=sw[0], trip=trip, joint=cv["joint"],
-                            d=[math.log(sw[i + 1] / sw[i]) for i in range(p["silent"] - 1)],
-                            other=cv["p"][1 - q]["silent"] if cv["p"][1 - q]["stopped"] else None))
-        return out
+    ports_of = lambda name: port_swings(cell_view(name, c.rows[name])) if name in c.rows else []
 
     # the dose in log-gain: the gain of a port grows by this much at each silent pulse
     lines.append("### The dose in log-gain\n")
@@ -682,13 +695,10 @@ def observations(c):
     if not ports:
         lines.append("Not evaluable: no port of the mismatch series fires.")
         return lines, O
-    dm = mean([x for p in ports for x in p["d"]])
+    dm = start_gaps(ports)
     if not dm:
         lines.append("Not evaluable: no port has two silent pulses, so the dose in log-gain is not measured.")
         return lines, O
-    for p in ports:
-        p["gap"] = math.log(p["trip"] / p["s1"]) / (mean(p["d"]) or dm)       # in doses of this port
-        p["pred"] = max(0, math.ceil(p["gap"]))
     same = [p for p in ports if p["pred"] == p["n"]]
     off = [p for p in ports if p["pred"] != p["n"]]
     far = hi([min(abs(p["gap"] - round(p["gap"])), 1.0) for p in off])
