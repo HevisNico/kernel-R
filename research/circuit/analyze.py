@@ -1,7 +1,13 @@
 """Verdict on every check and prediction of PREDICTION.md, and the figures.
 
 Reads results/*.csv. Writes results/summary.json, VERDICTS.md and figures/*.png.
-A run with an anomaly is listed and left out of every statistic.
+
+The guard reports two kinds of event on the protection latch (DESIGN.md):
+  not a FIRE            : at the pulse edge or before it, or in the period at rest.
+                          The run is listed and left out of the statistics.
+  against the mechanism : after the end of the pulse, twice in a period, or without an end.
+                          The run is listed and stays in the statistics.
+The titles of the figures say what is plotted. Counts in them are computed from the results.
 """
 import csv, glob, json, os
 import numpy as np
@@ -11,19 +17,23 @@ import matplotlib.pyplot as plt
 
 DOSE = 1.3465          # mV, the step of the nominal cell (PREDICTION.md)
 RES = "results"
-ANOMALIES, FAILED = [], sorted(os.path.basename(p)[:-7] for p in glob.glob(RES + "/*.failed"))
+ANOMALIES, AGAINST, FAILED = [], [], sorted(os.path.basename(p)[:-7] for p in glob.glob(RES + "/*.failed"))
 REST_FIRE = sorted(os.path.basename(p)[:-9] for p in glob.glob(RES + "/*.restfire"))
 
 
-def anomaly(x):
-    """A protection that is not a FIRE. Reported, never used as a measure."""
-    if x["fired"] != "1":
-        return None
-    lat = float(x["fire_latency"])
-    if lat < 0.05:
+def not_a_fire(x):
+    """A protection that cannot be a FIRE. Reported, never used as a measure."""
+    if x["fired"] == "1" and float(x["fire_latency"]) < 0.05:
         return "protection raised at the pulse edge or before it"
-    if lat > 1.02:
-        return "protection raised after the pulse"
+    return None
+
+
+def against(x):
+    """A protection that counts against the mechanism. Reported, and kept as a measure."""
+    if x["fired"] != "1" or not_a_fire(x):
+        return None
+    if float(x["fire_latency"]) > 1.02:
+        return "FIRE after the end of the pulse"
     if float(x["reopen"]) < 0:
         return "protection without an end"
     if x["second_rise"] == "1":
@@ -31,16 +41,23 @@ def anomaly(x):
     return None
 
 
+RAW = {}        # every run that produced a result, whatever the guard says of it
+
+
 def load(name):
     path = f"{RES}/{name}.csv"
     if not os.path.exists(path):
         return None
     rows = list(csv.DictReader(open(path)))
-    bad = sorted({anomaly(x) for x in rows if anomaly(x)})
+    RAW[name] = rows
+    late = sorted({against(x) for x in rows if against(x)})
+    if late:
+        AGAINST.append(dict(run=name, pulses=[x["pulse"] for x in rows if against(x)], kind=late))
+    bad = sorted({not_a_fire(x) for x in rows if not_a_fire(x)})
     if name in REST_FIRE:
         bad.append("protection raised in the period at rest")
     if bad:
-        ANOMALIES.append(dict(run=name, pulses=[x["pulse"] for x in rows if anomaly(x)], kind=bad))
+        ANOMALIES.append(dict(run=name, pulses=[x["pulse"] for x in rows if not_a_fire(x)], kind=bad))
         return None
     return rows
 
@@ -256,15 +273,21 @@ if mm:
             "cell: mean distance, doubles, band in doses. " + "; ".join(rowsmm), good)
 
 # ---- the gate, over every run
-steer = sum(c["p"][0]["steered_on_fire"] + c["p"][1]["steered_on_fire"] + (c["joint_steered"] if c["joint"] is not None else 0)
-            for c in [nom, nl] + list(pv.values()) + nz + mc if c) + sum(r.get("steered_on_fire", 0) for r in rf.values())
-fires = sum(len(c["p"][0]["firing_steps"]) + len(c["p"][1]["firing_steps"]) + (1 if c["joint"] is not None else 0)
-            for c in [nom, nl] + list(pv.values()) + nz + mc if c) + sum(sum(r["fired"]) for r in rf.values())
-verdict("P10", "no firing pulse steers the sensor current to the integrator, in any run", f"{steer} of {fires} firing pulses", steer == 0)
+# Every run that produced a result is used here, also a run that the guard left out of the statistics.
+for n in names(""):
+    if n not in RAW:
+        load(n)
+fired_rows = [x for rows in RAW.values() for x in rows if x["fired"] == "1"]
+fires = len(fired_rows)
+steer = sum(1 for x in fired_rows if x["steered1"] == "1" or x["steered2"] == "1")
+latest = max(float(x["fire_latency"]) for x in fired_rows) if fired_rows else None
+verdict("P10", "no firing pulse steers the sensor current to the integrator, in any run", f"{steer} of {fires} firing pulses in {len(RAW)} runs", bool(fires) and steer == 0)
 done = len(glob.glob(RES + "/*.csv"))
-verdict("P19", "no run fails and the guard reports nothing", f"{done} runs complete, {len(FAILED)} failed, {len(ANOMALIES)} with an anomaly", done == 146 and not FAILED and not ANOMALIES)
-out["runs_complete"], out["failed"], out["anomalies"] = done, FAILED, ANOMALIES
-out["firing_pulses_checked_for_steering"] = fires
+verdict("P19", "no run fails and the guard reports nothing",
+        f"{done} runs complete, {len(FAILED)} failed, {len(ANOMALIES)} with a protection that is not a FIRE, {len(AGAINST)} with an event against the mechanism",
+        done == 146 and not FAILED and not ANOMALIES and not AGAINST)
+out["runs_complete"], out["failed"], out["not_a_fire"], out["against_the_mechanism"] = done, FAILED, ANOMALIES, AGAINST
+out["firing_pulses_checked_for_steering"], out["latest_fire_latency"] = fires, latest
 
 V.sort(key=lambda v: (v[0][0], int(v[0][1:])))
 json.dump(dict(summary=out, verdicts=[dict(id=a, statement=b, measured=c, holds=d) for a, b, c, d in V]), open(RES + "/summary.json", "w"), indent=1)
@@ -272,9 +295,18 @@ with open("VERDICTS.md", "w") as fh:
     fh.write("# Verdicts\n\nWritten by `analyze.py` from `results/`. The statements are those of `PREDICTION.md`.\n\n| | Statement | Measured | Verdict |\n|---|---|---|---|\n")
     for a, b, c, d in V:
         fh.write(f"| {a} | {b} | {c} | {'holds' if d else 'fails'} |\n")
+    fh.write(f"\n{sum(1 for v in V if v[3])} of {len(V)} hold.\n\n## Guard\n\n")
+    fh.write(f"- Runs that the simulator aborted: {', '.join(FAILED) if FAILED else 'none'}.\n")
+    fh.write("- Runs with a protection that is not a FIRE, left out of the statistics: "
+             + ("; ".join(f"{a['run']} ({', '.join(a['kind'])}; pulses {', '.join(a['pulses'])})" for a in ANOMALIES) if ANOMALIES else "none") + ".\n")
+    fh.write("- Runs with an event against the mechanism, kept in the statistics: "
+             + ("; ".join(f"{a['run']} ({', '.join(a['kind'])}; pulses {', '.join(a['pulses'])})" for a in AGAINST) if AGAINST else "none") + ".\n")
+    if latest is not None:
+        fh.write(f"- Latest FIRE of the campaign: {latest:.4f} units after the start of its pulse. The pulse ends at 1.\n")
 for a, b, c, d in V:
     print(f"{a:4s} {'holds' if d else 'FAILS':6s} {c}")
-print("failed:", FAILED, "anomalies:", ANOMALIES)
+print("failed:", FAILED, "not a FIRE:", ANOMALIES, "against the mechanism:", AGAINST)
+print("latest FIRE of the campaign:", latest)
 
 # ---- figures
 BLUE, ORANGE, INK, MUTED, GRID, SURF = "#2a78d6", "#eb6834", "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
@@ -300,7 +332,7 @@ if nom:
     ax.text(5.5, v1.max() + 0.25, "pulses on port 1", ha="center", color=MUTED, fontsize=8.5); ax.text(15.5, v1.max() + 0.25, "pulses on port 2", ha="center", color=MUTED, fontsize=8.5)
     ax.text(21, v1.max() + 0.25, "both", ha="center", color=MUTED, fontsize=8.5)
     ax.set_xlabel("pulse"); ax.set_ylabel("stored voltage (mV)"); ax.set_xticks(range(1, 22, 2)); ax.set_ylim(lo - 0.7, v1.max() + 0.9)
-    ax.set_title("Nominal cell, no noise: four silent pulses write four doses, then the cell fires and writes nothing")
+    ax.set_title(f"Nominal cell, no noise: stored voltage after each pulse (s silent, F fire: {pat[:10]} {pat[10:20]} {pat[20:]})")
     ax.legend(loc="center right")
     save(fig, "fig1_nominal")
 
@@ -311,12 +343,13 @@ if mc:
     for c in ks:
         ax[0].text(c, cnt[c] + 1.2, str(cnt[c]), ha="center", color=MUTED, fontsize=8.5)
     ax[0].set_xlabel("silent pulses before the first FIRE"); ax[0].set_ylabel("ports"); ax[0].set_xticks(ks); ax[0].grid(axis="x", visible=False)
-    ax[0].set_title(f"Every port stops, each at its own count ({len(ports)} ports)")
+    ax[0].set_title(f"Silent pulses before the first FIRE ({stopped} of {len(ports)} ports fire)")
     ax[1].hist(joint, bins=np.arange(joint.min() - 0.00025, joint.max() + 0.00075, 0.001), color=BLUE, rwidth=0.86)
-    ax[1].axvspan(0.2393, 0.2554, color=MUTED, alpha=0.13, lw=0)
-    ax[1].text(0.2474, ax[1].get_ylim()[1] * 0.8, "window proved\nfor the ideal model", ha="center", color=MUTED, fontsize=8.5)
+    ax[1].axvspan(0.239, 0.256, color=MUTED, alpha=0.13, lw=0)       # stopped_pair_read_latency: (239/1000, 32/125]
+    inside = int(((joint > 0.239) & (joint <= 0.256)).sum())
+    ax[1].text(0.2475, ax[1].get_ylim()[1] * 0.8, "window proved\nfor the ideal model", ha="center", color=MUTED, fontsize=8.5)
     ax[1].set_xlim(0.238, max(0.282, joint.max() + 0.003)); ax[1].set_xlabel("joint read latency (time units)"); ax[1].set_ylabel("cells")
-    ax[1].set_title(f"Joint read of {len(joint)} cells: sigma {joint.std(ddof=1):.4f}, outside the proved window")
+    ax[1].set_title(f"Joint read of {len(joint)} of {len(mc)} cells: sigma {joint.std(ddof=1):.4f}, {inside} inside the window")
     save(fig, "fig2_cells")
 
     ss_all = np.array([s for p in ports for s in p["silent_steps"]] + [s for p in ports for s in p["relapse_steps"]])
@@ -328,17 +361,18 @@ if mc:
     ax.hist(ss_all, bins=bins, histtype="step", color=ORANGE, linewidth=2.0, label=f"silent pulse ({len(ss_all)})")
     ax.axvline(DOSE, color=GRID, linewidth=1.0); ax.text(DOSE, ax.get_ylim()[1] * 0.93, " one dose", color=MUTED, fontsize=8.5)
     ax.set_xlabel("change of the stored voltage over one period (mV)"); ax.set_ylabel("pulses")
-    ax.set_title("A silent pulse writes one dose. A firing pulse moves the read no more than rest does")
+    ax.set_title(f"Change of the stored voltage over one period, {len(mc)} cells with mismatch and noise")
     ax.legend(loc="upper center")
     save(fig, "fig3_steps")
 
     fig, ax = plt.subplots(figsize=(7.4, 3.2))
-    bins = np.arange(0.78, 1.0101, 0.01)
+    ff_all = [p["first_fire"] for p in calm] + late
+    bins = np.arange(min(0.78, min(ff_all) - 0.01), max(1.0101, max(ff_all) + 0.0101), 0.01)
     ax.hist([p["first_fire"] for p in calm], bins=bins, color=BLUE, rwidth=0.86, label=f"no relapse ({len(calm)} ports)")
-    ax.hist(late, bins=bins, color=ORANGE, rwidth=0.86, label=f"one silent pulse later ({len(rel)} ports)")
+    ax.hist(late, bins=bins, color=ORANGE, rwidth=0.86, label=f"a silent pulse later ({len(rel)} ports)")
     ax.axvline(1.0, color=GRID, linewidth=1.0); ax.text(0.999, ax.get_ylim()[1] * 0.9, "end of the pulse ", ha="right", color=MUTED, fontsize=8.5)
     ax.set_xlabel("latency of the first FIRE of a port (time units)"); ax.set_ylabel("ports")
-    ax.set_title("Only a port that first fired at the very end of the pulse falls silent again")
+    ax.set_title("Latency of the first FIRE of a port, and whether a silent pulse follows")
     ax.legend(loc="upper left")
     save(fig, "fig4_late_stop")
 
@@ -352,10 +386,10 @@ if panels:
         s = [i for i in range(len(r["v"])) if not r["fired"][i]]
         a.scatter(x[s], r["v"][s], color=ORANGE, s=22, zorder=3, edgecolors=SURF, linewidths=0.8)
         a.set_ylabel("stored (mV)"); a.set_title(title, fontsize=9.5, fontweight="normal", color=MUTED)
-    ax[0, 0].scatter([], [], color=ORANGE, s=22, label="silent pulse: writes one dose"); ax[0, 0].plot([], [], color=BLUE, linewidth=1.3, label="stored voltage after each pulse")
+    ax[0, 0].scatter([], [], color=ORANGE, s=22, label="silent pulse"); ax[0, 0].plot([], [], color=BLUE, linewidth=1.3, label="stored voltage after each pulse")
     ax[0, 0].legend(loc="upper right", ncol=2, fontsize=8.5)
     ax[-1, 0].set_xlabel("pulse")
-    fig.suptitle("Under a leak the cell falls silent for one pulse, writes one dose and fires again", x=0.01, ha="left", fontsize=10.5, fontweight="bold")
+    fig.suptitle("Stored voltage of one port under continued pulses", x=0.01, ha="left", fontsize=10.5, fontweight="bold")
     save(fig, "fig5_refresh")
 
 if mm:
