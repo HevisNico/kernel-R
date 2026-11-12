@@ -12,6 +12,33 @@ ROOT = Path(__file__).resolve().parent
 B = ROOT / "bridge_check"
 
 
+
+def frozen_rule_latch_distance():
+    """Distance of each comparator transition to the most recent latch transition, the quantity
+    named in LOCAL_PROTOCOL.md, recomputed from bridge_check/latch_events.csv."""
+    with (B / "latch_events.csv").open(newline="") as fh:
+        ev = list(csv.DictReader(fh))
+    runs = {}
+    for e in ev:
+        runs.setdefault(e["run"], []).append(e)
+    total = far = lead = 0
+    worst = 0.0
+    for es in runs.values():
+        latch = sorted(float(e["time"]) for e in es if e["signal"] == "latch")
+        for e in es:
+            if e["signal"] != "comparator":
+                continue
+            total += 1
+            t = float(e["time"])
+            prev = [u for u in latch if u <= t]
+            if not prev or t - prev[-1] > 1e-6:
+                far += 1
+                near = float(e["nearest_latch_transition_s"])
+                if near < 0:
+                    lead += 1
+                    worst = max(worst, -near)
+    return total, far, lead, worst
+
 def main():
     local = json.loads((B / "local_summary.json").read_text())
     level = json.loads((B / "level_summary.json").read_text())
@@ -73,7 +100,7 @@ def main():
          "`bridge_check/rest_samples.csv`"),
         ("FIRE of the circuit is one event per read", "verified on the replays",
          f"the protection latch rises at most once per period; the raw comparator has {ev['nominal_200ns_retry1']['comparator_transitions_per_fire_period'][0]} transitions in a period with a FIRE, "
-         f"all within 3 ns of a latch transition, none inside an ERROR window",
+         f"all within 3 ns of the nearest latch transition, none inside an ERROR window",
          "`bridge_check/latch_events.csv`, `bridge_check/LOCAL_RESULTS.md`"),
         ("A silent pulse writes once, a firing pulse writes nothing", "verified on the available data",
          f"steering switch turned on once per silent window and on {firing_on} firing windows of the replays; capacitor change on a firing window at most {cap_quiet:.1e} in log-gain without noise, {cap_noisy:.1e} with noise; "
@@ -120,6 +147,7 @@ def main():
 
     agree = sum(r["count_agrees"] == "True" for r in rows)
     p1 = cell[("mc_2064", 1)]
+    fr = frozen_rule_latch_distance()
     L = ["# The circuit against the need theorem", "",
          "Written by `bridge_application.py` from the pushed results. Theorem: `needAlong_of_circuit_tolerances` in",
          "[`lean/CircuitNeed.lean`](lean/CircuitNeed.lean), the variant of `needAlong_of_circuit_residual` with `sigma` and `e`.", "",
@@ -134,6 +162,24 @@ def main():
          f"the observed count equals `m` on all of them.",
          f"5. **`mc_2064`, port 1:** historical room {p1['room_historical_ell_0']:+.6f} with `ell = 0`; {p1['room_with_ell_static']:+.6f} with `ell_static` measured on the cell. "
          f"Its count stays {p1['observed_silent']} against `m` = {p1['m']}, and its historical status is not changed. The three replays of its mismatch seed give 4.", "",
+         "## What the zero means", "",
+         f"The counts are not missed. The observed count equals `m` on {agree} of {len(rows)} ports, and on every one of the "
+         f"{cum['cumulative']['inside']} ports that are inside under estimates with the cumulative budget. What is missing is the certificate: "
+         "bounds, established for each port, that its trajectory satisfies every hypothesis of the theorem. The original campaign did not record "
+         "the waveforms these bounds need, and a noisy run cannot be replayed from its seed. A certificate therefore needs a new campaign that "
+         "records them; this file does not claim one.", "",
+         "## A change to the extraction script after its first run", "",
+         "`bridge_check/local_analyze.py` was pushed before it was run (commit `89ec23c`). It was changed once after its first run, and only the "
+         "results of the changed script were pushed (commit `47f1725`, which contains the diff). Two quantities were changed: the distance "
+         "of each comparator transition to the nearest latch transition, before or after it, replaces the distance to the most recent latch transition; "
+         "and the capacitor change on firing windows replaces the transfer residual on those windows. No bound of the "
+         "rule files was changed. The results of the first run were not pushed.", "",
+         "The first change departs from the rule: `LOCAL_PROTOCOL.md` names the most recent latch transition. Recomputed from "
+         f"`bridge_check/latch_events.csv` with that quantity, {fr[1]} of {fr[0]} comparator transitions are more than 1 µs after the most recent "
+         f"latch transition, or have none in the period. All {fr[2]} of them precede a latch transition of the same direction by at most "
+         f"{1e9 * fr[3]:.2f} ns: they are the comparator edges that set and release the latch. The statement that every comparator transition lies "
+         "within 3 ns of a latch transition uses the nearest transition, not the quantity of the rule. The second change follows the rule, which asks "
+         "for the capacitor change on firing windows.", "",
          "## Hypotheses", "",
          "Verified: established on the available data. Supported: measured on a finite set of replays, on nominal devices, or through a proxy. "
          "To measure: no measure exists for the ports in question. Out of reach: cannot come from a finite simulation.", "",
