@@ -64,10 +64,31 @@ The campaign has one run of each. They are run again four times each, with the s
 | Repeat 3 | — | — | — | not evaluable: run missing |
 | Repeat 4 | — | — | — | not evaluable: run missing |
 
-## Independence of the noise samples of the campaign
+## The charge received by the integrator
 
-If two runs had the same noise sample, the changes of the stored voltage of their ports at rest would be the same. For every pair of noisy cell runs of the campaign, the correlation of these 20 changes is computed.
+P10 checks the steering command. Here the current itself is measured: an ammeter of 0 V between the steering switch and the summing node of each integrator, integrated over each whole period (`gate_current.py`). A charge of 40.4 fC on the feedback capacitor of 30 pF is one dose, 1.3465 mV.
+
+Charges in fC. For a pulse on both ports, both integrators are counted.
+
+| Run | Silent pulses | Charge on a silent pulse | Firing pulses | Charge on a firing pulse: mean | largest in size | Periods at rest | Charge at rest: mean |
+|---|---|---|---|---|---|---|---|
+| `mc_2062` | 8 | 24.73 to 62.52 | 14 | 0.0393 | 0.2271 | 20 | -0.0036 |
+| `mc_2064` | 9 | 32.53 to 43.79 | 13 | -0.0096 | 0.1766 | 20 | -0.0040 |
+| `nom` | 8 | 39.83 to 40.87 | 14 | -0.0067 | 0.0295 | 20 | -0.0039 |
+| `pvt_tt_125` | 14 | 40.08 to 41.00 | 8 | -0.0038 | 0.0149 | 20 | -0.0041 |
+| `pvt_tt_m40` | 4 | 40.16 to 40.37 | 18 | -0.0064 | 0.0204 | 20 | -0.0044 |
+
+- Largest charge received by an integrator on a firing pulse, runs without noise: 0.0295 fC, 0.07% of a dose, over 40 firing pulses.
+- Largest charge received by an integrator on a firing pulse, runs with mismatch and noise: 0.2271 fC, 0.56% of a dose, over 27 firing pulses.
+- The current of the ammeter alternates in sign from one time point to the next, an effect of trapezoidal integration. It limits this measure: the same effect spreads the charge of a silent pulse around one dose, and more so with noise.
+- The stored voltage integrates the same current exactly. In these runs it is averaged from the time points, without the rounding to 1 µV of the campaign. The solver resolves a voltage to 0.1 µV.
+- In the runs without noise, the mean change of the stored voltage over a period, toward a higher gain, is -0.22 µV on a firing pulse and -0.19 µV for a port at rest. A dose is 1346.5 µV.
+
+## Do two runs of the campaign share a noise sample?
+
+If two runs had the same noise sample, the changes of the stored voltage of their ports at rest would be the same. For every pair of noisy cell runs of the campaign, the correlation of these 20 changes is computed. This diagnostic can show a shared sample. It cannot prove that the samples are independent.
 
 - 120 runs, 7140 pairs.
 - Largest correlation: 0.76, between `mc_2045` and `mc_2059`. Pairs above 0.9: 0.
 - For independent samples of 20 values the largest of 7140 correlations is expected near 0.71.
+- No sign of a noise sample used twice in this diagnostic.

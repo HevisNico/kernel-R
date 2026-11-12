@@ -355,9 +355,16 @@ def analyse(res):
         a, b = sd(nz_sil), sd(nz_idle)
         if a is None or b is None:
             return R.add(pid, st, NA, DASH, nz_gap or "fewer than two silent pulses")
-        w = math.sqrt(max(a * a - b * b, 0.0))
-        S["noise"]["write_sigma_mV"] = w
-        R.judge(pid, st, f"{w:.3f} mV (silent step {a:.3f} mV)", [] if w < 0.067 or nz_gap else ["the write is noisier than predicted"], part(nz_gap))
+        # The write noise is what a silent step has beyond the read noise: a difference of two variances.
+        # When that difference is not positive the write noise is not resolved; it is not measured as zero.
+        w, top = write_noise(nz)
+        S["noise"].update(write_sigma_mV=w, write_sigma_upper_mV=top)
+        if w is None:
+            measured = f"not resolved: a silent step ({a:.3f} mV) is not noisier than a port at rest ({b:.3f} mV)"
+        else:
+            measured = f"{w:.3f} mV (silent step {a:.3f} mV, port at rest {b:.3f} mV)"
+        measured += f"; upper end of its 95% interval {fm(top)} mV"
+        R.judge(pid, st, measured, [] if (w or 0.0) < 0.067 or nz_gap else ["the write is noisier than predicted"], part(nz_gap))
     R.run("P4", "sigma of a silent step, read noise removed, below 0.067 mV", p4)
 
     def p5(pid, st):
@@ -707,6 +714,17 @@ def observations(c):
     return lines, O
 
 
+def write_noise(cells):
+    """Sigma of a silent step with the read noise removed, and the upper end of its 95% interval.
+    The sigma is None when the difference of the two variances is not positive: not resolved."""
+    units = [dict(silent=[s for p in x["p"] for s in p["silent_steps"]], idle=x["idle"]) for x in cells]
+    def excess(runs):
+        a, b = sd([s for r in runs for s in r["silent"]]), sd([s for r in runs for s in r["idle"]])
+        return None if a is None or b is None else a * a - b * b
+    e, ci = excess(units), interval(units, excess)
+    return (math.sqrt(e) if e is not None and e > 0 else None), (math.sqrt(max(ci[1], 0.0)) if ci else None)
+
+
 def interval(units, stat, draws=1000):
     """95% interval of a statistic by resampling whole runs with replacement (the draws are fixed: same report each time)."""
     if len(units) < 3:
@@ -735,7 +753,7 @@ def intervals(c, O):
     share = lambda runs: 100.0 * sum(r["relapsing"] for r in runs) / sum(r["ports"] for r in runs) if runs else None
     rows = [("Sigma of the joint read, noise only (P2)", a, flat("joint"), ".5f", ""),
             ("Sigma of the change of a port at rest, noise only (P3)", a, flat("idle"), ".3f", " mV"),
-            ("Sigma of a silent step, noise only (P4)", a, flat("silent"), ".3f", " mV"),
+            ("Sigma of a silent step with its read noise, noise only", a, flat("silent"), ".3f", " mV"),
             ("Sigma of a firing step, noise only (P5)", a, flat("firing"), ".3f", " mV"),
             ("Sigma of the joint read, mismatch and noise (P7)", b, flat("joint"), ".4f", ""),
             ("Share of the ports with a relapse, mismatch and noise (P8)", b, share, ".1f", "%"),
@@ -749,6 +767,9 @@ def intervals(c, O):
         v, ci = stat(units), interval(units, stat)
         O["intervals"][label] = dict(value=v, interval=ci, runs=len(units))
         L.append(f"| {label} | {fm(v, spec)}{unit_ if v is not None else ''} | " + (f"{ci[0]:{spec}} to {ci[1]:{spec}}{unit_}" if ci else DASH) + f" | {len(units)} |")
+    w, top = write_noise(nz)
+    L.append(f"| Write noise: sigma of a silent step with the read noise removed, noise only (P4) | {fm(w) + ' mV' if w is not None else 'not resolved'} | "
+             f"{'below ' + fm(top) + ' mV' if top is not None else DASH} | {len(nz)} |")
     mm = [refresh_view(n, c.rows[n]) for n in c.series("refresh_mm_") if n in c.rows]
     gaps = [mean(r["gaps"]) for r in mm if r["gaps"]]
     bands = [r["band"] for r in mm if r["band"] is not None]

@@ -14,7 +14,7 @@ Written by `analyze.py` from the results. The statements are those of `PREDICTIO
 | P1 | 4 silent pulses on both ports in at least 18 of 20 runs, never fewer than 3 or more than 5 | 20 of 20 runs, range 4 to 4 | holds | — |
 | P2 | sigma of the joint read below 0.0012, every read between 0.264 and 0.271 | sigma 0.00128 (±16% for 20 runs), 0.2645 to 0.2700 | fails | sigma is not below 0.0012 |
 | P3 | a port at rest changes over a period with a sigma between 0.05 and 0.10 mV | 0.071 mV | holds | — |
-| P4 | sigma of a silent step, read noise removed, below 0.067 mV | 0.000 mV (silent step 0.070 mV) | holds | — |
+| P4 | sigma of a silent step, read noise removed, below 0.067 mV | not resolved: a silent step (0.070 mV) is not noisier than a port at rest (0.071 mV); upper end of its 95% interval 0.037 mV | holds | — |
 | P5 | firing steps: mean within 0.01 mV of zero, sigma within 25% of the sigma at rest | mean -0.0019 mV, sigma 0.069 mV (0.97 of rest) | holds | — |
 | P6 | both ports of every cell stop within 10 pulses, after 2 to 8 silent pulses | 200 of 200 ports stop, 1 to 6 silent pulses (ports per count: 1: 1, 2: 7, 3: 48, 4: 74, 5: 60, 6: 10) | fails | 1 ports are outside 2 to 8 silent pulses |
 | P7 | every cell fires on the joint pulse; sigma 0.0025 to 0.0042; reads between 0.250 and 0.280; every pair within 0.05 | 100 of 100 fire, sigma 0.0029, 0.2595 to 0.2730, 4950 of 4950 pairs | holds | — |
@@ -83,11 +83,12 @@ A noisy run cannot be replayed: its seed does not set its noise (COMPLEMENT.md).
 |---|---|---|---|
 | Sigma of the joint read, noise only (P2) | 0.00128 | 0.00068 to 0.00166 | 20 |
 | Sigma of the change of a port at rest, noise only (P3) | 0.071 mV | 0.065 to 0.077 mV | 20 |
-| Sigma of a silent step, noise only (P4) | 0.070 mV | 0.062 to 0.078 mV | 20 |
+| Sigma of a silent step with its read noise, noise only | 0.070 mV | 0.062 to 0.078 mV | 20 |
 | Sigma of a firing step, noise only (P5) | 0.069 mV | 0.062 to 0.076 mV | 20 |
 | Sigma of the joint read, mismatch and noise (P7) | 0.0029 | 0.0025 to 0.0032 | 100 |
 | Share of the ports with a relapse, mismatch and noise (P8) | 4.5% | 2.0 to 7.5% | 100 |
 | Sigma of the total change over the firing pulses (P9) | 0.071 mV | 0.064 to 0.077 mV | 100 |
+| Write noise: sigma of a silent step with the read noise removed, noise only (P4) | not resolved | below 0.037 mV | 20 |
 | Mean distance between two relapses, one value per cell under 0.1 TΩ (P18) | 22.9 | cells from 21.7 to 24.0, sigma 0.8 | 8 |
 | Band of the stored voltage after the stop, one value per cell under 0.1 TΩ (P18) | 1.11 dose | cells from 1.03 to 1.18, sigma 0.05 | 8 |
 
