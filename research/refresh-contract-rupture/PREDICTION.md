@@ -36,10 +36,35 @@ or automatic recovery is allowed.
 
 V2's already published prefix was inspected when choosing this test. It has
 reserve 220 after period 660, and a wait issued at t=656 with ceiling 20 and
-next probe t=662. Since the histories before the jump are identical, the
+next probe t=662: an active probe spacing of **6 periods**. Since the histories before the jump are identical, the
 expected first post-jump probe in v3 is t=662. This is an explicit adversarial
 case selected from prior evidence, not an independently sampled statistical
 trial or a secret pilot of v3.
+
+## Repair capacity and fixed post-refusal behavior
+
+The post-refusal policy is fixed to **blocked stop**, not an emergency mode.
+No new measurements, writes, offers or autonomous restart are permitted after
+refusal. The plant and scorer continue to period 1320; unsafe exposure is not
+truncated at the refusal boundary. This predicts no recovery in this run.
+
+The repair-power inequality is NOT violated by leakage 140:
+
+    dose 220 > leakage 140 * latency 1 = 140,
+    physical net gain per continuously commanded write = 220 - 140 = 80.
+
+Even the fresh inferred ceiling would be 150..152, yielding a positive net
+gain of 68..70 and capacity target 100+2*U <=404 <660. Thus this case must not
+be reported as “the actuator cannot keep up” or “no valid configuration exists.”
+The observation violates the PREVIOUS horizon contract. At the expected
+refusal instant t=662, true reserve is -60 and the raw sensor lower is -64.
+The old carried estimate 139 is no longer valid and must be discarded. The
+fresh diagnostic ceiling is 150 (rate report 139 plus error 1 plus B=10), whose
+ready guard is 100+150=250; -64 does not meet it. A valid numerical repair
+configuration is not an admissible safe continuation from this entry state.
+Furthermore, the failed variation law cannot simply be assumed valid again
+by issuing a new number. A separately justified recovery/reauthorization
+protocol would be needed; none is part of this preregistered test.
 
 ## Violation and refusal
 
@@ -88,10 +113,10 @@ expected to **refute** that stronger statement, not prove it.
 
 | ID | Prediction |
 |---|---|
-| R1 | First post-jump probe at t=662; its rate-interval lower endpoint exceeds the old ceiling 20; exactly one demonstrated invalidation, zero ambiguous-only exceedances |
-| R2 | The decision at t=662 is refusal; its lower uses the fresh observation, not the old carried certificate; no later probes, commands or accepted leases |
-| R3 | Zero false `measured_safe_pre` claims, at least one true such claim, and no unconditional safety claim based on an absent probe or a carried bound |
-| R4 | Exactly 660 pre-write unsafe and 660 post-write unsafe periods (661..1320), exactly one undetected unsafe period (661), all retained in the report |
+| R1 | Last pre-jump probe t=656, active spacing 6, first post-jump probe t=662: detection delay 1 <= 6 periods. Its rate report 139 gives interval [138,140], whose lower endpoint 138 exceeds the old ceiling 20: exactly one demonstrated invalidation, zero ambiguous-only exceedances |
+| R2 | At t=662, refuse with fresh lower -64, discarding carried 139; latch blocked stop. Zero later probes, commands or accepted leases; no recovery through t=1320. Positive repair power does not override invalidation and failed entry readiness |
+| R3 | Zero false `measured_safe_pre` claims, at least one true such claim, and no unconditional safety claim based on an absent probe or carried bound. No past row or safety declaration is changed after detection |
+| R4 | Exactly 1 dangerous period strictly before detection (661), <= active spacing 6; 1 dangerous detection period (662), then 658 dangerous periods (663..1320). Totals: 660 pre-write unsafe, 660 post-write unsafe, 1 undetected unsafe; all retained separately |
 | R5 | Exactly one unsafe period with an active conditional contract (661); the stronger uninterrupted-service assertion is **false**, explicitly reported as REFUTED rather than omitted |
 | R6 | Common plant/action fields through t=660 match the archived v2 prefix; no assumption violation, refusal or invalidation before the jump; final reserve is -92180 |
 | R7 | The trace audit validates noise bounds, period order, one-period delivery, costs, alarm persistence, evidence for invalidation and the cessation of control; it expects the B/H law to fail and never marks that premise satisfied globally |
