@@ -1,0 +1,38 @@
+name: Circuit dose bridge
+
+on:
+  pull_request:
+    paths:
+      - 'research/circuit/lean/**'
+      - 'proof/lean/**'
+      - 'research/recursive-learning/**'
+      - '.github/actions/build-lean/**'
+      - '.github/workflows/circuit-bridge.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/circuit/lean/**'
+      - 'proof/lean/**'
+      - 'research/recursive-learning/**'
+      - '.github/actions/build-lean/**'
+      - '.github/workflows/circuit-bridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      LEAN_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/build-lean
+        with:
+          package-directory: research/circuit/lean
+          mathlib-cache-targets: Mathlib.Analysis.SpecialFunctions.Log.Basic Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus Mathlib.Tactic
+      - name: Reject axioms, admitted proofs and weakened error budgets
+        working-directory: research/circuit/lean
+        run: python3 -B check_negative.py

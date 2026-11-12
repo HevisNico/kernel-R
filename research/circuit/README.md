@@ -32,6 +32,27 @@ The campaign tests the mechanism: a write on a silent pulse, no write
 on a firing pulse, a stop that holds, and a read that agrees between
 cells.
 
+A separate [conditional Lean bridge](lean/README.md) connects capacitor
+charge balances to the kernel's ERROR-dose identity, bounds current and
+calibration errors, derives a common scalar need for varying write doses,
+and transfers strict scalar-contact margins with a latency bound. Separate
+ideal read windows allow doses up to 0.06. It does not certify the netlist
+or transfer those numerical read windows to this circuit. The bridge README
+distinguishes the substantive results from algebraic interface identities;
+audit declaration counts measure coverage, not scientific contributions.
+
+The [fixed need-tolerance test rule](NEED_TEST_PROTOCOL.md) records the
+qualification criteria, required measurements and failure reporting before
+any new campaign. The existing 200-port analysis is retrospective; the rule
+does not turn it into a preregistered experiment. The reproducible
+[need-budget diagnostic](NEED_BUDGET.md) retains all 200 ports and reports
+the remaining disagreement instead of tuning a budget to exclude it.
+
+[BRIDGE_APPLICATION.md](BRIDGE_APPLICATION.md) says where the simulated
+circuit stands against the need theorem after five instrumented replays and
+a DC calibration: each hypothesis with its bound and its source, and each of
+the 200 ports. No port is in the certified domain.
+
 ## Results
 
 The campaign has 141 runs. All produced a result, and the guard
