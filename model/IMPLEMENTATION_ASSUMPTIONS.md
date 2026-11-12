@@ -13,11 +13,12 @@ error common to both thresholds leaves the dose unchanged.
 [`training_read_common_offset`](../research/recursive-learning/native/Coincidence/OffsetAndDelay.lean)
 states this for one training pulse and one read.
 
-A circuit obtains a common error when one comparator detects both
-crossings. Its input offset then shifts both thresholds together. Two
-separate comparators would give two independent errors, and the
-tolerance theorems that bound each threshold separately would apply
-instead.
+One comparator used for both crossings can supply a common error if its
+input-referred offset is unchanged between them. This is an implementation
+condition: a change of offset with common-mode voltage, noise or switching
+history need not cancel. Two separate comparators can introduce distinct
+offsets; the theorems that bound the thresholds separately then apply if
+those bounds are met.
 
 ## Events react after a delay
 
@@ -35,14 +36,17 @@ lasts 0.15 model units at nominal values.
 ## A pulse acts after a lag
 
 The model applies the gain of a port to a pulse at the instant it
-arrives. A circuit element that applies a gain takes a short time to
-settle, so the pulse acts on the main charge a little later. A lag that
-is the same for every pulse of a cell shifts the FIRE dates of that cell
-and nothing else. The coincidence decision then depends on the
-difference between the lags of two cells:
+arrives. A real gain element has settling dynamics. The result in
 [`trained_dates_decide_lag`](../research/recursive-learning/native/Training/ReadLag.lean)
-allows 3/100 of a unit. A lag that depends on the pulse or on the port
-is not covered.
+assumes that each observed read FIRE date equals its model date plus a
+cell-specific lag. Under the stated read schedule, the coincidence
+decision survives when the two lags differ by at most 3/100 of a unit.
+
+This theorem compares dates. It does not derive the additive-lag
+assumption from a delayed input, a transistor's settling response or a
+modified hybrid execution. A circuit must justify that approximation
+separately. Pulse-dependent and port-dependent lags are not covered by
+the fixed-per-cell statement.
 
 ## The log-gain is a voltage measured against temperature
 
@@ -58,24 +62,30 @@ hidden in the statement that thresholds and actuation factors are fixed.
 
 ## Gains and the FIRE threshold carry a per-cell error
 
-The coincidence theorem takes a trained-port birth gain of exactly 1.2
-and a FIRE threshold within ±3%. Both are modelling choices. In a
-circuit the gain of each port and the FIRE threshold of each cell carry
-a fixed random error, set by device matching.
+The fixed-current comparison in
+[`CoincidenceSeparation.lean`](../research/recursive-learning/native/Coincidence/CoincidenceSeparation.lean)
+uses a birth gain of exactly 1.2 and a FIRE threshold within ±3%.
+Those assumptions belong to that comparison. In a circuit the gain of
+each port and the FIRE threshold of each cell carry device variation.
 
 The read latency depends on both. A result that must hold for every
 cell needs either a gain band wide enough for that error, or a mechanism
-by which the cell absorbs it. The coincidence theorem with a birth gain
-of 1.2 contains neither.
+by which the cell absorbs it. The fixed-current comparison does not
+establish that adaptation.
 
-The stop-learning theorems provide such a mechanism in the model. Each
-port is trained by identical pulses until the cell fires, so its final
-gain follows the cell's own FIRE level. For start gains that do not fire
+The v0.4.0 stop-learning theorems provide such a mechanism in the model.
+Each port receives enough identical, spaced pulses to reach stable firing
+from rest, so its final gain follows the cell's own FIRE level. The first
+FIRE alone is not a stopping certificate: a residual-charge-assisted FIRE
+can be followed by a silent pulse. For start gains that do not fire
 and a FIRE level between 0.95 and 1.05, the read latency of two trained
 ports lies in a window that depends on neither. See
 [`trained_read_exists`](../research/recursive-learning/native/Training/JointRead.lean)
 and [`OpenCell.read`](../research/recursive-learning/native/Network/FreeRead.lean).
 The pulse amplitude and the unit response remain exact there.
+The trained coincidence result is in
+[`TrainedCoincidence.lean`](../research/recursive-learning/native/Training/TrainedCoincidence.lean).
+It does not extend the fixed-current separation theorem to trained cells.
 
 The same theorems give a tolerance for the number of doses a port needs
 before it fires. With errors `a` on the start log-gain, `b` on the dose
