@@ -19,7 +19,8 @@ NATIVE = CONTROLLER.parent / 'recursive-learning/native'
 FILES = ['Counts.lean', 'Envelope.lean', 'Controller.lean', 'RecordedData.lean',
          'RecordedBridge.lean', 'Replay.lean', 'LogIntervals.lean', 'MeasuredGains.lean',
          'Readout.lean', 'RecordedGains.lean', 'ReadoutBridge.lean', 'IdealExample.lean',
-         'PeakError.lean', 'PeakBridge.lean', 'PeakMeasurement.lean', 'MeasurementBridge.lean']
+         'PeakError.lean', 'PeakBridge.lean', 'PeakMeasurement.lean', 'MeasurementBridge.lean',
+         'CampaignBridge.lean', 'CampaignData.lean', 'CampaignExample.lean']
 
 
 def command(args, cwd=HERE, env=None, timeout=180):
@@ -31,7 +32,7 @@ def hashes():
     paths = [HERE / 'PhysicalEvaluator' / f for f in FILES]
     paths += [HERE / f for f in ['PhysicalEvaluator.lean', 'PhysicalAudit.lean', 'Trace.lean',
               'lakefile.toml', 'lake-manifest.json', 'lean-toolchain', 'verify_physical.py',
-              'evidence_check.py', 'gain_check.py']]
+              'evidence_check.py', 'gain_check.py', 'campaign_check.py']]
     paths += sorted((HERE / 'evidence').iterdir())
     paths += sorted((CONTROLLER / 'ReusableController').glob('*.lean'))
     paths += [CONTROLLER / 'lakefile.toml', NATIVE / 'Search/VariableNeedTolerance.lean',
@@ -80,6 +81,15 @@ def main():
     search = os.pathsep.join(str((HERE / x).resolve()) for x in search.strip().split(os.pathsep))
     original = {f: (HERE / 'PhysicalEvaluator' / f).read_text() for f in FILES}
     mutations = [
+        ('omit_second_campaign_residual', 'CampaignBridge.lean', lambda s: replace_once(s,
+            'entry.baseB + 2 * entry.epsilon := by',
+            'entry.baseB + entry.epsilon := by'), None),
+        ('underpay_campaign_room', 'CampaignBridge.lean', lambda s: replace_once(s,
+            'room : (baseA + epsilon) + (baseB + 2 * epsilon) +',
+            'room : (baseA + epsilon) + (baseB + epsilon) +'), None),
+        ('weaken_campaign_transfer', 'CampaignBridge.lean', lambda s: replace_once(s,
+            'transferError : ∀ k, |actualGain k - referenceGain k| ≤ entry.epsilon',
+            'transferError : ∀ k, |actualGain k - referenceGain k| ≤ 2 * entry.epsilon'), None),
         ('non_strict_room', 'Counts.lean', lambda s: replace_once(s,
             'ell + 1 / 8000 < dose0 / 2', 'ell + 1 / 8000 ≤ dose0 / 2'), None),
         ('missing_gain_bound', 'Counts.lean', lambda s: replace_once(s,

@@ -12,6 +12,72 @@ precision**. The specialization here replaces its separate accuracy assumption
 with explicit scalar gain, threshold, rest-state and observation premises.
 Those physical premises are not all established by the public CSV projection.
 
+## Measured campaign entry: 37 ports
+
+[campaign_check.py](campaign_check.py) independently recomputes the public
+summaries from PR #109 at `7ded279f103dab5beb6c1c671f1acbdf4cff18c0`:
+202 completed runs, 100 cells and 200 ports. Its pinned snapshot contains
+1,035 files. Read CSV hashes, current/read row alignment, fitted residuals,
+threshold brackets, eligibility and observed counts are checked. This is a
+reanalysis of published simulated measurements, not a new simulator run or a
+hardware measurement. Private compact traces are not re-extracted.
+
+The amended `eps3` budget retains **37 ports**, with no count contradiction.
+[CampaignData.lean](PhysicalEvaluator/CampaignData.lean) contains all 37 entries,
+their recorded observation prefixes and exact rational numerical gates checked
+by Lean. Published bounds receive outward padding of `1e-10`. The numerical
+gates do not supply physical trajectories or discharge the transfer premises.
+The independent Python reanalysis uses floating-point logarithms with a
+`1e-10` comparison tolerance. Lean checks the resulting decimal budgets as
+exact rationals; it does not certify the campaign's numerical integration or
+replace that empirical residual calculation with interval analysis.
+
+`eps3` is already a **logarithmic residual**. It is not an amplitude error to
+feed through `epsilonPeak / (L - epsilonPeak)`. The campaign entry directly pays
+`a = baseA + eps3` and `B = baseB + 2*eps3`, using each port's own enlarged
+threshold budget `ell3`. [CampaignBridge.lean](PhysicalEvaluator/CampaignBridge.lean)
+proves this transfer and connects the resulting certificate to exact counts,
+zero feasibility tolerance, Ready and retained computed-cost non-degradation.
+The evaluator and acceptance rule remain fixed.
+
+| Campaign result | Value |
+|---|---:|
+| Original #107 eligible ports | 59 |
+| Leak-scan update (`status1`) | 58 |
+| Registered full-FIRE-current check (`status2`) | 0 |
+| Amended early-current check (`status3`) | 37 |
+| `eps3` range across all 200 ports | 0.000475776–0.001097527 |
+| Ports exceeding the old illustrative `1e-4` log budget | 200 |
+| Cells with both ports eligible under `status3` | 6032, 6077 |
+
+The explicit two-port composition in
+[CampaignExample.lean](PhysicalEvaluator/CampaignExample.lean) uses `t6032`
+(needs 3 and 4), chosen
+retrospectively as the lowest cell identifier with both ports eligible. The
+former `t6004` preparation port fails the new budget: its conservative room is
+about `-0.000854388`. Lean retains that failed inequality as a negative case.
+Its matching observed count does not rescue certification. The earlier
+`t6004` replay and hypothetical sensor budgets below remain historical
+conditional examples; they are not validated by the new campaign.
+
+The measurement boundary matters. Full and early current integrals use the
+output transistor current independently of the main capacitor voltage. Their
+logarithms are aligned to the voltage-derived readings by **two fitted offsets
+per port/run**, estimated on silent reads. `eps3` is the largest full-silent
+or early-read residual, plus the declared integration margin `MG = 1e-4`.
+That margin is not a proved numerical solver error bound. The early FIRE
+check stops at 0.75 and does not establish the final-quarter correction
+`kappa`/`eps_kappa`. Full FIRE current is affected by the routing event.
+
+The new measurements are noiseless, whereas the retained #107 observation
+prefixes are noisy runs. A common mismatch seed and matching counts do not
+prove that the residual transfers between these runs. Therefore
+`CampaignTransferPremises` still explicitly requires its bound on **each actual
+read**, the reference initial/cumulative bounds, resting charge and the two
+physical detection envelopes. All 37 numerical entries use measured `eps3`;
+none silently constructs those remaining physical premises. The chain is
+connected conditionally, not an unconditional physical closed-loop theorem.
+
 ## Why the derived tolerance is zero
 
 The analog error budget is
@@ -43,6 +109,7 @@ merging PR #107; no prior result or certification script is changed.
 | [PeakMeasurement.lean](PhysicalEvaluator/PeakMeasurement.lean) | Peak and initial-charge measurement errors propagate to a corrected-amplitude budget, together with a separate model residual | Supplied measurement-error bounds and physical/model discrepancy |
 | [PeakError.lean](PhysicalEvaluator/PeakError.lean), [PeakBridge.lean](PhysicalEvaluator/PeakBridge.lean) | Amplitude error becomes a log-gain error and feeds the recorded controller contract | A physical corrected-amplitude residual within the proved admissible budget |
 | [MeasurementBridge.lean](PhysicalEvaluator/MeasurementBridge.lean) | Raw readout vectors and declared sensor/model budgets derive both the amplitude residual and the actual resting-charge band | Supplied peak, charge and model-error bounds, plus physical detection envelopes |
+| [CampaignData.lean](PhysicalEvaluator/CampaignData.lean), [CampaignBridge.lean](PhysicalEvaluator/CampaignBridge.lean) | All 37 amended campaign budgets; measured per-port `eps3` enters the gain-transfer and controller theorem | Reference-state bounds, applicability to every actual read, rest charge and physical detection envelopes |
 | [Controller.lean](PhysicalEvaluator/Controller.lean) | Derived feasibility precision, exact computed-cost precision, Ready, retained reference-cost non-degradation and budgets | Fixed two-block benchmark and declared resource accounting |
 
 `FiniteProbeCertificate m` contains only `m+1` samples. It has no exact-count
@@ -90,14 +157,15 @@ acquisition ledger to selection and live-search work. The theorem does not
 measure or upper-bound that ledger physically. `acquisition_break_even`
 requires the savings to cover acquisition as well as selection.
 
-## Recorded-data replay
+## Original recorded-data replay (before the #109 measurement update)
 
 The seven files in [evidence/provenance.json](evidence/provenance.json) are
 public extracts from the pinned PR #107 revision. Hashes are checked against
 the pinned manifest, and each retained CSV against its metadata hash. No private
 binary trace is fetched or re-extracted, and no simulator is rerun.
 
-The selected positive case `t6004` has two in-domain ports, with counts 6 and 4.
+The originally selected case `t6004` had two in-domain ports under #107's
+budget, with counts 6 and 4. Its preparation port fails #109's amended budget.
 The negative case `t6007` has both ports outside the domain: port 1 counts 4
 instead of predicted 5; port 2 counts the predicted 3 and is **still excluded**.
 Agreement alone does not certify a port. These cases were selected after the
@@ -216,8 +284,8 @@ epsilonModel + exp(kappa) * (epsilonQ + exp(-t)*epsilonC).
 The fixed references do not assert exact physical timing or calibration:
 any mismatch in timing, correction, waveform or model must be covered by the
 supplied model residual, or a separate correction budget where applicable.
-The theorem does not estimate those errors from count agreement. No #109
-data or empirical residual bound is introduced by this checkpoint.
+The theorem does not estimate those errors from count agreement. This
+illustrative measurement entry is separate from the #109 campaign entry above.
 
 ### Recorded sensor-to-controller entry
 
@@ -296,14 +364,15 @@ that those premises hold. The docstrings make this distinction explicit.
 
 ## What still prevents a complete physical closed loop
 
-1. PR #107's scalar peak-to-gain correspondence and transfer of `h_mu` remain
-   conditional. `h_mu` is a worst case on six cells, not a bound established
-   for each test cell. This work adds no leak scans or new calibration coverage.
-2. The inferred-gain arithmetic and amplitude-to-gain error transfer are
-   proved. The physical amplitude/model residual, threshold bounds and
-   scalar detection envelopes remain obligations. Neither the numerical
-   admissible residual nor its measurement ledger establishes those bounds
-   empirically.
+1. PR #109 supplies leak scans for all 100 test cells. All midpoint estimates
+   lie in the original six-cell `h_mu` envelope, but only 67 whole sampled
+   brackets do. The campaign entry uses the per-cell enlarged bracket rather
+   than treating the six-cell maximum as a universal bound. A sampled bracket
+   still does not prove all later threshold behavior or port-2 correspondence.
+2. Measured `eps3` replaces the toy residual in the campaign entry. Its fitted
+   offsets, declared quadrature margin, noiseless-to-noisy transfer and the
+   final-quarter FIRE correction do not establish absolute true gain or
+   physical detection envelopes. These remain explicit obligations.
 3. A certificate for one recorded prefix does not establish that every later
    physical validation after preparation/reset reproduces those counts, or
    that two physical ports behave as the separable two-block learner under a
@@ -321,6 +390,8 @@ With the repository's pinned Lean 4.35.0 toolchain and Mathlib dependencies:
 lake build
 python3 evidence_check.py --check --report evidence-validation.json
 python3 gain_check.py --check --report gain-validation.json
+git fetch --no-tags --depth=1 origin 7ded279f103dab5beb6c1c671f1acbdf4cff18c0
+python3 campaign_check.py --check --report campaign-validation.json
 python3 verify_physical.py --report physical-validation.json
 lake env lean Trace.lean
 ```
@@ -330,7 +401,9 @@ including private/generated/unused declarations, permitting only `propext`,
 `Classical.choice` and `Quot.sound`. [evidence-validation.json](evidence-validation.json)
 records twelve data mutations; [gain-validation.json](gain-validation.json)
 records six readout-data mutations and generated/source hashes;
-[physical-validation.json](physical-validation.json) records twenty-three semantic
+[campaign-validation.json](campaign-validation.json) records six campaign-data
+mutations, the complete eligible-port list and snapshot provenance;
+[physical-validation.json](physical-validation.json) records twenty-six semantic
 proof mutations and source hashes. Parser/import failures never count as
-successful rejection. CI reproduces the build, all three verifiers and the
+successful rejection. CI reproduces the build, all four verifiers and the
 replay, preserving their reports.

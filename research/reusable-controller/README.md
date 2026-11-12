@@ -15,6 +15,9 @@ The [finite physical-certificate bridge](physical/README.md) derives zero
 discrete count error from the need theorem under explicit physical premises,
 then connects that precision to the controller's computed pulse ledger. It
 includes a pinned-data replay and states the remaining physical transfer gaps.
+It now imports measured per-port `eps3` budgets for all 37 eligible ports from
+the amended #109 campaign. Their numerical gates are checked in Lean; transfer
+to noisy reads and physical detection envelopes remain explicit premises.
 
 ## Algorithm and scope
 

@@ -9,3 +9,5 @@ import PhysicalEvaluator.ReadoutBridge
 import PhysicalEvaluator.PeakBridge
 import PhysicalEvaluator.PeakMeasurement
 import PhysicalEvaluator.MeasurementBridge
+import PhysicalEvaluator.CampaignData
+import PhysicalEvaluator.CampaignExample
