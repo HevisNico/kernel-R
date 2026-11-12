@@ -3,6 +3,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import time
@@ -45,6 +46,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ngspice", type=Path, required=True)
     parser.add_argument("--publication-commit", required=True)
+    parser.add_argument("--tmpfile-adapter", type=Path, required=True)
+    parser.add_argument("--tmpdir", type=Path, required=True)
     parser.add_argument("--run", required=True)
     args = parser.parse_args()
     manifest = json.loads((HERE / "manifest.json").read_text())
@@ -52,6 +55,11 @@ def main():
     for relative, expected in manifest["source_sha256"].items():
         assert digest(ROOT / relative) == expected, relative
     assert digest(args.ngspice) == manifest["ngspice_sha256"], "executable changed"
+    assert digest(args.tmpfile_adapter) == manifest["tmpfile_adapter_sha256"], "adapter changed"
+    assert (ROOT / ".spiceinit").read_bytes() == (ROOT / "spiceinit.txt").read_bytes(), "compatibility settings changed"
+    args.tmpdir.mkdir(parents=True, exist_ok=True)
+    env = dict(os.environ, TMPDIR=str(args.tmpdir.resolve()),
+               LD_PRELOAD=str(args.tmpfile_adapter.resolve()), SPICE_SCRIPTS=str(HERE / "runtime"))
     actual_pdk = subprocess.check_output(["git", "-C", str(ROOT / "pdk"), "rev-parse", "HEAD"], text=True).strip()
     assert actual_pdk == manifest["pdk_commit"], "PDK changed"
     # Require the declared protocol commit to be present and immutable inputs to match it.
@@ -67,11 +75,12 @@ def main():
     started = time.time()
     metadata = dict(run=run, publication_commit=args.publication_commit,
                     started_unix=started, deck_sha256=digest(circuit), signals=SIGNALS,
-                    ngspice_sha256=digest(args.ngspice), status="running")
+                    ngspice_sha256=digest(args.ngspice),
+                    tmpfile_adapter_sha256=digest(args.tmpfile_adapter), status="running")
     (out / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
     try:
         p = subprocess.run([str(args.ngspice.resolve()), "-b", str(circuit)], cwd=ROOT,
-                           capture_output=True, text=True, timeout=600)
+                           capture_output=True, text=True, timeout=600, env=env)
         (out / "stdout.log").write_text(p.stdout)
         (out / "stderr.log").write_text(p.stderr)
         metadata.update(returncode=p.returncode, status="produced_trace" if p.returncode == 0 and raw.exists() else "failed")

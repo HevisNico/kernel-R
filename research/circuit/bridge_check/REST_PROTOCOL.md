@@ -68,3 +68,19 @@ replay as stated. This is an applicability failure, not proof that rest
 charge caused the old count disagreement. If it passes, the other hypotheses
 remain unverified. Deterministic gain sweeps and current/charge measurements
 will need their own frozen run manifest before launch.
+
+## Runtime amendment 1, before retry
+
+The five attempts under commit `c8439968e3516c3f51f5d03d66d65d0a1a6b9852`
+all exited before transient analysis: the C runtime's `tmpfile()` tried an
+unavailable temporary directory. Their decks, logs and metadata are retained.
+No physical outputs were produced. `manifest_v1.json` preserves the initial list.
+
+The retry uses the same five configurations with names suffixed `_retry1`.
+A small audited adapter makes `tmpfile()` honor a writable `TMPDIR`; its C
+source and binary hash are recorded. A minimal central `spinit` sets one
+thread and avoids paths to uninstalled optional XSPICE models. The existing
+local `.spiceinit` compatibility settings are checked byte-for-byte.
+No solver, device, noise, sample-date or acceptance rule changes. The runtime
+adapter was tested on temporary-file I/O, without simulating a circuit.
+The amended code and manifest must be pushed before retrying.

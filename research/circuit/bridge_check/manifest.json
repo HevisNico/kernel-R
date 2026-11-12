@@ -8,13 +8,15 @@
     "blocks.spice": "7677efdb277d837937c28b13d807448a433d19019fc550c81e0c8d3234bfd1bd",
     "noise.json": "897dca6d564771abe69572e5c1f10c9eb70f59afa692fb85b1a4d10401e0c172",
     "spiceinit.txt": "ceb0f22c2f12fc545406534ab6801716f61caed2cf3fed03d7f5c7fb193a4bb1",
-    "bridge_check/rest_probe.py": "fdbd84dab0da51aa57fb772272fc1fad504bb7e31d05757818acf79ee33518fb",
-    "bridge_check/REST_PROTOCOL.md": "c5aafe56409fc7d792963bf4fc022ba0275e1b14eb696e2ccc8f56ad4838ef3d",
-    "bridge_check/rest_analyze.py": "5dba2f61f356d7793a239df7e1ce9cf187f269e7f3ee6d85b13cc444a4db10a2"
+    "bridge_check/rest_probe.py": "54b88c3199fb9fc0df47346682312289f0952264b99d2b51bd1f9ab862bd1d48",
+    "bridge_check/REST_PROTOCOL.md": "e515066b3b3d5ddd9106538d011d188aca01deebdfbddd7304e2e73902d89223",
+    "bridge_check/rest_analyze.py": "5dba2f61f356d7793a239df7e1ce9cf187f269e7f3ee6d85b13cc444a4db10a2",
+    "bridge_check/runtime/tmpfile_in_workspace.c": "c7d76fac11dff19ca59932e33c01123bd0ad843a667427c582b88afbb767daa3",
+    "bridge_check/runtime/spinit": "3957923e4e0cfb5afe67aa259bb54e52b699821f78a2287e70745482d817b0aa"
   },
   "runs": [
     {
-      "name": "nominal_200ns",
+      "name": "nominal_200ns_retry1",
       "section": "tt",
       "seed": null,
       "noise": false,
@@ -22,7 +24,7 @@
       "temperature_C": 27
     },
     {
-      "name": "nominal_100ns",
+      "name": "nominal_100ns_retry1",
       "section": "tt",
       "seed": null,
       "noise": false,
@@ -30,7 +32,7 @@
       "temperature_C": 27
     },
     {
-      "name": "mm2064_quiet",
+      "name": "mm2064_quiet_retry1",
       "section": "tt_mm",
       "seed": 2064,
       "noise": false,
@@ -38,7 +40,7 @@
       "temperature_C": 27
     },
     {
-      "name": "mm2064_noise_1",
+      "name": "mm2064_noise_1_retry1",
       "section": "tt_mm",
       "seed": 2064,
       "noise": true,
@@ -46,12 +48,21 @@
       "temperature_C": 27
     },
     {
-      "name": "mm2064_noise_2",
+      "name": "mm2064_noise_2_retry1",
       "section": "tt_mm",
       "seed": 2064,
       "noise": true,
       "max_step_s": 2e-07,
       "temperature_C": 27
     }
-  ]
+  ],
+  "amendment": "Runtime repair only, after five attempts failed before transient analysis; no physical data seen.",
+  "previous_attempts": [
+    "nominal_200ns",
+    "nominal_100ns",
+    "mm2064_quiet",
+    "mm2064_noise_1",
+    "mm2064_noise_2"
+  ],
+  "tmpfile_adapter_sha256": "c91823f366469eae019633d94b2b0a1fc053b7e4171dfbe9f8f0fa0d5d51e098"
 }
