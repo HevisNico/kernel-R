@@ -1,7 +1,9 @@
 # Obligations for a reusable native round
 
-This is a specification and source review, **not a proved native bridge**.
+This is a specification and source review, **not a proved native controller bridge**.
 The reference is Kernel R commit `518852d237dd4d45eda2c2b85aaad2e592bfdf89`.
+The [read-to-rest checkpoint](NATIVE_RETURN.md) now constructs one native
+continuation. M2 remains open until re-preparation and its input costs close.
 
 ## Why the existing cycle cannot simply be iterated
 
@@ -44,7 +46,7 @@ Preparation from birth would be a separate theorem.
 
 | Target | Required evidence |
 |---|---|
-| Read-to-rest continuation | Extend both high and low read outcomes through FAST/SLOW, retaining memories and accounting for every sensor phase and pending event |
+| Read-to-rest continuation | Constructed for both values with positive recovery, quiet sensors and an empty queue; see [the checked scope](NATIVE_RETURN.md). Initial preparation and physical invariants remain explicit |
 | Re-preparation | Reach the next read/precharge bands from the resulting state, using real input tokens and counting their costs |
 | Fixed-router reuse | Distinguish ignition, work, read and feedback events for multiple rounds without replacing the router or predetermining the validation outcomes |
 | Acceptance and rejection | Actual learner reports decide whether the candidate is committed; rejection keeps the accepted lesson and permits the other coordinate |
@@ -53,6 +55,7 @@ Preparation from birth would be a separate theorem.
 | Iteration | Compose the native rounds under the same router, with an explicit resource budget and complete witnesses |
 
 The discrete convergence theorem does not discharge any row of this table.
+The native return proof discharges only the first row under its stated premises.
 Finite complete witnesses must precede a universal comparison claim; comparing
 only complete runs is not an existence or progress argument. Threshold-contact
 and geometric-crossing hypotheses must be retained when using that semantics.
@@ -71,5 +74,6 @@ blocked-bit invariant and optimality proof must be reconsidered.
 
 No claim is made here about an unbounded number of strict improvements,
 learned search strategies, recurrent-network learning, or transistor-level
-correspondence. The next milestone is the physical read-to-rest and
-re-preparation continuation, with its preparation assumptions explicit.
+correspondence. The current milestone remains the physical read-to-rest and
+re-preparation continuation. Do not advance to fixed-router reuse while its
+re-preparation, source-admission and cost obligations remain open.

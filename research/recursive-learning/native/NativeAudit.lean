@@ -5,6 +5,7 @@ import Teaching.RoutedLesson
 import Teaching.Dispatch
 import Teaching.SelectorProtection
 import Teaching.SelectorRead
+import Teaching.SelectorReturnAudit
 import Teaching.SelectorPrecharge
 import Teaching.TeacherReopen
 import Teaching.TeacherStableClock

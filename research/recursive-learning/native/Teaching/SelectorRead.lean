@@ -234,6 +234,8 @@ structure SelectorReadRun (θ : Fin 1 → Parameters) (s : Snapshot 1) (high : B
   mainClock : final.main 0 = if horizon < s.time + latency + 1 then .fast else .slow
   chargeClock : final.x 0 .q = cadenceProtectedCharge (s.x 0 .b) (s.time + latency) horizon
   auxiliaryBelow : ∀ p, final.x 0 (.m p) < 1
+  auxiliaryRest : ∀ p, RestBand (final.x 0 (.m p))
+  deliveries : execution.deliveries = []
 
 /-- The read uses the actual admitted pulse. Both outcomes fire early
     enough to cover the whole ERROR phase with FAST or SLOW protection. -/
@@ -422,6 +424,9 @@ theorem selector_read_run_exists {θ ε s high}
       simpa only [final, setAux, not_lt.mpr returnBounds.1.le, ite_false] using error.raw_mode
     · exact error.raw_other 0 p (Or.inr same)
   have finalEmpty : final.pending = [] := error.pending.trans (decay.pending.trans firedEmpty)
+  have noDeliveries : execution.deliveries = [] := by
+    simp [execution, Execution.deliveries_append, firingDeliveries, decay.deliveries,
+      error.deliveries, errorJump, readyJump, Execution.deliveries, Move.deliveries, Jump.deliveries]
   have finalGuard : BeforeGuards final final.x := by
     constructor
     · intro i
@@ -453,6 +458,8 @@ theorem selector_read_run_exists {θ ε s high}
     auxiliaryReady := finalAux, rawNone := finalRaw, empty := finalEmpty, horizonBounds := returnBounds
     mainClock := error.main_mode, chargeClock := error.main_clock
     auxiliaryBelow := fun p => by simpa only [finalAux] using finalGuard.2 0 p
+    auxiliaryRest := ?_
+    deliveries := noDeliveries
   }⟩
   · intro v
     apply finalGuard.no_jump
@@ -464,6 +471,15 @@ theorem selector_read_run_exists {θ ε s high}
       errorJump, readyJump, Execution.ContactsTransversal, Jump.ContactTransversal]
   · simp [execution, Execution.emissions_append, firingEmissions, decay.emissions, error.emissions,
       errorJump, readyJump, Execution.ledger, Move.ledger, Jump.ledger, Ledger.add, Ledger.zero, F]
+  · intro p
+    by_cases same : p = 2
+    · subst p
+      change RestBand (error.final.x 0 (.m 2))
+      rw [readyGuard]
+      constructor <;> norm_num
+    · exact (execution.aux_no_input_rest_band 0 p (prepared.auxiliary p).1
+        (prepared.auxiliary p).2 (prepared.other p same)
+        (by simp [NoArrivalAt, noDeliveries])).1.2
 
 theorem SelectorReadRun.reads_high {θ s high} (run : SelectorReadRun θ s high) :
     run.latency < 1 / 5 ↔ high = true := by

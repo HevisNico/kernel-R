@@ -84,6 +84,13 @@ cycle router ignores later ignition dates. Reusing a controller requires a
 real continuation and a router fixed for the whole execution; changing the
 router between proof fragments is not a solution.
 
+The [native return checkpoint](NATIVE_RETURN.md) now constructs the read's
+FAST/SLOW continuation to rest for positive recovery. It preserves the gains,
+recovery and sensor rest bands and inherits the native physical invariant.
+**M2 remains open:** the returned charge is `1/10`, below the next read's
+required `13/20`. Re-preparation by real inputs and their costs are not proved.
+The subsequent milestones have not started.
+
 ## Reproduce
 
 From this directory, with Lean **4.35.0** and Python 3 available:
