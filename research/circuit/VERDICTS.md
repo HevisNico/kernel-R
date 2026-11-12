@@ -2,6 +2,8 @@
 
 Written by `analyze.py` from the results. The statements are those of `PREDICTION.md`.
 
+The date of `PREDICTION.md` cannot be checked from this repository alone: see `PREDICTION_PROVENANCE.md`. The predictions are not blind.
+
 22 hold, 2 fail, 0 not evaluable, of 24.
 
 | | Statement | Measured | Status | Reason |

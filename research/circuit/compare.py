@@ -5,7 +5,7 @@
 3. Prediction P2 on the replays, where a latency is printed from the start of its pulse.
    The verdict of the campaign stays in VERDICTS.md; this one is shown next to it.
 """
-import csv, math, os, shutil, statistics, sys, tempfile
+import csv, math, os, random, shutil, statistics, sys, tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import analyze
@@ -41,6 +41,37 @@ def verdicts_with(folder, names):
                 shutil.copy(f"{folder}/{n}.csv", tmp)
         c, R, S, X = analyze.analyse(tmp)
     return {v["id"]: v for v in R.v}, S
+
+
+def chi2_quantile(p, df):
+    """Quantile of a chi-square law (Wilson-Hilferty)."""
+    return df * (1 - 2 / (9 * df) + statistics.NormalDist().inv_cdf(p) * math.sqrt(2 / (9 * df))) ** 3
+
+
+def pooled_sigma(samples, limit):
+    """What the samples together say of a sigma predicted below `limit`. Assumes one normal law, and says how far the samples agree with that."""
+    df = sum(len(v) - 1 for v in samples)
+    s = math.sqrt(sum((len(v) - 1) * statistics.variance(v) for v in samples) / df)
+    n = len(samples[0])
+    x = (n - 1) * (limit / s) ** 2
+    z = ((x / (n - 1)) ** (1 / 3) - (1 - 2 / (9 * (n - 1)))) / math.sqrt(2 / (9 * (n - 1)))
+    over = 1 - statistics.NormalDist().cdf(z)
+    var = [statistics.variance(v) for v in samples]
+    ratio = max(var) / min(var)
+    rng, hit, draws = random.Random(0), 0, 20000
+    for _ in range(draws):
+        w = [statistics.variance([rng.gauss(0, 1) for _ in v]) for v in samples]
+        hit += max(w) / min(w) >= ratio
+    top = s * math.sqrt(df / chi2_quantile(0.05, df))
+    return [f"- {sum(len(v) for v in samples)} runs in {len(samples)} samples. Sigma inside a sample, the samples pooled: {s:.5f}.",
+            f"- If every read follows one normal law: 95% interval from {s * math.sqrt(df / chi2_quantile(0.975, df)):.5f} to "
+            f"{s * math.sqrt(df / chi2_quantile(0.025, df)):.5f}; one-sided 95% upper bound {top:.5f}, for a limit of {limit}.",
+            f"- With that sigma, a sample of {n} runs shows a sigma above {limit} about one time in {1 / over:.0f}.",
+            f"- To know a sigma within 10% at 95%, about {round(1 + (1.96 / 0.1) ** 2 / 2, -1):.0f} runs are needed.",
+            f"- Reserve: the variance of the largest sample is {ratio:.1f} times that of the smallest. Under one normal law, {len(samples)} samples of {n} "
+            f"differ that much with a probability of {100 * hit / draws:.1f}%. The interval above may therefore be too narrow.",
+            f"- The verdict of the campaign on P2 stays as written: fails. The samples together put the sigma "
+            + ("below the limit, with a small margin, under the reserve above." if top < limit else "at the limit or above it.")]
 
 
 def main(out="COMPLEMENT.md"):
@@ -141,24 +172,31 @@ def main(out="COMPLEMENT.md"):
         L.append("Not evaluable: no result of the campaign.")
     else:
         L += ["| Sample | Sigma of the joint read | Range of the joint read | Sigma of a port at rest | P1 | P2 | P3 | P4 | P5 |", "|---|---|---|---|---|---|---|---|---|"]
-        sig, fine = [], []
+        sig, fine, held, reads = [], [], {p: 0 for p in ("P1", "P2", "P3", "P4", "P5")}, []
         for label, d in samples:
             v, S = verdicts_with(d, nz)
             z = S.get("noise", {})
             j = z.get("joint") or []
             sig.append(z.get("joint_sigma"))
+            if len(j) >= 2:
+                reads.append(j)
+            for p in held:
+                held[p] += v[p]["status"] == analyze.HOLDS
             if d != "results":
                 fine += j
             L.append(f"| {label} | {analyze.fm(z.get('joint_sigma'), '.5f')} | {analyze.span(j, '.5f')} | {analyze.fm(z.get('idle_sigma_mV'), '.3f')} mV | "
                      + " | ".join(v[p]["status"] for p in ("P1", "P2", "P3", "P4", "P5")) + " |")
         sig = [s for s in sig if s]
         L.append("")
+        L.append(f"- Of {len(samples)} samples: " + ", ".join(f"{p} holds on {k}" for p, k in held.items()) + ".")
         if len(sig) >= 2:
             L.append(f"- Over the {len(sig)} samples the sigma of the joint read goes from {min(sig):.5f} to {max(sig):.5f}, a ratio of {max(sig) / min(sig):.1f}.")
             L.append(f"- If the joint reads followed a normal law, a sigma measured on 20 runs would be uncertain by about {100 / math.sqrt(38):.0f}%. "
                      f"Resampling the 20 runs of the campaign gives a wider interval: see the intervals in `VERDICTS.md`.")
         if len(fine) >= 3:
             L.append(f"- The {len(fine)} joint reads of the replays together: sigma {statistics.stdev(fine):.5f}, from {min(fine):.5f} to {max(fine):.5f}.")
+        if len(reads) >= 2:
+            L += ["", "### P2 on all the samples together", ""] + pooled_sigma(reads, 0.0012)
     L.append("")
 
     # 3b. the two noisy refresh runs, repeated
