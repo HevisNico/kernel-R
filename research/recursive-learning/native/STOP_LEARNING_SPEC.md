@@ -68,7 +68,7 @@ structure RestState (θ : Fin 1 → Parameters) (s : Snapshot 1) : Prop where
   caps : ∀ q, s.x 0 (.z q) ≤ Real.log ((θ 0).cap q)
 ```
 
-This is the definition in [SilentStep.lean](SilentStep.lean). The firing
+This is the definition in [SilentStep.lean](Training/SilentStep.lean). The firing
 step may need a narrower condition on the recovery rate.
 
 ## Theorems (all proved)
@@ -125,19 +125,19 @@ read together, with the FIRE dates.
 ## Proved before the training loop
 
 - The latency window, for the read equation at exact rest:
-  [StopLearningLatency.lean](StopLearningLatency.lean).
+  [StopLearningLatency.lean](Training/StopLearningLatency.lean).
 - The same window with a rest charge within a stated distance of 0.1:
   `stopped_read_response_residual`, in the same file.
 - Steps A and B at nominal thresholds and nominal dose, for gains at
   most 7/6 and gains in `[9/5, 11/5]`:
-  [NativeStopLearning.lean](NativeStopLearning.lean).
+  [NativeStopLearning.lean](Training/NativeStopLearning.lean).
 - Step A in the regime above, for any gain:
-  [SilentStep.lean](SilentStep.lean).
+  [SilentStep.lean](Training/SilentStep.lean).
 - The refractory period for any order of events:
-  [Refractory.lean](Refractory.lean).
+  [Refractory.lean](Training/Refractory.lean).
 - Step B in the regime above, for any gain:
-  [FiringStep.lean](FiringStep.lean).
-- The loop C for every start gain: [TrainingLoop.lean](TrainingLoop.lean).
+  [FiringStep.lean](Training/FiringStep.lean).
+- The loop C for every start gain: [TrainingLoop.lean](Training/TrainingLoop.lean).
 
 ## Reusable constructions
 

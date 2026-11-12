@@ -41,7 +41,7 @@ The gate is driven by the cell's phase, without a target-comparison signal
 in the cell. This is a prescribed pulse-training task, not a replacement
 for the classification tasks of the cited systems.
 
-[`stop_training_exists`](../research/recursive-learning/native/TrainingLoop.lean)
+[`stop_training_exists`](../research/recursive-learning/native/Training/TrainingLoop.lean)
 constructs the training execution and establishes stable firing from rest,
 with agreement for every competing complete run when the terminal queue
 is empty. It assumes the stated parameter bands, rest state and pulse
@@ -83,14 +83,14 @@ that Kernel R removes every source of fabrication variation.
 | Searches | Explicit cells realize count probes and a successive search with `2k + 1` cells for `2^k` needs | The schedule takes exponential time, dose precision tightens with depth, and scheduled wires represent clocked registers |
 
 The supporting statements are
-[`trained_read_exists`](../research/recursive-learning/native/JointRead.lean),
-[`trained_coincidence_network`](../research/recursive-learning/native/TrainedCoincidence.lean),
-[`acyclic_network_states`](../research/recursive-learning/native/AcyclicNetwork.lean)
-and [`successive_search_witness`](../research/recursive-learning/native/SuccessiveSearch.lean).
+[`trained_read_exists`](../research/recursive-learning/native/Training/JointRead.lean),
+[`trained_coincidence_network`](../research/recursive-learning/native/Training/TrainedCoincidence.lean),
+[`acyclic_network_states`](../research/recursive-learning/native/Network/AcyclicNetwork.lean)
+and [`successive_search_witness`](../research/recursive-learning/native/Search/SuccessiveSearch.lean).
 Their existence witnesses accompany the universal claims, so agreement
 between complete runs is not the only conclusion.
 
-The [fixed-current separation](../research/recursive-learning/native/CoincidenceSeparation.lean)
+The [fixed-current separation](../research/recursive-learning/native/Coincidence/CoincidenceSeparation.lean)
 uses a different, fixed-birth-gain task. It has not been reproved for the
 trained-cell setting. Neither it nor the numerical benchmark establishes
 superiority over Noack, TEXEL, calibrated synapses or all timed writes.
@@ -148,7 +148,7 @@ joint-read latency, about 0.267 model units, is outside the ideal
 The [design snapshot](https://github.com/HevisNico/kernel-R/blob/460405f1bd974875a35640c78854458a47123520/research/circuit/DESIGN.md)
 documents omitted effects and differences from the model.
 
-The [read-lag theorem](../research/recursive-learning/native/ReadLag.lean)
+The [read-lag theorem](../research/recursive-learning/native/Training/ReadLag.lean)
 assumes an additive shift of each cell's observed read FIRE date. It does
 not prove that transistor settling has that form. Device simulations and
 eventual measurements need a separate correspondence argument before the

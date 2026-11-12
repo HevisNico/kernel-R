@@ -1,0 +1,37 @@
+name: Circuit simulation analysis
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  circuit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: research/circuit
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Analysis on synthetic campaigns
+        run: python -B -m unittest test_analyze test_need_budget
+      - name: The committed reports are those of the committed results
+        run: |
+          python -B analyze.py --out "$RUNNER_TEMP/report" --no-figures
+          diff "$RUNNER_TEMP/report/VERDICTS.md" VERDICTS.md
+          python -B compare.py "$RUNNER_TEMP/COMPLEMENT.md" > /dev/null
+          diff "$RUNNER_TEMP/COMPLEMENT.md" COMPLEMENT.md
+      - name: The need-budget diagnostic reproduces the committed table
+        run: |
+          python -B need_budget.py --out "$RUNNER_TEMP/need-budget"
+          diff "$RUNNER_TEMP/need-budget/NEED_BUDGET.md" NEED_BUDGET.md
+          diff "$RUNNER_TEMP/need-budget/need_budget_ports.csv" need_budget_ports.csv

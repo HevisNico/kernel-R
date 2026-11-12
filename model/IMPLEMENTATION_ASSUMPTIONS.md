@@ -10,7 +10,7 @@ device has been built, and none of them is verified here.
 The dose of a full ERROR phase is `8 × (entry − exit)`. It depends on
 the distance between the two thresholds and not on where they sit. An
 error common to both thresholds leaves the dose unchanged.
-[`training_read_common_offset`](../research/recursive-learning/native/OffsetAndDelay.lean)
+[`training_read_common_offset`](../research/recursive-learning/native/Coincidence/OffsetAndDelay.lean)
 states this for one training pulse and one read.
 
 One comparator used for both crossings can supply a common error if its
@@ -25,7 +25,7 @@ those bounds are met.
 The model switches phase at the instant a charge meets its threshold. A
 circuit reacts a short time later, and the sensor keeps discharging in
 the meantime. The dose then depends on the discharge rates.
-[`training_read_reaction_delay`](../research/recursive-learning/native/OffsetAndDelay.lean)
+[`training_read_reaction_delay`](../research/recursive-learning/native/Coincidence/OffsetAndDelay.lean)
 bounds the change of the increment by `2.4 × d` for a delay `d` of at
 most 0.01 model units, the same at both thresholds.
 
@@ -37,7 +37,7 @@ lasts 0.15 model units at nominal values.
 
 The model applies the gain of a port to a pulse at the instant it
 arrives. A real gain element has settling dynamics. The result in
-[`trained_dates_decide_lag`](../research/recursive-learning/native/ReadLag.lean)
+[`trained_dates_decide_lag`](../research/recursive-learning/native/Training/ReadLag.lean)
 assumes that each observed read FIRE date equals its model date plus a
 cell-specific lag. Under the stated read schedule, the coincidence
 decision survives when the two lags differ by at most 3/100 of a unit.
@@ -63,7 +63,7 @@ hidden in the statement that thresholds and actuation factors are fixed.
 ## Gains and the FIRE threshold carry a per-cell error
 
 The fixed-current comparison in
-[`CoincidenceSeparation.lean`](../research/recursive-learning/native/CoincidenceSeparation.lean)
+[`CoincidenceSeparation.lean`](../research/recursive-learning/native/Coincidence/CoincidenceSeparation.lean)
 uses a birth gain of exactly 1.2 and a FIRE threshold within ±3%.
 Those assumptions belong to that comparison. In a circuit the gain of
 each port and the FIRE threshold of each cell carry device variation.
@@ -80,11 +80,11 @@ FIRE alone is not a stopping certificate: a residual-charge-assisted FIRE
 can be followed by a silent pulse. For start gains that do not fire
 and a FIRE level between 0.95 and 1.05, the read latency of two trained
 ports lies in a window that depends on neither. See
-[`trained_read_exists`](../research/recursive-learning/native/JointRead.lean)
-and [`OpenCell.read`](../research/recursive-learning/native/FreeRead.lean).
+[`trained_read_exists`](../research/recursive-learning/native/Training/JointRead.lean)
+and [`OpenCell.read`](../research/recursive-learning/native/Network/FreeRead.lean).
 The pulse amplitude and the unit response remain exact there.
 The trained coincidence result is in
-[`TrainedCoincidence.lean`](../research/recursive-learning/native/TrainedCoincidence.lean).
+[`TrainedCoincidence.lean`](../research/recursive-learning/native/Training/TrainedCoincidence.lean).
 It does not extend the fixed-current separation theorem to trained cells.
 
 The same theorems give a tolerance for the number of doses a port needs
@@ -93,7 +93,7 @@ and `ℓ` on the FIRE level, the need is `m` when
 `a + m * b + 20/17 * ℓ + 1/8000 < d₀ / 2`, for a nominal dose `d₀`. The
 dose error is counted once for each dose, so a search over `2^k` needs
 asks for a dose error below about `d₀ / 2^(k+1)`. See
-[`needIs_of_tolerance`](../research/recursive-learning/native/NeedTolerance.lean).
+[`needIs_of_tolerance`](../research/recursive-learning/native/Search/NeedTolerance.lean).
 
 The searches built on these cells use wires that release pulses at
 preset dates when a FIRE falls inside a window. Such a wire stands for

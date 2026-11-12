@@ -34,13 +34,13 @@ result marked as such.
 
 | What a cell or a network does | Holds for | Theorem |
 |---|---|---|
-| One pulse adds a fixed dose to the memory, whatever the discharge rate | ±10% fabrication, ±5% on the thresholds | [`training_read_every_complete`](research/recursive-learning/native/ParameterTraining.lean) |
-| Training with identical pulses stops by itself | any start gain below firing, firing level from 0.95 to 1.05 | [`stop_training_exists`](research/recursive-learning/native/TrainingLoop.lean) |
+| One pulse adds a fixed dose to the memory, whatever the discharge rate | ±10% fabrication, ±5% on the thresholds | [`training_read_every_complete`](research/recursive-learning/native/Thresholds/ParameterTraining.lean) |
+| Training with identical pulses stops by itself | any start gain below firing, firing level from 0.95 to 1.05 | [`stop_training_exists`](research/recursive-learning/native/Training/TrainingLoop.lean) |
 | A given chip has one behaviour | any finite network | [uniqueness](proof/lean/KernelR/HybridParameterUniversalExecution.lean) |
-| Cells joined by wires behave as each cell alone predicts | any number of cells | [`acyclic_network_states`](research/recursive-learning/native/AcyclicNetwork.lean) |
+| Cells joined by wires behave as each cell alone predicts | any number of cells | [`acyclic_network_states`](research/recursive-learning/native/Network/AcyclicNetwork.lean) |
 | A chain learns the same amounts in every cell | any length | [`every_finite_chain`](proof/lean/KernelR/TrustedHeadline.lean) |
-| Two cells decide whether two signals arrive together | a standard write provably fails | [`coincidence_exit_001_separation`](research/recursive-learning/native/CoincidenceSeparation.lean) |
-| A network finds a hidden number among `2^k` | `2k + 1` cells, every `k` | [`successive_search`](research/recursive-learning/native/SuccessiveSearch.lean) |
+| Two cells decide whether two signals arrive together | a standard write provably fails | [`coincidence_exit_001_separation`](research/recursive-learning/native/Coincidence/CoincidenceSeparation.lean) |
+| A network finds a hidden number among `2^k` | `2k + 1` cells, every `k` | [`successive_search`](research/recursive-learning/native/Search/SuccessiveSearch.lean) |
 
 | Word | Meaning here |
 |---|---|
@@ -106,8 +106,8 @@ variation and ±5% on both ERROR thresholds and on the FIRE level.
 - A fixed reaction delay `d` after each threshold crossing moves the
   dose by at most `2.4 × d`.
 
-[`training_read_every_complete`](research/recursive-learning/native/ParameterTraining.lean) ·
-[`training_read_common_offset` and `training_read_reaction_delay`](research/recursive-learning/native/OffsetAndDelay.lean)
+[`training_read_every_complete`](research/recursive-learning/native/Thresholds/ParameterTraining.lean) ·
+[`training_read_common_offset` and `training_read_reaction_delay`](research/recursive-learning/native/Coincidence/OffsetAndDelay.lean)
 
 ### 2. Training stops by itself
 
@@ -130,8 +130,8 @@ order, at most a quarter of a unit apart. The cell fires later than
 0.239 units after the first read pulse and no later than 0.256 units
 after the second, whatever the start gains and the firing level.
 
-[`stop_training_exists`](research/recursive-learning/native/TrainingLoop.lean) ·
-[`OpenCell.read`](research/recursive-learning/native/FreeRead.lean)
+[`stop_training_exists`](research/recursive-learning/native/Training/TrainingLoop.lean) ·
+[`OpenCell.read`](research/recursive-learning/native/Network/FreeRead.lean)
 
 ### 3. One chip, one behaviour
 
@@ -160,8 +160,8 @@ same firing dates in each cell.
   cell raises its active log-gain by 2.4 and its recovery rate by 0.3,
   across ±10% fabrication variation and bounded wire jitter.
 
-[`acyclic_network_states`](research/recursive-learning/native/AcyclicNetwork.lean) ·
-[`trained_wired_network` and `trained_chain_witness`](research/recursive-learning/native/WiredNetwork.lean) ·
+[`acyclic_network_states`](research/recursive-learning/native/Network/AcyclicNetwork.lean) ·
+[`trained_wired_network` and `trained_chain_witness`](research/recursive-learning/native/Network/WiredNetwork.lean) ·
 [`TrustedHeadline.every_finite_chain`](proof/lean/KernelR/TrustedHeadline.lean) ·
 [chain guide](docs/UNIVERSAL_FINITE_CHAIN.md)
 
@@ -183,9 +183,9 @@ same firing dates in each cell.
   comparison uses cells with a start gain of exactly 1.2 and a firing
   level within ±3%; it is not redone with trained cells.
 
-[`trained_coincidence_network`](research/recursive-learning/native/TrainedCoincidence.lean) ·
-[`trained_network_lag`](research/recursive-learning/native/ReadLag.lean) ·
-[`coincidence_exit_001_separation`](research/recursive-learning/native/CoincidenceSeparation.lean)
+[`trained_coincidence_network`](research/recursive-learning/native/Training/TrainedCoincidence.lean) ·
+[`trained_network_lag`](research/recursive-learning/native/Training/ReadLag.lean) ·
+[`coincidence_exit_001_separation`](research/recursive-learning/native/Coincidence/CoincidenceSeparation.lean)
 
 ### 6. A network finds a hidden number
 
@@ -211,9 +211,9 @@ own start gain, dose and firing level.
 
 A tree of `2^k − 1` questions, of which a run asks `k`, is also proved.
 
-[`successive_search` and `successive_search_witness`](research/recursive-learning/native/SuccessiveSearch.lean) ·
-[`bisection_search`](research/recursive-learning/native/BisectionSearch.lean) ·
-[`needIs_of_tolerance`](research/recursive-learning/native/NeedTolerance.lean) ·
+[`successive_search` and `successive_search_witness`](research/recursive-learning/native/Search/SuccessiveSearch.lean) ·
+[`bisection_search`](research/recursive-learning/native/Search/BisectionSearch.lean) ·
+[`needIs_of_tolerance`](research/recursive-learning/native/Search/NeedTolerance.lean) ·
 [map of the results](research/recursive-learning/native/README.md#map-of-the-stop-learning-results)
 
 ## What the benchmark showed
@@ -263,6 +263,10 @@ bounds stated in their guides.
 
 - **A mathematical model.** Hardware measurements would be needed for
   experimental validation.
+  A [transistor-level simulation of one cell](research/circuit/README.md)
+  is a simulation, not a measurement. Its joint read falls outside the
+  proved window, and it takes the arrival time of each pulse from ideal
+  signals.
 - **Exact quantities.** The pulse amplitude, the unit response and the
   MARK and SILENT levels are those of the model. See the
   [implementation assumptions](model/IMPLEMENTATION_ASSUMPTIONS.md).
@@ -331,7 +335,7 @@ definitions represent the written model.
 |---|---|
 | [`model/`](model/README.md) | Cell laws and the chain protocol |
 | [`proof/lean/`](proof/lean/README.md) | Core Lean development and audit |
-| [`research/`](research/README.md) | Tolerant training, coincidence proofs and benchmark |
+| [`research/`](research/README.md) | Tolerant training, coincidence proofs and benchmark, circuit simulation |
 | [`docs/`](docs/UNIVERSAL_FINITE_CHAIN.md) | Theorem guides, trusted base, provenance |
 | [`archive/`](archive/README.md) | Earlier experiments and specifications |
 

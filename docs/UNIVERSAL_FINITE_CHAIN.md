@@ -112,7 +112,7 @@ The earlier **staged three-cell protocol** remains proved from A's original
 birth and independent B/C births at 160/480 through **789.9**, with
 **A54/B61/C34**, all READY/q=0.1, no RAW and no pending tokens. Its
 [original headline](../proof/lean/KernelR/Headline.lean) and
-[checkpoint map](../proof/lean/HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
+[checkpoint map](../proof/lean/hybrid/CHECKPOINT.md#constructed-protocol-checkpoint)
 remain available. The new common-time birth program has different preparation
 and traffic; its N=3 instance is not the old staged protocol.
 

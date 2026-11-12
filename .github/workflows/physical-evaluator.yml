@@ -1,0 +1,60 @@
+name: Physical evaluator certificate bridge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - research/reusable-controller/**
+      - research/recursive-learning/**
+      - proof/lean/**
+      - .github/workflows/physical-evaluator.yml
+      - .github/actions/build-lean/**
+  pull_request:
+    paths:
+      - research/reusable-controller/**
+      - research/recursive-learning/**
+      - proof/lean/**
+      - .github/workflows/physical-evaluator.yml
+      - .github/actions/build-lean/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  physical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      LEAN_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/build-lean
+        with:
+          package-directory: research/reusable-controller/physical
+          mathlib-cache-targets: >-
+            Mathlib.Tactic
+            Mathlib.Analysis.Calculus.MeanValue
+            Mathlib.Analysis.Complex.ExponentialBounds
+            Mathlib.Analysis.SpecialFunctions.ExpDeriv
+            Mathlib.Analysis.SpecialFunctions.Log.Basic
+            Mathlib.Data.List.OfFn
+            Mathlib.Data.List.Sort
+            Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+            Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+      - name: Verify pinned evidence and reject twelve data mutations
+        working-directory: research/reusable-controller/physical
+        run: python -B evidence_check.py --check --report "$RUNNER_TEMP/physical-evidence.json"
+      - name: Verify physical certificate contracts and reject semantic mutations
+        working-directory: research/reusable-controller/physical
+        run: python -B verify_physical.py --report "$RUNNER_TEMP/physical-validation.json"
+      - name: Print recorded-data replay
+        working-directory: research/reusable-controller/physical
+        run: lake env lean Trace.lean
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: physical-evaluator-validation
+          path: |
+            ${{ runner.temp }}/physical-evidence.json
+            ${{ runner.temp }}/physical-validation.json
+          if-no-files-found: error

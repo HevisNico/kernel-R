@@ -1,0 +1,168 @@
+* Bridge rest diagnostic: mm2064_quiet
+.lib "pdk/models/sky130.lib.spice" tt_mm
+* one period at rest, K pulses on port 1, K pulses on port 2, then one pulse on both.
+* Every edge of the stimulus is 0.1 us after an instant of the noise sources (sampled every 0.4 us),
+* so an edge never falls on a noise sample.
+.param vddv=1.8 tu=20u tper=440u t0=4.1u kp=10
+.param cq=5p vunit=0.5 vr0=1.25
+.param vfire={vr0 - 0.9*vunit} vreopen={vr0 - 0.1*vunit}
+.param rleak={2*tu/cq} at={log(4)/tu} ipk={cq*vunit*at} ioff=50n
+.param vcm=0.4 vhi=0.6 vlo=0.5 vpre=1.3 vinit=0.3895
+.param cs0=400f cf0=30p idis=8.2n wg=40 lg=2.5 rlk=1e18
+.option scale=1e-6
+.option reltol=1e-4 abstol=1e-13 vntol=1e-7 chgtol=1e-17
+* ngspice puts a conductance gmin across every junction, 1e-12 S by default. On the summing
+* node of the integrator that is a leak of 0.4 pA, far above the modelled junction leakage.
+.option gmin=1e-16
+.include blocks.spice
+
+* Clocks of a pulse, from 0 to 1: admission during the pulse, reset released 1 us before the
+* pulse, precharge released at the pulse and until the end of the period.
+.global ksen krst kpreb
+vksen  ksen  0 pulse(0 1 {t0} 1n 1n {tu-1n} {tper})
+vkrst  krst  0 pulse(1 0 {t0-1u} 1n 1n {tper-t0+1u-2n-0.1u} {tper})
+vkpreb kpreb 0 pulse(0 1 {t0} 1n 1n {tper-t0-2n-0.1u} {tper})
+
+* One port: gain mirror, admission, sensor, window comparator, sequencing, steering, integrator.
+* The port receives a pulse in each period of [ta, tb) and in the last period, from tj on.
+.subckt rport vq vr0 pb vmem vdd vcm vhi vlo vpre vinit ta=0 tb=1 tj=2
+bip vdd gm i = {ioff} + (((time >= {ta} && time < {tb}) || time >= {tj}) ? v(ksen) : 0) * ({ipk}*exp(-((time - {tper}*floor(time/{tper})) - {t0})*{at}) - {ioff})
+* controls: the port follows the clocks ksen, krst and kpreb in the periods where it is pulsed.
+* The clocks are pulse sources with 1 ns edges, so the solver knows every edge. The port
+* selection changes only at a period boundary, where every control is at its rest value.
+bsen  sen0  0 v = ((time >= {ta} && time < {tb}) || time >= {tj}) ? 1.8*v(ksen) : 0
+brst  rst0  0 v = ((time >= {ta} && time < {tb}) || time >= {tj}) ? 1.8*v(krst) : 1.8
+bpreb preb0 0 v = ((time >= {ta} && time < {tb}) || time >= {tj}) ? 1.8*v(kpreb) : 0
+rsen sen0 sen 10k
+csen sen 0 20f
+rrst rst0 rst 10k
+crst rst 0 20f
+rpreb preb0 preb 10k
+cpreb preb 0 20f
+ibs ibs 0 10u
+ibo ibo 0 10u
+* gain mirror: the stored voltage is the source of the output device
+xmin  gm gm vcm  0 sky130_fd_pr__nfet_01v8 w={wg} l={lg}
+xmout dq gm vmem 0 sky130_fd_pr__nfet_01v8 w={wg} l={lg}
+* admission
+xnad sen pb admb vdd 0 nand2
+xiad admb adm vdd 0 inv
+xms1 dq adm  vq  0 sky130_fd_pr__nfet_01v8 w=1 l=0.15
+xms2 dq admb vr0 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15
+* sensor
+cs vs 0 {cs0}
+xmpre vs preb vpre vdd sky130_fd_pr__pfet_01v8 w=2 l=0.5
+idis vdd vgd {idis}
+xmbd  vgd vgd vcm 0 sky130_fd_pr__nfet_01v8 w=0.42 l=8
+xmdis vs  vgd x   0 sky130_fd_pr__nfet_01v8 w=0.42 l=8
+xmsi x si sum 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15
+xmsd x sd vcm 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15
+* integrator, preset once
+xop vcmn sum vmem ibo vdd 0 opamp
+bvcmn vcmn0 0 v = v(vcm) + v(nzo)
+rvcmn vcmn0 vcmn 1k
+cvcmn vcmn 0 20f
+cf sum vmem {cf0}
+* an imposed leak on the stored voltage, for the refresh experiment (none by default)
+rlk sum 0 {rlk}
+bdrv drv 0 v = min(1.8, max(0, v(vcm) + 10*(v(vmem) - v(vinit))))
+vrsti rsti0 0 pwl(0 1.8 2.1u 1.8 2.101u 0)
+rrsti rsti0 rsti 10k
+crsti rsti 0 20f
+srst sum drv rsti 0 swr
+* window comparator with a switched reference
+xcmps vs vrefsn cmps ibs vdd 0 comp
+bvrs vrefsn0 0 v = v(vrefs) + v(nzc)
+rvrs vrefsn0 vrefsn 1k
+cvrs vrefsn 0 20f
+xmr1n vrefs adb vhi 0   sky130_fd_pr__nfet_01v8 w=1 l=0.15
+xmr1p vrefs ad  vhi vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15
+xmr2n vrefs ad  vlo 0   sky130_fd_pr__nfet_01v8 w=1 l=0.15
+xmr2p vrefs adb vlo vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15
+* places where noise enters; run.py turns these sources into noise sources when noise is on
+vnzc nzc 0 dc 0
+rnzc nzc 0 1k
+vnzo nzo 0 dc 0
+rnzo nzo 0 1k
+* noise of the mirror current: a voltage noise source on its own node sets the current
+vnzi nzi 0 dc 0
+rnzi nzi 0 1k
+gnm dq vmem nzi 0 1
+* sequencing
+xien rst en vdd 0 inv
+xicb cmps cmpb vdd 0 inv
+xnsa cmpb en sba vdd 0 nand2
+xla sba en a ab vdd 0 srlatch
+rda a ad1 100k
+cda ad1 0 200f
+xia1 ad1 adb vdd 0 inv
+xia2 adb ad vdd 0 inv
+xnsc ad cmps sbc0 vdd 0 nand2
+xlc sbc0 en c cbar vdd 0 srlatch
+rdl c cd1 100k
+cdl cd1 0 200f
+xid1 cd1 cd2 vdd 0 inv
+xid2 cd2 cdel vdd 0 inv
+xnsb cdel cmpb sbb vdd 0 nand2
+xlb sbb en b bb vdd 0 srlatch
+* steering, blocked while the cell is protected
+xnsi a bb pb sib vdd 0 nand3
+xisi sib si vdd 0 inv
+xisd si sd vdd 0 inv
+.ends
+
+.model swr sw vt=0.9 vh=0.1 ron=1e6 roff=1e13
+
+vdd vdd 0 {vddv}
+vr0 vr0 0 {vr0}
+vfire vfire 0 {vfire}
+vreopen vreopen 0 {vreopen}
+vcm vcm 0 {vcm}
+vhi vhi 0 {vhi}
+vlo vlo 0 {vlo}
+vpre vpre 0 {vpre}
+vinit vinit 0 {vinit}
+ibm ibm 0 10u
+
+x1 vq vr0 pb vmem1 vdd vcm vhi vlo vpre vinit rport ta={tper} tb={(kp+1)*tper} tj={(2*kp+1)*tper}
+x2 vq vr0 pb vmem2 vdd vcm vhi vlo vpre vinit rport ta={(kp+1)*tper} tb={(2*kp+1)*tper} tj={(2*kp+1)*tper}
+
+* main charge: q = 0.1 at vr0, q = 1 at vfire, leak toward rest
+cq vq 0 {cq}
+rleak vq vr0 {rleak}
+
+* FIRE comparator with a switched reference: protected from the FIRE until the charge is back
+vnzm nzm 0 dc 0
+rnzm nzm 0 1k
+bvrm vrefmn0 0 v = v(vrefm) + v(nzm)
+rvrm vrefmn0 vrefmn 1k
+cvrm vrefmn 0 20f
+xcmpm vrefmn vq cmpm ibm vdd 0 comp wc=16 lc=4
+* The protection is a latch. It is set by the comparator only after the cell has been READY
+* for a while, and cleared only after it has been protected for a while. A glitch of the
+* comparator when its reference switches therefore cannot undo a FIRE or fake one.
+xicm cmpm cmpmb vdd 0 inv
+xnsp cmpm  pbdel sbp vdd 0 nand2
+xnrp cmpmb pdel  rbp vdd 0 nand2
+xlp sbp rbp p pb vdd 0 srlatch
+rdp p pd1 100k
+cdp pd1 0 2p
+xip1 pd1 pbdel vdd 0 inv
+xip2 pbdel pdel vdd 0 inv
+xmm1n vrefm pb vfire   0   sky130_fd_pr__nfet_01v8 w=1 l=0.15
+xmm1p vrefm p  vfire   vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15
+xmm2n vrefm p  vreopen 0   sky130_fd_pr__nfet_01v8 w=1 l=0.15
+xmm2p vrefm pb vreopen vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15
+.param kp=10
+.option temp=27
+.save v(vq) v(p) v(cmpm) v(vrefmn) v(vmem1) v(vmem2) v(x1.vs) v(x1.sum) v(x1.a) v(x1.b) v(x1.si) v(x2.vs) v(x2.sum) v(x2.a) v(x2.b) v(x2.si)
+.control
+setseed 2064
+reset
+tran 1u 0.00968 0 2e-07
+set wr_singlescale
+set numdgt=16
+wrdata /workspace/scratch/e19b075b640b/kernel-r-circuit-bridge/research/circuit/bridge_check/runs/mm2064_quiet/trace.txt v(vq) v(p) v(cmpm) v(vrefmn) v(vmem1) v(vmem2) v(x1.vs) v(x1.sum) v(x1.a) v(x1.b) v(x1.si) v(x2.vs) v(x2.sum) v(x2.a) v(x2.b) v(x2.si)
+quit
+.endc
+.end

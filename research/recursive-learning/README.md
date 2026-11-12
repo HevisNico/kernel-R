@@ -59,17 +59,17 @@ commits with actual R flows and arrivals for a supplied pulse script.
 For the final preparation slot, a single native R execution now carries the
 lesson through readout, routed feedback when the learner fires, the selector
 update, and receipt of the next selected pulse. The dispatch in that round
-changes the low selector gain. A [prepared read](native/SelectorRead.lean)
+changes the low selector gain. A [prepared read](native/Teaching/SelectorRead.lean)
 preserves both values and leaves a timing margin for routing the output.
-A [saturated work pulse](native/SelectorPrecharge.lean) supplies the
+A [saturated work pulse](native/Teaching/SelectorPrecharge.lean) supplies the
 required charge after a suitably timed reopening. A [local teacher
-execution](native/TeacherReopen.lean) now schedules the work pulse from
+execution](native/Teaching/TeacherReopen.lean) now schedules the work pulse from
 its own FIRE and reaches that reopening in both fabrication boxes.
-With recovery at its cap, a [fixed recovery clock](native/TeacherStableClock.lean)
+With recovery at its cap, a [fixed recovery clock](native/Teaching/TeacherStableClock.lean)
 allows bounded timing variation on that self-delivery and preserves the
-read. From an admitted work pulse, a [single physical continuation](native/CappedWorkRun.lean)
+read. From an admitted work pulse, a [single physical continuation](native/Teaching/CappedWorkRun.lean)
 builds the precharge and admits the selector pulse. In the
-[prepared controller and receiver](native/CappedDispatch.lean), the
+[prepared controller and receiver](native/Teaching/CappedDispatch.lean), the
 controller's own ignition FIRE schedules both work and read, and the
 read FIRE routes the next pulse to the selected learner port without
 changing the selector. Both stored values use the same absolute
@@ -78,19 +78,19 @@ belong to separate cells in this design. Connecting the credit memory,
 preparing the capped controller within the network and reusing its
 read remain open.
 
-The [full-lesson trials](native/NativeLesson.lean) check the actual
+The [full-lesson trials](native/Teaching/NativeLesson.lean) check the actual
 8-, 7- and 6-pulse lessons and two failing reductions in native R on
-fresh learners. The [native serial experiment](native/SerialAcceptance.lean)
+fresh learners. The [native serial experiment](native/Teaching/SerialAcceptance.lean)
 joins both acceptance decisions and both credit writes in one
 upward-crossing execution. The first acceptance issues seven pulses.
 Its routed selector update enables the second acceptance, which issues
 six. Blocking just that update keeps the first credit and the seven-pulse
 lesson. The native result uses a one-shot selector and a fixed calendar
-for this example. A separate [learner-readout experiment](native/LearnerReadout.lean)
+for this example. A separate [learner-readout experiment](native/Teaching/LearnerReadout.lean)
 uses the gains learned by the cell receiving each full trial. The learner's
 readout drives a credit write, or the failure of the 2 + 4 trial drives
 a selector update through a diagnostic cell. The
-[readout-driven serial theorem](native/ReadoutSeries.lean) joins those
+[readout-driven serial theorem](native/Teaching/ReadoutSeries.lean) joins those
 steps in one native execution. The accepted 3 + 4 trial launches the
 2 + 4 probe. Its failure writes the selector, whose readout launches
 3 + 3. The two actual acceptance firings write the two credits and
