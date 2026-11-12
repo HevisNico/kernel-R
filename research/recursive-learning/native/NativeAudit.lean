@@ -47,6 +47,7 @@ import Coincidence.CoincidenceProtectedTail
 import Coincidence.CoincidenceSeparation
 import Coincidence.OffsetAndDelay
 import Training.StopLearningLatency
+import Training.WideDoseRead
 import Training.NativeStopLearning
 import Training.SilentStep
 import Training.Refractory
@@ -66,6 +67,7 @@ import Search.SelfCalibratedProbe
 import Search.SearchCells
 import Search.TrainedSearch
 import Search.NeedTolerance
+import Search.VariableNeedTolerance
 import Search.SearchActions
 import Search.BisectionSearch
 import Search.SuccessiveSearch
@@ -113,6 +115,6 @@ run_cmd do
         throwError "Unexpected axiom {ax} in {name}"
     checked := checked + 1
     if info.isTheorem then theorems := theorems + 1
-  if modules < 71 then throwError "Only {modules} project modules found"
+  if modules < 73 then throwError "Only {modules} project modules found"
   if theorems == 0 then throwError "No project theorems found"
   logInfo m!"Native audit passed for {checked} declarations from {modules} modules, including {theorems} theorems."

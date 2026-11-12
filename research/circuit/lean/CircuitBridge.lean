@@ -10,20 +10,54 @@ k = beta / Cf. The affine log-gain law is a calibration assumption. -/
 namespace KernelR.Circuit
 open MeasureTheory Set
 
-/-- Two charge balances on a single write window. The sensor and the storage
-capacitor may have different currents: their discrepancy is not hidden. -/
+/-- Integral endpoint balances on a write window. Integrable currents may
+switch; no derivative is required at switching instants. This is a window
+endpoint contract, not a complete specification of the interior trajectory. -/
 structure ChargeWindow (s t : ℝ) where
   ordered : s ≤ t
   sensorCharge : ℝ → ℝ
   storageCharge : ℝ → ℝ
   sensorCurrent : ℝ → ℝ
   writeCurrent : ℝ → ℝ
-  sensor_derivative : ∀ x ∈ uIcc s t,
-    HasDerivAt sensorCharge (-sensorCurrent x) x
-  storage_derivative : ∀ x ∈ uIcc s t,
-    HasDerivAt storageCharge (-writeCurrent x) x
-  sensor_integrable : IntervalIntegrable (fun x => -sensorCurrent x) volume s t
-  write_integrable : IntervalIntegrable (fun x => -writeCurrent x) volume s t
+  sensor_integrable : IntervalIntegrable sensorCurrent volume s t
+  write_integrable : IntervalIntegrable writeCurrent volume s t
+  sensor_balance : sensorCharge s - sensorCharge t = ∫ x in s..t, sensorCurrent x
+  storage_balance : storageCharge s - storageCharge t = ∫ x in s..t, writeCurrent x
+
+/-- Compatibility with the smooth kernel law. Differentiability is a
+sufficient constructor, not a requirement of the circuit interface. -/
+noncomputable def ChargeWindow.ofDerivatives {s t : ℝ} (ordered : s ≤ t)
+    (sensorCharge storageCharge sensorCurrent writeCurrent : ℝ → ℝ)
+    (sensor_integrable : IntervalIntegrable sensorCurrent volume s t)
+    (write_integrable : IntervalIntegrable writeCurrent volume s t)
+    (sensor_derivative : ∀ x ∈ uIcc s t, HasDerivAt sensorCharge (-sensorCurrent x) x)
+    (storage_derivative : ∀ x ∈ uIcc s t, HasDerivAt storageCharge (-writeCurrent x) x) :
+    ChargeWindow s t where
+  ordered := ordered
+  sensorCharge := sensorCharge
+  storageCharge := storageCharge
+  sensorCurrent := sensorCurrent
+  writeCurrent := writeCurrent
+  sensor_integrable := sensor_integrable
+  write_integrable := write_integrable
+  sensor_balance := (KernelR.drain_integral sensor_derivative sensor_integrable.neg).symm
+  storage_balance := (KernelR.drain_integral storage_derivative write_integrable.neg).symm
+
+/-- Any integrable currents admit the integral charge trajectories, even
+when the currents jump. No differentiability assumption is introduced. -/
+noncomputable def ChargeWindow.ofCurrents {s t : ℝ} (ordered : s ≤ t)
+    (sensorInitial storageInitial : ℝ) (sensorCurrent writeCurrent : ℝ → ℝ)
+    (sensor_integrable : IntervalIntegrable sensorCurrent volume s t)
+    (write_integrable : IntervalIntegrable writeCurrent volume s t) : ChargeWindow s t where
+  ordered := ordered
+  sensorCharge := fun u => sensorInitial - ∫ x in s..u, sensorCurrent x
+  storageCharge := fun u => storageInitial - ∫ x in s..u, writeCurrent x
+  sensorCurrent := sensorCurrent
+  writeCurrent := writeCurrent
+  sensor_integrable := sensor_integrable
+  write_integrable := write_integrable
+  sensor_balance := by simp
+  storage_balance := by simp
 
 noncomputable def ChargeWindow.logGainStep {s t} (w : ChargeWindow s t) (k : ℝ) : ℝ :=
   k * (w.storageCharge s - w.storageCharge t)
@@ -41,14 +75,12 @@ theorem ChargeWindow.calibrated_gain {s t} (w : ChargeWindow s t) (k reference :
   simp only [ChargeWindow.logGainStep]
   ring
 
-/-- Rate independence follows from the existing kernel charge-balance
-theorem, with a separate term for imperfect current transfer. -/
+/-- The integral balances separate the sensor endpoint dose from imperfect
+current transfer. They apply unchanged to integrable switched currents. -/
 theorem ChargeWindow.balance {s t} (w : ChargeWindow s t) (k : ℝ) :
     w.logGainStep k = k * (w.sensorCharge s - w.sensorCharge t) + k * w.residual := by
-  have hs := KernelR.drain_integral w.sensor_derivative w.sensor_integrable
-  have hw := KernelR.drain_integral w.storage_derivative w.write_integrable
   simp only [ChargeWindow.logGainStep, ChargeWindow.residual]
-  rw [hs, hw]
+  rw [w.sensor_balance, w.storage_balance]
   ring
 
 /-- Ideal exposed steering transfers the whole sensor current. -/
@@ -69,9 +101,8 @@ theorem ChargeWindow.protected_step {s t} (w : ChargeWindow s t) (k : ℝ)
     calc
       _ = ∫ _ in s..t, (0 : ℝ) := intervalIntegral.integral_congr blocked
       _ = 0 := by simp
-  have hw := KernelR.drain_integral w.storage_derivative w.write_integrable
   simp only [ChargeWindow.logGainStep]
-  rw [← hw, zero, mul_zero]
+  rw [w.storage_balance, zero, mul_zero]
 
 /-- A bound on transferred-charge error gives a log-gain dose budget. -/
 theorem ChargeWindow.dose_error {s t} (w : ChargeWindow s t) {k η : ℝ}
@@ -85,9 +116,8 @@ that matters; exact zero is unnecessary. -/
 theorem ChargeWindow.protected_drift {s t} (w : ChargeWindow s t) {k η : ℝ}
     (scale : 0 ≤ k) (budget : |∫ x in s..t, w.writeCurrent x| ≤ η) :
     |w.logGainStep k| ≤ k * η := by
-  have hw := KernelR.drain_integral w.storage_derivative w.write_integrable
   simp only [ChargeWindow.logGainStep]
-  rw [← hw, abs_mul, abs_of_nonneg scale]
+  rw [w.storage_balance, abs_mul, abs_of_nonneg scale]
   exact mul_le_mul_of_nonneg_left budget scale
 
 /-- With Cs in farads and beta in inverse volts, the physical dose is

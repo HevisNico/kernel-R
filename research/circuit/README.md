@@ -32,10 +32,14 @@ The campaign tests the mechanism: a write on a silent pulse, no write
 on a firing pulse, a stop that holds, and a read that agrees between
 cells.
 
-A separate [conditional Lean dose bridge](lean/README.md) connects capacitor
-charge balances to the kernel's ERROR-dose identity and bounds the effect
-of imperfect current transfer. It does not certify the netlist or transfer
-the proved read window to this circuit.
+A separate [conditional Lean bridge](lean/README.md) connects capacitor
+charge balances to the kernel's ERROR-dose identity, bounds current and
+calibration errors, derives a common scalar need for varying write doses,
+and transfers strict scalar-contact margins with a latency bound. Separate
+ideal read windows allow doses up to 0.06. It does not certify the netlist
+or transfer those numerical read windows to this circuit. The bridge README
+distinguishes the substantive results from algebraic interface identities;
+audit declaration counts measure coverage, not scientific contributions.
 
 ## Results
 

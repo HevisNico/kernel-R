@@ -150,10 +150,26 @@ Limits:
 
 - **A sufficient condition.** The inequality is not shown to be
   necessary.
-- **The same error at every dose.** The dose of a probe is one number.
-  A dose that drifts from pulse to pulse is not covered.
+- **Fixed dose in the execution constructors.** The original theorem and
+  compiled search use one dose per probe. The variable-dose scalar contract
+  below does not yet generalize those executions.
 - **The witness varies the start gains only.** Its doses and FIRE
   levels are those of the explicit cell.
+
+## Variable doses at successive writes
+
+[VariableNeedTolerance.lean](VariableNeedTolerance.lean) proves
+`needAlong_of_variable_doses`: the same tolerance inequality guarantees
+need `m` when each nonnegative dose independently lies in `[d0-b,d0+b]`.
+`NeedAlong` uses the cumulative gain sequence; on a constant-dose ladder
+it is exactly `NeedIs`. `needAlong_of_step_tolerance` takes actual gain
+increments and requires their budgets to include inter-window drift.
+
+The circuit corollaries in [CircuitNeed.lean](../../../circuit/lean/CircuitNeed.lean)
+use `b = k * eta` for a charge-residual bound `eta`, with exact calibration
+and state linkage, or `b = k * eta + e` for an additional linkage error `e`.
+These are scalar read contracts; variable-dose hybrid execution and network
+composition remain separate obligations.
 
 ## A search that ends by a lesson
 
