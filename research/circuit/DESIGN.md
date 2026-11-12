@@ -251,10 +251,27 @@ On a noisy run of 1.4 ms the time points were audited: all 3 499 noise
 instants and all 26 edge corners are time points of the solution, and
 no step is longer than 200 ns.
 
-With a largest step of 200 ns, latencies are resolved to about 0.001
-unit for a joint read and 0.005 unit for a FIRE near the end of a
-pulse. This comes from a comparison with a largest step of 100 ns on
-the nominal cell.
+## Resolution of the measures
+
+The runner prints each measure with six significant digits. This sets
+the resolution of every time and every voltage in the results.
+
+| Measure | Resolution |
+|---|---|
+| A time in the first 10 ms of a run: every pulse of a cell run of 22 periods | 10 ns, 0.0005 unit |
+| A time between 10 ms and 100 ms: refresh runs from pulse 22 on, and the long nominal run | 100 ns, 0.005 unit |
+| A time after 100 ms: the 1 TΩ refresh run from pulse 227 on | 1 µs, 0.05 unit |
+| A stored voltage | 1 µV, 0.0007 dose |
+
+Whether a pulse fired does not depend on this resolution. A latency
+does. In the refresh runs a FIRE that comes in the last 100 ns of the
+pulse is printed with a latency of exactly 1.
+
+One such pulse was replayed with the internal nodes saved, with a
+largest step of 200 ns, with 100 ns, and with Gear integration. The
+FIRE comparator trips and the latch rises 50 ns, 48 ns and 57 ns before
+the end of the pulse. The printed latencies were 1.000, 1.000 and
+0.995.
 
 ## Measures
 
@@ -282,7 +299,9 @@ run. It reports two kinds of event. Neither is dropped silently.
 | The latch does not clear before the next pulse | Against the mechanism | Reported. The run stays in the statistics |
 
 The limit of 1.02 leaves 0.01 unit for the 200 ns of the latch and
-0.01 unit for the resolution of the measure.
+0.01 unit for the resolution of a latency up to 100 ms. After 100 ms,
+in the 1 TΩ refresh run, a latency is printed to 0.05 unit, and the
+guard cannot tell a FIRE at 1.00 from one at 1.02 there.
 
 The test that a firing pulse writes nothing (P10) is made on every run
 that produced a result, whatever the guard says of it. A run that the
