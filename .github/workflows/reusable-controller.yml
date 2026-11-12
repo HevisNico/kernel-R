@@ -61,9 +61,15 @@ jobs:
         run: python -B verify.py --report "$RUNNER_TEMP/controller-validation.json"
       - name: Print the rejection-and-recovery trace
         run: lake env lean Trace.lean
+      - name: Verify adaptive contracts and reject eleven semantic mutations
+        run: python -B verify_adaptive.py --report "$RUNNER_TEMP/adaptive-validation.json"
+      - name: Print the bounded-error policy selection trace
+        run: lake env lean AdaptiveTrace.lean
       - name: Preserve validation report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: reusable-controller-validation
-          path: ${{ runner.temp }}/controller-validation.json
+          path: |
+            ${{ runner.temp }}/controller-validation.json
+            ${{ runner.temp }}/adaptive-validation.json
           if-no-files-found: error

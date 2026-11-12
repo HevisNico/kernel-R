@@ -109,16 +109,17 @@ Before any adaptive-search work, M2 requires invariant preservation, a fixed
 calendar, an `n`-round physical recurrence and universal complete-run behavior.
 The proofs and validation for that stricter scope are in [NATIVE_ROUNDS.md](NATIVE_ROUNDS.md).
 
-M1's fixed search rule has not been changed. The next milestone may adjust
-step, coordinate order or stopping from recorded trials, while leaving the
-evaluator and acceptance rule outside mutable state. It must construct
-validation of policy candidates, invariant preservation and explicit budgets
-for both levels before claiming any adaptive improvement.
+M1's fixed search rule has not been changed. The separate [discrete adaptive
+milestone](ADAPTIVE.md) now selects coordinate priority, a unit-probe budget
+and stopping behavior from a finite family, while leaving evaluation and
+acceptance outside mutable state. It constructs policy validation, invariant
+preservation, robust adoption and budgets for both levels.
 
 Non-increasing validated policy cost is different from cumulative search
 cost: trials consume resources. Total accounting needs a budget and, if
 claimed, a separate amortization theorem. With inexact evaluation, true
 non-degradation needs robust bounds or acceptance margins; accepting within
 a tolerance alone does not prove it. Coupled or order-sensitive learners
-also require revisiting M1's permanent blocked-bit argument. No such theorem
-or physical adaptive controller is claimed by this M2 result.
+also require revisiting M1's permanent blocked-bit argument. The discrete
+extension uses certified failure to block and preserves memory on ambiguity;
+it does not provide a physical adaptive controller.

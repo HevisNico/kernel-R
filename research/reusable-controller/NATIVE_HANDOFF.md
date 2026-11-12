@@ -78,12 +78,10 @@ changing the other coordinate cannot make that rejected reduction valid.
 Remembering the rejection is sound for this learner. For a coupled task the
 blocked-bit invariant and optimality proof must be reconsidered.
 
-No claim is made here about an unbounded number of strict improvements,
-learned search strategies, recurrent-network learning, or transistor-level
-correspondence. The next discrete milestone is a search controller that
-adjusts its own search rule under an immutable evaluator, validated adoption,
-preserved invariants and explicit budgets. It remains separate from the open
-native refinement obligations above. See the [next gate](NATIVE_REPREPARE.md#adaptive-search-stays-behind-the-reuse-gate)
-for the cost and inexact-evaluation conditions that must not be assumed away.
-M2 validation must cover all four reuse obligations in [NATIVE_ROUNDS.md](NATIVE_ROUNDS.md)
-before that next milestone starts.
+The [bounded adaptive milestone](ADAPTIVE.md) now selects a search policy from
+a finite family using inexact evaluation, with immutable rules, preserved
+invariants and explicit costs. It does not claim an unbounded number of strict
+improvements, recurrent-network learning or transistor-level correspondence.
+Its benchmark and error bounds are fixed; ambiguous probes cannot justify
+permanent blocks. It remains separate from the native obligations above.
+All four selector-reuse obligations are covered by [M2](NATIVE_ROUNDS.md).

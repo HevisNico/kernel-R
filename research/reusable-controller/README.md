@@ -6,6 +6,11 @@ After a rejected edit the controller keeps its accepted lesson, records the
 rejection and continues on the other coordinate. The same transition is reused
 at every round. The native R realization of this loop is **not proved**.
 
+The [bounded adaptive milestone](ADAPTIVE.md) extends this with a finite choice
+of search policies and two inexact evaluators. It proves immutable evaluation,
+preserved invariants, robust non-degradation and separate spending budgets.
+The exact M1 algorithm and results below remain unchanged.
+
 ## Algorithm and scope
 
 The environment is one fixed learner with natural-number preparation and
@@ -100,8 +105,9 @@ every finite `n` under one router, and the same behavior for every complete
 execution. The actual full programme includes the first read arrival and
 costs exactly `3*n+1` deliveries. It uses an externally supplied finite
 ignition calendar and prepared resources; native implementation of M1 and
-preparation from birth remain open. The adaptive-search milestone has not
-started and remains behind the M2 validation gate.
+preparation from birth remain open. The [discrete adaptive milestone](ADAPTIVE.md)
+builds on the completed reuse obligations and states its own conditional
+accuracy premises; it does not close the remaining native refinement gaps.
 
 ## Reproduce
 
@@ -110,7 +116,9 @@ From this directory, with Lean **4.35.0** and Python 3 available:
 ```sh
 lake build
 lake env lean Trace.lean
+lake env lean AdaptiveTrace.lean
 python3 verify.py
+python3 verify_adaptive.py
 ```
 
 There is no Mathlib dependency. The default build includes an axiom audit of
@@ -123,6 +131,8 @@ accepting a failing trial, losing progress after rejection, omitting validation
 cost, adding the wrong credit, adding an unused project axiom, and admitting a
 proof. Parser/import errors do not count as successful negative controls.
 The temporary copies leave the original sources untouched.
+`verify_adaptive.py` adds eleven controls for robust acceptance, ambiguity,
+selection costs, live memory, finite consumption and proof trust.
 
 The native Lean development and transistor simulations are not rebuilt by
 these commands. This milestone neither changes their laws nor supplies a
