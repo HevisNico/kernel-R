@@ -5,6 +5,9 @@ import Teaching.RoutedLesson
 import Teaching.Dispatch
 import Teaching.SelectorProtection
 import Teaching.SelectorRead
+import Teaching.SelectorReturnAudit
+import Teaching.SelectorReprepareAudit
+import Teaching.SelectorRoundAudit
 import Teaching.SelectorPrecharge
 import Teaching.TeacherReopen
 import Teaching.TeacherStableClock
@@ -115,6 +118,6 @@ run_cmd do
         throwError "Unexpected axiom {ax} in {name}"
     checked := checked + 1
     if info.isTheorem then theorems := theorems + 1
-  if modules < 75 then throwError "Only {modules} project modules found"
+  if modules < 84 then throwError "Only {modules} project modules found"
   if theorems == 0 then throwError "No project theorems found"
   logInfo m!"Native audit passed for {checked} declarations from {modules} modules, including {theorems} theorems."

@@ -1,0 +1,146 @@
+{
+  "arithmetic": "exact rational decimals; outward padding 1/10000000000",
+  "checker_sha256": "dac6091abf746a24d3c58cd04e9a9e3840cc4461e02adaa41323fbe1a910c96f",
+  "commit": "9a30f822c8b01fddf11e2514c4aa4059750644cf",
+  "generated_matches": true,
+  "generated_sha256": "0c8fbca3513a93b67a90cc588db65f0d2eda03cf3d8f6cc7a04d17f06d130314",
+  "negative_controls": [
+    {
+      "check": "source hash: t6004_train.csv",
+      "layer": "integrity",
+      "mutation": "modified_source_hash",
+      "rejected": true
+    },
+    {
+      "check": "provenance hash",
+      "layer": "integrity",
+      "mutation": "modified_manifest",
+      "rejected": true
+    },
+    {
+      "check": "metadata csv_sha256",
+      "layer": "semantic; integrity deliberately bypassed",
+      "mutation": "metadata_wrong_csv_hash",
+      "rejected": true
+    },
+    {
+      "check": "first FIRE crosscheck",
+      "layer": "semantic; integrity deliberately bypassed",
+      "mutation": "wrong_first_reading",
+      "rejected": true
+    },
+    {
+      "check": "complete ordered train",
+      "layer": "semantic; integrity deliberately bypassed",
+      "mutation": "truncated_train",
+      "rejected": true
+    },
+    {
+      "check": "rest FIRE",
+      "layer": "semantic; integrity deliberately bypassed",
+      "mutation": "rest_fire",
+      "rejected": true
+    },
+    {
+      "check": "single latch prefix",
+      "layer": "semantic; integrity deliberately bypassed",
+      "mutation": "extra_latch_rise",
+      "rejected": true
+    },
+    {
+      "check": "steering prefix",
+      "layer": "semantic; integrity deliberately bypassed",
+      "mutation": "wrong_steering",
+      "rejected": true
+    },
+    {
+      "check": "resting charge band",
+      "layer": "semantic; integrity deliberately bypassed",
+      "mutation": "charge_outside_band",
+      "rejected": true
+    },
+    {
+      "check": "domain status crosscheck",
+      "layer": "semantic; integrity deliberately bypassed",
+      "mutation": "false_certificate_despite_agreeing_count",
+      "rejected": true
+    },
+    {
+      "check": "domain status crosscheck",
+      "layer": "semantic; integrity deliberately bypassed",
+      "mutation": "insufficient_room_even_with_matching_count",
+      "rejected": true
+    },
+    {
+      "check": "domain status crosscheck",
+      "layer": "semantic; integrity deliberately bypassed",
+      "mutation": "threshold_floor_violated",
+      "rejected": true
+    }
+  ],
+  "ports": [
+    {
+      "cell": "t6004",
+      "conservative_floor": "20254977358963/20000000000000",
+      "conservative_room": "3190795769987/850000000000000",
+      "dose0": "4209334265125419/100000000000000000",
+      "in_domain": true,
+      "nominal_level0": "101649007307/100000000000",
+      "observed": 6,
+      "port": 1,
+      "predicted": 6
+    },
+    {
+      "cell": "t6004",
+      "conservative_floor": "101254652266349/100000000000000",
+      "conservative_room": "389324849581/68000000000000",
+      "dose0": "4209334265125419/100000000000000000",
+      "in_domain": true,
+      "nominal_level0": "101649007307/100000000000",
+      "observed": 4,
+      "port": 2,
+      "predicted": 4
+    },
+    {
+      "cell": "t6007",
+      "conservative_floor": "98256921872347/100000000000000",
+      "conservative_room": "-15346332901143/1700000000000000",
+      "dose0": "4209334265125419/100000000000000000",
+      "in_domain": false,
+      "nominal_level0": "986678323193/1000000000000",
+      "observed": 4,
+      "port": 1,
+      "predicted": 5
+    },
+    {
+      "cell": "t6007",
+      "conservative_floor": "19656948763623/20000000000000",
+      "conservative_room": "-10017869671141/1700000000000000",
+      "dose0": "4209334265125419/100000000000000000",
+      "in_domain": false,
+      "nominal_level0": "986678323193/1000000000000",
+      "observed": 3,
+      "port": 2,
+      "predicted": 3
+    }
+  ],
+  "positive_domain_checks": true,
+  "positive_integrity": true,
+  "pull_request": 107,
+  "scope": "Public extracted measurements, not binary trace re-extraction or a new simulator campaign. Scalar peak-to-gain correspondence and transfer of h_mu from six cells remain assumptions.",
+  "source_sha256": {
+    "calibration.json": "a36f0ef3d5f50d0484e174c4cc7b2a83c71254ff4e9cdb271b57ce3dfb9d4094",
+    "ports.csv": "2672a491db07e2dfe96ac78d6209c6b96aef300a4b0e562096927a323fb7a642",
+    "predictions.csv": "c13b9631e711d5e48c8cff6598aa183cdc3e5df0f4ba7a7af8cb6873631fbde9",
+    "provenance.json": "c588891ca6a773c2d4fc49fc0dcdf9588466062fac04271179985647dcc5b4b9",
+    "t6004_train.csv": "3177ebb7702c0d2afdeabcbe66f355e38527fd5fb1ec40d38a3b3a63d6e39978",
+    "t6004_train.json": "bae73ce2d7df76abde087eb833a323bc45890a2f64146a17804594b153b82c79",
+    "t6007_train.csv": "69b5705914f85dabfc7a0f68981af9b86f1355312a3a10570bc2d2a1e8ada3d0",
+    "t6007_train.json": "2db4681680cfb56b4e5a7105d210c09341fbe70b1f4c3c58f5796b6a6fed6133"
+  },
+  "unproved_premises": [
+    "gain and threshold bounds from physical traces",
+    "scalar peak-to-gain/fire correspondence",
+    "six-cell h_mu transfer"
+  ]
+}

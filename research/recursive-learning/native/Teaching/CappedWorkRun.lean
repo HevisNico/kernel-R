@@ -655,6 +655,8 @@ structure CappedWorkRead (θ : Fin 1 → Parameters) (s : Snapshot 1) (high : Bo
   read : SelectorReadRun θ admitted high
   silent : lead.ledger.emissions = []
   gains : ∀ q, admitted.x 0 (.z q) = s.x 0 (.z q)
+  prepared : SelectorReadPrepared admitted high
+  deliveries : lead.deliveries = [cappedWorkReadToken s]
 
 /-- The real work pulse is followed by one prequeued read delivery. The
 work port is distinct from the selector, and the read takes its gain
@@ -693,9 +695,14 @@ theorem capped_work_read_exists {θ ε s p age high} (box : @PhysicalBox 1 θ ε
     rw [Execution.withFuture_ledger, work.emissions]
   refine ⟨⟨admitted, lead.append jump,
     (Execution.contactsTransversal_append _ _).2 ⟨positive, ⟨trivial, trivial⟩⟩,
-    due, read, ?_, gains⟩⟩
-  rw [Execution.emissions_append, silent]
-  rfl
+    due, read, ?_, gains, prepared, ?_⟩⟩
+  · rw [Execution.emissions_append, silent]
+    rfl
+  · rw [Execution.deliveries_append]
+    have noDeliveries : lead.deliveries = [] := by
+      rw [teacher_future_deliveries, work.deliveries]
+    rw [noDeliveries]
+    rfl
 
 noncomputable def CappedWorkRead.execution {θ s high} (run : CappedWorkRead θ s high) :
     Execution θ (fun _ _ => []) (withFuture s [cappedWorkReadToken s]) run.read.final :=

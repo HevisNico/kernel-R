@@ -2,6 +2,10 @@
 
 [Back to the native package](../README.md)
 
+The folder has eight Lean modules. `VariableNeedTolerance` extends the
+scalar tolerance contract; the other seven implement the count probes,
+search cells, fixed-dose tolerance and compiled searches described below.
+
 ## A count probe that calibrates itself
 
 [SelfCalibratedProbe.lean](SelfCalibratedProbe.lean) links the training
@@ -150,27 +154,51 @@ Limits:
 
 - **A sufficient condition.** The inequality is not shown to be
   necessary.
-- **Fixed dose in the execution constructors.** The original theorem and
-  compiled search use one dose per probe. The variable-dose scalar contract
-  below does not yet generalize those executions.
+- **One dose per probe in this theorem.** Variable doses are covered by
+  the separate scalar contract below, not by these native search constructors.
 - **The witness varies the start gains only.** Its doses and FIRE
   levels are those of the explicit cell.
 
-## Variable doses at successive writes
+## Variable doses and cumulative gain error
 
-[VariableNeedTolerance.lean](VariableNeedTolerance.lean) proves
-`needAlong_of_variable_doses`: the same tolerance inequality guarantees
-need `m` when each nonnegative dose independently lies in `[d0-b,d0+b]`.
-`NeedAlong` uses the cumulative gain sequence; on a constant-dose ladder
-it is exactly `NeedIs`. `needAlong_of_step_tolerance` takes actual gain
-increments and requires their budgets to include inter-window drift.
+[VariableNeedTolerance.lean](VariableNeedTolerance.lean) defines
+`NeedAlong level z m` for a sequence of log-gains. Every read before index
+`m` is silent and every read from `m` onward fires, for every rest charge
+in `[1/10, 1/10 + 1/10000]`. `needAlong_constant` recovers `NeedIs` for an
+arithmetic gain ladder.
+
+`needAlong_of_cumulative_tolerance` assumes the initial gain is within `a`
+of `needCentre level₀ d₀ m`, the cumulative error
+`|z n - z 0 - n*d₀|` is at most `B` for `n ≤ m`, and the fixed read level
+is within `ℓ` of `level₀`. Both levels are at least `19/20`. The sufficient
+budget is
+
+```text
+a + B + 20/17 * ℓ + 1/8000 < d₀ / 2.
+```
+
+For its conclusion at all later indices, the theorem additionally assumes
+`z m ≤ z n` whenever `m ≤ n`. This is an explicit hypothesis, not an
+observation of post-FIRE physical gain. Cumulative errors may cancel; no
+per-step error bound is needed for this form.
+
+`needAlong_of_variable_doses` instead takes an arbitrary nonnegative dose
+at each write, each within `b` of `d₀`. It derives the cumulative budget
+`B = m*b` and the same need contract. `needAlong_of_step_tolerance` states
+the corresponding condition on successive gain differences.
+
+These are scalar gain-sequence results. They do not construct native
+executions with varying ERROR doses, infer gain from a circuit peak, or
+replace the fixed-dose assumptions of `TrainedSearch`, `BisectionSearch`
+or `SuccessiveSearch`.
 
 The circuit corollaries in [CircuitNeed.lean](../../../circuit/lean/CircuitNeed.lean)
 use `b = k * eta + sigma + e` for charge residual `eta`, sensor-dose
 uncertainty `sigma`, and additional calibration/inter-window linkage error
 `e`. The earlier exact-sensor versions are retained as special cases.
-These are scalar read contracts; variable-dose hybrid execution and network
-composition remain separate obligations.
+The step budgets must include inter-window drift; these corollaries remain
+scalar read contracts, not variable-dose hybrid execution or network
+composition theorems.
 
 ## A search that ends by a lesson
 
