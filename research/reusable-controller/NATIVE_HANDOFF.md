@@ -85,3 +85,9 @@ improvements, recurrent-network learning or transistor-level correspondence.
 Its benchmark and error bounds are fixed; ambiguous probes cannot justify
 permanent blocks. It remains separate from the native obligations above.
 All four selector-reuse obligations are covered by [M2](NATIVE_ROUNDS.md).
+
+The [physical-certificate checkpoint](physical/README.md) derives exact finite
+counts and a zero-error margin evaluator under explicit scalar observation
+premises. Its pulse-accounting theorem and recorded-data replay do not supply
+the native feedback/refinement, fresh-resource/reset or physical cost rows
+above. The six-cell calibration-transfer limitation also remains explicit.

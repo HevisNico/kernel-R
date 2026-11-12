@@ -147,15 +147,18 @@ These are two constructed examples, not a statistical generalization claim.
 
 ## What remains open
 
-- Accuracy is proved for the executable example and assumed in the general
-  contracts. Neither error bound is derived from a circuit.
+- Accuracy is proved for the executable examples and assumed in the general
+  contracts. The separate [physical-certificate bridge](physical/README.md)
+  derives `tauL = 0` from finite scalar certificates, and `tauC = 0` for an
+  exact computed pulse ledger. This is conditional on the physical certificate
+  premises; it does not establish a physical cost sensor or a closed loop.
 - `needAlong_of_variable_doses` establishes dose-count stability under its
   gain, level and dose-error hypotheses. The circuit tolerance bridge on the
-  separate certification work is a prospective source of feasibility evidence,
-  not a policy-cost error bound. Connecting it requires an explicit
-  read-to-margin certificate and separate cost calibration, including rounding.
-  This milestone does not merge that work or remove its scalar peak-to-gain
-  and calibration-coverage assumptions.
+  separate certification work supplies the premises for the finite
+  read-to-margin certificate. It is not an error bound for an arbitrary
+  policy-cost sensor. Physical cost calibration and the recorded-to-future-run
+  transfer remain open. No PR is merged and no scalar peak-to-gain or
+  calibration-coverage assumption is removed.
 - Non-degradation compares policies on the **same fixed benchmark**, from the
   same initial lesson. It is not a claim about an arbitrary later live state,
   new learner, new oracle or changing objective.

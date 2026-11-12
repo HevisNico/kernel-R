@@ -11,6 +11,11 @@ of search policies and two inexact evaluators. It proves immutable evaluation,
 preserved invariants, robust non-degradation and separate spending budgets.
 The exact M1 algorithm and results below remain unchanged.
 
+The [finite physical-certificate bridge](physical/README.md) derives zero
+discrete count error from the need theorem under explicit physical premises,
+then connects that precision to the controller's computed pulse ledger. It
+includes a pinned-data replay and states the remaining physical transfer gaps.
+
 ## Algorithm and scope
 
 The environment is one fixed learner with natural-number preparation and
