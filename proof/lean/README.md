@@ -109,7 +109,7 @@ are retained; no A `PreparedSection` or charge reset is assumed. A's own
 birth port2 log-gain has gained0.6, while B's own independent newborn port2
 log-gain has gained1.8. Other gains and both recoveries are preserved; on
 the receipt-to352 suffix ERROR is zero elsewhere and total recovery is zero.
-The [checkpoint/factory map](HYBRID_EXECUTION.md#constructed-protocol-checkpoint)
+The [checkpoint/factory map](hybrid/CHECKPOINT.md#constructed-protocol-checkpoint)
 retains this352 checkpoint and describes the subsequent complete construction.
 
 `birth_protocol_reverse_teaching_exists` in
