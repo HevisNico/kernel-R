@@ -796,6 +796,8 @@ def write_report(c, R, S, out):
     n = {k: sum(v["status"] == k for v in R.v) for k in (HOLDS, FAILS, NA)}
     with open(f"{out}/VERDICTS.md", "w") as fh:
         fh.write("# Verdicts\n\nWritten by `analyze.py` from the results. The statements are those of `PREDICTION.md`.\n\n")
+        fh.write("The date of `PREDICTION.md` cannot be checked from this repository alone: see `PREDICTION_PROVENANCE.md`. "
+                 "The predictions are not blind.\n\n")
         fh.write(f"{n[HOLDS]} hold, {n[FAILS]} fail, {n[NA]} not evaluable, of {len(R.v)}.\n\n")
         fh.write("| | Statement | Measured | Status | Reason |\n|---|---|---|---|---|\n")
         for v in R.v:

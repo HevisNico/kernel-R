@@ -139,6 +139,7 @@ every port. One port of 200 stops after 1 silent pulse.
 |---|---|
 | [`DESIGN.md`](DESIGN.md) | The circuit, the reason for each design choice, the noise, the solver settings, what is not modelled |
 | [`PREDICTION.md`](PREDICTION.md) | Checks and predictions, written before the campaign |
+| [`PREDICTION_PROVENANCE.md`](PREDICTION_PROVENANCE.md) | Where and how the date of the predictions can be checked |
 | [`VERDICTS.md`](VERDICTS.md) | The status of each check and prediction, the state of each run, the guard, and observations made after the campaign |
 | [`COMPLEMENT.md`](COMPLEMENT.md) | Runs made after the campaign: replays with the same seeds |
 | [`cell.spice`](cell.spice), [`blocks.spice`](blocks.spice) | The netlist of the cell and its building blocks |
@@ -153,14 +154,14 @@ every port. One port of 200 stops after 1 silent pulse.
 
 ## Method
 
-- **Predictions written before the campaign, which this repository
-  cannot show.** [`PREDICTION.md`](PREDICTION.md) was committed on
-  2026-11-12 at 07:22 UTC in a private working repository, commit
-  `a8fd219`. The first run started at 07:23 UTC. The file entered this
-  repository at 09:02 UTC, after the campaign had started. Its SHA-256,
-  `8c17bf311e7f1353a6a41da84ad8f9c4fd3b4b6ff150c2a6009b620e935181e8`,
-  shows that the file is the same. It does not show the date. A reader
-  of this repository alone has to take the date on trust.
+- **Predictions written before the campaign. The date can be checked,
+  but not from this repository alone.** [`PREDICTION.md`](PREDICTION.md)
+  entered this repository at 09:02 UTC on 2026-11-12, after the
+  campaign had started. GitHub received the same file in a private
+  repository at 07:22:56 UTC, and the first results at 08:55:13 UTC.
+  Whoever has read access to that repository can check it; a reader
+  without it cannot. The record is in
+  [`PREDICTION_PROVENANCE.md`](PREDICTION_PROVENANCE.md).
 - **The predictions are not blind.** The file says what was known when
   it was written.
 - **One netlist, one set of options.** Every run of the campaign uses
