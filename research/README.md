@@ -22,6 +22,14 @@ Start with the
 [map of the stop-learning results](recursive-learning/native/README.md#map-of-the-stop-learning-results)
 and the [v0.4.0 release notes](../docs/RELEASE_V0_4_0.md).
 
+## Reusable discrete controller
+
+[`reusable-controller/`](reusable-controller/README.md) studies a reusable
+teaching loop over the unchanged discrete two-block learner. Rejected edits
+preserve the accepted lesson and allow search to continue. Lean proves
+termination, the minimum two-block lesson and explicit trial-cost accounting.
+The native R realization is a separate, documented proof obligation.
+
 ## Robust slow chain
 
 [`robust/`](robust/) contains the tested Python sources, certificates,
