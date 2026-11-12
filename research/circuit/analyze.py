@@ -52,8 +52,32 @@ def span(x, spec=".3f"):
 
 
 # ---- reading the runs
-def read_run(path):
-    """Rows of one run, or None and the reason."""
+def layout(name, mode, opts):
+    """The ports of the rows a run must have, in order, from its line in campaign.py."""
+    if mode == "refresh":
+        return [1] * int(opts[0])
+    kp = int(dict(o.split("=") for o in opts if "=" in o).get("kp", "10"))
+    return [1] * kp + [2] * kp + [0]
+
+
+LAYOUT = {name: layout(name, mode, opts) for name, mode, _, opts in jobs}
+
+
+def number(v):
+    f = float(v)
+    if not math.isfinite(f):
+        raise ValueError("not a finite number")
+    return f
+
+
+def flag(v):
+    if v not in ("0", "1"):
+        raise ValueError("not 0 or 1")
+    return v == "1"
+
+
+def read_run(path, ports=None):
+    """Rows of one run, or None and the reason. With ports, the rows must be exactly those of the plan."""
     try:
         with open(path, newline="") as fh:
             raw = list(csv.DictReader(fh))
@@ -64,19 +88,28 @@ def read_run(path):
     absent = [c for c in COLS if c not in raw[0]]
     if absent:
         return None, "column absent: " + ", ".join(absent)
+    if ports is not None and len(raw) != len(ports):
+        return None, f"{len(ports)} rows expected, {len(raw)} found"
     rows = []
     for i, x in enumerate(raw):
         try:
-            pos = lambda k: float(x[k]) if float(x[k]) >= 0 else None
-            fired = x["fired"] == "1"
+            pos = lambda k: number(x[k]) if number(x[k]) >= 0 else None
+            fired = flag(x["fired"])
+            second = flag(x["second_rise"])
+            if second and not fired:
+                raise ValueError("second rise without a first")
             rows.append(dict(pulse=int(x["pulse"]), port=int(x["port"]), fired=fired,
-                             lat=float(x["fire_latency"]) if fired else None, reopen=pos("reopen") if fired else None,
+                             lat=number(x["fire_latency"]) if fired else None, reopen=pos("reopen") if fired else None,
                              entry=(None, pos("entry1"), pos("entry2")), exit=(None, pos("exit1"), pos("exit2")),
-                             steered=(None, x["steered1"] == "1", x["steered2"] == "1"),
-                             v=(None, float(x["vmem1"]), float(x["vmem2"])), vq_min=float(x["vq_min"]),
-                             second=x["second_rise"] == "1", step=(None, float(x["step1_mV"]), float(x["step2_mV"]))))
+                             steered=(None, flag(x["steered1"]), flag(x["steered2"])),
+                             v=(None, number(x["vmem1"]), number(x["vmem2"])), vq_min=number(x["vq_min"]),
+                             second=second, step=(None, number(x["step1_mV"]), number(x["step2_mV"]))))
         except (ValueError, TypeError, KeyError):
             return None, f"value not readable in row {i + 1}"
+        if rows[-1]["pulse"] != i:
+            return None, f"pulse {rows[-1]['pulse']} in row {i + 1}, {i} expected"
+        if ports is not None and rows[-1]["port"] != ports[i]:
+            return None, f"port {rows[-1]['port']} in row {i + 1}, {ports[i]} expected"
     return rows, None
 
 
@@ -116,7 +149,7 @@ class Campaign:
             if not os.path.exists(path):
                 self.state[name] = ("missing", "run missing")
                 continue
-            rows, why = read_run(path)
+            rows, why = read_run(path, LAYOUT.get(name))
             if rows is None:
                 self.state[name] = ("unreadable", why)
                 continue

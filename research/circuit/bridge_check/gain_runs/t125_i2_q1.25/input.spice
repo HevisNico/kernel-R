@@ -1,0 +1,25 @@
+* Frozen nominal READY mirror calibration
+.lib "pdk/models/sky130.lib.spice" tt
+.option scale=1e-6 reltol=1e-4 abstol=1e-13 vntol=1e-7 gmin=1e-16
+.option temp=125
+vdd vdd 0 1.8
+vcm vcm 0 0.4
+vstore vmem 0 0.35
+vqhold vq 0 1.25
+vdump vr0 0 1.25
+vadm adm 0 1.8
+vadmb admb 0 0
+istim vdd gm 8.6643397569993154e-08
+xmin gm gm vcm 0 sky130_fd_pr__nfet_01v8 w=40 l=2.5
+xmout dq gm vmem 0 sky130_fd_pr__nfet_01v8 w=40 l=2.5
+xms1 dq adm vq 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15
+xms2 dq admb vr0 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15
+.save v(vmem) i(vqhold)
+.control
+dc vstore 0.35 0.42 0.0005
+set wr_singlescale
+set numdgt=16
+wrdata /home/user/kernel-r/research/circuit/bridge_check/gain_runs/t125_i2_q1.25/dc.txt v(vmem) i(vqhold)
+quit
+.endc
+.end

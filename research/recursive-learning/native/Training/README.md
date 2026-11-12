@@ -73,6 +73,23 @@ What they assume and do not prove:
   which a silent pulse writes an increment and a firing pulse writes none.
 - The pulse shape is canonical.
 
+## Separate windows for a last dose up to 0.06
+
+[WideDoseRead.lean](WideDoseRead.lean) keeps the ideal response and
+`StoppedTraining` contract but increases the allowed last dose from `1/20`
+to `3/50`. The joint-read window becomes `(0.236, 0.256]`, with skew
+strictly below `0.020`. The single-port window after training at amplitude
+`2/3` becomes `(0.349, 0.385]`, with skew strictly below `0.036`.
+
+`wide_pair_dates_decide_lag` preserves the coincidence distinction between
+offsets `0` and `±0.3` for dates within the wider pair bounds, with input
+stagger at most `0.1` and differential lag at most `0.03`. These additions
+do not change the execution constructors or their existing `1/20`
+hypotheses. In particular, the larger single-port skew is not a substitute
+for an existing `0.03` budget. The circuit's cold dose around `0.052` fits
+the new dose bound, but its observed joint latency around `0.267` does not
+fit the ideal window.
+
 ## Native training that stops at the first FIRE
 
 [NativeStopLearning.lean](NativeStopLearning.lean) constructs the

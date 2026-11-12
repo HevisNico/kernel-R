@@ -23,10 +23,15 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - name: Analysis on synthetic campaigns
-        run: python -B -m unittest test_analyze
+        run: python -B -m unittest test_analyze test_need_budget
       - name: The committed reports are those of the committed results
         run: |
           python -B analyze.py --out "$RUNNER_TEMP/report" --no-figures
           diff "$RUNNER_TEMP/report/VERDICTS.md" VERDICTS.md
           python -B compare.py "$RUNNER_TEMP/COMPLEMENT.md" > /dev/null
           diff "$RUNNER_TEMP/COMPLEMENT.md" COMPLEMENT.md
+      - name: The need-budget diagnostic reproduces the committed table
+        run: |
+          python -B need_budget.py --out "$RUNNER_TEMP/need-budget"
+          diff "$RUNNER_TEMP/need-budget/NEED_BUDGET.md" NEED_BUDGET.md
+          diff "$RUNNER_TEMP/need-budget/need_budget_ports.csv" need_budget_ports.csv

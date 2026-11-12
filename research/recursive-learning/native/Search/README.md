@@ -192,6 +192,14 @@ executions with varying ERROR doses, infer gain from a circuit peak, or
 replace the fixed-dose assumptions of `TrainedSearch`, `BisectionSearch`
 or `SuccessiveSearch`.
 
+The circuit corollaries in [CircuitNeed.lean](../../../circuit/lean/CircuitNeed.lean)
+use `b = k * eta + sigma + e` for charge residual `eta`, sensor-dose
+uncertainty `sigma`, and additional calibration/inter-window linkage error
+`e`. The earlier exact-sensor versions are retained as special cases.
+The step budgets must include inter-window drift; these corollaries remain
+scalar read contracts, not variable-dose hybrid execution or network
+composition theorems.
+
 ## A search that ends by a lesson
 
 [SearchActions.lean](SearchActions.lean) adds an action to the binary

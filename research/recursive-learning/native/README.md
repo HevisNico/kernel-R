@@ -22,19 +22,19 @@ has a README with the statements of its modules.
 | [`Teaching/`](Teaching/README.md) | credits and reusable selector reads in port gains, lessons, acceptance tests, report circuits | 36 |
 | [`Thresholds/`](Thresholds/README.md) | adaptive rounds, decision trees, realized FIRE and ERROR thresholds, training then read of one port | 12 |
 | [`Coincidence/`](Coincidence/README.md) | the v0.3.0 coincidence separation, the constant-current comparison, offset and delay | 9 |
-| [`Training/`](Training/README.md) | the stop-learning regime: silent and firing steps, the training loop, the joint read, trained coincidence, lag | 10 |
+| [`Training/`](Training/README.md) | the stop-learning regime: silent and firing steps, the training loop, the joint read, trained coincidence, lag and wider scalar read windows | 11 |
 | [`Network/`](Network/README.md) | products of cells, wires, forward composition, networks of any depth, report windows | 6 |
 | [`Search/`](Search/README.md) | fixed and variable-dose need bounds, probe and gate cells, trees of questions, successive approximation | 8 |
 
-These counts cover 81 Lean modules, including the three focused selector
+These counts cover 82 Lean modules, including the three focused selector
 audits in `Teaching`. [`NativeAudit.lean`](NativeAudit.lean) imports every
 module, directly or transitively, and runs the axiom audit. Its current scope
-is 83 modules including the two parent `RecursiveLearning` modules:
-6,306 declarations, of which 3,882 are theorems.
+is 84 modules including the two parent `RecursiveLearning` modules:
+6,318 declarations, of which 3,894 are theorems.
 
 The modules are named by folder: `import Training.SilentStep`.
 
-## Selector reuse and variable doses
+## Selector reuse and scalar tolerance
 
 These additions have their own hypotheses; they do not extend the compiled
 search networks or the stop-learning regime below automatically.
@@ -45,6 +45,7 @@ search networks or the stop-learning regime below automatically.
 | first read plus reusable rounds | [`delivered_calendar_program_exists`](Teaching/SelectorRoundBootstrap.lean) | first read is an actual charged delivery: `3n+1` deliveries and `2n+1` FIREs; every complete run has the same final state and FIRE dates |
 | variable-dose scalar need | [`needAlong_of_variable_doses`](Search/VariableNeedTolerance.lean) | nonnegative, independently varying doses with a per-step error budget |
 | cumulative scalar need | [`needAlong_of_cumulative_tolerance`](Search/VariableNeedTolerance.lean) | a cumulative gain budget through the target count, with gain bounded below by its target-count value afterwards |
+| wider scalar read window | [`stopped_pair_read_latency_wide`](Training/WideDoseRead.lean) | last dose up to `3/50` gives the ideal pair window `(0.236, 0.256]`; native execution constructors retain their existing dose assumptions |
 
 The [Teaching map](Teaching/README.md#reusing-the-selector-with-a-fixed-calendar)
 states the prepared resources and external-calendar limit. The
