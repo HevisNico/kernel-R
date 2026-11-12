@@ -32,6 +32,18 @@ MUTATIONS = [
     ("extend_certificate_deadline", "Deadline", "(within : earlier ≤ deadline)", "(within : True)"),
     ("use_expired_certificate", "Deadline", "now ≤ cert.expires ∧ cert.valid state", "now ≤ cert.expires + 1 ∧ cert.valid state"),
     ("overstate_two_level_progress", "TwoLevel", "rank t + 2 = rank s := by", "rank t + 3 = rank s := by"),
+    ("ignore_interval_uncertainty", "Renewal", "anchor.hi + granularity ≤ next.lo ∨ next.hi + granularity ≤ anchor.lo", "anchor.lo + granularity ≤ next.hi ∨ next.lo + granularity ≤ anchor.hi"),
+    ("undercharge_sampled_variation", "Renewal", "distance previous sample.truth + variation sample.truth rest", "variation sample.truth rest"),
+    ("inflate_reopening_granularity", "Renewal", "g * reopenings g initial.report (samples.map Sample.report) ≤", "(g + 1) * reopenings g initial.report (samples.map Sample.report) ≤"),
+    ("ignore_rate_measurement_error", "Renewal", "⟨value - radius, value + radius, by omega⟩", "⟨value, value, by omega⟩"),
+    ("omit_detection_uncertainty_widths", "Renewal", "(movement : g + (a.hi - a.lo) + (b.hi - b.lo) ≤ distance x y)", "(movement : g ≤ distance x y)"),
+    ("spend_scheduler_reserve", "Scheduler", "if bound * (cap + 1) + reserve ≤ initial then cap + 1", "if bound * (cap + 1) ≤ initial then cap + 1"),
+    ("schedule_beyond_cap", "Scheduler", "then cap + 1\n      else horizon", "then cap + 2\n      else horizon"),
+    ("omit_future_slew", "Scheduler", "report.hi + slew * cap\n", "report.hi\n"),
+    ("underrepair_one_tick", "Scheduler", "reserve + bound - initial\n", "reserve - initial\n"),
+    ("clip_negative_reserve", "Controller", "if 0 ≤ lower then", "if True then"),
+    ("reuse_stale_safety_anchor", "Controller", "Scheduler.rateCeiling reading.rate slew cap) cap⟩", "Scheduler.rateCeiling anchor slew cap) cap⟩"),
+
 ]
 
 SEMANTIC = re.compile(r"Type mismatch|type mismatch|unsolved goals|omega could not prove|Tactic `decide` proved|tactic 'decide' proved", re.I)
@@ -55,7 +67,7 @@ def hygiene():
     files = sorted(PROJECT.glob("*.lean"))
     root_imports = set((ROOT / "SelfCertifyingLearning.lean").read_text().splitlines())
     expected = {"import SelfCertifyingLearning." + p.stem for p in files}
-    if root_imports != expected or len(files) != 5:
+    if root_imports != expected or len(files) != 8:
         raise RuntimeError("Root module must import exactly every maintained proof module")
     manifest = json.loads((ROOT / "lake-manifest.json").read_text())
     if manifest["packages"] or "[[require]]" in (ROOT / "lakefile.toml").read_text():

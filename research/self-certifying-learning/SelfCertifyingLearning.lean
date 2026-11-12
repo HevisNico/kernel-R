@@ -3,3 +3,6 @@ import SelfCertifyingLearning.Composition
 import SelfCertifyingLearning.Deadline
 import SelfCertifyingLearning.Counterexamples
 import SelfCertifyingLearning.TwoLevel
+import SelfCertifyingLearning.Renewal
+import SelfCertifyingLearning.Scheduler
+import SelfCertifyingLearning.Controller

@@ -6,9 +6,11 @@ Kernel R definitions, circuit data or other research-package imports.
 
 The research question is whether a system can improve how it maintains a
 task while preserving its ability to detect and repair the next failure.
-This checkpoint proves discrete ingredients and counterexamples. It does
-not yet implement that adaptive system, derive certificates from physical
-observations, or claim a new universal principle.
+This checkpoint proves discrete ingredients and implements an observation-level
+supervisor: interval-based search reopening and a fresh, maximal admissible
+probe delay. It does not yet implement physical parameter identification,
+search inside an epoch, or a complete adaptive repair loop, and makes no
+claim of a new universal principle.
 
 ## What is checked
 
@@ -21,6 +23,12 @@ observations, or claim a new universal principle.
 | A concrete two-level system stabilizes | `stabilizes`, `path_balance` in [TwoLevel](SelfCertifyingLearning/TwoLevel.lean) | Each correction removes three local ticks and adds one to the other level; all finite correction orders have the same accounting |
 | An observation envelope supports a deadline | `safe_until_deadline` in [Deadline](SelfCertifyingLearning/Deadline.lean) | Safety at every intermediate discrete time, assuming the envelope holds there |
 | Decisions remain conditional on their context and deadline | `Decision.apply`, `expired_not_usable` in [Deadline](SelfCertifyingLearning/Deadline.lean) | `Usable` is a proposition, not an implemented validity monitor |
+| Honest interval separation charges each reopening to distinct sampled variation | `reopening_bound` in [Renewal](SelfCertifyingLearning/Renewal.lean) | Executable hysteresis; arbitrary honest interval widths; no false reopening in a constant world |
+| Sufficiently large resolvable movement triggers reopening | `detects_resolvable_change` in [Renewal](SelfCertifyingLearning/Renewal.lean) | Movement at least granularity plus the two report widths; checked at a visit |
+| The selected positive wait is maximal and safe | `plan_spec`, `plan_safe` in [Scheduler](SelfCertifyingLearning/Scheduler.lean) | Within a finite cap and certified loss ceiling; `none` requires repair or abstention |
+| A current report plus known future slew yields a loss ceiling | `rate_ceiling_sound` in [Scheduler](SelfCertifyingLearning/Scheduler.lean) | Uses a supplied slew bound over the whole cap; cannot certify an arbitrary hidden jump |
+| Bounded-error measurements produce sound controller inputs | `measurement_sound` in [Controller](SelfCertifyingLearning/Controller.lean) | Signed reserve lower bounds below zero are refused; no R sensor correspondence yet |
+| The supervisor refreshes safety even when search memory is retained | `visit_safe`, `run_reopening_bound` in [Controller](SelfCertifyingLearning/Controller.lean) | Concrete executable `visit`/`run`; conditional service at each accepted window and separate reopening accounting |
 | Shared observations cannot certify a property false in a compatible world | `indistinguishable_cannot_accept` in [Deadline](SelfCertifyingLearning/Deadline.lean) | Information limit for any sound observation-only checker |
 
 All potentials, counts, damage bounds and disturbance budgets are natural
@@ -37,6 +45,20 @@ cross-damage = 1, weights = (1, 1) and eta = 2. [TwoLevel](SelfCertifyingLearnin
 constructs its transitions and proves validity is equivalent to having no
 enabled correction. This is a discrete repair example, not a learned
 refresh policy or a physical R execution.
+
+## Executable supervisor
+
+[CONTROLLER.md](CONTROLLER.md) specifies the new observation-level mechanism,
+its proof chain and its limits. Every visit constructs its safety plan from
+the **fresh** rate interval, while only a sufficiently separated interval
+replaces the search anchor. A retained anchor is not a certificate that an
+old rejection or old policy remains valid.
+
+With reserve 110, required reserve 10, zero slew and cap 40, exact rate 10
+permits a wait of 10; rate 22 permits 4. At rate 12 the wait shortens to 8
+even when a granularity-5 search anchor stays at 10. An interval [0, 200]
+requires refusal at that reserve although it does not prove a rate change.
+These are kernel-checked examples, not a preregistered adaptive comparison.
 
 ## Counterexamples are part of the result
 
@@ -70,23 +92,23 @@ No package download is required after Lean itself is installed. The
 checks the same distribution digest as the repository's existing installer.
 It builds, audits and runs the controls without requesting a Mathlib cache.
 
-[Audit](Audit.lean) examines every declaration originating in the six
+[Audit](Audit.lean) examines every declaration originating in the nine
 project modules, including private and generated declarations and names
 outside the project namespace. Only `propext`, `Classical.choice` and
 `Quot.sound` are allowed; project axioms and admitted proofs are rejected.
 The source inventory check requires every proof module to be imported.
 
-[verify.py](verify.py) compiles the unmodified module before each of twelve
+[verify.py](verify.py) compiles the unmodified module before each of twenty-three
 semantic mutations. A parser/import/name failure or timeout is not a
 successful rejection. Three further controls test unused external-namespace
 and private axioms and an admitted theorem against the compiled audit.
 The report records current source hashes and the actual audit output.
 
-The [recorded local checkpoint](validation.json) passed the full standalone
-build: 239 audited declarations, including 107 theorems (generated helpers
-included), six project modules, twelve paired semantic controls and three
-audit controls. All thirteen repository tests also passed. CI at the
-published commit is a separate check; this local record does not predict it.
+The [recorded local checkpoint](validation.json) records the current standalone
+build, audited declaration/theorem counts, nine project modules, twenty-three
+paired semantic controls and three audit controls. Generated helpers are
+included in declaration counts. CI at the published commit is a separate
+check; this local record does not predict it.
 
 These checks establish the stated Lean implications, not the fidelity of a
 physical implementation to their premises. The full historical Kernel R
@@ -94,12 +116,15 @@ build is a separate CI gate; this package does not import or rebuild it.
 
 ## Next obligations
 
-1. Implement observation-derived contexts with explicit possible future
-   perturbations, deadlines, renewals and a safe fallback.
-2. Charge genuine search reopenings separately from periodic renewals.
-   Status changes alone do not bound either by disturbance magnitude.
-3. Specify a repair-capacity condition: one dose need not compensate for
-   all loss incurred during a long observation gap.
+1. Derive the measurement and future-slew assumptions from an actual sensor
+   and plant. Bounded-error scalar measurements are now handled; R binary/count
+   observations and unforeseen physical jumps are not.
+2. Implement search and its stored decisions inside each epoch. Reopening
+   accounting is now proved for the interval monitor, but it does not bound
+   search work, safety refusals or periodic certificate renewals.
+3. Close the repair/scheduling loop with finite dose size, capacity, latency,
+   leakage during repair and an explicit service policy. `unitWrites` proves
+   a one-tick restart only for ideal instantaneous uncapped unit writes.
 4. Fix the discrete comparison in [EXPERIMENT_DRAFT.md](EXPERIMENT_DRAFT.md)
    before running it. No adaptive experiment is run in this checkpoint.
 5. Instantiate the contracts in R or another physical model without

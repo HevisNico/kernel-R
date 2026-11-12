@@ -4,6 +4,20 @@ No adaptive simulation has been run for this package. Publishing this file
 does not register an executable protocol: the unresolved choices below must
 be fixed, versioned and published before running the comparison.
 
+## Implemented ingredients, not a completed protocol
+
+[CONTROLLER.md](CONTROLLER.md) now fixes a concrete candidate supervisor:
+bounded-error scalar reports, interval-separation search epochs, a fresh
+safety ceiling `report.hi + slew * cap`, and the maximal affordable positive
+wait within `cap`. Zero affordable wait means repair or abstention. The
+monitor's reopening count is proved bounded by true sampled variation.
+
+These choices settle parts of information, future-envelope and memory
+semantics **for that discrete candidate only**. They do not supply R's
+sensor model, choose a perturbation distribution, define the within-period
+repair sequence, or fix the naive/prudent baselines. Kernel-evaluated
+examples are not an adaptive trial and do not preregister a comparison.
+
 ## Objective
 
 Compare the cost of maintaining a scalar task under leakage while retaining
