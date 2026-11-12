@@ -178,6 +178,11 @@ the transistor circuit is certified here.
 
 ## Hypothesis status before instrumented replay
 
+The status after the replays, with the bound and the source of each
+hypothesis and the 200 ports, is in
+[BRIDGE_APPLICATION.md](../BRIDGE_APPLICATION.md). The table below is the
+state before them and is kept as it was.
+
 Categories distinguish finite recorded evidence from a uniform physical guarantee.
 The [public rest diagnostic](../bridge_check/REST_PROTOCOL.md) starts with the
 missing pre-pulse state; its criteria and run list are committed before simulation.
