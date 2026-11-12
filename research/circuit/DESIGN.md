@@ -69,7 +69,9 @@ Each choice is given with its reason.
   subthreshold the current of a transistor is exponential in its source
   voltage. A step of the stored voltage is then a step of log-gain, and
   equal steps multiply the gain by equal factors. In the nominal cell
-  26.9 mV of stored voltage is one unit of log-gain.
+  at 27 °C, 31.8 mV of stored voltage is one unit of log-gain. This is
+  measured on the campaign: the peak of the main charge grows by 4.3%
+  at each silent pulse.
 - **Sources near 0.4 V, not at ground.** The stored voltage is the
   output of an op-amp, which cannot reach ground.
 - **Long and wide devices, 40 µm / 2.5 µm.** They limit the mismatch of
@@ -113,8 +115,10 @@ Each choice is given with its reason.
   capacitor. The step of the stored voltage is
   `(C_s / C_f) × (V_entry − V_exit)`.
 - **400 fF, 30 pF and a window of 100 mV.** The step is 1.33 mV by
-  design and 1.3465 mV in the nominal cell. That is 0.05 in log-gain,
-  the dose of the read-window theorems.
+  design and 1.3465 mV in the nominal cell. In log-gain that is 0.042
+  at 27 °C, 0.052 at −40 °C and 0.033 at 125 °C, measured on the
+  campaign. The read-window theorems take doses of at most 1/20. The
+  dose at −40 °C is above that.
 - **A window of 100 mV.** It is large against the noise of the
   comparator, 0.5 mV rms.
 - **One comparator for the entry and the exit.** Its offset moves both
@@ -138,8 +142,8 @@ Each choice is given with its reason.
 - **A two-stage op-amp.** Its output drives the source of the mirror and
   has to sink the mirror current.
 - **A preset at the start of a run.** Every cell starts from the same
-  stored voltage, about 4.5 doses short of the firing gain of the
-  nominal cell. A cell with mismatch then needs more or fewer pulses.
+  stored voltage, 3.6 doses short of the firing gain of the nominal
+  cell. A cell with mismatch then needs more or fewer pulses.
 
 ### Timing
 
@@ -156,6 +160,9 @@ Each choice is given with its reason.
 - **No MARK phase.** The learning of the recovery rate is not built.
 - **One discharge rate.** The model has different rates in SILENT and
   ERROR. The dose does not depend on them.
+- **The dose is fixed in volts, not in log-gain.** The slope of the
+  gain law follows the absolute temperature. The same step of the
+  stored voltage is 0.052 in log-gain at −40 °C and 0.033 at 125 °C.
 - **The thresholds are scaled to the supply.**
 - **The joint read is outside the proved window.** Two trained ports of
   this circuit fire together near 0.267. The window proved for the
@@ -229,7 +236,17 @@ its noise is injected in the transient at its input.
   rms of its block. This puts more of the op-amp noise at low frequency
   than the block has, which overstates the noise of a read of the
   stored voltage.
-- **One seed per run** sets the mismatch sample and the noise sample.
+- **The seed of a run sets its mismatch sample, not its noise.** Run
+  again with the same seed, a noisy run draws another noise sample.
+  This was found after the campaign, by replaying 24 runs
+  ([`COMPLEMENT.md`](COMPLEMENT.md)). The noise samples of the campaign
+  are independent of each other. A noisy run of the campaign cannot be
+  reproduced exactly. Three ways of seeding the simulator were tried on
+  a short run: the `setseed` command, the `seed` option in the netlist,
+  and `rndseed` in the start file. None makes the noise reproducible.
+  A run without noise, run again, gives the same file byte for byte.
+  The variation therefore comes from the noise generator, and not from
+  the solver, the runner or the four runs computed at a time.
 
 ## Solver
 
@@ -263,15 +280,34 @@ the resolution of every time and every voltage in the results.
 | A time after 100 ms: the 1 TΩ refresh run from pulse 227 on | 1 µs, 0.05 unit |
 | A stored voltage | 1 µV, 0.0007 dose |
 
-Whether a pulse fired does not depend on this resolution. A latency
-does. In the refresh runs a FIRE that comes in the last 100 ns of the
-pulse is printed with a latency of exactly 1.
+One time unit is 20 µs, so 10 ns is 0.0005 unit.
 
-One such pulse was replayed with the internal nodes saved, with a
-largest step of 200 ns, with 100 ns, and with Gear integration. The
-FIRE comparator trips and the latch rises 50 ns, 48 ns and 57 ns before
-the end of the pulse. The printed latencies were 1.000, 1.000 and
-0.995.
+Whether a pulse fired does not depend on this resolution. A latency
+does. In the refresh runs after 10 ms, a FIRE that comes in the last
+50 ns of the pulse is printed with a latency of exactly 1. Eleven
+pulses of the campaign are in this case, all in refresh runs.
+
+One of them, pulse 77 of the refresh run under 0.1 TΩ, worked by hand:
+
+| | |
+|---|---|
+| Printed time of the FIRE | 0.0343441 s, 34 344.1 µs |
+| Start of the pulse | 78 periods of 440 µs, plus 4.1 µs: 34 324.1 µs |
+| Difference | 20.0 µs |
+| Divided by the unit of 20 µs | a latency of 1.000 |
+| Last printed digit of the time | 0.1 µs, 0.005 unit |
+
+That pulse was replayed with the internal nodes saved, with a largest
+step of 200 ns, with 100 ns, and with Gear integration. The FIRE
+comparator trips and the latch rises 49.9 ns, 47.8 ns and 57.4 ns
+before the end of the pulse. With 200 ns that is 34 344.05 µs, printed
+34 344.1 µs. The printed latencies were 1.000, 1.000 and 0.995. The
+replay with 200 ns gives the same latency and the same stored voltage
+as the campaign on its 78 pulses.
+
+The joint read of a cell run comes at 9.25 ms. It is printed to 10 ns,
+0.0005 unit. The complement in [`COMPLEMENT.md`](COMPLEMENT.md) repeats
+the 20 noise runs with every time printed from the start of its pulse.
 
 ## Measures
 
