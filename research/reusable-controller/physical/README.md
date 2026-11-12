@@ -100,6 +100,10 @@ certificate, exact first-FIRE decoding and controller contract directly from
 these conditions. Every old finite envelope certificate embeds in it without
 changing its observations or adding a physical hypothesis.
 
+The transfer adds `eps3` to **both** initial bounds (`aSilent = aFire = baseA + eps3`)
+and `2*eps3` to **both** cumulative bounds (`BSilent = baseBSilent + 2*eps3`,
+`BFire = baseBFire + 2*eps3`), paying the initial and current read errors in each direction.
+
 [asymmetric_check.py](asymmetric_check.py) follows the frozen A1 formula:
 initial centering remains unchanged; only the cumulative budget is split by
 direction and read index. It retains all applicable kappa errors, both endpoint
@@ -114,11 +118,31 @@ its 37-entry report are unchanged. The previously excluded `t6004` preparation
 port now passes A1, while its failed symmetric gate remains recorded; these
 are different rules, not a revision of the old result.
 
+| Rule | Eligible ports | Count contradictions |
+|---|---:|---:|
+| Registered symmetric budget (#109 amended status3) | 37 | 0 |
+| A1, declared before its calculation | 57 | 0 |
+
+**None of the 11 wrong-count ports from #107 is among the 57.** The reproducible
+[review report](ASYMMETRIC_REVIEW.md) lists their identities and decomposes all
+20 additions: the largest old term was `a` for 12 and `B` for 8; the limiting
+A1 side is silence for 13 and FIRE for 7. Both room tests pass for every added
+port. These are dominant-term and limiting-margin labels, not exclusive causes;
+`a` is unchanged and the old failure concerned the sum of the budget terms.
+
+Two negative controls mutate `Search.AsymmetricNeedTolerance` itself: replacing
+the lower FIRE bound with an upper bound, and removing `1/8000` from the silence
+condition. Both must fail Lean's proof check; parser/import failures do not count.
+
 This improves the sufficient scalar criterion. It does not discharge noisy-run
 transfer, fitted-offset interpretation, FIRE reconstruction, rest-state or
 physical detection-envelope premises. The same conditional boundary remains.
 
 ## Planned numerical and noisy-repeat checks
+
+Scope is frozen for PR #110. The campaign owner will perform step refinement
+and noisy repetitions; their measured results will enter a separate PR based
+on `main` after #110 is merged. The existing plans below are not new results.
 
 [STEP_STUDY_PROTOCOL.md](STEP_STUDY_PROTOCOL.md) freezes six nominal/calibration
 cases at maximum steps 200/100/50 ns, with duplicate baselines: 24 runs.
@@ -465,7 +489,7 @@ records twelve data mutations; [gain-validation.json](gain-validation.json)
 records six readout-data mutations and generated/source hashes;
 [campaign-validation.json](campaign-validation.json) records six campaign-data
 mutations, the complete eligible-port list and snapshot provenance;
-[physical-validation.json](physical-validation.json) records thirty semantic
+[physical-validation.json](physical-validation.json) records thirty-two semantic
 proof mutations and source hashes. Parser/import failures never count as
 successful rejection. CI reproduces the build, all five verifiers, the 16
 directional/statistical tests, repetition readiness and the original replay,

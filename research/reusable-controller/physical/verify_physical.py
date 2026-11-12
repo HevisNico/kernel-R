@@ -82,7 +82,14 @@ def main():
         raise RuntimeError(search)
     search = os.pathsep.join(str((HERE / x).resolve()) for x in search.strip().split(os.pathsep))
     original = {f: (HERE / 'PhysicalEvaluator' / f).read_text() for f in FILES}
+    original['Search/AsymmetricNeedTolerance.lean'] = (NATIVE / 'Search/AsymmetricNeedTolerance.lean').read_text()
     mutations = [
+        ('directional_theorem_reverse_fire_bound', 'Search/AsymmetricNeedTolerance.lean', lambda s: replace_once(s,
+            '(cumulativeLower : z 0 + (m : ℝ) * d₀ - z m ≤ BFire)',
+            '(cumulativeLower : z m - z 0 - (m : ℝ) * d₀ ≤ BFire)'), None),
+        ('directional_theorem_omit_rest_allowance', 'Search/AsymmetricNeedTolerance.lean', lambda s: replace_once(s,
+            '(silenceRoom : aSilent + BSilent + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2)',
+            '(silenceRoom : aSilent + BSilent + 20 / 17 * ℓ < d₀ / 2)'), None),
         ('asymmetric_nonstrict_silence', 'Asymmetric.lean', lambda s: replace_once(s,
             'silenceRoom : aSilent + BSilent + 20 / 17 * ell + 1 / 8000 < dose0 / 2',
             'silenceRoom : aSilent + BSilent + 20 / 17 * ell + 1 / 8000 ≤ dose0 / 2'), None),
@@ -171,7 +178,11 @@ def main():
             for artifact in (HERE / '.lake/build/lib/lean').glob('PhysicalEvaluator.*'):
                 if artifact.is_file():
                     shutil.copy2(artifact, folder / artifact.name)
-            relative = 'PhysicalEvaluator/' + changed
+            if changed.startswith('Search/'):
+                shutil.copytree(NATIVE / '.lake/build/lib/lean/Search', folder / 'Search')
+                relative = changed
+            else:
+                relative = 'PhysicalEvaluator/' + changed
             (folder / relative).write_text(mutate(original[changed]))
             env = dict(os.environ, LEAN_PATH=str(folder) + os.pathsep + search)
             code, log = command([lean.strip(), '-o', relative.removesuffix('.lean') + '.olean', relative], folder, env)
