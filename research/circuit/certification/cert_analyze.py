@@ -278,7 +278,7 @@ def certify():
             fire_last = part[r_]["fired"] == 1
             a = a_s + abs(z[0] - g0s) + MZ + (eps if part[0]["fired"] == 1 else 0.0)
             dev = [abs(z[n] - z[0] - n * d0) for n in range(1, r_ + 1)]
-            B = (max(dev) if dev else 0.0) + (eps if fire_last and r_ >= 1 else 0.0) + 2 * MZ
+            B = (max(dev) if dev else 0.0) + (eps if fire_last else 0.0) + 2 * MZ
             noise = max(x["noise_sup_V"] for x in part) / 0.5
             ell = C["h_mu"] + noise + MQ
             room = d0 / 2 - a - B - 20 / 17 * ell - 1 / 8000
@@ -396,8 +396,31 @@ def certify():
     for r in out:
         L.append(f"| `{r['cell']}` | {r['port']} | {r.get('m', '')} | {r.get('count', DASH)} | {DASH if 'count_agrees' not in r else ('yes' if r['count_agrees'] else 'no')} | {fm(r.get('a'))} | {fm(r.get('B'))} | "
                  f"{fm(r.get('level_term'))} | {fm(r.get('room'), '+.5f')} | {fm(r.get('b_direct'))} | {r['status']} | {r['reason'] or DASH} |")
+    L += traces_section()
     (HERE / "REPORT.md").write_text("\n".join(L) + "\n")
     print("\n".join(L[:22 + len(V)]))
+
+
+def traces_section():
+    """What is kept of each run, and what a reader can check."""
+    import hashlib
+    import subprocess
+    metas = [json.loads(p.read_text()) for stage in MANIFEST["stages"] for p in sorted((HERE / "results" / stage).glob("*.json"))]
+    hashed = sum(1 for m in metas if m.get("trace_sha256"))
+    noisy = sum(1 for m in metas if m["run"].get("noise"))
+    now = hashlib.sha256((HERE / "cert_run.py").read_bytes()).hexdigest()
+    p = subprocess.run(["git", "show", "5b9d75f:research/circuit/certification/cert_run.py"], capture_output=True, cwd=HERE)
+    same = "not checked: the commit could not be read" if p.returncode else (
+        "identical to the file of that commit" if hashlib.sha256(p.stdout).hexdigest() == now else "**different from the file of that commit**")
+    return ["", "## Traces and reproduction", "",
+            f"- **Extraction.** Every value of a run is extracted by `cert_run.py` when the run ends. The script was pushed in commit `5b9d75f`, before the first run. Its SHA-256 now is `{now}`: {same}.",
+            "- **What is public.** For each run: one row per pulse with every quantity that enters a bound (`results/<stage>/<run>.csv`), and its metadata with the SHA-256 of the deck, of the binary, "
+            "of the rows and of the compact trace (`results/<stage>/<run>.json`).",
+            f"- **Traces.** The compact trace of a run holds the solver points around each pulse and each write window, as `PREDICTION.md` says. The traces are in the private repository "
+            f"`HevisNico/kernel-R-circuit`, folder `07-certification-traces/`; {hashed} of the {len(metas)} runs with a result have the hash of their trace in their public metadata. "
+            "That hash is the hash of the compact trace, not of the full solver output, which is not kept. Amendment 1 said that no trace would be kept; amendment 2 withdrew it before the runs of stages 2 and 3.",
+            f"- **Reproduction.** Each run is made once. In the original campaign a run without noise replayed from its deck gave the same output byte for byte. The {noisy} runs with noise are not reproduced by their seed. "
+            "Their extraction can be checked again only from the compact traces; their statistics can be reproduced by new runs, not their values."]
 
 
 if __name__ == "__main__":
