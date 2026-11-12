@@ -40,8 +40,18 @@ response factor algebraically, but does not establish the physical calibration.
 
 Ports without a ceiling comparison: 0.
 
+Among the 105 ports outside the proxy room criterion,
+**96 counts are exact and 9 disagree**.
+Correct counts outside a sufficient region are allowed. This is consistent with
+a conservative criterion, but does not validate the unmeasured hypotheses or turn
+the proxy into a guarantee for the ports inside it.
+
 Ceiling disagreements passing the proxy criterion: 1 of 10.
 Thus even this optimistic surrogate does **not** give a perfect separation.
+
+Terminology: these are the ten disagreements of the retrospective ceiling-of-gap
+comparison, not ten failures of P6. The original P6 predicts a stop after 2 to 8
+silent pulses (within 10 pulses); its single count-range exception is identified below.
 
 | Run | Port | Observed silent | Ceiling | `a_proxy` | `b_sample` | `room_proxy` | Passes |
 |---|---:|---:|---:|---:|---:|---:|---|
@@ -55,6 +65,56 @@ Thus even this optimistic surrogate does **not** give a perfect separation.
 | mc_2095 | 1 | 4 | 5 | 0.0198855339 | 0.00931570674 | -0.0457583035 | False |
 | mc_2098 | 1 | 5 | 4 | 0.0198014337 | 0.00736009831 | -0.0287286837 | False |
 | mc_2099 | 2 | 4 | 5 | 0.0206806421 | 0.00451447623 | -0.0226586058 | False |
+
+**Outside room (9):** `mc_2022`, port 2; `mc_2028`, port 1; `mc_2062`, port 2; `mc_2063`, port 1; `mc_2071`, port 1; `mc_2075`, port 2; `mc_2095`, port 1; `mc_2098`, port 1; `mc_2099`, port 2.
+**Inside room (1):** `mc_2064`, port 1.
+
+## Missing dispersion: not evaluable
+
+**`mc_2027`, port 2: not evaluable.** It has 1 silent pulse and therefore
+no pair of consecutive silent peaks from which to estimate dose dispersion.
+The pooled dose only supplies the historical ceiling; `b_sample`, `room_proxy`
+and the proxy decision remain missing, not zero. Its observed count is
+`1` and ceiling is `1`: they agree.
+
+Original P6 count-range exceptions: `mc_2027`, port 2.
+
+## Case study: mc_2064, port 1
+
+**Cause not identified from the committed summary data.** The disagreement remains
+in the passing-proxy group. No estimate, uncertainty budget or cutoff is changed.
+
+Observed silent pulses: **3**; ceiling estimate: **4**.
+The unchanged gap is `3.0305309012` doses; `room_proxy = 0.000233183351493 > 0`.
+The dose estimate `0.0417154840256` and dispersion `0.000228856992475`
+come from only **2 consecutive-silent-peak ratios**.
+
+Directly recorded values, from [the original CSV](results/mc_2064.csv):
+
+| Pulse index | Fires | Main swing (V) | End storage voltage (V) | Storage drop (mV) | FIRE latency (model units) |
+|---|---|---:|---:|---:|---:|
+| 0 | False | 0.39708 | 0.3878000 | 1.42600 | — |
+| 1 | False | 0.41390 | 0.3865770 | 1.22300 | — |
+| 2 | False | 0.43163 | 0.3850960 | 1.48100 | — |
+| 3 | True | 0.45052 | 0.3851300 | -0.03400 | 0.99550 |
+
+The peak ratios sample transitions after the first two silent pulses. The third silent write is
+the transition to the first FIRE and is absent from that estimator: the following
+peak belongs to a firing period with protection, rather than an uncut silent read.
+Its recorded storage-voltage drop is larger than either preceding drop, but these
+are noisy voltage averages without an independent log-gain calibration. This does
+not establish that a larger actual dose caused the early FIRE.
+
+The median firing-swing proxy is `0.45059 V`; the first firing-period
+swing is `0.45052 V`. Neither is a direct threshold-at-contact
+measurement. Substituting the latter into the estimator would change the analysis
+after seeing its answer, so it is not done.
+
+The summaries therefore expose a missing final-write log-gain measurement and an uncalibrated
+threshold proxy, but do not distinguish their effects or identify a physical cause.
+Resolving that attribution requires independently calibrated gain/current and
+threshold/contact traces. No new simulation or fitted correction is used here.
+
 
 ## Why this is not a test of the theorem's boundary
 

@@ -11,7 +11,7 @@ import math
 from pathlib import Path
 import statistics
 
-from analyze import Campaign, VR0, cell_view
+from analyze import Campaign, VR0, cell_view, read_run
 
 
 FIELDS = [
@@ -76,6 +76,8 @@ def analyze(results):
             doses = [math.log(swings[j + 1] / swings[j]) for j in range(p["silent"] - 1)]
             row.update(observed_silent=p["silent"], trip_proxy=statistics.median(firing),
                        first_swing=swings[0], dose_samples=len(doses))
+            if not doses:
+                row["missing_reason"] += "; only one silent peak: no consecutive silent pair to estimate dose dispersion"
             samples.append((row, doses))
     pooled = [d for _, doses in samples for d in doses]
     fallback = statistics.mean(pooled) if pooled else None
@@ -93,7 +95,49 @@ def analyze(results):
     return records, digest.hexdigest()
 
 
-def render(rows, digest):
+def case_study(rows, results):
+    """Inspect the fixed disagreement without changing any proxy or budget."""
+    lines = ["## Case study: mc_2064, port 1", "",
+             "**Cause not identified from the committed summary data.** The disagreement remains",
+             "in the passing-proxy group. No estimate, uncertainty budget or cutoff is changed.", ""]
+    row = next((r for r in rows if (r["run"], r["port"]) == ("mc_2064", 1)), None)
+    raw, why = read_run(str(Path(results) / "mc_2064.csv"))
+    if row is None or row["room_proxy"] is None or raw is None:
+        return lines + ["Case not evaluable: " + (why or "proxy data unavailable"), ""]
+    own = [r for r in raw if r["port"] == 1]
+    first = next((i for i, r in enumerate(own) if r["fired"]), None)
+    if first is None:
+        return lines + ["Case not evaluable: first FIRE unavailable.", ""]
+    lines += [f"Observed silent pulses: **{row['observed_silent']}**; ceiling estimate: **{row['ceiling_count']}**.",
+              f"The unchanged gap is `{row['gap_proxy']:.12g}` doses; `room_proxy = {row['room_proxy']:.12g} > 0`.",
+              f"The dose estimate `{row['d0_proxy']:.12g}` and dispersion `{row['b_sample']:.12g}`",
+              f"come from only **{row['dose_samples']} consecutive-silent-peak ratios**.", "",
+              "Directly recorded values, from [the original CSV](results/mc_2064.csv):", "",
+              "| Pulse index | Fires | Main swing (V) | End storage voltage (V) | Storage drop (mV) | FIRE latency (model units) |",
+              "|---|---|---:|---:|---:|---:|"]
+    for x in own[:first + 1]:
+        latency = "—" if x["lat"] is None else f"{x['lat']:.5f}"
+        lines.append(f"| {x['pulse']} | {x['fired']} | {VR0-x['vq_min']:.5f} | {x['v'][1]:.7f} | "
+                     f"{x['step'][1]:.5f} | {latency} |")
+    lines += ["",
+              "The peak ratios sample transitions after the first two silent pulses. The third silent write is",
+              "the transition to the first FIRE and is absent from that estimator: the following",
+              "peak belongs to a firing period with protection, rather than an uncut silent read.",
+              "Its recorded storage-voltage drop is larger than either preceding drop, but these",
+              "are noisy voltage averages without an independent log-gain calibration. This does",
+              "not establish that a larger actual dose caused the early FIRE.", "",
+              f"The median firing-swing proxy is `{row['trip_proxy']:.5f} V`; the first firing-period",
+              f"swing is `{VR0-own[first]['vq_min']:.5f} V`. Neither is a direct threshold-at-contact",
+              "measurement. Substituting the latter into the estimator would change the analysis",
+              "after seeing its answer, so it is not done.", "",
+              "The summaries therefore expose a missing final-write log-gain measurement and an uncalibrated",
+              "threshold proxy, but do not distinguish their effects or identify a physical cause.",
+              "Resolving that attribution requires independently calibrated gain/current and",
+              "threshold/contact traces. No new simulation or fitted correction is used here.", ""]
+    return lines
+
+
+def render(rows, digest, results):
     def count(status, agrees):
         return sum(r["proxy_passes"] is status and r["count_agrees"] is agrees for r in rows)
 
@@ -133,14 +177,37 @@ def render(rows, digest):
     for status, label in ((True, "Passes"), (False, "Fails"), (None, "Missing dispersion")):
         lines.append(f"| {label} | {count(status, True)} | {count(status, False)} |")
     lines += ["", f"Ports without a ceiling comparison: {missing}.", "",
+              f"Among the {count(False, True) + count(False, False)} ports outside the proxy room criterion,",
+              f"**{count(False, True)} counts are exact and {count(False, False)} disagree**.",
+              "Correct counts outside a sufficient region are allowed. This is consistent with",
+              "a conservative criterion, but does not validate the unmeasured hypotheses or turn",
+              "the proxy into a guarantee for the ports inside it.", "",
               f"Ceiling disagreements passing the proxy criterion: {len(passed_disagree)} of {len(disagree)}.",
               "Thus even this optimistic surrogate does **not** give a perfect separation.", "",
+              "Terminology: these are the ten disagreements of the retrospective ceiling-of-gap",
+              "comparison, not ten failures of P6. The original P6 predicts a stop after 2 to 8",
+              "silent pulses (within 10 pulses); its single count-range exception is identified below.", "",
               "| Run | Port | Observed silent | Ceiling | `a_proxy` | `b_sample` | `room_proxy` | Passes |",
               "|---|---:|---:|---:|---:|---:|---:|---|"]
     for r in disagree:
         vals = ["missing" if r[k] is None else f"{r[k]:.9g}" for k in ("a_proxy", "b_sample", "room_proxy")]
         lines.append(f"| {r['run']} | {r['port']} | {r['observed_silent']} | {r['ceiling_count']} | "
                      + " | ".join(vals) + f" | {r['proxy_passes']} |")
+    outside = [r for r in disagree if r["proxy_passes"] is False]
+    label = lambda r: f"`{r['run']}`, port {r['port']}"
+    lines += ["", f"**Outside room ({len(outside)}):** " + "; ".join(map(label, outside)) + ".",
+              f"**Inside room ({len(passed_disagree)}):** " + "; ".join(map(label, passed_disagree)) + ".", "",
+              "## Missing dispersion: not evaluable", ""]
+    for r in rows:
+        if r["dose_samples"] == 0:
+            lines += [f"**{label(r)}: not evaluable.** It has {r['observed_silent']} silent pulse and therefore",
+                      "no pair of consecutive silent peaks from which to estimate dose dispersion.",
+                      "The pooled dose only supplies the historical ceiling; `b_sample`, `room_proxy`",
+                      "and the proxy decision remain missing, not zero. Its observed count is",
+                      f"`{r['observed_silent']}` and ceiling is `{r['ceiling_count']}`: they agree.", ""]
+    p6 = [r for r in rows if r["observed_silent"] is not None and not 2 <= r["observed_silent"] <= 8]
+    lines += ["Original P6 count-range exceptions: " + "; ".join(map(label, p6)) + ".", ""]
+    lines += case_study(rows, results)
     lines += ["", "## Why this is not a test of the theorem's boundary", "",
               "- `trip` uses the same campaign's firing outcomes; the dose estimator is selected by",
               "  which pulses stayed silent. These are retrospective, outcome-dependent estimates.",
@@ -172,7 +239,7 @@ def main():
         # Round for portable report diffs; classification uses unrounded values.
         writer.writerows({k: format(v, ".12g") if isinstance(v, float) else v
                           for k, v in row.items()} for row in rows)
-    (args.out / "NEED_BUDGET.md").write_text(render(rows, digest))
+    (args.out / "NEED_BUDGET.md").write_text(render(rows, digest, args.results))
     print(f"Reported {len(rows)} planned ports; no full theorem qualification is inferred.")
 
 

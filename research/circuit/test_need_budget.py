@@ -46,6 +46,19 @@ class NeedBudgetTests(unittest.TestCase):
         self.assertFalse(row["count_agrees"])
         self.assertEqual(row["qualification"], "not_evaluable")
 
+    def test_cohorts_and_missing_port_remain_explicit_in_report(self):
+        results = Path(__file__).parent / "results"
+        rows, digest = need_budget.analyze(results)
+        report = need_budget.render(rows, digest, results)
+        self.assertIn("**96 counts are exact and 9 disagree**", report)
+        self.assertIn("**Outside room (9):**", report)
+        self.assertIn("**Inside room (1):** `mc_2064`, port 1", report)
+        self.assertIn("**`mc_2027`, port 2: not evaluable.**", report)
+        self.assertIn("**Cause not identified from the committed summary data.**", report)
+        missing = next(r for r in rows if (r["run"], r["port"]) == ("mc_2027", 2))
+        self.assertIn("only one silent peak", missing["missing_reason"])
+        self.assertIsNone(missing["room_proxy"])
+
     def test_scale_of_voltage_proxy_cancels(self):
         x = need_budget.proxy_budget(0.8, 1, [0.039, 0.041])
         y = need_budget.proxy_budget(0.4, 0.5, [0.039, 0.041])
