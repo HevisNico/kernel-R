@@ -24,8 +24,8 @@ removes two causes of this.
   those two levels. A slower cell takes longer and learns the same
   amount.
 - **When to stop.** A cell trained with identical pulses stops learning
-  by itself the moment it starts to fire. No memory value is tuned by
-  hand.
+  by itself once its gain supports firing from rest. No final memory
+  value is tuned by hand.
 
 Everything below is a theorem checked by a computer, or a numerical
 result marked as such.
@@ -111,13 +111,19 @@ variation and ±5% on both ERROR thresholds and on the FIRE level.
 
 ### 2. Training stops by itself
 
-*Send the same pulse again and again. The cell stops learning when it
-starts to fire.*
+*Send the same pulse again and again. The cell reaches a gain that fires
+from rest and stops changing.*
 
 A pulse that leaves the cell silent writes one dose. A pulse that makes
 it fire writes nothing, because the write phase then falls inside the
 refractory period. Training therefore ends at a gain set by the cell's
-own firing level. No gain and no firing level is set by hand.
+own firing level. The final gain is not prescribed; the firing level is
+a fixed per-cell parameter within the theorem's band.
+
+The first FIRE need not be the final stop: residual charge can let a
+pulse fire before the gain is sufficient from exact rest. A later pulse
+can then be silent and write again. The stopping theorem accounts for
+this case.
 
 After training two ports, one pulse on each reads the cell, in either
 order, at most a quarter of a unit apart. The cell fires later than
@@ -167,8 +173,9 @@ same firing dates in each cell.
   gains and firing levels are trained as in result 2. Their two read
   FIRE dates are closer than 0.15 units exactly when the two cells are
   read at the same date, among offsets of −0.3, 0 and +0.3 units. The
-  decision still holds when each cell acts with its own lag, for lags
-  within 3/100 of a unit of each other.
+  decision still holds if each cell's read FIRE date is observed with
+  an additive lag, for lags within 3/100 of a unit of each other. This
+  is a condition on observed dates, not a circuit-delay model.
 - **Against a fixed-current write.** On a registered timing task, Kernel
   R gives the expected decision in every complete run. A write that
   applies a fixed current for a fixed time fails one admissible trial
@@ -279,13 +286,19 @@ More in the guides: [stop-learning results](research/recursive-learning/native/R
 
 ## Related work
 
-Analog synaptic increments that contain no discharge rate already exist.
-The closest precedent we examined is the switched-capacitor synapse of
-Noack et al., whose step is set by a capacitor ratio and control voltages
-in a clocked circuit. Kernel R integrates a self-timed discharge between
-two state thresholds and machine-checks how the updates compose.
-[Noack et al.](https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00010/full) ·
-[full comparison](docs/RELATED_WORK.md)
+Rate-independent charge increments, stop-learning rules and formal
+verification of spiking networks all have precedents. The closest
+switched-capacitor comparison examined here is Noack et al.; the
+stop-learning comparison also includes Brader et al., earlier analog
+circuits and TEXEL.
+
+Kernel R studies a particular combination: a sensor discharge between
+two state thresholds sets the dose; the post-FIRE protected phase blocks
+the write; Lean connects those dynamics to training, read windows and
+composition of trained cells. The comparison concerns these mechanisms
+and guarantees, rather than a claim to have invented stop-learning or
+to outperform existing chips.
+[Mechanism-by-mechanism comparison and references](docs/RELATED_WORK.md)
 
 ## How to check it
 
