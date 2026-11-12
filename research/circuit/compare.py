@@ -185,10 +185,59 @@ def main(out="COMPLEMENT.md"):
                      + (f", distances from {min(gaps)} to {max(gaps)} periods, mean {statistics.mean(gaps):.1f}." if gaps else "."))
             L.append("")
 
+    # 3c. the charge really received by each integrator
+    L += ["## The charge received by the integrator", "",
+          "P10 checks the steering command. Here the current itself is measured: an ammeter of 0 V between the steering switch and the "
+          "summing node of each integrator, integrated over each whole period (`gate_current.py`). "
+          "A charge of 40.4 fC on the feedback capacitor of 30 pF is one dose, 1.3465 mV.", ""]
+    gate = sorted(f[:-4] for f in os.listdir("results_gate") if f.endswith(".csv")) if os.path.isdir("results_gate") else []
+    if not gate:
+        L.append("Not evaluable: no run.")
+    else:
+        L += ["Charges in fC. For a pulse on both ports, both integrators are counted.", "",
+              "| Run | Silent pulses | Charge on a silent pulse | Firing pulses | Charge on a firing pulse: mean | largest in size | Periods at rest | Charge at rest: mean |",
+              "|---|---|---|---|---|---|---|---|"]
+        worst, steps_f, steps_r = {False: [], True: []}, [], []
+        for n in gate:
+            rr = rows(f"results_gate/{n}.csv")
+            sil, fir, rest = [], [], []
+            noisy = n.startswith(("mc_", "nz_"))
+            for x in rr:
+                q, s = (None, float(x["charge1_fC"]), float(x["charge2_fC"])), (None, float(x["step1_mV"]), float(x["step2_mV"]))
+                for port in (1, 2):
+                    if x["port"] in (str(port), "0"):
+                        (fir if x["fired"] == "1" else sil).append(q[port])
+                        if x["fired"] == "1" and not noisy:
+                            steps_f.append(s[port])
+                    else:
+                        rest.append(q[port])
+                        if not noisy:
+                            steps_r.append(s[port])
+            worst[noisy] += [abs(q) for q in fir]
+            m = lambda v, spec=".4f": format(statistics.mean(v), spec) if v else DASH
+            L.append(f"| `{n}` | {len(sil)} | " + (f"{min(sil):.2f} to {max(sil):.2f}" if sil else DASH) + f" | {len(fir)} | {m(fir)} | "
+                     + (f"{max(abs(q) for q in fir):.4f}" if fir else DASH) + f" | {len(rest)} | {m(rest)} |")
+        L.append("")
+        for noisy, label in ((False, "without noise"), (True, "with mismatch and noise")):
+            if worst[noisy]:
+                L.append(f"- Largest charge received by an integrator on a firing pulse, runs {label}: {max(worst[noisy]):.4f} fC, "
+                         f"{100 * max(worst[noisy]) / 40.395:.2f}% of a dose, over {len(worst[noisy])} firing pulses.")
+        L += [
+              "- The current of the ammeter alternates in sign from one time point to the next, an effect of trapezoidal integration. "
+              "It limits this measure: the same effect spreads the charge of a silent pulse around one dose, and more so with noise.",
+              "- The stored voltage integrates the same current exactly. In these runs it is averaged from the time points, without the rounding "
+              "to 1 µV of the campaign. The solver resolves a voltage to 0.1 µV."]
+        if steps_f and steps_r:
+            L.append(f"- In the runs without noise, the mean change of the stored voltage over a period, toward a higher gain, is "
+                     f"{1e3 * statistics.mean(steps_f):+.2f} µV on a firing pulse and {1e3 * statistics.mean(steps_r):+.2f} µV for a port at rest. "
+                     f"A dose is 1346.5 µV.")
+    L.append("")
+
     # 4. are the noise samples of the campaign independent of each other?
-    L += ["## Independence of the noise samples of the campaign", "",
+    L += ["## Do two runs of the campaign share a noise sample?", "",
           "If two runs had the same noise sample, the changes of the stored voltage of their ports at rest would be the same. "
-          "For every pair of noisy cell runs of the campaign, the correlation of these 20 changes is computed.", ""]
+          "For every pair of noisy cell runs of the campaign, the correlation of these 20 changes is computed. "
+          "This diagnostic can show a shared sample. It cannot prove that the samples are independent.", ""]
     idle = {}
     for path in sorted(os.listdir("results")) if os.path.isdir("results") else []:
         if path.startswith(("nz_", "mc_")) and path.endswith(".csv"):
@@ -203,7 +252,8 @@ def main(out="COMPLEMENT.md"):
         top = max(cs)
         L += [f"- {len(names)} runs, {len(cs)} pairs.",
               f"- Largest correlation: {top[0]:.2f}, between `{top[1]}` and `{top[2]}`. Pairs above 0.9: {sum(1 for x in cs if x[0] > 0.9)}.",
-              f"- For independent samples of 20 values the largest of {len(cs)} correlations is expected near {expected_largest(len(cs), 20):.2f}."]
+              f"- For independent samples of 20 values the largest of {len(cs)} correlations is expected near {expected_largest(len(cs), 20):.2f}.",
+              "- No sign of a noise sample used twice in this diagnostic." if top[0] < 0.9 else "- A pair of runs is correlated as a shared noise sample would be."]
     L.append("")
     with open(out, "w") as fh:
         fh.write("\n".join(L))

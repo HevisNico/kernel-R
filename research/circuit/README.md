@@ -43,7 +43,8 @@ fail**. The table of verdicts is in [`VERDICTS.md`](VERDICTS.md).
 | Does the nominal cell stop? | Each port is silent for 4 pulses, then fires on the 6 that follow. Each silent pulse writes 1.346 to 1.347 mV. A firing pulse moves the stored voltage by 0.001 mV at most |
 | Does noise move the stop? | No: 4 silent pulses on both ports in 20 runs of 20 |
 | Do cells with mismatch and noise stop? | All 200 ports of 100 cells stop, after 1 to 6 silent pulses |
-| Does a firing pulse write? | No: the sensor current is never steered to the integrator on any of the 3 526 firing pulses of the campaign |
+| Does a firing pulse write? | The steering switch to the integrator is never turned on, on any of the 3 526 firing pulses of the campaign. The charge that the integrator receives was measured afterwards on five runs: at most 0.03 fC on a firing pulse without noise, 0.07% of a dose, and at most 0.23 fC with mismatch and noise, 0.56% of a dose |
+| Is the write itself noisy? | Not resolved. A silent step (sigma 0.070 mV) is not noisier than the change of a port at rest (0.071 mV), so the noise of the write is hidden by the noise of the read. Its 95% interval ends at 0.037 mV, 2.7% of a dose |
 | Do the cells read alike? | All 100 cells fire on the joint pulse, between 0.2595 and 0.2730, sigma 0.0029. Every pair of cells is within 0.05 |
 | Does a port fall silent again after its stop? | 9 ports of 200 have one silent pulse after their first FIRE. All 9 first fired later than 0.97, at the very end of the pulse. None does it twice |
 | Corners and temperature | The cell stops at ss, ff, sf, fs, at −40 °C and at 125 °C, after 4, 4, 4, 4, 2 and 7 silent pulses. Joint read from 0.2635 to 0.2705 |
@@ -109,8 +110,10 @@ every port. One port of 200 stops after 1 silent pulse.
 - **A noisy run is not.** Its seed sets its mismatch sample and not its
   noise. Run again with the same seed, it draws another noise sample.
   The seeds stay in the list of runs, but they do not replay the noise.
-- **The noise samples of the campaign are independent.** No two of its
-  120 noisy cell runs share one.
+- **No sign that two runs share a noise sample.** In one diagnostic on
+  the 120 noisy cell runs of the campaign, no pair of runs shows the
+  correlation that a shared sample would give. This does not prove that
+  the samples are independent.
 - **Running the campaign again gives other runs from the same
   distribution.** What should come out again is the verdicts and the
   orders of magnitude, not each run.
@@ -136,10 +139,10 @@ folder yet. `COMPLEMENT.md` marks them as missing.
 | [`campaign.py`](campaign.py) | The list of runs of the campaign, and its launcher |
 | [`analyze.py`](analyze.py) | Applies the guard, gives a status to each prediction, draws the figures |
 | [`test_analyze.py`](test_analyze.py) | Tests of the analysis on synthetic campaigns |
-| [`complement.py`](complement.py), [`compare.py`](compare.py) | The runs of the complement and their comparison with the campaign |
+| [`complement.py`](complement.py), [`gate_current.py`](gate_current.py), [`compare.py`](compare.py) | The runs of the complement and their comparison with the campaign |
 | [`noise.py`](noise.py), [`noise.json`](noise.json) | Noise analysis of each block and the levels injected |
 | `results/` | The campaign: one file per run, one row per pulse |
-| `results_rel*/`, `results_rep*/`, `results_check/` | The complement: replays, repeats, and runs without noise run again |
+| `results_rel*/`, `results_rep*/`, `results_check/`, `results_gate/` | The complement: replays, repeats, runs without noise run again, and the charge received by the integrator |
 
 ## Method
 
@@ -199,7 +202,8 @@ What follows was done afterwards.
 - **Observations were added** to the report: the dose in log-gain and
   the start gap of each port. They are not predictions.
 - **A complement was run:** replays with the same seeds, repeats of
-  the noisy runs, and runs without noise once more. `run.py` got an option that prints each time
+  the noisy runs, runs without noise once more, and five runs with an
+  ammeter in front of each integrator. `run.py` got an option that prints each time
   from the start of its pulse. Without the option it gives the same
   result as the campaign, byte for byte, on the nominal run.
 

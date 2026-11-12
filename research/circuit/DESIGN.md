@@ -239,8 +239,9 @@ its noise is injected in the transient at its input.
 - **The seed of a run sets its mismatch sample, not its noise.** Run
   again with the same seed, a noisy run draws another noise sample.
   This was found after the campaign, by replaying 24 runs
-  ([`COMPLEMENT.md`](COMPLEMENT.md)). The noise samples of the campaign
-  are independent of each other. A noisy run of the campaign cannot be
+  ([`COMPLEMENT.md`](COMPLEMENT.md)). A diagnostic on the campaign shows
+  no sign that two runs share a noise sample; it does not prove that
+  the samples are independent. A noisy run of the campaign cannot be
   reproduced exactly. Three ways of seeding the simulator were tried on
   a short run: the `setseed` command, the `seed` option in the netlist,
   and `rndseed` in the start file. None makes the noise reproducible.
