@@ -5,10 +5,10 @@ Written by `bridge_application.py` from the pushed results. Theorem: `needAlong_
 
 ## Summary
 
-1. **Certified:** the theorem, the lemma `ChargeWindow.local_slope_step` that bounds the calibration error by `epsilon` times the step, and their audits: no `sorry`, no project axiom, seven negative controls rejected.
+1. **Certified:** the theorem, its cumulative variant `needAlong_of_cumulative_tolerance`, the lemma `ChargeWindow.local_slope_step` that bounds the calibration error by `epsilon` times the step, and their audits: no `sorry`, no project axiom, eight negative controls rejected.
 2. **Verified on the five replays:** the rest band (105 of 105 states), one FIRE of the latch per read, one write per silent pulse and none on a firing pulse.
-3. **Supported, on the replays only:** `k*eta`, `sigma` and `e`. On the nominal replays their sum is 5.0e-03 per write, a quarter of `d0/2`; with noise `e` is larger and is a statistic.
-4. **Not certified:** no port of the 100 cells is in the certified domain. 0 of 200: the original trajectories have no waveform, `a` and `d0` are proxies, and `ell` is measured for one cell.
+3. **Supported, on the replays only:** `k*eta`, `sigma` and `e`. On the nominal replays their sum is 5.0e-03 per write, a quarter of `d0/2`, half of it calibration error. `m*b` is the largest term of the budget on 180 ports; for the median port `b` would have to be divided by 2.0.
+4. **Not certified:** no port of the 100 cells is in the certified domain, 0 of 200: the original trajectories have no waveform, `a` and `d0` are proxies, `ell` is measured for one cell. Under estimates only, the room is positive on 19 ports with the per-write budget and on 69 with the cumulative budget; the observed count equals `m` on all of them.
 5. **`mc_2064`, port 1:** historical room +0.000233 with `ell = 0`; -0.000100 with `ell_static` measured on the cell. Its count stays 3 against `m` = 4, and its historical status is not changed. The three replays of its mismatch seed give 4.
 
 ## Hypotheses
@@ -250,3 +250,11 @@ The full table is [`bridge_ports.csv`](bridge_ports.csv). The historical columns
 | `mc_2099` | 2 | 4 | 5 | no | -0.02266 | — | no | no waveform; proxies; ell not measured; historical room not positive |
 | `mc_2100` | 1 | 5 | 5 | yes | +0.00202 | — | no | no waveform; proxies; ell not measured |
 | `mc_2100` | 2 | 3 | 3 | yes | +0.00554 | — | no | no waveform; proxies; ell not measured |
+
+## After this result: a new rule
+
+The result above, no port in the certified domain, is not changed by what follows. [`bridge_check/CUMULATIVE_PROTOCOL.md`](bridge_check/CUMULATIVE_PROTOCOL.md) was declared after it and pushed before its numbers were computed. The numbers are in [`bridge_check/CUMULATIVE_RESULTS.md`](bridge_check/CUMULATIVE_RESULTS.md).
+
+- **Which term fails.** With `b` = 0.00499 per write, measured on the nominal replays, `m*b` is the largest term on 180 ports and `a` on 20. The room is positive on 19 ports under these estimates. The port with the largest room is `mc_2084`, port 1: +0.01048. For the median port `b` would have to be divided by 2.0.
+- **Cumulative budget.** With the cumulated gain read on the stored voltage of each original run, 69 ports are inside under estimates, 128 outside, 3 not evaluable. The observed count disagrees with `m` on 0 of the ports inside. The median `B` is 0.01376, of which 0.01050 is calibration: the calibration error is proportional to the cumulated step, so reading the cumulated gain does not reduce it.
+- **Neither is a certificate.** `a` and `d0` are peak-based proxies, `ell` is measured for one cell, the calibration is that of nominal devices, and the scalar read equation is not established.

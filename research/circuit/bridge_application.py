@@ -15,6 +15,7 @@ B = ROOT / "bridge_check"
 def main():
     local = json.loads((B / "local_summary.json").read_text())
     level = json.loads((B / "level_summary.json").read_text())
+    cum = json.loads((B / "cumulative_summary.json").read_text())
     with (B / "rest_samples.csv").open(newline="") as fh:
         rest = list(csv.DictReader(fh))
     with (ROOT / "need_budget_ports.csv").open(newline="") as fh:
@@ -123,11 +124,14 @@ def main():
          "Written by `bridge_application.py` from the pushed results. Theorem: `needAlong_of_circuit_tolerances` in",
          "[`lean/CircuitNeed.lean`](lean/CircuitNeed.lean), the variant of `needAlong_of_circuit_residual` with `sigma` and `e`.", "",
          "## Summary", "",
-         "1. **Certified:** the theorem, the lemma `ChargeWindow.local_slope_step` that bounds the calibration error by `epsilon` times the step, "
-         "and their audits: no `sorry`, no project axiom, seven negative controls rejected.",
+         "1. **Certified:** the theorem, its cumulative variant `needAlong_of_cumulative_tolerance`, the lemma `ChargeWindow.local_slope_step` that bounds "
+         "the calibration error by `epsilon` times the step, and their audits: no `sorry`, no project axiom, eight negative controls rejected.",
          f"2. **Verified on the five replays:** the rest band ({inside} of {len(rest)} states), one FIRE of the latch per read, one write per silent pulse and none on a firing pulse.",
-         f"3. **Supported, on the replays only:** `k*eta`, `sigma` and `e`. On the nominal replays their sum is {b_nom:.1e} per write, a quarter of `d0/2`; with noise `e` is larger and is a statistic.",
-         f"4. **Not certified:** no port of the 100 cells is in the certified domain. 0 of {len(rows)}: the original trajectories have no waveform, `a` and `d0` are proxies, and `ell` is measured for one cell.",
+         f"3. **Supported, on the replays only:** `k*eta`, `sigma` and `e`. On the nominal replays their sum is {b_nom:.1e} per write, a quarter of `d0/2`, half of it calibration error. "
+         f"`m*b` is the largest term of the budget on {cum['per_write']['largest_term_counts'].get('m*b', 0)} ports; for the median port `b` would have to be divided by {cum['per_write']['median_b_over_b_max']:.1f}.",
+         f"4. **Not certified:** no port of the 100 cells is in the certified domain, 0 of {len(rows)}: the original trajectories have no waveform, `a` and `d0` are proxies, `ell` is measured for one cell. "
+         f"Under estimates only, the room is positive on {cum['per_write']['positive_room']} ports with the per-write budget and on {cum['cumulative']['inside']} with the cumulative budget; "
+         f"the observed count equals `m` on all of them.",
          f"5. **`mc_2064`, port 1:** historical room {p1['room_historical_ell_0']:+.6f} with `ell = 0`; {p1['room_with_ell_static']:+.6f} with `ell_static` measured on the cell. "
          f"Its count stays {p1['observed_silent']} against `m` = {p1['m']}, and its historical status is not changed. The three replays of its mismatch seed give 4.", "",
          "## Hypotheses", "",
@@ -151,7 +155,21 @@ def main():
         hist = "—" if r["room_historical_ell_0"] == "" else f"{float(r['room_historical_ell_0']):+.5f}"
         stat = "—" if r["room_with_ell_static"] == "" else f"{float(r['room_with_ell_static']):+.5f}"
         L.append(f"| `{r['run']}` | {r['port']} | {r['observed_silent']} | {r['m']} | {'yes' if r['count_agrees'] == 'True' else 'no'} | {hist} | {stat} | no | {why} |")
-    L.append("")
+    L += ["", "## After this result: a new rule", "",
+          "The result above, no port in the certified domain, is not changed by what follows. "
+          "[`bridge_check/CUMULATIVE_PROTOCOL.md`](bridge_check/CUMULATIVE_PROTOCOL.md) was declared after it and pushed before its numbers were computed. "
+          "The numbers are in [`bridge_check/CUMULATIVE_RESULTS.md`](bridge_check/CUMULATIVE_RESULTS.md).", "",
+          f"- **Which term fails.** With `b` = {cum['b']:.5f} per write, measured on the nominal replays, `m*b` is the largest term on "
+          f"{cum['per_write']['largest_term_counts'].get('m*b', 0)} ports and `a` on {cum['per_write']['largest_term_counts'].get('a', 0)}. "
+          f"The room is positive on {cum['per_write']['positive_room']} ports under these estimates. The port with the largest room is "
+          f"`{cum['per_write']['closest']['run']}`, port {cum['per_write']['closest']['port']}: {cum['per_write']['closest']['room']:+.5f}. "
+          f"For the median port `b` would have to be divided by {cum['per_write']['median_b_over_b_max']:.1f}.",
+          f"- **Cumulative budget.** With the cumulated gain read on the stored voltage of each original run, {cum['cumulative']['inside']} ports are inside under estimates, "
+          f"{cum['cumulative']['status'].get('outside the sufficient region', 0)} outside, {cum['cumulative']['status'].get('not evaluable', 0)} not evaluable. "
+          f"The observed count disagrees with `m` on {len(cum['cumulative']['inside_disagree'])} of the ports inside. "
+          f"The median `B` is {cum['cumulative']['median_B']:.5f}, of which {cum['cumulative']['median_B_calibration']:.5f} is calibration: "
+          "the calibration error is proportional to the cumulated step, so reading the cumulated gain does not reduce it.",
+          "- **Neither is a certificate.** `a` and `d0` are peak-based proxies, `ell` is measured for one cell, the calibration is that of nominal devices, and the scalar read equation is not established.", ""]
     (ROOT / "BRIDGE_APPLICATION.md").write_text("\n".join(L))
     print("\n".join(L[:9 + len(H) + 12]))
 
