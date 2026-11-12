@@ -20,6 +20,6 @@ run_cmd do
     for ax in ← collectAxioms name do
       unless allowed.contains ax do throwError "Unexpected axiom {ax} in {name}"
     if info.isTheorem then theorems := theorems + 1
-  if modules < 9 then throwError "Incomplete module audit: {modules}"
+  if modules < 10 then throwError "Incomplete module audit: {modules}"
   if theorems == 0 then throwError "No project theorems found"
   logInfo m!"Audit passed: {candidates.size} declarations, {theorems} theorems, {modules} modules."

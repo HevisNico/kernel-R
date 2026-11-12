@@ -95,7 +95,7 @@ def main():
         with tempfile.TemporaryDirectory(prefix=".adaptive-negative-", dir=HERE.parent) as td:
             folder = Path(td)
             shutil.copytree(HERE, folder, dirs_exist_ok=True, ignore=shutil.ignore_patterns(
-                ".lake", "__pycache__", "validation.json", "adaptive-validation.json"))
+                ".lake", "physical", "__pycache__", "validation.json", "adaptive-validation.json"))
             mutate(folder)
             code, log = verify.build(lake, folder)
             diagnostic = re.search(r"error: ReusableController/" + re.escape(marker) + r":\d+:\d+:", log)

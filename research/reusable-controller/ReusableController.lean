@@ -5,3 +5,4 @@ import ReusableController.NoisySearch
 import ReusableController.Selection
 import ReusableController.AdaptiveSystem
 import ReusableController.AdaptiveExamples
+import ReusableController.SecondBenchmark

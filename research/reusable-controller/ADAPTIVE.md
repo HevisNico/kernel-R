@@ -119,6 +119,32 @@ separable learner, not an order-dependent physical learner or universal
 superiority. With exact evaluation and enough fuel, both orders can reach
 the same minimum.
 
+## Second benchmark: a different winner and objective sensitivity
+
+[SecondBenchmark.lean](ReusableController/SecondBenchmark.lean) uses needs
+`(2,3)`, initial lesson `(10,6)`, twelve probes, overhead two, and two lesson
+uses per episode. Its margin error repeats `-1,+1,+1`; every reading has
+nonzero error. The complete family contains all four order/stopping choices.
+
+| Policy | True cost | Report | Validation charge |
+|---|---:|---:|---:|
+| Practice first, continue (initial) | 167 | 166 | 170 |
+| Preparation first, continue | 157 | 156 | 160 |
+| Practice first, stop on ambiguity | 123 | 122 | 126 |
+| Preparation first, stop on ambiguity | 118 | 119 | 121 |
+
+There are three validated adoptions. Preparation-first with early stopping
+wins, unlike the first benchmark. It retains `(4,6)` after six accepted edits
+and seven probes, with 84 trial pulses. Selection costs 577; live work costs
+98; their sum is 675. `amortization_exact_threshold` proves that selection
+breaks even **if and only if** at least twelve episodes are used. The explicit
+live-first accounting gives `1993 <= 2004` for twelve episodes.
+
+Changing the deployment count to twenty changes the objective. The four costs
+become 293, 265, 321 and 298: preparation-first with continued search now wins.
+This illustrates why a policy must be revalidated when the benchmark changes.
+These are two constructed examples, not a statistical generalization claim.
+
 ## What remains open
 
 - Accuracy is proved for the executable example and assumed in the general

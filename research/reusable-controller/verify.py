@@ -18,7 +18,8 @@ HERE = Path(__file__).resolve().parent
 
 def source_hashes():
     paths = sorted(HERE.rglob("*.lean"))
-    paths = [p for p in paths if ".lake" not in p.relative_to(HERE).parts]
+    # The nested physical adapter is a separate Mathlib package with its own audit.
+    paths = [p for p in paths if not {".lake", "physical"}.intersection(p.relative_to(HERE).parts)]
     paths += [HERE / "lakefile.toml", HERE / "lean-toolchain", HERE / "verify.py",
               HERE.parent / "recursive-learning/RecursiveLearning/Model.lean"]
     return {str(p.relative_to(HERE)) if p.is_relative_to(HERE) else
@@ -94,7 +95,7 @@ def main():
         with tempfile.TemporaryDirectory(prefix=".controller-negative-", dir=HERE.parent) as td:
             folder = Path(td)
             shutil.copytree(HERE, folder, dirs_exist_ok=True,
-                            ignore=shutil.ignore_patterns(".lake", "__pycache__", "validation.json"))
+                            ignore=shutil.ignore_patterns(".lake", "physical", "__pycache__", "validation.json"))
             mutate(folder)
             code, log = build(lake, folder)
             diagnostic = re.search(r"error: ReusableController/Proofs\.lean:\d+:\d+:", log)
