@@ -6,6 +6,7 @@ on:
     paths:
       - research/recursive-learning/**
       - research/reusable-controller/verify_native_return.py
+      - research/reusable-controller/verify_native_reprepare.py
       - proof/lean/**
       - .github/workflows/recursive-learning.yml
       - .github/actions/build-lean/**
@@ -13,6 +14,7 @@ on:
     paths:
       - research/recursive-learning/**
       - research/reusable-controller/verify_native_return.py
+      - research/reusable-controller/verify_native_reprepare.py
       - proof/lean/**
       - .github/workflows/recursive-learning.yml
       - .github/actions/build-lean/**
@@ -48,4 +50,11 @@ jobs:
         with:
           name: native-return-validation
           path: ${{ runner.temp }}/native-return-validation.json
+          if-no-files-found: error
+      - name: Reject native re-preparation semantic mutations
+        run: python -B research/reusable-controller/verify_native_reprepare.py --report "$RUNNER_TEMP/native-reprepare-validation.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-reprepare-validation
+          path: ${{ runner.temp }}/native-reprepare-validation.json
           if-no-files-found: error

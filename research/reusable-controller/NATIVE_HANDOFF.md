@@ -2,8 +2,10 @@
 
 This is a specification and source review, **not a proved native controller bridge**.
 The reference is Kernel R commit `518852d237dd4d45eda2c2b85aaad2e592bfdf89`.
-The [read-to-rest checkpoint](NATIVE_RETURN.md) now constructs one native
-continuation. M2 remains open until re-preparation and its input costs close.
+The [read-to-rest checkpoint](NATIVE_RETURN.md) and
+[finite re-preparation proof](NATIVE_REPREPARE.md) close the minimal M2
+continuation with three new input deliveries and explicit prepared resources.
+This is not autonomous multi-round reuse or a realization of M1.
 
 ## Why the existing cycle cannot simply be iterated
 
@@ -47,7 +49,7 @@ Preparation from birth would be a separate theorem.
 | Target | Required evidence |
 |---|---|
 | Read-to-rest continuation | Constructed for both values with positive recovery, quiet sensors and an empty queue; see [the checked scope](NATIVE_RETURN.md). Initial preparation and physical invariants remain explicit |
-| Re-preparation | Reach the next read/precharge bands from the resulting state, using real input tokens and counting their costs |
+| Re-preparation | Constructed for either selector value with one initially queued ignition and two routed inputs; exactly three new deliveries; see [scope and assumptions](NATIVE_REPREPARE.md) |
 | Fixed-router reuse | Distinguish ignition, work, read and feedback events for multiple rounds without replacing the router or predetermining the validation outcomes |
 | Acceptance and rejection | Actual learner reports decide whether the candidate is committed; rejection keeps the accepted lesson and permits the other coordinate |
 | Decode refinement | The decoded native endpoints implement `round`, with an explicit map for unavailable decrements and halting |
@@ -55,7 +57,8 @@ Preparation from birth would be a separate theorem.
 | Iteration | Compose the native rounds under the same router, with an explicit resource budget and complete witnesses |
 
 The discrete convergence theorem does not discharge any row of this table.
-The native return proof discharges only the first row under its stated premises.
+The native return and re-preparation proofs discharge the first two rows
+under their stated premises, for a finite externally initialized programme.
 Finite complete witnesses must precede a universal comparison claim; comparing
 only complete runs is not an existence or progress argument. Threshold-contact
 and geometric-crossing hypotheses must be retained when using that semantics.
@@ -74,6 +77,8 @@ blocked-bit invariant and optimality proof must be reconsidered.
 
 No claim is made here about an unbounded number of strict improvements,
 learned search strategies, recurrent-network learning, or transistor-level
-correspondence. The current milestone remains the physical read-to-rest and
-re-preparation continuation. Do not advance to fixed-router reuse while its
-re-preparation, source-admission and cost obligations remain open.
+correspondence. The next discrete milestone is a search controller that
+adjusts its own search rule under an immutable evaluator, validated adoption,
+preserved invariants and explicit budgets. It remains separate from the open
+native refinement obligations above. See the [next gate](NATIVE_REPREPARE.md#next-gate-adaptive-search-still-discrete)
+for the cost and inexact-evaluation conditions that must not be assumed away.

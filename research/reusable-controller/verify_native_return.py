@@ -1,4 +1,4 @@
-"""Check the native read-to-rest sub-obligation; this does not close M2.
+"""Check native read-to-rest; re-preparation has a separate verifier.
 
 Build the native dependencies once, then compile semantic mutations into
 isolated temporary import directories. Original sources/oleans are not changed.
@@ -114,7 +114,7 @@ def main():
             print(name + ": rejected", flush=True)
     if hashes() != before:
         raise RuntimeError("Original sources changed")
-    report = {"lean": version.strip(), "scope": "read-to-rest only; M2 remains open",
+    report = {"lean": version.strip(), "scope": "read-to-rest only; re-preparation checked separately",
               "positive_build": True, "axiom_audit": audit, "negative_controls": results,
               "source_sha256": before}
     if args.report:

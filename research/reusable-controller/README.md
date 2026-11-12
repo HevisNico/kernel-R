@@ -87,9 +87,13 @@ router between proof fragments is not a solution.
 The [native return checkpoint](NATIVE_RETURN.md) now constructs the read's
 FAST/SLOW continuation to rest for positive recovery. It preserves the gains,
 recovery and sensor rest bands and inherits the native physical invariant.
-**M2 remains open:** the returned charge is `1/10`, below the next read's
-required `13/20`. Re-preparation by real inputs and their costs are not proved.
-The subsequent milestones have not started.
+The [minimal M2 continuation](NATIVE_REPREPARE.md) now constructs real
+re-preparation from that rest boundary to the next admitted read for either
+selector value. It charges exactly three new deliveries, preserves the gains
+and uses one fixed router across the finite execution. The external ignition
+token is present in the initial queue; initial gains and recovery are prepared
+resources. Autonomous repeated cycles and native implementation of M1 remain
+open. The next discrete adaptive-search milestone has not started.
 
 ## Reproduce
 

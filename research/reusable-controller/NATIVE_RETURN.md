@@ -1,8 +1,11 @@
-# Read-to-rest checkpoint: M2 remains open
+# Read-to-rest checkpoint
 
 The native [SelectorReturn.lean](../recursive-learning/native/Teaching/SelectorReturn.lean)
 constructs a continuation after either selector read outcome. This closes
 the return sub-obligation, not the whole reusable-round milestone.
+The subsequent [finite re-preparation proof](NATIVE_REPREPARE.md) closes the
+minimal M2 continuation and its input count under explicit initial-resource
+assumptions. This document records the narrower return result.
 
 ## Constructed, checked statements
 
@@ -40,7 +43,7 @@ proves this directly: `1/10` fails the prepared read's lower charge bound
 `13/20`. This prevents a proof from silently treating a returned snapshot
 as a new read-ready snapshot.
 
-## Still required to close M2
+## Obligation discharged by the subsequent M2 proof
 
 Construct actual input admission and precharge from the returned boundary,
 preserving memories, handling every sensor/raw/queue event and charging for
@@ -48,8 +51,10 @@ every required input. Any initial source queue must be explicit; changing
 time, charge or the queue by definition is not a continuation. The starting
 gain and recovery preparation assumptions must remain visible.
 
-No M3, M4 or M5 work is certified by this checkpoint. The whole milestone
-stays unchecked on PR #108 until these remaining obligations are closed.
+[NATIVE_REPREPARE.md](NATIVE_REPREPARE.md) supplies that construction for a
+finite programme with an initially queued ignition token. No autonomous
+multi-round reuse, report/decode refinement or full controller cost theorem
+is certified by this checkpoint.
 
 ## Reproduce and audit
 
