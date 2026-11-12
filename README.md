@@ -256,6 +256,10 @@ bounds stated in their guides.
 
 - **A mathematical model.** Hardware measurements would be needed for
   experimental validation.
+  A [transistor-level simulation of one cell](research/circuit/README.md)
+  is a simulation, not a measurement. Its joint read falls outside the
+  proved window, and it takes the arrival time of each pulse from ideal
+  signals.
 - **Exact quantities.** The pulse amplitude, the unit response and the
   MARK and SILENT levels are those of the model. See the
   [implementation assumptions](model/IMPLEMENTATION_ASSUMPTIONS.md).
@@ -318,7 +322,7 @@ definitions represent the written model.
 |---|---|
 | [`model/`](model/README.md) | Cell laws and the chain protocol |
 | [`proof/lean/`](proof/lean/README.md) | Core Lean development and audit |
-| [`research/`](research/README.md) | Tolerant training, coincidence proofs and benchmark |
+| [`research/`](research/README.md) | Tolerant training, coincidence proofs and benchmark, circuit simulation |
 | [`docs/`](docs/UNIVERSAL_FINITE_CHAIN.md) | Theorem guides, trusted base, provenance |
 | [`archive/`](archive/README.md) | Earlier experiments and specifications |
 

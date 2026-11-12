@@ -1,0 +1,58 @@
+* Building blocks for the R cell circuits (SKY130, 1.8 V)
+* All w and l are in micrometres (.option scale=1e-6 in the top file).
+
+.subckt inv a y vdd vss
+xmp y a vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15
+xmn y a vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=0.15
+.ends
+
+.subckt nand2 a b y vdd vss
+xmp1 y a vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15
+xmp2 y b vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15
+xmn1 y a n1 vss sky130_fd_pr__nfet_01v8 w=0.84 l=0.15
+xmn2 n1 b vss vss sky130_fd_pr__nfet_01v8 w=0.84 l=0.15
+.ends
+
+* Three-input NAND
+.subckt nand3 a b c y vdd vss
+xmp1 y a vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15
+xmp2 y b vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15
+xmp3 y c vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15
+xmn1 y a n1 vss sky130_fd_pr__nfet_01v8 w=1.26 l=0.15
+xmn2 n1 b n2 vss sky130_fd_pr__nfet_01v8 w=1.26 l=0.15
+xmn3 n2 c vss vss sky130_fd_pr__nfet_01v8 w=1.26 l=0.15
+.ends
+
+* SR latch with active-low set and reset
+.subckt srlatch sb rb q qb vdd vss
+x1 sb qb q vdd vss nand2
+x2 rb q qb vdd vss nand2
+.ends
+
+* Two-stage Miller op-amp, PMOS (lvt) input pair. ib sinks the bias current.
+.subckt opamp inp inn out ib vdd vss
+xmb  ib ib vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2
+xmt  tail ib vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2
+xm1  o1m inn tail vdd sky130_fd_pr__pfet_01v8_lvt w=16 l=1
+xm2  o1  inp tail vdd sky130_fd_pr__pfet_01v8_lvt w=16 l=1
+xm3  o1m o1m vss vss sky130_fd_pr__nfet_01v8 w=4 l=2
+xm4  o1  o1m vss vss sky130_fd_pr__nfet_01v8 w=4 l=2
+xm5  out o1 vss vss sky130_fd_pr__nfet_01v8 w=16 l=1
+xm6  out ib vdd vdd sky130_fd_pr__pfet_01v8 w=32 l=2
+rz   o1 oz 4k
+cc   oz out 1.5p
+.ends
+
+* Continuous-time comparator: out is high when inp > inn.
+.subckt comp inp inn out ib vdd vss wc=4 lc=1
+xmb  ib ib vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2
+xmt  tail ib vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=2
+xm1  o1m inn tail vdd sky130_fd_pr__pfet_01v8_lvt w={wc} l={lc}
+xm2  o1  inp tail vdd sky130_fd_pr__pfet_01v8_lvt w={wc} l={lc}
+xm3  o1m o1m vss vss sky130_fd_pr__nfet_01v8 w=2 l=1
+xm4  o1  o1m vss vss sky130_fd_pr__nfet_01v8 w=2 l=1
+xm5  o2 o1 vss vss sky130_fd_pr__nfet_01v8 w=2 l=0.5
+xm6  o2 ib vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=2
+xi1  o2 o3 vdd vss inv
+xi2  o3 out vdd vss inv
+.ends
