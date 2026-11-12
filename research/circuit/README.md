@@ -7,19 +7,33 @@ SkyWater 130 nm process, with ngspice and the open SKY130 device models.
 Nothing here is a proof, and nothing here is a hardware measurement.**
 The Lean proofs of the model are in [`proof/lean/`](../../proof/lean/README.md).
 
+**Status: the campaign is running. This folder holds the method and
+the predictions. It holds no result yet.**
+
 ## Question
 
-Does a cell, left alone with a train of identical pulses, raise its
-gain and stop by itself, with device mismatch and noise? Does it hold
-its gain when the stored voltage leaks?
+Does a cell that receives a train of identical pulses raise its gain
+and stop by itself, with device mismatch and noise? Does it hold its
+gain when the stored voltage leaks?
 
 ## What this does not test
 
-Two trained ports of this circuit fire together near 0.267 time units.
-The window proved for the ideal model is (0.239, 0.2554]. The circuit
-is outside that window, and no result here is a test of it. The
-campaign tests the mechanism: a write on a silent pulse, no write on a
-firing pulse, a stop that holds, and a read that agrees between cells.
+- **The proved read window.** Two trained ports of this circuit fire
+  together near 0.267 time units. The window proved for the ideal model
+  is (0.239, 0.256]: theorem `stopped_pair_read_latency` in
+  [`StopLearningLatency.lean`](../recursive-learning/native/StopLearningLatency.lean).
+  The circuit is outside that window, and no result here is a test of
+  it.
+- **A cell without a clock.** The circuit does not detect the arrival
+  of a pulse. With each pulse the stimulus gives three ideal timing
+  signals: the admission during the pulse, the reset of the sequencing
+  latches 1 µs before the pulse, and the end of the precharge of the
+  sensor. The end of the write is set by the sensor itself. See
+  [what the stimulus provides](DESIGN.md#what-the-stimulus-provides).
+
+The campaign tests the mechanism: a write on a silent pulse, no write
+on a firing pulse, a stop that holds, and a read that agrees between
+cells.
 
 ## Files
 
@@ -35,13 +49,16 @@ firing pulse, a stop that holds, and a read that agrees between cells.
 
 ## Method
 
-- **Predictions first.** [`PREDICTION.md`](PREDICTION.md) was committed
-  on 2026-11-12 at 07:22 UTC in the working repository of the campaign.
-  The first run started at 07:23 UTC. The file here is identical; its
-  SHA-256 is
-  `8c17bf311e7f1353a6a41da84ad8f9c4fd3b4b6ff150c2a6009b620e935181e8`.
-  The predictions are not blind: the file says what was known when it
-  was written.
+- **Predictions written before the campaign, which this repository
+  cannot show.** [`PREDICTION.md`](PREDICTION.md) was committed on
+  2026-11-12 at 07:22 UTC in a private working repository, commit
+  `a8fd219`. The first run started at 07:23 UTC. The file entered this
+  repository at 09:02 UTC, after the campaign had started. Its SHA-256,
+  `8c17bf311e7f1353a6a41da84ad8f9c4fd3b4b6ff150c2a6009b620e935181e8`,
+  shows that the file is the same. It does not show the date. A reader
+  of this repository alone has to take the date on trust.
+- **The predictions are not blind.** The file says what was known when
+  it was written.
 - **One netlist, one set of options.** Every run of the campaign uses
   the same netlist, the same solver options and the same largest time
   step.
@@ -50,6 +67,21 @@ firing pulse, a stop that holds, and a read that agrees between cells.
   is reported as an anomaly and left out of the statistics. A run that
   the simulator aborts is listed as failed.
 - **A failed prediction stays** in the report with its verdict.
+
+## Corrections to the prediction file
+
+`PREDICTION.md` is left as written. Two things in it are corrected here.
+
+- It gives the proved window as (0.239, 0.2554]. The theorem gives
+  (0.239, 0.256]. The value 0.2554 has no source in this repository.
+  The circuit, near 0.267, is outside both.
+- It puts every event of the guard in one class, left out of the
+  statistics. The analysis now keeps in the statistics the events that
+  count against the mechanism: a FIRE after the end of the pulse, a
+  protection that rises twice, a protection without an end. They are
+  reported and they make P19 fail. A FIRE after the end of the pulse
+  belongs to the list of what would count against the mechanism. See
+  [the guard](DESIGN.md#the-guard).
 
 ## The campaign
 

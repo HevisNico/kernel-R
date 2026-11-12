@@ -257,8 +257,9 @@ bounds stated in their guides.
 - **A mathematical model.** Hardware measurements would be needed for
   experimental validation.
   A [transistor-level simulation of one cell](research/circuit/README.md)
-  is a simulation, not a measurement, and its joint read falls outside
-  the proved window.
+  is a simulation, not a measurement. Its joint read falls outside the
+  proved window, and it takes the arrival time of each pulse from ideal
+  signals.
 - **Exact quantities.** The pulse amplitude, the unit response and the
   MARK and SILENT levels are those of the model. See the
   [implementation assumptions](model/IMPLEMENTATION_ASSUMPTIONS.md).

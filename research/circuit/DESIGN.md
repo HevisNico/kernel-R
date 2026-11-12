@@ -2,14 +2,19 @@
 
 ## Question
 
-One circuit does everything. A pulse arrives. The cell fires or stays
-silent. Its sensor discharges between two thresholds and writes a dose,
-unless the cell has fired. No script decides anything after the pulses
-are sent.
+A pulse arrives. The cell fires or stays silent. Its sensor discharges
+between two thresholds and writes a dose, unless the cell has fired.
+The circuit takes these decisions: to fire or not, when the write
+starts and ends, how much it writes, and whether it writes.
 
-**Does a cell, left alone with a train of identical pulses, raise its
-gain and stop by itself, with device mismatch and noise? Does it hold
-its gain when the stored voltage leaks?**
+The circuit does not detect the arrival of a pulse. Three ideal timing
+signals come with each pulse. They are listed in
+[what the stimulus provides](#what-the-stimulus-provides).
+
+**Does a cell that receives a train of identical pulses, each with the
+same timing signals, raise its gain and stop by itself, with device
+mismatch and noise? Does it hold its gain when the stored voltage
+leaks?**
 
 ## The circuit
 
@@ -154,8 +159,42 @@ Each choice is given with its reason.
 - **The thresholds are scaled to the supply.**
 - **The joint read is outside the proved window.** Two trained ports of
   this circuit fire together near 0.267. The window proved for the
-  ideal model is (0.239, 0.2554]. The mirror and the comparator add a
-  delay that the ideal model does not have.
+  ideal model is (0.239, 0.256]: theorem `stopped_pair_read_latency` in
+  [`StopLearningLatency.lean`](../recursive-learning/native/StopLearningLatency.lean).
+  The mirror and the comparator add a delay that the ideal model does
+  not have.
+- **The arrival of a pulse is not detected.** See the next section.
+
+## What the stimulus provides
+
+With each pulse the stimulus gives the pulsed port three timing
+signals. They are ideal sources. They are the same for every pulse and
+do not depend on what the cell does.
+
+| Signal | Timing | What it does |
+|---|---|---|
+| Admission | High during the pulse, one unit | Lets the output of the mirror reach the main capacitor |
+| Reset of the sequencing latches | Released 1 µs before the pulse, applied again at the end of the period | Clears the entry and exit latches of the sensor |
+| End of precharge | At the start of the pulse, until the end of the period | The sensor capacitor stops being precharged and starts to discharge |
+
+- **No pulse detector is built.** A cell that works alone would have to
+  derive these three signals from the pulse itself. The delay, the
+  jitter and the mismatch of such a detector are not in this study.
+- **The reset comes before the pulse.** A detector could not release a
+  reset 1 µs before the pulse that it detects. A real cell would clear
+  its latches at the end of the previous cycle, or after the detection.
+- **The duration of the admission is given.** It is one unit, the
+  length of the pulse, set by the stimulus.
+- **What is not given.** No signal tells the circuit whether it fired,
+  when to start the write or when to end it. The sensor crossing the
+  exit level ends the write.
+- **The statement of the model that there is no clock** is therefore
+  only partly carried by this circuit. The end of the write needs no
+  clock here. The start of a sensor cycle is taken from an ideal
+  signal.
+
+The stimulus also selects which port is pulsed in each period, and
+presets the integrator once at the start of a run.
 
 ## Stimulus
 
@@ -231,15 +270,34 @@ the nominal cell.
 
 ## The guard
 
-A run is reported as an anomaly, and left out of every statistic, if
-its protection latch rises within 0.05 unit of the pulse edge or before
-it, rises after the pulse, rises twice in one period, has no end, or
-rises in the period at rest. A run that the simulator aborts writes no
-result and is listed as failed. An anomaly is never dropped silently
-and never counted as a measure.
+The analysis looks at the protection latch in every period of every
+run. It reports two kinds of event. Neither is dropped silently.
+
+| Event | Kind | Treatment |
+|---|---|---|
+| The latch rises within 0.05 unit of the pulse edge, or before it | Not a FIRE: the main capacitor cannot reach the FIRE level that early | Reported. The run is left out of the statistics |
+| The latch rises in the period at rest | Not a FIRE: there is no pulse | Reported. The run is left out of the statistics |
+| The latch rises later than 1.02 units, after the end of the pulse | Against the mechanism: a late FIRE comes closer to the write | Reported. The run stays in the statistics |
+| The latch rises twice in one period | Against the mechanism | Reported. The run stays in the statistics |
+| The latch does not clear before the next pulse | Against the mechanism | Reported. The run stays in the statistics |
+
+The limit of 1.02 leaves 0.01 unit for the 200 ns of the latch and
+0.01 unit for the resolution of the measure.
+
+The test that a firing pulse writes nothing (P10) is made on every run
+that produced a result, whatever the guard says of it. A run that the
+simulator aborts writes no result and is listed as failed.
+
+`PREDICTION.md` was written with one class of anomaly, all left out of
+the statistics. The split above was made afterwards. Prediction P19 is
+judged as written: it fails if the guard reports any event of either
+kind.
 
 ## Not modelled
 
+- Detection of the pulse. The admission, the reset of the sequencing
+  latches and the end of the precharge are ideal signals given with
+  each pulse.
 - Layout parasitics and coupling between nodes.
 - Supply and ground: the supply is an ideal source. A bounce of the
   supply at a pulse edge could raise a latch in a real circuit, and
