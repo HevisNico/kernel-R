@@ -71,6 +71,17 @@ MUTATIONS = [
     ("reuse_relative_origin_between_epochs", "EpochSafety", "(fun t => state (cursor.now + t)) ∧ Realizes state tail", "(fun t => state t) ∧ Realizes state tail"),
     ("skip_reference_dose_verification", "EpochExamples", "decide (action = .write →\n      min (c.capacity : Int) (state 0 - (c.loss : Int) + (c.dose : Int)) ≤ state c.latency)", "true"),
 
+    ("ignore_write_horizon", "OfferFactory", "count * max hardware.maxWait hardware.latency\n", "count * hardware.maxWait\n"),
+    ("omit_factory_measurement_error", "OfferFactory", "let report := Renewal.measurement reading.value reading.error", "let report := Renewal.measurement reading.value 0"),
+    ("omit_factory_future_slew", "OfferFactory", "Scheduler.rateCeiling report hardware.slew window,", "Scheduler.rateCeiling report 0 window,"),
+    ("resign_stale_measurement", "OfferFactory", "if request.reading.measuredAt = cursor.now then", "if True then"),
+    ("forget_actual_write_loss", "OfferFactory", "| n + 1 => loss rate n + rate (n + 1)", "| n + 1 => loss rate n"),
+    ("weaken_measured_growth", "OfferFactory", "growth : ∀ k, k ≤ horizon hardware count → rate k ≤ rate 0 + hardware.slew * k", "growth : ∀ k, k ≤ horizon hardware count → rate k ≤ rate 0 + hardware.slew * k + 1"),
+    ("weaken_physical_flow", "OfferFactory", "flow : ∀ k, k < horizon hardware count → state k - (rate (k + 1) : Int) ≤ state (k + 1)", "flow : ∀ k, k < horizon hardware count → state k - (rate (k + 1) : Int) - 1 ≤ state (k + 1)"),
+    ("assume_dose_without_delivery", "OfferFactory", "delivery : Delivers (make policy hardware reading count).config count\n    (entry cursor (make policy hardware reading count)) rate state", "delivery : True"),
+    ("observe_after_dispatch", "OfferFactory", "(observed : (cursor.lower : Int) ≤ state cursor.now)", "(observed : (cursor.lower : Int) ≤ state (cursor.now + 1))"),
+    ("invent_larger_dose", "OfferFactory", "hardware.latency, hardware.dose, hardware.capacity, hardware.maxWait⟩", "hardware.latency, hardware.dose + 1, hardware.capacity, hardware.maxWait⟩"),
+
 
 
 ]
@@ -96,7 +107,7 @@ def hygiene():
     files = sorted(PROJECT.glob("*.lean"))
     root_imports = set((ROOT / "SelfCertifyingLearning.lean").read_text().splitlines())
     expected = {"import SelfCertifyingLearning." + p.stem for p in files}
-    if root_imports != expected or len(files) != 14:
+    if root_imports != expected or len(files) != 16:
         raise RuntimeError("Root module must import exactly every maintained proof module")
     manifest = json.loads((ROOT / "lake-manifest.json").read_text())
     if manifest["packages"] or "[[require]]" in (ROOT / "lakefile.toml").read_text():

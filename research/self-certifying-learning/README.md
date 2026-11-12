@@ -1,18 +1,19 @@
 # Self-certifying learning: discrete foundations
 
-An independent first proof package for repair budgets and time-limited
+An independent proof package for repair budgets and time-limited
 observation contracts. It uses **Lean 4.35.0 and Std only**: no Mathlib,
 Kernel R definitions, circuit data or other research-package imports.
 
 The research question is whether a system can improve how it maintains a
 task while preserving its ability to detect and repair the next failure.
-This checkpoint proves discrete ingredients and implements an observation-level
-supervisor: interval-based search reopening and a fresh, maximal admissible
-probe delay. A conservative fallback now closes the delayed repair/scheduling
-loop under a fixed full-duration loss ceiling. A finite-lived contract coordinator
-now selects supplied offers, preserves handoff reserve and pays reconfiguration
-debt across phases. Producing honest future contracts from physical observations
-and search inside an epoch remain open. There is no novelty claim.
+This milestone now has a conditional end-to-end theorem: dated bounded-error
+observations generate finite-lived contracts, executable admission selects
+them, and delayed repair phases compose with service and cost guarantees.
+Known future slew and hardware laws remain explicit physical assumptions.
+
+[STATUS.md](STATUS.md) records the final verified scope, exact assumptions,
+reproduction command and claim boundary. This is not a novelty claim or a
+physical R validation.
 
 ## What is checked
 
@@ -39,6 +40,9 @@ and search inside an epoch remain open. There is no novelty claim.
 | Renewal preserves debt and reconfiguration is paid once | `global_balance`, `switch_budget`, `same_config_no_charge` in [Epochs](SelfCertifyingLearning/Epochs.lean) | Sum of existing phase ledgers; finite abstract switching allowance, not assumed physical variation |
 | Admitted phases compose on one calendar timeline | `composed_safe` in [EpochSafety](SelfCertifyingLearning/EpochSafety.lean) | Fixed service floor and sound transition laws; guarantee stops at a blocked boundary |
 | A contract switch has a concrete checked trajectory | `reference_realizes`, `reference_safe` in [EpochExamples](SelfCertifyingLearning/EpochExamples.lean) | An expired candidate is rejected, a prudent fallback is selected and all phase laws are checked |
+| Dated measurements generate finite-lived offers covering writes and waits | `make`, `proposed_origin`, `generated_realizes` in [OfferFactory](SelfCertifyingLearning/OfferFactory.lean) | Rejects stale measurements; uses known error, future slew and hardware bounds |
+| The generated supervisor has an end-to-end service and cost theorem | `system_safe`, `system_cost` in [OfferFactory](SelfCertifyingLearning/OfferFactory.lean) | Exact executed requests, actual-rate loss and delivery laws; guarantee ends at a blocked boundary |
+| Both example contracts come from observations | `complete_service`, `complete_cost` in [FactoryExample](SelfCertifyingLearning/FactoryExample.lean) | Constant actual rate with increased measurement uncertainty; no empirical performance claim |
 | Shared observations cannot certify a property false in a compatible world | `indistinguishable_cannot_accept` in [Deadline](SelfCertifyingLearning/Deadline.lean) | Information limit for any sound observation-only checker |
 
 All potentials, counts, damage bounds and disturbance budgets are natural
@@ -117,20 +121,20 @@ No package download is required after Lean itself is installed. The
 checks the same distribution digest as the repository's existing installer.
 It builds, audits and runs the controls without requesting a Mathlib cache.
 
-[Audit](Audit.lean) examines every declaration originating in the fifteen
+[Audit](Audit.lean) examines every declaration originating in the seventeen
 project modules, including private and generated declarations and names
 outside the project namespace. Only `propext`, `Classical.choice` and
 `Quot.sound` are allowed; project axioms and admitted proofs are rejected.
 The source inventory check requires every proof module to be imported.
 
-[verify.py](verify.py) compiles the unmodified module before each of fifty
+[verify.py](verify.py) compiles the unmodified module before each of sixty
 semantic mutations. A parser/import/name failure or timeout is not a
 successful rejection. Three further controls test unused external-namespace
 and private axioms and an admitted theorem against the compiled audit.
 The report records current source hashes and the actual audit output.
 
 The [recorded local checkpoint](validation.json) records the current standalone
-build, audited declaration/theorem counts, fifteen project modules, fifty
+build, audited declaration/theorem counts, seventeen project modules, sixty
 paired semantic controls and three audit controls. Generated helpers are
 included in declaration counts. CI at the published commit is a separate
 check; this local record does not predict it.
@@ -139,7 +143,7 @@ These checks establish the stated Lean implications, not the fidelity of a
 physical implementation to their premises. The full historical Kernel R
 build is a separate CI gate; this package does not import or rebuild it.
 
-## Next obligations
+## Separate research obligations
 
 1. Derive the measurement and future-slew assumptions from an actual sensor
    and plant. Bounded-error scalar measurements are now handled; R binary/count
@@ -147,10 +151,10 @@ build is a separate CI gate; this package does not import or rebuild it.
 2. Implement search and its stored decisions inside each epoch. Reopening
    accounting is now proved for the interval monitor, but it does not bound
    search work, safety refusals or periodic certificate renewals.
-3. Produce honest finite-lived contract offers from observations and renew
-   them early enough to ensure continuation. Selection, calendar composition
-   and budgeted reconfiguration are now proved; perpetual availability of an
-   affordable offer and finite sensing/dispatch costs are not.
+3. Establish the producer's error, slew and actuator assumptions for an actual
+   plant. Observation-backed finite contracts are now generated and proved;
+   perpetual availability, learned physical bounds and finite sensing/dispatch
+   costs are separate obligations.
 4. Fix the discrete comparison in [EXPERIMENT_DRAFT.md](EXPERIMENT_DRAFT.md)
    before running it. No adaptive experiment is run in this checkpoint.
 5. Instantiate the contracts in R or another physical model without

@@ -128,11 +128,12 @@ a request with no current offer. A same-configuration renewal has zero new
 charge. These are kernel-checked examples, not a preregistered empirical
 comparison or evidence about fabricated R cells.
 
-## Remaining work
+## Final producer integration
 
-The next missing mechanism is an observation-backed producer of honest
-contracts and a policy that requests renewals early enough to preserve
-continuation. Search decisions within an epoch, finite sensing/dispatch
-costs and a quantitative link between physical variation and affordable
-reconfiguration remain open. The current result verifies selection and
-composition **given** those offers; it does not prove their perpetual supply.
+[STATUS.md](STATUS.md) and `OfferFactory` now close the finite-prefix producer
+integration: fresh bounded-error observations, a known future slew and fixed
+hardware guarantees produce the supplied offers. The end-to-end theorem
+derives their transition laws from actual-rate dynamics and delayed delivery.
+It does not learn these physical guarantees or ensure perpetual availability.
+Search decisions inside epochs, real sensing/dispatch costs and a physical
+bound on affordable reconfiguration remain separate research obligations.

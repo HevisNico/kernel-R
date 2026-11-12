@@ -90,7 +90,9 @@ ideal unit-write example is no longer the only repair result.
 There is still no learned estimate of future slew, physical R recovery
 theorem or comparative performance result. [EPOCHS.md](EPOCHS.md) now adds
 checked selection among supplied finite-lived offers and a budget for
-reconfiguration. Producing their true future envelopes remains open.
+reconfiguration. [STATUS.md](STATUS.md) records the completed observation-backed
+producer under known measurement-error, slew and hardware assumptions;
+establishing those assumptions for R remains separate work.
 `EXPERIMENT_DRAFT.md` remains a design draft. Before running a comparison,
 fix the experimental plant/sensor parameters, temporal ordering across
 observations and control phases, baselines, costs and out-of-envelope trials

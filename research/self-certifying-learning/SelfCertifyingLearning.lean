@@ -12,3 +12,5 @@ import SelfCertifyingLearning.RepairPlant
 import SelfCertifyingLearning.Epochs
 import SelfCertifyingLearning.EpochSafety
 import SelfCertifyingLearning.EpochExamples
+import SelfCertifyingLearning.OfferFactory
+import SelfCertifyingLearning.FactoryExample

@@ -1,8 +1,9 @@
 # Two-level refresh experiment — design draft, not preregistration
 
-No adaptive simulation has been run for this package. Publishing this file
-does not register an executable protocol: the unresolved choices below must
-be fixed, versioned and published before running the comparison.
+No empirical controller comparison has been run for this package.
+Kernel-checked deterministic witnesses are included. Publishing this file
+does not register an experimental protocol: the unresolved choices below
+must be fixed, versioned and published before running the comparison.
 
 ## Implemented ingredients, not a completed protocol
 
@@ -30,9 +31,11 @@ retrospectively preregistered here.
 finite-lived contracts: complete-phase deadline coverage, a common handoff
 reserve, explicit switching credit and refusal when no offer qualifies.
 A checked two-contract trajectory includes rejection of an expired candidate.
-The experiment still needs an offer-generation policy based on its sensor
-model; the checked example does not establish adaptive performance or
-perpetual availability of honest offers.
+`OfferFactory` now implements a producer for fresh bounded-error scalar
+readings under known slew/hardware limits, with an end-to-end proof and a
+second deterministic witness. The experiment must instantiate its sensor and
+physical bounds and choose a renewal policy; these witnesses do not establish
+adaptive performance or perpetual availability of honest offers.
 
 ## Objective
 

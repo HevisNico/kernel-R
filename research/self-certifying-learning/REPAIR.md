@@ -130,9 +130,10 @@ adaptive comparison or transistor-level evidence.
 
 [EPOCHS.md](EPOCHS.md) now supplies executable selection of finite-lived
 contract offers, explicit switching charges, and a service theorem over the
-composed calendar timeline. It still assumes that honest future envelopes
-are supplied: learning them, ensuring timely affordable renewals and modeling
-real sensing/dispatch delays remain open. The next physical bridge must
+composed calendar timeline. `OfferFactory` now constructs those envelopes from fresh bounded-error
+observations and known slew/hardware guarantees; [STATUS.md](STATUS.md)
+records the end-to-end result. Learning the physical bounds, ensuring perpetual
+affordable renewal and modeling real sensing/dispatch delays remain open. The next physical bridge must
 derive actual dose, timing, saturation, sensor and leakage guarantees. These
 properties have not been established for R, continuous-time circuitry or
 fabricated hardware by this package.
