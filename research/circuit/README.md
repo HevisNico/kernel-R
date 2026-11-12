@@ -18,7 +18,7 @@ gain when the stored voltage leaks?
 - **The proved read window.** Two trained ports of this circuit fire
   together near 0.267 time units. The window proved for the ideal model
   is (0.239, 0.256]: theorem `stopped_pair_read_latency` in
-  [`StopLearningLatency.lean`](../recursive-learning/native/StopLearningLatency.lean).
+  [`StopLearningLatency.lean`](../recursive-learning/native/Training/StopLearningLatency.lean).
   The circuit is outside that window, and no result here is a test of
   it.
 - **A cell without a clock.** The circuit does not detect the arrival

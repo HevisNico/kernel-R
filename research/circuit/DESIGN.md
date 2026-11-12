@@ -167,7 +167,7 @@ Each choice is given with its reason.
 - **The joint read is outside the proved window.** Two trained ports of
   this circuit fire together near 0.267. The window proved for the
   ideal model is (0.239, 0.256]: theorem `stopped_pair_read_latency` in
-  [`StopLearningLatency.lean`](../recursive-learning/native/StopLearningLatency.lean).
+  [`StopLearningLatency.lean`](../recursive-learning/native/Training/StopLearningLatency.lean).
   The mirror and the comparator add a delay that the ideal model does
   not have.
 - **The arrival of a pulse is not detected.** See the next section.
