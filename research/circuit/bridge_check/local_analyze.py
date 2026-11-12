@@ -148,13 +148,14 @@ def events(name, d):
             cr = crossings(d, COL[signal], lo, hi)
             bounds = [lo] + [t for t, _ in cr] + [hi]
             for i, (t, s) in enumerate(cr):
-                prev_latch = max((u for u, _ in latch if u < t or (signal == "cmpm" and u <= t)), default=None)
+                near = min(((t - u, "rise" if ls > 0 else "fall") for u, ls in latch), key=lambda z: abs(z[0]), default=(None, None))
                 nxt = bounds[i + 2]
                 out.append(dict(run=name, period=k, signal="latch" if signal == "p" else "comparator", direction="rise" if s > 0 else "fall",
                                 time=t, latency=(t - edge) / TU, dwell_before_s=t - bounds[i], dwell_before_censored=i == 0,
                                 dwell_after_s=nxt - t, dwell_after_censored=i == len(cr) - 1,
                                 after_first_fire_s=None if first_fire is None else t - first_fire,
-                                after_latch_transition_s=None if prev_latch is None else t - prev_latch,
+                                nearest_latch_transition_s=near[0] if signal == "cmpm" else None,
+                                nearest_latch_transition=near[1] if signal == "cmpm" else None,
                                 protection_active=at(d, COL["p"], t) >= 0.9 if signal == "cmpm" else s > 0,
                                 inside_error_window=any(e <= t <= x for _, e, x in wins),
                                 distance_to_error_window_s=min((max(e - t, t - x, 0.0) for _, e, x in wins), default=None)))
@@ -199,6 +200,7 @@ def main():
             r[f"sensor_tolerance_{tag}"] = abs(beta * (CS / CF) * (dvs - 0.1))
             r[f"residual_log_gain_{tag}"] = beta / CF * abs(r["residual_C"])
             r[f"sum_move_log_gain_{tag}"] = beta * abs(r["sum_move_V"])
+            r[f"capacitor_log_gain_{tag}"] = beta * abs(dcap)
             r[f"step_log_gain_{tag}"] = beta * dvm
         r["step_sign_robust_global"] = abs(g["beta_per_V"] * dvm) > 2 * g["all_grid_max_abs_log_error"]
         if l["status"] == "analyzed":
@@ -250,8 +252,7 @@ def main():
                                                   "step_log_gain_local", "step_error_bound_local", "increment_local", "increment_error_bound_local",
                                                   "handoff_local", "off_window_drift_local", "sensor_tolerance_global", "residual_log_gain_global",
                                                   "step_log_gain_global")},
-            firing={k: stats(firing, k) for k in ("residual_log_gain_local", "step_log_gain_local", "sum_move_log_gain_local", "increment_local",
-                                                  "handoff_local")},
+            firing={k: stats(firing, k) for k in ("capacitor_log_gain_local", "step_log_gain_local", "sum_move_log_gain_local", "increment_local")},
             silent_step_sign_robust_global=sum(bool(r.get("step_sign_robust_global")) for r in silent),
             silent_steps_positive=sum(r["vmem_drop_V"] > 0 for r in silent),
             silent_increments_positive=sum(r.get("read_to_read_drop_V", 0) > 0 for r in silent if r.get("read_to_read_drop_V") is not None))
@@ -278,10 +279,15 @@ def main():
             comparator_transitions_inside_error_window=sum(e["inside_error_window"] for e in comp),
             latch_transitions_inside_error_window=sum(e["inside_error_window"] for e in latch),
             nearest_comparator_transition_to_error_window_s=min((e["distance_to_error_window_s"] for e in comp if e["distance_to_error_window_s"] is not None), default=None),
-            comparator_transitions_more_than_1us_from_a_latch_transition=sum(
-                1 for e in comp if e["after_latch_transition_s"] is None or abs(e["after_latch_transition_s"]) > 1e-6),
+            comparator_transitions_without_a_latch_transition_in_the_period=sum(e["nearest_latch_transition_s"] is None for e in comp),
             largest_comparator_distance_to_latch_transition_s=max(
-                (abs(e["after_latch_transition_s"]) for e in comp if e["after_latch_transition_s"] is not None), default=None),
+                (abs(e["nearest_latch_transition_s"]) for e in comp if e["nearest_latch_transition_s"] is not None), default=None),
+            comparator_offsets_from_latch_rise_s=[f(e["nearest_latch_transition_s"] for e in comp if e["nearest_latch_transition"] == "rise") for f in (min, max)]
+            if any(e["nearest_latch_transition"] == "rise" for e in comp) else None,
+            comparator_offsets_from_latch_fall_s=[f(e["nearest_latch_transition_s"] for e in comp if e["nearest_latch_transition"] == "fall") for f in (min, max)]
+            if any(e["nearest_latch_transition"] == "fall" for e in comp) else None,
+            latch_high_dwell_s=[f(e["dwell_after_s"] for e in latch if e["direction"] == "rise" and not e["dwell_after_censored"]) for f in (min, max)]
+            if any(e["direction"] == "rise" and not e["dwell_after_censored"] for e in latch) else None,
             first_latch_fire_latencies=[min(e["latency"] for e in latch if e["period"] == k and e["direction"] == "rise") for k in fire_periods])
     summary["events"] = ev_sum
     (HERE / "local_summary.json").write_text(json.dumps(summary, indent=2) + "\n")
@@ -320,24 +326,30 @@ def main():
                  f"{fmt(s['step_log_gain_local']['min'], '.5f')} to {fmt(s['step_log_gain_local']['max'], '.5f')} | {fmt(s['step_error_bound_local']['max'], '.2e')} | "
                  f"{fmt(s['increment_local']['min'], '.5f')} to {fmt(s['increment_local']['max'], '.5f')} | {fmt(s['handoff_local']['max'], '.2e')} | "
                  f"{gsum['silent_increments_positive']} of {s['increment_local']['n']} |")
-    L += ["", "| Run | Firing windows | Steering switch turned on | Residual, in log-gain (largest) | Step at the window (largest) | Read-to-read increment (largest) |", "|---|---|---|---|---|---|"]
+    L += ["", "On a window with a FIRE the sensor current goes to the dump, so the quantity to bound is the change of the capacitor itself.", "",
+          "| Run | Firing windows | Steering switch turned on | Capacitor change, in log-gain (largest) | Step at the window (largest) | Read-to-read increment (largest) |", "|---|---|---|---|---|---|"]
     for name, gsum in groups.items():
         s = gsum["firing"]
         on = sum(1 for r in rows if r["run"] == name and r["fired"] and r["steering_rises"])
-        L.append(f"| `{name}` | {gsum['firing_windows']} | {on} | {fmt(s['residual_log_gain_local']['max'], '.2e')} | {fmt(s['step_log_gain_local']['max'], '.2e')} | {fmt(s['increment_local']['max'], '.2e')} |")
+        L.append(f"| `{name}` | {gsum['firing_windows']} | {on} | {fmt(s['capacitor_log_gain_local']['max'], '.2e')} | {fmt(s['step_log_gain_local']['max'], '.2e')} | {fmt(s['increment_local']['max'], '.2e')} |")
     L += ["", "With the global affine law, the sign of a silent step is robust to twice its largest error on "
           + ", ".join(f"{g_['silent_step_sign_robust_global']} of {g_['silent_windows']} windows of `{n}`" for n, g_ in groups.items()) + ".", "",
           "## FIRE and comparator events", "",
           "FIRE is the rising crossing of the protection latch at 0.9 V. The raw comparator is a different signal.", "",
-          "| Run | Periods with FIRE | Latch rises per period | Comparator transitions in a period with FIRE | in a silent period | Comparator segments shorter than 200 ns | longest of them (ns) | Farthest comparator transition from a latch transition (ns) | Comparator transitions inside an ERROR window | Nearest to an ERROR window (µs) |",
-          "|---|---|---|---|---|---|---|---|---|---|"]
+          "| Run | Periods with FIRE | Latch rises per period | Latch high for (µs) | Comparator transitions in a period with FIRE | in a silent period | Comparator segments shorter than 200 ns | longest of them (ns) | Comparator transitions around the latch rise (ns from it) | around the latch fall (ns from it) | inside an ERROR window | Nearest to an ERROR window (µs) |",
+          "|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for name, e in ev_sum.items():
-        L.append(f"| `{name}` | {e['periods_with_fire']} | {e['latch_rises_per_period']} | {e['comparator_transitions_per_fire_period']} | {e['comparator_transitions_in_silent_periods']} | "
+        ns = lambda v: DASH if v is None else f"{1e9 * v[0]:+.2f} to {1e9 * v[1]:+.2f}"
+        L.append(f"| `{name}` | {e['periods_with_fire']} | {e['latch_rises_per_period']} | "
+                 + (DASH if e['latch_high_dwell_s'] is None else f"{1e6 * e['latch_high_dwell_s'][0]:.1f} to {1e6 * e['latch_high_dwell_s'][1]:.1f}")
+                 + f" | {e['comparator_transitions_per_fire_period']} | {e['comparator_transitions_in_silent_periods']} | "
                  f"{e['comparator_segments_shorter_than_200ns']} | {fmt(None if e['longest_short_segment_s'] is None else 1e9 * e['longest_short_segment_s'], '.2f')} | "
-                 f"{fmt(None if e['largest_comparator_distance_to_latch_transition_s'] is None else 1e9 * e['largest_comparator_distance_to_latch_transition_s'], '.2f')} | "
+                 f"{ns(e['comparator_offsets_from_latch_rise_s'])} | {ns(e['comparator_offsets_from_latch_fall_s'])} | "
                  f"{e['comparator_transitions_inside_error_window']} | {fmt(None if e['nearest_comparator_transition_to_error_window_s'] is None else 1e6 * e['nearest_comparator_transition_to_error_window_s'], '.2f')} |")
     L += ["", "- The protection latch rises at most once per period in these replays, and falls once after each rise.",
           "- The raw comparator has several transitions in every period with a FIRE. The statement that there is no extra crossing holds for the latch, not for the comparator.",
+          "- Every comparator transition of these replays lies within the nanoseconds given above of a latch transition: three around the FIRE and three around the release. "
+          "The latch has one rise and one fall in such a period. No comparator transition falls inside an ERROR window, and the nearest is more than 16 µs away from one.",
           "- Every transition, with its date, its dwell lengths and its distance to the latch transitions and to the ERROR windows, is in `latch_events.csv`.",
           "- The delayed enable nodes of the latch are not saved, so the comparison with its 200 ns lockout is descriptive.", ""]
     (HERE / "LOCAL_RESULTS.md").write_text("\n".join(L))
