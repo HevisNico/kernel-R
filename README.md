@@ -7,8 +7,9 @@
 
 Kernel R is a mathematical model of an asynchronous analog learning cell.
 Its Lean 4 proofs start from the cell's differential equations and establish
-what networks of these cells learn. The work is at the model stage: there
-is no chip.
+what networks of these cells learn. A transistor-level simulation of one
+cell tests the mechanism, and the proved results are applied to it port by
+port where its measured margins allow. There is no chip.
 
 ## In plain words
 
@@ -17,7 +18,7 @@ the same design never behave quite alike. Train them the same way and
 they end up with different memories.
 
 Kernel R is a design for a small learning unit, called a cell, that
-removes two causes of this.
+removes two causes of this, and can say in advance when it will succeed.
 
 - **How much a pulse teaches.** A cell learns by letting a small charge
   drain between two fixed levels. The amount learned depends only on
@@ -26,28 +27,34 @@ removes two causes of this.
 - **When to stop.** A cell trained with identical pulses stops learning
   by itself once its gain supports firing from rest. No final memory
   value is tuned by hand.
+- **Knowing in advance.** From margins measured on a cell, a theorem
+  says whether that cell will learn in exactly the predicted number of
+  pulses. In simulation it has never been wrong where it gave that
+  guarantee.
 
-Everything below is a theorem checked by a computer, or a numerical
+Everything below is a theorem checked by a computer, or a simulation
 result marked as such.
 
-## The results in one table
+## Main results
 
-| What a cell or a network does | Holds for | Theorem |
+| Result | Kind | Where |
 |---|---|---|
-| One pulse adds a fixed dose to the memory, whatever the discharge rate | ±10% fabrication, ±5% on the thresholds | [`training_read_every_complete`](research/recursive-learning/native/Thresholds/ParameterTraining.lean) |
-| Training with identical pulses stops by itself | any start gain below firing, firing level from 0.95 to 1.05 | [`stop_training_exists`](research/recursive-learning/native/Training/TrainingLoop.lean) |
-| A given chip has one behaviour | any finite network | [uniqueness](proof/lean/KernelR/HybridParameterUniversalExecution.lean) |
-| Cells joined by wires behave as each cell alone predicts | any number of cells | [`acyclic_network_states`](research/recursive-learning/native/Network/AcyclicNetwork.lean) |
-| A chain learns the same amounts in every cell | any length | [`every_finite_chain`](proof/lean/KernelR/TrustedHeadline.lean) |
-| Two cells decide whether two signals arrive together | a standard write provably fails | [`coincidence_exit_001_separation`](research/recursive-learning/native/Coincidence/CoincidenceSeparation.lean) |
-| A network finds a hidden number among `2^k` | `2k + 1` cells, every `k` | [`successive_search`](research/recursive-learning/native/Search/SuccessiveSearch.lean) |
+| One pulse adds a fixed dose to the memory, whatever the discharge rate, with ±10% fabrication variation | Lean | [`training_read_every_complete`](research/recursive-learning/native/Thresholds/ParameterTraining.lean) |
+| Training with identical pulses stops by itself, for any start gain and a firing level from 0.95 to 1.05 | Lean | [`stop_training_exists`](research/recursive-learning/native/Training/TrainingLoop.lean) |
+| A given chip has one behaviour: complete runs from the same start agree | Lean | [uniqueness](proof/lean/KernelR/HybridParameterUniversalExecution.lean) |
+| Networks of trained cells of any size do what the single-cell descriptions say | Lean | [`acyclic_network_states`](research/recursive-learning/native/Network/AcyclicNetwork.lean) |
+| Two trained cells decide whether two signals arrive together | Lean | [`trained_coincidence_network`](research/recursive-learning/native/Training/TrainedCoincidence.lean) |
+| `2k + 1` cells find a hidden number among `2^k` | Lean | [`successive_search`](research/recursive-learning/native/Search/SuccessiveSearch.lean) |
+| The need of a port stays exact under errors on the start gain, every dose and the firing level, within half a dose in total | Lean | [`needAlong_of_cumulative_tolerance`](research/recursive-learning/native/Search/VariableNeedTolerance.lean) |
+| A transistor-level cell trains and stops by itself; 22 of 24 registered checks and predictions hold | simulation | [circuit study](research/circuit/README.md) |
+| On 200 new simulated ports, 37 are certified from margins measured on their own runs; all 37 counts are the predicted ones | simulation + Lean | [certification](research/circuit/certification-unconditional/REPORT_AMENDMENT_1.md) |
+| A controller is reused over any number of native rounds with an exact input cost, and adapts its own search without degrading its true cost, under an assumed evaluator precision | Lean | [reusable controller](research/reusable-controller/README.md) |
 
 | Word | Meaning here |
 |---|---|
 | Pulse | A short input signal lasting one time unit |
 | Port | One of a cell's three inputs |
 | Gain | How strongly a port's pulses charge the cell. This is the memory |
-| Threshold | A charge level that triggers a change of phase |
 | FIRE | The pulse a cell emits when its charge reaches its firing level |
 | ERROR phase | The part of a sensor's discharge that raises a gain |
 | Dose | The fixed amount that one ERROR phase adds to a gain |
@@ -93,216 +100,148 @@ See the [cell laws](model/CELL.md) and the [glossary](docs/GLOSSARY.md).
 
 ## What is proved
 
-### 1. One pulse teaches a fixed dose
+**A fixed dose.** A single cell trained by one pulse fires on a later
+read of the same port, in every complete run, with ±10% fabrication
+variation and ±5% on the thresholds. A common shift of both ERROR
+thresholds leaves the dose unchanged.
+[`training_read_every_complete`](research/recursive-learning/native/Thresholds/ParameterTraining.lean)
 
-*How much a cell learns does not depend on how fast it discharges.*
-
-A single cell trained by one pulse fires on a later read of the same
-port, in every complete run. The theorem allows ±10% fabrication
-variation and ±5% on both ERROR thresholds and on the FIRE level.
-
-- A shift common to both ERROR thresholds, up to 4% of the entry level,
-  leaves the dose unchanged.
-- A fixed reaction delay `d` after each threshold crossing moves the
-  dose by at most `2.4 × d`.
-
-[`training_read_every_complete`](research/recursive-learning/native/Thresholds/ParameterTraining.lean) ·
-[`training_read_common_offset` and `training_read_reaction_delay`](research/recursive-learning/native/Coincidence/OffsetAndDelay.lean)
-
-### 2. Training stops by itself
-
-*Send the same pulse again and again. The cell reaches a gain that fires
-from rest and stops changing.*
-
-A pulse that leaves the cell silent writes one dose. A pulse that makes
-it fire writes nothing, because the write phase then falls inside the
-refractory period. Training therefore ends at a gain set by the cell's
-own firing level. The final gain is not prescribed; the firing level is
-a fixed per-cell parameter within the theorem's band.
-
-The first FIRE need not be the final stop: residual charge can let a
-pulse fire before the gain is sufficient from exact rest. A later pulse
-can then be silent and write again. The stopping theorem accounts for
-this case.
-
-After training two ports, one pulse on each reads the cell, in either
-order, at most a quarter of a unit apart. The cell fires later than
+**Training stops by itself.** A pulse that leaves the cell silent writes
+one dose. A pulse that makes it fire writes nothing, because the write
+falls inside the refractory period. Training ends at a gain set by the
+cell's own firing level. Two trained ports read together fire later than
 0.239 units after the first read pulse and no later than 0.256 units
-after the second, whatever the start gains and the firing level.
-
+after the second.
 [`stop_training_exists`](research/recursive-learning/native/Training/TrainingLoop.lean) ·
 [`OpenCell.read`](research/recursive-learning/native/Network/FreeRead.lean)
 
-### 3. One chip, one behaviour
-
-*Simultaneous events can be processed in any legal order. The outcome
-is the same.*
-
-Thresholds are fields of each cell's parameters. For any finite network
-with fixed parameters and wires, two runs from the same start that are
-both complete through the same date have the same end state and the
-same firing dates in each cell.
-
-[semantics](proof/lean/KernelR/HybridParameterExecution.lean) ·
+**One chip, one behaviour.** For any finite network with fixed parameters
+and wires, two runs from the same start that are complete through the
+same date have the same end state and the same firing dates.
 [uniqueness](proof/lean/KernelR/HybridParameterUniversalExecution.lean)
 
-### 4. Cells compose
-
-*Describe each cell alone. The network does what the descriptions say.*
-
-- **Any network with forward wires.** One theorem turns the description
-  of each cell into a complete run of the whole network, with the same
-  firing dates and the same final memories in every complete run.
-- **Trained cells.** Any number of cells trained as in result 2, each
-  read by sources or by the FIRE of earlier cells. A chain of `n` such
-  cells is proved for every `n`.
-- **Chains under a fixed protocol.** In a chain of any length, every
-  cell raises its active log-gain by 2.4 and its recovery rate by 0.3,
-  across ±10% fabrication variation and bounded wire jitter.
-
+**Cells compose.** The description of each cell alone gives a complete
+run of any network with forward wires, with the same firing dates and
+final memories in every complete run. Chains of trained cells are proved
+for every length.
 [`acyclic_network_states`](research/recursive-learning/native/Network/AcyclicNetwork.lean) ·
-[`trained_wired_network` and `trained_chain_witness`](research/recursive-learning/native/Network/WiredNetwork.lean) ·
-[`TrustedHeadline.every_finite_chain`](proof/lean/KernelR/TrustedHeadline.lean) ·
-[chain guide](docs/UNIVERSAL_FINITE_CHAIN.md)
+[`trained_wired_network`](research/recursive-learning/native/Network/WiredNetwork.lean)
 
-### 5. Two cells decide a coincidence, and a standard write cannot
-
-*Two cells detect that two signals arrive together.*
-
-- **With trained cells.** Two cells with their own parameters, start
-  gains and firing levels are trained as in result 2. Their two read
-  FIRE dates are closer than 0.15 units exactly when the two cells are
-  read at the same date, among offsets of −0.3, 0 and +0.3 units. The
-  decision still holds if each cell's read FIRE date is observed with
-  an additive lag, for lags within 3/100 of a unit of each other. This
-  is a condition on observed dates, not a circuit-delay model.
-- **Against a fixed-current write.** On a registered timing task, Kernel
-  R gives the expected decision in every complete run. A write that
-  applies a fixed current for a fixed time fails one admissible trial
-  for every current and duration, under the same ±10% variation. This
-  comparison uses cells with a start gain of exactly 1.2 and a firing
-  level within ±3%; it is not redone with trained cells.
-
+**Coincidence.** Two cells with their own parameters, trained as above,
+fire within 0.15 units of each other exactly when they are read at the
+same date. A write that applies a fixed current for a fixed time fails
+one admissible trial for every current and duration.
 [`trained_coincidence_network`](research/recursive-learning/native/Training/TrainedCoincidence.lean) ·
-[`trained_network_lag`](research/recursive-learning/native/Training/ReadLag.lean) ·
 [`coincidence_exit_001_separation`](research/recursive-learning/native/Coincidence/CoincidenceSeparation.lean)
 
-### 6. A network finds a hidden number
-
-*`2k + 1` cells find one number among `2^k` and give it in binary.*
-
-The hidden number `m` is the need of a port: how many doses it must
-receive before a pulse makes its cell fire. It follows from the cell's
-own start gain, dose and firing level.
-
-- **A question.** A probe cell that receives `c` training pulses and
-  then a read pulse fires on the read exactly when `m ≤ c`.
-- **Acting on silence.** A trained cell read by one pulse fires late.
-  Read by two it fires early. A gate cell therefore fires late exactly
-  when a probe stayed silent.
-- **The search.** One probe and one gate for each of `k` depths, and a
-  learner. Each gate that answers no adds its binary weight to the later
-  questions. The gates give the binary digits of `m − 1`, and the
-  learner receives exactly `m` doses. The run lasts about `33 · 2^k`
-  time units.
-- **Tolerance.** Probes with different start gains, doses and firing
-  levels share the same need inside a stated band. The dose error counts
-  `m` times: a dose of 1/20 known to 1% separates needs up to 49.
-
-A tree of `2^k − 1` questions, of which a run asks `k`, is also proved.
-
-[`successive_search` and `successive_search_witness`](research/recursive-learning/native/Search/SuccessiveSearch.lean) ·
-[`bisection_search`](research/recursive-learning/native/Search/BisectionSearch.lean) ·
-[`needIs_of_tolerance`](research/recursive-learning/native/Search/NeedTolerance.lean) ·
+**Search.** The hidden number is the need of a port. One probe and one
+gate per depth, and a learner, give the binary digits of the need; the
+learner receives exactly that many doses.
+[`successive_search`](research/recursive-learning/native/Search/SuccessiveSearch.lean) ·
 [map of the results](research/recursive-learning/native/README.md#map-of-the-stop-learning-results)
 
-## What the benchmark showed
+**Tolerance.** If the errors on the start gain, on every dose and on the
+firing level stay below half a dose in total, the need is exact.
+[`needAlong_of_cumulative_tolerance`](research/recursive-learning/native/Search/VariableNeedTolerance.lean)
 
-*A numerical result, registered before the sweeps.*
+The shared regime: firing level between 0.95 and 1.05, ERROR entry
+between 0.07 and 0.08, dose at most 1/20 for the read windows (3/50 for
+the [wider windows](research/recursive-learning/native/Training/WideDoseRead.lean)),
+pulses at least 22 units apart, other parameters within ±10%.
 
-Each score counts passing combinations of ERROR and FIRE threshold
-error, out of 36, on the coincidence task of result 5 with ±10%
-fabrication variation, on 625 sampled points.
+## From the model to a circuit
 
-| Write rule | Needs a clock | Score |
-|---|---|---:|
-| Constant current, best tested setting | yes | 12 |
-| Timed discharge, same duration as R (0.15) | yes | 8 |
-| **Kernel R**, exit 0.025 | no | 16 |
-| **Kernel R**, exit 0.01 | no | 22 |
-| **Kernel R**, exit 0.0025 | no | 23 |
-| Timed discharge, 0.4 or longer | yes | 27 |
+*Simulations in the SkyWater 130 nm process with ngspice. No chip, no
+layout. Predictions were dated before the runs.*
 
-Every Kernel R setting scores above the best tested constant-current
-write. A timer long enough for the slowest device scores higher, at the
-cost of a clock.
+**The mechanism.** A transistor-level cell with two ports trains and stops
+by itself across mismatch, noise, corners and temperature, in a campaign
+of 141 runs with none abandoned. Under a leak it maintains itself: one silent pulse rewrites
+a dose about every 22 periods. 22 of 24 registered checks and predictions
+hold; the two that fail are a sigma limit set too tight and a range of
+silent pulses set too narrow.
+[circuit study](research/circuit/README.md) ·
+[verdicts](research/circuit/VERDICTS.md)
 
-[protocol](research/recursive-learning/COINCIDENCE_BENCHMARK.md) ·
-[numerical results](research/recursive-learning/coincidence/RESULTS.md) ·
-[exit-threshold sweep](research/recursive-learning/coincidence/EXIT_TRADEOFF_RESULTS.md)
+**Certification.** On 100 new cells (200 ports), the tolerance theorem
+is applied to each port with bounds measured on its own run.
 
-## Conditions
+| Step | Ports certified | Counts contradicted |
+|---|---|---|
+| Margins measured, two conditions declared | 59 | 0 |
+| Threshold offset measured on each cell | 58 | 0 |
+| Gain also measured independently, as amended before the test runs | 37 | 0 |
 
-Results 2, 4 (trained cells), 5 (trained cells) and 6 share one regime:
+The threshold offset of every one of the 100 cells lies inside the
+calibration envelope, as the first campaign assumed. The gain measure
+registered first certifies no port, because the mirror current changes
+after a FIRE; a corrected measure, declared before the test runs,
+certifies 37. Every port whose count differs from the prediction is
+outside the certified domain: most start close to a boundary between two
+needs, where the theorem gives no guarantee.
+[first campaign](research/circuit/certification/REPORT.md) ·
+[measured conditions](research/circuit/certification-unconditional/REPORT_AMENDMENT_1.md) ·
+[circuit-to-model bridge](research/circuit/lean/README.md)
 
-| Quantity | Condition |
-|---|---|
-| Firing level | between 0.95 and 1.05, one value per cell |
-| ERROR entry threshold | between 0.07 and 0.08 |
-| ERROR exit threshold | at least 0.005, below the entry |
-| Dose | at most 1/20 for the read windows |
-| Recovery rate at the start | between 0.07 and 0.10 |
-| Pulses on one cell | at least 22 units apart |
-| Other parameters | anywhere within ±10% of nominal |
+## A controller that is reused and adapts
 
-Result 1 uses an ERROR entry near 0.1. The chains of result 4 and the
-fixed-current comparison of result 5 use nominal thresholds or the
-bounds stated in their guides.
+A teaching controller is closed natively in R cells: under a fixed
+calendar, a read returns to rest and is prepared again, for any number
+of rounds, with exactly three input deliveries per round in every
+complete run.
+A second level chooses among search policies. The evaluator and the
+acceptance rule are outside what it can change, and a policy is adopted
+only if it beats the current one by more than twice the evaluator's error
+bound, so the true cost never increases. That error bound is assumed in
+the general theorems.
+[`calendar_rounds_exists`](research/recursive-learning/native/Teaching/SelectorRounds.lean) ·
+[adaptive search](research/reusable-controller/ADAPTIVE.md) ·
+[physical bridge](research/reusable-controller/physical/README.md)
 
 ## Limits
 
-- **A mathematical model.** Hardware measurements would be needed for
-  experimental validation.
-  A [transistor-level simulation of one cell](research/circuit/README.md)
-  is a simulation, not a measurement. Its joint read falls outside the
-  proved window, and it takes the arrival time of each pulse from ideal
-  signals.
+- **Simulation, not hardware.** The circuit results are simulations of
+  one cell; no device was measured.
+- **The joint read of the circuit** fires near 0.267 units, outside the
+  window proved for the model, (0.239, 0.256].
+- **Ideal timing signals.** The simulated cell takes the arrival of each
+  pulse from ideal signals; it does not detect pulses itself.
+- **Certification is per port and conditional on a simulation.** The
+  threshold of a cell is measured once, on one port; the gain error is
+  measured without noise and applied to a noisy run; each count comes
+  from one noisy run. Statistical repeatability is not yet measured.
+- **Clocked wires.** In the search, a FIRE inside a window releases
+  pulses at preset dates, which stands for a clocked register.
 - **Exact quantities.** The pulse amplitude, the unit response and the
-  MARK and SILENT levels are those of the model. See the
-  [implementation assumptions](model/IMPLEMENTATION_ASSUMPTIONS.md).
-- **Clocked wires.** In result 6 a FIRE inside a window releases pulses
-  at preset dates. Such a wire stands for a clocked register, which is
-  not built from cells.
-- **Dose precision.** Separating `2^k` needs asks for a dose error below
-  about `d₀ / 2^(k+1)`, for a nominal dose `d₀`.
+  MARK and SILENT levels are those of the model.
+  [Implementation assumptions](model/IMPLEMENTATION_ASSUMPTIONS.md)
 - **Elementary tasks.** The networks hold at every size, on a
   coincidence decision and the search for one number.
-- **Receiver.** The coincidence receiver is a decision rule on the two
-  cells' firing dates.
-- **Complete runs.** Theorems compare runs complete through a date. The
-  declared tasks have complete witnesses.
 
-More in the guides: [stop-learning results](research/recursive-learning/native/README.md#map-of-the-stop-learning-results),
-[adaptive teaching loop](research/recursive-learning/native/README.md),
-[exact dose counting](docs/EXACT_DOSE_COUNTING.md),
-[chain progress](proof/lean/PROGRESS.md) and
-[port-memory saturation](docs/GAIN_MEMORY_SATURATION.md).
+## History
+
+| Version | Date | What it added |
+|---|---|---|
+| [v0.1.0](https://github.com/HevisNico/kernel-R/releases/tag/v0.1.0) | 2026-10-30 | Robust composition of N cells |
+| [v0.2.0](docs/RELEASE_V0_2_0.md) | 2026-11-02 | A chain of any length learns the same amounts in every cell |
+| [v0.3.0](docs/RELEASE_V0_3_0.md) | 2026-11-10 | Learning with realized thresholds; the coincidence decision and its benchmark |
+| [v0.4.0](docs/RELEASE_V0_4_0.md) | 2026-11-11 | Training that stops by itself, networks of trained cells, searches |
+| since v0.4.0 | | Circuit simulation, certification on measured margins, reusable and adaptive controller |
+
+The [registered benchmark](research/recursive-learning/COINCIDENCE_BENCHMARK.md)
+of v0.3.0 compares write rules on the coincidence task; every Kernel R
+setting scored above the best tested constant-current write. All versions:
+[releases](docs/RELEASES.md).
 
 ## Related work
 
-Rate-independent charge increments, stop-learning rules and formal
-verification of spiking networks all have precedents. The closest
-switched-capacitor comparison examined here is Noack et al.; the
-stop-learning comparison also includes Brader et al., earlier analog
-circuits and TEXEL.
-
-Kernel R studies a particular combination: a sensor discharge between
-two state thresholds sets the dose; the post-FIRE protected phase blocks
-the write; Lean connects those dynamics to training, read windows and
-composition of trained cells. The comparison concerns these mechanisms
-and guarantees, rather than a claim to have invented stop-learning or
-to outperform existing chips.
-[Mechanism-by-mechanism comparison and references](docs/RELATED_WORK.md)
+Rate-independent charge increments, stop-learning rules, run-time
+contracts and formal verification of spiking networks all have
+precedents. Kernel R studies a particular combination: a sensor discharge
+between two state thresholds sets the dose, the protected phase after a
+FIRE blocks the write, and Lean connects those dynamics to training,
+composition, and certification of simulated devices.
+[Comparison and references](docs/RELATED_WORK.md)
 
 ## How to check it
 
@@ -322,12 +261,12 @@ lake exe cache get
 lake build
 ```
 
-The core audit and the native package's default audit allow only
-`propext`, `Classical.choice` and `Quot.sound` and fail on admitted proofs.
-See the [validation ledger](docs/VALIDATION_LEDGER.md).
-
-The [reviewer's reading path](REVIEW.md) starts with how the Lean
-definitions represent the written model.
+Every audit allows only `propext`, `Classical.choice` and `Quot.sound`
+and fails on admitted proofs. Each research package has its own build,
+audit and CI workflow; see its README. The circuit reports regenerate
+from the committed results.
+[Validation ledger](docs/VALIDATION_LEDGER.md) ·
+[reviewer's reading path](REVIEW.md)
 
 ## Repository map
 
@@ -335,8 +274,11 @@ definitions represent the written model.
 |---|---|
 | [`model/`](model/README.md) | Cell laws and the chain protocol |
 | [`proof/lean/`](proof/lean/README.md) | Core Lean development and audit |
-| [`research/`](research/README.md) | Tolerant training, coincidence proofs and benchmark, circuit simulation |
-| [`docs/`](docs/UNIVERSAL_FINITE_CHAIN.md) | Theorem guides, trusted base, provenance |
+| [`research/recursive-learning/`](research/recursive-learning/README.md) | Trained cells, networks, searches, tolerance |
+| [`research/circuit/`](research/circuit/README.md) | Transistor-level simulation, certification campaigns, circuit-to-model bridge |
+| [`research/reusable-controller/`](research/reusable-controller/README.md) | Reusable and adaptive controller, physical bridge |
+| [`research/`](research/README.md) | All research packages |
+| [`docs/`](docs/UNIVERSAL_FINITE_CHAIN.md) | Theorem guides, trusted base, provenance, releases |
 | [`archive/`](archive/README.md) | Earlier experiments and specifications |
 
 ## Origin, AI assistance and license
