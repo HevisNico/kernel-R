@@ -40,3 +40,8 @@ deviation, without modifying the pinned sources.
 
 [`reset-window/`](reset-window/README.md) is a standalone Lean model of
 terminal saturation under compressed protection or residual coupling.
+
+## Circuit simulation
+
+[`circuit/`](circuit/README.md) is a transistor-level simulation of one cell
+in an open 130 nm process. It is not a proof and not a hardware measurement.
