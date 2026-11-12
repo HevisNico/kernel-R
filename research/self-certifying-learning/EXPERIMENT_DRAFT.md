@@ -37,6 +37,13 @@ second deterministic witness. The experiment must instantiate its sensor and
 physical bounds and choose a renewal policy; these witnesses do not establish
 adaptive performance or perpetual availability of honest offers.
 
+[REVIEW_FOLLOWUP.md](REVIEW_FOLLOWUP.md) adds an explicit per-observation-attempt
+price and a finite-catalogue minimum among complete certified plans ending at
+the same deadline. These declared prices are not energy measurements, and
+catalogue optimality does not settle the online comparison. The fixed-fallback
+availability theorem supplies a candidate availability baseline under a hard
+loss ceiling and funded initial reserve/deficit.
+
 ## Objective
 
 Compare the cost of maintaining a scalar task under leakage while retaining

@@ -222,6 +222,9 @@ theorem system_safe {policy hardware cursor requests state rate}
   EpochSafety.composed_safe (run_wellFormed policy hardware cursor requests) state initial observed
     (supported_realizes supported)
 
+/-- Pure bookkeeping bound on write commands in the generated plan. No
+physical hypotheses are needed; this is not a bound on measured energy,
+observation cost or actuator performance. -/
 theorem system_cost (policy hardware cursor requests) :
     (run policy hardware cursor requests).writes ≤ cursor.debt + cursor.credit +
       (run policy hardware cursor requests).leakBudget :=

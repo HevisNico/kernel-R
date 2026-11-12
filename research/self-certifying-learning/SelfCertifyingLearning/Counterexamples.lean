@@ -10,9 +10,48 @@ theorem arbitrary_idle_activity (n : Nat) :
   | zero => rfl
   | succ n ih => simpa [List.replicate_succ, corrections] using ih
 
-/-- Without availability an incorrect state may have no successor. -/
-theorem bad_deadlock : ∃ _s : Unit, ¬ (False : Prop) ∧ ¬ ∃ _t : Unit, False := by
-  exact ⟨(), not_false, by simp⟩
+/-! A finite transition system with a working repair and a disconnected
+invalid state. Strict rank decrease of enabled repairs alone cannot imply
+that every initial state reaches validity: availability is indispensable. -/
+namespace MissingAvailability
+
+inductive State where
+  | stuck
+  | pending
+  | good
+  deriving DecidableEq
+
+def valid (s : State) : Prop := s = .good
+
+def step (s t : State) : Prop := s = .pending ∧ t = .good
+
+def rank : State → Nat
+  | .stuck => 1
+  | .pending => 1
+  | .good => 0
+
+theorem enabled_repairs_decrease {s t : State} (transition : step s t) : rank t < rank s := by
+  obtain ⟨rfl, rfl⟩ := transition
+  decide
+
+theorem working_repair : RepairPath step .pending 1 .good :=
+  .cons ⟨rfl, rfl⟩ (.nil State.good)
+
+theorem stuck_path {n : Nat} {last : State} (path : RepairPath step .stuck n last) :
+    n = 0 ∧ last = .stuck := by
+  cases path with
+  | nil => exact ⟨rfl, rfl⟩
+  | cons transition _ => have impossible := transition.1; cases impossible
+
+/-- The reachable-state conclusion of repair_exists fails from stuck,
+although another state is repairable and every enabled repair decreases rank. -/
+theorem no_valid_path : ¬ ∃ last n, RepairPath step .stuck n last ∧ valid last := by
+  rintro ⟨last, n, path, good⟩
+  have reached := stuck_path path
+  rw [reached.2] at good
+  cases good
+
+end MissingAvailability
 
 /-- Neighbor ratios 4/5, even with pair products 16/25 < 1, do not
 provide positive weighted margins for this three-level chain.

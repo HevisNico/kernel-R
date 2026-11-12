@@ -14,3 +14,6 @@ import SelfCertifyingLearning.EpochSafety
 import SelfCertifyingLearning.EpochExamples
 import SelfCertifyingLearning.OfferFactory
 import SelfCertifyingLearning.FactoryExample
+import SelfCertifyingLearning.CompositionCheck
+import SelfCertifyingLearning.Availability
+import SelfCertifyingLearning.ObservationCost

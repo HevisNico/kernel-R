@@ -6,8 +6,17 @@ contract producer, executable selection and repair policies, their physical
 interface, composition, cost accounting and concrete checked witnesses.
 
 This closes the implementation/proof tranche in this PR. It is not a claim
-that universal physical learning, perpetual availability, or the R hardware
-correspondence has been established.
+that universal physical learning, arbitrary adaptive availability, or the R
+hardware correspondence has been established.
+
+## Review extension
+
+[REVIEW_FOLLOWUP.md](REVIEW_FOLLOWUP.md) records subsequent review changes.
+The package now also proves perpetual renewal for a funded fixed fallback,
+with all-time service conditional on indefinitely valid physical laws; this
+is narrower than arbitrary adaptive availability. It adds symbolic observation
+costs with exact finite-catalogue constrained minimization, an executable
+coupling verifier, and a substantive missing-availability counterexample.
 
 ## The end-to-end result
 
@@ -70,9 +79,11 @@ exact readings and selections executed by the program. It requires no future
 physical evidence for a suffix that was never dispatched.
 
 The system can block. Its safety theorem then ends at that boundary, not at
-an imagined later recovery. Nothing here guarantees the perpetual supply of
-an admissible contract, fresh measurements, sufficient credit or working
-actuators. Those cannot be inferred from the absence of observed failure.
+an imagined later recovery. The generic observation producer does not guarantee perpetual supply of
+admissible contracts, fresh measurements or working actuators. The separate
+fixed-fallback availability theorem supplies sufficient conditions for that
+policy, including entry funding and persistent physical laws. These conditions
+cannot be inferred from the absence of observed failure.
 
 ## Concrete completed witness
 
@@ -96,7 +107,7 @@ With the pinned Lean 4.35.0 distribution on PATH, from this directory:
 python3 -B verify.py --report .lake/validation.json
 ```
 
-The report records source hashes, the module-based axiom audit, sixty paired
+The report records source hashes, the module-based axiom audit, seventy paired
 semantic mutation controls and three audit controls. A mutation only counts
 when the original compiles and the altered source fails for proof/type
 reasons; parser/import/name failures do not count. The audit includes private

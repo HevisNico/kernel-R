@@ -15,6 +15,11 @@ Known future slew and hardware laws remain explicit physical assumptions.
 reproduction command and claim boundary. This is not a novelty claim or a
 physical R validation.
 
+[REVIEW_FOLLOWUP.md](REVIEW_FOLLOWUP.md) adds a fixed-fallback availability
+theorem, explicit observation prices, an exact coupling checker and the
+review corrections. [R_BRIDGE.md](R_BRIDGE.md) records the native/circuit
+adapter obligations without treating calibration as certification.
+
 ## What is checked
 
 | Statement | Source | Exact scope |
@@ -43,6 +48,10 @@ physical R validation.
 | Dated measurements generate finite-lived offers covering writes and waits | `make`, `proposed_origin`, `generated_realizes` in [OfferFactory](SelfCertifyingLearning/OfferFactory.lean) | Rejects stale measurements; uses known error, future slew and hardware bounds |
 | The generated supervisor has an end-to-end service and cost theorem | `system_safe`, `system_cost` in [OfferFactory](SelfCertifyingLearning/OfferFactory.lean) | Exact executed requests, actual-rate loss and delivery laws; guarantee ends at a blocked boundary |
 | Both example contracts come from observations | `complete_service`, `complete_cost` in [FactoryExample](SelfCertifyingLearning/FactoryExample.lean) | Constant actual rate with increased measurement uncertainty; no empirical performance claim |
+| A funded fixed fallback always has an admissible renewal | `available`, `completes_every_prefix` in [Availability](SelfCertifyingLearning/Availability.lean) | Known hard loss ceiling, valid repair/capacity parameters and funded entry; no arbitrary adaptive-availability claim |
+| The fixed fallback can maintain service at all future ticks | `perpetual_service` in [Availability](SelfCertifyingLearning/Availability.lean) | One physical trajectory must realize all prefixes, including indefinitely valid dose/loss laws |
+| Numeric coupling witnesses are checked exactly | `check_iff`, `verified_decrease` in [CompositionCheck](SelfCertifyingLearning/CompositionCheck.lean) | Positive natural-tick weights and margins; no spectral characterization or weight search |
+| Observation attempts enter a constrained total-cost objective | `select_spec`, `selected_service` in [ObservationCost](SelfCertifyingLearning/ObservationCost.lean) | Minimum in a finite catalogue of certified complete plans at a common deadline; symbolic prices, not measured energy |
 | Shared observations cannot certify a property false in a compatible world | `indistinguishable_cannot_accept` in [Deadline](SelfCertifyingLearning/Deadline.lean) | Information limit for any sound observation-only checker |
 
 All potentials, counts, damage bounds and disturbance budgets are natural
@@ -121,20 +130,20 @@ No package download is required after Lean itself is installed. The
 checks the same distribution digest as the repository's existing installer.
 It builds, audits and runs the controls without requesting a Mathlib cache.
 
-[Audit](Audit.lean) examines every declaration originating in the seventeen
+[Audit](Audit.lean) examines every declaration originating in the twenty
 project modules, including private and generated declarations and names
 outside the project namespace. Only `propext`, `Classical.choice` and
 `Quot.sound` are allowed; project axioms and admitted proofs are rejected.
 The source inventory check requires every proof module to be imported.
 
-[verify.py](verify.py) compiles the unmodified module before each of sixty
+[verify.py](verify.py) compiles the unmodified module before each of seventy
 semantic mutations. A parser/import/name failure or timeout is not a
 successful rejection. Three further controls test unused external-namespace
 and private axioms and an admitted theorem against the compiled audit.
 The report records current source hashes and the actual audit output.
 
 The [recorded local checkpoint](validation.json) records the current standalone
-build, audited declaration/theorem counts, seventeen project modules, sixty
+build, audited declaration/theorem counts, twenty project modules, seventy
 paired semantic controls and three audit controls. Generated helpers are
 included in declaration counts. CI at the published commit is a separate
 check; this local record does not predict it.

@@ -82,6 +82,17 @@ MUTATIONS = [
     ("observe_after_dispatch", "OfferFactory", "(observed : (cursor.lower : Int) ≤ state cursor.now)", "(observed : (cursor.lower : Int) ≤ state (cursor.now + 1))"),
     ("invent_larger_dose", "OfferFactory", "hardware.latency, hardware.dose, hardware.capacity, hardware.maxWait⟩", "hardware.latency, hardware.dose + 1, hardware.capacity, hardware.maxWait⟩"),
 
+    ("admit_zero_coupling_margin", "CompositionCheck", "0 < w.eta ∧ ∀ i", "0 ≤ w.eta ∧ ∀ i"),
+    ("forget_certificate_spillover", "CompositionCheck", "w.eta + weighted w.weights (spill w.damage i) (List.finRange n) ≤", "w.eta ≤"),
+    ("omit_fallback_entry_funding", "Availability", "deficit c cursor.lower ≤ cursor.debt + cursor.credit\n", "True\n"),
+    ("understate_fallback_lease", "Availability", "cursor.now + max c.maxWait c.latency⟩", "cursor.now⟩"),
+    ("make_fallback_renewal_block", "Availability", "| some chosen => .phase cursor chosen (renew c (advance cursor chosen) n)", "| some chosen => .blocked cursor"),
+    ("drop_all_time_physics", "Availability", "(physics : ∀ n, EpochSafety.Realizes state (renew c cursor n))", "(physics : ∀ n, n ≤ 1 → EpochSafety.Realizes state (renew c cursor n))"),
+    ("erase_observation_price", "ObservationCost", "prices.observation * attempts plan + prices.write * plan.writes", "prices.write * plan.writes"),
+    ("do_not_bill_blocked_sample", "ObservationCost", "| .blocked _ => 1", "| .blocked _ => 0"),
+    ("reward_premature_completion", "ObservationCost", "completed plan && decide (plan.finish.now = deadline)", "completed plan && decide (plan.finish.now ≤ deadline)"),
+    ("choose_more_expensive_plan", "ObservationCost", "if price next ≤ price best then next else best", "if price best ≤ price next then next else best"),
+
 
 
 ]
@@ -107,7 +118,7 @@ def hygiene():
     files = sorted(PROJECT.glob("*.lean"))
     root_imports = set((ROOT / "SelfCertifyingLearning.lean").read_text().splitlines())
     expected = {"import SelfCertifyingLearning." + p.stem for p in files}
-    if root_imports != expected or len(files) != 16:
+    if root_imports != expected or len(files) != 19:
         raise RuntimeError("Root module must import exactly every maintained proof module")
     manifest = json.loads((ROOT / "lake-manifest.json").read_text())
     if manifest["packages"] or "[[require]]" in (ROOT / "lakefile.toml").read_text():
