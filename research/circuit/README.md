@@ -41,6 +41,11 @@ or transfer those numerical read windows to this circuit. The bridge README
 distinguishes the substantive results from algebraic interface identities;
 audit declaration counts measure coverage, not scientific contributions.
 
+The [fixed need-tolerance test rule](NEED_TEST_PROTOCOL.md) records the
+qualification criteria, required measurements and failure reporting before
+any new campaign. The existing 200-port analysis is retrospective; the rule
+does not turn it into a preregistered experiment.
+
 ## Results
 
 The campaign has 141 runs. All produced a result, and the guard
