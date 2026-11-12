@@ -8,6 +8,10 @@ One full exposed ERROR section adds `3/5` to its port, which represents one
 credit or sets the selector. The encoding is relative to that port's starting
 log-gain.
 
+This folder contains 36 Lean modules: 33 implementation modules and three
+focused selector audits. The reusable selector modules are mapped below;
+the other sections describe the lesson, dispatch and report constructions.
+
 ## What Lean checks
 
 [`encodes_iff_counts`](NativeLearning.lean) applies to any native execution
@@ -298,13 +302,60 @@ upward-crossing execution runs through actual admission at the learner.
 
 The two credit gains belong to a separate memory cell in this design.
 The dispatch theorem contains the controller and receiver. Connecting a
-credit cell to this capped controller and reusing its read remain open.
+credit cell to this capped controller remains open. Repeated local reads
+are constructed by the fixed-calendar programme below; its theorem does
+not iterate the two-cell dispatch to the learner.
 The serial experiment below uses a one-shot selector. Saturated recovery
 and the prepared ignition gain are initial conditions here. From
 `b = 0.08`, ten full MARK doses of 0.1 leave recovery at 1.08, so
 preparing the cap by MARK would require an eleventh protected section
 with the last dose cut short. No such preparation sequence is part of
 this theorem.
+
+## Reusing the selector with a fixed calendar
+
+| Module | Contract |
+|---|---|
+| [SelectorReturn](SelectorReturn.lean) | complete the native return after a read, with sensors at rest and no active RAW; no coordinate is reset |
+| [SelectorReprepare](SelectorReprepare.lean) | one re-preparation with an explicit ignition input and routed work/read pulses; this earlier constructor does not choose an autonomous restart date |
+| [SelectorRoundUniversal](SelectorRoundUniversal.lean) | transfer terminal observations, FIRE dates and delivery multisets between complete executions |
+| [SelectorRound](SelectorRound.lean) | `RoundReady` and one round on a calendar of period 32 |
+| [SelectorRounds](SelectorRounds.lean) | finite recurrence, preservation with future calendar tokens, exact `3n` deliveries and complete-execution uniqueness |
+| [SelectorRoundBootstrap](SelectorRoundBootstrap.lean) | initial read admission plus the recurrence, exact `3n+1` deliveries and `2n+1` FIREs |
+| [SelectorReturnAudit](SelectorReturnAudit.lean), [SelectorReprepareAudit](SelectorReprepareAudit.lean), [SelectorRoundAudit](SelectorRoundAudit.lean) | focused declaration and axiom audits, also imported by the package audit |
+
+`RoundReady` is a quiet READY boundary: the physical invariant holds,
+recovery is at `11/10`, ignition gain is in `[9/5, 11/5]`, work gain is at
+its fabrication cap, and selector log-gain is the stored value `0` or `0.6`.
+Sensors are at rest, RAW is absent and the local pending queue is empty.
+`calendar_round_exists` restores this boundary while preserving every gain
+and recovery. It constructs the next prepared read by actual impulses.
+
+For a boundary at `origin + 32k`, ignition is due at `origin + 32k + 1`.
+The same router forwards the ignition FIRE to work and read; its FIRE
+windows and all external ignition dates are fixed before execution.
+`calendar_rounds_exists` covers any finite number of rounds, either stored
+value, either fabrication box and every delay function within the declared
+work-delay budget. Each round consumes three deliveries and emits two FIREs.
+`ScheduledRoundReady` describes the actual intermediate states: the remaining
+calendar is still present, up to queue permutation. The proof carries these
+tokens through the execution; it does not insert them between rounds.
+
+`delivered_calendar_program_exists` includes the first read as a real
+delivery. Starting from its prepared resources, it completes at
+`start + 32(n+1)` with exactly `3n+1` deliveries and `2n+1` FIREs.
+`prepared_delivered_calendar_program_exists` supplies concrete resources
+for every finite count and both stored values. The `every_complete` and
+`every_crossing_complete` contracts of `DeliveredCalendarProgram` fix the
+final state, FIRE dates and delivery multiset for all complete histories
+through that horizon, under the same initial state, parameters and router.
+Complete upward-crossing histories are also constructed, so the universal
+statements are not vacuous.
+
+The finite ignition calendar remains an external input. The theorem does
+not manufacture the initially capped recovery/work gain or prepared read
+charge from birth, nor connect repeated reads to a changing credit memory
+or an adaptive teaching rule.
 
 ## Full lessons and a routed acceptance test
 
@@ -379,8 +430,9 @@ calendar. They do not yet read the learners’ physical state. Feeding
 them from learner readouts is the next step. The lesson receipts
 exclude probes, clock inputs and credit deliveries. The
 selector is read once, and the low read can write to its sensor gain.
-A reusable selector and an adaptive rule for arbitrary lesson shapes
-are separate problems.
+The reusable selector programme above is separate from this serial
+experiment. Connecting its rounds to this experiment and to an adaptive
+rule for arbitrary lesson shapes is not part of the serial theorem.
 
 ## Feedback from a learner's actual readout
 

@@ -19,17 +19,37 @@ has a README with the statements of its modules.
 
 | Folder | Content | Modules |
 |---|---|---|
-| [`Teaching/`](Teaching/README.md) | credits and selector of the teaching loop in port gains, lessons, acceptance tests, report circuits | 27 |
+| [`Teaching/`](Teaching/README.md) | credits and reusable selector reads in port gains, lessons, acceptance tests, report circuits | 36 |
 | [`Thresholds/`](Thresholds/README.md) | adaptive rounds, decision trees, realized FIRE and ERROR thresholds, training then read of one port | 12 |
 | [`Coincidence/`](Coincidence/README.md) | the v0.3.0 coincidence separation, the constant-current comparison, offset and delay | 9 |
 | [`Training/`](Training/README.md) | the stop-learning regime: silent and firing steps, the training loop, the joint read, trained coincidence, lag | 10 |
 | [`Network/`](Network/README.md) | products of cells, wires, forward composition, networks of any depth, report windows | 6 |
-| [`Search/`](Search/README.md) | the need of a port, probe and gate cells, trees of questions, successive approximation | 7 |
+| [`Search/`](Search/README.md) | fixed and variable-dose need bounds, probe and gate cells, trees of questions, successive approximation | 8 |
 
-[`NativeAudit.lean`](NativeAudit.lean) imports every module and runs the
-axiom audit.
+These counts cover 81 Lean modules, including the three focused selector
+audits in `Teaching`. [`NativeAudit.lean`](NativeAudit.lean) imports every
+module, directly or transitively, and runs the axiom audit. Its current scope
+is 83 modules including the two parent `RecursiveLearning` modules:
+6,306 declarations, of which 3,882 are theorems.
 
 The modules are named by folder: `import Training.SilentStep`.
+
+## Selector reuse and variable doses
+
+These additions have their own hypotheses; they do not extend the compiled
+search networks or the stop-learning regime below automatically.
+
+| Result | Main theorem | Scope |
+|---|---|---|
+| reusable selector read | [`calendar_rounds_exists`](Teaching/SelectorRounds.lean) | fixed period 32, every finite round count and admissible delay function; preserved gains and recovery, exactly `3n` deliveries |
+| first read plus reusable rounds | [`delivered_calendar_program_exists`](Teaching/SelectorRoundBootstrap.lean) | first read is an actual charged delivery: `3n+1` deliveries and `2n+1` FIREs; every complete run has the same final state and FIRE dates |
+| variable-dose scalar need | [`needAlong_of_variable_doses`](Search/VariableNeedTolerance.lean) | nonnegative, independently varying doses with a per-step error budget |
+| cumulative scalar need | [`needAlong_of_cumulative_tolerance`](Search/VariableNeedTolerance.lean) | a cumulative gain budget through the target count, with gain bounded below by its target-count value afterwards |
+
+The [Teaching map](Teaching/README.md#reusing-the-selector-with-a-fixed-calendar)
+states the prepared resources and external-calendar limit. The
+[Search map](Search/README.md#variable-doses-and-cumulative-gain-error) states
+the scalar tolerance budget and its separation from native execution proofs.
 
 ## Map of the stop-learning results
 

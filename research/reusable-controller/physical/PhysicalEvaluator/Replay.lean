@@ -3,7 +3,11 @@ import PhysicalEvaluator.RecordedBridge
 /-! Executable replay of the public t6004 observations. This uses recorded
 data, not a newly simulated physical feedback loop. The equality to the
 certified environment is conditional on the physical premises in
-RecordedBridge, which are not constructed merely by decoding the CSV. -/
+RecordedBridge, which are not constructed merely by decoding the CSV.
+The concrete replay conclusions themselves do not depend on those premises:
+`replay_sound` and the discrete controller already prove them. The certificate
+variants only connect this fixed computation to a conditional physical
+interpretation; they do not establish that the physical premises hold. -/
 namespace ReusableController.PhysicalEvaluator.Replay
 open RecursiveLearning ReusableController.Adaptive RecordedData
 
@@ -33,16 +37,24 @@ def recordedTrainPulses : Nat := 21
 
 theorem recorded_readout : readoutCounts t6004p1Readings t6004p2Readings = some (6, 4) := by decide
 
+/-- Definitional equality for any supplied certificates: the environment's
+computational fields do not depend on their proof or physical-state fields.
+This does not construct the premises or validate them against a circuit. -/
 theorem replay_matches_certificates (p : PreparationPremises) (q : PracticePremises) :
     certifiedEnvironment (preparationCertificate p) (practiceCertificate q)
       start policies 1 20 1 = environment := by rfl
 
+/-- Conditional physical interpretation of a fixed decoded replay. The
+conclusion is independent of `p` and `q` and is also proved without them by
+`replay_sound`; the premises do not add a physical validation result. -/
 theorem replay_sound_from_certificates (p : PreparationPremises) (q : PracticePremises) :
     environment.Sound := by
   rw [← replay_matches_certificates p q]
   exact certified_environment_sound (preparationCertificate p) (practiceCertificate q)
     start policies 1 20 1 (by decide)
 
+/-- As with `replay_matches_certificates`, the computation is independent of
+the supplied envelope witnesses. Their physical validity remains external. -/
 theorem replay_matches_envelopes (p : PreparationEnvelopePremises) (q : PracticeEnvelopePremises) :
     certifiedEnvironment (preparationEnvelopeCertificate p).toProbeCertificate
       (practiceEnvelopeCertificate q).toProbeCertificate start policies 1 20 1 = environment := by rfl
@@ -65,6 +77,10 @@ theorem actual_selection_and_search :
     completed.memory.live.trialPulses = 148 ∧ completed.memory.live.attempts = 11 ∧
     recordedTrainPulses + completed.memory.spent + completed.memory.live.work 1 = 921 := by decide
 
+/-- The conclusion concerns a fixed, already decoded discrete replay and
+does not depend on `p` or `q`. It follows independently from `replay_sound`
+and the discrete adoption contract. This version supplies the conditional
+certificate interpretation, not evidence that its physical premises hold. -/
 theorem certified_replay_nondegradation (p : PreparationPremises) (q : PracticePremises) :
     Ready ⟨6, 4⟩ completed.memory.live ∧
       referenceCost 6 4 start policies 1 20 completed.memory.incumbent ≤
@@ -75,7 +91,9 @@ theorem certified_replay_nondegradation (p : PreparationPremises) (q : PracticeP
   exact h
 
 /-- The recorded replay also accepts the lower/upper observation-envelope
-premises directly; no constant physical read threshold is introduced. -/
+premises directly; no constant physical read threshold is introduced.
+The conclusion is independent of these witnesses and already follows for the
+decoded model from `replay_sound`; only its physical interpretation uses them. -/
 theorem envelope_replay_nondegradation
     (p : PreparationEnvelopePremises) (q : PracticeEnvelopePremises) :
     Ready ⟨6, 4⟩ completed.memory.live ∧

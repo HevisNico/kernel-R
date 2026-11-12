@@ -154,11 +154,13 @@ These are two constructed examples, not a statistical generalization claim.
   premises; it does not establish a physical cost sensor or a closed loop.
 - `needAlong_of_variable_doses` establishes dose-count stability under its
   gain, level and dose-error hypotheses. The circuit tolerance bridge on the
-  separate certification work supplies the premises for the finite
-  read-to-margin certificate. It is not an error bound for an arbitrary
+  separate certification work supplies numerical budgets, but does not
+  establish every physical premise of the finite read-to-margin certificate.
+  True-state gain/threshold bounds, scalar observation correspondence and
+  calibration transfer remain explicit obligations. It is not an error bound for an arbitrary
   policy-cost sensor. Physical cost calibration and the recorded-to-future-run
-  transfer remain open. No PR is merged and no scalar peak-to-gain or
-  calibration-coverage assumption is removed.
+  transfer remain open. No scalar peak-to-gain or calibration-coverage
+  assumption is removed by this bridge.
 - Non-degradation compares policies on the **same fixed benchmark**, from the
   same initial lesson. It is not a claim about an arbitrary later live state,
   new learner, new oracle or changing objective.

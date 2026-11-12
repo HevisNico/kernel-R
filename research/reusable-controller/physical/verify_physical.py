@@ -16,7 +16,8 @@ import tempfile
 HERE = Path(__file__).resolve().parent
 CONTROLLER = HERE.parent
 NATIVE = CONTROLLER.parent / 'recursive-learning/native'
-FILES = ['Counts.lean', 'Envelope.lean', 'Controller.lean', 'RecordedData.lean', 'RecordedBridge.lean', 'Replay.lean']
+FILES = ['Counts.lean', 'Envelope.lean', 'Controller.lean', 'RecordedData.lean',
+         'RecordedBridge.lean', 'Replay.lean', 'IdealExample.lean']
 
 
 def command(args, cwd=HERE, env=None, timeout=180):

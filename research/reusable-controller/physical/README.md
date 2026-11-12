@@ -26,8 +26,8 @@ Failure of the budget does not give a larger certified count tolerance.
 
 The prerequisite [VariableNeedTolerance.lean](../../recursive-learning/native/Search/VariableNeedTolerance.lean)
 is copied byte for byte from PR #107 at
-`9a30f822c8b01fddf11e2514c4aa4059750644cf`. No PR is merged and no prior result
-or certification script is changed.
+`9a30f822c8b01fddf11e2514c4aa4059750644cf`. That prerequisite was copied without
+merging PR #107; no prior result or certification script is changed.
 
 ## Proof chain and its premises
 
@@ -50,6 +50,14 @@ Detection must imply scalar firing at the lower threshold, and scalar firing
 at the upper threshold must imply detection. A low/high effective threshold
 is a logical witness, not an assertion that the real threshold was constant.
 This does not prove the circuit-to-scalar envelope correspondence itself.
+
+[IdealExample.lean](PhysicalEvaluator/IdealExample.lean) constructs concrete
+`FiniteProbeCertificate` values without physical hypotheses: unit threshold,
+resting charge `0.1`, constant dose `1/20` and zero gain/threshold errors.
+Their executable observations are false until the target count and true at
+that count. Instances at counts two and three show that the certificate
+interface is inhabited and derive zero margin error for those ideal needs.
+These are scalar-model examples, not calibrated circuit realizations.
 
 `readoutCounts` returns `none` when a FIRE is missing, including on a nonempty
 all-false trace. Decoding alone is not certification: an uncertified trace can
@@ -120,6 +128,13 @@ Simulation runtime and hardware energy are not pulse counts. The conditional
 `replay_matches_envelopes`/`envelope_replay_nondegradation` entry connect this
 executable replay to the supplied physical premises, without claiming that
 the replay itself establishes them.
+
+The conclusions of the `certified_replay_nondegradation` and
+`envelope_replay_nondegradation` lemmas are properties of the fixed decoded
+model and do not depend on their physical-premise arguments. They already
+follow from `replay_sound` and the discrete controller contract. Supplying the
+premises gives a conditional physical interpretation, not additional evidence
+that those premises hold. The docstrings make this distinction explicit.
 
 ## What still prevents a complete physical closed loop
 
