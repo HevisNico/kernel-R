@@ -48,8 +48,8 @@ fail**. The table of verdicts is in [`VERDICTS.md`](VERDICTS.md).
 | Do the cells read alike? | All 100 cells fire on the joint pulse, between 0.2595 and 0.2730, sigma 0.0029. Every pair of cells is within 0.05 |
 | Does a port fall silent again after its stop? | 9 ports of 200 have one silent pulse after their first FIRE. All 9 first fired later than 0.97, at the very end of the pulse. None does it twice |
 | Corners and temperature | The cell stops at ss, ff, sf, fs, at −40 °C and at 125 °C, after 4, 4, 4, 4, 2 and 7 silent pulses. Joint read from 0.2635 to 0.2705 |
-| Without a leak, does the gain hold? | Yes: no silent pulse after the stop in a run of 150 pulses, with and without noise |
-| Under a leak, does the cell maintain itself? | Yes. Under 0.1 TΩ it falls silent for one pulse every 22 or 23 periods, writes one dose and fires again. The stored voltage stays within one dose. With noise: every 21 to 25 periods, within 1.11 dose |
+| Without a leak, does the gain hold? | Yes: no silent pulse after the stop in a run of 150 pulses, with and without noise. With noise the stored voltage stays within 0.22 to 0.29 dose, over 5 runs |
+| Under a leak, does the cell maintain itself? | Yes. Under 0.1 TΩ it falls silent for one pulse every 22 or 23 periods, writes one dose and fires again. The stored voltage stays within one dose. With noise: every 21 to 25 periods, within 1.06 to 1.18 dose, over 5 runs |
 | With mismatch, noise and a leak? | The 8 cells maintain themselves: a silent pulse every 21.7 to 24.0 periods on average, never two in a row, within 1.03 to 1.18 dose |
 
 ![Nominal cell](figures/fig1_nominal.png)
@@ -72,9 +72,13 @@ Measured 0.00128 on 20 runs. Every read is inside the predicted range.
 - Twenty runs do not fix this sigma well. Resampling the 20 runs gives
   a 95% interval from 0.00068 to 0.00166. The limit of 0.0012 is inside
   it.
-- A second sample of the same 20 runs, made after the campaign, gives
-  0.00062 and holds P2. See [`COMPLEMENT.md`](COMPLEMENT.md).
-- The campaign does not settle P2. Its verdict as written stays: fails.
+- Three more samples of the same 20 runs, made after the campaign,
+  give 0.00062, 0.00106 and 0.00097. P2 holds on these three and fails
+  on the campaign. Their 60 reads together have a sigma of 0.00089.
+  See [`COMPLEMENT.md`](COMPLEMENT.md).
+- The sigma moves from 0.0006 to 0.0013 between samples of 20 runs.
+  The limit of 0.0012 was set too close to it. The verdict of the
+  campaign as written stays: fails.
 
 **P6. Number of silent pulses with mismatch.** Predicted 2 to 8 on
 every port. One port of 200 stops after 1 silent pulse.
@@ -105,8 +109,8 @@ every port. One port of 200 stops after 1 silent pulse.
 
 ## What can be reproduced
 
-- **A run without noise is reproduced exactly.** The nominal run, run
-  again, gives the same file byte for byte.
+- **A run without noise is reproduced exactly.** The nominal run and
+  the run at −40 °C, run again, give the same files byte for byte.
 - **A noisy run is not.** Its seed sets its mismatch sample and not its
   noise. Run again with the same seed, it draws another noise sample.
   The seeds stay in the list of runs, but they do not replay the noise.
@@ -120,11 +124,9 @@ every port. One port of 200 stops after 1 silent pulse.
 - **A number that comes from noise has an interval.** The intervals are
   at the end of [`VERDICTS.md`](VERDICTS.md). The repeated runs are in
   [`COMPLEMENT.md`](COMPLEMENT.md).
-
-**Status of the complement: two series are still being computed.** The
-four repeats of each noisy refresh run, two more samples of the 20
-noise runs and the replay of one corner without noise are not in this
-folder yet. `COMPLEMENT.md` marks them as missing.
+- **The verdicts come out again.** On three more samples of the 20
+  noise runs, P1, P3, P4 and P5 hold each time, and P2 holds. On four
+  more runs of each noisy refresh run, P14 and P17 hold each time.
 
 ## Files
 

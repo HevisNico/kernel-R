@@ -7,6 +7,7 @@ Run after the campaign by `complement.py` and read by `compare.py`. Nothing here
 The option `rel` was added to `run.py` after the campaign. Runs without noise are run again without it. They must give the result of the campaign exactly: if they did not, something else than the noise would vary from one run to the next.
 
 - `nom`: identical byte for byte to the result of the campaign.
+- `pvt_tt_m40`: identical byte for byte to the result of the campaign.
 
 ## Runs replayed with the same seeds
 
@@ -35,10 +36,13 @@ P1 to P5 are judged again on each sample, as written. The verdicts of the campai
 |---|---|---|---|---|---|---|---|---|
 | Campaign | 0.00128 | 0.26450 to 0.27000 | 0.071 mV | holds | fails | holds | holds | holds |
 | Replay 1 | 0.00062 | 0.26645 to 0.26875 | 0.070 mV | holds | holds | holds | holds | holds |
+| Replay 2 | 0.00106 | 0.26545 to 0.26960 | 0.070 mV | holds | holds | holds | holds | holds |
+| Replay 3 | 0.00097 | 0.26555 to 0.26960 | 0.063 mV | holds | holds | holds | holds | holds |
 
-- Over the 2 samples the sigma of the joint read goes from 0.00062 to 0.00128, a ratio of 2.0.
+- Of 4 samples: P1 holds on 4, P2 holds on 3, P3 holds on 4, P4 holds on 4, P5 holds on 4.
+- Over the 4 samples the sigma of the joint read goes from 0.00062 to 0.00128, a ratio of 2.0.
 - If the joint reads followed a normal law, a sigma measured on 20 runs would be uncertain by about 16%. Resampling the 20 runs of the campaign gives a wider interval: see the intervals in `VERDICTS.md`.
-- The 20 joint reads of the replays together: sigma 0.00062, from 0.26645 to 0.26875.
+- The 60 joint reads of the replays together: sigma 0.00089, from 0.26545 to 0.26960.
 
 ## The two noisy refresh runs, repeated
 
@@ -49,20 +53,24 @@ The campaign has one run of each. They are run again four times each, with the s
 | Sample | Relapses | Distances between relapses | Band in doses | P14 |
 |---|---|---|---|---|
 | Campaign | 0 | — | 0.29 | holds |
-| Repeat 1 | — | — | — | not evaluable: run missing |
-| Repeat 2 | — | — | — | not evaluable: run missing |
-| Repeat 3 | — | — | — | not evaluable: run missing |
-| Repeat 4 | — | — | — | not evaluable: run missing |
+| Repeat 1 | 0 | — | 0.22 | holds |
+| Repeat 2 | 0 | — | 0.26 | holds |
+| Repeat 3 | 0 | — | 0.29 | holds |
+| Repeat 4 | 0 | — | 0.29 | holds |
+
+Over 5 runs: 0 to 0 relapses, band from 0.22 to 0.29 dose.
 
 ### 0.1 TΩ, with noise, 150 pulses (P17: relapses 17 to 28 periods apart, never two silent pulses in a row, band within 1.6 dose)
 
 | Sample | Relapses | Distances between relapses | Band in doses | P17 |
 |---|---|---|---|---|
 | Campaign | 7 | 23, 23, 22, 25, 21, 23 | 1.11 | holds |
-| Repeat 1 | — | — | — | not evaluable: run missing |
-| Repeat 2 | — | — | — | not evaluable: run missing |
-| Repeat 3 | — | — | — | not evaluable: run missing |
-| Repeat 4 | — | — | — | not evaluable: run missing |
+| Repeat 1 | 7 | 22, 22, 23, 22, 22, 25 | 1.18 | holds |
+| Repeat 2 | 7 | 24, 25, 22, 23, 23, 22 | 1.12 | holds |
+| Repeat 3 | 7 | 22, 22, 24, 23, 21, 24 | 1.06 | holds |
+| Repeat 4 | 7 | 22, 23, 23, 24, 21, 22 | 1.11 | holds |
+
+Over 5 runs: 7 to 7 relapses, band from 1.06 to 1.18 dose, distances from 21 to 25 periods, mean 22.8.
 
 ## The charge received by the integrator
 

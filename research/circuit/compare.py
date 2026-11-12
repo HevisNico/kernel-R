@@ -141,18 +141,21 @@ def main(out="COMPLEMENT.md"):
         L.append("Not evaluable: no result of the campaign.")
     else:
         L += ["| Sample | Sigma of the joint read | Range of the joint read | Sigma of a port at rest | P1 | P2 | P3 | P4 | P5 |", "|---|---|---|---|---|---|---|---|---|"]
-        sig, fine = [], []
+        sig, fine, held = [], [], {p: 0 for p in ("P1", "P2", "P3", "P4", "P5")}
         for label, d in samples:
             v, S = verdicts_with(d, nz)
             z = S.get("noise", {})
             j = z.get("joint") or []
             sig.append(z.get("joint_sigma"))
+            for p in held:
+                held[p] += v[p]["status"] == analyze.HOLDS
             if d != "results":
                 fine += j
             L.append(f"| {label} | {analyze.fm(z.get('joint_sigma'), '.5f')} | {analyze.span(j, '.5f')} | {analyze.fm(z.get('idle_sigma_mV'), '.3f')} mV | "
                      + " | ".join(v[p]["status"] for p in ("P1", "P2", "P3", "P4", "P5")) + " |")
         sig = [s for s in sig if s]
         L.append("")
+        L.append(f"- Of {len(samples)} samples: " + ", ".join(f"{p} holds on {k}" for p, k in held.items()) + ".")
         if len(sig) >= 2:
             L.append(f"- Over the {len(sig)} samples the sigma of the joint read goes from {min(sig):.5f} to {max(sig):.5f}, a ratio of {max(sig) / min(sig):.1f}.")
             L.append(f"- If the joint reads followed a normal law, a sigma measured on 20 runs would be uncertain by about {100 / math.sqrt(38):.0f}%. "
