@@ -40,7 +40,7 @@ reserve may differ between rounds and are never reset.
 The physical foundation's `PreparedSection` allows residual main charge and a
 narrower recovery band. Its `Execution.learned_pulse` analyses a supplied,
 birth-reachable isolated-input execution. The original READY-birth construction
-now reaches [the complete N=3 cadence at789.9](HYBRID_EXECUTION.md#constructed-protocol-checkpoint),
+now reaches [the complete N=3 cadence at789.9](hybrid/CHECKPOINT.md#constructed-protocol-checkpoint),
 with cumulative A54/B61/C34, all cells READY/q=0.1, no RAW and an empty global
 queue. That finite network witness does not supply an indefinite network
 continuation or learned-domain membership for its higher-gain endpoint.

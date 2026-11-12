@@ -142,3 +142,16 @@ The theorem proofs are machine-checked. Mathematical semantic review therefore f
 - [Fresh Lean export](https://github.com/HevisNico/kernel-R/blob/04ca7fbd6927f893b1da4e7fd4ac6dadf0dc6196/proof/lean/scripts/evidence/export_trusted_base.py), [source boundary](https://github.com/HevisNico/kernel-R/blob/04ca7fbd6927f893b1da4e7fd4ac6dadf0dc6196/proof/lean/scripts/check_trusted_source_boundary.py), and [CI workflow](https://github.com/HevisNico/kernel-R/blob/04ca7fbd6927f893b1da4e7fd4ac6dadf0dc6196/.github/workflows/lean.yml): the exported list is rechecked, existing Lean declarations are preserved, and the controls run at the recorded revision.
 
 Full CI status and validation counts must be read at their exact recorded commit. The generated declaration list is not itself a claim that a CI run passed.
+
+## Research packages outside this list
+
+The packages under [`research/`](../research/README.md), including the
+trained cells, networks and searches of
+[`research/recursive-learning/native/`](../research/recursive-learning/native/README.md),
+are not part of this trusted base and do not change it. They import the
+kernel definitions of `proof/lean` unchanged and add their own statements.
+Their declarations are covered by their own axiom audits, run in their own
+CI workflows, and their regime and hypotheses are reviewed separately; see
+[REVIEW.md](../REVIEW.md#trained-cells-networks-and-searches-v040). A reader
+of one of their theorems trusts the fixed declarations above, plus the
+definitions that theorem's own statement uses.

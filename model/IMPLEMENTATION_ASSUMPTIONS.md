@@ -10,7 +10,7 @@ device has been built, and none of them is verified here.
 The dose of a full ERROR phase is `8 × (entry − exit)`. It depends on
 the distance between the two thresholds and not on where they sit. An
 error common to both thresholds leaves the dose unchanged.
-[`training_read_common_offset`](../research/recursive-learning/native/OffsetAndDelay.lean)
+[`training_read_common_offset`](../research/recursive-learning/native/Coincidence/OffsetAndDelay.lean)
 states this for one training pulse and one read.
 
 A circuit obtains a common error when one comparator detects both
@@ -24,7 +24,7 @@ instead.
 The model switches phase at the instant a charge meets its threshold. A
 circuit reacts a short time later, and the sensor keeps discharging in
 the meantime. The dose then depends on the discharge rates.
-[`training_read_reaction_delay`](../research/recursive-learning/native/OffsetAndDelay.lean)
+[`training_read_reaction_delay`](../research/recursive-learning/native/Coincidence/OffsetAndDelay.lean)
 bounds the change of the increment by `2.4 × d` for a delay `d` of at
 most 0.01 model units, the same at both thresholds.
 
@@ -40,7 +40,7 @@ settle, so the pulse acts on the main charge a little later. A lag that
 is the same for every pulse of a cell shifts the FIRE dates of that cell
 and nothing else. The coincidence decision then depends on the
 difference between the lags of two cells:
-[`trained_dates_decide_lag`](../research/recursive-learning/native/ReadLag.lean)
+[`trained_dates_decide_lag`](../research/recursive-learning/native/Training/ReadLag.lean)
 allows 3/100 of a unit. A lag that depends on the pulse or on the port
 is not covered.
 
@@ -73,8 +73,8 @@ port is trained by identical pulses until the cell fires, so its final
 gain follows the cell's own FIRE level. For start gains that do not fire
 and a FIRE level between 0.95 and 1.05, the read latency of two trained
 ports lies in a window that depends on neither. See
-[`trained_read_exists`](../research/recursive-learning/native/JointRead.lean)
-and [`OpenCell.read`](../research/recursive-learning/native/FreeRead.lean).
+[`trained_read_exists`](../research/recursive-learning/native/Training/JointRead.lean)
+and [`OpenCell.read`](../research/recursive-learning/native/Network/FreeRead.lean).
 The pulse amplitude and the unit response remain exact there.
 
 The same theorems give a tolerance for the number of doses a port needs
@@ -83,7 +83,7 @@ and `ℓ` on the FIRE level, the need is `m` when
 `a + m * b + 20/17 * ℓ + 1/8000 < d₀ / 2`, for a nominal dose `d₀`. The
 dose error is counted once for each dose, so a search over `2^k` needs
 asks for a dose error below about `d₀ / 2^(k+1)`. See
-[`needIs_of_tolerance`](../research/recursive-learning/native/NeedTolerance.lean).
+[`needIs_of_tolerance`](../research/recursive-learning/native/Search/NeedTolerance.lean).
 
 The searches built on these cells use wires that release pulses at
 preset dates when a FIRE falls inside a window. Such a wire stands for
