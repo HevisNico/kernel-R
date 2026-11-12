@@ -6,3 +6,5 @@ import PhysicalEvaluator.RecordedBridge
 import PhysicalEvaluator.Replay
 import PhysicalEvaluator.IdealExample
 import PhysicalEvaluator.ReadoutBridge
+import PhysicalEvaluator.PeakBridge
+import PhysicalEvaluator.PeakMeasurement

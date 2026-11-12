@@ -18,7 +18,8 @@ CONTROLLER = HERE.parent
 NATIVE = CONTROLLER.parent / 'recursive-learning/native'
 FILES = ['Counts.lean', 'Envelope.lean', 'Controller.lean', 'RecordedData.lean',
          'RecordedBridge.lean', 'Replay.lean', 'LogIntervals.lean', 'MeasuredGains.lean',
-         'Readout.lean', 'RecordedGains.lean', 'ReadoutBridge.lean', 'IdealExample.lean']
+         'Readout.lean', 'RecordedGains.lean', 'ReadoutBridge.lean', 'IdealExample.lean',
+         'PeakError.lean', 'PeakBridge.lean', 'PeakMeasurement.lean']
 
 
 def command(args, cwd=HERE, env=None, timeout=180):
@@ -115,6 +116,18 @@ def main():
             '2 * |logArgument x| ^ (2 * n + 1)', '|logArgument x| ^ (2 * n + 1)'), None),
         ('false_exponential_lower_bound', 'Readout.lean', lambda s: replace_once(s,
             '(60653065 / 100000000 : ℝ)', '(60653068 / 100000000 : ℝ)'), None),
+        ('optimistic_log_denominator', 'PeakError.lean', lambda s: replace_once(s,
+            '0 < truth ∧ |Real.log truth - Real.log measured| ≤ eps / (L - eps) := by',
+            '0 < truth ∧ |Real.log truth - Real.log measured| ≤ eps / L := by'), None),
+        ('omit_charge_measurement_error', 'PeakMeasurement.lean', lambda s: replace_once(s,
+            'correctedPeak qMeasured cMeasured duration kappa| ≤\n      Real.exp kappa * (epsilonQ + Real.exp (-duration) * epsilonC) := by',
+            'correctedPeak qMeasured cMeasured duration kappa| ≤\n      Real.exp kappa * epsilonQ := by'), None),
+        ('omit_model_error_budget', 'PeakMeasurement.lean', lambda s: replace_once(s,
+            '(budget : epsilonModel + Real.exp kappa * (epsilonQ + Real.exp (-duration) * epsilonC) ≤ epsilon)',
+            '(budget : Real.exp kappa * (epsilonQ + Real.exp (-duration) * epsilonC) ≤ epsilon)'), None),
+        ('weaken_peak_residual_limit', 'PeakBridge.lean', lambda s: replace_once(s,
+            'epsilonAdmissible : epsilonPeak ≤ 7 / 100010',
+            'epsilonAdmissible : epsilonPeak ≤ 1 / 10000'), None),
     ]
     results = []
     for name, changed, mutate, audit_marker in mutations:

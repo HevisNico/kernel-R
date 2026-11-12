@@ -40,6 +40,8 @@ merging PR #107; no prior result or certification script is changed.
 | [RecordedBridge.lean](PhysicalEvaluator/RecordedBridge.lean) | Numerical constants discharge room/floor in conditional certificate constructors, including a direct envelope entry | Explicit gain, cumulative, charge and scalar level/envelope correspondence fields |
 | [RecordedGains.lean](PhysicalEvaluator/RecordedGains.lean) | Initial and cumulative inferred-gain bounds recomputed from twelve published reads, including proved log/exp enclosures | Published decimal readings and fixed scalar inference formula |
 | [ReadoutBridge.lean](PhysicalEvaluator/ReadoutBridge.lean) | Those inferred bounds discharge the true-gain premises after paying an explicit readout residual | True normalized gain differs from the inferred gain by at most `1e-4`, plus rest-state and detection envelopes |
+| [PeakMeasurement.lean](PhysicalEvaluator/PeakMeasurement.lean) | Peak and initial-charge measurement errors propagate to a corrected-amplitude budget, together with a separate model residual | Supplied measurement-error bounds and physical/model discrepancy |
+| [PeakError.lean](PhysicalEvaluator/PeakError.lean), [PeakBridge.lean](PhysicalEvaluator/PeakBridge.lean) | Amplitude error becomes a log-gain error and feeds the recorded controller contract | A physical corrected-amplitude residual within the proved admissible budget |
 | [Controller.lean](PhysicalEvaluator/Controller.lean) | Derived feasibility precision, exact computed-cost precision, Ready, retained reference-cost non-degradation and budgets | Fixed two-block benchmark and declared resource accounting |
 
 `FiniteProbeCertificate m` contains only `m+1` samples. It has no exact-count
@@ -154,6 +156,68 @@ from `eps_kappa_cohort`; the two saved test trains cannot establish it. The
 comparison to the published budgets above does not require substituting either
 empirical estimate for the unproved physical residual.
 
+### From a peak residual to the gain budget
+
+The new entry uses an explicit corrected-amplitude residual `epsilonPeak`.
+For a recorded logarithm `y`, the reconstructed amplitude is `exp(y)`;
+the scalar model's amplitude is `response(1) * exp(trueGain)`. The physical
+premise bounds their absolute difference by `epsilonPeak`. For a FIRE read,
+the reconstructed amplitude includes the early-read correction; it is not
+the raw `q_peak` column.
+
+The generic bound is
+
+```text
+measuredAmplitude >= L > 0, 0 <= epsilonPeak < L
+abs(trueAmplitude - measuredAmplitude) <= epsilonPeak
+    => abs(log(trueAmplitude) - log(measuredAmplitude))
+         <= epsilonPeak / (L - epsilonPeak).
+```
+
+The denominator pays for uncertainty in the true amplitude. Replacing it
+with `L` would generally underestimate the error. `PeakError.lean` proves
+this inequality and the normalization to scalar log gain. Its correction
+variant additionally pays `epsilonKappa` when the additive logarithmic
+correction has that uncertainty.
+
+For all twelve recorded reads, `PeakBridge.lean` proves the reconstructed
+amplitude is at least `7/10`, using the previously checked gain intervals.
+Thus any nonnegative residual satisfying
+
+```text
+epsilonPeak <= 7/100010
+```
+
+gives log-gain error at most `1e-4`. The concrete illustrative residual
+`1/20000` gives the exact bound `1/13999`, below `1e-4`.
+`peak_residual_controller_contract` then recovers Ready and retained
+reference-cost non-degradation with the same explicit rest-state and
+detection-envelope premises. These are admissible budgets in model amplitude
+units, **not measured peak errors or a new voltage calibration**.
+
+The measurement ledger is also explicit. With the same reference duration
+`t` and correction `kappa` for the physical and reported readings, define
+
+```text
+correctedPeak(q,c,t,kappa) = exp(kappa) * (q - 0.1 - (c - 0.1)*exp(-t))
+```
+
+If peak and initial-charge readings have errors bounded by `epsilonQ` and
+`epsilonC`, their corrected-amplitude difference is bounded by
+`exp(kappa) * (epsilonQ + exp(-t)*epsilonC)`. With a separately supplied
+scalar-model residual `epsilonModel`, the total is
+
+```text
+epsilonModel + exp(kappa) * (epsilonQ + exp(-t)*epsilonC).
+```
+
+`gain_error_of_measurements` composes that ledger with the logarithmic bound.
+The fixed references do not assert exact physical timing or calibration:
+any mismatch in timing, correction, waveform or model must be covered by the
+supplied model residual, or a separate correction budget where applicable.
+The theorem does not estimate those errors from count agreement. No #109
+data or empirical residual bound is introduced by this checkpoint.
+
 [Replay.lean](PhysicalEvaluator/Replay.lean) actually runs two policies from
 lesson `(10,9)`, with overhead one and twenty lesson uses per episode:
 
@@ -189,10 +253,11 @@ that those premises hold. The docstrings make this distinction explicit.
 1. PR #107's scalar peak-to-gain correspondence and transfer of `h_mu` remain
    conditional. `h_mu` is a worst case on six cells, not a bound established
    for each test cell. This work adds no leak scans or new calibration coverage.
-2. The inferred-gain arithmetic is now proved from the published decimals.
-   Its relation to true gains, the threshold bounds and scalar detection
-   envelopes remain physical obligations. The new readout entry exposes an
-   explicit residual bound; it does not establish that bound empirically.
+2. The inferred-gain arithmetic and amplitude-to-gain error transfer are
+   proved. The physical amplitude/model residual, threshold bounds and
+   scalar detection envelopes remain obligations. Neither the numerical
+   admissible residual nor its measurement ledger establishes those bounds
+   empirically.
 3. A certificate for one recorded prefix does not establish that every later
    physical validation after preparation/reset reproduces those counts, or
    that two physical ports behave as the separable two-block learner under a
@@ -219,7 +284,7 @@ including private/generated/unused declarations, permitting only `propext`,
 `Classical.choice` and `Quot.sound`. [evidence-validation.json](evidence-validation.json)
 records twelve data mutations; [gain-validation.json](gain-validation.json)
 records four readout-data mutations and generated/source hashes;
-[physical-validation.json](physical-validation.json) records sixteen semantic
+[physical-validation.json](physical-validation.json) records twenty semantic
 proof mutations and source hashes. Parser/import failures never count as
 successful rejection. CI reproduces the build, all three verifiers and the
 replay, preserving their reports.
