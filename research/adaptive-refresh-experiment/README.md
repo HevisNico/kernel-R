@@ -38,3 +38,7 @@ Next physical work: establish a circuit state map and sensor correspondence,
 extract dose/loss intervals from actual refresh waveforms with explicit units,
 and check those premises against fabrication/noise conditions. A transistor
 jump experiment comes after that calibration and its own preregistration.
+
+After the registered v2 run, [R_CALIBRATION.md](R_CALIBRATION.md) derives nominal
+voltage/dose/leakage estimates from 13 existing refresh CSVs, separating net
+write increments from inferred gross dose. No v2 input or result was changed.
