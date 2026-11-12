@@ -1,0 +1,56 @@
+name: Self-certifying learning foundations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - research/self-certifying-learning/**
+      - .github/workflows/self-certifying-learning.yml
+  pull_request:
+    paths:
+      - research/self-certifying-learning/**
+      - .github/workflows/self-certifying-learning.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  foundations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: research/self-certifying-learning
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install the pinned Lean distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = 'leanprover/lean4:v4.35.0'
+          archive=$(mktemp "$RUNNER_TEMP/lean.XXXXXXXX.tar.zst")
+          install_dir=$(mktemp -d "$RUNNER_TEMP/lean.XXXXXXXX")
+          trap 'rm -f "$archive"' EXIT
+          download_toolchain() {
+            curl --fail --silent --show-error --location \
+              --retry 2 --retry-all-errors --retry-max-time 180 \
+              --connect-timeout 10 --max-time 180 --output "$archive" "$@" &&
+            printf '%s  %s\n' '7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d' "$archive" \
+              | sha256sum --check
+          }
+          download_toolchain -H 'Accept: application/octet-stream' \
+            "https://api.github.com/repos/leanprover/lean4/releases/assets/634574462?download=1&run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" ||
+          download_toolchain \
+            "https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst?run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          tar --no-same-owner --strip-components=1 --zstd -xf "$archive" -C "$install_dir"
+          "$install_dir/bin/lean" --version
+          printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
+      - name: Build, audit and reject semantic mutations
+        run: python3 -B verify.py --report .lake/validation.json
+      - name: Preserve validation and source hashes
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: self-certifying-learning-${{ github.event.pull_request.head.sha || github.sha }}
+          path: research/self-certifying-learning/.lake/validation.json
+          if-no-files-found: error

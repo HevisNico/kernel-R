@@ -1,7 +1,15 @@
 # Research packages
 
-Standalone Lean packages and numerical studies built on the Kernel R model.
+Standalone Lean packages and numerical studies related to the Kernel R model.
 Each has its own `lakefile.toml` and README.
+
+## Self-certifying learning foundations
+
+[`self-certifying-learning/`](self-certifying-learning/README.md) is an
+independent Lean/Std package for discrete repair budgets, weighted coupling
+certificates and observation deadlines, with a constructed two-level repair
+example and counterexamples. It imports no R definitions. Adaptive refresh
+and its physical implementation remain planned work.
 
 ## Recursive learning and trained cells
 
