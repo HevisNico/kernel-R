@@ -17,7 +17,8 @@ HERE = Path(__file__).resolve().parent
 CONTROLLER = HERE.parent
 NATIVE = CONTROLLER.parent / 'recursive-learning/native'
 FILES = ['Counts.lean', 'Envelope.lean', 'Controller.lean', 'RecordedData.lean',
-         'RecordedBridge.lean', 'Replay.lean', 'IdealExample.lean']
+         'RecordedBridge.lean', 'Replay.lean', 'LogIntervals.lean', 'MeasuredGains.lean',
+         'Readout.lean', 'RecordedGains.lean', 'ReadoutBridge.lean', 'IdealExample.lean']
 
 
 def command(args, cwd=HERE, env=None, timeout=180):
@@ -28,7 +29,8 @@ def command(args, cwd=HERE, env=None, timeout=180):
 def hashes():
     paths = [HERE / 'PhysicalEvaluator' / f for f in FILES]
     paths += [HERE / f for f in ['PhysicalEvaluator.lean', 'PhysicalAudit.lean', 'Trace.lean',
-              'lakefile.toml', 'lake-manifest.json', 'lean-toolchain', 'verify_physical.py', 'evidence_check.py']]
+              'lakefile.toml', 'lake-manifest.json', 'lean-toolchain', 'verify_physical.py',
+              'evidence_check.py', 'gain_check.py']]
     paths += sorted((HERE / 'evidence').iterdir())
     paths += sorted((CONTROLLER / 'ReusableController').glob('*.lean'))
     paths += [CONTROLLER / 'lakefile.toml', NATIVE / 'Search/VariableNeedTolerance.lean',
@@ -105,6 +107,14 @@ def main():
         ('unused_physical_axiom', 'Counts.lean', lambda s: s + '\naxiom unusedPhysicalAxiom : True\n',
             'Unexpected project axiom'),
         ('admitted_derived_accuracy', 'Counts.lean', admit_accuracy, 'Unexpected axiom sorryAx'),
+        ('reverse_response_normalization', 'MeasuredGains.lean', lambda s: replace_once(s,
+            ':= y - Real.log (response 1)', ':= y + Real.log (response 1)'), None),
+        ('omit_initial_readout_error', 'MeasuredGains.lean', lambda s: replace_once(s,
+            '≤ Bhat + deltak + delta0 := by', '≤ Bhat + deltak := by'), None),
+        ('halve_log_remainder', 'LogIntervals.lean', lambda s: replace_once(s,
+            '2 * |logArgument x| ^ (2 * n + 1)', '|logArgument x| ^ (2 * n + 1)'), None),
+        ('false_exponential_lower_bound', 'Readout.lean', lambda s: replace_once(s,
+            '(60653065 / 100000000 : ℝ)', '(60653068 / 100000000 : ℝ)'), None),
     ]
     results = []
     for name, changed, mutate, audit_marker in mutations:

@@ -1,7 +1,7 @@
 {
   "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
   "positive_build": true,
-  "axiom_audit": "info: PhysicalAudit.lean:7:0: Physical audit passed: 7234 declarations, 4617 theorems, 159 modules.",
+  "axiom_audit": "info: PhysicalAudit.lean:7:0: Physical audit passed: 7474 declarations, 4806 theorems, 164 modules.",
   "negative_controls": [
     {
       "mutation": "non_strict_room",
@@ -62,6 +62,26 @@
       "mutation": "admitted_derived_accuracy",
       "rejected": true,
       "check": "Unexpected axiom sorryAx"
+    },
+    {
+      "mutation": "reverse_response_normalization",
+      "rejected": true,
+      "check": "PhysicalEvaluator/MeasuredGains.lean"
+    },
+    {
+      "mutation": "omit_initial_readout_error",
+      "rejected": true,
+      "check": "PhysicalEvaluator/MeasuredGains.lean"
+    },
+    {
+      "mutation": "halve_log_remainder",
+      "rejected": true,
+      "check": "PhysicalEvaluator/LogIntervals.lean"
+    },
+    {
+      "mutation": "false_exponential_lower_bound",
+      "rejected": true,
+      "check": "PhysicalEvaluator/Readout.lean"
     }
   ],
   "source_sha256": {
@@ -71,15 +91,21 @@
     "PhysicalEvaluator/RecordedData.lean": "0c8fbca3513a93b67a90cc588db65f0d2eda03cf3d8f6cc7a04d17f06d130314",
     "PhysicalEvaluator/RecordedBridge.lean": "06b510e09c840868960c6667f5131943ebaeccc6e22360c6b58ab83d9b8b714d",
     "PhysicalEvaluator/Replay.lean": "a5ca9ee8d0bafacce1313629625ab2dc5c3388634cdeec988ae5cd354c4589ed",
+    "PhysicalEvaluator/LogIntervals.lean": "dafbc3915502002515d6b555322d72c7d9558df977f09699e19ecac7b47ea90a",
+    "PhysicalEvaluator/MeasuredGains.lean": "50592f8284a82857487b8815eb46df07cb6c9d4962389065cd0314831232b09f",
+    "PhysicalEvaluator/Readout.lean": "ee88f31ab215056162036decb0f87cdd853fba16c0bc40239a3cb04a9a973f2a",
+    "PhysicalEvaluator/RecordedGains.lean": "29b50a0b500c627c57c095e1f0732415fe1097f9cbf904174c36d0a5dd90556a",
+    "PhysicalEvaluator/ReadoutBridge.lean": "78921e10c0a6221bc3bbae004d39dd0b834fbf93136c471115fd82db89327d2e",
     "PhysicalEvaluator/IdealExample.lean": "c309de30136f979e62ca4a25330c86302a33fee04bf74c2ffa274d7abc7d18e7",
-    "PhysicalEvaluator.lean": "8875e02092dc0e61de95c4e53c16cde4b29670eb1599b9c7408a290d36497099",
+    "PhysicalEvaluator.lean": "ce8d52bbe35aabbff456cab89489cd5461cc155d52d2722aa3bc12c6a523d96a",
     "PhysicalAudit.lean": "c542dfcebbaae2b736e597370e1cf52c95925c6b2dd7df6bb39e43c8bb12a7fa",
     "Trace.lean": "457d5341247d4b99f58347afcb0734c09a5823019eefa64d1b40a924738481c0",
     "lakefile.toml": "0ed865355fdaa9feda87b993264f1dc74e8c58d4b96d485f91778353d7933b36",
     "lake-manifest.json": "72e719632edde1e781eb88aea35e05f785b945ee9274b799b98143f3e5385566",
     "lean-toolchain": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
-    "verify_physical.py": "e9573322d3fd097c5ee880cb6de4e3ac46d88a74f94a9524040f88d983668083",
+    "verify_physical.py": "11853f56788329575dd4cd9fa1467848a73f15b6846d7f21f8abb2947212e2fb",
     "evidence_check.py": "dac6091abf746a24d3c58cd04e9a9e3840cc4461e02adaa41323fbe1a910c96f",
+    "gain_check.py": "3e115c3fbd835d108e6e776f4cd60612b5338a583fc16713d415e8a9a15273a3",
     "evidence/calibration.json": "a36f0ef3d5f50d0484e174c4cc7b2a83c71254ff4e9cdb271b57ce3dfb9d4094",
     "evidence/ports.csv": "2672a491db07e2dfe96ac78d6209c6b96aef300a4b0e562096927a323fb7a642",
     "evidence/predictions.csv": "c13b9631e711d5e48c8cff6598aa183cdc3e5df0f4ba7a7af8cb6873631fbde9",

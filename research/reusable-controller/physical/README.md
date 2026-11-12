@@ -38,6 +38,8 @@ merging PR #107; no prior result or certification script is changed.
 | [Envelope.lean](PhysicalEvaluator/Envelope.lean) | Lower/upper detection envelopes imply the same exact finite count | The physical detection respects those envelopes |
 | [RecordedData.lean](PhysicalEvaluator/RecordedData.lean) | Published numerical budgets/floors, recorded rest charges and first-FIRE decoding | Their interpretation as bounds on actual scalar states |
 | [RecordedBridge.lean](PhysicalEvaluator/RecordedBridge.lean) | Numerical constants discharge room/floor in conditional certificate constructors, including a direct envelope entry | Explicit gain, cumulative, charge and scalar level/envelope correspondence fields |
+| [RecordedGains.lean](PhysicalEvaluator/RecordedGains.lean) | Initial and cumulative inferred-gain bounds recomputed from twelve published reads, including proved log/exp enclosures | Published decimal readings and fixed scalar inference formula |
+| [ReadoutBridge.lean](PhysicalEvaluator/ReadoutBridge.lean) | Those inferred bounds discharge the true-gain premises after paying an explicit readout residual | True normalized gain differs from the inferred gain by at most `1e-4`, plus rest-state and detection envelopes |
 | [Controller.lean](PhysicalEvaluator/Controller.lean) | Derived feasibility precision, exact computed-cost precision, Ready, retained reference-cost non-degradation and budgets | Fixed two-block benchmark and declared resource accounting |
 
 `FiniteProbeCertificate m` contains only `m+1` samples. It has no exact-count
@@ -106,6 +108,52 @@ The positive conservative rooms are approximately 0.003754 and 0.005725.
 The constructor's true-state premises must still hold relative to its exact
 references. Arithmetic widening is not a proof of those premises.
 
+### Recomputing the inferred gains
+
+[gain_check.py](gain_check.py) now recomputes the twelve readings through the
+first FIRE of each positive-case port. It uses `q_peak` for a silent read and
+`q_tc` for a firing read whose latency is at least 0.76:
+
+```
+y_silent = log(q_peak - 0.1 - (c_pre - 0.1)*exp(-1/2))
+y_fire   = log(q_tc   - 0.1 - (c_pre - 0.1)*exp(-3/8)) + kappa
+z_inferred = y - log(response(1))
+```
+
+The response normalization matters: the published `y` is not the native model's
+log gain `z`. [MeasuredGains.lean](PhysicalEvaluator/MeasuredGains.lean) proves
+the corresponding center identity and that subtracting this fixed response
+leaves cumulative increments unchanged. It also proves that a uniform readout
+error `delta` costs `delta` in the initial bound and `2*delta` in the cumulative
+bound. The total need budget therefore pays `3*delta`.
+
+The generator uses exact rational arithmetic, with outward-rounded intervals.
+[LogIntervals.lean](PhysicalEvaluator/LogIntervals.lean) proves the analytic
+Taylor remainder; [Readout.lean](PhysicalEvaluator/Readout.lean) proves the
+exponential enclosures and propagates them through the readout formula. Lean
+independently checks all twelve generated logarithm intervals and the derived
+initial/cumulative bounds. No floating-point logarithm is trusted.
+
+| Positive-case port | Samples | Inferred initial bound `ahat` | Inferred cumulative bound `Bhat` |
+|---|---:|---:|---:|
+| `t6004`, preparation | 7 | 0.0054284 | 0.00466844 |
+| `t6004`, practice | 5 | 0.00127293 | 0.004584 |
+
+Both satisfy `ahat + 1e-4 <= aCSV` and `Bhat + 2e-4 <= BCSV`, using the
+existing outward-padded CSV budgets. Thus `readout_controller_contract` derives
+the previous conditional non-degradation result from a readout residual bound,
+without asking for the initial and cumulative true-gain bounds separately.
+**The `1e-4` residual is an admissible hypothesis, not a measured error.** Its
+physical justification must cover model mismatch, rounding of the serialized
+readings, and the firing-read correction. Count agreement cannot establish it.
+
+The fixed `kappa` is taken from the pinned calibration. This recomputation does
+not estimate its physical error or reproduce PR #107's global `eps`, which was
+computed across silent reads from all 100 test cells. That `eps` is different
+from `eps_kappa_cohort`; the two saved test trains cannot establish it. The
+comparison to the published budgets above does not require substituting either
+empirical estimate for the unproved physical residual.
+
 [Replay.lean](PhysicalEvaluator/Replay.lean) actually runs two policies from
 lesson `(10,9)`, with overhead one and twenty lesson uses per episode:
 
@@ -141,10 +189,10 @@ that those premises hold. The docstrings make this distinction explicit.
 1. PR #107's scalar peak-to-gain correspondence and transfer of `h_mu` remain
    conditional. `h_mu` is a worst case on six cells, not a bound established
    for each test cell. This work adds no leak scans or new calibration coverage.
-2. Numerical room and recorded counts do not alone prove true-state gain/
-   threshold bounds or the scalar detection envelope. The conditional
-   constructors expose those obligations instead of replacing them with an
-   assumed oracle-accuracy field.
+2. The inferred-gain arithmetic is now proved from the published decimals.
+   Its relation to true gains, the threshold bounds and scalar detection
+   envelopes remain physical obligations. The new readout entry exposes an
+   explicit residual bound; it does not establish that bound empirically.
 3. A certificate for one recorded prefix does not establish that every later
    physical validation after preparation/reset reproduces those counts, or
    that two physical ports behave as the separable two-block learner under a
@@ -161,6 +209,7 @@ With the repository's pinned Lean 4.35.0 toolchain and Mathlib dependencies:
 ```sh
 lake build
 python3 evidence_check.py --check --report evidence-validation.json
+python3 gain_check.py --check --report gain-validation.json
 python3 verify_physical.py --report physical-validation.json
 lake env lean Trace.lean
 ```
@@ -168,7 +217,9 @@ lake env lean Trace.lean
 The module audit checks all declarations in imported project modules,
 including private/generated/unused declarations, permitting only `propext`,
 `Classical.choice` and `Quot.sound`. [evidence-validation.json](evidence-validation.json)
-records twelve data mutations; [physical-validation.json](physical-validation.json)
-records semantic proof mutations and source hashes. Parser/import failures
-never count as successful rejection. CI reproduces the build, both verifiers
-and the replay, preserving their reports.
+records twelve data mutations; [gain-validation.json](gain-validation.json)
+records four readout-data mutations and generated/source hashes;
+[physical-validation.json](physical-validation.json) records sixteen semantic
+proof mutations and source hashes. Parser/import failures never count as
+successful rejection. CI reproduces the build, all three verifiers and the
+replay, preserving their reports.

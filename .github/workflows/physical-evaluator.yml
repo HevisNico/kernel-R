@@ -38,6 +38,7 @@ jobs:
             Mathlib.Analysis.Complex.ExponentialBounds
             Mathlib.Analysis.SpecialFunctions.ExpDeriv
             Mathlib.Analysis.SpecialFunctions.Log.Basic
+            Mathlib.Analysis.SpecialFunctions.Log.Deriv
             Mathlib.Data.List.OfFn
             Mathlib.Data.List.Sort
             Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
@@ -48,6 +49,9 @@ jobs:
       - name: Verify physical certificate contracts and reject semantic mutations
         working-directory: research/reusable-controller/physical
         run: python -B verify_physical.py --report "$RUNNER_TEMP/physical-validation.json"
+      - name: Recompute scalar gains with rational enclosures
+        working-directory: research/reusable-controller/physical
+        run: python -B gain_check.py --check --report "$RUNNER_TEMP/physical-gains.json"
       - name: Print recorded-data replay
         working-directory: research/reusable-controller/physical
         run: lake env lean Trace.lean
@@ -57,4 +61,5 @@ jobs:
           path: |
             ${{ runner.temp }}/physical-evidence.json
             ${{ runner.temp }}/physical-validation.json
+            ${{ runner.temp }}/physical-gains.json
           if-no-files-found: error
