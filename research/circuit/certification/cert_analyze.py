@@ -169,6 +169,9 @@ def calibrate():
          f"| `s` | {fm(C['s_per_V'], '.3f')} per V | slope of the gain against the stored voltage, silent reads before the first FIRE |",
          f"| `mu` | {fm(C['mu'])} | firing level minus static level, {len(mids)} of {len(scans)} leak scans |",
          f"| `h_mu` | {fm(C['h_mu'])} | spread of `mu` between cells plus the largest half-width of a scan |", "",
+         "**Scope:** `h_mu` is the worst case on six cells (five calibration cells and the nominal cell), not a bound established for each test cell. "
+         "Applying it to the 100 test cells assumes that the calibration covers their dynamic threshold offsets. "
+         "The inferred gains also assume the scalar model's peak-to-gain correspondence; these simulations do not prove that correspondence.", "",
          "| Leak scan | First FIRE | Silent read | Peak of the silent read | Peak of the read before | Static level | Midpoint minus static | Half-width |", "|---|---|---|---|---|---|---|---|"]
     L += [f"| `{d['run']}` | {d['first_fire']} | {d['silent_read']} | {d['peak_silent']:.5f} | {d['peak_before']:.5f} | {d['static_level']:.5f} | {d['mid_minus_static']:+.5f} | {d['half_width']:.5f} |" for d in detail]
     (HERE / "CALIBRATION.md").write_text("\n".join(L) + "\n")
@@ -368,14 +371,16 @@ def certify():
          "Written by `cert_analyze.py certify` under [`PREDICTION.md`](PREDICTION.md). Constants: [`CALIBRATION.md`](CALIBRATION.md). "
          "Predicted needs: [`PREDICTED.md`](PREDICTED.md). One row per port: [`ports.csv`](ports.csv).", "",
          "## Summary", "",
-         f"1. **Certified:** {len(cert)} ports of {n}, with every hypothesis of `needAlong_of_cumulative_tolerance` bounded on the port's own run; the count is the predicted one on {len(cert) - len(wrong)} of them"
+         f"1. **Conditionally certified under the registered rule:** {len(cert)} ports of {n} pass its measured budgets and checks; the count is the predicted one on {len(cert) - len(wrong)} of them"
          + (f" and **contradicted on {len(wrong)}**" if wrong else "") + ".",
          f"2. **Not certified:** {by.get('outside the certified domain', 0)} ports outside the certified domain, {by.get('not evaluable', 0)} not evaluable. "
          + ("Largest term where the room is not positive: " + ", ".join(f"`{k}` on {v} ports" for k, v in sorted(terms.items(), key=lambda kv: -kv[1])) + "." if terms else ""),
          f"3. **Count:** the observed count equals the predicted `m` on {len(agree)} of {len(with_count)} ports, certified or not.",
          f"4. **Target `b <= {TARGET}` per write:** `b_direct` meets it on {fm(None if share(bdir, TARGET) is None else 100 * share(bdir, TARGET), '.1f')}% of the ports; its median is {fm(med(bdir))}, "
          f"{fm(None if med(bdir) is None else med(bdir) / TARGET, '.1f')} times the target. `b_sum` meets it on {fm(None if share(bsum, TARGET) is None else 100 * share(bsum, TARGET), '.1f')}%; median {fm(med(bsum))}.",
-         "5. **What it rests on:** a simulation; the comparator fires when the uncut peak of a read reaches the firing level within `ell`, supported by six leak scans; "
+         "5. **Scope of certification:** it is conditional on the scalar model's peak-to-gain correspondence and on transferring `mu` to the test cells: "
+         "`h_mu` is the worst case on six cells, not a bound established for each test cell. "
+         "The comparator/uncut-peak correspondence within `ell` is supported by those six leak scans; "
          f"the gain of a read with a FIRE is read 0.25 unit before the end of its pulse, within `eps_kappa` = {fm(eps)}.", "",
          "## Predictions", "", "| | Prediction | Measured | Verdict |", "|---|---|---|---|"]
     L += [f"| {a} | {b} | {c} | {d} |" for a, b, c, d in V]
@@ -383,7 +388,7 @@ def certify():
           "| Hypothesis | Bound | Source |", "|---|---|---|",
           f"| Start distance `a` | `a_s` from stage 2 (median {fm(med([r['a_s'] for r in ev]))}), plus the shift of the first read of the test run (median {fm(med([r['start_shift'] for r in ev]))}, largest {fm(max((r['start_shift'] for r in ev), default=None))}), plus {MZ} | ramp and first read of the cell without noise; first read of the test run |",
           f"| Cumulated gain `B` | median {fm(med([r['B'] for r in ev]))}, largest {fm(max((r['B'] for r in ev), default=None))} | gains of the reads of the test run; `d0` = {fm(d0)} from the cohort |",
-          f"| Threshold `ell` | `h_mu` = {fm(C.get('h_mu'))}, plus the noise of the threshold in the reads (median {fm(med([r['noise'] for r in ev]))}, largest {fm(max((r['noise'] for r in ev), default=None))}), plus {MQ} | six leak scans; noise source recorded in each read |",
+          f"| Threshold `ell` | `h_mu` = {fm(C.get('h_mu'))}, plus the noise of the threshold in the reads (median {fm(med([r['noise'] for r in ev]))}, largest {fm(max((r['noise'] for r in ev), default=None))}), plus {MQ} | six leak scans; transfer of their bound to each test cell is assumed; noise source recorded in each read |",
           f"| `19/20 <= level` | smallest `level0 - ell`: {fm(min((r['level0'] - r['ell'] for r in ev), default=None))} | ramp of each cell |",
           f"| Rest band | {E['rest_total'] - E['rest_outside']} of {E['rest_total']} states inside `[0.1, 0.1001]` | 1 ps before each pulse of the test runs |",
           f"| One FIRE per read, one write per silent pulse, none with a FIRE | {E['latch_twice']} periods with two rises, {E['steer_bad']} off the steering rule, of {E['periods']} | latch and steering signals of the test runs |",

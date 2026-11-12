@@ -12,6 +12,8 @@ Status: **evaluated**.
 | `mu` | 0.00039 | firing level minus static level, 6 of 6 leak scans |
 | `h_mu` | 0.00151 | spread of `mu` between cells plus the largest half-width of a scan |
 
+**Scope:** `h_mu` is the worst case on six cells (five calibration cells and the nominal cell), not a bound established for each test cell. Applying it to the 100 test cells assumes that the calibration covers their dynamic threshold offsets. The inferred gains also assume the scalar model's peak-to-gain correspondence; these simulations do not prove that correspondence.
+
 | Leak scan | First FIRE | Silent read | Peak of the silent read | Peak of the read before | Static level | Midpoint minus static | Half-width |
 |---|---|---|---|---|---|---|---|
 | `nom_leak` | 4 | 9 | 0.99821 | 1.00006 | 0.99819 | +0.00094 | 0.00093 |
