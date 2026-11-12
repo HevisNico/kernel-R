@@ -202,6 +202,64 @@ ideal timing guarantees can be applied to them.
   compares complete executions for a fixed router and fixed parameters.
   Bounded delays are a hypothesis of the chain theorem.
 
+## Adaptive and contract-based assurance
+
+These works bear on the adaptive layers, such as the
+[bounded adaptive search](../research/reusable-controller/ADAPTIVE.md).
+Each covers part of what those layers do; none of those examined combines
+them. This is a reading of abstracts and main statements, not a systematic
+search.
+
+- **Re-learning on demand.**
+  [Event-triggered learning](https://arxiv.org/abs/1904.03042)
+  (Solowjow and Trimpe) learns a new model only when a statistical test
+  finds that observed behaviour departs from the current model.
+  [Schlüter, Solowjow and Trimpe](https://arxiv.org/abs/1910.07732) apply
+  this to linear quadratic control. This is the closest precedent for
+  reopening a decision when a violation is shown. The abstracts examined
+  give no explicit bound on the number of triggers; the full texts remain
+  to be checked.
+- **Bounded switching under noise.**
+  [Hespanha, Liberzon and Morse](https://web.ece.ucsb.edu/~hespanha/published/hy-bound.pdf)
+  bound the number of switchings of scale-independent hysteresis logic on
+  any interval, in the presence of noise and disturbances. This is the
+  precedent for bounding the number of reopenings by the accumulated
+  perturbation.
+- **Contracts at run time.**
+  [Adaptive assume-guarantee contracts](https://eskang.github.io/assets/papers/nfm24-adaptation.pdf)
+  detect a violated assumption at run time and weaken the guarantee in
+  response, without a bound on how often this happens.
+  [Assume-Guarantee-Repair](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7439735/)
+  alternates verification and repair at design time.
+  [ENTRUST](https://arxiv.org/abs/1703.06350) issues a new assurance case
+  with each reconfiguration of a self-adaptive system.
+- **Reusing certificates.**
+  [VeRecycle](https://arxiv.org/abs/2505.14001) re-certifies only the
+  components of a neural policy that a change in dynamics affects.
+  [Certified continual learning](https://arxiv.org/abs/2407.06697) aims to
+  keep verified properties through retraining.
+- **Staying identifiable.** Adaptive MPC with persistent-excitation
+  constraints
+  ([Lu and Cannon](https://arxiv.org/abs/2211.09275),
+  [Hernandez and Trodden](https://arxiv.org/abs/1804.07506)) and
+  [forward-looking excitation](https://arxiv.org/abs/2004.01625)
+  (Brüggemann and Bitmead, related to dual control) keep the system
+  identifiable while controlling it, at a single level of learning.
+- **Monitoring architectures.**
+  [Neural Simplex](https://arxiv.org/abs/1908.00528) and
+  [Black-Box Simplex](https://arxiv.org/abs/2102.12981) switch from a
+  learned controller to a verified fallback. One level monitors another;
+  guarantees are not composed across levels of learning.
+- **Learning hardware and proofs.**
+  [Analog on-chip learning circuits](https://arxiv.org/abs/2307.06084)
+  implement stop-learning in hardware without a proof.
+  [Set-based verification](https://www.em.cs.uni-frankfurt.de/fileadmin/em_files/Paper/2025/DFGpaper.pdf)
+  checks analog neural networks under device mismatch, for inference only.
+  The Lean hardware work examined, such as
+  [CircuitProver](https://arxiv.org/abs/2607.27259), targets digital
+  designs. [Altisen, Corbineau and Devismes](https://arxiv.org/abs/1610.08685)
+  certify self-stabilizing distributed algorithms in Coq.
+
 ## Key references and reading locations
 
 - Senn, W. and Fusi, S. (2005). *Learning Only When Necessary: Better
