@@ -165,7 +165,8 @@ every port. One port of 200 stops after 1 silent pulse.
 | [`COMPLEMENT.md`](COMPLEMENT.md) | Runs made after the campaign: replays with the same seeds |
 | [`cell.spice`](cell.spice), [`blocks.spice`](blocks.spice) | The netlist of the cell and its building blocks |
 | [`run.py`](run.py) | Runs one cell and writes one row per pulse |
-| [`campaign.py`](campaign.py) | The list of runs of the campaign, and its launcher |
+| [`campaign.py`](campaign.py) | The list of runs of the campaign, and the launcher that ran it, kept as recorded |
+| [`launch.py`](launch.py) | The same launcher, with exit statuses checked: a failed run fails the launch |
 | [`analyze.py`](analyze.py) | Applies the guard, gives a status to each prediction, draws the figures |
 | [`test_analyze.py`](test_analyze.py) | Tests of the analysis on synthetic campaigns |
 | [`complement.py`](complement.py), [`gate_current.py`](gate_current.py), [`compare.py`](compare.py) | The runs of the complement and their comparison with the campaign |
@@ -273,7 +274,7 @@ cd research/circuit
 sh fetch_pdk.sh
 cp spiceinit.txt .spiceinit
 mkdir -p work results
-python3 campaign.py
+python3 launch.py
 python3 analyze.py
 python3 -B -m unittest test_analyze
 ```

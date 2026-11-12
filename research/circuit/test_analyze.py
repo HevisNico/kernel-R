@@ -4,7 +4,8 @@ Each test writes a whole campaign of synthetic results, runs the analysis and ch
 full report is written with the right status and the right reason. One campaign passes every
 check. The others each break one thing: the nominal cell never fires, the joint read never
 fires, no port fires in the refresh runs, no relapse under a leak, runs are missing, the guard
-has something to report, a firing pulse writes.
+has something to report, a firing pulse writes, a result is truncated, out of order or holds a value
+that is not a finite number or a flag. One test checks that launch.py fails when a run fails.
 
   python3 -B -m unittest test_analyze        (from research/circuit)
 """
@@ -227,6 +228,83 @@ class Analysis(unittest.TestCase):
         self.assertEqual(v["P10"]["status"], FAILS)
         self.assertIn("mc_2003", v["P10"]["reason"])
 
+
+    def edit(self, res, name, change):
+        """Rewrite one result file of the campaign with change(lines) applied to its lines."""
+        with open(f"{res}/{name}.csv") as fh:
+            lines = fh.read().splitlines()
+        with open(f"{res}/{name}.csv", "w") as fh:
+            fh.write("\n".join(change(lines)) + "\n")
+
+    def unreadable(self, v, name, why):
+        self.assertNotEqual(v["P19"]["status"], HOLDS)
+        self.assertIn("1 runs missing or not readable", v["P19"]["reason"])
+        self.assertIn(f"{name} ({why}", self.report)
+
+    def test_a_truncated_run(self):
+        v = self.run_on(prepare=lambda res: self.edit(res, "refresh_none", lambda l: l[:6]))
+        self.assertEqual(v["P13"]["status"], NA)
+        self.unreadable(v, "refresh_none", "150 rows expected, 5 found")
+
+    def test_rows_out_of_order(self):
+        v = self.run_on(prepare=lambda res: self.edit(res, "nom", lambda l: [l[0], l[2], l[1]] + l[3:]))
+        self.unreadable(v, "nom", "pulse 1 in row 1, 0 expected")
+
+    def test_a_port_out_of_plan(self):
+        def swap(lines):
+            cells = lines[1].split(",")
+            cells[1] = "2"
+            return [lines[0], ",".join(cells)] + lines[2:]
+        v = self.run_on(prepare=lambda res: self.edit(res, "nom", swap))
+        self.unreadable(v, "nom", "port 2 in row 1, 1 expected")
+
+    def test_a_latency_that_is_not_a_number(self):
+        col = analyze.COLS.index("fire_latency")
+        def nan(lines):
+            out = [lines[0]]
+            for line in lines[1:]:
+                cells = line.split(",")
+                if cells[analyze.COLS.index("fired")] == "1" and len(out) < 99:
+                    cells[col] = "nan"
+                    out.append(",".join(cells))
+                    out.extend(lines[len(out):])
+                    return out
+                out.append(line)
+            return out
+        v = self.run_on(prepare=lambda res: self.edit(res, "mc_2001", nan))
+        self.unreadable(v, "mc_2001", "value not readable in row")
+
+    def test_a_flag_that_is_not_0_or_1(self):
+        col = analyze.COLS.index("second_rise")
+        def two(lines):
+            cells = lines[1].split(",")
+            cells[col] = "2"
+            return [lines[0], ",".join(cells)] + lines[2:]
+        v = self.run_on(prepare=lambda res: self.edit(res, "mc_2002", two))
+        self.unreadable(v, "mc_2002", "value not readable in row 1")
+
+
+class Launcher(unittest.TestCase):
+    def test_a_failed_run_makes_the_campaign_fail(self):
+        import contextlib, io, launch, subprocess
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        os.makedirs(tmp.name + "/results")
+        failed = subprocess.CompletedProcess([], 3, stdout="", stderr="ngspice aborted\n")
+        cwd, real = os.getcwd(), launch.subprocess.run
+        os.chdir(tmp.name)
+        launch.subprocess.run = lambda *a, **k: failed
+        try:
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                code = launch.main(jobs[:2])
+        finally:
+            os.chdir(cwd)
+            launch.subprocess.run = real
+        self.assertEqual(code, 1)
+        self.assertIn("2 runs, 2 failed", out.getvalue())
+        for name, *_ in jobs[:2]:
+            with open(f"{tmp.name}/results/{name}.failed") as fh:
+                self.assertIn("exited with status 3", fh.read())
 
 if __name__ == "__main__":
     unittest.main()
