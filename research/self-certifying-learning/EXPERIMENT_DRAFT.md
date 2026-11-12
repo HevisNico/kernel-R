@@ -18,6 +18,14 @@ sensor model, choose a perturbation distribution, define the within-period
 repair sequence, or fix the naive/prudent baselines. Kernel-evaluated
 examples are not an adaptive trial and do not preregister a comparison.
 
+[REPAIR.md](REPAIR.md) additionally fixes a conservative reference plant:
+per-tick loss, dose at write completion, saturation, and a fallback that
+preserves the repair-time buffer. A finite deterministic trace and general
+realization theorem are kernel-checked. They are not an adaptive comparison.
+The remaining protocol must choose numerical distributions, sensor behavior,
+phase switching, baselines and costs; no empirical results are being
+retrospectively preregistered here.
+
 ## Objective
 
 Compare the cost of maintaining a scalar task under leakage while retaining

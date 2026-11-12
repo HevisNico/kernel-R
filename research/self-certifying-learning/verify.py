@@ -43,6 +43,20 @@ MUTATIONS = [
     ("underrepair_one_tick", "Scheduler", "reserve + bound - initial\n", "reserve - initial\n"),
     ("clip_negative_reserve", "Controller", "if 0 ≤ lower then", "if True then"),
     ("reuse_stale_safety_anchor", "Controller", "Scheduler.rateCeiling reading.rate slew cap) cap⟩", "Scheduler.rateCeiling anchor slew cap) cap⟩"),
+    ("ignore_repair_latency_loss", "Repair", "c.bound * c.latency\n", "c.bound\n"),
+    ("spend_repair_buffer", "Repair", "c.service + c.loss\n", "c.service\n"),
+    ("ignore_loss_in_net_gain", "Repair", "c.dose - c.loss\n", "c.dose\n"),
+    ("allow_zero_net_progress", "Repair", "c.loss < c.dose ∧ c.target ≤ c.capacity", "c.loss ≤ c.dose ∧ c.target ≤ c.capacity"),
+    ("undersized_restart_capacity", "Repair", "c.target ≤ c.capacity\n", "c.guard ≤ c.capacity\n"),
+    ("ignore_storage_saturation", "Repair", "min c.capacity (lower + c.gain)\n", "lower + c.gain\n"),
+    ("omit_delayed_dose_delivery", "Repair", "(delivered : min (c.capacity : Int) (initial - (c.loss : Int) + (c.dose : Int)) ≤ final)", "(delivered : min (c.capacity : Int) (initial - (c.loss : Int)) ≤ final)"),
+    ("erase_recovery_elapsed_time", "Repair", "(pulses c n lower : Int) ≤ state (n * c.latency) := by", "(pulses c n lower : Int) ≤ state n := by"),
+    ("schedule_to_bare_service", "ClosedLoop", "match Scheduler.plan lower c.guard c.bound c.maxWait with", "match Scheduler.plan lower c.service c.bound c.maxWait with"),
+    ("forget_wait_loss", "ClosedLoop", "| .wait ticks => lower - c.bound * ticks", "| .wait ticks => lower"),
+    ("zero_time_write", "ClosedLoop", "| .write => c.latency\n", "| .write => 0\n"),
+    ("handoff_without_buffer", "ClosedLoop", "(Controller.visit g c.guard slew c.maxWait anchor reading).delay = some delay", "(Controller.visit g c.service slew c.maxWait anchor reading).delay = some delay"),
+    ("deliver_dose_early", "RepairPlant", "if t < c.latency then", "if t + 1 < c.latency then"),
+
 
 ]
 
@@ -67,7 +81,7 @@ def hygiene():
     files = sorted(PROJECT.glob("*.lean"))
     root_imports = set((ROOT / "SelfCertifyingLearning.lean").read_text().splitlines())
     expected = {"import SelfCertifyingLearning." + p.stem for p in files}
-    if root_imports != expected or len(files) != 8:
+    if root_imports != expected or len(files) != 11:
         raise RuntimeError("Root module must import exactly every maintained proof module")
     manifest = json.loads((ROOT / "lake-manifest.json").read_text())
     if manifest["packages"] or "[[require]]" in (ROOT / "lakefile.toml").read_text():

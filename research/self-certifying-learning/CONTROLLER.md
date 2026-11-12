@@ -82,11 +82,18 @@ still need their own context-dependent validity proof.
 
 ## Remaining experiment and physical obligations
 
-There is no completed closed-loop simulation, learned estimate of the future
-slew, physical recovery theorem, or comparative performance result here.
+[REPAIR.md](REPAIR.md) now provides a conservative delayed-write loop, an
+executable discrete plant witness and a guarded handoff theorem. It accounts
+for finite dose, latency, saturation and leakage during repair. The earlier
+ideal unit-write example is no longer the only repair result.
+
+There is still no learned estimate of future slew, physical R recovery
+theorem, automated envelope-switching policy or comparative performance result.
 `EXPERIMENT_DRAFT.md` remains a design draft. Before running a comparison,
-fix the plant/sensor model, repair latency and capacity, temporal ordering,
-baselines, costs and out-of-envelope trials in an executable protocol.
+fix the experimental plant/sensor parameters, temporal ordering across
+observations and control phases, baselines, costs and out-of-envelope trials
+in an executable protocol. The proved fallback alone does not settle these
+adaptive experimental choices.
 
 In particular, a jump immediately after a probe that exceeds the declared
 slew invalidates `visit_safe`'s premises. The earlier indistinguishability

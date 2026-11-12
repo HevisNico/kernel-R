@@ -6,3 +6,6 @@ import SelfCertifyingLearning.TwoLevel
 import SelfCertifyingLearning.Renewal
 import SelfCertifyingLearning.Scheduler
 import SelfCertifyingLearning.Controller
+import SelfCertifyingLearning.Repair
+import SelfCertifyingLearning.ClosedLoop
+import SelfCertifyingLearning.RepairPlant
