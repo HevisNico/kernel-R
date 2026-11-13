@@ -23,5 +23,5 @@ run_cmd do
     for ax in ← collectAxioms name do
       unless allowed.contains ax do throwError "Unexpected axiom {ax} in {name}"
     if info.isTheorem then theorems := theorems + 1
-  if modules < 8 then throwError "Incomplete physical module audit: {modules}"
+  if modules < 174 then throwError "Incomplete physical module audit: {modules}"
   logInfo m!"Physical audit passed: {candidates.size} declarations, {theorems} theorems, {modules} modules."

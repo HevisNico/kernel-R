@@ -17,7 +17,11 @@ HERE = Path(__file__).resolve().parent
 CONTROLLER = HERE.parent
 NATIVE = CONTROLLER.parent / 'recursive-learning/native'
 FILES = ['Counts.lean', 'Envelope.lean', 'Controller.lean', 'RecordedData.lean',
-         'RecordedBridge.lean', 'Replay.lean', 'IdealExample.lean']
+         'RecordedBridge.lean', 'Replay.lean', 'LogIntervals.lean', 'MeasuredGains.lean',
+         'Readout.lean', 'RecordedGains.lean', 'ReadoutBridge.lean', 'IdealExample.lean',
+         'PeakError.lean', 'PeakBridge.lean', 'PeakMeasurement.lean', 'MeasurementBridge.lean',
+         'CampaignBridge.lean', 'CampaignData.lean', 'CampaignExample.lean',
+         'Asymmetric.lean', 'AsymmetricData.lean']
 
 
 def command(args, cwd=HERE, env=None, timeout=180):
@@ -28,10 +32,12 @@ def command(args, cwd=HERE, env=None, timeout=180):
 def hashes():
     paths = [HERE / 'PhysicalEvaluator' / f for f in FILES]
     paths += [HERE / f for f in ['PhysicalEvaluator.lean', 'PhysicalAudit.lean', 'Trace.lean',
-              'lakefile.toml', 'lake-manifest.json', 'lean-toolchain', 'verify_physical.py', 'evidence_check.py']]
+              'lakefile.toml', 'lake-manifest.json', 'lean-toolchain', 'verify_physical.py',
+              'evidence_check.py', 'gain_check.py', 'campaign_check.py', 'asymmetric_check.py']]
     paths += sorted((HERE / 'evidence').iterdir())
     paths += sorted((CONTROLLER / 'ReusableController').glob('*.lean'))
     paths += [CONTROLLER / 'lakefile.toml', NATIVE / 'Search/VariableNeedTolerance.lean',
+              NATIVE / 'Search/AsymmetricNeedTolerance.lean',
               NATIVE / 'Search/NeedTolerance.lean', NATIVE / 'lakefile.toml',
               NATIVE.parent / 'RecursiveLearning/Model.lean']
     return {os.path.relpath(p, HERE): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
@@ -76,7 +82,35 @@ def main():
         raise RuntimeError(search)
     search = os.pathsep.join(str((HERE / x).resolve()) for x in search.strip().split(os.pathsep))
     original = {f: (HERE / 'PhysicalEvaluator' / f).read_text() for f in FILES}
+    original['Search/AsymmetricNeedTolerance.lean'] = (NATIVE / 'Search/AsymmetricNeedTolerance.lean').read_text()
     mutations = [
+        ('directional_theorem_reverse_fire_bound', 'Search/AsymmetricNeedTolerance.lean', lambda s: replace_once(s,
+            '(cumulativeLower : z 0 + (m : ℝ) * d₀ - z m ≤ BFire)',
+            '(cumulativeLower : z m - z 0 - (m : ℝ) * d₀ ≤ BFire)'), None),
+        ('directional_theorem_omit_rest_allowance', 'Search/AsymmetricNeedTolerance.lean', lambda s: replace_once(s,
+            '(silenceRoom : aSilent + BSilent + 20 / 17 * ℓ + 1 / 8000 < d₀ / 2)',
+            '(silenceRoom : aSilent + BSilent + 20 / 17 * ℓ < d₀ / 2)'), None),
+        ('asymmetric_nonstrict_silence', 'Asymmetric.lean', lambda s: replace_once(s,
+            'silenceRoom : aSilent + BSilent + 20 / 17 * ell + 1 / 8000 < dose0 / 2',
+            'silenceRoom : aSilent + BSilent + 20 / 17 * ell + 1 / 8000 ≤ dose0 / 2'), None),
+        ('asymmetric_weaken_fire_room', 'Asymmetric.lean', lambda s: replace_once(s,
+            'fireRoom : aFire + BFire + 20 / 17 * ell ≤ dose0 / 2',
+            'fireRoom : aFire + BFire + 20 / 17 * ell ≤ dose0'), None),
+        ('asymmetric_omit_endpoint_error', 'Asymmetric.lean', lambda s: replace_once(s,
+            'BSilent := entry.baseBSilent + 2 * entry.epsilon',
+            'BSilent := entry.baseBSilent + entry.epsilon'), None),
+        ('asymmetric_reverse_fire_deficit', 'Asymmetric.lean', lambda s: replace_once(s,
+            'referenceGain 0 + (m : ℝ) * entry.dose0 - referenceGain (Fin.last m) ≤ entry.baseBFire',
+            'referenceGain (Fin.last m) - referenceGain 0 - (m : ℝ) * entry.dose0 ≤ entry.baseBFire'), None),
+        ('omit_second_campaign_residual', 'CampaignBridge.lean', lambda s: replace_once(s,
+            'entry.baseB + 2 * entry.epsilon := by',
+            'entry.baseB + entry.epsilon := by'), None),
+        ('underpay_campaign_room', 'CampaignBridge.lean', lambda s: replace_once(s,
+            'room : (baseA + epsilon) + (baseB + 2 * epsilon) +',
+            'room : (baseA + epsilon) + (baseB + epsilon) +'), None),
+        ('weaken_campaign_transfer', 'CampaignBridge.lean', lambda s: replace_once(s,
+            'transferError : ∀ k, |actualGain k - referenceGain k| ≤ entry.epsilon',
+            'transferError : ∀ k, |actualGain k - referenceGain k| ≤ 2 * entry.epsilon'), None),
         ('non_strict_room', 'Counts.lean', lambda s: replace_once(s,
             'ell + 1 / 8000 < dose0 / 2', 'ell + 1 / 8000 ≤ dose0 / 2'), None),
         ('missing_gain_bound', 'Counts.lean', lambda s: replace_once(s,
@@ -105,6 +139,34 @@ def main():
         ('unused_physical_axiom', 'Counts.lean', lambda s: s + '\naxiom unusedPhysicalAxiom : True\n',
             'Unexpected project axiom'),
         ('admitted_derived_accuracy', 'Counts.lean', admit_accuracy, 'Unexpected axiom sorryAx'),
+        ('reverse_response_normalization', 'MeasuredGains.lean', lambda s: replace_once(s,
+            ':= y - Real.log (response 1)', ':= y + Real.log (response 1)'), None),
+        ('omit_initial_readout_error', 'MeasuredGains.lean', lambda s: replace_once(s,
+            '≤ Bhat + deltak + delta0 := by', '≤ Bhat + deltak := by'), None),
+        ('halve_log_remainder', 'LogIntervals.lean', lambda s: replace_once(s,
+            '2 * |logArgument x| ^ (2 * n + 1)', '|logArgument x| ^ (2 * n + 1)'), None),
+        ('false_exponential_lower_bound', 'Readout.lean', lambda s: replace_once(s,
+            '(60653065 / 100000000 : ℝ)', '(60653068 / 100000000 : ℝ)'), None),
+        ('optimistic_log_denominator', 'PeakError.lean', lambda s: replace_once(s,
+            '0 < truth ∧ |Real.log truth - Real.log measured| ≤ eps / (L - eps) := by',
+            '0 < truth ∧ |Real.log truth - Real.log measured| ≤ eps / L := by'), None),
+        ('omit_charge_measurement_error', 'PeakMeasurement.lean', lambda s: replace_once(s,
+            'correctedPeak qMeasured cMeasured duration kappa| ≤\n      Real.exp kappa * (epsilonQ + Real.exp (-duration) * epsilonC) := by',
+            'correctedPeak qMeasured cMeasured duration kappa| ≤\n      Real.exp kappa * epsilonQ := by'), None),
+        ('omit_model_error_budget', 'PeakMeasurement.lean', lambda s: replace_once(s,
+            '(budget : epsilonModel + Real.exp kappa * (epsilonQ + Real.exp (-duration) * epsilonC) ≤ epsilon)',
+            '(budget : Real.exp kappa * (epsilonQ + Real.exp (-duration) * epsilonC) ≤ epsilon)'), None),
+        ('weaken_peak_residual_limit', 'PeakBridge.lean', lambda s: replace_once(s,
+            'epsilonAdmissible : epsilonPeak ≤ 7 / 100010',
+            'epsilonAdmissible : epsilonPeak ≤ 1 / 10000'), None),
+        ('weaken_charge_sensor_accuracy', 'MeasurementBridge.lean', lambda s: replace_once(s,
+            'chargeError : ∀ k, |trueC k - C k| ≤ 1 / 10000000',
+            'chargeError : ∀ k, |trueC k - C k| ≤ 1 / 1000000'), None),
+        ('weaken_measurement_model_budget', 'MeasurementBridge.lean', lambda s: replace_once(s,
+            'correctedPeak (trueQ k) (trueC k) (duration k) (kappa k)| ≤ 1 / 50000',
+            'correctedPeak (trueQ k) (trueC k) (duration k) (kappa k)| ≤ 1 / 10000'), None),
+        ('disconnect_rest_charge_from_sensor', 'MeasurementBridge.lean', lambda s: replace_once(s,
+            'charge := w.trueC', 'charge := fun _ => 1 / 10'), None),
     ]
     results = []
     for name, changed, mutate, audit_marker in mutations:
@@ -116,7 +178,11 @@ def main():
             for artifact in (HERE / '.lake/build/lib/lean').glob('PhysicalEvaluator.*'):
                 if artifact.is_file():
                     shutil.copy2(artifact, folder / artifact.name)
-            relative = 'PhysicalEvaluator/' + changed
+            if changed.startswith('Search/'):
+                shutil.copytree(NATIVE / '.lake/build/lib/lean/Search', folder / 'Search')
+                relative = changed
+            else:
+                relative = 'PhysicalEvaluator/' + changed
             (folder / relative).write_text(mutate(original[changed]))
             env = dict(os.environ, LEAN_PATH=str(folder) + os.pathsep + search)
             code, log = command([lean.strip(), '-o', relative.removesuffix('.lean') + '.olean', relative], folder, env)

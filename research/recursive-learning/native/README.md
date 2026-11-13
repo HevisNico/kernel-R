@@ -24,13 +24,13 @@ has a README with the statements of its modules.
 | [`Coincidence/`](Coincidence/README.md) | the v0.3.0 coincidence separation, the constant-current comparison, offset and delay | 9 |
 | [`Training/`](Training/README.md) | the stop-learning regime: silent and firing steps, the training loop, the joint read, trained coincidence, lag and wider scalar read windows | 11 |
 | [`Network/`](Network/README.md) | products of cells, wires, forward composition, networks of any depth, report windows | 6 |
-| [`Search/`](Search/README.md) | fixed and variable-dose need bounds, probe and gate cells, trees of questions, successive approximation | 8 |
+| [`Search/`](Search/README.md) | fixed and variable-dose need bounds, probe and gate cells, trees of questions, successive approximation | 9 |
 
-These counts cover 82 Lean modules, including the three focused selector
+These counts cover 83 Lean modules, including the three focused selector
 audits in `Teaching`. [`NativeAudit.lean`](NativeAudit.lean) imports every
 module, directly or transitively, and runs the axiom audit. Its current scope
-is 84 modules including the two parent `RecursiveLearning` modules:
-6,318 declarations, of which 3,894 are theorems.
+is 85 modules including the two parent `RecursiveLearning` modules:
+6,323 declarations, of which 3,899 are theorems.
 
 The modules are named by folder: `import Training.SilentStep`.
 
@@ -45,6 +45,7 @@ search networks or the stop-learning regime below automatically.
 | first read plus reusable rounds | [`delivered_calendar_program_exists`](Teaching/SelectorRoundBootstrap.lean) | first read is an actual charged delivery: `3n+1` deliveries and `2n+1` FIREs; every complete run has the same final state and FIRE dates |
 | variable-dose scalar need | [`needAlong_of_variable_doses`](Search/VariableNeedTolerance.lean) | nonnegative, independently varying doses with a per-step error budget |
 | cumulative scalar need | [`needAlong_of_cumulative_tolerance`](Search/VariableNeedTolerance.lean) | a cumulative gain budget through the target count, with gain bounded below by its target-count value afterwards |
+| directional scalar need | [`needAlong_of_asymmetric_cumulative_tolerance`](Search/AsymmetricNeedTolerance.lean) | upper cumulative bound before the target and lower bound at the target, with separate silence/FIRE budgets |
 | wider scalar read window | [`stopped_pair_read_latency_wide`](Training/WideDoseRead.lean) | last dose up to `3/50` gives the ideal pair window `(0.236, 0.256]`; native execution constructors retain their existing dose assumptions |
 
 The [Teaching map](Teaching/README.md#reusing-the-selector-with-a-fixed-calendar)
