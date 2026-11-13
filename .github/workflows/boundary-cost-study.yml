@@ -1,0 +1,34 @@
+name: Fixed boundary cost study
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - research/boundary-cost-study/**
+      - research/adaptive-refresh-experiment/controllers.py
+      - .github/workflows/boundary-cost-study.yml
+  pull_request:
+    paths:
+      - research/boundary-cost-study/**
+      - research/adaptive-refresh-experiment/controllers.py
+      - .github/workflows/boundary-cost-study.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exploratory-cost:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Check guards, semantic controls and independent optima
+        run: python3 -B -m unittest discover -s research/boundary-cost-study -v
+      - name: Reproduce exploratory costs without invoking old experiment runners
+        run: python3 -B research/boundary-cost-study/study.py
+      - name: Check deterministic results
+        run: git diff --exit-code -- research/boundary-cost-study/RESULTS.json
