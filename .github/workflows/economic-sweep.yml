@@ -2,9 +2,9 @@ name: Exploratory economic sweep
 on:
   push:
     branches: [main]
-    paths: ['research/economic-sweep/**', 'research/boundary-cost-study/**', '.github/workflows/economic-sweep.yml']
+    paths: ['research/economic-sweep/**', 'research/exploratory-reproduction/**', 'research/boundary-cost-study/**', '.github/workflows/economic-sweep.yml']
   pull_request:
-    paths: ['research/economic-sweep/**', 'research/boundary-cost-study/**', '.github/workflows/economic-sweep.yml']
+    paths: ['research/economic-sweep/**', 'research/exploratory-reproduction/**', 'research/boundary-cost-study/**', '.github/workflows/economic-sweep.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,6 +19,8 @@ jobs:
           python-version: '3.12'
       - name: Check independent oracle and policy accounting
         run: python3 -B -m unittest discover -s research/economic-sweep -v
+      - name: Regenerate exploratory traces and verify all published fingerprints
+        run: python3 -B -m unittest discover -s research/exploratory-reproduction -v
       - name: Reproduce exploratory grid
         run: python3 -B research/economic-sweep/sweep.py
       - name: Preserve exact result bytes
