@@ -1,78 +1,73 @@
-import Std
-
-/-! Phase 0 control for the proposed discrete write semantics.
-Two cells retire one unit of work and send one unit to the other on every
-write. Each write increases its cell's stored value by one. -/
+import ChipFiring
+import GuardedFeedback
 
 namespace NetworkStability.Control
 
-structure State where
-  leftWork : Nat
-  rightWork : Nat
-  leftWrites : Nat
-  rightWrites : Nat
+open ChipFiring SelfCertifyingLearning
 
-def start : State := ⟨1, 0, 0, 0⟩
+def reciprocal (initial : Fin 2 → Nat) : Model 2 where
+  spill j i := if j = i then 0 else 1
+  initial := initial
 
-inductive Write : State → State → Prop where
-  | left (r a b k : Nat) :
-      Write ⟨k + 1, r, a, b⟩ ⟨k, r + 1, a + 1, b⟩
-  | right (l a b k : Nat) :
-      Write ⟨l, k + 1, a, b⟩ ⟨l + 1, k, a, b + 1⟩
+def critical : Model 2 := reciprocal (fun i => if i = 0 then 1 else 0)
 
-def Terminal (s : State) : Prop := ∀ t, ¬ Write s t
+def subcritical : Model 2 := reciprocal (fun _ => 2)
 
-inductive Reach : Nat → State → Prop where
-  | start : Reach 0 start
-  | next {n s t} : Reach n s → Write s t → Reach (n + 1) t
+theorem positive_fixture :
+    (∀ i, (compute subcritical 2 4 (start subcritical)).work i = 1) ∧
+    (∀ i, (compute subcritical 2 4 (start subcritical)).writes i = 1) := by decide
 
-theorem no_positive_margin (wLeft wRight eta : Nat) (pos : 0 < eta) :
-    ¬ (eta + wRight ≤ wLeft ∧ eta + wLeft ≤ wRight) := by
+theorem critical_nonstrict :
+    (∀ i, tally (critical.spill i) ≤ 1) ∧
+    (∀ i, tally (fun j => critical.spill j i) ≤ 1) := by decide
+
+theorem no_positive_margin (w : Fin 2 → Nat) (eta : Nat) (pos : 0 < eta) :
+    ¬ ∀ i, eta + weighted w (fun j => critical.spill j i) (List.finRange 2) ≤ w i := by
+  intro h
+  have hl := h 0
+  have hr := h 1
+  change eta + (w 0 * 0 + (w 1 * 1 + 0)) ≤ w 0 at hl
+  change eta + (w 0 * 1 + (w 1 * 0 + 0)) ≤ w 1 at hr
+  simp only [Nat.mul_zero, Nat.mul_one, Nat.add_zero, Nat.zero_add] at hl hr
   omega
 
-theorem reachable_ledger {n s} (r : Reach n s) :
-    s.leftWork + s.rightWork = 1 ∧ s.leftWrites + s.rightWrites = n := by
-  induction r with
-  | start => decide
-  | next _ step ih =>
-    cases step <;> simp_all <;> omega
+private theorem work_eq {n s} (r : Reach critical 1 n s) : s.work 0 + s.work 1 = 1 := by
+  have left := balance r 0
+  have right := balance r 1
+  change s.work 0 + 1 * s.writes 0 = 1 + (0 * s.writes 0 + (1 * s.writes 1 + 0)) at left
+  change s.work 1 + 1 * s.writes 1 = 0 + (1 * s.writes 0 + (0 * s.writes 1 + 0)) at right
+  simp only [Nat.one_mul, Nat.zero_mul, Nat.add_zero, Nat.zero_add] at left right
+  omega
 
-theorem enabled_of_work {s : State} (work : s.leftWork + s.rightWork = 1) :
-    ∃ t, Write s t := by
-  obtain ⟨l, r, a, b⟩ := s
-  cases l with
-  | zero =>
-    cases r with
-    | zero => simp at work
-    | succ k => exact ⟨_, Write.right 0 a b k⟩
-  | succ k => exact ⟨_, Write.left r a b k⟩
+theorem no_reachable_terminal {n s} (r : Reach critical 1 n s) : ¬ Terminal 1 s := by
+  intro h
+  have left := h 0
+  have right := h 1
+  have := work_eq r
+  omega
 
-theorem no_reachable_terminal {n s} (r : Reach n s) : ¬ Terminal s := by
-  obtain ⟨t, step⟩ := enabled_of_work (reachable_ledger r).1
-  exact fun terminal => terminal t step
-
-theorem writes_at_every_length (n : Nat) : ∃ s, Reach n s := by
+theorem writes_at_every_length (n : Nat) : ∃ s, Reach critical 1 n s := by
   induction n with
-  | zero => exact ⟨start, Reach.start⟩
+  | zero => exact ⟨_, Reach.start⟩
   | succ n ih =>
     obtain ⟨s, r⟩ := ih
-    obtain ⟨t, step⟩ := enabled_of_work (reachable_ledger r).1
-    exact ⟨t, r.next step⟩
+    have hw := work_eq r
+    by_cases left : 1 ≤ s.work 0
+    · exact ⟨_, r.fire 0 left⟩
+    · exact ⟨_, r.fire 1 (by omega)⟩
 
 theorem exceeds_any_ceiling (ceiling : Nat) :
-    ∃ n s, Reach n s ∧ (ceiling < s.leftWrites ∨ ceiling < s.rightWrites) := by
-  let n := 2 * ceiling + 1
-  obtain ⟨s, r⟩ := writes_at_every_length n
-  have total := (reachable_ledger r).2
-  refine ⟨n, s, r, ?_⟩
-  dsimp [n] at total
-  omega
+    ∃ n s, Reach critical 1 n s ∧ (ceiling < s.writes 0 ∨ ceiling < s.writes 1) := by
+  obtain ⟨s, r⟩ := writes_at_every_length (2 * ceiling + 1)
+  have h := count_eq r
+  change 1 * s.writes 0 + (1 * s.writes 1 + 0) = 2 * ceiling + 1 at h
+  simp only [Nat.one_mul, Nat.add_zero] at h
+  exact ⟨_, s, r, by omega⟩
 
-#print axioms no_positive_margin
-#print axioms reachable_ledger
-#print axioms enabled_of_work
-#print axioms no_reachable_terminal
-#print axioms writes_at_every_length
-#print axioms exceeds_any_ceiling
+def oneWay : Model 2 where
+  initial := fun _ => 2
+  spill j i := if i = 0 ∧ j = 1 then 1 else 0
+
+theorem one_way_spill : (fire oneWay 2 (start oneWay) 0).work 1 = 3 := by decide
 
 end NetworkStability.Control
