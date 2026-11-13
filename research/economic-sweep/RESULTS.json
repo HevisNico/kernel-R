@@ -1,0 +1,1692 @@
+{
+  "status": "EXPLORATORY ONLY",
+  "grid": {
+    "hard_ceiling": 150,
+    "service": 100,
+    "dose": 220,
+    "horizon": 264,
+    "capacities": [
+      300,
+      440,
+      660,
+      1000,
+      1500,
+      3000,
+      6600
+    ],
+    "probe_prices": [
+      1,
+      10,
+      100,
+      1000
+    ],
+    "write_price": 100,
+    "scenarios": [
+      "jump",
+      "high"
+    ],
+    "policies": [
+      "hard_max_wait",
+      "optimistic_shield",
+      "hard_fill"
+    ]
+  },
+  "reference_sha256": "df390c631ce3bf9b77bd506b37343b912d02d8f1f49f9eccb3fb1568444a0e43",
+  "plan_sha256": "28151615affb7615b67cc68f87b3c21efeb3187dd36496cf7ecd21ffe048750f",
+  "cases": [
+    {
+      "scenario": "jump",
+      "capacity": 300,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 265,
+          "writes": 264,
+          "final_reserve": 300,
+          "saturation_loss": 38280,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "10163013d77a830a9109fd372ac1d527fa5326c66bf947cb425832ef3d402633"
+        },
+        "optimistic_shield": {
+          "probes": 265,
+          "writes": 264,
+          "final_reserve": 300,
+          "saturation_loss": 38280,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [
+            {
+              "time": 133,
+              "measured_lower": 139,
+              "refuted_upper": 22
+            }
+          ],
+          "clips": 133,
+          "min_pre": 160,
+          "trace_sha256": "10163013d77a830a9109fd372ac1d527fa5326c66bf947cb425832ef3d402633"
+        },
+        "hard_fill": {
+          "probes": 265,
+          "writes": 264,
+          "final_reserve": 300,
+          "saturation_loss": 38280,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "10163013d77a830a9109fd372ac1d527fa5326c66bf947cb425832ef3d402633"
+        }
+      },
+      "oracle": {
+        "costs": [
+          26665,
+          29050,
+          52900,
+          291400
+        ],
+        "states": 265,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 0,
+        "first_difference": null
+      }
+    },
+    {
+      "scenario": "jump",
+      "capacity": 440,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 265,
+          "writes": 114,
+          "final_reserve": 440,
+          "saturation_loss": 5280,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 150,
+          "trace_sha256": "01fd992f681d032ece477401754c88fcec9e3e96f5cdb0c02285870fc01e3b0b"
+        },
+        "optimistic_shield": {
+          "probes": 265,
+          "writes": 114,
+          "final_reserve": 440,
+          "saturation_loss": 5280,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [
+            {
+              "time": 133,
+              "measured_lower": 139,
+              "refuted_upper": 22
+            }
+          ],
+          "clips": 133,
+          "min_pre": 150,
+          "trace_sha256": "01fd992f681d032ece477401754c88fcec9e3e96f5cdb0c02285870fc01e3b0b"
+        },
+        "hard_fill": {
+          "probes": 265,
+          "writes": 114,
+          "final_reserve": 440,
+          "saturation_loss": 5280,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 150,
+          "trace_sha256": "01fd992f681d032ece477401754c88fcec9e3e96f5cdb0c02285870fc01e3b0b"
+        }
+      },
+      "oracle": {
+        "costs": [
+          11665,
+          14050,
+          37900,
+          276400
+        ],
+        "states": 1086,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 0,
+        "first_difference": null
+      }
+    },
+    {
+      "scenario": "jump",
+      "capacity": 660,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 246,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 120,
+          "trace_sha256": "5e47fa8b7fb8259ff2556008717ecd904d6e47b3e6daf31707479113b44a0281"
+        },
+        "optimistic_shield": {
+          "probes": 246,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [
+            {
+              "time": 133,
+              "measured_lower": 139,
+              "refuted_upper": 22
+            }
+          ],
+          "clips": 114,
+          "min_pre": 120,
+          "trace_sha256": "5e47fa8b7fb8259ff2556008717ecd904d6e47b3e6daf31707479113b44a0281"
+        },
+        "hard_fill": {
+          "probes": 235,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "9ad62f3a61c4f0a97177b4cfe5dd6b4fb24e2c402810c3c957a76eee5127c9e1"
+        }
+      },
+      "oracle": {
+        "costs": [
+          9200,
+          11000,
+          27400,
+          189400
+        ],
+        "states": 8738,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 0,
+        "first_difference": null
+      }
+    },
+    {
+      "scenario": "jump",
+      "capacity": 1000,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 246,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 120,
+          "trace_sha256": "5e47fa8b7fb8259ff2556008717ecd904d6e47b3e6daf31707479113b44a0281"
+        },
+        "optimistic_shield": {
+          "probes": 246,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [
+            {
+              "time": 133,
+              "measured_lower": 139,
+              "refuted_upper": 22
+            }
+          ],
+          "clips": 114,
+          "min_pre": 120,
+          "trace_sha256": "5e47fa8b7fb8259ff2556008717ecd904d6e47b3e6daf31707479113b44a0281"
+        },
+        "hard_fill": {
+          "probes": 143,
+          "writes": 91,
+          "final_reserve": 660,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 180,
+          "trace_sha256": "f9938ad6763903931138ebc721eadc9f71b6d88ee052bf146851029f1ac73b9e"
+        }
+      },
+      "oracle": {
+        "costs": [
+          9134,
+          10340,
+          22300,
+          141100
+        ],
+        "states": 16180,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 0,
+        "first_difference": null
+      }
+    },
+    {
+      "scenario": "jump",
+      "capacity": 1500,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 246,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 120,
+          "trace_sha256": "5e47fa8b7fb8259ff2556008717ecd904d6e47b3e6daf31707479113b44a0281"
+        },
+        "optimistic_shield": {
+          "probes": 246,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [
+            {
+              "time": 133,
+              "measured_lower": 139,
+              "refuted_upper": 22
+            }
+          ],
+          "clips": 114,
+          "min_pre": 120,
+          "trace_sha256": "5e47fa8b7fb8259ff2556008717ecd904d6e47b3e6daf31707479113b44a0281"
+        },
+        "hard_fill": {
+          "probes": 119,
+          "writes": 93,
+          "final_reserve": 1100,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 200,
+          "trace_sha256": "c4879b16095f727d0b808e022c81c31cadff831164be6993f5cb73029a21a103"
+        }
+      },
+      "oracle": {
+        "costs": [
+          9114,
+          10140,
+          20400,
+          123000
+        ],
+        "states": 24926,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 0,
+        "first_difference": null
+      }
+    },
+    {
+      "scenario": "jump",
+      "capacity": 3000,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 246,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 120,
+          "trace_sha256": "5e47fa8b7fb8259ff2556008717ecd904d6e47b3e6daf31707479113b44a0281"
+        },
+        "optimistic_shield": {
+          "probes": 246,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [
+            {
+              "time": 133,
+              "measured_lower": 139,
+              "refuted_upper": 22
+            }
+          ],
+          "clips": 114,
+          "min_pre": 120,
+          "trace_sha256": "5e47fa8b7fb8259ff2556008717ecd904d6e47b3e6daf31707479113b44a0281"
+        },
+        "hard_fill": {
+          "probes": 108,
+          "writes": 97,
+          "final_reserve": 1980,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 320,
+          "trace_sha256": "b0d266dba00456e80a798cce288558e06e2c52c264e78de748eb36730a8948bb"
+        }
+      },
+      "oracle": {
+        "costs": [
+          9101,
+          10010,
+          19100,
+          110000
+        ],
+        "states": 44120,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 0,
+        "first_difference": null
+      }
+    },
+    {
+      "scenario": "jump",
+      "capacity": 6600,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 246,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 120,
+          "trace_sha256": "5e47fa8b7fb8259ff2556008717ecd904d6e47b3e6daf31707479113b44a0281"
+        },
+        "optimistic_shield": {
+          "probes": 246,
+          "writes": 90,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [
+            {
+              "time": 133,
+              "measured_lower": 139,
+              "refuted_upper": 22
+            }
+          ],
+          "clips": 114,
+          "min_pre": 120,
+          "trace_sha256": "5e47fa8b7fb8259ff2556008717ecd904d6e47b3e6daf31707479113b44a0281"
+        },
+        "hard_fill": {
+          "probes": 109,
+          "writes": 104,
+          "final_reserve": 3520,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 430,
+          "trace_sha256": "1090ff27894c19ffccd24dc717438f654b5d7b7c8b17d9fd4c751527441d378f"
+        }
+      },
+      "oracle": {
+        "costs": [
+          9096,
+          9960,
+          18600,
+          105000
+        ],
+        "states": 82999,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 0,
+        "first_difference": null
+      }
+    },
+    {
+      "scenario": "high",
+      "capacity": 300,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 265,
+          "writes": 264,
+          "final_reserve": 300,
+          "saturation_loss": 21120,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "0c1cec2d7016985cec37a33818c95dfd3387f69197f8ce2a8b906913ffec9ccf"
+        },
+        "optimistic_shield": {
+          "probes": 265,
+          "writes": 264,
+          "final_reserve": 300,
+          "saturation_loss": 21120,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "0c1cec2d7016985cec37a33818c95dfd3387f69197f8ce2a8b906913ffec9ccf"
+        },
+        "hard_fill": {
+          "probes": 265,
+          "writes": 264,
+          "final_reserve": 300,
+          "saturation_loss": 21120,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "0c1cec2d7016985cec37a33818c95dfd3387f69197f8ce2a8b906913ffec9ccf"
+        }
+      },
+      "oracle": {
+        "costs": [
+          26665,
+          29050,
+          52900,
+          291400
+        ],
+        "states": 265,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 0,
+        "first_difference": null
+      }
+    },
+    {
+      "scenario": "high",
+      "capacity": 440,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 265,
+          "writes": 176,
+          "final_reserve": 440,
+          "saturation_loss": 1760,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "f4fae7cb6bf2791e56f1f9c0a959c31ff7f37c42894e45535c63a3ba4ea3aec7"
+        },
+        "optimistic_shield": {
+          "probes": 265,
+          "writes": 176,
+          "final_reserve": 440,
+          "saturation_loss": 1760,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "f4fae7cb6bf2791e56f1f9c0a959c31ff7f37c42894e45535c63a3ba4ea3aec7"
+        },
+        "hard_fill": {
+          "probes": 265,
+          "writes": 176,
+          "final_reserve": 440,
+          "saturation_loss": 1760,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "f4fae7cb6bf2791e56f1f9c0a959c31ff7f37c42894e45535c63a3ba4ea3aec7"
+        }
+      },
+      "oracle": {
+        "costs": [
+          17865,
+          20250,
+          44100,
+          282600
+        ],
+        "states": 792,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 0,
+        "first_difference": null
+      }
+    },
+    {
+      "scenario": "high",
+      "capacity": 660,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 120,
+          "trace_sha256": "cc77e0608904bb234890717449c86bd8483dda3e90d6c680f51df507171cfa0e"
+        },
+        "optimistic_shield": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 140,
+          "trace_sha256": "dffb24ba48217ffed958ad986026f73a1087c86e4497615c290e7236f105cd9f"
+        },
+        "hard_fill": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "48c4caaa14521fdaa8b97ef5c308d8e1ad339f233fc42db07dee8fc9250b19f6"
+        }
+      },
+      "oracle": {
+        "costs": [
+          17017,
+          18970,
+          38500,
+          233800
+        ],
+        "states": 5390,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 8,
+        "first_difference": 49
+      }
+    },
+    {
+      "scenario": "high",
+      "capacity": 1000,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 120,
+          "trace_sha256": "cc77e0608904bb234890717449c86bd8483dda3e90d6c680f51df507171cfa0e"
+        },
+        "optimistic_shield": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 140,
+          "trace_sha256": "dffb24ba48217ffed958ad986026f73a1087c86e4497615c290e7236f105cd9f"
+        },
+        "hard_fill": {
+          "probes": 201,
+          "writes": 169,
+          "final_reserve": 660,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 160,
+          "trace_sha256": "8657887a38215521ae8053d907eeed9bb97ad5f9a0a58f1745823314841fbcc1"
+        }
+      },
+      "oracle": {
+        "costs": [
+          16991,
+          18710,
+          35900,
+          206900
+        ],
+        "states": 9548,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 8,
+        "first_difference": 49
+      }
+    },
+    {
+      "scenario": "high",
+      "capacity": 1500,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 120,
+          "trace_sha256": "cc77e0608904bb234890717449c86bd8483dda3e90d6c680f51df507171cfa0e"
+        },
+        "optimistic_shield": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 140,
+          "trace_sha256": "dffb24ba48217ffed958ad986026f73a1087c86e4497615c290e7236f105cd9f"
+        },
+        "hard_fill": {
+          "probes": 186,
+          "writes": 171,
+          "final_reserve": 1100,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 200,
+          "trace_sha256": "23067438ded09d58709257cc5a37a1f82e874472a0ee129846e2fd96bb2b8296"
+        }
+      },
+      "oracle": {
+        "costs": [
+          16981,
+          18610,
+          34900,
+          197800
+        ],
+        "states": 15323,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 8,
+        "first_difference": 49
+      }
+    },
+    {
+      "scenario": "high",
+      "capacity": 3000,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 120,
+          "trace_sha256": "cc77e0608904bb234890717449c86bd8483dda3e90d6c680f51df507171cfa0e"
+        },
+        "optimistic_shield": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 140,
+          "trace_sha256": "dffb24ba48217ffed958ad986026f73a1087c86e4497615c290e7236f105cd9f"
+        },
+        "hard_fill": {
+          "probes": 179,
+          "writes": 172,
+          "final_reserve": 1320,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 300,
+          "trace_sha256": "100e768696c44e527b5f1763504237bf1a9224c9ab3a89ff684c5b3fef3ffa81"
+        }
+      },
+      "oracle": {
+        "costs": [
+          16975,
+          18550,
+          34300,
+          191800
+        ],
+        "states": 30505,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 8,
+        "first_difference": 49
+      }
+    },
+    {
+      "scenario": "high",
+      "capacity": 6600,
+      "policies": {
+        "hard_max_wait": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 120,
+          "trace_sha256": "cc77e0608904bb234890717449c86bd8483dda3e90d6c680f51df507171cfa0e"
+        },
+        "optimistic_shield": {
+          "probes": 265,
+          "writes": 168,
+          "final_reserve": 440,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 140,
+          "trace_sha256": "dffb24ba48217ffed958ad986026f73a1087c86e4497615c290e7236f105cd9f"
+        },
+        "hard_fill": {
+          "probes": 187,
+          "writes": 184,
+          "final_reserve": 3960,
+          "saturation_loss": 0,
+          "unsafe_pre": [],
+          "unsafe_post": [],
+          "refusals": [],
+          "revisions": [],
+          "clips": 0,
+          "min_pre": 300,
+          "trace_sha256": "f70a0b5551a403711ea646719820afb03dcb84d9140533eb0a4e939f4fde38d4"
+        }
+      },
+      "oracle": {
+        "costs": [
+          16972,
+          18520,
+          34000,
+          188800
+        ],
+        "states": 52922,
+        "scope": "hindsight optimum in fixed hard-ready action family"
+      },
+      "action_difference": {
+        "differing_periods": 8,
+        "first_difference": 49
+      }
+    }
+  ],
+  "cells": [
+    {
+      "scenario": "jump",
+      "capacity": 300,
+      "capacity_over_H": 2.0,
+      "probe_over_write": 0.01,
+      "oracle_cost": 26665,
+      "fixed_cost": 26665,
+      "optimistic_cost": 26665,
+      "fill_cost": 26665,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "jump",
+      "capacity": 300,
+      "capacity_over_H": 2.0,
+      "probe_over_write": 0.1,
+      "oracle_cost": 29050,
+      "fixed_cost": 29050,
+      "optimistic_cost": 29050,
+      "fill_cost": 29050,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "jump",
+      "capacity": 300,
+      "capacity_over_H": 2.0,
+      "probe_over_write": 1.0,
+      "oracle_cost": 52900,
+      "fixed_cost": 52900,
+      "optimistic_cost": 52900,
+      "fill_cost": 52900,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "jump",
+      "capacity": 300,
+      "capacity_over_H": 2.0,
+      "probe_over_write": 10.0,
+      "oracle_cost": 291400,
+      "fixed_cost": 291400,
+      "optimistic_cost": 291400,
+      "fill_cost": 291400,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "jump",
+      "capacity": 440,
+      "capacity_over_H": 2.933333333333333,
+      "probe_over_write": 0.01,
+      "oracle_cost": 11665,
+      "fixed_cost": 11665,
+      "optimistic_cost": 11665,
+      "fill_cost": 11665,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "jump",
+      "capacity": 440,
+      "capacity_over_H": 2.933333333333333,
+      "probe_over_write": 0.1,
+      "oracle_cost": 14050,
+      "fixed_cost": 14050,
+      "optimistic_cost": 14050,
+      "fill_cost": 14050,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "jump",
+      "capacity": 440,
+      "capacity_over_H": 2.933333333333333,
+      "probe_over_write": 1.0,
+      "oracle_cost": 37900,
+      "fixed_cost": 37900,
+      "optimistic_cost": 37900,
+      "fill_cost": 37900,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "jump",
+      "capacity": 440,
+      "capacity_over_H": 2.933333333333333,
+      "probe_over_write": 10.0,
+      "oracle_cost": 276400,
+      "fixed_cost": 276400,
+      "optimistic_cost": 276400,
+      "fill_cost": 276400,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "jump",
+      "capacity": 660,
+      "capacity_over_H": 4.4,
+      "probe_over_write": 0.01,
+      "oracle_cost": 9200,
+      "fixed_cost": 9246,
+      "optimistic_cost": 9246,
+      "fill_cost": 9235,
+      "actions_differ": false,
+      "fixed_gap": 0.005,
+      "optimistic_gap": 0.005,
+      "fill_gap": 0.0038043478260869567
+    },
+    {
+      "scenario": "jump",
+      "capacity": 660,
+      "capacity_over_H": 4.4,
+      "probe_over_write": 0.1,
+      "oracle_cost": 11000,
+      "fixed_cost": 11460,
+      "optimistic_cost": 11460,
+      "fill_cost": 11350,
+      "actions_differ": false,
+      "fixed_gap": 0.04181818181818182,
+      "optimistic_gap": 0.04181818181818182,
+      "fill_gap": 0.031818181818181815
+    },
+    {
+      "scenario": "jump",
+      "capacity": 660,
+      "capacity_over_H": 4.4,
+      "probe_over_write": 1.0,
+      "oracle_cost": 27400,
+      "fixed_cost": 33600,
+      "optimistic_cost": 33600,
+      "fill_cost": 32500,
+      "actions_differ": false,
+      "fixed_gap": 0.22627737226277372,
+      "optimistic_gap": 0.22627737226277372,
+      "fill_gap": 0.18613138686131386
+    },
+    {
+      "scenario": "jump",
+      "capacity": 660,
+      "capacity_over_H": 4.4,
+      "probe_over_write": 10.0,
+      "oracle_cost": 189400,
+      "fixed_cost": 255000,
+      "optimistic_cost": 255000,
+      "fill_cost": 244000,
+      "actions_differ": false,
+      "fixed_gap": 0.34635691657866946,
+      "optimistic_gap": 0.34635691657866946,
+      "fill_gap": 0.28827877507919747
+    },
+    {
+      "scenario": "jump",
+      "capacity": 1000,
+      "capacity_over_H": 6.666666666666667,
+      "probe_over_write": 0.01,
+      "oracle_cost": 9134,
+      "fixed_cost": 9246,
+      "optimistic_cost": 9246,
+      "fill_cost": 9243,
+      "actions_differ": false,
+      "fixed_gap": 0.012261878694985767,
+      "optimistic_gap": 0.012261878694985767,
+      "fill_gap": 0.011933435515655792
+    },
+    {
+      "scenario": "jump",
+      "capacity": 1000,
+      "capacity_over_H": 6.666666666666667,
+      "probe_over_write": 0.1,
+      "oracle_cost": 10340,
+      "fixed_cost": 11460,
+      "optimistic_cost": 11460,
+      "fill_cost": 10530,
+      "actions_differ": false,
+      "fixed_gap": 0.10831721470019343,
+      "optimistic_gap": 0.10831721470019343,
+      "fill_gap": 0.0183752417794971
+    },
+    {
+      "scenario": "jump",
+      "capacity": 1000,
+      "capacity_over_H": 6.666666666666667,
+      "probe_over_write": 1.0,
+      "oracle_cost": 22300,
+      "fixed_cost": 33600,
+      "optimistic_cost": 33600,
+      "fill_cost": 23400,
+      "actions_differ": false,
+      "fixed_gap": 0.5067264573991032,
+      "optimistic_gap": 0.5067264573991032,
+      "fill_gap": 0.04932735426008968
+    },
+    {
+      "scenario": "jump",
+      "capacity": 1000,
+      "capacity_over_H": 6.666666666666667,
+      "probe_over_write": 10.0,
+      "oracle_cost": 141100,
+      "fixed_cost": 255000,
+      "optimistic_cost": 255000,
+      "fill_cost": 152100,
+      "actions_differ": false,
+      "fixed_gap": 0.8072289156626506,
+      "optimistic_gap": 0.8072289156626506,
+      "fill_gap": 0.07795889440113395
+    },
+    {
+      "scenario": "jump",
+      "capacity": 1500,
+      "capacity_over_H": 10.0,
+      "probe_over_write": 0.01,
+      "oracle_cost": 9114,
+      "fixed_cost": 9246,
+      "optimistic_cost": 9246,
+      "fill_cost": 9419,
+      "actions_differ": false,
+      "fixed_gap": 0.014483212639894667,
+      "optimistic_gap": 0.014483212639894667,
+      "fill_gap": 0.033464998902786924
+    },
+    {
+      "scenario": "jump",
+      "capacity": 1500,
+      "capacity_over_H": 10.0,
+      "probe_over_write": 0.1,
+      "oracle_cost": 10140,
+      "fixed_cost": 11460,
+      "optimistic_cost": 11460,
+      "fill_cost": 10490,
+      "actions_differ": false,
+      "fixed_gap": 0.1301775147928994,
+      "optimistic_gap": 0.1301775147928994,
+      "fill_gap": 0.03451676528599606
+    },
+    {
+      "scenario": "jump",
+      "capacity": 1500,
+      "capacity_over_H": 10.0,
+      "probe_over_write": 1.0,
+      "oracle_cost": 20400,
+      "fixed_cost": 33600,
+      "optimistic_cost": 33600,
+      "fill_cost": 21200,
+      "actions_differ": false,
+      "fixed_gap": 0.6470588235294118,
+      "optimistic_gap": 0.6470588235294118,
+      "fill_gap": 0.0392156862745098
+    },
+    {
+      "scenario": "jump",
+      "capacity": 1500,
+      "capacity_over_H": 10.0,
+      "probe_over_write": 10.0,
+      "oracle_cost": 123000,
+      "fixed_cost": 255000,
+      "optimistic_cost": 255000,
+      "fill_cost": 128300,
+      "actions_differ": false,
+      "fixed_gap": 1.0731707317073171,
+      "optimistic_gap": 1.0731707317073171,
+      "fill_gap": 0.043089430894308944
+    },
+    {
+      "scenario": "jump",
+      "capacity": 3000,
+      "capacity_over_H": 20.0,
+      "probe_over_write": 0.01,
+      "oracle_cost": 9101,
+      "fixed_cost": 9246,
+      "optimistic_cost": 9246,
+      "fill_cost": 9808,
+      "actions_differ": false,
+      "fixed_gap": 0.01593231513020547,
+      "optimistic_gap": 0.01593231513020547,
+      "fill_gap": 0.07768377101417427
+    },
+    {
+      "scenario": "jump",
+      "capacity": 3000,
+      "capacity_over_H": 20.0,
+      "probe_over_write": 0.1,
+      "oracle_cost": 10010,
+      "fixed_cost": 11460,
+      "optimistic_cost": 11460,
+      "fill_cost": 10780,
+      "actions_differ": false,
+      "fixed_gap": 0.14485514485514486,
+      "optimistic_gap": 0.14485514485514486,
+      "fill_gap": 0.07692307692307693
+    },
+    {
+      "scenario": "jump",
+      "capacity": 3000,
+      "capacity_over_H": 20.0,
+      "probe_over_write": 1.0,
+      "oracle_cost": 19100,
+      "fixed_cost": 33600,
+      "optimistic_cost": 33600,
+      "fill_cost": 20500,
+      "actions_differ": false,
+      "fixed_gap": 0.7591623036649214,
+      "optimistic_gap": 0.7591623036649214,
+      "fill_gap": 0.07329842931937172
+    },
+    {
+      "scenario": "jump",
+      "capacity": 3000,
+      "capacity_over_H": 20.0,
+      "probe_over_write": 10.0,
+      "oracle_cost": 110000,
+      "fixed_cost": 255000,
+      "optimistic_cost": 255000,
+      "fill_cost": 117700,
+      "actions_differ": false,
+      "fixed_gap": 1.3181818181818181,
+      "optimistic_gap": 1.3181818181818181,
+      "fill_gap": 0.07
+    },
+    {
+      "scenario": "jump",
+      "capacity": 6600,
+      "capacity_over_H": 44.0,
+      "probe_over_write": 0.01,
+      "oracle_cost": 9096,
+      "fixed_cost": 9246,
+      "optimistic_cost": 9246,
+      "fill_cost": 10509,
+      "actions_differ": false,
+      "fixed_gap": 0.016490765171503958,
+      "optimistic_gap": 0.016490765171503958,
+      "fill_gap": 0.1553430079155673
+    },
+    {
+      "scenario": "jump",
+      "capacity": 6600,
+      "capacity_over_H": 44.0,
+      "probe_over_write": 0.1,
+      "oracle_cost": 9960,
+      "fixed_cost": 11460,
+      "optimistic_cost": 11460,
+      "fill_cost": 11490,
+      "actions_differ": false,
+      "fixed_gap": 0.15060240963855423,
+      "optimistic_gap": 0.15060240963855423,
+      "fill_gap": 0.1536144578313253
+    },
+    {
+      "scenario": "jump",
+      "capacity": 6600,
+      "capacity_over_H": 44.0,
+      "probe_over_write": 1.0,
+      "oracle_cost": 18600,
+      "fixed_cost": 33600,
+      "optimistic_cost": 33600,
+      "fill_cost": 21300,
+      "actions_differ": false,
+      "fixed_gap": 0.8064516129032258,
+      "optimistic_gap": 0.8064516129032258,
+      "fill_gap": 0.14516129032258066
+    },
+    {
+      "scenario": "jump",
+      "capacity": 6600,
+      "capacity_over_H": 44.0,
+      "probe_over_write": 10.0,
+      "oracle_cost": 105000,
+      "fixed_cost": 255000,
+      "optimistic_cost": 255000,
+      "fill_cost": 119400,
+      "actions_differ": false,
+      "fixed_gap": 1.4285714285714286,
+      "optimistic_gap": 1.4285714285714286,
+      "fill_gap": 0.13714285714285715
+    },
+    {
+      "scenario": "high",
+      "capacity": 300,
+      "capacity_over_H": 2.0,
+      "probe_over_write": 0.01,
+      "oracle_cost": 26665,
+      "fixed_cost": 26665,
+      "optimistic_cost": 26665,
+      "fill_cost": 26665,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "high",
+      "capacity": 300,
+      "capacity_over_H": 2.0,
+      "probe_over_write": 0.1,
+      "oracle_cost": 29050,
+      "fixed_cost": 29050,
+      "optimistic_cost": 29050,
+      "fill_cost": 29050,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "high",
+      "capacity": 300,
+      "capacity_over_H": 2.0,
+      "probe_over_write": 1.0,
+      "oracle_cost": 52900,
+      "fixed_cost": 52900,
+      "optimistic_cost": 52900,
+      "fill_cost": 52900,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "high",
+      "capacity": 300,
+      "capacity_over_H": 2.0,
+      "probe_over_write": 10.0,
+      "oracle_cost": 291400,
+      "fixed_cost": 291400,
+      "optimistic_cost": 291400,
+      "fill_cost": 291400,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "high",
+      "capacity": 440,
+      "capacity_over_H": 2.933333333333333,
+      "probe_over_write": 0.01,
+      "oracle_cost": 17865,
+      "fixed_cost": 17865,
+      "optimistic_cost": 17865,
+      "fill_cost": 17865,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "high",
+      "capacity": 440,
+      "capacity_over_H": 2.933333333333333,
+      "probe_over_write": 0.1,
+      "oracle_cost": 20250,
+      "fixed_cost": 20250,
+      "optimistic_cost": 20250,
+      "fill_cost": 20250,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "high",
+      "capacity": 440,
+      "capacity_over_H": 2.933333333333333,
+      "probe_over_write": 1.0,
+      "oracle_cost": 44100,
+      "fixed_cost": 44100,
+      "optimistic_cost": 44100,
+      "fill_cost": 44100,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "high",
+      "capacity": 440,
+      "capacity_over_H": 2.933333333333333,
+      "probe_over_write": 10.0,
+      "oracle_cost": 282600,
+      "fixed_cost": 282600,
+      "optimistic_cost": 282600,
+      "fill_cost": 282600,
+      "actions_differ": false,
+      "fixed_gap": 0.0,
+      "optimistic_gap": 0.0,
+      "fill_gap": 0.0
+    },
+    {
+      "scenario": "high",
+      "capacity": 660,
+      "capacity_over_H": 4.4,
+      "probe_over_write": 0.01,
+      "oracle_cost": 17017,
+      "fixed_cost": 17065,
+      "optimistic_cost": 17065,
+      "fill_cost": 17065,
+      "actions_differ": true,
+      "fixed_gap": 0.0028207087030616444,
+      "optimistic_gap": 0.0028207087030616444,
+      "fill_gap": 0.0028207087030616444
+    },
+    {
+      "scenario": "high",
+      "capacity": 660,
+      "capacity_over_H": 4.4,
+      "probe_over_write": 0.1,
+      "oracle_cost": 18970,
+      "fixed_cost": 19450,
+      "optimistic_cost": 19450,
+      "fill_cost": 19450,
+      "actions_differ": true,
+      "fixed_gap": 0.025303110173958882,
+      "optimistic_gap": 0.025303110173958882,
+      "fill_gap": 0.025303110173958882
+    },
+    {
+      "scenario": "high",
+      "capacity": 660,
+      "capacity_over_H": 4.4,
+      "probe_over_write": 1.0,
+      "oracle_cost": 38500,
+      "fixed_cost": 43300,
+      "optimistic_cost": 43300,
+      "fill_cost": 43300,
+      "actions_differ": true,
+      "fixed_gap": 0.12467532467532468,
+      "optimistic_gap": 0.12467532467532468,
+      "fill_gap": 0.12467532467532468
+    },
+    {
+      "scenario": "high",
+      "capacity": 660,
+      "capacity_over_H": 4.4,
+      "probe_over_write": 10.0,
+      "oracle_cost": 233800,
+      "fixed_cost": 281800,
+      "optimistic_cost": 281800,
+      "fill_cost": 281800,
+      "actions_differ": true,
+      "fixed_gap": 0.20530367835757057,
+      "optimistic_gap": 0.20530367835757057,
+      "fill_gap": 0.20530367835757057
+    },
+    {
+      "scenario": "high",
+      "capacity": 1000,
+      "capacity_over_H": 6.666666666666667,
+      "probe_over_write": 0.01,
+      "oracle_cost": 16991,
+      "fixed_cost": 17065,
+      "optimistic_cost": 17065,
+      "fill_cost": 17101,
+      "actions_differ": true,
+      "fixed_gap": 0.0043552468954152195,
+      "optimistic_gap": 0.0043552468954152195,
+      "fill_gap": 0.006474015655346948
+    },
+    {
+      "scenario": "high",
+      "capacity": 1000,
+      "capacity_over_H": 6.666666666666667,
+      "probe_over_write": 0.1,
+      "oracle_cost": 18710,
+      "fixed_cost": 19450,
+      "optimistic_cost": 19450,
+      "fill_cost": 18910,
+      "actions_differ": true,
+      "fixed_gap": 0.03955104222340994,
+      "optimistic_gap": 0.03955104222340994,
+      "fill_gap": 0.010689470871191877
+    },
+    {
+      "scenario": "high",
+      "capacity": 1000,
+      "capacity_over_H": 6.666666666666667,
+      "probe_over_write": 1.0,
+      "oracle_cost": 35900,
+      "fixed_cost": 43300,
+      "optimistic_cost": 43300,
+      "fill_cost": 37000,
+      "actions_differ": true,
+      "fixed_gap": 0.20612813370473537,
+      "optimistic_gap": 0.20612813370473537,
+      "fill_gap": 0.03064066852367688
+    },
+    {
+      "scenario": "high",
+      "capacity": 1000,
+      "capacity_over_H": 6.666666666666667,
+      "probe_over_write": 10.0,
+      "oracle_cost": 206900,
+      "fixed_cost": 281800,
+      "optimistic_cost": 281800,
+      "fill_cost": 217900,
+      "actions_differ": true,
+      "fixed_gap": 0.3620106331561141,
+      "optimistic_gap": 0.3620106331561141,
+      "fill_gap": 0.053165780570323826
+    },
+    {
+      "scenario": "high",
+      "capacity": 1500,
+      "capacity_over_H": 10.0,
+      "probe_over_write": 0.01,
+      "oracle_cost": 16981,
+      "fixed_cost": 17065,
+      "optimistic_cost": 17065,
+      "fill_cost": 17286,
+      "actions_differ": true,
+      "fixed_gap": 0.004946705141039986,
+      "optimistic_gap": 0.004946705141039986,
+      "fill_gap": 0.01796125080972852
+    },
+    {
+      "scenario": "high",
+      "capacity": 1500,
+      "capacity_over_H": 10.0,
+      "probe_over_write": 0.1,
+      "oracle_cost": 18610,
+      "fixed_cost": 19450,
+      "optimistic_cost": 19450,
+      "fill_cost": 18960,
+      "actions_differ": true,
+      "fixed_gap": 0.045137023105857065,
+      "optimistic_gap": 0.045137023105857065,
+      "fill_gap": 0.018807092960773777
+    },
+    {
+      "scenario": "high",
+      "capacity": 1500,
+      "capacity_over_H": 10.0,
+      "probe_over_write": 1.0,
+      "oracle_cost": 34900,
+      "fixed_cost": 43300,
+      "optimistic_cost": 43300,
+      "fill_cost": 35700,
+      "actions_differ": true,
+      "fixed_gap": 0.24068767908309455,
+      "optimistic_gap": 0.24068767908309455,
+      "fill_gap": 0.022922636103151862
+    },
+    {
+      "scenario": "high",
+      "capacity": 1500,
+      "capacity_over_H": 10.0,
+      "probe_over_write": 10.0,
+      "oracle_cost": 197800,
+      "fixed_cost": 281800,
+      "optimistic_cost": 281800,
+      "fill_cost": 203100,
+      "actions_differ": true,
+      "fixed_gap": 0.4246713852376138,
+      "optimistic_gap": 0.4246713852376138,
+      "fill_gap": 0.02679474216380182
+    },
+    {
+      "scenario": "high",
+      "capacity": 3000,
+      "capacity_over_H": 20.0,
+      "probe_over_write": 0.01,
+      "oracle_cost": 16975,
+      "fixed_cost": 17065,
+      "optimistic_cost": 17065,
+      "fill_cost": 17379,
+      "actions_differ": true,
+      "fixed_gap": 0.005301914580265096,
+      "optimistic_gap": 0.005301914580265096,
+      "fill_gap": 0.023799705449189985
+    },
+    {
+      "scenario": "high",
+      "capacity": 3000,
+      "capacity_over_H": 20.0,
+      "probe_over_write": 0.1,
+      "oracle_cost": 18550,
+      "fixed_cost": 19450,
+      "optimistic_cost": 19450,
+      "fill_cost": 18990,
+      "actions_differ": true,
+      "fixed_gap": 0.04851752021563342,
+      "optimistic_gap": 0.04851752021563342,
+      "fill_gap": 0.02371967654986523
+    },
+    {
+      "scenario": "high",
+      "capacity": 3000,
+      "capacity_over_H": 20.0,
+      "probe_over_write": 1.0,
+      "oracle_cost": 34300,
+      "fixed_cost": 43300,
+      "optimistic_cost": 43300,
+      "fill_cost": 35100,
+      "actions_differ": true,
+      "fixed_gap": 0.26239067055393583,
+      "optimistic_gap": 0.26239067055393583,
+      "fill_gap": 0.023323615160349854
+    },
+    {
+      "scenario": "high",
+      "capacity": 3000,
+      "capacity_over_H": 20.0,
+      "probe_over_write": 10.0,
+      "oracle_cost": 191800,
+      "fixed_cost": 281800,
+      "optimistic_cost": 281800,
+      "fill_cost": 196200,
+      "actions_differ": true,
+      "fixed_gap": 0.4692387904066736,
+      "optimistic_gap": 0.4692387904066736,
+      "fill_gap": 0.022940563086548488
+    },
+    {
+      "scenario": "high",
+      "capacity": 6600,
+      "capacity_over_H": 44.0,
+      "probe_over_write": 0.01,
+      "oracle_cost": 16972,
+      "fixed_cost": 17065,
+      "optimistic_cost": 17065,
+      "fill_cost": 18587,
+      "actions_differ": true,
+      "fixed_gap": 0.005479613481027575,
+      "optimistic_gap": 0.005479613481027575,
+      "fill_gap": 0.0951567287296724
+    },
+    {
+      "scenario": "high",
+      "capacity": 6600,
+      "capacity_over_H": 44.0,
+      "probe_over_write": 0.1,
+      "oracle_cost": 18520,
+      "fixed_cost": 19450,
+      "optimistic_cost": 19450,
+      "fill_cost": 20270,
+      "actions_differ": true,
+      "fixed_gap": 0.050215982721382287,
+      "optimistic_gap": 0.050215982721382287,
+      "fill_gap": 0.09449244060475162
+    },
+    {
+      "scenario": "high",
+      "capacity": 6600,
+      "capacity_over_H": 44.0,
+      "probe_over_write": 1.0,
+      "oracle_cost": 34000,
+      "fixed_cost": 43300,
+      "optimistic_cost": 43300,
+      "fill_cost": 37100,
+      "actions_differ": true,
+      "fixed_gap": 0.2735294117647059,
+      "optimistic_gap": 0.2735294117647059,
+      "fill_gap": 0.09117647058823529
+    },
+    {
+      "scenario": "high",
+      "capacity": 6600,
+      "capacity_over_H": 44.0,
+      "probe_over_write": 10.0,
+      "oracle_cost": 188800,
+      "fixed_cost": 281800,
+      "optimistic_cost": 281800,
+      "fill_cost": 205400,
+      "actions_differ": true,
+      "fixed_gap": 0.4925847457627119,
+      "optimistic_gap": 0.4925847457627119,
+      "fill_gap": 0.08792372881355932
+    }
+  ]
+}
