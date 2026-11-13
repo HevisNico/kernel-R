@@ -89,8 +89,11 @@ All seven predictions of v1, eight of v2, seven of v3 and eight of v4 hold.
 
   The directional rule bounds silence and firing separately
   ([`needAlong_of_asymmetric_cumulative_tolerance`](../research/recursive-learning/native/Search/AsymmetricNeedTolerance.lean)).
-  The repetitions give a one-sided 95% bound of 0.262% on the probability
-  of a wrong count per trial, pooling the ports; in 925 of the 1 140
+  The repetitions give a one-sided 95% bound of 0.288% on the probability
+  of a wrong count per trial, pooling the ports and counting the 1 040
+  independent runs: 100 runs give two ports, so the 1 140 trials are not
+  all independent, and the 0.262% of the generated report assumes they
+  are. In 925 of the 1 140
   trials the port is certified again from that trial's own measures.
   [repetitions](../research/circuit/repetition/REPORT.md)
 
