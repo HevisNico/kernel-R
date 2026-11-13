@@ -87,5 +87,26 @@ open NetworkStability.RoutedCalendar
     )
 
 
+    feedback = """import FeedbackExamples
+open NetworkStability.AutonomousFeedback
+"""
+    pending = """example :
+  (run MODEL 1 (fun _ => 0) 4 (start 1 [SEED])).pending = [] := by decide
+"""
+    paired(
+        directory, "zero-decrease self-loop",
+        feedback + pending.replace("MODEL", "(Ring.model 0 (fun _ => true))").replace("SEED", "0"),
+        feedback + pending.replace("MODEL", "loop").replace("SEED", "()"),
+    )
+    and_task = """example :
+  (3, true) ∈ (run (Ring.model 2 BITS) 1 (fun _ => 0) 6 (start 3 [0])).log := by decide
+"""
+    paired(
+        directory, "ring acknowledgement with a false input",
+        feedback + and_task.replace("BITS", "(fun _ => true)"),
+        feedback + and_task.replace("BITS", "(fun i => i != 1)"),
+    )
+
+
 if __name__ == "__main__":
     main()
