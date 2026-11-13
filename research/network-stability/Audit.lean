@@ -2,6 +2,8 @@ import Counterexample
 import NativeReciprocal
 import RoutedCalendarExamples
 import FeedbackExamples
+import PerpetualExamples
+import ScheduleCounterexample
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -10,7 +12,8 @@ run_cmd do
   let env ← getEnv
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
   let modules := #[`ChipFiring, `GuardedFeedback, `Counterexample, `NativeReciprocal,
-    `RoutedCalendar, `RoutedCalendarExamples, `AutonomousFeedback, `FeedbackExamples]
+    `RoutedCalendar, `RoutedCalendarExamples, `AutonomousFeedback, `FeedbackExamples,
+    `PerpetualFeedback, `PerpetualExamples, `ScheduleCounterexample]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -41,7 +44,14 @@ run_cmd do
       ``NetworkStability.AutonomousFeedback.loop_accepts_zero_margin,
       ``NetworkStability.AutonomousFeedback.drive_disables_write,
       ``NetworkStability.AutonomousFeedback.Ring.ring_edges,
-      ``NetworkStability.AutonomousFeedback.Ring.uniform_and] do
+      ``NetworkStability.AutonomousFeedback.Ring.uniform_and,
+      ``NetworkStability.AutonomousFeedback.reserve_prefix,
+      ``NetworkStability.AutonomousFeedback.memory_stabilizes,
+      ``NetworkStability.AutonomousFeedback.strict_probe_rank,
+      ``NetworkStability.AutonomousFeedback.loop_memory_forever,
+      ``NetworkStability.AutonomousFeedback.RecirculatingRing.one_write_then_perpetual,
+      ``NetworkStability.AutonomousFeedback.ScheduleCounterexample.different_terminal_memory,
+      ``NetworkStability.AutonomousFeedback.ScheduleCounterexample.both_orders_have_margins] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."
