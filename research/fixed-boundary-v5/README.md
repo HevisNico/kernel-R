@@ -14,9 +14,9 @@ v5 confirmation or evidence that every possible learning mechanism is useless.
 
 ## Formal scope
 
-[Model.lean](Model.lean) contains 33 explicitly named theorems. The audit checks
-266 declarations, including 132 theorem declarations with generated ones
-included; it requires 17 central theorems by name and permits only `propext`,
+[Model.lean](Model.lean) contains 35 explicitly named theorems. The audit checks
+271 declarations, including 137 theorem declarations with generated ones
+included; it requires 19 central theorems by name and permits only `propext`,
 `Classical.choice` and `Quot.sound` as axioms.
 
 The same observation-only kernel is proved and called by [Bridge.lean](Bridge.lean).
@@ -30,7 +30,8 @@ The proofs cover:
 - service both before and after delivery, and preservation of Ready;
 - a recursively constructed physical execution using the actual kernel,
   safe exact-length prefixes covering every horizon and no refusal inside H;
-- one or two ticks per action, bounded writes and abstract cost at most `11N+1`;
+- one or two ticks per action, bounded writes and abstract cost at most `11N+1`,
+  including a last wait started before N and shortened by the terminal readout;
 - immediate kernel refusal on a measured lower rate above H, and soundness of
   that violation; the rejected carry is discarded;
 - arithmetic showing that the already known 5671/5516 cost ratio is below

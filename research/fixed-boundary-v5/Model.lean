@@ -407,6 +407,30 @@ theorem horizon_cost_bound (world : World) (policy : Policy)
   have cost := total_cost_bound world policy n initial
   omega
 
+/-- Count decisions by their issue times. The last action may extend beyond
+an externally imposed terminal readout, so its completion need not be inside
+the horizon. Every issued action still begins strictly before that readout. -/
+theorem issued_decisions_within_horizon (world : World) (policy : Policy)
+    (n horizon : Nat) (physics : Physics world)
+    (issued : n = 0 ∨ (finalState world policy (n - 1) initial).now < horizon) :
+    n ≤ horizon := by
+  rcases issued with none | lastStart
+  · omega
+  · have progress := (every_horizon_covered world policy (n - 1) physics).2.2
+    omega
+
+/-- An issued wait may be truncated by the paid terminal observation. Count
+its issue probe and every issued write anyway: no refund or omitted command
+is needed to obtain the horizon budget. -/
+theorem horizon_issued_cost_bound (world : World) (policy : Policy)
+    (n horizon : Nat) (physics : Physics world)
+    (issued : n = 0 ∨ (finalState world policy (n - 1) initial).now < horizon) :
+    n + 1 + 10 * writes world policy n initial ≤ 11*horizon + 1 := by
+  have count := issued_decisions_within_horizon world policy n horizon physics issued
+  have cost := total_cost_bound world policy n initial
+  omega
+
+
 theorem no_refusal_inside_boundary (world : World) (policy : Policy) (s : State)
     (physics : Physics world) (entry : Entry world policy s) :
     (reading world policy s).action ≠ .refuse := by

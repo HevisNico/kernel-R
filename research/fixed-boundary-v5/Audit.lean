@@ -22,10 +22,11 @@ run_cmd do
       ``FixedBoundaryV5.step_preserves_entry, ``FixedBoundaryV5.execution_safe,
       ``FixedBoundaryV5.execution_length, ``FixedBoundaryV5.execution_clock,
       ``FixedBoundaryV5.every_horizon_covered, ``FixedBoundaryV5.exact_horizon_prefix,
-      ``FixedBoundaryV5.horizon_cost_bound, ``FixedBoundaryV5.no_refusal_inside_boundary,
+      ``FixedBoundaryV5.horizon_cost_bound, ``FixedBoundaryV5.issued_decisions_within_horizon,
+      ``FixedBoundaryV5.horizon_issued_cost_bound, ``FixedBoundaryV5.no_refusal_inside_boundary,
       ``FixedBoundaryV5.early_refill_selected, ``FixedBoundaryV5.prudent_one_tick,
       ``FixedBoundaryV5.measured_violation_sound, ``FixedBoundaryV5.measured_violation_refuses] do
     let some info := env.find? name | throwError "Missing required theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
-  if theorems < 132 then throwError "Incomplete fixed-boundary proof audit"
+  if theorems < 137 then throwError "Incomplete fixed-boundary proof audit"
   logInfo m!"FixedBoundaryV5 audit: {checked} declarations, {theorems} theorems."
