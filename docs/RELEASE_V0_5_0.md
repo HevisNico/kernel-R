@@ -41,7 +41,7 @@ The kernel definitions are unchanged.
   coupling inequalities between levels; a two-level instance is accepted
   and an accumulating three-level chain is rejected.
 
-**Three preregistered experiments.** The leak jumps at a date the
+**Four preregistered experiments.** The leak jumps at a date the
 controllers do not know. A naive controller spaces its probes as long as
 it sees no failure; a prudent one probes every period.
 
@@ -58,9 +58,10 @@ All seven predictions of v1, eight of v2, seven of v3 and eight of v4 hold.
   every period and repairs within a budget; it makes no safety claim
   without a fresh measurement, and returns to a guaranteed contract only on
   an external authorization bound to a new generation, a fresh issue time
-  and a full expiry. [recovery](../research/refusal-recovery/README.md) The leak
-and the dose of these runs match the refresh records of the circuit
-([calibration](../research/adaptive-refresh-experiment/R_CALIBRATION.md)).
+  and a full expiry. [recovery](../research/refusal-recovery/README.md)
+- **Calibration.** The leak and the dose of these runs match the refresh
+  records of the circuit
+  ([calibration](../research/adaptive-refresh-experiment/R_CALIBRATION.md)).
 
 **Certification of a simulated circuit**
 
