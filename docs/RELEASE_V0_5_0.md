@@ -1,4 +1,4 @@
-# Kernel R v0.5.0: a supervisor that stays verifiable, and certification of a simulated circuit
+# Kernel R v0.5.0: a simulated circuit certified port by port, and a supervisor that stays verifiable
 
 **Release notes for v0.5.0**, released on 2026-11-13. Counts and limits
 describe the release commit.
@@ -7,15 +7,16 @@ describe the release commit.
 
 This release adds a supervisor, proved in Lean, that keeps a degrading task
 in service from dated, bounded-error observations without giving up the
-observations that reveal its next error. Three discrete experiments,
+observations that reveal its next error. Four discrete experiments,
 each preregistered before implementation and run once, test it with a
-known leak ceiling, with a ceiling estimated from observations, and with a
-broken assumption.
+known leak ceiling, with a ceiling estimated from observations, with a
+broken assumption, and with recovery after that rupture.
 
 It also applies the tolerance theorem of v0.4.0 to a transistor-level
 simulation of the R cell, port by port, with bounds measured on each port's
-own run. In every step of this certification, no certified port had its
-count contradicted.
+own run. 57 of 200 new ports are certified, and on 1 140 fresh noisy
+repetitions of those ports the count is always the predicted one. In every
+step of this certification, no certified port had its count contradicted.
 
 The kernel definitions are unchanged.
 
@@ -49,8 +50,15 @@ it sees no failure; a prudent one probes every period.
 | [v1](../research/discrete-refresh-experiment/run-v1/REPORT.md), leak ceiling known | 1 247, no missed danger | 2 211 | 1 014, 759 dangerous periods unseen |
 | [v2](../research/adaptive-refresh-experiment/run-v2/REPORT.md), ceiling estimated under a bounded-variation law | 1 325, no missed danger | 2 211 | 1 014, 739 dangerous periods unseen |
 | [v3](../research/refresh-contract-rupture/run-v3/REPORT.md), leak jumps from 10 to 140, beyond that law | detected one period after the jump, contract refused, no false safety declaration | | |
+| [v4](../research/recovery-v4/run-v4/REPORT.md), v3 then recovery | four unguaranteed repairs, service resumed after a fresh external authorization, zero false safety claims, total cost 5 421 as predicted | | |
 
-All seven predictions of v1, eight of v2 and seven of v3 hold. The leak
+All seven predictions of v1, eight of v2, seven of v3 and eight of v4 hold.
+
+- **Recovery after a refusal.** An explicitly unguaranteed mode probes
+  every period and repairs within a budget; it makes no safety claim
+  without a fresh measurement, and returns to a guaranteed contract only on
+  an external authorization bound to a new generation, a fresh issue time
+  and a full expiry. [recovery](../research/refusal-recovery/README.md) The leak
 and the dose of these runs match the refresh records of the circuit
 ([calibration](../research/adaptive-refresh-experiment/R_CALIBRATION.md)).
 
@@ -72,6 +80,15 @@ and the dose of these runs match the refresh records of the circuit
 | Margins measured, two conditions declared | 59 | 0 |
 | Threshold offset measured on each cell | 58 | 0 |
 | Gain also measured independently, as amended before the test runs | 37 | 0 |
+| Directional rule, registered before the recount | 57 | 0 |
+| 20 fresh noisy repetitions of the 57 ports | 1 140 of 1 140 trials right | 0 |
+
+  The directional rule bounds silence and firing separately
+  ([`needAlong_of_asymmetric_cumulative_tolerance`](../research/recursive-learning/native/Search/AsymmetricNeedTolerance.lean)).
+  The repetitions give a one-sided 95% bound of 0.262% on the probability
+  of a wrong count per trial, pooling the ports; in 925 of the 1 140
+  trials the port is certified again from that trial's own measures.
+  [repetitions](../research/circuit/repetition/REPORT.md)
 
   The registered gain measure certifies no port, because the mirror
   current changes after a FIRE; the corrected measure was declared before
@@ -97,20 +114,22 @@ and the dose of these runs match the refresh records of the circuit
 - The joint read of the circuit fires near 0.267 units, outside the window
   proved for the model, (0.239, 0.256]. The simulated cell takes the arrival
   of each pulse from ideal signals.
-- Certification uses one noisy run per port; the threshold of a cell is
-  measured once, on one port; the gain error is measured without noise.
-  Statistical repeatability is not measured in this release.
+- The repetition bound pools ports assumed interchangeable; per port, 20
+  repetitions bound the error only at 13.9%. The threshold of a cell is
+  measured once, on one port; the gain of a read that fires is checked by
+  the current up to 0.75 unit.
 - The supervisor experiments are discrete models. The variation law of v2
-  is supplied, not learned. v3 stops without recovering. Decisions come
-  from Lean lemmas; the experiment wrapper has no end-to-end proof. The
-  link to the circuit is a nominal calibration.
+  is supplied, not learned. In v4 the new ceiling comes from an external
+  authority that knows the simulator. Decisions come from Lean lemmas; the
+  experiment wrappers have no end-to-end proof. The link to the circuit is
+  a nominal calibration.
 - The `PREDICTION.md` of v3 was revised once, in `07caf3f`, before any
   implementation or execution; the report cites that version.
 - The adaptive controller's general theorems assume the evaluator's error
   bound.
 
-Work in progress, not in this release: the directional need rule and its
-57 ports, and the preregistered repetition campaign (pull request 110).
+Next: the supervisor applied to the simulated circuit, a variation law
+that refutes and replaces itself, and a two-level learning tower.
 
 ## Verification
 

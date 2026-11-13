@@ -13,7 +13,8 @@ is tested in three preregistered discrete experiments:
 [`discrete-refresh-experiment/`](discrete-refresh-experiment/README.md) (known leak ceiling),
 [`adaptive-refresh-experiment/`](adaptive-refresh-experiment/README.md) (estimated ceiling, with a
 calibration on the circuit's refresh records) and
-[`refresh-contract-rupture/`](refresh-contract-rupture/README.md) (broken assumption).
+[`refresh-contract-rupture/`](refresh-contract-rupture/README.md) (broken assumption), with
+recovery in [`refusal-recovery/`](refusal-recovery/README.md) and [`recovery-v4/`](recovery-v4/README.md).
 
 ## Recursive learning and trained cells
 
