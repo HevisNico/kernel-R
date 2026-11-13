@@ -4,6 +4,7 @@ import RoutedCalendarExamples
 import FeedbackExamples
 import PerpetualExamples
 import ScheduleCounterexample
+import ScheduleExamples
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -13,7 +14,8 @@ run_cmd do
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
   let modules := #[`ChipFiring, `GuardedFeedback, `Counterexample, `NativeReciprocal,
     `RoutedCalendar, `RoutedCalendarExamples, `AutonomousFeedback, `FeedbackExamples,
-    `PerpetualFeedback, `PerpetualExamples, `ScheduleCounterexample]
+    `PerpetualFeedback, `PerpetualExamples, `ScheduleCounterexample,
+    `ScheduleConfluence, `ScheduleExamples]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -51,7 +53,18 @@ run_cmd do
       ``NetworkStability.AutonomousFeedback.loop_memory_forever,
       ``NetworkStability.AutonomousFeedback.RecirculatingRing.one_write_then_perpetual,
       ``NetworkStability.AutonomousFeedback.ScheduleCounterexample.different_terminal_memory,
-      ``NetworkStability.AutonomousFeedback.ScheduleCounterexample.both_orders_have_margins] do
+      ``NetworkStability.AutonomousFeedback.ScheduleCounterexample.both_orders_have_margins,
+      ``NetworkStability.AutonomousFeedback.Schedule.different_cells_commute,
+      ``NetworkStability.AutonomousFeedback.Schedule.exact_queue_order_can_differ,
+      ``NetworkStability.AutonomousFeedback.Schedule.local_diamond,
+      ``NetworkStability.AutonomousFeedback.Schedule.newman,
+      ``NetworkStability.AutonomousFeedback.Schedule.terminal_memory_unique,
+      ``NetworkStability.AutonomousFeedback.Schedule.certified_terminal_memory_unique,
+      ``NetworkStability.AutonomousFeedback.Schedule.finite_prefix_confluence,
+      ``NetworkStability.AutonomousFeedback.Schedule.write_closed_memory_unique,
+      ``NetworkStability.AutonomousFeedback.Schedule.counterexample_violates_A,
+      ``NetworkStability.AutonomousFeedback.Schedule.counterexample_violates_B,
+      ``NetworkStability.AutonomousFeedback.Schedule.uniform_ring_order_independent] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."

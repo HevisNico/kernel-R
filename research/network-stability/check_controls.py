@@ -130,5 +130,16 @@ example :
     )
 
 
+    room = """import ScheduleExamples
+open NetworkStability.AutonomousFeedback.Schedule
+example : decide (0 ≤ (-2 : Int) + 1 + ERROR) = false := by decide
+"""
+    paired(
+        directory, "interleaving margin exhausted",
+        room.replace("ERROR", "0"),
+        room.replace("ERROR", "1"),
+    )
+
+
 if __name__ == "__main__":
     main()
