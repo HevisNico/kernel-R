@@ -61,12 +61,9 @@ jobs:
           tar --no-same-owner --strip-components=1 --zstd -xf "$archive" -C "$install_dir"
           "$install_dir/bin/lean" --version
           printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
-      - name: Audit proofs and preparation, or immutable saved evidence
-        run: |
-          if test -d run-v5; then
-            python3 -B verify.py
-          else
-            python3 -B verify.py --preflight
-          fi
+      - name: Test saved-publication verification on temporary repositories
+        run: python3 -B -m unittest discover -s checks -v
+      - name: Authenticate authorized raw publication and verify immutable evidence
+        run: python3 -B checks/verify_saved.py
       - name: Confirm tracked sources and historical evidence are untouched
         run: git diff --exit-code
