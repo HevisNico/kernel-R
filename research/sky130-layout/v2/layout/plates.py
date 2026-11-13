@@ -100,6 +100,12 @@ def main(full_csv, out_csv):
     (BUILD / "cell_pex_noplates.tcl").write_text("\n".join(tcl) + "\n")
     devices.run_magic("cell_pex_noplates.tcl", "cell_pex_noplates.log")
     text = (BUILD / "rcell_np_c.spice").read_text()
+    # A piece may carry both a label added here and the label of a device terminal; Magic then
+    # names it by the second. The aliases it records give the first back.
+    for line in (BUILD / "rcell_np.ext").read_text().splitlines():
+        m = re.fullmatch(r'equiv "([^"]+)" "([^"]+)_uq\d+"', line)
+        if m and "/d1." in m.group(1):
+            text = re.sub(r"(?<![\w./#])" + re.escape(m.group(1)) + r"(?![\w./#])", m.group(2), text)
     (BUILD / "rcell_np_named.spice").write_text(re.sub(r"_uq\d+\b", "", text))
     second = pex.main(BUILD / "rcell_np_named.spice", BUILD / "np_areas.csv", BUILD / "np_caps.csv")
     with open(full_csv) as fh:
