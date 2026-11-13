@@ -1,0 +1,21 @@
+* MIM capacitance in the pinned models, read from an AC analysis at 1 kHz (simulation, typical corner)
+.lib "pdk/models/sky130.lib.spice" tt
+.option scale=1e-6
+v1 a 0 dc 0 ac 1
+x1 a 0 sky130_fd_pr__cap_mim_m3_1 w=30 l=30
+v2 b 0 dc 0 ac 1
+x2 b 0 sky130_fd_pr__cap_mim_m3_2 w=30 l=30
+v3 c 0 dc 0 ac 1
+x3 c 0 sky130_fd_pr__cap_mim_m3_1 w=14.14 l=14.14
+v4 d 0 dc 0 ac 1
+x4 d 0 sky130_fd_pr__cap_mim_m3_1 w=10 l=10
+.control
+ac lin 1 1k 1k
+let c1 = -imag(i(v1))/(2*pi*1k)
+let c2 = -imag(i(v2))/(2*pi*1k)
+let c3 = -imag(i(v3))/(2*pi*1k)
+let c4 = -imag(i(v4))/(2*pi*1k)
+print c1 c2 c3 c4
+quit
+.endc
+.end
