@@ -1,8 +1,11 @@
 # SKY130 supervisor qualification and owner launch kit
 
 **Phase 1, not preregistered. The physical certificate is not closed.**
-The owner alone will execute a future registered campaign on two owner
-machines. [Launch kit](launchkit/README.md) supplies the pinned environment,
+A future registered campaign will be executed by a Claude Code cloud session
+on behalf of the owner, on two cloud containers whose inventories are
+recorded, with the [second launch kit](../sky130-supervisor-closure/launchkit/README.md),
+which replaces the one of this folder for that campaign.
+The first [launch kit](launchkit/README.md) supplies the pinned environment,
 preflight, one command per machine, publication ordering, permanent attempt
 claims, interruption handling and byte-identical survivor collection. Its
 end-to-end test used an unrelated RC circuit, not a registered scenario.
