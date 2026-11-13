@@ -1,11 +1,24 @@
 # V5: service inside a fixed boundary
 
-**Preparation complete; registered batch not executed.** The
-[protocol](PREDICTION.md) was published in
-`6361398d04cf6cbf7c382b4955b879f6025a07a3` before v5 implementation and before
-any of its twelve seeded scenarios were generated or inspected. The known v3
-case is explicitly an explored replication. The fixed boundary is H=150,
-service100, dose220, capacity660, latency1, with bounded sensor errors.
+**The registered batch completed once; S1–S6 and all local saved-evidence
+checks passed. Raw traces are not committed: their publication awaits explicit
+user authorization. Do not rerun the batch.** The protocol was published before
+implementation and before the twelve new scenarios were generated. The successful
+exact-head CI snapshot and attempt marker were published in
+`975fefb224787baca8e941f38ba4d00ccb24bf5f` before execution.
+
+Published without raw trajectories: [aggregate RESULTS.json](RESULTS.json),
+[oracle outputs](ORACLES.json), [unchanged generated report](PUBLIC_REPORT.md),
+and [post-run checks](POSTRUN_CHECKS.json). The complete pending file inventory,
+including the 27 raw compressed traces and their exact SHA-256 fingerprints,
+is [PENDING_EVIDENCE.json](PENDING_EVIDENCE.json). The full original evidence is
+preserved separately; no controller replay is needed to publish it later.
+
+All twelve new early-refill and matched-prudent cases stayed safe. The known
+replication reproduced 5671 versus oracle5516 (2.810007% excess). Seeded gaps
+ranged from 2.003643% to 4.188288%, median3.7472375%; only2/12 were below2.82%.
+Those counts have no pass threshold. The outside-boundary control refused at661.
+This is a fixed-boundary discrete-model result, not transistor validation.
 
 V5 removes the optimistic variation law. It proves the safety of early refill
 and the matched safe-prudent policy. The prior study's identical-action negative
@@ -57,7 +70,7 @@ future plant/noise, may trade dose saturation for fewer probes, values terminal
 inventory at zero and optimizes only the declared one-command/Ready-at-next-probe
 family. No claim of 2.82% excess is made for the twelve new scenarios.
 
-The batch will contain the known replication, twelve fixed seeded scenarios,
+The completed batch contains the known replication, twelve fixed seeded scenarios,
 matched safe-prudent runs and one outside-boundary control. Every case and every
 failure will be retained. Two independent frozen dynamic programs check oracle
 costs. The saved-row audit reconstructs decisions, plant chronology, sensor
@@ -65,14 +78,18 @@ bounds, carry, costs, refusal and exact registered seed draws without running
 another controller. Six saved-evidence mutations must be rejected after
 recomputing valid hash chains. All registered source files are hashed.
 
-Current validation comprises the Lean build/axiom audit, four isolated synthetic
+Completed local validation comprises the Lean build/axiom audit, four isolated synthetic
 tests and five paired semantic proof mutations. The unit fixtures do not execute
-registered scenarios or shortened pilots. The six saved-evidence controls cannot
-run until evidence exists; preparation CI success alone is not the experiment.
+registered scenarios or shortened pilots. All six saved-evidence controls passed locally. Until raw evidence is committed,
+remote CI still checks preparation only; it does not certify the saved batch.
 
-## Execution gate and reproduction
+## Recorded execution procedure — do not relaunch
 
-Use the pinned Lean 4.35.0 distribution and Python 3.12. Preparation:
+The commands below document the completed procedure. The persistent attempt
+marker already exists: **never invoke the registered runner again**. Use the
+read-only verification command after restoring the authorized saved evidence.
+
+Pinned versions: Lean4.35.0 and Python3.12. Preparation used:
 
 ```sh
 cd research/fixed-boundary-v5
