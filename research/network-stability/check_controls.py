@@ -61,5 +61,31 @@ example : episode 0 0 0 EQUALITY episode 1 0 0 := by decide
     )
 
 
+    calendar = """import RoutedCalendarExamples
+open NetworkStability.RoutedCalendar
+"""
+    # At the positive error limit, the original silent slot stays silent.
+    # Moving its port score to the boundary makes the same error trigger FIRE.
+    edge = """example :
+  (run 2 (fun _ => 1) (start 1) [⟨0, OFFSET, []⟩]).fires = [false] := by decide
+"""
+    paired(
+        directory, "silence margin at threshold",
+        calendar + edge.replace("OFFSET", "-2"),
+        calendar + edge.replace("OFFSET", "-1"),
+    )
+    # Remove only the B-to-A contact. The acknowledgement must then fail.
+    ack = """example :
+  (run 2 (fun _ => 0) (start 2)
+    [⟨0, 3, []⟩, ⟨1, -3, [⟨0, 6⟩]⟩, ⟨0, -5, CONTACTS⟩]).fires =
+    [true, true, true] := by decide
+"""
+    paired(
+        directory, "drop reciprocal acknowledgement",
+        calendar + ack.replace("CONTACTS", "[⟨1, 6⟩]"),
+        calendar + ack.replace("CONTACTS", "[]"),
+    )
+
+
 if __name__ == "__main__":
     main()
