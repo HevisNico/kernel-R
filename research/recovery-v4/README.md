@@ -1,9 +1,25 @@
 # Registered v4 recovery demonstration
 
-Status: protocol published before implementation; **no registered attempt has
-been executed**. Predictions are not observations. The prerequisite is #117 at
-`c6684f796d092b2324489cb9920f78a9fcca7a5a`; every workflow and latest-attempt job
-on that exact head must succeed before the attempt.
+Status: the single registered attempt completed successfully. **V1–V8 all
+passed**, with zero audit issues. The prerequisite #117 workflows and all latest
+jobs succeeded on exact head `c6684f796d092b2324489cb9920f78a9fcca7a5a` before
+launch; their snapshot and the durable first-attempt marker were published in
+`88ede1537af880beb9308e597589482647bf2562`. Raw evidence was published unchanged in
+`e836bbe1f107e2db62f9cff5f943ee77a95138bc`.
+
+Observed: rupture at 661, refusal at 662, four unguaranteed repair commands at
+662–665, external authorization and post-delivery guaranteed service at 666,
+first guaranteed pre-instant at 667. There were zero false sampled or new
+contract declarations, 838 probes, 450 writes, 82 tokens and one root event:
+**5,421 declared cost units**, exactly as preregistered. Six unsafe pre-instant
+periods and the old lease's unsafe exposure remain in the record.
+
+See the [unedited report](run-v4/REPORT.md), [raw trace](run-v4/adaptive.csv),
+[registered predictions](PREDICTION.md), [CI gate](CI_GATE.json) and
+[post-run validation](POSTRUN_CHECKS.json). The six saved-evidence semantic
+controls also passed, each with a recomputed valid hash chain. No second
+trajectory was run. This PR stays draft pending review and its own final CI;
+no merge or readiness transition is performed.
 
 The [preregistration](PREDICTION.md) fixes the v3 scenario, four unguaranteed
 recovery writes, one external authorization at 666, and a return to guaranteed
@@ -35,7 +51,11 @@ another trajectory. Six saved-trace mutations must be rejected even after
 recomputing their hash chains; these checks run only once evidence exists.
 Synthetic fixtures never import the registered runner.
 
-## Preparation and one attempt
+## Recorded execution procedure (do not rerun)
+
+The preparation and one-attempt commands below document the completed procedure.
+The persistent marker now exists: **do not launch the experiment again**.
+The final read-only verification command remains available.
 
 With the repository's pinned Lean 4.35.0 distribution on `PATH`:
 
