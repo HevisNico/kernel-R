@@ -24,6 +24,11 @@ explicitly retain zero certified ports. Missing original waveforms,
 peak-based proxies, limited threshold measurements, nominal calibration and
 an unestablished scalar read equation prevent using those estimates as
 universal premises. This follow-up does not change those historical results.
+Those figures concern the original campaign only. Later campaigns that
+record waveforms certify ports one by one
+([certification](../circuit/certification/REPORT.md),
+[measured conditions](../circuit/certification-unconditional/REPORT_AMENDMENT_1.md));
+this note was written before them.
 
 ## Four correspondences to prove
 

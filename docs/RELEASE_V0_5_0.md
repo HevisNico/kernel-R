@@ -14,8 +14,11 @@ broken assumption, and with recovery after that rupture.
 
 It also applies the tolerance theorem of v0.4.0 to a transistor-level
 simulation of the R cell, port by port, with bounds measured on each port's
-own run. 57 of 200 new ports are certified, and on 1 140 fresh noisy
-repetitions of those ports the count is always the predicted one. In every
+own run. 37 of 200 new ports are certified by preregistered rules, and 57
+by a directional rule fixed afterwards on the same ports. On 1 140 fresh
+noisy repetitions of those 57 ports (same cells, new noise) the count is
+always the predicted one; the directional rule has not yet been tried on
+new cells. In every
 step of this certification, no certified port had its count contradicted.
 
 The kernel definitions are unchanged.
@@ -49,7 +52,7 @@ it sees no failure; a prudent one probes every period.
 |---|---|---|---|
 | [v1](../research/discrete-refresh-experiment/run-v1/REPORT.md), leak ceiling known | 1 247, no missed danger | 2 211 | 1 014, 759 dangerous periods unseen |
 | [v2](../research/adaptive-refresh-experiment/run-v2/REPORT.md), ceiling estimated under a bounded-variation law | 1 325, no missed danger | 2 211 | 1 014, 739 dangerous periods unseen |
-| [v3](../research/refresh-contract-rupture/run-v3/REPORT.md), leak jumps from 10 to 140, beyond that law | detected one period after the jump, contract refused, no false safety declaration | | |
+| [v3](../research/refresh-contract-rupture/run-v3/REPORT.md), leak jumps from 10 to 140, beyond that law | detected at the next probe, one period after the jump in this run (probes were 6 periods apart; the guarantee is the next probe), contract refused, no false safety declaration | | |
 | [v4](../research/recovery-v4/run-v4/REPORT.md), v3 then recovery | four unguaranteed repairs, service resumed after a fresh external authorization, zero false safety claims, total cost 5 421 as predicted | | |
 
 All seven predictions of v1, eight of v2, seven of v3 and eight of v4 hold.
@@ -81,8 +84,8 @@ All seven predictions of v1, eight of v2, seven of v3 and eight of v4 hold.
 | Margins measured, two conditions declared | 59 | 0 |
 | Threshold offset measured on each cell | 58 | 0 |
 | Gain also measured independently, as amended before the test runs | 37 | 0 |
-| Directional rule, registered before the recount | 57 | 0 |
-| 20 fresh noisy repetitions of the 57 ports | 1 140 of 1 140 trials right | 0 |
+| Directional rule, fixed after the campaigns and applied to the same ports (retrospective) | 57 | 0 |
+| 20 fresh noisy repetitions of the 57 ports (same cells, new noise) | 1 140 of 1 140 trials right | 0 |
 
   The directional rule bounds silence and firing separately
   ([`needAlong_of_asymmetric_cumulative_tolerance`](../research/recursive-learning/native/Search/AsymmetricNeedTolerance.lean)).

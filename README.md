@@ -59,10 +59,10 @@ assumption is broken.
 | Networks of trained cells of any size behave as the single cells predict; two cells decide a coincidence; `2k + 1` cells find a number among `2^k` | Lean |
 | The need stays exact while the errors on start gain, doses and firing level stay within half a dose | Lean |
 | A transistor-level cell trains and stops by itself; 22 of 24 registered checks and predictions hold | simulation |
-| On 200 new simulated ports, 57 are certified from margins measured on their own runs; every certified count is the predicted one | simulation + Lean |
-| On 1 140 fresh noisy trials of those 57 ports, the count is always right: under 0.26% error per trial at 95% confidence | simulation |
+| On 200 new simulated ports, 37 are certified by preregistered rules and 57 by a directional rule fixed afterwards, from margins measured on their own runs; every certified count is the predicted one | simulation + Lean |
+| On 1 140 fresh noisy trials of those 57 ports (same cells, new noise), the count is always right: under 0.26% error per trial at 95% confidence | simulation |
 | A supervisor keeps a degrading task in service from dated observations, at 40 to 44% less cost than constant checking, with no missed danger | Lean + experiment |
-| When its assumption breaks, it detects it within one period, refuses, recovers without false safety claims, and resumes only on a fresh external authorization | Lean + experiment |
+| When its assumption breaks, it detects it at its next probe, refuses, recovers without false safety claims, and resumes only on a fresh external authorization | Lean + experiment |
 
 ## 1. The cell (Lean)
 
@@ -108,14 +108,17 @@ corners and temperature, and maintains itself under a leak.
 [circuit study](research/circuit/README.md)
 
 On 100 new cells (200 ports), the tolerance theorem is applied to each port
-with bounds measured on its own run. Each step was registered before it ran.
+with bounds measured on its own run. The first three steps were registered
+before they ran. The directional rule was fixed afterwards and applied to
+the same 200 ports, so it is retrospective; the repetitions test it on new
+noise but on the same cells. It has not yet been tried on new cells.
 
 | Step | Ports certified | Counts contradicted |
 |---|---|---|
 | Margins measured, two conditions assumed | 59 | 0 |
 | Threshold of each cell measured | 58 | 0 |
 | Gain also measured independently | 37 | 0 |
-| Directional rule (silence and firing bounded separately) | 57 | 0 |
+| Directional rule (silence and firing bounded separately), retrospective | 57 | 0 |
 | 20 fresh noisy repetitions of the 57 ports | 1 140 of 1 140 trials right | 0 |
 
 Every port whose count differs from its prediction is outside the certified
@@ -144,7 +147,7 @@ probes while it sees no failure; a *prudent* one probes every period.
 |---|---|---|
 | [v1](research/discrete-refresh-experiment/run-v1/REPORT.md) | leak ceiling known | supervisor 1 247, prudent 2 211, naive 1 014 with 759 dangerous periods unseen |
 | [v2](research/adaptive-refresh-experiment/run-v2/REPORT.md) | ceiling estimated from observations, variation law given | supervisor 1 325, no missed danger, 6% above v1 |
-| [v3](research/refresh-contract-rupture/run-v3/REPORT.md) | the leak jumps from 10 to 140, beyond that law | detected one period after the jump, contract refused, no false safety claim |
+| [v3](research/refresh-contract-rupture/run-v3/REPORT.md) | the leak jumps from 10 to 140, beyond that law | detected at the next probe, one period after the jump in this run (probes were 6 periods apart), contract refused, no false safety claim |
 | [v4](research/recovery-v4/run-v4/REPORT.md) | v3, then recovery | four unguaranteed repairs, service resumed after a fresh external authorization, zero false safety claims |
 
 The naive controller is cheapest because it observes least, and it is the
