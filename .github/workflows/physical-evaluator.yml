@@ -38,6 +38,7 @@ jobs:
             Mathlib.Analysis.Complex.ExponentialBounds
             Mathlib.Analysis.SpecialFunctions.ExpDeriv
             Mathlib.Analysis.SpecialFunctions.Log.Basic
+            Mathlib.Analysis.SpecialFunctions.Log.Deriv
             Mathlib.Data.List.OfFn
             Mathlib.Data.List.Sort
             Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
@@ -48,6 +49,22 @@ jobs:
       - name: Verify physical certificate contracts and reject semantic mutations
         working-directory: research/reusable-controller/physical
         run: python -B verify_physical.py --report "$RUNNER_TEMP/physical-validation.json"
+      - name: Recompute scalar gains with rational enclosures
+        working-directory: research/reusable-controller/physical
+        run: python -B gain_check.py --check --report "$RUNNER_TEMP/physical-gains.json"
+      - name: Fetch pinned public campaign evidence
+        run: git fetch --no-tags --depth=1 origin 7ded279f103dab5beb6c1c671f1acbdf4cff18c0
+      - name: Recompute 200 campaign ports and verify 37 eligible entries
+        working-directory: research/reusable-controller/physical
+        run: python -B campaign_check.py --check --report "$RUNNER_TEMP/physical-campaign.json"
+      - name: Fetch published directional rule
+        run: git fetch --no-tags --depth=1 origin 8b11a5f5d2b6843bc6ca1f9ff0b82c30fa99f19d
+      - name: Reproduce asymmetric rule and verify planning statistics
+        working-directory: research/reusable-controller/physical
+        run: |
+          python -B asymmetric_check.py --check --report "$RUNNER_TEMP/physical-asymmetric.json"
+          python -B -m unittest test_asymmetric_check test_repetition_plan
+          python -B repetition_plan.py --report "$RUNNER_TEMP/physical-repetition-readiness.json"
       - name: Print recorded-data replay
         working-directory: research/reusable-controller/physical
         run: lake env lean Trace.lean
@@ -57,4 +74,8 @@ jobs:
           path: |
             ${{ runner.temp }}/physical-evidence.json
             ${{ runner.temp }}/physical-validation.json
+            ${{ runner.temp }}/physical-gains.json
+            ${{ runner.temp }}/physical-campaign.json
+            ${{ runner.temp }}/physical-asymmetric.json
+            ${{ runner.temp }}/physical-repetition-readiness.json
           if-no-files-found: error
