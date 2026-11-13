@@ -3,7 +3,7 @@
 [![Lean proof checks](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml/badge.svg)](https://github.com/HevisNico/kernel-R/actions/workflows/lean.yml)
 [![Recursive learning proofs](https://github.com/HevisNico/kernel-R/actions/workflows/recursive-learning.yml/badge.svg)](https://github.com/HevisNico/kernel-R/actions/workflows/recursive-learning.yml)
 
-**Current release** [v0.4.0](https://github.com/HevisNico/kernel-R/releases/tag/v0.4.0) · **Zenodo archive (all versions)** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
+**Current release** [v0.5.0](https://github.com/HevisNico/kernel-R/releases/tag/v0.5.0) · **Zenodo archive (all versions)** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
 
 Kernel R is a mathematical model of an asynchronous analog learning cell.
 Its Lean 4 proofs start from the cell's differential equations and establish
@@ -31,6 +31,10 @@ removes two causes of this, and can say in advance when it will succeed.
   says whether that cell will learn in exactly the predicted number of
   pulses. In simulation it has never been wrong where it gave that
   guarantee.
+- **Staying verifiable.** A supervisor keeps a task in service while it
+  degrades, at a fraction of the cost of constant checking, without
+  giving up the observations that reveal its next error. When its own
+  assumption breaks, it sees it and stops instead of claiming safety.
 
 Everything below is a theorem checked by a computer, or a simulation
 result marked as such.
@@ -48,6 +52,7 @@ result marked as such.
 | The need of a port stays exact under errors on the start gain, every dose and the firing level, within half a dose in total | Lean | [`needAlong_of_cumulative_tolerance`](research/recursive-learning/native/Search/VariableNeedTolerance.lean) |
 | A transistor-level cell trains and stops by itself; 22 of 24 registered checks and predictions hold | simulation | [circuit study](research/circuit/README.md) |
 | On 200 new simulated ports, 37 are certified from margins measured on their own runs; all 37 counts are the predicted ones | simulation + Lean | [certification](research/circuit/certification-unconditional/REPORT_AMENDMENT_1.md) |
+| A supervisor keeps a degrading task in service from dated, bounded-error observations, with proved service and cost bounds; in preregistered runs it misses no dangerous period at 44% (known ceiling) and 40% (learned ceiling) less cost than constant checking, and detects a broken assumption within one period | Lean + discrete experiments | [supervisor](research/self-certifying-learning/README.md) |
 | A controller is reused over any number of native rounds with an exact input cost, and adapts its own search without degrading its true cost, under an assumed evaluator precision | Lean | [reusable controller](research/reusable-controller/README.md) |
 
 | Word | Meaning here |
@@ -198,6 +203,35 @@ the general theorems.
 [adaptive search](research/reusable-controller/ADAPTIVE.md) ·
 [physical bridge](research/reusable-controller/physical/README.md)
 
+## A supervisor that stays verifiable
+
+A task loses reserve under a leak and is repaired by doses. A supervisor
+decides when to observe and when to repair. Lean proves, for the plan it
+generates from dated bounded-error observations, that service holds at
+every time of the accepted plan and that the number of writes is bounded.
+A stale observation is refused, never redated, and every contract expires
+at a horizon fixed in advance, so the supervisor cannot save cost by
+looking less. A fixed fallback is always available under a hard loss
+ceiling.
+[`system_safe`](research/self-certifying-learning/SelfCertifyingLearning/OfferFactory.lean) ·
+[`perpetual_service`](research/self-certifying-learning/SelfCertifyingLearning/Availability.lean)
+
+Three discrete experiments, each preregistered before implementation and
+run once, test it against a naive controller, which spaces its probes as
+long as it sees no failure, and a prudent one, which probes every period.
+The leak jumps at a date the controllers do not know.
+
+| Run | Supervisor | Prudent | Naive | Result |
+|---|---|---|---|---|
+| [v1](research/discrete-refresh-experiment/run-v1/REPORT.md): leak ceiling known | 1 247, no missed danger | 2 211 | 1 014, 759 dangerous periods unseen | 44% cheaper than prudent |
+| [v2](research/adaptive-refresh-experiment/run-v2/REPORT.md): ceiling estimated from observations under a bounded-variation law | 1 325, no missed danger | 2 211 | 1 014, 739 dangerous periods unseen | 40% cheaper than prudent, 6% above v1 |
+| [v3](research/refresh-contract-rupture/run-v3/REPORT.md): the leak jumps from 10 to 140, beyond that law | detected one period after the jump, contract refused | | | no false safety declaration |
+
+The naive controller is cheapest because it observes least, and it is
+the one that misses danger. The leak and the dose of these runs match
+the refresh records of the circuit
+([calibration](research/adaptive-refresh-experiment/R_CALIBRATION.md)).
+
 ## Limits
 
 - **Simulation, not hardware.** The circuit results are simulations of
@@ -217,6 +251,10 @@ the general theorems.
   [Implementation assumptions](model/IMPLEMENTATION_ASSUMPTIONS.md)
 - **Elementary tasks.** The networks hold at every size, on a
   coincidence decision and the search for one number.
+- **The supervisor experiments are discrete models.** The variation law
+  of v2 is supplied, not learned; v3 stops without recovering; the
+  decisions come from Lean lemmas, but the experiment wrapper has no
+  end-to-end proof; the link to the circuit is a nominal calibration.
 
 ## History
 
@@ -226,7 +264,7 @@ the general theorems.
 | [v0.2.0](docs/RELEASE_V0_2_0.md) | 2026-11-02 | A chain of any length learns the same amounts in every cell |
 | [v0.3.0](docs/RELEASE_V0_3_0.md) | 2026-11-10 | Learning with realized thresholds; the coincidence decision and its benchmark |
 | [v0.4.0](docs/RELEASE_V0_4_0.md) | 2026-11-11 | Training that stops by itself, networks of trained cells, searches |
-| since v0.4.0 | | Circuit simulation, certification on measured margins, reusable and adaptive controller |
+| [v0.5.0](docs/RELEASE_V0_5_0.md) | 2026-11-13 | Circuit simulation, certification on measured margins, reusable and adaptive controller, a supervisor that stays verifiable |
 
 The [registered benchmark](research/recursive-learning/COINCIDENCE_BENCHMARK.md)
 of v0.3.0 compares write rules on the coincidence task; every Kernel R
@@ -277,6 +315,7 @@ from the committed results.
 | [`research/recursive-learning/`](research/recursive-learning/README.md) | Trained cells, networks, searches, tolerance |
 | [`research/circuit/`](research/circuit/README.md) | Transistor-level simulation, certification campaigns, circuit-to-model bridge |
 | [`research/reusable-controller/`](research/reusable-controller/README.md) | Reusable and adaptive controller, physical bridge |
+| [`research/self-certifying-learning/`](research/self-certifying-learning/README.md) | Supervisor proofs; its experiments are in `discrete-refresh-experiment`, `adaptive-refresh-experiment` and `refresh-contract-rupture` |
 | [`research/`](research/README.md) | All research packages |
 | [`docs/`](docs/UNIVERSAL_FINITE_CHAIN.md) | Theorem guides, trusted base, provenance, releases |
 | [`archive/`](archive/README.md) | Earlier experiments and specifications |

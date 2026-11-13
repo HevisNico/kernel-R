@@ -2,6 +2,7 @@
 
 | Version | Date | Notes | Source |
 |---|---|---|---|
+| v0.5.0 | 2026-11-13 | [RELEASE_V0_5_0.md](RELEASE_V0_5_0.md) | [tag](https://github.com/HevisNico/kernel-R/releases/tag/v0.5.0) |
 | v0.4.0 | 2026-11-11 | [RELEASE_V0_4_0.md](RELEASE_V0_4_0.md) | [tag](https://github.com/HevisNico/kernel-R/releases/tag/v0.4.0) |
 | v0.3.0 | 2026-11-10 | [RELEASE_V0_3_0.md](RELEASE_V0_3_0.md) | [tag](https://github.com/HevisNico/kernel-R/releases/tag/v0.3.0) |
 | v0.2.0 | 2026-11-02 | [RELEASE_V0_2_0.md](RELEASE_V0_2_0.md) | [tag](https://github.com/HevisNico/kernel-R/releases/tag/v0.2.0) |
