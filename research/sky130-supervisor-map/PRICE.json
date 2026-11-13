@@ -1,0 +1,68 @@
+{
+  "all_arithmetic_guards_pass": true,
+  "bounds_mV": {
+    "C": "4",
+    "Dmax": "7/5",
+    "Dmin": "13/10",
+    "H": "13/20",
+    "S": "0",
+    "epsilon": "1/10"
+  },
+  "conditional_ledger": {
+    "difference_fraction_of_prudent": "20/281",
+    "difference_from_probe_counts_only": "20",
+    "maintenance_actions_each": 20,
+    "prices": {
+      "maintenance": "10",
+      "probe": "1",
+      "service": "1"
+    },
+    "probe_spacing_periods": 2,
+    "prudent_cost": "281",
+    "prudent_decision_probes": 40,
+    "requires_feasible_plans_and_matched_terminal_inventory": true,
+    "same_service_and_maintenance_counts_assumed": true,
+    "service_pulses": 40,
+    "spaced_cost": "261",
+    "spaced_decision_probes": 20,
+    "terminal_probes_each": 1,
+    "terminal_target_alone_does_not_ensure_equal_unused_stock": true
+  },
+  "conservation": {
+    "assumed_loss_each_period_mV": "13/20",
+    "at_most_one_maintenance_per_period_count_condition": true,
+    "common_count_at_least_necessary_bound": true,
+    "common_write_count": 20,
+    "exact_target_for_exact_dose": false,
+    "gross_count_is_not_a_schedule_or_cost_upper_bound": true,
+    "gross_count_using_Dmin_without_saturation": 20,
+    "horizon_periods": 40,
+    "initial_reserve_mV": "2",
+    "interval_lower_meets_terminal_floor": true,
+    "necessary_write_count_using_Dmax": 19,
+    "required_gross_dose_mV": "26",
+    "terminal_reserve_target_mV": "2",
+    "unsaturated_terminal_interval_mV": [
+      "2",
+      "4"
+    ]
+  },
+  "guard_values_mV": {
+    "maximum_admissible_write_upper": "13/5",
+    "minimum_fresh_write_upper": "17/20",
+    "ready_lower": "13/20",
+    "selected_spacing_required_lower": "39/20",
+    "worst_fresh_lower_at_capacity": "19/5"
+  },
+  "guards": {
+    "fresh_ready_write_interval_nonempty": true,
+    "independent_box_repair_balance": true,
+    "initial_fresh_ready": true,
+    "one_wait_plus_one_repair_period": true,
+    "selected_spacing_plus_one_repair_period": true
+  },
+  "maximum_wait_periods_from_capacity": 4,
+  "scope": "conditional arithmetic only; no circuit bounds, policy execution or performance guarantee",
+  "units": "reserve quantities in mV; exact rational strings; costs in declared abstract units",
+  "zero_loss_wait_is_unbounded": false
+}
