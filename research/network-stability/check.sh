@@ -19,7 +19,7 @@ self_certifying="$repo/research/self-certifying-learning"
   done
 )
 
-modules=(ChipFiring GuardedFeedback Counterexample NativeReciprocal)
+modules=(ChipFiring GuardedFeedback Counterexample NativeReciprocal RoutedCalendar RoutedCalendarExamples)
 expected=$(printf '%s\n' Audit.lean "${modules[@]/%/.lean}" | sort)
 actual=$(find . -name '*.lean' -printf '%P\n' | sort)
 if [[ "$expected" != "$actual" ]]; then
