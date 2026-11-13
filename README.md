@@ -7,9 +7,11 @@
 
 Kernel R is a mathematical model of an asynchronous analog learning cell.
 Its Lean 4 proofs start from the cell's differential equations and establish
-what networks of these cells learn. A transistor-level simulation of one
-cell tests the mechanism, and the proved results are applied to it port by
-port where its measured margins allow. There is no chip.
+what networks of these cells learn. A proved supervisor keeps a degrading
+task in service while staying able to detect its next error. A
+transistor-level simulation of one cell tests the mechanism, and the proved
+results are applied to it port by port where its measured margins allow.
+There is no chip.
 
 ## In plain words
 
