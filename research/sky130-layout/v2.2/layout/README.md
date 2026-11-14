@@ -11,10 +11,27 @@ sh run.sh        # every block, flattened DRC, KLayout, antenna, negative contro
 sh run_x.sh      # the extraction and the verdicts X1 to X7: under a minute. Run once.
 ```
 
-Outputs go to `build/`, not committed. Hashes: [`SHA256SUMS`](SHA256SUMS).
-The verdicts are written to `../X_REPORT.md` by
-[`x_check.py`](x_check.py), committed with this file, before the
-extraction.
+Outputs go to `build/`, not committed. Hashes: [`SHA256SUMS`](SHA256SUMS)
+and [`SHA256SUMS_X`](SHA256SUMS_X). The verdicts are in
+[`../X_REPORT.md`](../X_REPORT.md), written by
+[`x_check.py`](x_check.py), which was committed with this file before
+the extraction (commit `f0a3fc9`). The report is not edited.
+
+## After the extraction
+
+Added once the extraction was made; the rest of this file is as it was
+pushed before.
+
+- **Extracted once. The layout was not changed after, nor any script.**
+- **X1 to X7 hold.** Between `vq` and `vrefmn` Magic extracts nothing
+  any more; the largest capacitance from `vq` to a loud net is
+  0.0014 fF (`adm` of port 2, after its floor).
+- **X3 holds its redeclared limit and not the earlier one**: 52.45 fF
+  on `vq`, limit 55 fF; by the 45 fF of the earlier layouts it fails.
+- After the plate step the files of the blocks are still those of
+  `SHA256SUMS`: the repair of the flow holds.
+- Nothing has been simulated. The nominal stage starts on the owner's
+  word.
 
 ## What differs from layout 2.1
 
