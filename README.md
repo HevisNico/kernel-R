@@ -7,8 +7,9 @@
 **Current release** [v1.0.0](https://github.com/HevisNico/kernel-R/releases/tag/v1.0.0) · **Zenodo archive (all versions)** [10.5281/zenodo.23884521](https://doi.org/10.5281/zenodo.23884521)
 
 > In an analog network that learns in closed loop, learning stops by itself:
-> every memory settles after finitely many writes, whatever the order of the
-> pulses and even while they keep arriving. Its final value is computed
+> while every read has room for its error budget, every memory settles after
+> finitely many writes, whatever the order of the pulses and even while they
+> keep arriving. Its final value is computed
 > before the network is run, from measurements made cell by cell; a
 > measurable margin says when that computation is guaranteed.
 
@@ -137,7 +138,9 @@ a discrete model. Two results show that executions of the analog cell model
   [`native_ring_refinement`](https://github.com/HevisNico/kernel-R/blob/419e4c66aae2921416993dd4e7c64996e05dc98f/research/network-stability/NativeRingRefinement.lean) (proof)
 
 Each condition of the ring class is rejected by a checked counterexample
-([examples](research/network-stability/NativeRingExamples.lean)).
+([examples](research/network-stability/NativeRingExamples.lean)). The class
+is deliberately small: one token in flight, one write per run, admissions
+in READY only, MARK disabled.
 
 ## 3. Predicting what a network will learn (simulation, preregistered)
 
@@ -185,6 +188,9 @@ is applied to each port with bounds measured on its own run.
 The repetitions bound the error per trial below 0.29% at 95% confidence,
 counting the 1 040 independent runs. The directional rule was fixed after
 the 200 ports were seen; it has not yet been tried on new cells.
+Correction: an earlier result at 125 °C, a stop with no relapse after it,
+was an artifact of netlists without junction areas; with junction areas,
+13 of 13 predictions hold.
 [certification](research/circuit/certification/REPORT.md) ·
 [directional rule](research/reusable-controller/physical/ASYMMETRIC_PROTOCOL.md) ·
 [repetitions](research/circuit/repetition/REPORT.md)
@@ -207,8 +213,10 @@ authorization ([v1](research/discrete-refresh-experiment/run-v1/REPORT.md),
 [v4](research/recovery-v4/run-v4/REPORT.md)).
 
 On the simulated circuit, with the leak tripled at a date it does not know,
-the supervised cell failed no service in 93 runs over nine corners and
-temperatures (2 232 services); left to itself, the cell failed 44 of 240.
+the supervised cell failed no service in 93 noisy runs over eight
+configurations of corner, temperature and mismatch (2 232 services), and in
+the noise-free run of each of nine configurations; left to itself, the cell
+failed 44 of 240.
 14 of 14 preregistered predictions hold.
 [supervisor campaign](research/sky130-supervisor-campaign/REPORT.md)
 
@@ -233,6 +241,9 @@ the first extracted layout with ideal sources: about 372 µW at rest and about
   theorem with hypotheses checked on the run (pulse separation, doses only).
   The refinement from the analog cell model is proved for the ring class
   and the reciprocal witness, not for the simulated transistor network.
+- **The ring class** has one token in flight, one write per run, admissions
+  in READY only and MARK disabled. Richer classes (several tokens, repeated
+  training, admissions in SLOW, MARK writes) are not yet proved.
 - **Ideal timing and router.** The simulated cells receive pulses from
   ideal signals; the network's router is ideal.
 - **Read window.** The simulated joint read fires near 0.267 units, outside
@@ -308,10 +319,15 @@ All versions: [releases](docs/RELEASES.md).
 
 ## Related work, origin and license
 
-Learning that stops once a unit responds correctly, stop-learning synapses,
-order-independent halting in abelian networks, and formal verification of
-spiking and hybrid systems all have precedents. Kernel R studies one
-combination of them, proved and tested end to end; no precedent was found
+Learning that stops once a unit responds correctly has bounded updates since
+Novikoff (1962); stop-learning synapses exist in silicon; order-independent
+halting is a theorem for abelian networks (Bond and Levine, 2016); and
+spiking and hybrid systems have been formally verified. The analog cell is
+not a monotone or abelian processor in general: a recent pulse helps the
+next read, and a FIRE can be followed by another write. Order-independence
+therefore holds only under the separation and margin conditions, and the
+negative control shows it failing outside them. Kernel R studies one
+combination of these ideas, proved and tested end to end; no precedent was found
 for the refinement from an analog cell model to a network model, or for a
 preregistered prediction of a network's exact memory from per-cell
 measurements. [Comparison and references](docs/RELATED_WORK.md)
