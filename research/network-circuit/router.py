@@ -52,7 +52,22 @@ def longer_reciprocal():
                 horizon=4599 / 10)
 
 
-def run(out, calendar, ngspice, pdk, cells=("a", "b"), seed=None, **deck_args):
+def refusal(guard, protected, previous, date):
+    """Why the guard refuses a pulse that would start at `date` (seconds) on a cell whose previous pulse started at
+    `previous` (None if there was none), or None if it lets it through."""
+    if guard is None:
+        return None
+    if protected:
+        return "protected"
+    if previous is not None and date - previous < guard * net.TU - 1e-9:
+        return "too soon after the previous pulse of the cell"
+    return None
+
+
+def run(out, calendar, ngspice, pdk, cells=("a", "b"), seed=None, guard=None, **deck_args):
+    """`guard`, if given, is the least number of time units between the starts of two pulses on one cell. The router
+    then refuses, and records as refused, a pulse that would start sooner after the previous pulse of its cell, or
+    while its cell is protected. A refused pulse is not delivered and is not put back in the queue."""
     text = net.deck(cells=cells, **deck_args)
     at = lambda units: ORIGIN + units * net.TU
     horizon = at(calendar["horizon"])
@@ -64,6 +79,7 @@ def run(out, calendar, ngspice, pdk, cells=("a", "b"), seed=None, **deck_args):
         order += 1
     protected = {c: False for c in cells}
     last_fire = {c: 0.0 for c in cells}
+    last_pulse = {c: None for c in cells}
     while True:
         target = min(queue[0][0] - net.LEAD - 1e-6, horizon) if queue else horizon
         now = s.run(target, watch=[c for c in cells if not protected[c]])
@@ -91,11 +107,16 @@ def run(out, calendar, ngspice, pdk, cells=("a", "b"), seed=None, **deck_args):
             continue
         date, _, o = heapq.heappop(queue)
         o.update(id=len(occurrences), date_s=date, protected_when_scheduled=protected[o["cell"]])
-        if date < s.busy[(o["cell"], o["port"])]:           # the port is still in its previous cycle: the testbench cannot deliver
+        previous = last_pulse[o["cell"]]
+        reason = refusal(guard, protected[o["cell"]], previous, date)
+        if reason:
+            o.update(delivered=False, refused=reason, since_previous_units=None if previous is None else (date - previous) / net.TU)
+        elif date < s.busy[(o["cell"], o["port"])]:         # the port is still in its previous cycle: the testbench cannot deliver
             o["delivered"] = False
         else:
             s.pulse(o["cell"], o["port"], date)
             o["delivered"] = True
+            last_pulse[o["cell"]] = date
         occurrences.append(o)
     left = [dict(o, date_s=d) for d, _, o in sorted(queue)]
     raw = s.close()
@@ -103,7 +124,7 @@ def run(out, calendar, ngspice, pdk, cells=("a", "b"), seed=None, **deck_args):
     for o in occurrences:
         if o["delivered"]:
             o.update(measure.pulse_record(tr, o["cell"], o["port"], o["date_s"]))
-    result = dict(calendar=dict(calendar, edges=calendar["edges"]), cells=list(cells), deck=deck_args, seed=seed, origin_s=ORIGIN,
+    result = dict(calendar=dict(calendar, edges=calendar["edges"]), cells=list(cells), deck=deck_args, seed=seed, guard_units=guard, origin_s=ORIGIN,
                   occurrences=occurrences, fires=fires, still_queued_at_the_horizon=left, wall_s=time.time() - began, points=int(len(tr.t)),
                   raw_sha256=net.sim.digest(raw), deck_sha256=net.sim.digest(Path(out) / "input.spice"),
                   final_u_V={f"{c}{p}": tr.u(c, p, horizon - 30e-6, horizon - 2e-6) for c in cells for p in net.PORTS},
@@ -114,11 +135,11 @@ def run(out, calendar, ngspice, pdk, cells=("a", "b"), seed=None, **deck_args):
 
 def word(result):
     """The decision word of each port: s for a silent read that wrote, F for a FIRE, - for a pulse that arrived while the
-    cell was protected, x for a pulse the testbench could not deliver."""
+    cell was protected, r for a pulse the guard refused, x for a pulse the testbench could not deliver."""
     out = {}
     for o in result["occurrences"]:
         key = f"{o['cell']}{o['port']}"
-        letter = "x" if not o["delivered"] else "-" if o["protected_at_start"] else "F" if o["fire"] else "s" if o[f"writes{o['port']}"] == 1 else "?"
+        letter = "r" if o.get("refused") else "x" if not o["delivered"] else "-" if o["protected_at_start"] else "F" if o["fire"] else "s" if o[f"writes{o['port']}"] == 1 else "?"
         out[key] = out.get(key, "") + letter
     return out
 

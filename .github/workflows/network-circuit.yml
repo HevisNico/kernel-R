@@ -1,0 +1,57 @@
+name: Network of circuit cells
+
+on:
+  pull_request:
+    paths:
+      - research/network-circuit/**
+      - research/network-stability/RoutedCalendar.lean
+      - research/network-stability/AutonomousFeedback.lean
+      - research/self-certifying-learning/SelfCertifyingLearning/Budget.lean
+      - research/self-certifying-learning/SelfCertifyingLearning/Composition.lean
+      - .github/workflows/network-circuit.yml
+  push:
+    branches: [main]
+    paths:
+      - research/network-circuit/**
+      - .github/workflows/network-circuit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase1:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Python with numpy 2.3.5
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/python"
+          "$RUNNER_TEMP/python/bin/python" -m pip install numpy==2.3.5
+      - name: Model, calendars, guard, and committed results against their scripts
+        run: cd research/network-circuit/phase1 && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_phase1
+      - name: Install the pinned Lean distribution
+        run: |
+          set -euo pipefail
+          test "$(cat proof/lean/lean-toolchain)" = 'leanprover/lean4:v4.35.0'
+          archive=$(mktemp "$RUNNER_TEMP/lean.XXXXXXXX.tar.zst")
+          install_dir=$(mktemp -d "$RUNNER_TEMP/lean.XXXXXXXX")
+          download_toolchain() {
+            curl --fail --silent --show-error --location \
+              --retry 2 --retry-all-errors --retry-max-time 180 \
+              --connect-timeout 10 --max-time 180 --output "$archive" "$@" &&
+            printf '%s  %s\n' '7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d' "$archive" \
+              | sha256sum --check
+          }
+          download_toolchain -H 'Accept: application/octet-stream' \
+            "https://api.github.com/repos/leanprover/lean4/releases/assets/634574462?download=1&run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" ||
+          download_toolchain \
+            "https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst?run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          tar --no-same-owner --strip-components=1 --zstd -xf "$archive" -C "$install_dir"
+          rm -f "$archive"
+          "$install_dir/bin/lean" --version
+          printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
+      - name: Compile the instance of the network theorem and audit its axioms
+        run: bash research/network-circuit/phase1/check.sh
