@@ -8,8 +8,13 @@ Each has its own `lakefile.toml` and README.
 [`self-certifying-learning/`](self-certifying-learning/README.md) is an
 independent Lean/Std package for discrete repair budgets, weighted coupling
 certificates and observation deadlines, with a constructed two-level repair
-example and counterexamples. It imports no R definitions. Adaptive refresh
-and its physical implementation remain planned work.
+example and counterexamples. It imports no R definitions. Its supervisor
+is tested in three preregistered discrete experiments:
+[`discrete-refresh-experiment/`](discrete-refresh-experiment/README.md) (known leak ceiling),
+[`adaptive-refresh-experiment/`](adaptive-refresh-experiment/README.md) (estimated ceiling, with a
+calibration on the circuit's refresh records) and
+[`refresh-contract-rupture/`](refresh-contract-rupture/README.md) (broken assumption), with
+recovery in [`refusal-recovery/`](refusal-recovery/README.md) and [`recovery-v4/`](recovery-v4/README.md).
 
 ## Recursive learning and trained cells
 

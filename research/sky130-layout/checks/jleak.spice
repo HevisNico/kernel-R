@@ -1,0 +1,19 @@
+* Reverse current of the two n-diffusions of a switch (w=1 l=0.15) held at 0.4 V, gate off (simulation, typical corner)
+* x0: no areas given, as in cell.spice and blocks.spice. x1: the areas Magic extracts for this width.
+.lib "pdk/models/sky130.lib.spice" tt
+.option scale=1e-6 gmin=1e-21 abstol=1e-18
+vd0 d0 0 0.4
+x0 d0 0 d0 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15
+vd1 d1 0 0.4
+x1 d1 0 d1 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+.control
+foreach t 27 85 125
+  set temp = $t
+  op
+  let i0 = -i(vd0)
+  let i1 = -i(vd1)
+  print i0 i1
+end
+quit
+.endc
+.end

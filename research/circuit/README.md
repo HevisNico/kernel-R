@@ -51,7 +51,13 @@ the remaining disagreement instead of tuning a budget to exclude it.
 [BRIDGE_APPLICATION.md](BRIDGE_APPLICATION.md) says where the simulated
 circuit stands against the need theorem after five instrumented replays and
 a DC calibration: each hypothesis with its bound and its source, and each of
-the 200 ports. No port is in the certified domain.
+the 200 ports. No port of that original campaign is in the certified
+domain, because its runs recorded no waveforms. The later campaigns, which
+record them, certify ports one by one:
+[certification](certification/REPORT.md) (59 under two conditions),
+[measured conditions](certification-unconditional/REPORT_AMENDMENT_1.md) (37),
+and the retrospective directional rule
+[A1](../reusable-controller/physical/ASYMMETRIC_PROTOCOL.md) (57).
 
 ## Results
 

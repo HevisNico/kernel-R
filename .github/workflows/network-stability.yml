@@ -1,0 +1,38 @@
+name: Network stability
+
+on:
+  pull_request:
+    paths:
+      - 'research/network-stability/**'
+      - 'research/self-certifying-learning/SelfCertifyingLearning/Budget.lean'
+      - 'research/self-certifying-learning/SelfCertifyingLearning/Composition.lean'
+      - 'proof/lean/**'
+      - '.github/actions/build-lean/**'
+      - '.github/workflows/network-stability.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/network-stability/**'
+      - 'research/self-certifying-learning/SelfCertifyingLearning/Budget.lean'
+      - 'research/self-certifying-learning/SelfCertifyingLearning/Composition.lean'
+      - 'proof/lean/**'
+      - '.github/actions/build-lean/**'
+      - '.github/workflows/network-stability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      LEAN_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/build-lean
+        with:
+          package-directory: proof/lean
+      - name: Compile network proofs, audit axioms, and check mutations
+        run: bash research/network-stability/check.sh
