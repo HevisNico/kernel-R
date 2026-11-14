@@ -916,8 +916,7 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
       exact same addr
   have noGainRest (i : Fin 6) : rest.countP (gainWrites C i) = 0 := by
     apply List.countP_eq_zero.mpr
-    intro row mem
-    intro yes
+    intro row mem yes
     have no := (firing_no_write fire i (firing row mem)).1
     exact Bool.noConfusion (no.symm.trans yes)
   have noGainMark (i : Fin 6) : marks.countP (gainWrites C i) = 0 := by
@@ -945,8 +944,7 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
     contradiction
   have noMarkRest (i : Fin 6) : rest.countP (markWrites C i) = 0 := by
     apply List.countP_eq_zero.mpr
-    intro row mem
-    intro yes
+    intro row mem yes
     have no := (firing_no_write fire i (firing row mem)).2
     exact Bool.noConfusion (no.symm.trans yes)
   have recover (i : Fin 2) : marks.countP (markWrites C (Address.mk i .recovery).encode) = 1 := by
@@ -979,16 +977,14 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
     | port0 =>
       have zero : marks.countP (markWrites C (Address.mk i .port0).encode) = 0 := by
         apply List.countP_eq_zero.mpr
-        intro row _
-        intro yes
+        intro row _ yes
         exact Bool.noConfusion ((markWrites_ne_gain fire i false row).symm.trans yes)
       rw [zero]
       fin_cases i <;> norm_num [Address.encode, Coordinate.index, doseCount]
     | port1 =>
       have zero : marks.countP (markWrites C (Address.mk i .port1).encode) = 0 := by
         apply List.countP_eq_zero.mpr
-        intro row _
-        intro yes
+        intro row _ yes
         exact Bool.noConfusion ((markWrites_ne_gain fire i true row).symm.trans yes)
       rw [zero]
       fin_cases i <;> norm_num [Address.encode, Coordinate.index, doseCount]
@@ -1005,11 +1001,8 @@ private theorem gainKey_injective_on_protocol (a b : ReciprocalInput)
     (h : (Address.mk a.1 (if a.2 = 2 then .port1 else .port0)).encode =
       (Address.mk b.1 (if b.2 = 2 then .port1 else .port0)).encode) :
     a = b := by
-  rcases ha with rfl | rfl | rfl | rfl <;> rcases hb with rfl | rfl | rfl | rfl
-  all_goals first
-    | rfl
-    | have values := congrArg Fin.val h
-      simp [Address.encode, Coordinate.index] at values <;> omega
+  rcases ha with rfl | rfl | rfl | rfl <;> rcases hb with rfl | rfl | rfl | rfl <;>
+    first | rfl | exact ((by decide : ¬ _) h).elim
 
 private theorem canonicalOrder (execution : NominalEpoch) (orderedRows : List Row)
     (eq : orderedRows.map Transaction.probe = (stagedDeliveries execution).map reciprocalOccurrence)
@@ -1450,24 +1443,23 @@ theorem nominal_reciprocal_transaction_words :
       · obtain ⟨token, present, eq⟩ := List.mem_map.mp tail
         have h := (c.suffix.delivery_time_bounds token (List.mem_filter.mp present).1).1
         rw [c.at40.date] at h
-        rw [← eq]
-        linarith only [h]
+        linarith
     · have h := forwardLate row (List.mem_append_left _ fA)
       obtain ⟨clock, _, rfl⟩ := List.mem_map.mp fA
       norm_num [reciprocalRow] at h ⊢
-      linarith only [h]
+      linarith
     · have h := forwardLate row (List.mem_append_right _ fB)
       obtain ⟨clock, _, rfl⟩ := List.mem_map.mp fB
       norm_num [reciprocalRow] at h ⊢
-      linarith only [h, actualSecond.2]
+      linarith [actualSecond.2]
     · have h := reverseLate row (List.mem_append_left _ rB)
       obtain ⟨clock, _, rfl⟩ := List.mem_map.mp rB
       norm_num [reciprocalRow] at h ⊢
-      linarith only [h]
+      linarith
     · have h := reverseLate row (List.mem_append_right _ rA)
       obtain ⟨clock, _, rfl⟩ := List.mem_map.mp rA
       norm_num [reciprocalRow] at h ⊢
-      linarith only [h, bound368.2]
+      linarith [bound368.2]
   have trainingFirst : ∀ tx ∈ rows, ∀ learner ∈ rows, tx.decision = true →
       gainWrites (reciprocalCalendar fire) (MarkFeedback.gain (reciprocalCalendar fire).model tx.probe) learner = true →
       learner.probe.due < tx.probe.due := by
@@ -1498,12 +1490,11 @@ theorem nominal_reciprocal_transaction_words :
     · have low := bounds.2.1 (compare (0, 2) (readyA2 learner m).1)
       simp only [gainsA2, List.mem_cons, List.not_mem_nil, or_false] at m
       rcases m with rfl | rfl | rfl <;>
-        simp only [reciprocalRow] <;>
-        linarith only [low, bound344.2, bound352.2, bound360.2, bound368.1]
+        simp only [reciprocalRow] <;> linarith [bound344.2, bound352.2, bound360.2, bound368.1]
     · have low := bounds.2.2.1 (compare (1, 1) (readyB1 learner m).1)
       obtain rfl := List.mem_singleton.mp m
       change r.final.time < tx.probe.due
-      linarith only [low, actualForward.2, actualSecond.1]
+      linarith [actualForward.2, actualSecond.1]
     · have low := bounds.2.2.2 (compare (1, 2) (readyB2 learner m).1)
       simp only [gainsB2, List.mem_cons, List.not_mem_nil, or_false] at m
       rcases m with rfl | rfl | rfl <;> exact (lt_of_lt_of_le (by norm_num [reciprocalRow]) low)
