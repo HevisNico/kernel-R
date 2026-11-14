@@ -1,6 +1,8 @@
 import NativeMultiTokenTarget
 import NativeMultiTokenMilestone
 import SynchronizedProduct
+import LaunchWave
+import ProtectedReceipt
 import Lean.Elab.Command
 import Lean.Util.CollectAxioms
 
@@ -12,7 +14,7 @@ run_cmd do
   let mut modules : Nat := 0
   for (mod, data) in env.header.moduleNames.zip env.header.moduleData do
     if mod == `NativeMultiTokenTarget || mod == `NativeMultiTokenMilestone ||
-        mod == `SynchronizedProduct then
+        mod == `SynchronizedProduct || mod == `LaunchWave || mod == `ProtectedReceipt then
       modules := modules + 1
       for name in data.constNames do
         let some info := env.constants.find? name
@@ -23,13 +25,16 @@ run_cmd do
           unless allowed.contains axiomName do
             throwError "Unexpected axiom {axiomName} in {name}"
         count := count + 1
-  if modules != 3 || count == 0 then
-    throwError "Expected the target and both native multi-token proof modules in the audit"
+  if modules != 5 || count == 0 then
+    throwError "Expected the target and four native multi-token proof modules in the audit"
   for result in #[``NetworkStability.NativeMultiToken.guarded_conjuncts,
       ``NetworkStability.NativeMultiToken.scalar_latency,
       ``NetworkStability.NativeMultiToken.training_silence,
       ``NetworkStability.NativeMultiToken.synchronized_ledger,
-      ``NetworkStability.NativeMultiToken.weak_training_transaction] do
+      ``NetworkStability.NativeMultiToken.weak_training_transaction,
+      ``NetworkStability.NativeMultiToken.launch_wave,
+      ``NetworkStability.NativeMultiToken.provisional_mark_recovery,
+      ``NetworkStability.NativeMultiToken.protected_slow_admission] do
     let some (.thmInfo _) := env.constants.find? result
       | throwError "Missing milestone theorem {result}"
   let some (.defnInfo target) := env.constants.find?
