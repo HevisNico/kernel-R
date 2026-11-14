@@ -13,10 +13,38 @@ sh run.sh        # every block, flattened DRC, KLayout, antenna, negative contro
 sh run_x.sh      # the extraction and the verdicts X1 to X7: under a minute. Run once.
 ```
 
-Outputs go to `build/`, not committed. Hashes: [`SHA256SUMS`](SHA256SUMS).
-The verdicts are written to `../X_REPORT.md` by
-[`x_check.py`](x_check.py), committed with this file, before the
-extraction.
+Outputs go to `build/`, not committed. Hashes: [`SHA256SUMS`](SHA256SUMS)
+and [`SHA256SUMS_X`](SHA256SUMS_X). The verdicts are in
+[`../X_REPORT.md`](../X_REPORT.md), written by
+[`x_check.py`](x_check.py), which was committed with this file before
+the extraction (commit `bb2494d`). The report is not edited.
+
+## After the extraction
+
+Added once the extraction was made; the rest of this file is as it was
+pushed before.
+
+- **Extracted once. The layout was not changed after.** No script was
+  changed either.
+- **5 hold, 2 fail.** X2, X4, X5, X6 and X7 hold: the largest
+  capacitance between `x`, `vgd` or `vs` and a steering control is
+  0.033 fF (1.10 fF in the second layout), and `vs` carries 7.0 fF
+  (12.0 fF).
+- **X1 fails again**: 0.0426 fF between `vq` and `vrefmn`, limit
+  0.03 fF (0.0492 fF in the second layout). Every other loud net is
+  below 0.001 fF.
+- **X3 fails**: 52.3 fF on `vq`, limit 45 fF (39.7 fF). 42.1 fF of it
+  go to node 0, against 29.0 fF: the top has 454 shield nodes where the
+  second layout had 273. The prediction of the second layout called a
+  value of X3 outside its range a limit and not a failure.
+- **A likely cause of X1, read on the drawing, not tested by any run.**
+  The three rows put the device that carries `vrefmn` (`xm2`) right
+  under the one that carries `vq` (`xm1`): their boxes are 2.9 µm
+  apart over their whole width, two gates of 4 µm facing two gates of
+  4 µm. In the second layout the two were in one row with two devices
+  between them. The change took `vrefmn` away from the wire of `vq`
+  (10.5 µm) and brought it next to the gate of `vq`. The estimate
+  could not see it: it has no polysilicon, as said below.
 
 ## What differs from the second layout
 
