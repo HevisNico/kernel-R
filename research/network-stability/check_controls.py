@@ -141,5 +141,16 @@ example : decide (0 ≤ (-2 : Int) + 1 + ERROR) = false := by decide
     )
 
 
+    fairness = """import FairnessExamples
+open NetworkStability.AutonomousFeedback.Schedule
+example : (starved.state 12).writes 0 REL (served.state 12).writes 0 := by decide
+"""
+    paired(
+        directory, "false limit uniqueness without fairness",
+        fairness.replace("REL", "≠"),
+        fairness.replace("REL", "="),
+    )
+
+
 if __name__ == "__main__":
     main()

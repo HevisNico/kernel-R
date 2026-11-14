@@ -5,6 +5,8 @@ import FeedbackExamples
 import PerpetualExamples
 import ScheduleCounterexample
 import ScheduleExamples
+import PortMemory
+import FairnessExamples
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -15,7 +17,8 @@ run_cmd do
   let modules := #[`ChipFiring, `GuardedFeedback, `Counterexample, `NativeReciprocal,
     `RoutedCalendar, `RoutedCalendarExamples, `AutonomousFeedback, `FeedbackExamples,
     `PerpetualFeedback, `PerpetualExamples, `ScheduleCounterexample,
-    `ScheduleConfluence, `ScheduleExamples]
+    `ScheduleConfluence, `ScheduleExamples,
+    `FairMemory, `NetworkTheorem, `PortMemory, `FairnessExamples]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -64,7 +67,16 @@ run_cmd do
       ``NetworkStability.AutonomousFeedback.Schedule.write_closed_memory_unique,
       ``NetworkStability.AutonomousFeedback.Schedule.counterexample_violates_A,
       ``NetworkStability.AutonomousFeedback.Schedule.counterexample_violates_B,
-      ``NetworkStability.AutonomousFeedback.Schedule.uniform_ring_order_independent] do
+      ``NetworkStability.AutonomousFeedback.Schedule.uniform_ring_order_independent,
+      ``NetworkStability.AutonomousFeedback.Schedule.network_memory,
+      ``NetworkStability.AutonomousFeedback.Schedule.fair_limit_unique,
+      ``NetworkStability.AutonomousFeedback.Schedule.starved_is_unfair,
+      ``NetworkStability.AutonomousFeedback.Schedule.starvation_model_has_diamonds,
+      ``NetworkStability.AutonomousFeedback.Schedule.different_stable_memories_without_fairness,
+      ``NetworkStability.AutonomousFeedback.Schedule.PortMemory.per_port_bounds,
+      ``NetworkStability.AutonomousFeedback.Schedule.PortMemory.both_ports_and_recovery_can_be_pending,
+      ``NetworkStability.AutonomousFeedback.Schedule.PortMemory.per_port_terminal_unique,
+      ``NetworkStability.AutonomousFeedback.Schedule.PortMemory.per_port_fair_limit_unique] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."
