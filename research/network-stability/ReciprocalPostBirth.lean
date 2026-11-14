@@ -755,7 +755,6 @@ private theorem guard_of_partition (fire : ReciprocalProbe → ℝ) (rows : List
             markWrites_ne_gain fire (C.model.cell head.probe) (C.model.secondPort head.probe) row]
         change 0 + past.countP (gainWrites C g) + past.countP (markWrites C g) = k
         rw [zero, Nat.add_zero, Nat.zero_add]
-        rfl
       have total : rows.countP (gainWrites C g) = threshold := totals head mem
       have remaining : k + (head :: tail).countP (gainWrites C g) = threshold := by
         simpa only [split, List.countP_append, k] using total
@@ -974,7 +973,7 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
         noMarkReady a2 _ (fun row mem => (gain2 row mem).2.2),
         noMarkReady b1 _ (fun row mem => (gain1 row mem).2.2),
         noMarkReady b2 _ (fun row mem => (gain3 row mem).2.2)]
-      <;> rfl
+      <;> simp only [Nat.zero_add]
     rw [marksOnly]
     cases c with
     | port0 =>
