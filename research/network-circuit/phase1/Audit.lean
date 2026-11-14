@@ -1,4 +1,5 @@
 import CircuitNetwork
+import DatedOrder
 import Instances
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
@@ -7,7 +8,7 @@ open Lean Elab Command in
 run_cmd do
   let env ← getEnv
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
-  let modules := #[`CircuitNetwork, `Instances]
+  let modules := #[`CircuitNetwork, `DatedOrder, `Instances]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -20,6 +21,13 @@ run_cmd do
   for name in #[``NetworkStability.CircuitNetwork.certificate,
       ``NetworkStability.CircuitNetwork.circuit_certified,
       ``NetworkStability.CircuitNetwork.nominal_of_port,
-      ``NetworkStability.CircuitNetwork.circuit_predicted] do
+      ``NetworkStability.CircuitNetwork.circuit_predicted,
+      ``NetworkStability.PortOrder.terminal_unique,
+      ``NetworkStability.PortOrder.noisy_exact,
+      ``NetworkStability.PortOrder.dated_run_eq_queue_run,
+      ``NetworkStability.PortOrder.dated_run_exists,
+      ``NetworkStability.CircuitNetwork.circuit_dated_predicted,
+      ``NetworkStability.CircuitNetwork.circuit_dated_eq_queue,
+      ``NetworkStability.CircuitNetwork.circuit_dated_run_exists] do
     unless env.contains name do throwError "Missing {name}"
   logInfo m!"network circuit: {count} theorems, axioms within propext, Classical.choice, Quot.sound"
