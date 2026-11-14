@@ -6,6 +6,10 @@ Lean implementation. The baseline is [the dated guarded theorem][dated],
 [the single-token ring design in #152][ring], and [the merged #148 reciprocal
 refinement][reciprocal].
 
+The #148 reciprocal witness is not a member of this class. It uses
+staggered births and external source trains in place of a common prepared
+snapshot and the three fixed waves specified here.
+
 ## Native class
 
 Fix any $N\ge2$. Use the nominal `KernelR.Hybrid.Execution` model and
@@ -46,8 +50,9 @@ Use the following fixed outward rational intervals.
 $1.822<\exp(3/5)<1.823$ and $3.320<\exp(6/5)<3.321$ suffice. For G compare $3.320 A_i$ with $9/5$ from below and
 $3.321 A_i$ with $2$ from above. This also bounds the first
 two amplitudes by $2/3.320$ and $2(1.823)/3.320$, respectively.
-Both are below $7/6$, so the weak requirement is derived rather than
-included as a separate membership test. There is no
+Both amplitudes are below $7/6$, which gives the weak-read bound at
+charge $1/10$. Establishing the silence margin with the residual
+charge carried from the preceding wave is a proof obligation. There is no
 search over rounding precision. Use the inequalities in the table for
 the soundness argument, and those rational comparisons for deciding
 membership. $\log(5/2)>9/10$ is the strict lower bound used in T3.
@@ -138,6 +143,13 @@ used for the guarded bound only.
 
 ## Frozen target statement · unproved
 
+[`NativeMultiTokenTarget.lean`](NativeMultiTokenTarget.lean) defines
+`NativeMultiTokenRefinement : Prop` and the rational membership checker.
+`bash research/native-multitoken/check.sh` typechecks the statement,
+checks the two- and three-cell examples, and audits the target module's
+axioms. Construction of the multitoken execution and proof of refinement
+wait for the generic strong step in the single-token ring (#152/#153).
+
 For every accepted tuple, let $S,\theta,R,C,\mathrm{seed}$ be the
 snapshot, parameters, native router, calendar and guarded seed compiled
 as above. Let $T=t_3+10$. There exist a native execution $E$ from
@@ -196,7 +208,7 @@ reuse does not depend on unfinished branch symbols.
 | Source | Reuse | New obligation |
 | --- | --- | --- |
 | [`quiet_source_arrival_exists` and `quiet_complete_exists`][quiet] | Quiet scalar waits and complete cuts. | Admit the full minimal-date batch and assemble overlapping local flow/jump segments at the union of their event dates. The former lemma's updated snapshot has a single intake and cannot construct the active batch. Show preservation of pending multiplicities. |
-| [`weak_input_cycle_exists`][weak] | Local ERROR cycle, $3/5$ dose and restoration of `ReadyCoordinates`. The parameter inequalities fit both visits. | Construct each one-cell leg with a local queue and an empty router, then synchronize the product. Reuse [the existing autonomous projection][project] for local observations when its premises hold. It does not supply the converse product. Prove exact transport of the per-cell ledger and decay of residual charge before the next wave. |
+| [`weak_input_cycle_exists`][weak] | Local ERROR cycle, $3/5$ dose and restoration of `ReadyCoordinates`. G supplies the amplitude bound for both visits. | Construct each one-cell leg with a local queue and an empty router, then synchronize the product. Reuse [the existing autonomous projection][project] for local observations when its premises hold. It does not supply the converse product. Prove exact transport of the per-cell ledger. Bound the residual charge from the first wave and establish the second wave's silence margin with that residual. |
 | [`first_learned_fire_exists` and `readyPulse_first_learned_crossing_transversal`][fire] | Exact root and local FIRE segment. Reuse the single-token construction's planned FAST/SLOW legs where their assumptions hold. | Cut active product traces at distinct or tied FIRE clocks. Evaluate the real router at each global FIRE jump and amend the pending queue there. Build the protected receiver path with its early incoming receipt instead of requiring a complete, quiet SLOW return before it. |
 | [`predicted_phase_after_fire`][timing], [`Execution.cadence_mark_only_pulse`][mark], and [`ProtectedReceipt.recovery_dose`][native] | The phase-window comparison, one-input recovery budget, and nominal MARK/ERROR ledger accounts. The cadence lemma inspects a supplied sufficiently long run. | Use [the one-cell cadence constructor][mark-exists] as a local reference. Generalize its charge-window premises to T3 and construct and synchronize the protected intake, MARK, auxiliary return and main reopening. Establish the budget before invoking T3. A synchronized constructor for these parameters and dates remains open. |
 | [`Execution.token_balance`][balance], [`native_queue_replay`][native], [`TransactionReplay.append`][replay], and [`dated_network_memory`][dated] | Token conservation, replay algebra, and guarded convergence. #148's [`nominal_reciprocal_refinement`][reciprocal] is the reference for aligning admission/FIRE words, retaining pending occurrences, and comparing memory coordinatewise. | Compile exact clocks and phases and construct replay rows; prove the in-flight accounting, per-wave dose fold, uniform reserve and rank, and the distinct-cell tie condition. #148's fixed transaction table and counts depend on its witness. |
