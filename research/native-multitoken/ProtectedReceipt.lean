@@ -52,9 +52,11 @@ private theorem provisional_mark_integral {θ ε} (box : @PhysicalBox 1 θ ε) (
   have le := intervalIntegral.integral_mono_on (μ := volume) after
     (continuous.intervalIntegrable s.time t) (intervalIntegrable_const (c := (7 / 25 : ℝ)))
     (fun v hv => (pointwise v hv).2)
-  simpa [intervalIntegral.integral_const, smul_eq_mul, mul_comm] using le
+  simp only [intervalIntegral.integral_const, smul_eq_mul] at le
+  linarith
 
-private structure ReceiptMarkPrefix (θ : Fin 1 → Parameters) (route : Router 1) (s : Snapshot 1) (p : Port) where
+private structure ReceiptMarkPrefix (θ : Fin 1 → KernelR.Hybrid.Parameters)
+    (route : Router 1) (s : Snapshot 1) (p : Port) where
   final : Snapshot 1
   execution : Execution θ route s final
   contacts_transversal : execution.ContactsTransversal
@@ -446,9 +448,14 @@ theorem protected_slow_admission {p : Parameters N} (accepted : p.check = true) 
       (by rw [clock]; exact budget) aux (by simp [a, setRaw])
       (fun q ne => by simp [a, setRaw, ne, raw]) future
   refine ⟨u, .cons (.jump intake) body, after, finish, ready, qRest, rawRest, pending,
-    ?_, emitted, dose, doses⟩
-  change [token] ++ body.deliveries = _
-  rw [delivered]
-  rfl
+    ?_, emitted, ?_, ?_⟩
+  · change [token] ++ body.deliveries = _
+    rw [delivered]
+    rfl
+  · change 0 + body.ledger.recovery 0 = _
+    simpa only [zero_add] using dose
+  · intro q
+    change 0 + body.ledger.error 0 q = 0 ∧ 0 + body.ledger.mark 0 q = _
+    simpa only [zero_add] using doses q
 
 end NetworkStability.NativeMultiToken
