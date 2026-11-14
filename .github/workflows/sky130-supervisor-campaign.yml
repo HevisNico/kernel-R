@@ -1,0 +1,54 @@
+name: SKY130 supervisor campaign
+
+on:
+  pull_request:
+    paths:
+      - research/sky130-supervisor-campaign/**
+      - research/sky130-supervisor-closure/**
+      - research/sky130-supervisor-qualification/**
+      - research/sky130-supervisor-map/**
+      - research/circuit/**
+      - .github/workflows/sky130-supervisor-campaign.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  campaign:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Python 3.12.3 of Ubuntu 24.04 and numpy 2.3.5
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y python3.12 python3.12-venv
+          test "$(/usr/bin/python3.12 -c 'import platform; print(platform.python_version())')" = '3.12.3'
+          /usr/bin/python3.12 -m venv "$RUNNER_TEMP/python"
+          "$RUNNER_TEMP/python/bin/python" -m pip install numpy==2.3.5
+      - name: The preregistration is the file that was pushed alone
+        run: |
+          git diff --exit-code 77ffe5e84eb45edbc23f3581f4de8419ba61a331 -- research/sky130-supervisor-campaign/PREDICTION.md
+          test "$(sha256sum research/sky130-supervisor-campaign/PREDICTION.md | cut -d' ' -f1)" = '27989a36013709de4fe77e1c8baa5fbdf168c4b4662cd38fec3583af9b72cab5'
+          test "$(git show --stat --format= 77ffe5e84eb45edbc23f3581f4de8419ba61a331 | grep -c '|')" = '1'
+      - name: Plan, decisions and analysis of the campaign
+        run: cd research/sky130-supervisor-campaign && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_campaign
+      - name: Kernel, launch kit and qualification
+        run: |
+          set -euo pipefail
+          (cd research/sky130-supervisor-closure && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_kernel)
+          "$RUNNER_TEMP/python/bin/python" -B -m unittest discover -s research/sky130-supervisor-closure/launchkit -p 'test_*.py'
+          "$RUNNER_TEMP/python/bin/python" -B research/sky130-supervisor-closure/verify.py
+      - name: No registered run exists before the launch
+        run: |
+          test ! -e research/sky130-supervisor-campaign/CAMPAIGN.json || test -e research/sky130-supervisor-campaign/RUN_ATTEMPT.json
+      - name: The files of the qualification are those of its pull request
+        run: |
+          git diff --exit-code e5b40eeb8c2fa23c40337a800769f011199a0c9d -- research/sky130-supervisor-closure research/sky130-supervisor-qualification research/sky130-supervisor-map research/circuit
+      - name: Nothing was written by the checks
+        run: git diff --exit-code
