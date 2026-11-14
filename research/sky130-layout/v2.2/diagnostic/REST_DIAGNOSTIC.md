@@ -57,16 +57,16 @@ noise is larger than that.
 
 Each line is the same noisy run with one thing changed.
 
-| Cell | Stage C | No noise on the FIRE reference | No capacitance (areas alone) | Without `vq`–`dq` (0.35 fF) | Without `vq` to node 0, `vdd`, `vr0`, `vpre` (48.4 fF) | Without `vq` to the FIRE comparator (3.6 fF) | Schematic, same noise |
-|---|---|---|---|---|---|---|---|
-| `t6051` | **−181.0** | +38.4 | −173.0 | −175.4 | −183.1 | −175.6 | +109.6 |
-| `t6082` | **−12.7** | −11.0 | +41.1 | +38.0 | −13.3 | −12.6 | +322.8 |
-| `t6031` | **−3.3** | +32.6 | +7.7 | +6.2 | −3.7 | −2.3 | +289.7 |
-| `t6065` | +434.3 | +41.7 | +427.2 | not run | not run | +424.9 | +710.3 |
-| `t6074` | +72.1 | not run | +119.7 | +117.2 | +72.3 | not run | +401.9 |
-| `t6002` | +43.7 | not run | +36.3 | not run | not run | not run | +317.5 |
-| `t6003` | +61.0 | not run | +52.0 | not run | not run | not run | +336.5 |
-| `t6030` | +148.1 | not run | +163.0 | not run | not run | not run | +445.1 |
+| Cell | Stage C | No noise on the FIRE reference | Only the noise of the FIRE reference | No capacitance (areas alone) | Without `vq`–`dq` (0.35 fF) | Without `vq` to node 0, `vdd`, `vr0`, `vpre` (48.4 fF) | Without `vq` to the FIRE comparator (3.6 fF) | Schematic, same noise |
+|---|---|---|---|---|---|---|---|---|
+| `t6051` | **−181.0** | +38.4 | −177.0 | −173.0 | −175.4 | −183.1 | −175.6 | +109.6 |
+| `t6082` | **−12.7** | −11.0 | +41.0 | +41.1 | +38.0 | −13.3 | −12.6 | +322.8 |
+| `t6031` | **−3.3** | +32.6 | +6.8 | +7.7 | +6.2 | −3.7 | −2.3 | +289.7 |
+| `t6065` | +434.3 | +41.7 | +435.3 | +427.2 | not run | not run | +424.9 | +710.3 |
+| `t6074` | +72.1 | not run | not run | +119.7 | +117.2 | +72.3 | not run | +401.9 |
+| `t6002` | +43.7 | not run | not run | +36.3 | not run | not run | not run | +317.5 |
+| `t6003` | +61.0 | not run | not run | +52.0 | not run | not run | not run | +336.5 |
+| `t6030` | +148.1 | not run | not run | +163.0 | not run | not run | not run | +445.1 |
 
 Without noise the rest charge before the first read is **+42.6 for
 every cell**: the nominal cell, the 8 calibration cells and the 8 cells,
@@ -88,8 +88,10 @@ into.
 
 **b. The noise of the FIRE reference moves `vq` by more than what is
 left.** With that source turned down a million times the first read
-comes back to +33 to +42 on three of the four cells run, and with the
-three other sources turned down instead it stays where it was. No
+comes back to +33 to +42 on three of the four cells run (`t6082` keeps
+what point c describes). With the three other sources turned down
+instead, the first read is that of the netlist with no capacitance,
+within 8. No
 extracted capacitance carries it: between `vq` and `vrefmn` Magic
 extracts nothing on layout 2.2, and the netlist with no capacitance at
 all shows the same excursion (−216 for `t6051`, +385 for `t6065`). It
