@@ -193,6 +193,7 @@ def run(a):
                 continue
         if n == a.services:
             events.append(dict(slot=k, phase="end", observed_V=obs, report=report))
+            controls([(0, 0), (0, 0)])                      # nothing is requested after the last observation
             break
         g = leak_at(n, a.jump, a.jump_period)               # set after the observation: the kernel is not told
         if g != leak_now:
@@ -206,15 +207,15 @@ def run(a):
         events.append(dict(slot=k + 1, phase="read", period=n, read=name))
         controls([(ports[0], 1), (ports[1], 1)])
         k, n = k + 2, n + 1
-    s.run_to(k * sim.SLOT + 100e-6)
+    s.run_to(k * sim.SLOT + 1e-6)
     raw = s.close()
     d = read_raw(raw)
-    assert d[-1, 0] >= k * sim.SLOT + 100e-6
+    assert d[-1, 0] >= k * sim.SLOT
     result = dict(id=a.id, scenario=a.scenario, config=a.config, mode=a.mode, noise=bool(a.noise), version=a.version, seed=a.seed,
                   section=config["section"], temperature_C=config["temperature_C"], reference_leak_S=G0, jump_S=a.jump, jump_period=a.jump_period,
-                  services_requested=a.services, services_run=n, entered_at_slot=entered, refused_at_period=refused, last_slot=k,
+                  services_requested=a.services, services_run=n, entered_at_slot=entered, refused_at_period=refused, last_slot=k - 1,
                   ended_at_the_last_slot_of_its_plan=True, v_service_V=v_service, bounds=[vars(b) for b in bounds], events=events,
-                  records=[slot_record(d, j) for j in range(2, k + 1)], noise_fingerprint=fingerprint, points=int(len(d)), wall_s=time.time() - began,
+                  records=[slot_record(d, j) for j in range(2, k)], noise_fingerprint=fingerprint, points=int(len(d)), wall_s=time.time() - began,
                   deck_sha256=hashlib.sha256(text.encode()).hexdigest(), files={x: sim.digest(a.out / x) for x in ("input.spice", "head.raw", "trace.raw")})
     (a.out / "result.json").write_text(json.dumps(result, indent=1) + "\n")
     return result
