@@ -47,8 +47,9 @@ jobs:
       - name: No registered run exists before the launch
         run: |
           test ! -e research/sky130-supervisor-campaign/CAMPAIGN.json || test -e research/sky130-supervisor-campaign/RUN_ATTEMPT.json
-      - name: The files of the qualification are those of its pull request
+      - name: The files of the qualification, and the circuit files the campaign used, are those of its pull request
         run: |
-          git diff --exit-code e5b40eeb8c2fa23c40337a800769f011199a0c9d -- research/sky130-supervisor-closure research/sky130-supervisor-qualification research/sky130-supervisor-map research/circuit
+          git diff --exit-code e5b40eeb8c2fa23c40337a800769f011199a0c9d -- research/sky130-supervisor-closure research/sky130-supervisor-qualification research/sky130-supervisor-map \
+            research/circuit/cell.spice research/circuit/blocks.spice research/circuit/noise.json research/circuit/spiceinit.txt
       - name: Nothing was written by the checks
         run: git diff --exit-code
