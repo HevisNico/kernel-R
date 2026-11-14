@@ -165,5 +165,16 @@ example :
     )
 
 
+    phase = """import PhaseAdmission
+open NetworkStability.PhaseAdmission
+example : afterReopen (fun a b : Nat => a ≤ b) 1 DATE = .slow := by decide
+"""
+    paired(
+        directory, "read date crosses reopening",
+        phase.replace("DATE", "0"),
+        phase.replace("DATE", "1"),
+    )
+
+
 if __name__ == "__main__":
     main()

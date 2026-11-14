@@ -10,7 +10,7 @@ import FairnessExamples
 import ConcreteFairness
 import NativeEndpoint
 import MarkCounterexample
-import NativeRefinement
+import NativeTransactions
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -23,7 +23,8 @@ run_cmd do
     `PerpetualFeedback, `PerpetualExamples, `ScheduleCounterexample,
     `ScheduleConfluence, `ScheduleExamples,
     `FairMemory, `NetworkTheorem, `PortMemory, `FairnessExamples,
-    `ConcreteFairness, `NativeEndpoint, `MarkFeedback, `MarkCounterexample, `NativeMarkTrace, `NativeRefinement]
+    `ConcreteFairness, `NativeEndpoint, `MarkFeedback, `MarkCounterexample, `NativeMarkTrace, `NativeRefinement,
+    `PhaseAdmission, `NativeAdmissions, `NativeTransactions]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -105,7 +106,21 @@ run_cmd do
       ``NetworkStability.NativeReciprocal.ProtectedReceipt.recovery_dose,
       ``NetworkStability.NativeReciprocal.nominal_staged_dose_balance,
       ``NetworkStability.NativeReciprocal.ProtectedReceipt.certified_pair,
-      ``NetworkStability.NativeReciprocal.certified_opposite_decisions_need_different_read_laws] do
+      ``NetworkStability.NativeReciprocal.certified_opposite_decisions_need_different_read_laws,
+      ``NetworkStability.PhaseAdmission.network_memory,
+      ``NetworkStability.PhaseAdmission.tied_occurrences_commute,
+      ``NetworkStability.PhaseAdmission.Trace.chronological,
+      ``NetworkStability.PhaseAdmission.Trace.zero_error_replay,
+      ``NetworkStability.PhaseAdmission.Trace.rank_bound,
+      ``NetworkStability.PhaseAdmission.ReopenRace.coincident_reopening_different_memory,
+      ``NetworkStability.PhaseAdmission.ReopenRace.strict_gap_forces_same_first_action,
+      ``NetworkStability.NativeReciprocal.nominal_admission_words,
+      ``NetworkStability.NativeReciprocal.recordedMode_recovers_admission,
+      ``NetworkStability.NativeReciprocal.ProtectedReceipt.dated_pair,
+      ``NetworkStability.NativeReciprocal.nominal_forward_sender_transactions,
+      ``NetworkStability.NativeReciprocal.nominal_reverse_sender_transactions,
+      ``NetworkStability.NativeReciprocal.prepared_pulse_zero_doses,
+      ``NetworkStability.NativeReciprocal.PreparedTransactions.responses] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."
