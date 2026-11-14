@@ -1,0 +1,39 @@
+#!/usr/bin/python3 -I
+"""Stands between a campaign runner and ngspice: rewrites the deck, then runs the simulator.
+
+A runner of research/circuit calls `ngspice -b DECK`. With this folder first on PATH, the deck is
+rewritten by netlist.py into DECK.p1 and the real simulator runs on that. The runner is unchanged.
+
+  P1_HOME     folder of netlist.py
+  P1_NGSPICE  the real simulator (default /usr/bin/ngspice)
+  P1_MODE     flat   expand the sub-circuits, add nothing
+              zero   expand, areas and capacitances at zero (identity test)
+              zerocaps  expand, the capacitances of P1_CAPS at zero, no area (diagnosis)
+              areas  expand, with the areas of P1_AREAS (and the capacitances of P1_CAPS if set)
+"""
+import os
+import sys
+
+sys.path.insert(0, os.environ["P1_HOME"])
+import netlist
+
+real = os.environ.get("P1_NGSPICE", "/usr/bin/ngspice")
+mode = os.environ["P1_MODE"]
+args = sys.argv[1:]
+deck = args[-1]
+caps = netlist.read_caps(os.environ["P1_CAPS"]) if os.environ.get("P1_CAPS") else None
+if mode == "flat":
+    text, _ = netlist.build(open(deck).read(), open("blocks.spice").read())
+elif mode == "zero":
+    text, _ = netlist.build(open(deck).read(), open("blocks.spice").read(), zero=True, caps=caps)
+elif mode == "zerocaps":
+    text, _ = netlist.build(open(deck).read(), open("blocks.spice").read(), caps=[(a, b, "0") for a, b, _ in caps])
+elif mode == "areas":
+    text, _ = netlist.build(open(deck).read(), open("blocks.spice").read(),
+                            areas=netlist.read_areas(os.environ["P1_AREAS"]), caps=caps)
+else:
+    sys.exit(f"P1_MODE={mode}: unknown")
+out = deck + ".p1"
+with open(out, "w") as fh:
+    fh.write(text)
+os.execv(real, [real] + args[:-1] + [out])

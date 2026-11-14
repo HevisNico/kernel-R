@@ -1,0 +1,47 @@
+#!/usr/bin/python3 -I
+"""Stands between a campaign runner and ngspice in stage P: rewrites the deck, then runs the simulator.
+
+The runners of research/circuit (run.py, certification/cert_run.py, certification-unconditional/
+uncond_run.py) are used unchanged. They call this file as their simulator.
+
+  P1_HOME      folder of netlist.py
+  P1_NGSPICE   the real simulator
+  P1_MODE      schematic  the deck as the runner wrote it (the checks of the harness)
+               stage      sub-circuits expanded, with the areas of P1_AREAS and the capacitances of P1_CAPS
+  P1_NOISE_ID  for a run with noise: the simulator is started with the preload P1_FAKEPID
+               (built from ../../circuit/repetition/fakepid.c) and FAKEPID set to this number,
+               so that the run draws the same noise each time it is made
+  P1_SUPPLY    a file: the current of the supply source is saved too and written there
+"""
+import os
+import sys
+
+sys.path.insert(0, os.environ["P1_HOME"])
+import netlist
+
+real = os.environ["P1_NGSPICE"]
+mode = os.environ["P1_MODE"]
+args = sys.argv[1:]
+deck = args[-1]
+text = open(deck).read()
+if mode == "stage":
+    text, _ = netlist.build(text, open("blocks.spice").read(), areas=netlist.read_areas(os.environ["P1_AREAS"]),
+                            caps=netlist.read_caps(os.environ["P1_CAPS"]))
+elif mode != "schematic":
+    sys.exit(f"P1_MODE={mode}: unknown")
+supply = os.environ.get("P1_SUPPLY")
+if supply:
+    lines = text.splitlines()
+    save = [i for i, l in enumerate(lines) if l.startswith(".save ")]
+    tran = [i for i, l in enumerate(lines) if l.startswith("tran ")]
+    assert len(save) == 1 and len(tran) == 1, "one .save line and one tran line expected"
+    lines[save[0]] += " i(vdd)"
+    lines.insert(tran[0] + 1, f"wrdata {supply} i(vdd)")
+    text = "\n".join(lines) + "\n"
+out = deck + ".p1"
+with open(out, "w") as fh:
+    fh.write(text)
+env = dict(os.environ)
+if env.get("P1_NOISE_ID"):
+    env.update(LD_PRELOAD=env["P1_FAKEPID"], FAKEPID=env["P1_NOISE_ID"])
+os.execve(real, [real] + args[:-1] + [out], env)
