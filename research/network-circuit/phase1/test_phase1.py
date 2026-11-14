@@ -87,8 +87,14 @@ class Committed(unittest.TestCase):
     def test_no_network_result_for_the_instances(self):
         measures = json.loads((HERE / "MEASURES.json").read_text())
         for instance in measures["instances"].values():
-            for train in instance["trains"].values():
+            for train in [instance["quiet_train"]] + instance["noisy_trains"]:
                 self.assertIn("each port alone", train["calendar"])
+
+    def test_nominal_rehearsal(self):
+        import nominal
+        committed = json.loads((HERE / "NOMINAL_REHEARSAL.json").read_text())
+        self.assertEqual(committed["words_of_the_model"], {"a1": "ssss" + "F" * 14, "a2": "ssss" + "F" * 6, "b1": "ssss" + "F" * 6, "b2": "ssss" + "F" * 14})
+        self.assertEqual(committed["calendar"], calendars.reciprocal(18)["name"])
 
 
 if __name__ == "__main__":

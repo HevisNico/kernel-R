@@ -14,11 +14,15 @@ higher gain. Per port:
   help_16       what a FIRE 16 units earlier adds to a read, over what a pulse 22 units earlier adds: the gain
                 of latency, divided by the slope
   help_18       the same at 18 units, from the train without noise: after a silent read, and after a FIRE
-  noise         standard deviation of a read, as an equivalent `u`: scatter of the FIRE latency in the noisy train
-                at one stored state, divided by the slope there
+  noise         of a read, as an equivalent `u`, from the noisy trains that gave the word of the train without
+                noise, each in its own simulator process:
+                  within a run   scatter of the FIRE latency about the mean of its run, divided by the slope;
+                  run offsets    for each run, (FIRE latency without noise - mean FIRE latency of the run) / slope
 
-Per instance, `dose_noise_sd_mV`: root mean square of (dose in the noisy train - dose of the port without noise),
-over the silent reads of its four ports.
+Per instance:
+  noise_between_runs_mV   root mean square of the run offsets of its four ports: what one run adds to every read
+                          of a port, the same for the whole run (see NOISE.md)
+  dose_noise_sd_mV        root mean square of (dose in a noisy train - dose of the port without noise)
 """
 import json
 from pathlib import Path
@@ -44,7 +48,7 @@ def secant(points, u):
     return (l1 - l0) / (u1 - u0)
 
 
-def port(scan, trains):
+def port(name, scan, quiet, noisy):
     P = scan["pulses"]
     isolated = [p for p in P if p["kind"] in ("read", "reference")]
     fired = [(p["u_before_mV"], p["latency"]) for p in isolated if p["fire"]]
@@ -66,40 +70,38 @@ def port(scan, trains):
              latency_range=[min(l for _, l in fired), max(l for _, l in fired)],
              protected_until_units=max(p["protected_until_units"] for p in P if p["fire"]),
              error_phase_units=[min(p["error_phase_units"][0] for p in P if p.get("error_phase_units")), max(p["error_phase_units"][1] for p in P if p.get("error_phase_units"))])
-    quiet = trains.get("quiet")
-    if quiet:
-        T = quiet
-        word = "".join("F" if p["fire"] else "s" for p in T)
-        first = next((i for i, p in enumerate(T) if p["fire"]), None)
-        r["train_18_quiet"] = dict(word=word, writes=word.count("s"))
-        if first is not None and first + 1 < len(T) and all(p["fire"] for p in T[first:]):
-            level = T[first]["u_before_mV"]
-            here = secant(fired, level)
-            base = reference["latency"] + (level - trained) * here       # isolated latency at this stored state
-            later = [p["latency"] for p in T[first + 1:]]
-            r["train_18_quiet"].update(state_mV=level, latency_first_fire=T[first]["latency"], latency_later=statistics.median(later),
-                                       later_range=[min(later), max(later)])
-            r["help_18_after_silent_mV"] = (base - T[first]["latency"]) / here
-            r["help_18_after_fire_mV"] = (base - statistics.median(later)) / here
-    noisy = trains.get("noise")
-    if noisy:
-        T = noisy
-        word = "".join("F" if p["fire"] else "s" for p in T)
-        steps = [p["step_mV"] for p in T if not p["fire"]]
-        groups = {}
-        for i, p in enumerate(T):
-            if p["fire"]:
-                groups.setdefault(word[:i].count("s"), []).append(p)
-        writes, G = max(groups.items(), key=lambda kv: len(kv[1])) if groups else (None, [])
-        r["train_18_noise"] = dict(word=word, writes=word.count("s"), doses_mV=steps)
-        if len(G) >= 8:
-            level = statistics.mean(p["u_before_mV"] for p in G)
-            here = secant(fired, level)
-            lat = [p["latency"] for p in G]
-            r["train_18_noise"].update(fires_at_one_state=len(G), writes_at_that_state=writes, state_mV=level, slope_per_mV=here,
-                                       latency_mean=statistics.mean(lat), latency_sd=statistics.stdev(lat),
-                                       state_sd_mV=statistics.stdev(p["u_before_mV"] for p in G))
-            r["noise_sd_mV"] = statistics.stdev(lat) / here
+    T = quiet
+    word = "".join("F" if p["fire"] else "s" for p in T)
+    first = word.index("F")
+    assert word == "s" * first + "F" * (len(word) - first) and len(word) - first >= 2
+    level = T[first]["u_before_mV"]
+    here = secant(fired, level)
+    base = reference["latency"] + (level - trained) * here               # isolated latency at this stored state
+    later = [p["latency"] for p in T[first + 1:]]
+    r["train_18_quiet"] = dict(word=word, writes=first, state_mV=level, slope_per_mV=here, latency_first_fire=T[first]["latency"],
+                               latency_later=statistics.median(later), later_range=[min(later), max(later)])
+    r["help_18_after_silent_mV"] = (base - T[first]["latency"]) / here
+    r["help_18_after_fire_mV"] = (base - statistics.median(later)) / here
+    runs, offsets, squares, count, doses = [], [], 0.0, 0, []
+    for run in noisy:
+        N = run["ports"][name]
+        noisy_word = "".join("F" if p["fire"] else "s" for p in N)
+        doses += [p["step_mV"] for p in N if not p["fire"]]
+        lat = [p["latency"] for p in N if p["fire"]]
+        same = noisy_word == "s" * first + "F" * (len(noisy_word) - first) and len(lat) >= 3
+        entry = dict(run=run["run"], word=noisy_word, same_word_as_without_noise=same)
+        if same:
+            mean = statistics.mean(lat)
+            entry.update(fires=len(lat), offset_mV=(statistics.median(later) - mean) / here, within_sd_mV=statistics.stdev(lat) / here)
+            offsets.append(entry["offset_mV"])
+            squares += sum((x - mean) ** 2 for x in lat) / here ** 2
+            count += len(lat) - 1
+        runs.append(entry)
+    r["noisy_trains"] = runs
+    r["noisy_doses_mV"] = doses
+    r["noise_run_offsets_mV"] = offsets
+    if count >= 8:
+        r["noise_within_run_mV"] = (squares / count) ** 0.5
     return r
 
 
@@ -107,13 +109,15 @@ def main():
     M = json.loads(Path(sys.argv[1]).read_text())
     out = {}
     for seed, I in M["instances"].items():
-        trains = I["trains"]
-        ports = {name: port(scan, {mode: t["ports"][name] for mode, t in trains.items()}) for name, scan in I["scans"].items()}
-        deviations = [x - p["dose_mV"] for p in ports.values() for x in p.get("train_18_noise", {}).get("doses_mV", [])]
+        ports = {name: port(name, scan, I["quiet_train"]["ports"][name], I["noisy_trains"]) for name, scan in I["scans"].items()}
+        deviations = [x - p["dose_mV"] for p in ports.values() for x in p["noisy_doses_mV"]]
+        offsets = [x for p in ports.values() for x in p["noise_run_offsets_mV"]]
         out[seed] = dict(section=I["section"], seed=I["seed"], ports=ports,
-                         protected_until_units=max(p["protected_until_units"] for p in ports.values()))
-        if deviations:                                    # one number per instance: a port has three to five noisy doses only
-            out[seed].update(dose_noise_sd_mV=statistics.mean(x * x for x in deviations) ** 0.5, noisy_doses=len(deviations))
+                         protected_until_units=max(p["protected_until_units"] for p in ports.values()),
+                         noisy_trains=len(I["noisy_trains"]), run_offsets=len(offsets),
+                         dose_noise_sd_mV=statistics.mean(x * x for x in deviations) ** 0.5, noisy_doses=len(deviations))
+        if len(offsets) >= 8:
+            out[seed]["noise_between_runs_mV"] = statistics.mean(x * x for x in offsets) ** 0.5
     Path(sys.argv[2]).write_text(json.dumps(dict(what="constants of the guarded model per instance; see constants.py", help_22_nominal_mV=HELP_22_NOMINAL,
                                                  instances=out), indent=1) + "\n")
 
