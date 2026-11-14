@@ -1,0 +1,36 @@
+* Values of the drawn capacitors and resistors in the pinned models (simulation, typical corner, 27 C).
+* Capacitance from an AC analysis at 1 kHz; resistance from the current under 0.1 V.
+.lib "pdk/models/sky130.lib.spice" tt
+.option scale=1e-6
+v1 a 0 dc 0 ac 1
+x1 a 0 sky130_fd_pr__cap_mim_m3_1 w=14 l=14
+v2 b 0 dc 0 ac 1
+x2 b 0 sky130_fd_pr__cap_mim_m3_1 w=24.84 l=24.84
+v3 c 0 dc 0 ac 1
+x3 c 0 sky130_fd_pr__cap_mim_m3_1 w=27.22 l=27.22
+v4 d 0 dc 0 ac 1
+x4 d 0 sky130_fd_pr__cap_mim_m3_1 w=22.2 l=22.2
+v5 e 0 dc 0 ac 1
+x5 e 0 sky130_fd_pr__cap_mim_m3_1 w=9.84 l=9.84
+v6 f 0 dc 0.1
+x6 f 0 0 sky130_fd_pr__res_xhigh_po_0p35 l=17.5
+v7 g 0 dc 0.1
+x7 g 0 0 sky130_fd_pr__res_xhigh_po_0p35 l=70
+v8 h 0 dc 0.1
+x8 h 0 0 sky130_fd_pr__res_xhigh_po_1p41 l=2.66
+.control
+op
+let r100k = -0.1/i(v6)
+let r400k = -0.1/i(v7)
+let r4k = -0.1/i(v8)
+print r100k r400k r4k
+ac lin 1 1k 1k
+let c14 = -imag(i(v1))/(2*pi*1k)
+let c24p84 = -imag(i(v2))/(2*pi*1k)
+let c27p22 = -imag(i(v3))/(2*pi*1k)
+let c22p2 = -imag(i(v4))/(2*pi*1k)
+let c9p84 = -imag(i(v5))/(2*pi*1k)
+print c14 c24p84 c27p22 c22p2 c9p84
+quit
+.endc
+.end
