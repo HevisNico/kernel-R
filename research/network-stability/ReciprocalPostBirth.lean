@@ -1000,7 +1000,27 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
     rw [gains, gainIndex_eq]
     rcases keys row member with h | h | h | h <;> rw [h] <;> decide
 
-set_option maxHeartbeats 12000000 in
+private theorem canonicalOrder (execution : NominalEpoch) (orderedRows : List Row)
+    (eq : orderedRows.map Transaction.probe = (stagedDeliveries execution).map reciprocalOccurrence)
+    (before : ∀ d ∈ execution.staged.before.deliveries, d.due < (160 : ℝ))
+    (birth : execution.staged.afterBirth.time = 160) :
+    orderedRows.Pairwise (fun a b => a.probe.due ≤ b.probe.due) := by
+  have timing : (stagedDeliveries execution).Pairwise (fun a b => a.due ≤ b.due) := by
+    unfold stagedDeliveries
+    apply List.pairwise_append.mpr
+    refine ⟨List.pairwise_map.mpr execution.staged.before.deliveries_chronological,
+      execution.staged.after.deliveries_chronological, ?_⟩
+    intro token mem next hn
+    obtain ⟨old, seen, rfl⟩ := List.mem_map.mp mem
+    have later := (execution.staged.after.delivery_time_bounds next hn).1
+    rw [birth] at later
+    exact (before old seen).le.trans later
+  have mapped : (orderedRows.map Transaction.probe).Pairwise (fun a b => a.due ≤ b.due) := by
+    rw [eq]
+    exact List.pairwise_map.mpr timing
+  exact (List.pairwise_map (f := Transaction.probe)).mp mapped
+
+set_option maxHeartbeats 30000000 in
 /-- A single staged native history realizes the entire reciprocal
 admission list and FIRE multiset. Each FIRE row retains its native clock. -/
 theorem nominal_reciprocal_transaction_words :
@@ -1109,16 +1129,13 @@ theorem nominal_reciprocal_transaction_words :
     by rfl
   have samePreFires : native.staged.before.ledger.emissions = (c.execution.append b.wait).ledger.emissions :=
     by rfl
-  have sameAfter : native.staged.after.deliveries =
-      (z.staged.after.append ((reverseHead p).append finish.execution)).deliveries := by
-    simp only [FirstCoupledTeaching.reverse_teaching_staged,
-      FirstCoupledTeaching.first_reverse_interleaved_staged, FirstCoupledTeaching.first_reverse_wire_staged,
-      FirstCoupledTeaching.feedback_first_fire_staged, reverseHead, Execution.append_assoc]
-  have samePostFires : native.staged.after.ledger.emissions =
-      (z.staged.after.append ((reverseHead p).append finish.execution)).ledger.emissions := by
-    simp only [FirstCoupledTeaching.reverse_teaching_staged,
-      FirstCoupledTeaching.first_reverse_interleaved_staged, FirstCoupledTeaching.first_reverse_wire_staged,
-      FirstCoupledTeaching.feedback_first_fire_staged, reverseHead, Execution.append_assoc]
+  have actualAfter : native.staged.after = z.staged.after.append ((reverseHead p).append finish.execution) := by
+    change ((((z.staged.after.append w.execution).append a.execution).append q.execution).append
+      p.execution).append finish.execution =
+      z.staged.after.append ((reverseHead p).append finish.execution)
+    simp only [reverseHead, Execution.append_assoc]
+  have sameAfter := congrArg (fun e => e.deliveries) actualAfter
+  have samePostFires := congrArg (fun e => e.ledger.emissions) actualAfter
   have birthDate : native.staged.afterBirth.time = 160 := b.after_date
   rw [Execution.deliveries_append, b.wait_deliveries, List.append_nil] at sameBefore
   rw [Execution.emissions_append, b.wait_emissions, List.append_nil] at samePreFires
@@ -1155,8 +1172,10 @@ theorem nominal_reciprocal_transaction_words :
       simp [reciprocalEntryRouter, Contact.route, teachingContact, feedbackContact, input, other, early]
   let table := birthRows ++ forwardRows ++ reverseRows
   have budget : (table.map Transaction.probe).Perm ((stagedDeliveries native).map reciprocalOccurrence) := by
-    rw [stagedDeliveries, sameBefore, sameAfter, Execution.deliveries_append, List.map_append, ← birthDates]
+    have appendDates := Execution.deliveries_append z.staged.after ((reverseHead p).append finish.execution)
+    rw [stagedDeliveries, sameBefore, sameAfter, appendDates]
     simp only [table, List.map_append]
+    rw [← birthDates]
     simpa only [List.append_assoc] using (forwardDates.append reverseDates).append_left
       (birthRows.map Transaction.probe)
   obtain ⟨rows, alignment, admitted⟩ := alignRows table _ budget
@@ -1397,18 +1416,7 @@ theorem nominal_reciprocal_transaction_words :
       contradiction
     · exact (markPhase row m).1
 
-  have order : rows.Pairwise (fun a b => a.probe.due ≤ b.probe.due) := by
-    have sorted : ((stagedDeliveries native).map reciprocalOccurrence).Pairwise (fun a b => a.due ≤ b.due) := by
-      apply List.pairwise_map.mpr
-      apply List.pairwise_append.mpr
-      refine ⟨List.pairwise_map.mpr native.staged.before.deliveries_chronological,
-        native.staged.after.deliveries_chronological, ?_⟩
-      intro token mem next hn
-      obtain ⟨old, seen, rfl⟩ := List.mem_map.mp mem
-      have later := (native.staged.after.delivery_time_bounds next hn).1
-      rw [birthDate] at later
-      exact (beforeClose old seen).le.trans later
-    exact (List.pairwise_map (f := Transaction.probe)).mp (admitted.symm ▸ sorted)
+  have order := canonicalOrder native rows admitted beforeClose birthDate
   have learnedMin (row : Row) (mem : row ∈ firedRows) :
       (row.probe.input = (0, 0) → 24 ≤ row.probe.due) ∧
       (row.probe.input = (0, 2) → f368 + 7 / 20 ≤ row.probe.due) ∧
