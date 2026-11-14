@@ -298,7 +298,8 @@ theorem reciprocal_clipped_ties (C : Calendar 2 ℝ ReciprocalInput) (d : Nat)
       (reciprocalEntryRouter nominalDelay nominalDelay p.input.1 (fire p)).map reciprocalOccurrence) :
     TieAdmissible (C.through (· ≤ ·) horizon) d
       (horizonCut (· ≤ ·) horizon (MarkFeedback.initial 2 reciprocalSeed)) := by
-  apply reciprocal_tie_admissible _ _ _ cell
+  refine reciprocal_tie_admissible (C.through (· ≤ ·) horizon) d
+    (horizonCut (· ≤ ·) horizon (MarkFeedback.initial 2 reciprocalSeed)).pending cell ?_ ?_
   · intro p mem
     exact reciprocal_seed_bands p (List.mem_filter.mp mem).1
   · intro p _ q mem
