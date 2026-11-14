@@ -28,7 +28,9 @@ theorem observed_training_count
     complete (Fin.last m) (fireNeed.2 m le_rfl _ (band (Fin.last m)))
   have shape : List.ofFn observed = List.replicate m false ++ [true] := by
     rw [List.ofFn_succ_last, prior, List.ofFn_const, last]
-  exact ⟨shape, by simp [shape]⟩
+  refine ⟨shape, ?_⟩
+  rw [shape]
+  simp [List.count_singleton]
 
 /-- A1 with a two-sided rest band, under explicit measured gain and detection
 premises. Gain is clamped at m, so this finite result has no post-prefix
@@ -53,7 +55,7 @@ theorem observed_training_count_a1
     List.ofFn observed = List.replicate m false ++ [true] ∧
       (List.ofFn observed).count false = m := by
   let z (k : ℕ) := gain ⟨min k m, Nat.lt_succ_of_le (Nat.min_le_right k m)⟩
-  have prefix (k : Fin (m + 1)) : z k.val = gain k := by
+  have gainAt (k : Fin (m + 1)) : z k.val = gain k := by
     simp [z, min_eq_left (Nat.le_of_lt_succ k.isLt)]
   have need (level : ℝ) (floor : 19 / 20 ≤ level) (near : |level - level₀| ≤ ℓ) :
       NeedAlongBand lo hi level z m := by
@@ -69,7 +71,7 @@ theorem observed_training_count_a1
       let j : Fin (m + 1) := ⟨k, Nat.lt_succ_of_lt hk⟩
       have bound := cumulativeUpper j hk
       change gain j - gain 0 - (k : ℝ) * d₀ ≤ BSilent at bound
-      rw [show z k = gain j from prefix j]
+      rw [show z k = gain j from gainAt j]
       exact bound
     · simpa [z, Fin.last] using cumulativeLower
     · exact near
@@ -79,9 +81,9 @@ theorem observed_training_count_a1
     (need _ levelFloor (abs_le.mpr ⟨by linarith, by linarith⟩))
     (need _ (by linarith) (abs_le.mpr ⟨by linarith, by linarith⟩)) charge observed band
   · intro k fired
-    simpa only [prefix k] using sound k fired
+    simpa only [gainAt k] using sound k fired
   · intro k fires
-    exact complete k (by simpa only [prefix k] using fires)
+    exact complete k (by simpa only [gainAt k] using fires)
 
 /-- The common status-3 budget implies both directional budgets. -/
 theorem status3_implies_a1_rooms {a B ℓ d₀ lo hi : ℝ}

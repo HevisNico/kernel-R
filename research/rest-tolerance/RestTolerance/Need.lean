@@ -93,7 +93,8 @@ theorem needAlong_of_asymmetric_rest_tolerance
     have drive := mul_le_mul_of_nonneg_left rise (Real.exp_pos (z k)).le
     have score := (read_score_error (gain := Real.exp (z k)) loPos hiPos band ht.1).2
     simp only [readyPulse_from, sub_self, zero_mul, add_zero] at score
-    linarith
+    rw [readyPulse_from] at reach
+    linarith only [reach, score, drive, scaled]
   · intro k later c band
     have gap := fire_log_gap fire loPos
     have enough : Real.log ((level - 1 / 10 + lo) / response 1) ≤ z m := by nlinarith
@@ -105,7 +106,9 @@ theorem needAlong_of_asymmetric_rest_tolerance
     have score := (read_score_error (gain := Real.exp (z k)) loPos hiPos band
       (show (0 : ℝ) ≤ 1 by norm_num)).1
     simp only [readyPulse_from, sub_self, zero_mul, add_zero] at score
-    exact ⟨1, ⟨zero_le_one, le_rfl⟩, by linarith⟩
+    refine ⟨1, ⟨zero_le_one, le_rfl⟩, ?_⟩
+    rw [readyPulse_from]
+    linarith only [scaled, score]
 
 theorem needAlong_of_cumulative_rest_tolerance
     {level level₀ d₀ a B ℓ lo hi : ℝ} {m : ℕ}
