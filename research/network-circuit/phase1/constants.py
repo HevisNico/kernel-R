@@ -105,19 +105,23 @@ def port(name, scan, quiet, noisy):
     return r
 
 
+def instance(I):
+    """The constants of one instance from its entry of MEASURES.json."""
+    ports = {name: port(name, scan, I["quiet_train"]["ports"][name], I["noisy_trains"]) for name, scan in I["scans"].items()}
+    deviations = [x - p["dose_mV"] for p in ports.values() for x in p["noisy_doses_mV"]]
+    offsets = [x for p in ports.values() for x in p["noise_run_offsets_mV"]]
+    out = dict(section=I["section"], seed=I["seed"], ports=ports,
+               protected_until_units=max(p["protected_until_units"] for p in ports.values()),
+               noisy_trains=len(I["noisy_trains"]), run_offsets=len(offsets),
+               dose_noise_sd_mV=statistics.mean(x * x for x in deviations) ** 0.5, noisy_doses=len(deviations))
+    if len(offsets) >= 8:
+        out["noise_between_runs_mV"] = statistics.mean(x * x for x in offsets) ** 0.5
+    return out
+
+
 def main():
     M = json.loads(Path(sys.argv[1]).read_text())
-    out = {}
-    for seed, I in M["instances"].items():
-        ports = {name: port(name, scan, I["quiet_train"]["ports"][name], I["noisy_trains"]) for name, scan in I["scans"].items()}
-        deviations = [x - p["dose_mV"] for p in ports.values() for x in p["noisy_doses_mV"]]
-        offsets = [x for p in ports.values() for x in p["noise_run_offsets_mV"]]
-        out[seed] = dict(section=I["section"], seed=I["seed"], ports=ports,
-                         protected_until_units=max(p["protected_until_units"] for p in ports.values()),
-                         noisy_trains=len(I["noisy_trains"]), run_offsets=len(offsets),
-                         dose_noise_sd_mV=statistics.mean(x * x for x in deviations) ** 0.5, noisy_doses=len(deviations))
-        if len(offsets) >= 8:
-            out[seed]["noise_between_runs_mV"] = statistics.mean(x * x for x in offsets) ** 0.5
+    out = {seed: instance(I) for seed, I in M["instances"].items()}
     Path(sys.argv[2]).write_text(json.dumps(dict(what="constants of the guarded model per instance; see constants.py", help_22_nominal_mV=HELP_22_NOMINAL,
                                                  instances=out), indent=1) + "\n")
 
