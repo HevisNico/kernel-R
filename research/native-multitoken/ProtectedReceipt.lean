@@ -282,7 +282,15 @@ theorem protected_receipt_body {θ ε route} (hb : @PhysicalBox 1 θ ε)
         B * (t - m.final.time) < 9 / 10 := by
       rw [Bexact] at hI ⊢
       linarith
-    simpa only [B, neg_add, neg_mul, add_assoc] using quarter_above_reopen hcost
+    have exponent :
+        -(9 / 50) * (s.time - fastEnd) +
+          (-(m.execution.accumulatedRecovery 0) + -(s.x 0 .b + 1 / 10) * (t - m.final.time)) =
+        -((9 / 50) * (s.time - fastEnd) + m.execution.accumulatedRecovery 0 +
+          B * (t - m.final.time)) := by
+      dsimp [B]
+      ring
+    rw [exponent]
+    exact quarter_above_reopen hcost
   obtain ⟨a⟩ := cadence_mark_aux_return_exists (route := route) hb m.final p s.time m.physical m.raw_valid
     ⟨m.early, m.deadline⟩ m.main_slow m.aux_silent m.sensor_charge m.charge
     (by rw [m.recovery_gain]; exact hB.le) m.sensor_budget hguard m.auxiliary_other
@@ -294,7 +302,7 @@ theorem protected_receipt_body {θ ε route} (hb : @PhysicalBox 1 θ ε)
     exact lt_add_of_pos_right _ (div_pos
       (Real.log_pos ((lt_div_iff₀ (by norm_num : (0:ℝ)<1/10)).mpr (by linarith [a.charge.1])))
       (by rw [hbA]; exact hB))
-  have hqMpos : 0<m.final.x 0 .q := by linarith [m.charge.1]
+  have hqMpos : 0 < m.final.x 0 .q := by linarith [m.charge.1]
   have hlog : Real.log (a.final.x 0 .q/(1/10))=
       Real.log (m.final.x 0 .q/(1/10))-B*(a.final.time-m.final.time) := by
     rw [a.charge_clock,m.recovery_gain]
