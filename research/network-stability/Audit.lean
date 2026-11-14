@@ -23,6 +23,7 @@ import NativeStrongStep
 import NativeWeakStep
 import NativeRingRefinement
 import NativeRingTwo
+import NativePeriodicRingTarget
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -40,7 +41,7 @@ run_cmd do
     `NativeWireTransactions, `NativeComposition, `DatedReplay, `ReciprocalClosure, `DatedNetwork, `DatedTrainingControl,
     `ReciprocalLearning, `ReciprocalReverseRows, `ReciprocalDated, `ReciprocalReplay, `ReciprocalPostBirth,
     `NativeRingTarget, `NativeRingExamples, `NativeStrongStep, `NativeWeakStep,
-    `NativeRingRefinement, `NativeRingTwo]
+    `NativeRingRefinement, `NativeRingTwo, `NativePeriodicRingTarget]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
