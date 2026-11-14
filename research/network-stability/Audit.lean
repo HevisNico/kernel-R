@@ -17,6 +17,7 @@ import ReciprocalDated
 import ReciprocalReplay
 import ReciprocalPostBirth
 import DatedTrainingControl
+import NativeRingTarget
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -32,7 +33,8 @@ run_cmd do
     `ConcreteFairness, `NativeEndpoint, `MarkFeedback, `MarkCounterexample, `NativeMarkTrace, `NativeRefinement,
     `PhaseAdmission, `NativeAdmissions, `NativeTransactions, `DatedFairness, `NativeTiming,
     `NativeWireTransactions, `NativeComposition, `DatedReplay, `ReciprocalClosure, `DatedNetwork, `DatedTrainingControl,
-    `ReciprocalLearning, `ReciprocalReverseRows, `ReciprocalDated, `ReciprocalReplay, `ReciprocalPostBirth]
+    `ReciprocalLearning, `ReciprocalReverseRows, `ReciprocalDated, `ReciprocalReplay, `ReciprocalPostBirth,
+    `NativeRingTarget]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
