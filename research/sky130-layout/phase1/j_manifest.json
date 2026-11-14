@@ -1,0 +1,88 @@
+{
+ "stage": "J",
+ "prediction_sha256": "1a5f9246fd2fe8a35a4ec442219191da63e15f7ab89ac9ec286271d246a50bae",
+ "ngspice_path": "/usr/bin/ngspice",
+ "ngspice_sha256": "820658317b0b54035208da41936fd6871ce924036e5ea4113a4168b821b7fc45",
+ "pdk_commit": "1232782c1b9fab3aacda74d67ce7c92bf7da8105",
+ "inputs": {
+  "circuit/cell.spice": "cc322898bd396c93ec87dc04b8d51176ae0d9e4419080e46113fd35314aed9ad",
+  "circuit/blocks.spice": "7677efdb277d837937c28b13d807448a433d19019fc550c81e0c8d3234bfd1bd",
+  "circuit/run.py": "f93b6ad7c09cf1a1728bfb907d039d2170a6b278d701161283d2615d4cb99ccc",
+  "circuit/noise.json": "897dca6d564771abe69572e5c1f10c9eb70f59afa692fb85b1a4d10401e0c172",
+  "circuit/spiceinit.txt": "ceb0f22c2f12fc545406534ab6801716f61caed2cf3fed03d7f5c7fb193a4bb1",
+  "sky130-layout/phase1/netlist.py": "48175a9e44cbee3f22c8b94144ea29811c66088d6ecbf7419ce6bbd49dd642da",
+  "sky130-layout/phase1/shim/ngspice": "2c0a0131a63ed27d4fac0091ffc432834aa58ea1fc1982b9be94686d87d4c026",
+  "sky130-layout/phase1/areas.csv": "2d89bea15524df3e317c087216a992a443b9a3b147351e99d2d675b3dbb7d17d",
+  "sky130-layout/phase1/j_stage.py": "94791accded783b48ed9d4f854ed3a5637f98daf9275bea7cef1864fb26ad4a2"
+ },
+ "runs": [
+  {
+   "name": "j1",
+   "kind": "cell",
+   "section": "tt",
+   "args": [
+    "rel=1"
+   ],
+   "areas": true,
+   "reference": "nom"
+  },
+  {
+   "name": "j2",
+   "kind": "cell",
+   "section": "tt",
+   "args": [
+    "temp=125",
+    "rel=1"
+   ],
+   "areas": true,
+   "reference": "pvt_tt_125"
+  },
+  {
+   "name": "j3",
+   "kind": "refresh",
+   "section": "tt",
+   "args": [
+    "60",
+    "rel=1"
+   ],
+   "areas": true,
+   "reference": "refresh_none"
+  },
+  {
+   "name": "j4",
+   "kind": "refresh",
+   "section": "tt",
+   "args": [
+    "100",
+    "rlk=1e11",
+    "rel=1"
+   ],
+   "areas": true,
+   "reference": "refresh_lk11"
+  },
+  {
+   "name": "j5",
+   "kind": "refresh",
+   "section": "tt",
+   "args": [
+    "60",
+    "temp=125",
+    "rel=1"
+   ],
+   "areas": true,
+   "reference": null
+  },
+  {
+   "name": "j6",
+   "kind": "refresh",
+   "section": "tt",
+   "args": [
+    "60",
+    "temp=125",
+    "rel=1"
+   ],
+   "areas": false,
+   "reference": null
+  }
+ ]
+}
