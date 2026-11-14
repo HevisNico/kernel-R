@@ -1,6 +1,11 @@
 # Owner launch kit — no registered campaign supplied yet
 
-The registered campaign is run **only by the owner on the owner's machines**.
+The registered campaign is run by a Claude Code cloud session on behalf of the
+owner, on two cloud containers whose inventories are recorded, with the
+[second version of this kit](../../sky130-supervisor-closure/launchkit/README.md).
+That version replaces this one for the campaign: where the two differ
+(interpreter, simulator start file, resume after a restart, who executes), the
+second one holds. Below, "owner" names the executor.
 This directory supplies and tests the environment checks, durable one-attempt
 launch protocol, two-machine split, evidence collection and interruption path.
 It contains no PREDICTION.md, registered seeds, jump scenarios or launchable

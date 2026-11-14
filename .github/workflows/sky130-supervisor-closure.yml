@@ -1,0 +1,53 @@
+name: SKY130 supervisor qualification closure
+
+on:
+  pull_request:
+    paths:
+      - research/sky130-supervisor-closure/**
+      - research/sky130-supervisor-qualification/**
+      - research/sky130-supervisor-map/**
+      - research/circuit/**
+      - .github/workflows/sky130-supervisor-closure.yml
+  push:
+    branches: [main]
+    paths:
+      - research/sky130-supervisor-closure/**
+      - .github/workflows/sky130-supervisor-closure.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  closure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+      - name: Python 3.12.3 of Ubuntu 24.04 and numpy 2.3.5
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y python3.12 python3.12-venv
+          test "$(/usr/bin/python3.12 -c 'import platform; print(platform.python_version())')" = '3.12.3'
+          /usr/bin/python3.12 -m venv "$RUNNER_TEMP/python"
+          "$RUNNER_TEMP/python/bin/python" -m pip install numpy==2.3.5
+          dpkg-query -W python3.12-minimal
+          sha256sum /usr/bin/python3.12
+      - name: Kernel against the proved properties
+        run: cd research/sky130-supervisor-closure && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_kernel
+      - name: Launch kit controls
+        run: |
+          "$RUNNER_TEMP/python/bin/python" -B -m unittest discover -s research/sky130-supervisor-closure/launchkit -p 'test_*.py' -v
+      - name: Published qualification against its own numbers
+        run: |
+          "$RUNNER_TEMP/python/bin/python" -B research/sky130-supervisor-closure/verify.py
+      - name: The files of the two earlier pull requests are unchanged, except two sentences of two README files
+        run: |
+          git diff --exit-code 41d0fc1548a1ba84c77d6f5344b1b6e2acb2a97c -- research/sky130-supervisor-map research/sky130-supervisor-qualification \
+            ':!research/sky130-supervisor-qualification/README.md' ':!research/sky130-supervisor-qualification/launchkit/README.md'
+          git diff --stat 41d0fc1548a1ba84c77d6f5344b1b6e2acb2a97c -- research/sky130-supervisor-qualification/README.md research/sky130-supervisor-qualification/launchkit/README.md
+      - name: Nothing was written by the checks
+        run: git diff --exit-code
