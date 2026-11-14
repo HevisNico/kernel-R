@@ -973,7 +973,7 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
         noMarkReady a2 _ (fun row mem => (gain2 row mem).2.2),
         noMarkReady b1 _ (fun row mem => (gain1 row mem).2.2),
         noMarkReady b2 _ (fun row mem => (gain3 row mem).2.2)]
-      <;> simp only [Nat.zero_add]
+      simp only [Nat.zero_add]
     rw [marksOnly]
     cases c with
     | port0 =>
@@ -998,6 +998,18 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
   · intro row member
     rw [gains, gainIndex_eq]
     rcases keys row member with h | h | h | h <;> rw [h] <;> decide
+
+private theorem gainKey_injective_on_protocol (a b : ReciprocalInput)
+    (ha : a = (0, 0) ∨ a = (0, 2) ∨ a = (1, 1) ∨ a = (1, 2))
+    (hb : b = (0, 0) ∨ b = (0, 2) ∨ b = (1, 1) ∨ b = (1, 2))
+    (h : (Address.mk a.1 (if a.2 = 2 then .port1 else .port0)).encode =
+      (Address.mk b.1 (if b.2 = 2 then .port1 else .port0)).encode) :
+    a = b := by
+  rcases ha with rfl | rfl | rfl | rfl <;> rcases hb with rfl | rfl | rfl | rfl
+  all_goals first
+    | rfl
+    | have values := congrArg Fin.val h
+      simp [Address.encode, Coordinate.index] at values
 
 private theorem canonicalOrder (execution : NominalEpoch) (orderedRows : List Row)
     (eq : orderedRows.map Transaction.probe = (stagedDeliveries execution).map reciprocalOccurrence)
@@ -1172,7 +1184,7 @@ theorem nominal_reciprocal_transaction_words :
   let table := birthRows ++ forwardRows ++ reverseRows
   have budget : (table.map Transaction.probe).Perm ((stagedDeliveries native).map reciprocalOccurrence) := by
     have appendDates := Execution.deliveries_append z.staged.after ((reverseHead p).append finish.execution)
-    rw [stagedDeliveries, sameBefore, sameAfter, appendDates]
+    rw [stagedDeliveries, sameBefore, sameAfter.trans appendDates]
     simp only [table, List.map_append]
     rw [← birthDates]
     simpa only [List.append_assoc] using (forwardDates.append reverseDates).append_left
@@ -1222,7 +1234,8 @@ theorem nominal_reciprocal_transaction_words :
   have firePerm : (Transaction.fires Prod.fst rows).Perm (stagedFires native) := by
     have move := alignment.filterMap (fun tx => tx.fireDate.map (fun date => (tx.probe.input.1, date)))
     refine move.trans ?_
-    rw [stagedFires, samePreFires, samePostFires, Execution.emissions_append, ← birthFires]
+    have appendFires := Execution.emissions_append z.staged.after ((reverseHead p).append finish.execution)
+    rw [stagedFires, samePreFires, samePostFires.trans appendFires, ← birthFires]
     simp only [table, Transaction.fires, List.filterMap_append]
     simpa only [List.append_assoc, Transaction.fires] using (forwardFires.append reverseFires).append_left
       (Transaction.fires Prod.fst birthRows)
@@ -1411,8 +1424,7 @@ theorem nominal_reciprocal_transaction_words :
     · exact (readyA2 row m).2.1
     · exact (readyB1 row m).2.1
     · exact (readyB2 row m).2.1
-    · rw [(firedPhase row m).2] at slow
-      contradiction
+    · exact Phase.noConfusion ((firedPhase row m).2.symm.trans slow)
     · exact (markPhase row m).1
 
   have order := canonicalOrder native rows admitted beforeClose birthDate
@@ -1438,23 +1450,24 @@ theorem nominal_reciprocal_transaction_words :
       · obtain ⟨token, present, eq⟩ := List.mem_map.mp tail
         have h := (c.suffix.delivery_time_bounds token (List.mem_filter.mp present).1).1
         rw [c.at40.date] at h
-        linarith
+        rw [← eq]
+        linarith only [h]
     · have h := forwardLate row (List.mem_append_left _ fA)
       obtain ⟨clock, _, rfl⟩ := List.mem_map.mp fA
       norm_num [reciprocalRow] at h ⊢
-      linarith
+      linarith only [h]
     · have h := forwardLate row (List.mem_append_right _ fB)
       obtain ⟨clock, _, rfl⟩ := List.mem_map.mp fB
       norm_num [reciprocalRow] at h ⊢
-      linarith [actualSecond.2]
+      linarith only [h, actualSecond.2]
     · have h := reverseLate row (List.mem_append_left _ rB)
       obtain ⟨clock, _, rfl⟩ := List.mem_map.mp rB
       norm_num [reciprocalRow] at h ⊢
-      linarith
+      linarith only [h]
     · have h := reverseLate row (List.mem_append_right _ rA)
       obtain ⟨clock, _, rfl⟩ := List.mem_map.mp rA
       norm_num [reciprocalRow] at h ⊢
-      linarith [bound368.2]
+      linarith only [h, bound368.2]
   have trainingFirst : ∀ tx ∈ rows, ∀ learner ∈ rows, tx.decision = true →
       gainWrites (reciprocalCalendar fire) (MarkFeedback.gain (reciprocalCalendar fire).model tx.probe) learner = true →
       learner.probe.due < tx.probe.due := by
@@ -1471,13 +1484,11 @@ theorem nominal_reciprocal_transaction_words :
       · simp [(markPhase tx m).1] at fired
     have address := ((gainWrites_iff fire learner _).mp dose).2.2
     rw [gainIndex_eq, gainIndex_eq] at address
-    have same := AutonomousFeedback.Schedule.PortMemory.address_encode_injective _ _ address
-    have fireKeys := firedPK tx fireMember
+    have same := gainKey_injective_on_protocol learner.probe.input tx.probe.input
+      (keys learner (perm.mem_iff.mp hl)) (firedPK tx fireMember) address
     have bounds := learnedMin tx fireMember
     have compare (key : ReciprocalInput) (h : learner.probe.input = key) :
-        tx.probe.input = key := by
-      rw [h] at same
-      rcases fireKeys with k | k | k | k <;> rw [k] at same ⊢ <;> first | rfl | contradiction
+        tx.probe.input = key := same.symm.trans h
     have m := perm.mem_iff.mp hl
     simp only [classified, List.mem_append] at m
     rcases m with (((((m | m) | m) | m) | m) | m)
@@ -1487,19 +1498,18 @@ theorem nominal_reciprocal_transaction_words :
     · have low := bounds.2.1 (compare (0, 2) (readyA2 learner m).1)
       simp only [gainsA2, List.mem_cons, List.not_mem_nil, or_false] at m
       rcases m with rfl | rfl | rfl <;>
-        simp only [reciprocalRow] <;> linarith [bound344.2, bound352.2, bound360.2, bound368.1]
+        simp only [reciprocalRow] <;>
+        linarith only [low, bound344.2, bound352.2, bound360.2, bound368.1]
     · have low := bounds.2.2.1 (compare (1, 1) (readyB1 learner m).1)
       obtain rfl := List.mem_singleton.mp m
       change r.final.time < tx.probe.due
-      linarith [actualForward.2, actualSecond.1]
+      linarith only [low, actualForward.2, actualSecond.1]
     · have low := bounds.2.2.2 (compare (1, 2) (readyB2 learner m).1)
       simp only [gainsB2, List.mem_cons, List.not_mem_nil, or_false] at m
       rcases m with rfl | rfl | rfl <;> exact (lt_of_lt_of_le (by norm_num [reciprocalRow]) low)
-    · rw [(firing_no_write fire _ (firedPhase learner m).1).1] at dose
-      contradiction
+    · exact Bool.noConfusion ((firing_no_write fire _ (firedPhase learner m).1).1.symm.trans dose)
     · have fast := ((gainWrites_iff fire learner _).mp dose).2.1
-      rw [(markPhase learner m).2] at fast
-      contradiction
+      exact Phase.noConfusion (fast.symm.trans (markPhase learner m).2)
   have guards := guard_of_partition fire rows exactShape exactFire order totalsRows protectedSilent trainingFirst
   exact ⟨native, rows, fire, alignment.length_eq.trans tableLength, admitted, firePerm,
     exactShape, causal, exactFire, preClosed, guards, countsRows⟩
