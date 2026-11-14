@@ -118,9 +118,11 @@ def deck(cells=("a", "b"), section="tt", temperature=27, noise=False, junction="
     if caps is not None:                                    # the capacitances of one cell, repeated inside each cell
         local = lambda node, c: node if node in ("0", "vdd", "vr0", "vfire", "vreopen", "vcm", "vhi", "vlo", "vpre") else f"x{c}.{node}"
         wires = [(local(a, c), local(b, c), f) for c in cells for a, b, f in netlist.read_caps(caps)]
+    marker = ".control\n.endc\n"                           # the tool of stage J puts the capacitors before a control section
+    text = swap(text, "\n.end\n", "\n" + marker + ".end\n")
     flat, devices = netlist.build(text, (CIRCUIT / "blocks.spice").read_text(), areas=every, zero=junction == "zero", caps=wires)
     assert len(devices) == 232 * len(cells), len(devices)
-    return flat
+    return swap(flat, marker, "")
 
 
 def signals(cells, noise=True):

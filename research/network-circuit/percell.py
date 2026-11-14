@@ -4,7 +4,7 @@
   percell.py threshold OUT PORT                   the service threshold of one port, by bisection (isolated reads)
   percell.py history OUT                          how a read depends on what the cell did just before
 
-Each ends with NGSPICE PDK. One cell (`a`), typical corner, 27 C, junction areas of stage J, no noise:
+Each ends with NGSPICE PDK, after an optional `--layout DIR`. One cell (`a`), typical corner, 27 C, junction areas of stage J, no noise:
 the cells of the nominal network are this cell twice.
 """
 import json
@@ -23,8 +23,14 @@ PERIOD = 22 * net.TU            # isolated reads: the spacing of the earlier cam
 LEAK_PER_MV = 4.42e-10          # conductance that loses about 1 mV in 170 us; refined on the run itself
 
 
+LAYOUT = Path(sys.argv[sys.argv.index("--layout") + 1]) if "--layout" in sys.argv else None
+
+
 def session(out, ngspice, pdk, stop_s):
-    return net.Session(out, net.deck(cells=(C,)), (C,), ngspice, pdk, stop_s=stop_s)
+    """With `--layout DIR` the areas and the wire capacitances are those of a layout extraction: DIR/p_areas.csv and
+    DIR/p_caps_primary.csv, in the format of stage P of the layout study."""
+    extraction = {} if LAYOUT is None else dict(areas=LAYOUT / "p_areas.csv", caps=LAYOUT / "p_caps_primary.csv")
+    return net.Session(out, net.deck(cells=(C,), **extraction), (C,), ngspice, pdk, stop_s=stop_s)
 
 
 def read(s, port, date, amp=1):
@@ -162,6 +168,8 @@ def history(out, ngspice, pdk):
 def main():
     kind, out = sys.argv[1], Path(sys.argv[2])
     ngspice, pdk = Path(sys.argv[-2]), Path(sys.argv[-1])
+    if LAYOUT is not None:
+        del sys.argv[sys.argv.index("--layout"):sys.argv.index("--layout") + 2]
     began = time.time()
     if kind == "train":
         r = train(out, int(sys.argv[3]), float(sys.argv[4]), int(sys.argv[5]), ngspice, pdk)
