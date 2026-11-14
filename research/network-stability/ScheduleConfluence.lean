@@ -145,7 +145,7 @@ theorem interleaving_decision (score lo hi : Int) (d k added : Nat) (e : Int)
 def cleanScore (M : Model N P) (d : Nat) (s : Config N P) (p : P) : Int :=
   score M d ⟨s.pending, s.writes, []⟩ p
 
-private theorem read_after_room (M : Model N P) (d : Nat)
+theorem read_after_room (M : Model N P) (d : Nat)
     (s : Config N P) (p q : P) (rest : List P)
     (room : InterleavingRoom (cleanScore M d s p) 0 0 d 1) :
     read M d (process M d s q rest) p = read M d s p := by

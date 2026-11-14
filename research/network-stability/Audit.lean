@@ -7,6 +7,8 @@ import ScheduleCounterexample
 import ScheduleExamples
 import PortMemory
 import FairnessExamples
+import ConcreteFairness
+import NativeEndpoint
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -18,7 +20,8 @@ run_cmd do
     `RoutedCalendar, `RoutedCalendarExamples, `AutonomousFeedback, `FeedbackExamples,
     `PerpetualFeedback, `PerpetualExamples, `ScheduleCounterexample,
     `ScheduleConfluence, `ScheduleExamples,
-    `FairMemory, `NetworkTheorem, `PortMemory, `FairnessExamples]
+    `FairMemory, `NetworkTheorem, `PortMemory, `FairnessExamples,
+    `ConcreteFairness, `NativeEndpoint]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -76,7 +79,16 @@ run_cmd do
       ``NetworkStability.AutonomousFeedback.Schedule.PortMemory.per_port_bounds,
       ``NetworkStability.AutonomousFeedback.Schedule.PortMemory.both_ports_and_recovery_can_be_pending,
       ``NetworkStability.AutonomousFeedback.Schedule.PortMemory.per_port_terminal_unique,
-      ``NetworkStability.AutonomousFeedback.Schedule.PortMemory.per_port_fair_limit_unique] do
+      ``NetworkStability.AutonomousFeedback.Schedule.PortMemory.per_port_fair_limit_unique,
+      ``NetworkStability.AutonomousFeedback.Schedule.fifo_write_fair,
+      ``NetworkStability.AutonomousFeedback.Schedule.noisy_fifo_write_fair,
+      ``NetworkStability.NativeReciprocal.nominal_endpoint_exists,
+      ``NetworkStability.NativeReciprocal.reciprocal_tokens,
+      ``NetworkStability.NativeReciprocal.reciprocal_flow_headroom,
+      ``NetworkStability.NativeReciprocal.rail_contact_control,
+      ``NetworkStability.NativeReciprocal.uncertified_threshold_control,
+      ``NetworkStability.NativeReciprocal.recovery_requires_non_fire_update,
+      ``NetworkStability.NativeReciprocal.endpoint_ledger_does_not_replay_fire] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."
