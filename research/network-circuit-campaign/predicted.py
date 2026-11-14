@@ -5,9 +5,9 @@ the two budgets, which instances are eligible, the zero-error words, the control
 
 EVIDENCE are the folders written by `launch.py collect` for the measures of the two machines (their small files,
 as committed, are enough: no waveform is read). Written in OUT_DIR, all without a date so that anyone gets the
-same bytes: MEASURES.json, CONSTANTS.json, PREDICTED.json and Predicted.lean, which restates the margins for the
-Lean kernel (`check.sh`). PREDICTED.json is the protocol of the network runs: it is committed and pushed before
-any of them, and the launcher is bound to its SHA-256.
+same bytes: MEASURES.json, PREDICTED.json and Predicted.lean, which restates the margins for the Lean kernel
+(`check.sh`). PREDICTED.json holds the constants, the budgets, the words and the plan of the network runs; it is
+the protocol of those runs: committed and pushed before any of them, with the launcher bound to its SHA-256.
 
 Everything is decided by PREDICTION.md; the scripts of ../network-circuit/phase1 do the arithmetic.
 """
@@ -98,7 +98,7 @@ def predictions(M, missing, seeds):
             continue
         without = predict.predict(C[seed], 0.0, HELP_22_MV, quiet_calendar, allowance=ALLOWANCE_MV)
         noisy = predict.predict(C[seed], K, HELP_22_MV, quiet_calendar)
-        instances[seed] = dict(measured=True, eligible=without["all_reads_have_room"],
+        instances[seed] = dict(measured=True, eligible=without["all_reads_have_room"], constants=C[seed],
                                zero_error_words={p: without["ports"][p]["zero_error_word"] for p in model.PORTS},
                                writes={p: without["nominal_writes"][p] for p in model.PORTS},
                                least_margin_of_a_last_silence_mV=min(C[seed]["ports"][p]["room_last_silence_mV"] for p in model.PORTS),
@@ -119,17 +119,16 @@ def build(out, folders, which=None, section=None, runs=None, network=None):
     C, instances, measured, eligible, control = predictions(M, missing, [i["seed"] for i in which])
     seed_of = {str(i["seed"]): i["seed"] for i in which}
     planned = (plan.network_runs if network is None else network)([seed_of[s] for s in measured], None if control is None else seed_of[control], which)
-    write(Path(out), M, C, instances, measured, eligible, control, planned, {str(i["seed"]): i["machine"] for i in which})
+    write(Path(out), M, instances, measured, eligible, control, planned, {str(i["seed"]): i["machine"] for i in which})
 
 
 def main(argv):
     build(argv[1], argv[2:])
 
 
-def write(out, M, C, instances, measured, eligible, control, network, machines):
+def write(out, M, instances, measured, eligible, control, network, machines):
     dump = lambda name, value: (out / name).write_text(json.dumps(value, indent=1, allow_nan=False) + "\n")
     dump("MEASURES.json", dict(what="per-port measures of the instances of the campaign; see predicted.py", instances=M))
-    dump("CONSTANTS.json", dict(what="constants of the guarded model per measured instance; see predicted.py", help_22_nominal_mV=HELP_22_MV, instances=C))
     dump("PREDICTED.json", dict(
         what="predictions of the network campaign, written from the per-cell measures before any network run; see PREDICTION.md and predicted.py",
         k=K, allowance_for_the_simulator_mV=ALLOWANCE_MV, help_22_mV=HELP_22_MV, calendar=calendars.reciprocal(18)["name"], control_calendar=calendars.reciprocal(8)["name"],

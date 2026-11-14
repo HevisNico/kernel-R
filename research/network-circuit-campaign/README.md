@@ -38,8 +38,9 @@ once per stage:
 | network runs | `PREDICTED.json` | `CAMPAIGN_R.json` | `RUN_ATTEMPT_R.json` | 3 without noise, the control on one machine, 6 noisy |
 
 Between the two, the prediction step: `predicted.py` reads the collected
-measures of both machines and writes `MEASURES.json`, `CONSTANTS.json`,
-`PREDICTED.json` and `Predicted.lean`. These are committed and pushed. The
+measures of both machines and writes `MEASURES.json`, `PREDICTED.json`
+(constants, budgets, eligibility, words, control instance, network runs)
+and `Predicted.lean`. These are committed and pushed. The
 launcher of the network runs is bound to the SHA-256 of `PREDICTED.json` and
 refuses to start if that file is not published or has changed: the
 predictions exist in Git before any network run.
@@ -87,7 +88,7 @@ CI runs the Lean check). Then the same three commands with `runs`,
 `CAMPAIGN_R.json` and `PREDICTED.json` as protocol, and at the end, once:
 
 ```sh
-"$PY" -B research/network-circuit-campaign/analyze.py research/network-circuit-campaign research/network-circuit-campaign/PREDICTED.json research/network-circuit-campaign/CONSTANTS.json --measures "$MEASURES_A" "$MEASURES_B" --runs "$RUNS_A" "$RUNS_B"
+"$PY" -B research/network-circuit-campaign/analyze.py research/network-circuit-campaign research/network-circuit-campaign/PREDICTED.json --measures "$MEASURES_A" "$MEASURES_B" --runs "$RUNS_A" "$RUNS_B"
 ```
 
 ## Budget

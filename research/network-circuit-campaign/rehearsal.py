@@ -110,7 +110,7 @@ def main():
     import predicted
     setup = dict(which=WHICH, section=SECTION, runs=runs_m, network=network_runs)
     predicted.build(repo / plan.BASE, measures, **setup)
-    git("add", f"{plan.BASE}/MEASURES.json", f"{plan.BASE}/CONSTANTS.json", f"{plan.BASE}/PREDICTED.json")
+    git("add", f"{plan.BASE}/MEASURES.json", f"{plan.BASE}/PREDICTED.json")
     git("commit", "--quiet", "-m", "Rehearsal: predictions")
     protocol_r = git("rev-parse", "HEAD")
     lean = shutil.which("lean")
@@ -119,12 +119,11 @@ def main():
     git("commit", "--quiet", "-m", "Rehearsal: the margins for the Lean kernel")
     source_r = git("rev-parse", "HEAD")
     P = json.loads((repo / plan.BASE / "PREDICTED.json").read_text())
-    C = json.loads((repo / plan.BASE / "CONSTANTS.json").read_text())
     network, manifest_r = stage("runs", protocol_r, source_r, P["network_runs"])
     assert manifest_m["protocol_sha256"] != manifest_r["protocol_sha256"]
     claims = sh(["git", "ls-remote", "--heads", remote], work).split()[1::2]
 
-    R = analyze.analyse(P, C, measures, network, **setup)
+    R = analyze.analyse(P, measures, network, **setup)
     (work / "RESULTS.json").write_text(json.dumps(R, indent=1) + "\n")
     (work / "REPORT.md").write_text(analyze.report(R, P))
     assert R["predictions_are_those_of_the_measures"] and not R["runs_not_in_the_predictions"]
