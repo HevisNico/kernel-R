@@ -30,7 +30,7 @@ theorem observed_training_count
     rw [List.ofFn_succ_last, prior, List.ofFn_const, last]
   refine ⟨shape, ?_⟩
   rw [shape]
-  simp [List.count_singleton]
+  simp
 
 /-- A1 with a two-sided rest band, under explicit measured gain and detection
 premises. Gain is clamped at m, so this finite result has no post-prefix
@@ -59,9 +59,10 @@ theorem observed_training_count_a1
     simp [z, min_eq_left (Nat.le_of_lt_succ k.isLt)]
   have need (level : ℝ) (floor : 19 / 20 ≤ level) (near : |level - level₀| ≤ ℓ) :
       NeedAlongBand lo hi level z m := by
+    have nominalFloor : 19 / 20 ≤ level₀ := by linarith
     apply needAlong_of_asymmetric_rest_tolerance
       (aSilent := aSilent) (aFire := aFire) (BSilent := BSilent) (BFire := BFire) (ℓ := ℓ)
-      z floor (by linarith)
+      z floor nominalFloor
       dosePos loPos hiPos hiCap
     · intro n hn
       simp [z, min_eq_right hn]

@@ -38,7 +38,7 @@ def lean_mutations():
             output = result.stdout + result.stderr
             errors = re.findall(r":(\d+):\d+: error: ([^\n]+)", output)
             if result.returncode == 0 or not errors or any(
-                int(number) != line or not message.startswith(("linarith", "Tactic `linarith`"))
+                int(number) != line or not message.startswith(("linarith", "nlinarith", "Tactic `linarith`", "Tactic `nlinarith`"))
                 for number, message in errors
             ):
                 raise AssertionError(f"{label}: expected the proof inequality to fail\n{output}")
