@@ -1,6 +1,7 @@
 import Counterexample
 import NativeReciprocal
 import RoutedCalendarExamples
+import FeedbackExamples
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -9,7 +10,7 @@ run_cmd do
   let env ← getEnv
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
   let modules := #[`ChipFiring, `GuardedFeedback, `Counterexample, `NativeReciprocal,
-    `RoutedCalendar, `RoutedCalendarExamples]
+    `RoutedCalendar, `RoutedCalendarExamples, `AutonomousFeedback, `FeedbackExamples]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -33,7 +34,14 @@ run_cmd do
       ``NetworkStability.RoutedCalendar.structural_sound,
       ``NetworkStability.RoutedCalendar.recovers_three_probe_model,
       ``NetworkStability.RoutedCalendar.handshake_correct,
-      ``NetworkStability.RoutedCalendar.removing_return_changes_memory] do
+      ``NetworkStability.RoutedCalendar.removing_return_changes_memory,
+      ``NetworkStability.AutonomousFeedback.certified_feedback,
+      ``NetworkStability.AutonomousFeedback.loop_does_not_terminate,
+      ``NetworkStability.AutonomousFeedback.loop_has_no_strict_margin,
+      ``NetworkStability.AutonomousFeedback.loop_accepts_zero_margin,
+      ``NetworkStability.AutonomousFeedback.drive_disables_write,
+      ``NetworkStability.AutonomousFeedback.Ring.ring_edges,
+      ``NetworkStability.AutonomousFeedback.Ring.uniform_and] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."
