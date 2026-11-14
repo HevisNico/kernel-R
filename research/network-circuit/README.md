@@ -1,8 +1,8 @@
 # A network of R cells at transistor level: phase 0
 
 **Exploratory. Nothing here is preregistered, and nothing here is the
-decisive experiment of [`docs/ROADMAP_V1.md`](../../docs/ROADMAP_V1.md)
-(branch `docs/roadmap-v1`).** Phase 0 builds the bench, looks at what a
+decisive experiment of `docs/ROADMAP_V1.md` (branch `docs/roadmap-v1`, not
+yet on `main`).** Phase 0 builds the bench, looks at what a
 two-cell network does, measures what the theorem needs, and lists where the
 circuit leaves the theorem. It stops there, for review.
 
