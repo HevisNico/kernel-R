@@ -10,7 +10,7 @@ import FairnessExamples
 import ConcreteFairness
 import NativeEndpoint
 import MarkCounterexample
-import NativeMarkTrace
+import NativeRefinement
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -23,7 +23,7 @@ run_cmd do
     `PerpetualFeedback, `PerpetualExamples, `ScheduleCounterexample,
     `ScheduleConfluence, `ScheduleExamples,
     `FairMemory, `NetworkTheorem, `PortMemory, `FairnessExamples,
-    `ConcreteFairness, `NativeEndpoint, `MarkFeedback, `MarkCounterexample, `NativeMarkTrace]
+    `ConcreteFairness, `NativeEndpoint, `MarkFeedback, `MarkCounterexample, `NativeMarkTrace, `NativeRefinement]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -98,7 +98,14 @@ run_cmd do
       ``NetworkStability.MarkFeedback.Control.fifo_misses_reachable_write,
       ``NetworkStability.NativeReciprocal.reciprocal_native_event_words,
       ``NetworkStability.NativeReciprocal.positive_mark_requires_elapsed_time,
-      ``NetworkStability.NativeReciprocal.forward_receiver_prefix] do
+      ``NetworkStability.NativeReciprocal.forward_receiver_prefix,
+      ``NetworkStability.NativeReciprocal.nominal_full_dated_replay,
+      ``NetworkStability.NativeReciprocal.nominal_settled_exclusivity_fails,
+      ``NetworkStability.NativeReciprocal.ProtectedReceipt.no_fixed_input_replay,
+      ``NetworkStability.NativeReciprocal.ProtectedReceipt.recovery_dose,
+      ``NetworkStability.NativeReciprocal.nominal_staged_dose_balance,
+      ``NetworkStability.NativeReciprocal.ProtectedReceipt.certified_pair,
+      ``NetworkStability.NativeReciprocal.certified_opposite_decisions_need_different_read_laws] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."
