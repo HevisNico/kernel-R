@@ -15,6 +15,7 @@ import DatedReplay
 import DatedFairness
 import ReciprocalDated
 import ReciprocalReplay
+import ReciprocalPostBirth
 import DatedTrainingControl
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
@@ -31,7 +32,7 @@ run_cmd do
     `ConcreteFairness, `NativeEndpoint, `MarkFeedback, `MarkCounterexample, `NativeMarkTrace, `NativeRefinement,
     `PhaseAdmission, `NativeAdmissions, `NativeTransactions, `DatedFairness, `NativeTiming,
     `NativeWireTransactions, `NativeComposition, `DatedReplay, `ReciprocalClosure, `DatedNetwork, `DatedTrainingControl,
-    `ReciprocalLearning, `ReciprocalReverseRows, `ReciprocalDated, `ReciprocalReplay]
+    `ReciprocalLearning, `ReciprocalReverseRows, `ReciprocalDated, `ReciprocalReplay, `ReciprocalPostBirth]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -176,7 +177,8 @@ run_cmd do
       ``NetworkStability.NativeReciprocal.birth_transaction_table,
       ``NetworkStability.NativeReciprocal.reciprocal_before_birth_replay,
       ``NetworkStability.NativeReciprocal.nominal_prebirth_refinement,
-      ``NetworkStability.NativeReciprocal.reciprocal_replay_of_transaction_table] do
+      ``NetworkStability.NativeReciprocal.reciprocal_replay_of_transaction_table,
+      ``NetworkStability.NativeReciprocal.nominal_reciprocal_refinement] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."
