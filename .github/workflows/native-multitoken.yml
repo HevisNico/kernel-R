@@ -1,0 +1,40 @@
+name: Native multi-token target
+
+on:
+  pull_request:
+    paths:
+      - 'research/native-multitoken/**'
+      - 'research/network-stability/**'
+      - 'research/self-certifying-learning/SelfCertifyingLearning/Budget.lean'
+      - 'research/self-certifying-learning/SelfCertifyingLearning/Composition.lean'
+      - 'proof/lean/**'
+      - '.github/actions/build-lean/**'
+      - '.github/workflows/native-multitoken.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/native-multitoken/**'
+      - 'research/network-stability/**'
+      - 'research/self-certifying-learning/SelfCertifyingLearning/Budget.lean'
+      - 'research/self-certifying-learning/SelfCertifyingLearning/Composition.lean'
+      - 'proof/lean/**'
+      - '.github/actions/build-lean/**'
+      - '.github/workflows/native-multitoken.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      LEAN_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/build-lean
+        with:
+          package-directory: proof/lean
+      - name: Typecheck and audit the frozen target
+        run: bash research/native-multitoken/check.sh
