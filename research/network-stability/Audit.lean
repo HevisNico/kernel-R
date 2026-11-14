@@ -13,6 +13,7 @@ import MarkCounterexample
 import NativeComposition
 import DatedReplay
 import DatedFairness
+import ReciprocalClosure
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -27,7 +28,7 @@ run_cmd do
     `FairMemory, `NetworkTheorem, `PortMemory, `FairnessExamples,
     `ConcreteFairness, `NativeEndpoint, `MarkFeedback, `MarkCounterexample, `NativeMarkTrace, `NativeRefinement,
     `PhaseAdmission, `NativeAdmissions, `NativeTransactions, `DatedFairness, `NativeTiming,
-    `NativeWireTransactions, `NativeComposition, `DatedReplay]
+    `NativeWireTransactions, `NativeComposition, `DatedReplay, `ReciprocalClosure]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -141,7 +142,10 @@ run_cmd do
       ``NetworkStability.PhaseAdmission.TransactionReplay.append,
       ``NetworkStability.PhaseAdmission.replay_network_memory,
       ``NetworkStability.PhaseAdmission.Trace.through,
-      ``NetworkStability.PhaseAdmission.through_terminal_unique] do
+      ``NetworkStability.PhaseAdmission.through_terminal_unique,
+      ``NetworkStability.NativeReciprocal.first_strong_birth_token_queued,
+      ``NetworkStability.NativeReciprocal.birth_first_strong_native_certificate,
+      ``NetworkStability.NativeReciprocal.birth_training_prefix_no_global_diamond] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."
