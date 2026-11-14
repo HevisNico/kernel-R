@@ -13,7 +13,8 @@ import MarkCounterexample
 import NativeComposition
 import DatedReplay
 import DatedFairness
-import ReciprocalClosure
+import ReciprocalDated
+import DatedTrainingControl
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -28,7 +29,8 @@ run_cmd do
     `FairMemory, `NetworkTheorem, `PortMemory, `FairnessExamples,
     `ConcreteFairness, `NativeEndpoint, `MarkFeedback, `MarkCounterexample, `NativeMarkTrace, `NativeRefinement,
     `PhaseAdmission, `NativeAdmissions, `NativeTransactions, `DatedFairness, `NativeTiming,
-    `NativeWireTransactions, `NativeComposition, `DatedReplay, `ReciprocalClosure]
+    `NativeWireTransactions, `NativeComposition, `DatedReplay, `ReciprocalClosure, `DatedNetwork, `DatedTrainingControl,
+    `ReciprocalLearning, `ReciprocalReverseRows, `ReciprocalDated]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -145,7 +147,31 @@ run_cmd do
       ``NetworkStability.PhaseAdmission.through_terminal_unique,
       ``NetworkStability.NativeReciprocal.first_strong_birth_token_queued,
       ``NetworkStability.NativeReciprocal.birth_first_strong_native_certificate,
-      ``NetworkStability.NativeReciprocal.birth_training_prefix_no_global_diamond] do
+      ``NetworkStability.NativeReciprocal.birth_training_prefix_no_global_diamond,
+      ``NetworkStability.PhaseAdmission.TieAdmissible.of_global,
+      ``NetworkStability.PhaseAdmission.local_tie_diamond,
+      ``NetworkStability.PhaseAdmission.dated_terminal_unique,
+      ``NetworkStability.PhaseAdmission.dated_horizon_unique,
+      ``NetworkStability.PhaseAdmission.dated_write_fair,
+      ``NetworkStability.PhaseAdmission.dated_limit_unique,
+      ``NetworkStability.PhaseAdmission.dated_noisy_safe,
+      ``NetworkStability.PhaseAdmission.dated_network_memory,
+      ``NetworkStability.NativeReciprocal.training_rejects_global,
+      ``NetworkStability.NativeReciprocal.training_dates_replay,
+      ``NetworkStability.NativeReciprocal.training_dated_memory,
+      ``NetworkStability.NativeReciprocal.birth_weak_rows,
+      ``NetworkStability.NativeReciprocal.feedback_weak_rows,
+      ``NetworkStability.NativeReciprocal.first_forward_weak_row,
+      ``NetworkStability.NativeReciprocal.first_reverse_weak_row,
+      ``NetworkStability.NativeReciprocal.birth_protected_row,
+      ``NetworkStability.NativeReciprocal.feedback_strong_row,
+      ``NetworkStability.NativeReciprocal.forward_sender_entry_rows,
+      ``NetworkStability.NativeReciprocal.reverse_entry_exact_boundary,
+      ``NetworkStability.NativeReciprocal.reciprocal_route_has_tie_room,
+      ``NetworkStability.NativeReciprocal.reciprocal_clipped_ties,
+      ``NetworkStability.NativeReciprocal.reciprocal_rank_certificate,
+      ``NetworkStability.NativeReciprocal.reciprocal_reserve_certificate,
+      ``NetworkStability.NativeReciprocal.reciprocal_replay_network] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."
