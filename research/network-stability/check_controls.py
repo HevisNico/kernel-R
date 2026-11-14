@@ -152,5 +152,18 @@ example : (starved.state 12).writes 0 REL (served.state 12).writes 0 := by decid
     )
 
 
+    mark = """import MarkCounterexample
+open NetworkStability.MarkFeedback NetworkStability.MarkFeedback.Control
+example :
+  (markFirst COUPLING).writes (gain (fixture COUPLING) .test) =
+    (testFirst COUPLING).writes (gain (fixture COUPLING) .test) := by decide
+"""
+    paired(
+        directory, "recovery changes another port's read",
+        mark.replace("COUPLING", "0"),
+        mark.replace("COUPLING", "1"),
+    )
+
+
 if __name__ == "__main__":
     main()
