@@ -187,5 +187,19 @@ example : loop.due REL writer.due := by decide
     )
 
 
+    training = """import DatedTrainingControl
+open NetworkStability.NativeReciprocal
+open NetworkStability.MarkFeedback
+example : read trainingCalendar.model 2
+    (fifo trainingCalendar.model 2 (fun _ => 0) trainingStart N)
+    (trainingProbe 24) 0 = true := by decide
+"""
+    paired(
+        directory, "global diamond at source 24",
+        training.replace("Start N", "Start 3"),
+        training.replace("Start N", "Start 2"),
+    )
+
+
 if __name__ == "__main__":
     main()
