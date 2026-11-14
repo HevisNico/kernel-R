@@ -516,9 +516,9 @@ private theorem reverse_entry_rows (p : FirstReverseInterleavedPair q)
       subst clock
     · change 344 ≤ a.final.time ∧ a.final.time < (344 : ℝ) + 1
       constructor <;> linarith only [a.window.1, a.window.2]
-    · exact ⟨second.1, by simpa [reciprocalRow] using second.2⟩
-    · exact ⟨third.1, by simpa [reciprocalRow] using third.2⟩
-    · exact ⟨fourth.1, by simpa [reciprocalRow] using fourth.2⟩
+    · exact ⟨second.1, by simpa only [reciprocalRow, show (352 : ℝ) + 1 = 353 by norm_num] using second.2⟩
+    · exact ⟨third.1, by simpa only [reciprocalRow, show (360 : ℝ) + 1 = 361 by norm_num] using third.2⟩
+    · exact ⟨fourth.1, by simpa only [reciprocalRow, show (368 : ℝ) + 1 = 369 by norm_num] using fourth.2⟩
     · exact returned
 
 end Reverse
@@ -753,7 +753,9 @@ private theorem guard_of_partition (fire : ReciprocalProbe → ℝ) (rows : List
           intro row _
           simp [show markWrites C g row = false from
             markWrites_ne_gain fire (C.model.cell head.probe) (C.model.secondPort head.probe) row]
-        simp [zero, k]
+        change 0 + past.countP (gainWrites C g) + past.countP (markWrites C g) = k
+        rw [zero, Nat.add_zero, Nat.zero_add]
+        rfl
       have total : rows.countP (gainWrites C g) = threshold := totals head mem
       have remaining : k + (head :: tail).countP (gainWrites C g) = threshold := by
         simpa only [split, List.countP_append, k] using total
@@ -790,7 +792,7 @@ private theorem guard_of_partition (fire : ReciprocalProbe → ℝ) (rows : List
               apply List.countP_eq_zero.mpr
               intro row hr
               cases write : gainWrites C g row with
-              | false => simp [write]
+              | false => simp
               | true =>
                 have present : row ∈ rows := by rw [split]; exact List.mem_append_right _ hr
                 have before := trainingFirst head mem row present hd write
@@ -814,11 +816,13 @@ private theorem guard_of_partition (fire : ReciprocalProbe → ℝ) (rows : List
           simp [Transaction.decision, hc, reciprocalRow, MarkFeedback.emitted, C,
             Calendar.model, reciprocalCalendar, same]
       refine ⟨by rw [limits.1, limits.2]; decide, ?_, ?_, emitted, ?_⟩
-      · rw [limits.1, limits.2]
+      · change RoutedCalendar.HasRoom (MarkFeedback.score C.model 2 ⟨[], counts⟩ head.probe) head.lo head.hi
+        rw [limits.1, limits.2]
         rcases branches with ⟨_, negative⟩ | ⟨_, positive⟩
         · exact Or.inl ⟨negative, by simpa⟩
         · exact Or.inr ⟨by omega, by omega⟩
-      · unfold MarkFeedback.read
+      · change MarkFeedback.read C.model 2 ⟨[], counts⟩ head.probe 0 = _
+        unfold MarkFeedback.read
         rcases branches with ⟨decision, negative⟩ | ⟨decision, positive⟩
         · rw [decision]
           exact decide_eq_false (by omega)
@@ -859,7 +863,7 @@ private theorem recoveryWrites_iff (fire : ReciprocalProbe → ℝ) (row : Row) 
       MarkFeedback.recovery (reciprocalCalendar fire).model row.probe = i := by
   change ((decide ((reciprocalCalendar fire).phase row.probe.input row.probe.due = .slow) && !row.decision) &&
     decide (MarkFeedback.recovery (reciprocalCalendar fire).model row.probe = i)) = true ↔ _
-  simp [and_left_comm, and_comm, and_assoc]
+  simp [and_left_comm, and_comm]
 
 private theorem gainIndex_eq (fire : ReciprocalProbe → ℝ) (p : ReciprocalProbe) :
     MarkFeedback.gain (reciprocalCalendar fire).model p =
@@ -914,7 +918,9 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
   have noGainRest (i : Fin 6) : rest.countP (gainWrites C i) = 0 := by
     apply List.countP_eq_zero.mpr
     intro row mem
-    exact (firing_no_write fire i (firing row mem)).1
+    intro yes
+    have no := (firing_no_write fire i (firing row mem)).1
+    exact Bool.noConfusion (no.symm.trans yes)
   have noGainMark (i : Fin 6) : marks.countP (gainWrites C i) = 0 := by
     apply List.countP_eq_zero.mpr
     intro row mem written
@@ -941,7 +947,9 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
   have noMarkRest (i : Fin 6) : rest.countP (markWrites C i) = 0 := by
     apply List.countP_eq_zero.mpr
     intro row mem
-    exact (firing_no_write fire i (firing row mem)).2
+    intro yes
+    have no := (firing_no_write fire i (firing row mem)).2
+    exact Bool.noConfusion (no.symm.trans yes)
   have recover (i : Fin 2) : marks.countP (markWrites C (Address.mk i .recovery).encode) = 1 := by
     rw [List.countP_eq_length_filter, ← markBalance i]
     congr 1
@@ -973,14 +981,16 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
       have zero : marks.countP (markWrites C (Address.mk i .port0).encode) = 0 := by
         apply List.countP_eq_zero.mpr
         intro row _
-        simp [markWrites_ne_gain fire i false row]
+        intro yes
+        exact Bool.noConfusion ((markWrites_ne_gain fire i false row).symm.trans yes)
       rw [zero]
       fin_cases i <;> norm_num [Address.encode, Coordinate.index, doseCount]
     | port1 =>
       have zero : marks.countP (markWrites C (Address.mk i .port1).encode) = 0 := by
         apply List.countP_eq_zero.mpr
         intro row _
-        simp [markWrites_ne_gain fire i true row]
+        intro yes
+        exact Bool.noConfusion ((markWrites_ne_gain fire i true row).symm.trans yes)
       rw [zero]
       fin_cases i <;> norm_num [Address.encode, Coordinate.index, doseCount]
     | recovery =>
