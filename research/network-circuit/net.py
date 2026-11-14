@@ -54,11 +54,13 @@ def swap(text, old, new, count=1):
     return text.replace(old, new)
 
 
-def deck(cells=("a", "b"), section="tt", temperature=27, noise=False, junction="areas", caps=None, areas=None, vinit=0.3895):
+def deck(cells=("a", "b"), section="tt", temperature=27, noise=False, junction="areas", caps=None, areas=None, vinit=0.3895, leak_per_port=False):
     """Netlist text of a deck with one R cell per name in `cells`. No analysis command: the session issues them.
 
     `vinit` is the preset of every stored voltage, or a dict {(cell, port): volts}. `areas` and `caps` are paths of
-    csv files for one cell, in the format of `junction/netlist.py`; `junction="areas"` uses the areas of stage J."""
+    csv files for one cell, in the format of `junction/netlist.py`; `junction="areas"` uses the areas of stage J.
+    With `leak_per_port` the imposed leak of each integrator has its own control node `gl<cell><port>` (zero by
+    default) instead of the common node `gl`: a measure can then move one stored voltage alone."""
     text = (CIRCUIT / "cell.spice").read_text()
     lines = text.splitlines()
     head = lines[1:lines.index(".include blocks.spice") + 1]
@@ -77,8 +79,8 @@ def deck(cells=("a", "b"), section="tt", temperature=27, noise=False, junction="
     supplies = [l for l in rest if re.match(r"v(dd|r0|fire|reopen|cm|hi|lo|pre) ", l)]
     body = [l for l in rest if l and not l.startswith(("*", ".model")) and l not in supplies and not l.startswith(("vinit ", "x1 ", "x2 "))]
     assert len(supplies) == 8 and len(model) == 1 and any(l.startswith("xlp ") for l in body) and any(l.startswith("ibm ") for l in body)
-    cell = [".subckt rcell vdd vr0 vfire vreopen vcm vhi vlo vpre gl vinit1 ks1 kr1 kp1 ts1 amp1 vinit2 ks2 kr2 kp2 ts2 amp2"]
-    cell += [f"x{p} vq vr0 pb vmem{p} vdd vcm vhi vlo vpre vinit{p} ks{p} kr{p} kp{p} ts{p} amp{p} gl rport" for p in PORTS]
+    cell = [".subckt rcell vdd vr0 vfire vreopen vcm vhi vlo vpre gl1 gl2 vinit1 ks1 kr1 kp1 ts1 amp1 vinit2 ks2 kr2 kp2 ts2 amp2"]
+    cell += [f"x{p} vq vr0 pb vmem{p} vdd vcm vhi vlo vpre vinit{p} ks{p} kr{p} kp{p} ts{p} amp{p} gl{p} rport" for p in PORTS]
     cell += body + [".ends"]
     if noise:
         params = json.loads((CIRCUIT / "noise.json").read_text())["params"]
@@ -103,9 +105,12 @@ def deck(cells=("a", "b"), section="tt", temperature=27, noise=False, junction="
                     f"vkp{c}{p} kp{c}{p} 0 pulse(0 1 {NEVER} 1n 1n {CYCLE:.12g} 2)",
                     f"vts{c}{p} ts{c}{p} 0 dc {NEVER}", f"vamp{c}{p} amp{c}{p} 0 dc 1"]
             nodes += [f"vinit{c}{p} ks{c}{p} kr{c}{p} kp{c}{p} ts{c}{p} amp{c}{p}"]
-        top.append(f"x{c} vdd vr0 vfire vreopen vcm vhi vlo vpre gl {' '.join(nodes)} rcell")
+        leak = f"gl{c}1 gl{c}2" if leak_per_port else "gl gl"
+        top.append(f"x{c} vdd vr0 vfire vreopen vcm vhi vlo vpre {leak} {' '.join(nodes)} rcell")
+        if leak_per_port:
+            top += [f"vgl{c}{p} gl{c}{p} 0 dc 0" for p in PORTS]
     out = [f"* {len(cells)} R cells, pulses at any date (phase 0 of the network experiment, exploratory)", f'.lib "pdk/models/sky130.lib.spice" {section}']
-    out += head + [port] + cell + model + supplies + top + [f".option temp={temperature}", "vgl gl 0 dc 0", ".end"]
+    out += head + [port] + cell + model + supplies + top + [f".option temp={temperature}"] + ([] if leak_per_port else ["vgl gl 0 dc 0"]) + [".end"]
     text = "\n".join(out) + "\n"
     if junction is None and areas is None and caps is None:
         return text
@@ -125,14 +130,14 @@ def deck(cells=("a", "b"), section="tt", temperature=27, noise=False, junction="
     return swap(flat, marker, "")
 
 
-def signals(cells, noise=True):
+def signals(cells, leak_per_port=False):
     out = []
     for c in cells:
         out += [f"v(x{c}.p)", f"v(x{c}.vq)"]
         for p in PORTS:
             out += [f"v(x{c}.vmem{p})", f"v(x{c}.x{p}.sum)", f"v(x{c}.x{p}.si)", f"v(ks{c}{p})", f"v(amp{c}{p})"]
         out += [f"v(x{c}.nzm)"] + [f"v(x{c}.x{p}.{n})" for p in PORTS for n in ("nzo", "nzc")]
-    return out + ["v(gl)"]
+    return out + ([f"v(gl{c}{p})" for c in cells for p in PORTS] if leak_per_port else ["v(gl)"])
 
 
 class Session(sim.Session):
@@ -140,7 +145,7 @@ class Session(sim.Session):
 
     def __init__(self, folder, text, cells, ngspice, pdk, seed=None, stop_s=0.02, max_step="200n", noise_id=None, shim=None):
         self.cells = tuple(cells)
-        self.saved = signals(self.cells)
+        self.saved = signals(self.cells, leak_per_port="\nvgl gl 0 dc 0" not in text)
         self.folder = Path(folder)
         self.folder.mkdir(parents=True, exist_ok=False)
         (self.folder / "pdk").symlink_to(Path(pdk).resolve(), target_is_directory=True)
@@ -172,6 +177,7 @@ class Session(sim.Session):
             self.cmd(f"stop when v(x{c}.p) > 0.9")
         if not self.started:
             self.started = True
+            self.cmd("save " + " ".join(self.saved))       # `delete all` also clears the list of saved vectors: without this line every node is kept in memory
             self.cmd(f"tran 1u {self.stop_s:.12g} 0 {self.max_step}")
         else:
             self.cmd("resume")
