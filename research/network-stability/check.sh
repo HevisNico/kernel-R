@@ -25,7 +25,7 @@ modules=(ChipFiring GuardedFeedback Counterexample NativeReciprocal RoutedCalend
   ConcreteFairness NativeEndpoint MarkFeedback MarkCounterexample NativeMarkTrace NativeRefinement
   PhaseAdmission NativeAdmissions NativeTransactions DatedFairness NativeTiming NativeWireTransactions
   NativeComposition DatedReplay ReciprocalClosure DatedNetwork DatedTrainingControl
-  ReciprocalLearning ReciprocalReverseRows ReciprocalDated)
+  ReciprocalLearning ReciprocalReverseRows ReciprocalDated ReciprocalReplay)
 expected=$(printf '%s\n' Audit.lean "${modules[@]/%/.lean}" | sort)
 actual=$(find . -name '*.lean' -printf '%P\n' | sort)
 if [[ "$expected" != "$actual" ]]; then
