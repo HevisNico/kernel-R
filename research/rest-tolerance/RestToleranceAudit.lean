@@ -5,8 +5,8 @@ open Lean Elab Command in
 run_cmd do
   let env ← getEnv
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
-  let mut modules := 0
-  let mut declarations := 0
+  let mut modules : Nat := 0
+  let mut declarations : Nat := 0
   for (mod, data) in env.header.moduleNames.zip env.header.moduleData do
     if (`RestTolerance).isPrefixOf mod then
       modules := modules + 1
