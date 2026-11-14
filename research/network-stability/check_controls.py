@@ -176,5 +176,16 @@ example : afterReopen (fun a b : Nat => a ≤ b) 1 DATE = .slow := by decide
     )
 
 
+    service = """import DatedFairness
+open NetworkStability.PhaseAdmission.Starvation
+example : loop.due REL writer.due := by decide
+"""
+    paired(
+        directory, "earliest-date starvation order",
+        service.replace("REL", "<"),
+        service.replace("REL", ">"),
+    )
+
+
 if __name__ == "__main__":
     main()
