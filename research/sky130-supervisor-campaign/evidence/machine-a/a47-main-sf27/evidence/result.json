@@ -1,0 +1,1668 @@
+{
+ "id": "a47-main-sf27",
+ "scenario": "main-sf27",
+ "config": "sf27",
+ "mode": "supervised",
+ "noise": true,
+ "version": 2,
+ "seed": 10047,
+ "section": "sf",
+ "temperature_C": 27,
+ "reference_leak_S": 1e-11,
+ "jump_S": 3e-11,
+ "jump_period": 8,
+ "services_requested": 24,
+ "services_run": 24,
+ "entered_at_slot": 6,
+ "refused_at_period": [
+  null,
+  null
+ ],
+ "last_slot": 53,
+ "ended_at_the_last_slot_of_its_plan": true,
+ "v_service_V": [
+  -0.015130752477257703,
+  -0.015130874432512098
+ ],
+ "bounds": [
+  {
+   "S": 2343,
+   "H": 2622,
+   "Dmin": 13332,
+   "Dmax": 13707,
+   "linear_capacity": 22205,
+   "semantic_capacity": 21335,
+   "epsilon": 20
+  },
+  {
+   "S": 2343,
+   "H": 2622,
+   "Dmin": 13332,
+   "Dmax": 13707,
+   "linear_capacity": 22204,
+   "semantic_capacity": 21335,
+   "epsilon": 20
+  }
+ ],
+ "events": [
+  {
+   "slot": 2,
+   "phase": "preparation",
+   "observed_V": [
+    -0.010635600000000023,
+    -0.010490600000000017
+   ],
+   "report": [
+    -44952,
+    -46403
+   ],
+   "action": [
+    "maintenance",
+    "maintenance"
+   ]
+  },
+  {
+   "slot": 3,
+   "phase": "preparation",
+   "observed_V": [
+    -0.011962600000000045,
+    -0.011824999999999974
+   ],
+   "report": [
+    -31682,
+    -33059
+   ],
+   "action": [
+    "maintenance",
+    "maintenance"
+   ]
+  },
+  {
+   "slot": 4,
+   "phase": "preparation",
+   "observed_V": [
+    -0.013280999999999932,
+    -0.01313069999999994
+   ],
+   "report": [
+    -18498,
+    -20002
+   ],
+   "action": [
+    "maintenance",
+    "maintenance"
+   ]
+  },
+  {
+   "slot": 5,
+   "phase": "preparation",
+   "observed_V": [
+    -0.014592300000000002,
+    -0.01444899999999999
+   ],
+   "report": [
+    -5385,
+    -6819
+   ],
+   "action": [
+    "maintenance",
+    "maintenance"
+   ]
+  },
+  {
+   "slot": 6,
+   "phase": "maintenance",
+   "period": 0,
+   "observed_V": [
+    -0.015921099999999966,
+    -0.015774500000000025
+   ],
+   "report": [
+    7903,
+    6436
+   ],
+   "action": [
+    "wait",
+    "maintenance"
+   ],
+   "kernel": [
+    {
+     "lower": 7883,
+     "upper": 7923,
+     "carry": 7883,
+     "next_carry": 5261,
+     "answer": "wait"
+    },
+    {
+     "lower": 6416,
+     "upper": 6456,
+     "carry": 6416,
+     "next_carry": 17126,
+     "answer": "maintenance"
+    }
+   ],
+   "leak_S": 1e-11
+  },
+  {
+   "slot": 7,
+   "phase": "read",
+   "period": 0,
+   "read": "port1"
+  },
+  {
+   "slot": 8,
+   "phase": "maintenance",
+   "period": 1,
+   "observed_V": [
+    -0.015862299999999996,
+    -0.01705200000000001
+   ],
+   "report": [
+    7315,
+    19211
+   ],
+   "action": [
+    "maintenance",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 7295,
+     "upper": 7335,
+     "carry": 5261,
+     "next_carry": 18005,
+     "answer": "maintenance"
+    },
+    {
+     "lower": 19191,
+     "upper": 19231,
+     "carry": 17126,
+     "next_carry": 16569,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 1e-11
+  },
+  {
+   "slot": 9,
+   "phase": "read",
+   "period": 1,
+   "read": "port2"
+  },
+  {
+   "slot": 10,
+   "phase": "maintenance",
+   "period": 2,
+   "observed_V": [
+    -0.017168000000000072,
+    -0.01699320000000004
+   ],
+   "report": [
+    20372,
+    18623
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 20352,
+     "upper": 20392,
+     "carry": 18005,
+     "next_carry": 17730,
+     "answer": "wait"
+    },
+    {
+     "lower": 18603,
+     "upper": 18643,
+     "carry": 16569,
+     "next_carry": 15981,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 1e-11
+  },
+  {
+   "slot": 11,
+   "phase": "read",
+   "period": 2,
+   "read": "joint"
+  },
+  {
+   "slot": 12,
+   "phase": "maintenance",
+   "period": 3,
+   "observed_V": [
+    -0.01710919999999999,
+    -0.016934499999999963
+   ],
+   "report": [
+    19784,
+    18036
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 19764,
+     "upper": 19804,
+     "carry": 17730,
+     "next_carry": 17142,
+     "answer": "wait"
+    },
+    {
+     "lower": 18016,
+     "upper": 18056,
+     "carry": 15981,
+     "next_carry": 15394,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 1e-11
+  },
+  {
+   "slot": 13,
+   "phase": "read",
+   "period": 3,
+   "read": "port1"
+  },
+  {
+   "slot": 14,
+   "phase": "maintenance",
+   "period": 4,
+   "observed_V": [
+    -0.01705040000000002,
+    -0.016875699999999993
+   ],
+   "report": [
+    19196,
+    17448
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 19176,
+     "upper": 19216,
+     "carry": 17142,
+     "next_carry": 16554,
+     "answer": "wait"
+    },
+    {
+     "lower": 17428,
+     "upper": 17468,
+     "carry": 15394,
+     "next_carry": 14806,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 1e-11
+  },
+  {
+   "slot": 15,
+   "phase": "read",
+   "period": 4,
+   "read": "port2"
+  },
+  {
+   "slot": 16,
+   "phase": "maintenance",
+   "period": 5,
+   "observed_V": [
+    -0.016991599999999996,
+    -0.01681680000000002
+   ],
+   "report": [
+    18608,
+    16859
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 18588,
+     "upper": 18628,
+     "carry": 16554,
+     "next_carry": 15966,
+     "answer": "wait"
+    },
+    {
+     "lower": 16839,
+     "upper": 16879,
+     "carry": 14806,
+     "next_carry": 14217,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 1e-11
+  },
+  {
+   "slot": 17,
+   "phase": "read",
+   "period": 5,
+   "read": "joint"
+  },
+  {
+   "slot": 18,
+   "phase": "maintenance",
+   "period": 6,
+   "observed_V": [
+    -0.01693279999999997,
+    -0.0167582
+   ],
+   "report": [
+    18020,
+    16273
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 18000,
+     "upper": 18040,
+     "carry": 15966,
+     "next_carry": 15378,
+     "answer": "wait"
+    },
+    {
+     "lower": 16253,
+     "upper": 16293,
+     "carry": 14217,
+     "next_carry": 13631,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 1e-11
+  },
+  {
+   "slot": 19,
+   "phase": "read",
+   "period": 6,
+   "read": "port1"
+  },
+  {
+   "slot": 20,
+   "phase": "maintenance",
+   "period": 7,
+   "observed_V": [
+    -0.016874000000000056,
+    -0.016699399999999975
+   ],
+   "report": [
+    17432,
+    15685
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 17412,
+     "upper": 17452,
+     "carry": 15378,
+     "next_carry": 14790,
+     "answer": "wait"
+    },
+    {
+     "lower": 15665,
+     "upper": 15705,
+     "carry": 13631,
+     "next_carry": 13043,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 1e-11
+  },
+  {
+   "slot": 21,
+   "phase": "read",
+   "period": 7,
+   "read": "port2"
+  },
+  {
+   "slot": 22,
+   "phase": "maintenance",
+   "period": 8,
+   "observed_V": [
+    -0.016815300000000033,
+    -0.016640700000000008
+   ],
+   "report": [
+    16845,
+    15098
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 16825,
+     "upper": 16865,
+     "carry": 14790,
+     "next_carry": 14203,
+     "answer": "wait"
+    },
+    {
+     "lower": 15078,
+     "upper": 15118,
+     "carry": 13043,
+     "next_carry": 12456,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 23,
+   "phase": "read",
+   "period": 8,
+   "read": "joint"
+  },
+  {
+   "slot": 24,
+   "phase": "maintenance",
+   "period": 9,
+   "observed_V": [
+    -0.016649799999999992,
+    -0.016475399999999973
+   ],
+   "report": [
+    15190,
+    13445
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 15170,
+     "upper": 15210,
+     "carry": 14203,
+     "next_carry": 12548,
+     "answer": "wait"
+    },
+    {
+     "lower": 13425,
+     "upper": 13465,
+     "carry": 12456,
+     "next_carry": 10803,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 25,
+   "phase": "read",
+   "period": 9,
+   "read": "port1"
+  },
+  {
+   "slot": 26,
+   "phase": "maintenance",
+   "period": 10,
+   "observed_V": [
+    -0.016473600000000088,
+    -0.016299200000000014
+   ],
+   "report": [
+    13428,
+    11683
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 13408,
+     "upper": 13448,
+     "carry": 12548,
+     "next_carry": 10786,
+     "answer": "wait"
+    },
+    {
+     "lower": 11663,
+     "upper": 11703,
+     "carry": 10803,
+     "next_carry": 9041,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 27,
+   "phase": "read",
+   "period": 10,
+   "read": "port2"
+  },
+  {
+   "slot": 28,
+   "phase": "maintenance",
+   "period": 11,
+   "observed_V": [
+    -0.016297399999999962,
+    -0.0161231
+   ],
+   "report": [
+    11666,
+    9922
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 11646,
+     "upper": 11686,
+     "carry": 10786,
+     "next_carry": 9024,
+     "answer": "wait"
+    },
+    {
+     "lower": 9902,
+     "upper": 9942,
+     "carry": 9041,
+     "next_carry": 7280,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 29,
+   "phase": "read",
+   "period": 11,
+   "read": "joint"
+  },
+  {
+   "slot": 30,
+   "phase": "maintenance",
+   "period": 12,
+   "observed_V": [
+    -0.016121199999999947,
+    -0.015947199999999995
+   ],
+   "report": [
+    9904,
+    8163
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 9884,
+     "upper": 9924,
+     "carry": 9024,
+     "next_carry": 7262,
+     "answer": "wait"
+    },
+    {
+     "lower": 8143,
+     "upper": 8183,
+     "carry": 7280,
+     "next_carry": 5521,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 31,
+   "phase": "read",
+   "period": 12,
+   "read": "port1"
+  },
+  {
+   "slot": 32,
+   "phase": "maintenance",
+   "period": 13,
+   "observed_V": [
+    -0.015945199999999937,
+    -0.015771000000000035
+   ],
+   "report": [
+    8144,
+    6401
+   ],
+   "action": [
+    "wait",
+    "maintenance"
+   ],
+   "kernel": [
+    {
+     "lower": 8124,
+     "upper": 8164,
+     "carry": 7262,
+     "next_carry": 5502,
+     "answer": "wait"
+    },
+    {
+     "lower": 6381,
+     "upper": 6421,
+     "carry": 5521,
+     "next_carry": 17091,
+     "answer": "maintenance"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 33,
+   "phase": "read",
+   "period": 13,
+   "read": "port2"
+  },
+  {
+   "slot": 34,
+   "phase": "maintenance",
+   "period": 14,
+   "observed_V": [
+    -0.01576889999999992,
+    -0.01694019999999996
+   ],
+   "report": [
+    6381,
+    18093
+   ],
+   "action": [
+    "maintenance",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 6361,
+     "upper": 6401,
+     "carry": 5502,
+     "next_carry": 17071,
+     "answer": "maintenance"
+    },
+    {
+     "lower": 18073,
+     "upper": 18113,
+     "carry": 17091,
+     "next_carry": 15451,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 35,
+   "phase": "read",
+   "period": 14,
+   "read": "joint"
+  },
+  {
+   "slot": 36,
+   "phase": "maintenance",
+   "period": 15,
+   "observed_V": [
+    -0.016954199999999975,
+    -0.01676419999999995
+   ],
+   "report": [
+    18234,
+    16333
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 18214,
+     "upper": 18254,
+     "carry": 17071,
+     "next_carry": 15592,
+     "answer": "wait"
+    },
+    {
+     "lower": 16313,
+     "upper": 16353,
+     "carry": 15451,
+     "next_carry": 13691,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 37,
+   "phase": "read",
+   "period": 15,
+   "read": "port1"
+  },
+  {
+   "slot": 38,
+   "phase": "maintenance",
+   "period": 16,
+   "observed_V": [
+    -0.016777899999999957,
+    -0.016588099999999995
+   ],
+   "report": [
+    16471,
+    14572
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 16451,
+     "upper": 16491,
+     "carry": 15592,
+     "next_carry": 13829,
+     "answer": "wait"
+    },
+    {
+     "lower": 14552,
+     "upper": 14592,
+     "carry": 13691,
+     "next_carry": 11930,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 39,
+   "phase": "read",
+   "period": 16,
+   "read": "port2"
+  },
+  {
+   "slot": 40,
+   "phase": "maintenance",
+   "period": 17,
+   "observed_V": [
+    -0.016601599999999994,
+    -0.01641189999999998
+   ],
+   "report": [
+    14708,
+    12810
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 14688,
+     "upper": 14728,
+     "carry": 13829,
+     "next_carry": 12066,
+     "answer": "wait"
+    },
+    {
+     "lower": 12790,
+     "upper": 12830,
+     "carry": 11930,
+     "next_carry": 10168,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 41,
+   "phase": "read",
+   "period": 17,
+   "read": "joint"
+  },
+  {
+   "slot": 42,
+   "phase": "maintenance",
+   "period": 18,
+   "observed_V": [
+    -0.016425499999999982,
+    -0.016235900000000025
+   ],
+   "report": [
+    12947,
+    11050
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 12927,
+     "upper": 12967,
+     "carry": 12066,
+     "next_carry": 10305,
+     "answer": "wait"
+    },
+    {
+     "lower": 11030,
+     "upper": 11070,
+     "carry": 10168,
+     "next_carry": 8408,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 43,
+   "phase": "read",
+   "period": 18,
+   "read": "port1"
+  },
+  {
+   "slot": 44,
+   "phase": "maintenance",
+   "period": 19,
+   "observed_V": [
+    -0.01624939999999997,
+    -0.016059800000000013
+   ],
+   "report": [
+    11186,
+    9289
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 11166,
+     "upper": 11206,
+     "carry": 10305,
+     "next_carry": 8544,
+     "answer": "wait"
+    },
+    {
+     "lower": 9269,
+     "upper": 9309,
+     "carry": 8408,
+     "next_carry": 6647,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 45,
+   "phase": "read",
+   "period": 19,
+   "read": "port2"
+  },
+  {
+   "slot": 46,
+   "phase": "maintenance",
+   "period": 20,
+   "observed_V": [
+    -0.01607320000000001,
+    -0.015883599999999998
+   ],
+   "report": [
+    9424,
+    7527
+   ],
+   "action": [
+    "wait",
+    "maintenance"
+   ],
+   "kernel": [
+    {
+     "lower": 9404,
+     "upper": 9444,
+     "carry": 8544,
+     "next_carry": 6782,
+     "answer": "wait"
+    },
+    {
+     "lower": 7507,
+     "upper": 7547,
+     "carry": 6647,
+     "next_carry": 18217,
+     "answer": "maintenance"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 47,
+   "phase": "read",
+   "period": 20,
+   "read": "joint"
+  },
+  {
+   "slot": 48,
+   "phase": "maintenance",
+   "period": 21,
+   "observed_V": [
+    -0.01589700000000005,
+    -0.017054400000000025
+   ],
+   "report": [
+    7662,
+    19235
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 7642,
+     "upper": 7682,
+     "carry": 6782,
+     "next_carry": 5020,
+     "answer": "wait"
+    },
+    {
+     "lower": 19215,
+     "upper": 19255,
+     "carry": 18217,
+     "next_carry": 16593,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 49,
+   "phase": "read",
+   "period": 21,
+   "read": "port1"
+  },
+  {
+   "slot": 50,
+   "phase": "maintenance",
+   "period": 22,
+   "observed_V": [
+    -0.015720899999999982,
+    -0.016878300000000013
+   ],
+   "report": [
+    5901,
+    17474
+   ],
+   "action": [
+    "maintenance",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 5881,
+     "upper": 5921,
+     "carry": 5020,
+     "next_carry": 16591,
+     "answer": "maintenance"
+    },
+    {
+     "lower": 17454,
+     "upper": 17494,
+     "carry": 16593,
+     "next_carry": 14832,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 51,
+   "phase": "read",
+   "period": 22,
+   "read": "port2"
+  },
+  {
+   "slot": 52,
+   "phase": "maintenance",
+   "period": 23,
+   "observed_V": [
+    -0.01689560000000001,
+    -0.016702199999999945
+   ],
+   "report": [
+    17648,
+    15713
+   ],
+   "action": [
+    "wait",
+    "wait"
+   ],
+   "kernel": [
+    {
+     "lower": 17628,
+     "upper": 17668,
+     "carry": 16591,
+     "next_carry": 15006,
+     "answer": "wait"
+    },
+    {
+     "lower": 15693,
+     "upper": 15733,
+     "carry": 14832,
+     "next_carry": 13071,
+     "answer": "wait"
+    }
+   ],
+   "leak_S": 3e-11
+  },
+  {
+   "slot": 53,
+   "phase": "read",
+   "period": 23,
+   "read": "joint"
+  },
+  {
+   "slot": 54,
+   "phase": "end",
+   "observed_V": [
+    -0.016719499999999998,
+    -0.016526100000000044
+   ],
+   "report": [
+    15887,
+    13952
+   ]
+  }
+ ],
+ "records": [
+  {
+   "slot": 2,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 1,
+   "u1_pre_pulse": -0.010632967031645957,
+   "u1_obs": -0.011962597453703427,
+   "writes2": 1,
+   "u2_pre_pulse": -0.01048802121879544,
+   "u2_obs": -0.011825051611271675
+  },
+  {
+   "slot": 3,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 1,
+   "u1_pre_pulse": -0.011959973733265017,
+   "u1_obs": -0.01328103243036749,
+   "writes2": 1,
+   "u2_pre_pulse": -0.011822491409910763,
+   "u2_obs": -0.013130713715408804
+  },
+  {
+   "slot": 4,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 1,
+   "u1_pre_pulse": -0.013278451259016943,
+   "u1_obs": -0.014592360162018203,
+   "writes2": 1,
+   "u2_pre_pulse": -0.013128098960924206,
+   "u2_obs": -0.014448974463336095
+  },
+  {
+   "slot": 5,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 1,
+   "u1_pre_pulse": -0.014589766537606408,
+   "u1_obs": -0.015921111305389812,
+   "writes2": 1,
+   "u2_pre_pulse": -0.014446384939629742,
+   "u2_obs": -0.015774478759697674
+  },
+  {
+   "slot": 6,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.015918522653697476,
+   "u1_obs": -0.01589172713982967,
+   "writes2": 1,
+   "u2_pre_pulse": -0.01577188109340244,
+   "u2_obs": -0.01708140142307174
+  },
+  {
+   "slot": 7,
+   "fires": 1,
+   "fire_latency": 0.8949322792311362,
+   "writes1": 0,
+   "u1_pre_pulse": -0.015889088114161454,
+   "u1_obs": -0.015862228601483397,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01707878059048712,
+   "u2_obs": -0.017052052097615067
+  },
+  {
+   "slot": 8,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 1,
+   "u1_pre_pulse": -0.01585966143844819,
+   "u1_obs": -0.017197367303688593,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01704940472954325,
+   "u2_obs": -0.017022690685130737
+  },
+  {
+   "slot": 9,
+   "fires": 1,
+   "fire_latency": 0.7712966151891746,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01719479780196781,
+   "u1_obs": -0.017167991158186402,
+   "writes2": 0,
+   "u2_pre_pulse": -0.017020061771912398,
+   "u2_obs": -0.016993213660781104
+  },
+  {
+   "slot": 10,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.017165413073568725,
+   "u1_obs": -0.0171386476078762,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016990599021012243,
+   "u2_obs": -0.016963870052052687
+  },
+  {
+   "slot": 11,
+   "fires": 1,
+   "fire_latency": 0.2537393732782613,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01713609213935552,
+   "u1_obs": -0.0171091959674341,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016961225047968376,
+   "u2_obs": -0.01693448601669678
+  },
+  {
+   "slot": 12,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.017106574630683657,
+   "u1_obs": -0.017079862130848333,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016931857355497126,
+   "u2_obs": -0.016905113035863062
+  },
+  {
+   "slot": 13,
+   "fires": 1,
+   "fire_latency": 0.7820562708994132,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01707730485828879,
+   "u1_obs": -0.017050450903350278,
+   "writes2": 0,
+   "u2_pre_pulse": -0.0169024794493714,
+   "u2_obs": -0.016875746523722812
+  },
+  {
+   "slot": 14,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01704784916379759,
+   "u1_obs": -0.0170209850477801,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016873143211681374,
+   "u2_obs": -0.016846283506348647
+  },
+  {
+   "slot": 15,
+   "fires": 1,
+   "fire_latency": 0.7920984218021524,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01701841650515007,
+   "u1_obs": -0.016991612856672667,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016843673648396007,
+   "u2_obs": -0.016816850967745767
+  },
+  {
+   "slot": 16,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016988962399312968,
+   "u1_obs": -0.016962235309534113,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016814290487002004,
+   "u2_obs": -0.01678757549823634
+  },
+  {
+   "slot": 17,
+   "fires": 1,
+   "fire_latency": 0.25421802169365204,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016959604798301053,
+   "u1_obs": -0.016932773223931663,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01678496698248727,
+   "u2_obs": -0.016758129195550198
+  },
+  {
+   "slot": 18,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016930141867252002,
+   "u1_obs": -0.016903374818283745,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01675551889585908,
+   "u2_obs": -0.016728727714234948
+  },
+  {
+   "slot": 19,
+   "fires": 1,
+   "fire_latency": 0.8047803582821956,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016900788236318076,
+   "u1_obs": -0.01687394400987008,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01672619242043233,
+   "u2_obs": -0.01669936802253863
+  },
+  {
+   "slot": 20,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016871360943254476,
+   "u1_obs": -0.016844655694924937,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01669681086478303,
+   "u2_obs": -0.01666990349494163
+  },
+  {
+   "slot": 21,
+   "fires": 1,
+   "fire_latency": 0.794584060944192,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016841994228998403,
+   "u1_obs": -0.0168152428250411,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016667347849512848,
+   "u2_obs": -0.016640662497205083
+  },
+  {
+   "slot": 22,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016812653945569245,
+   "u1_obs": -0.01673793728048606,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01663804535650526,
+   "u2_obs": -0.016563365761119775
+  },
+  {
+   "slot": 23,
+   "fires": 1,
+   "fire_latency": 0.2581039280098437,
+   "writes1": 0,
+   "u1_pre_pulse": -0.0167300892546538,
+   "u1_obs": -0.01664981575818969,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01655555919660312,
+   "u2_obs": -0.016475350727951754
+  },
+  {
+   "slot": 24,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01664199697578278,
+   "u1_obs": -0.016561695846120994,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016467540929770375,
+   "u2_obs": -0.01638722894855643
+  },
+  {
+   "slot": 25,
+   "fires": 1,
+   "fire_latency": 0.8245530558339459,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01655382660906879,
+   "u1_obs": -0.016473666415092347,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016379461141888152,
+   "u2_obs": -0.016299285555791077
+  },
+  {
+   "slot": 26,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016465836990496863,
+   "u1_obs": -0.01638552215271255,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01629149402434843,
+   "u2_obs": -0.01621119804542631
+  },
+  {
+   "slot": 27,
+   "fires": 1,
+   "fire_latency": 0.8451517394071163,
+   "writes1": 0,
+   "u1_pre_pulse": -0.0163777414438816,
+   "u1_obs": -0.01629743666928324,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016203376360159394,
+   "u2_obs": -0.01612309005746715
+  },
+  {
+   "slot": 28,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016289591441050078,
+   "u1_obs": -0.016209363478390748,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016115295291701193,
+   "u2_obs": -0.016035089916864753
+  },
+  {
+   "slot": 29,
+   "fires": 1,
+   "fire_latency": 0.263199898342363,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016201554592226552,
+   "u1_obs": -0.01612124765299272,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016027314368775525,
+   "u2_obs": -0.015947182237053048
+  },
+  {
+   "slot": 30,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016113413256754416,
+   "u1_obs": -0.016033139187635104,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01593932379252755,
+   "u2_obs": -0.015859133268866177
+  },
+  {
+   "slot": 31,
+   "fires": 1,
+   "fire_latency": 0.8736307470419827,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016025341053590214,
+   "u1_obs": -0.015945158202505805,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01585130218758618,
+   "u2_obs": -0.015771018009759386
+  },
+  {
+   "slot": 32,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.015937306483529368,
+   "u1_obs": -0.015857025730114993,
+   "writes2": 1,
+   "u2_pre_pulse": -0.01576317776409991,
+   "u2_obs": -0.017028338234945095
+  },
+  {
+   "slot": 33,
+   "fires": 1,
+   "fire_latency": 0.7722313945020928,
+   "writes1": 0,
+   "u1_pre_pulse": -0.015849203891779073,
+   "u1_obs": -0.01576890863121483,
+   "writes2": 0,
+   "u2_pre_pulse": -0.017020490089267926,
+   "u2_obs": -0.016940267025781663
+  },
+  {
+   "slot": 34,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 1,
+   "u1_pre_pulse": -0.01576112073409247,
+   "u1_obs": -0.017042172433365865,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01693243453796589,
+   "u2_obs": -0.016852210753049213
+  },
+  {
+   "slot": 35,
+   "fires": 1,
+   "fire_latency": 0.25470324294426594,
+   "writes1": 0,
+   "u1_pre_pulse": -0.017034405559626764,
+   "u1_obs": -0.01695419478950122,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016844408425942203,
+   "u2_obs": -0.016764233977062004
+  },
+  {
+   "slot": 36,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016946363326353187,
+   "u1_obs": -0.016866021610862647,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016756431088869816,
+   "u2_obs": -0.016676191119018857
+  },
+  {
+   "slot": 37,
+   "fires": 1,
+   "fire_latency": 0.8031013587343382,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01685823709142098,
+   "u1_obs": -0.016777952071160618,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016668372966421596,
+   "u2_obs": -0.016588096555241905
+  },
+  {
+   "slot": 38,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01677017489426713,
+   "u1_obs": -0.016689814816237547,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016580293784285827,
+   "u2_obs": -0.016500017479525064
+  },
+  {
+   "slot": 39,
+   "fires": 1,
+   "fire_latency": 0.806924914121054,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01668203894270598,
+   "u1_obs": -0.016601671505281246,
+   "writes2": 0,
+   "u2_pre_pulse": -0.01649230498807125,
+   "u2_obs": -0.016411937220825124
+  },
+  {
+   "slot": 40,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016593864609052766,
+   "u1_obs": -0.016513582016999595,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016404153322569504,
+   "u2_obs": -0.01632388033627319
+  },
+  {
+   "slot": 41,
+   "fires": 1,
+   "fire_latency": 0.2603498428951186,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01650573171793468,
+   "u1_obs": -0.016425474098606785,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016316043971263905,
+   "u2_obs": -0.016235861549965314
+  },
+  {
+   "slot": 42,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016417700967368776,
+   "u1_obs": -0.016337497641066623,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016228048595286038,
+   "u2_obs": -0.016147843822635177
+  },
+  {
+   "slot": 43,
+   "fires": 1,
+   "fire_latency": 0.8428599672539453,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01632962615036654,
+   "u1_obs": -0.01624938165446893,
+   "writes2": 0,
+   "u2_pre_pulse": -0.0161400225487065,
+   "u2_obs": -0.016059774271704963
+  },
+  {
+   "slot": 44,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016241581146673123,
+   "u1_obs": -0.01616129153107765,
+   "writes2": 0,
+   "u2_pre_pulse": -0.0160519648361504,
+   "u2_obs": -0.015971685679579684
+  },
+  {
+   "slot": 45,
+   "fires": 1,
+   "fire_latency": 0.8656323637710465,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016153437932777015,
+   "u1_obs": -0.016073135061047295,
+   "writes2": 0,
+   "u2_pre_pulse": -0.015963856080617178,
+   "u2_obs": -0.01588364252079716
+  },
+  {
+   "slot": 46,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01606533933707055,
+   "u1_obs": -0.01598513432994836,
+   "writes2": 1,
+   "u2_pre_pulse": -0.015875895295682618,
+   "u2_obs": -0.017142461160943923
+  },
+  {
+   "slot": 47,
+   "fires": 1,
+   "fire_latency": 0.25778219149892967,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01597735808776929,
+   "u1_obs": -0.01589699200416106,
+   "writes2": 0,
+   "u2_pre_pulse": -0.017134651197209694,
+   "u2_obs": -0.01705437650467978
+  },
+  {
+   "slot": 48,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.015889220883824884,
+   "u1_obs": -0.015808971068986766,
+   "writes2": 0,
+   "u2_pre_pulse": -0.017046584026215506,
+   "u2_obs": -0.016966362798298606
+  },
+  {
+   "slot": 49,
+   "fires": 1,
+   "fire_latency": 0.9077588972550951,
+   "writes1": 0,
+   "u1_pre_pulse": -0.015801148351268113,
+   "u1_obs": -0.015720843696034048,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016958551943594746,
+   "u2_obs": -0.01687831508502652
+  },
+  {
+   "slot": 50,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 1,
+   "u1_pre_pulse": -0.015712994317406248,
+   "u1_obs": -0.016983703781832005,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016870506810229224,
+   "u2_obs": -0.016790243854408915
+  },
+  {
+   "slot": 51,
+   "fires": 1,
+   "fire_latency": 0.7842921981047125,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016975855877595036,
+   "u1_obs": -0.01689553913162334,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016782431333718484,
+   "u2_obs": -0.016702171640980423
+  },
+  {
+   "slot": 52,
+   "fires": 0,
+   "fire_latency": null,
+   "writes1": 0,
+   "u1_pre_pulse": -0.016887767801972986,
+   "u1_obs": -0.016807522259496166,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016694423649057655,
+   "u2_obs": -0.01661414510255982
+  },
+  {
+   "slot": 53,
+   "fires": 1,
+   "fire_latency": 0.2557230766588352,
+   "writes1": 0,
+   "u1_pre_pulse": -0.01679967959493217,
+   "u1_obs": -0.01671942284055722,
+   "writes2": 0,
+   "u2_pre_pulse": -0.016606373525332285,
+   "u2_obs": -0.016526076281348667
+  }
+ ],
+ "noise_fingerprint": "541e1d86a4f2b8457ca8380847fa7425f5a57916bf97867581e602bf1d6ec007",
+ "points": 231798,
+ "wall_s": 274.6995928287506,
+ "deck_sha256": "16ec4a85a7806008f8e506b6588d82f944d06474f56fb04a14fa6fb434d2bdce",
+ "files": {
+  "input.spice": "4675a45667ff46092fb89190e1b4667227b664385ee9ab2ef32e9eb9519e7912",
+  "head.raw": "c61d99fb9340613f8f2d9906409dc11c44e664c4240f9a4cdfb574782f32975a",
+  "trace.raw": "dda776ba0de92d9a2c6e1afc24bbade2806639f5199567486b46dc8d5472b466"
+ }
+}
