@@ -60,7 +60,7 @@ assumption is broken.
 | The need stays exact while the errors on start gain, doses and firing level stay within half a dose | Lean |
 | A transistor-level cell trains and stops by itself; 22 of 24 registered checks and predictions hold | simulation |
 | On 200 new simulated ports, 37 are certified by preregistered rules and 57 by a directional rule fixed afterwards, from margins measured on their own runs; every certified count is the predicted one | simulation + Lean |
-| On 1 140 fresh noisy trials of those 57 ports (same cells, new noise), the count is always right: under 0.26% error per trial at 95% confidence | simulation |
+| On 1 140 fresh noisy trials of those 57 ports (same cells, new noise), the count is always right: under 0.29% error per trial at 95% confidence, counting the 1 040 independent runs (100 runs give two ports) | simulation |
 | A supervisor keeps a degrading task in service from dated observations, at 40 to 44% less cost than constant checking, with no missed danger | Lean + experiment |
 | When its assumption breaks, it detects it at its next probe, refuses, recovers without false safety claims, and resumes only on a fresh external authorization | Lean + experiment |
 
