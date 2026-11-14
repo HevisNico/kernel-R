@@ -40,6 +40,10 @@ fi
 lean -DwarningAsError=true -o "$build/NativeMultiTokenTarget.olean" NativeMultiTokenTarget.lean
 lean -DwarningAsError=true -o "$build/NativeMultiTokenMilestone.olean" NativeMultiTokenMilestone.lean
 lean -DwarningAsError=true -o "$build/SynchronizedProduct.olean" SynchronizedProduct.lean
-lean -DwarningAsError=true -o "$build/LaunchWave.olean" LaunchWave.lean
-lean -DwarningAsError=true -o "$build/ProtectedReceipt.olean" ProtectedReceipt.lean
+failed=0
+lean -DwarningAsError=true -o "$build/LaunchWave.olean" LaunchWave.lean || failed=1
+lean -DwarningAsError=true -o "$build/ProtectedReceipt.olean" ProtectedReceipt.lean || failed=1
+if ((failed)); then
+  exit 1
+fi
 lean -DwarningAsError=true NativeMultiTokenAudit.lean

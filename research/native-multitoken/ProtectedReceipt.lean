@@ -5,6 +5,7 @@ import KernelR.HybridCadenceMarkOnlyExistence
 namespace NetworkStability.NativeMultiToken
 
 open KernelR.Hybrid Set MeasureTheory
+open scoped BigOperators
 
 private theorem quarter_above_reopen {cost : ℝ} (bound : cost < 9 / 10) :
     1 / 10 < (1 / 4) * Real.exp (-cost) := by
@@ -279,7 +280,7 @@ theorem protected_receipt_body {θ ε route} (hb : @PhysicalBox 1 θ ε)
         B * (t - m.final.time) < 9 / 10 := by
       rw [Bexact] at hI ⊢
       linarith
-    simpa only [B, neg_add, neg_mul] using quarter_above_reopen hcost
+    simpa only [B, neg_add, neg_mul, add_assoc] using quarter_above_reopen hcost
   obtain ⟨a⟩ := cadence_mark_aux_return_exists (route := route) hb m.final p s.time m.physical m.raw_valid
     ⟨m.early, m.deadline⟩ m.main_slow m.aux_silent m.sensor_charge m.charge
     (by rw [m.recovery_gain]; exact hB.le) m.sensor_budget hguard m.auxiliary_other
@@ -401,11 +402,13 @@ private theorem receipt_calendar_budget {p : Parameters N} (accepted : p.check =
   have good : p.Valid := of_decide_eq_true accepted
   have d := good.2.2.2.2.1 i
   have low : (8 / 5 : ℚ) < p.delay i := by linarith
-  have lowR : (8 / 5 : ℝ) < (p.delay i : ℝ) := by exact_mod_cast low
+  have lowR : (8 / 5 : ℝ) < (p.delay i : ℝ) := by
+    simpa using (Rat.cast_lt (K := ℝ)).mpr low
   have validBudget := good.2.2.2.2.2 i
   change (9 / 50 : ℚ) * (p.delay i + 3 / 5 - 1) + (7 / 25) * (419 / 300) < 9 / 10 at validBudget
   have budgetR : (9 / 50 : ℝ) * ((p.delay i : ℝ) + 3 / 5 - 1) +
-      (7 / 25) * (419 / 300) < 9 / 10 := by exact_mod_cast validBudget
+      (7 / 25) * (419 / 300) < 9 / 10 := by
+    simpa using (Rat.cast_lt (K := ℝ)).mpr validBudget
   obtain ⟨first, last, _, _⟩ := scalar_latency accepted i
   obtain ⟨targetFirst, targetLast, _, _⟩ := scalar_latency accepted (p.successor i)
   dsimp

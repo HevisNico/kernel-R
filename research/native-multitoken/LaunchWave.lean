@@ -18,7 +18,7 @@ private theorem local_launch_clock {p : Parameters N} (accepted : p.check = true
   let fire := leg.cycle.fire
   obtain ⟨early, late, root, _⟩ := scalar_latency accepted i
   rw [fire.date]
-  apply readyPulse_root_unique upper lower
+  apply readyPulse_root_unique (start := s.time) upper lower
   · exact ⟨by linarith [fire.early], by linarith [fire.deadline]⟩
   · exact ⟨by linarith, by linarith⟩
   · exact fire.response_root
@@ -50,13 +50,14 @@ private theorem router_launch {p : Parameters N} (accepted : p.check = true) (i 
       [⟨p.successor i, 2, launchDate p + latency p i + (p.delay i : ℝ)⟩] := by
   obtain ⟨early, late, _, _⟩ := scalar_latency accepted i
   unfold router
-  rw [if_pos ⟨by linarith, by linarith⟩]
+  rw [ite_eq_left ⟨by linarith, by linarith⟩]
 
 private theorem launch_child_future {p : Parameters N} (accepted : p.check = true) (i : Fin N) :
     launchDate p + 9 / 10 < launchDate p + latency p i + (p.delay i : ℝ) := by
   have d := (of_decide_eq_true accepted : p.Valid).2.2.2.2.1 i
   have lower : (8 / 5 : ℚ) < p.delay i := by linarith
-  have realLower : (8 / 5 : ℝ) < (p.delay i : ℝ) := by exact_mod_cast lower
+  have realLower : (8 / 5 : ℝ) < (p.delay i : ℝ) := by
+    simpa using (Rat.cast_lt (K := ℝ)).mpr lower
   linarith [(scalar_latency accepted i).1]
 
 private theorem emission_cell_perm {l : List (Fin N × ℝ)} {fire : Fin N → ℝ}
@@ -70,9 +71,9 @@ private theorem emission_cell_perm {l : List (Fin N × ℝ)} {fire : Fin N → �
   rw [List.count_eq_length_filter, List.filter_map, List.length_map]
   have predicate : (fun e : Fin N × ℝ => (e.1 == i)) = (fun e => decide (e.1 = i)) := by
     funext e
-    exact beq_eq_decide_eq _ _
+    exact Bool.beq_eq_decide_eq _ _
   rw [Function.comp_def, predicate, length]
-  exact ((List.nodup_finRange N).count_eq_one_of_mem (List.mem_finRange i)).symm
+  exact (List.count_eq_one_of_mem (List.nodup_finRange N) (List.mem_finRange i)).symm
 
 /-- Launch at the frozen calendar date, with all RAW pulses already admitted.
 The common cut is after every launch FIRE and before any child is due. Each
@@ -104,8 +105,8 @@ theorem launch_wave {p : Parameters N} (accepted : p.check = true) {ε : ℝ}
   have clock (i : Fin N) : (leg i).cycle.fire.final.time = launchDate p + latency p i :=
     (local_launch_clock accepted i _ _ (leg i) (charge i) (gain i)
       (window i).1 (prepared i).charge.2).trans (by rw [show (localView s i).time = launchDate p from date])
-  have prefix (i : Fin N) := launch_prefix (leg i)
-  choose cuts legs follows finish deliveries fires using prefix
+  have localPrefix (i : Fin N) := launch_prefix (leg i)
+  choose cuts legs follows finish deliveries fires using localPrefix
   have cutDate (i : Fin N) : (cuts i).time = launchDate p + 9 / 10 :=
     (finish i).trans (by rw [show (localView s i).time = launchDate p from date])
   obtain ⟨out, body, noArrival, queue, emitted, count, _, _, _, _⟩ :=
