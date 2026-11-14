@@ -90,8 +90,8 @@ femtofarad: 5.39 fF to node 0 gives 0.018 mV, 2.28 fF to `vdd` 0.008 mV,
 
 This sum is arithmetic on the table. The capacitances were taken out
 one at a time and the effects are assumed to add; the group runs say
-they nearly do (+0.052 for `x` as a group, against +0.062 for its pairs
-one by one).
+they nearly do (+0.052 mV for `x` as a group, against +0.051 mV for its
+pairs one by one).
 
 ## What this diagnostic does not show
 
