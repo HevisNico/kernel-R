@@ -108,5 +108,27 @@ open NetworkStability.AutonomousFeedback
     )
 
 
+    orders = """import ScheduleCounterexample
+open NetworkStability.AutonomousFeedback NetworkStability.AutonomousFeedback.ScheduleCounterexample
+example : stored 2 (fun _ => 1) warmFirst 1 REL stored 2 (fun _ => 1) readFirst 1 := by decide
+"""
+    paired(
+        directory, "false schedule independence",
+        orders.replace("REL", "≠"),
+        orders.replace("REL", "="),
+    )
+    traffic = """import PerpetualExamples
+open NetworkStability.AutonomousFeedback
+example :
+  (run (RecirculatingRing.model 2) 1 (fun _ => 0) 12 (start 3 [none, some 0])).pending
+    REL [] := by decide
+"""
+    paired(
+        directory, "false queue drainage under local reserve",
+        traffic.replace("REL", "≠"),
+        traffic.replace("REL", "="),
+    )
+
+
 if __name__ == "__main__":
     main()
