@@ -22,7 +22,9 @@ self_certifying="$repo/research/self-certifying-learning"
 modules=(ChipFiring GuardedFeedback Counterexample NativeReciprocal RoutedCalendar RoutedCalendarExamples
   AutonomousFeedback FeedbackExamples PerpetualFeedback PerpetualExamples ScheduleCounterexample
   ScheduleConfluence ScheduleExamples FairMemory NetworkTheorem PortMemory FairnessExamples
-  ConcreteFairness NativeEndpoint MarkFeedback MarkCounterexample NativeMarkTrace NativeRefinement PhaseAdmission NativeAdmissions NativeTransactions)
+  ConcreteFairness NativeEndpoint MarkFeedback MarkCounterexample NativeMarkTrace NativeRefinement
+  PhaseAdmission NativeAdmissions NativeTransactions DatedFairness NativeTiming NativeWireTransactions
+  NativeComposition DatedReplay)
 expected=$(printf '%s\n' Audit.lean "${modules[@]/%/.lean}" | sort)
 actual=$(find . -name '*.lean' -printf '%P\n' | sort)
 if [[ "$expected" != "$actual" ]]; then
