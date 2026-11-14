@@ -458,7 +458,6 @@ theorem forward_transaction_table (z : FirstCoupledTeaching x)
       rw [senderDates] at present
       rcases List.mem_cons.mp present with same | delivered
       · rw [same]
-        exact le_rfl
       · obtain ⟨token, member, same⟩ := List.mem_map.mp delivered
         rw [← same]
         have bound := (z.train.execution.delivery_time_bounds token (List.mem_filter.mp member).1).1
@@ -485,7 +484,7 @@ private noncomputable def reverseEntryRows (first f352 f360 f368 returnFire : �
     reciprocalRow ⟨360, 1, 2⟩ (some f360), reciprocalRow ⟨f360 + 7 / 20, 0, 2⟩ none,
     reciprocalRow ⟨368, 1, 2⟩ (some f368), reciprocalRow ⟨f368 + 7 / 20, 0, 2⟩ (some returnFire)]
 
-private def reverseHead (p : FirstReverseInterleavedPair q) : Execution θ
+private noncomputable def reverseHead (p : FirstReverseInterleavedPair q) : Execution θ
     (reciprocalEntryRouter nominalDelay nominalDelay) start p.final :=
   (((w.execution.append a.execution).append q.execution).append p.execution)
 
@@ -517,9 +516,9 @@ private theorem reverse_entry_rows (p : FirstReverseInterleavedPair q)
       subst clock
     · change 344 ≤ a.final.time ∧ a.final.time < (344 : ℝ) + 1
       constructor <;> linarith only [a.window.1, a.window.2]
-    · exact ⟨second.1, by simpa using second.2⟩
-    · exact ⟨third.1, by simpa using third.2⟩
-    · exact ⟨fourth.1, by simpa using fourth.2⟩
+    · exact ⟨second.1, by simpa [reciprocalRow] using second.2⟩
+    · exact ⟨third.1, by simpa [reciprocalRow] using third.2⟩
+    · exact ⟨fourth.1, by simpa [reciprocalRow] using fourth.2⟩
     · exact returned
 
 end Reverse
@@ -604,7 +603,7 @@ theorem reverse_transaction_table (p : FirstReverseInterleavedPair q)
     senderCount, receiverCount, rfl, ?_, ?_, ?_, ?_⟩
   · simp only [List.map_append, senderDates, receiverDates, Execution.deliveries_append,
       Execution.cast_parameters_deliveries] at headDates ⊢
-    rw [← headDates]
+    rw [← List.append_assoc (List.map reciprocalOccurrence (reverseHead p).deliveries), ← headDates]
     simp only [List.append_assoc, List.cons_append, List.nil_append]
     apply List.Perm.append_left
     have perm := (List.perm_append_comm (l₁ := epoch.execution.cellDeliveries 1)
@@ -639,7 +638,6 @@ theorem reverse_transaction_table (p : FirstReverseInterleavedPair q)
       rw [senderDates] at present
       rcases List.mem_cons.mp present with same | delivered
       · rw [same]
-        exact le_rfl
       · obtain ⟨token, member, same⟩ := List.mem_map.mp delivered
         rw [← same]
         have bound := (epoch.execution.delivery_time_bounds token (List.mem_filter.mp member).1).1
@@ -670,9 +668,24 @@ private theorem countFold (fire : ReciprocalProbe → ℝ) (rows : List Row)
     change writesAfter (reciprocalCalendar fire) tail
       (fun j => start j + MarkFeedback.footprint (reciprocalCalendar fire).model head.probe head.decision j) i = _
     rw [ih]
-    simp only [List.countP_cons, gainWrites, markWrites, MarkFeedback.footprint,
-      Bool.and_eq_true, Bool.not_eq_true', decide_eq_true_eq, eq_comm (a := i)]
-    split <;> split <;> omega
+    simp only [List.countP_cons]
+    have dose : MarkFeedback.footprint (reciprocalCalendar fire).model head.probe head.decision i =
+        (if gainWrites (reciprocalCalendar fire) i head then 1 else 0) +
+        (if markWrites (reciprocalCalendar fire) i head then 1 else 0) := by
+      unfold MarkFeedback.footprint gainWrites markWrites
+      have gainEq : (((!head.decision && (reciprocalCalendar fire).model.learn head.probe) &&
+        decide (MarkFeedback.gain (reciprocalCalendar fire).model head.probe = i)) = true) =
+          (head.decision = false ∧ (reciprocalCalendar fire).model.learn head.probe = true ∧
+            i = MarkFeedback.gain (reciprocalCalendar fire).model head.probe) := by
+        simp [and_assoc, eq_comm (a := i)]
+      have markEq : (((reciprocalCalendar fire).model.mark head.probe head.decision &&
+        decide (MarkFeedback.recovery (reciprocalCalendar fire).model head.probe = i)) = true) =
+          ((reciprocalCalendar fire).model.mark head.probe head.decision = true ∧
+            i = MarkFeedback.recovery (reciprocalCalendar fire).model head.probe) := by
+        simp [eq_comm (a := i)]
+      simp only [gainEq, markEq]
+    rw [dose]
+    omega
 
 private theorem markWrites_ne_gain (fire : ReciprocalProbe → ℝ) (i : Fin 2) (port : Bool)
     (row : Row) :
@@ -690,19 +703,21 @@ private theorem ready_odd_score (fire : ReciprocalProbe → ℝ) (counts : Fin 6
     MarkFeedback.score (reciprocalCalendar fire).model 2 ⟨[], counts⟩ p =
       2 * (counts (MarkFeedback.gain (reciprocalCalendar fire).model p) : Int) -
         (if p.input = (1, 1) then 1 else 5) := by
-  unfold MarkFeedback.score
-  change (reciprocalCalendar fire).bias p.input ((reciprocalCalendar fire).phase p.input p.due) + _ = _
+  change (if (reciprocalCalendar fire).phase p.input p.due = .slow then (-7 : Int)
+      else if p.input = (1, 1) then -1 else -5) +
+    2 * (counts (MarkFeedback.gain (reciprocalCalendar fire).model p) : Int) + 0 * _ = _
   rw [ready]
-  by_cases h : p.input = (1, 1) <;> simp [reciprocalCalendar, h] <;> omega
+  by_cases h : p.input = (1, 1) <;> simp [h] <;> omega
 
 private theorem slow_odd_score (fire : ReciprocalProbe → ℝ) (counts : Fin 6 → Nat) (p : ReciprocalProbe)
     (slow : (reciprocalCalendar fire).phase p.input p.due = .slow) :
     MarkFeedback.score (reciprocalCalendar fire).model 2 ⟨[], counts⟩ p =
       2 * (counts (MarkFeedback.gain (reciprocalCalendar fire).model p) : Int) - 7 := by
-  unfold MarkFeedback.score
-  change (reciprocalCalendar fire).bias p.input ((reciprocalCalendar fire).phase p.input p.due) + _ = _
+  change (if (reciprocalCalendar fire).phase p.input p.due = .slow then (-7 : Int)
+      else if p.input = (1, 1) then -1 else -5) +
+    2 * (counts (MarkFeedback.gain (reciprocalCalendar fire).model p) : Int) + 0 * _ = _
   rw [slow]
-  simp [reciprocalCalendar]
+  simp
   omega
 
 private theorem guard_of_partition (fire : ReciprocalProbe → ℝ) (rows : List Row)
@@ -741,7 +756,7 @@ private theorem guard_of_partition (fire : ReciprocalProbe → ℝ) (rows : List
         simp [zero, k]
       have total : rows.countP (gainWrites C g) = threshold := totals head mem
       have remaining : k + (head :: tail).countP (gainWrites C g) = threshold := by
-        rwa [split, List.countP_append] at total
+        simpa only [split, List.countP_append, k] using total
       have trip : k ≤ 3 := by
         have upper : threshold ≤ 3 := by unfold threshold; split <;> decide
         omega
@@ -765,7 +780,7 @@ private theorem guard_of_partition (fire : ReciprocalProbe → ℝ) (rows : List
               simp only [gainWrites, hd, Bool.not_false, Bool.true_and, g, decide_true, Bool.and_true]
               change decide (C.phase head.probe.input head.probe.due = .ready) = true
               simp [hp]
-            simp only [List.countP_cons, self, if_true] at remaining
+            simp only [List.countP_cons, self, ite_true] at remaining
             left
             refine ⟨rfl, ?_⟩
             by_cases key : head.probe.input = (1, 1) <;>
@@ -782,7 +797,7 @@ private theorem guard_of_partition (fire : ReciprocalProbe → ℝ) (rows : List
                 have after : head.probe.due ≤ row.probe.due := by
                   rcases List.mem_cons.mp hr with rfl | later
                   · rfl
-                  · have sorted := ordered.sublist (show head :: tail <+ rows by rw [split]; exact List.sublist_append_right ..)
+                  · have sorted := ordered.sublist (show List.Sublist (head :: tail) rows by rw [split]; exact List.sublist_append_right ..)
                     exact (List.pairwise_cons.mp sorted).1 row later
                 exact (not_lt_of_ge after before).elim
             have eq : k = threshold := by omega
@@ -834,13 +849,17 @@ private def readyDose (fire : ReciprocalProbe → ℝ) (row : Row) (i : Fin 6) :
 
 private theorem gainWrites_iff (fire : ReciprocalProbe → ℝ) (row : Row) (i : Fin 6) :
     gainWrites (reciprocalCalendar fire) i row = true ↔ readyDose fire row i := by
-  simp [gainWrites, readyDose, Calendar.model]
+  change ((!row.decision && decide ((reciprocalCalendar fire).phase row.probe.input row.probe.due = .ready)) &&
+    decide (MarkFeedback.gain (reciprocalCalendar fire).model row.probe = i)) = true ↔ _
+  simp [readyDose, and_assoc]
 
 private theorem recoveryWrites_iff (fire : ReciprocalProbe → ℝ) (row : Row) (i : Fin 6) :
     markWrites (reciprocalCalendar fire) i row = true ↔
       row.decision = false ∧ (reciprocalCalendar fire).phase row.probe.input row.probe.due = .slow ∧
       MarkFeedback.recovery (reciprocalCalendar fire).model row.probe = i := by
-  simp [markWrites, Calendar.model, reciprocalCalendar, and_left_comm, and_comm]
+  change ((decide ((reciprocalCalendar fire).phase row.probe.input row.probe.due = .slow) && !row.decision) &&
+    decide (MarkFeedback.recovery (reciprocalCalendar fire).model row.probe = i)) = true ↔ _
+  simp [and_left_comm, and_comm, and_assoc]
 
 private theorem gainIndex_eq (fire : ReciprocalProbe → ℝ) (p : ReciprocalProbe) :
     MarkFeedback.gain (reciprocalCalendar fire).model p =
@@ -878,12 +897,14 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
       (all : ∀ row ∈ rows, row.probe.input = key ∧ row.decision = false ∧ C.phase row.probe.input row.probe.due = .ready) :
       rows.countP (gainWrites C i) =
         if (Address.mk key.1 (if key.2 = 2 then .port1 else .port0)).encode = i then rows.length else 0 := by
-    split_ifs with same
-    · apply List.countP_eq_length.mpr
+    by_cases same : (Address.mk key.1 (if key.2 = 2 then .port1 else .port0)).encode = i
+    · rw [ite_eq_left same]
+      apply List.countP_eq_length.mpr
       intro row mem
       obtain ⟨keyEq, silent, ready⟩ := all row mem
-      exact (gainWrites_iff fire row i).mpr ⟨silent, ready, by rw [gainIndex_eq, keyEq, same]⟩
-    · apply List.countP_eq_zero.mpr
+      exact (gainWrites_iff fire row i).mpr ⟨silent, ready, by rw [gainIndex_eq, keyEq]; exact same⟩
+    · rw [ite_eq_right same]
+      apply List.countP_eq_zero.mpr
       intro row mem
       have keyEq := (all row mem).1
       intro written
@@ -893,7 +914,7 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
   have noGainRest (i : Fin 6) : rest.countP (gainWrites C i) = 0 := by
     apply List.countP_eq_zero.mpr
     intro row mem
-    simp [(firing_no_write fire i (firing row mem)).1]
+    exact (firing_no_write fire i (firing row mem)).1
   have noGainMark (i : Fin 6) : marks.countP (gainWrites C i) = 0 := by
     apply List.countP_eq_zero.mpr
     intro row mem written
@@ -920,7 +941,7 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
   have noMarkRest (i : Fin 6) : rest.countP (markWrites C i) = 0 := by
     apply List.countP_eq_zero.mpr
     intro row mem
-    simp [(firing_no_write fire i (firing row mem)).2]
+    exact (firing_no_write fire i (firing row mem)).2
   have recover (i : Fin 2) : marks.countP (markWrites C (Address.mk i .recovery).encode) = 1 := by
     rw [List.countP_eq_length_filter, ← markBalance i]
     congr 1
@@ -937,36 +958,39 @@ private theorem explicitCounts (fire : ReciprocalProbe → ℝ)
   refine ⟨?_, ?_⟩
   · intro i c
     rw [countFold, gains]
-    simp only [table, List.countP_append, noMarkRest, Nat.zero_add,
-      noMarkReady a0 _ (fun row mem => (gain0 row mem).2.2),
-      noMarkReady a2 _ (fun row mem => (gain2 row mem).2.2),
-      noMarkReady b1 _ (fun row mem => (gain1 row mem).2.2),
-      noMarkReady b2 _ (fun row mem => (gain3 row mem).2.2)]
+    have marksOnly : table.countP (markWrites C (Address.mk i c).encode) =
+        marks.countP (markWrites C (Address.mk i c).encode) := by
+      change (a0 ++ a2 ++ b1 ++ b2 ++ rest ++ marks).countP (markWrites C _) = _
+      rw [List.countP_append, List.countP_append, List.countP_append, List.countP_append, List.countP_append,
+        noMarkRest, noMarkReady a0 _ (fun row mem => (gain0 row mem).2.2),
+        noMarkReady a2 _ (fun row mem => (gain2 row mem).2.2),
+        noMarkReady b1 _ (fun row mem => (gain1 row mem).2.2),
+        noMarkReady b2 _ (fun row mem => (gain3 row mem).2.2)]
+      <;> rfl
+    rw [marksOnly]
     cases c with
     | port0 =>
-      change _ + marks.countP (markWrites C (Address.mk i (if false then .port1 else .port0)).encode) = _
       have zero : marks.countP (markWrites C (Address.mk i .port0).encode) = 0 := by
         apply List.countP_eq_zero.mpr
         intro row _
         simp [markWrites_ne_gain fire i false row]
       rw [zero]
-      fin_cases i <;> decide
+      fin_cases i <;> norm_num [Address.encode, Coordinate.index, doseCount]
     | port1 =>
-      change _ + marks.countP (markWrites C (Address.mk i (if true then .port1 else .port0)).encode) = _
       have zero : marks.countP (markWrites C (Address.mk i .port1).encode) = 0 := by
         apply List.countP_eq_zero.mpr
         intro row _
         simp [markWrites_ne_gain fire i true row]
       rw [zero]
-      fin_cases i <;> decide
+      fin_cases i <;> norm_num [Address.encode, Coordinate.index, doseCount]
     | recovery =>
       rw [recover]
-      fin_cases i <;> decide
+      fin_cases i <;> norm_num [Address.encode, Coordinate.index, doseCount]
   · intro row member
     rw [gains, gainIndex_eq]
     rcases keys row member with h | h | h | h <;> rw [h] <;> decide
 
-set_option maxHeartbeats 2000000 in
+set_option maxHeartbeats 12000000 in
 /-- A single staged native history realizes the entire reciprocal
 admission list and FIRE multiset. Each FIRE row retains its native clock. -/
 theorem nominal_reciprocal_transaction_words :
@@ -1014,9 +1038,9 @@ theorem nominal_reciprocal_transaction_words :
     b_gains := fun port => (learned.gains 1 port).trans (entry.b_gains port)
     recovery := fun i => (learned.recovery i).trans (entry.recovery i)
     a_emission_count := by
-      simp only [Execution.emissionTimes_append, List.length_append, entry.a_emission_count,
-        Execution.emissionTimes, Execution.cast_parameters_ledger]
-      exact congrArg (1 + ·) learned.a_emission_count
+      rw [Execution.emissionTimes_append, List.length_append, entry.a_emission_count]
+      have same := learned.a_emission_count
+      simpa only [Execution.emissionTimes, Execution.cast_parameters_ledger] using congrArg (1 + ·) same
     b_emission_count := by
       rw [Execution.emissionTimes_append, List.length_append, entry.b_emission_count]
       have same := learned.b_emission_count
@@ -1027,8 +1051,8 @@ theorem nominal_reciprocal_transaction_words :
   }
   have hcomplete : CompleteThrough (z.reverse_teaching_staged finish).after (4599 / 10) := by
     simpa only [CompleteThrough] using finish.complete
-  obtain ⟨native, dateNative, stagedNative⟩ : ∃ native : NominalEpoch, native.final = finish.final ∧ HEq native.staged (z.reverse_teaching_staged finish) := by
-    refine ⟨{
+  let native : NominalEpoch := by
+    refine {
       final := finish.final, staged := z.reverse_teaching_staged finish
       newborn_origin := b.newborn_state
       sources_origin := b.source_list
@@ -1050,7 +1074,7 @@ theorem nominal_reciprocal_transaction_words :
       physical := finish.physical
       raw_valid := finish.raw_valid
       complete := hcomplete
-      }, rfl, HEq.rfl⟩
+    }
     · simp only [FirstCoupledTeaching.reverse_teaching_staged,Execution.emissionTimes_append,
         List.length_append,finish.a_emission_count]
       simp only [List.length_append] at hA
@@ -1072,22 +1096,20 @@ theorem nominal_reciprocal_transaction_words :
     · rw [finish.recovery,p.b_recovery,z.b_recovery_own]
 
   have sameBefore : native.staged.before.deliveries = (c.execution.append b.wait).deliveries :=
-    by cases stagedNative; rfl
+    by rfl
   have samePreFires : native.staged.before.ledger.emissions = (c.execution.append b.wait).ledger.emissions :=
-    by cases stagedNative; rfl
+    by rfl
   have sameAfter : native.staged.after.deliveries =
       (z.staged.after.append ((reverseHead p).append finish.execution)).deliveries := by
-    cases stagedNative
     simp only [FirstCoupledTeaching.reverse_teaching_staged,
       FirstCoupledTeaching.first_reverse_interleaved_staged, FirstCoupledTeaching.first_reverse_wire_staged,
       FirstCoupledTeaching.feedback_first_fire_staged, reverseHead, Execution.append_assoc]
   have samePostFires : native.staged.after.ledger.emissions =
       (z.staged.after.append ((reverseHead p).append finish.execution)).ledger.emissions := by
-    cases stagedNative
     simp only [FirstCoupledTeaching.reverse_teaching_staged,
       FirstCoupledTeaching.first_reverse_interleaved_staged, FirstCoupledTeaching.first_reverse_wire_staged,
       FirstCoupledTeaching.feedback_first_fire_staged, reverseHead, Execution.append_assoc]
-  have birthDate : native.staged.afterBirth.time = 160 := by cases stagedNative; exact b.after_date
+  have birthDate : native.staged.afterBirth.time = 160 := b.after_date
   rw [Execution.deliveries_append, b.wait_deliveries, List.append_nil] at sameBefore
   rw [Execution.emissions_append, b.wait_emissions, List.append_nil] at samePreFires
   obtain ⟨strong, prepared, birthRows, _, cert, birthShape, birthDates, birthFires, birthBand, birthClocks⟩ :=
@@ -1123,8 +1145,8 @@ theorem nominal_reciprocal_transaction_words :
       simp [reciprocalEntryRouter, Contact.route, teachingContact, feedbackContact, input, other, early]
   let table := birthRows ++ forwardRows ++ reverseRows
   have budget : (table.map Transaction.probe).Perm ((stagedDeliveries native).map reciprocalOccurrence) := by
-    simp only [table, stagedDeliveries, List.map_append, sameBefore, sameAfter, Execution.deliveries_append]
-    rw [← birthDates]
+    rw [stagedDeliveries, sameBefore, sameAfter, Execution.deliveries_append, List.map_append, ← birthDates]
+    simp only [table, List.map_append]
     simpa only [List.append_assoc] using (forwardDates.append reverseDates).append_left
       (birthRows.map Transaction.probe)
   obtain ⟨rows, alignment, admitted⟩ := alignRows table _ budget
@@ -1171,11 +1193,11 @@ theorem nominal_reciprocal_transaction_words :
       forwardEntryRows, reverseEntryRows]
   have firePerm : (Transaction.fires Prod.fst rows).Perm (stagedFires native) := by
     have move := alignment.filterMap (fun tx => tx.fireDate.map (fun date => (tx.probe.input.1, date)))
-    simp only [stagedFires, samePreFires, samePostFires, Execution.emissions_append]
-    apply move.trans
-    simp only [table, Transaction.fires, List.filterMap_append] at birthFires forwardFires reverseFires ⊢
-    rw [birthFires]
-    simpa only [List.append_assoc] using (forwardFires.append reverseFires).append_left _
+    refine move.trans ?_
+    rw [stagedFires, samePreFires, samePostFires, Execution.emissions_append, ← birthFires]
+    simp only [table, Transaction.fires, List.filterMap_append]
+    simpa only [List.append_assoc, Transaction.fires] using (forwardFires.append reverseFires).append_left
+      (Transaction.fires Prod.fst birthRows)
 
   let gainsA0 : List Row := [reciprocalRow ⟨0, 0, 0⟩ none,
     reciprocalRow ⟨8, 0, 0⟩ none, reciprocalRow ⟨16, 0, 0⟩ none]
@@ -1256,7 +1278,7 @@ theorem nominal_reciprocal_transaction_words :
     intro row mem
     simp only [gainsA2, List.mem_cons, List.not_mem_nil, or_false] at mem
     rcases mem with rfl | rfl | rfl <;>
-      exact ⟨rfl, rfl, rowWindow fire _ _ (by linarith [bound344.1, bound352.1, bound360.1])⟩
+      exact ⟨rfl, rfl, rowWindow fire _ _ (by simp only [reciprocalRow]; linarith [bound344.1, bound352.1, bound360.1])⟩
   have readyB1 : ∀ row ∈ gainsB1, row.probe.input = (1, 1) ∧ row.decision = false ∧
       (reciprocalCalendar fire).phase row.probe.input row.probe.due = .ready := by
     intro row mem
@@ -1268,7 +1290,7 @@ theorem nominal_reciprocal_transaction_words :
     intro row mem
     simp only [gainsB2, List.mem_cons, List.not_mem_nil, or_false] at mem
     rcases mem with rfl | rfl | rfl <;>
-      exact ⟨rfl, rfl, rowWindow fire _ _ (by norm_num)⟩
+      exact ⟨rfl, rfl, rowWindow fire _ _ (by norm_num [reciprocalRow])⟩
   have markPhase : ∀ row ∈ marked, row.decision = false ∧
       (reciprocalCalendar fire).phase row.probe.input row.probe.due = .slow := by
     intro row mem
@@ -1303,7 +1325,8 @@ theorem nominal_reciprocal_transaction_words :
         rw [dates, c.at40.date] at member
         rcases List.mem_cons.mp member with eq | tail
         · rw [eq]
-        · obtain ⟨token, present, rfl⟩ := List.mem_map.mp tail
+        · obtain ⟨token, present, eq⟩ := List.mem_map.mp tail
+          rw [← eq]
           have h := (c.suffix.delivery_time_bounds token (List.mem_filter.mp present).1).1
           rwa [c.at40.date] at h
       have ne : clocks.1 ≠ 32 := by linarith
@@ -1336,12 +1359,14 @@ theorem nominal_reciprocal_transaction_words :
       · exact Or.inl rfl
       · exact Or.inr (Or.inr (Or.inl rfl))
   obtain ⟨counts, totals⟩ := explicitCounts fire gainsA0 gainsA2 gainsB1 gainsB2 firedRows marked
-    (by decide) readyA0 readyA2 readyB1 readyB2 (fun p mem => (firedPhase p mem).1) markPhase
+    (by exact ⟨rfl, rfl, rfl, rfl⟩) readyA0 readyA2 readyB1 readyB2 (fun p mem => (firedPhase p mem).1) markPhase
     (by intro i; fin_cases i <;> rfl) keys
   have countsRows (i : Fin 2) (coord : Coordinate) :
       writesAfter (reciprocalCalendar fire) rows (fun _ => 0) (Address.mk i coord).encode = doseCount i coord := by
-    rw [countFold, List.Perm.countP_eq _ perm, List.Perm.countP_eq _ perm, ← countFold]
-    exact counts i coord
+    calc
+      _ = writesAfter (reciprocalCalendar fire) classified (fun _ => 0) (Address.mk i coord).encode := by
+        rw [countFold, countFold, List.Perm.countP_eq _ perm, List.Perm.countP_eq _ perm]
+      _ = _ := counts i coord
   have totalsRows : ∀ row ∈ rows, rows.countP
       (gainWrites (reciprocalCalendar fire) (MarkFeedback.gain (reciprocalCalendar fire).model row.probe)) =
       if row.probe.input = (1, 1) then 1 else 3 := by
