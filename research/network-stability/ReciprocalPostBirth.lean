@@ -1009,7 +1009,7 @@ private theorem gainKey_injective_on_protocol (a b : ReciprocalInput)
   all_goals first
     | rfl
     | have values := congrArg Fin.val h
-      simp [Address.encode, Coordinate.index] at values
+      simp [Address.encode, Coordinate.index] at values <;> omega
 
 private theorem canonicalOrder (execution : NominalEpoch) (orderedRows : List Row)
     (eq : orderedRows.map Transaction.probe = (stagedDeliveries execution).map reciprocalOccurrence)
