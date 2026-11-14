@@ -117,6 +117,18 @@ class Predicted(unittest.TestCase):
         self.assertEqual(predicted.predictions({}, {"1": {}, "2": {}}, [1, 2])[2:], ([], [], None))
 
 
+class Rehearsal(unittest.TestCase):
+    def test_rehearsal_was_made_on_the_frozen_files(self):
+        r = json.loads((HERE / "REHEARSAL.json").read_text())
+        self.assertTrue(r["all_checks_passed"] and r["second_launch_refused_at_each_stage"] and r["no_link_in_the_evidence"])
+        self.assertEqual(r["files"], {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in plan.FROZEN})
+        self.assertEqual(r["lean_check"], "Predicted.lean: checked")
+        self.assertEqual(len({c for c in r["claims"] if "owner-launch" in c}), 4)
+        limits = dict(scan=375, quiet=700, noisy=700)
+        for kind, walls in r["wall_s_by_kind"].items():
+            self.assertLess(max(walls), limits.get(kind, 860), kind)
+
+
 class Trace:
     def __init__(self, protected, fires, writes):
         self.protected, self.fires, self.writes = protected, fires, writes

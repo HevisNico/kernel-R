@@ -125,10 +125,43 @@ words are computed:
 
 ## Rehearsal
 
-`REHEARSAL.json`, written by `rehearsal.py`: the whole chain on the nominal
-cell (no mismatch), through the real launcher in its synthetic kind with a
+[`REHEARSAL.json`](REHEARSAL.json), written by `rehearsal.py` on the frozen
+files (the test compares their hashes): the whole chain on the **nominal
+cell** (no mismatch), through the real launcher in its synthetic kind with a
 local Git remote. It is not a registered run and the nominal cell is not an
-instance. See the section "Rehearsal results" below.
+instance. Its eight measure runs and four network runs were spread over the
+two "machines" of the kit, both on one container.
+
+| | |
+|---|---|
+| Two launches, two protocols | four claims, two per protocol; a second launch is refused at each stage |
+| Prediction step | the nominal cell is measured and eligible: noise-free budgets of -0.053 to +0.043..0.060 mV, least room 0.47 to 0.50 mV; full room at `K = 3` as well |
+| Lean check | `Predicted.lean: checked` |
+| Run without noise, 18 units | the four predicted words; no pulse refused; closest pulses on a cell 17.28 units apart; largest move of a stored voltage that is not a dose 0.0009 mV |
+| Control, 8 units | the four zero-error words: **C1 would fail on the nominal cell**. Its last silences hold by 0.80 mV, more than the help at 8 units; phase 0 had seen the same. Closest pulses 7.2 units apart, none on a protected cell |
+| Two noisy runs | the four zero-error words in both; run offsets of 0.12 mV rms over 8 port-runs (0.095 measured on the trains) |
+| Analysis | reproduces `PREDICTED.json` from the evidence of the measures; every record agrees with its waveform |
+
+Wall time per run, four at a time or fewer, against the limits of
+`PREDICTION.md`:
+
+| Run | Rehearsal, s | Limit, s |
+|---|---|---|
+| scan of one port | 218 to 236 | 375 |
+| train of 10 reads, no noise | 344 | 700 |
+| train of 10 reads, noise | 476 to 480 | 700 |
+| network run, 18 units, no noise | 498 | 860 |
+| control run, 8 units, no noise | 453 | 860 |
+| network run, 18 units, noise | 661 to 663 | 860 |
+
+The rehearsal ran four simulations at a time at most, often two or three,
+where the campaign runs four on each machine; its times are not a bound. Evidence of the
+nominal cell: 0.27 GB for its measures, 0.21 GB for its network runs.
+
+The control instance of the campaign is chosen, by `PREDICTION.md`, as the
+eligible instance whose smallest margin of a last silence is the smallest.
+C1 can still fail if every eligible instance has all its last silences
+above the help at 8 units, as the nominal cell has.
 
 ## Tests
 
