@@ -1,5 +1,8 @@
 # A network of R cells at transistor level: phase 0
 
+Phase 1, which instantiates the theorem for this cell and derives the
+constants of cells with mismatch, is in [`phase1/`](phase1/README.md).
+
 **Exploratory. Nothing here is preregistered, and nothing here is the
 decisive experiment of `docs/ROADMAP_V1.md` (branch `docs/roadmap-v1`, not
 yet on `main`).** Phase 0 builds the bench, looks at what a
