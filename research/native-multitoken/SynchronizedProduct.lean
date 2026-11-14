@@ -14,14 +14,14 @@ noncomputable def assemble (t : ℝ) (states : Fin N → Snapshot 1)
   ⟨t, fun i => (states i).x 0, fun i => (states i).main 0,
     fun i => (states i).aux 0, fun i => (states i).raw 0, queue⟩
 
-private theorem assemble_field (θ : Fin N → Parameters) (t : ℝ)
+theorem assemble_field (θ : Fin N → Parameters) (t : ℝ)
     (states : Fin N → Snapshot 1) (q : List (Delivery N)) (path : ℝ → Values N)
     (v : ℝ) (i : Fin N) (c : Coord) :
     field θ (assemble t states q) (path v) v i c =
       field (fun _ => θ i) (states i) (fun _ => path v i) v 0 c := by
   cases c <;> rfl
 
-private noncomputable def parallelFlow {θ : Fin N → Parameters} {t u : ℝ}
+noncomputable def parallelFlow {θ : Fin N → Parameters} {t u : ℝ}
     {a b : Fin N → Snapshot 1} (start : ∀ i, (a i).time = t)
     (finish : ∀ i, (b i).time = u) (positive : t < u)
     (f : ∀ i, Flow (fun _ => θ i) (a i) (b i))
@@ -95,13 +95,13 @@ private theorem assemble_raw (t : ℝ) (a : Fin N → Snapshot 1) (q : List (Del
   refine snapshot_eq rfl ?_ ?_ ?_ ?_ rfl <;> funext j <;>
     by_cases h : j = i <;> simp [assemble, setRaw, h]
 
-private theorem cast_jump {route : Router N} {s a b : Snapshot N}
+theorem cast_jump {route : Router N} {s a b : Snapshot N}
     (j : Jump route s a) (target : a = b) :
     ∃ k : Jump route s b, k.ledger = j.ledger ∧ k.deliveries = j.deliveries := by
   subst b
   exact ⟨j, rfl, rfl⟩
 
-private theorem parallelJump {route : Router N} {t : ℝ} {states : Fin N → Snapshot 1}
+theorem parallelJump {route : Router N} {t : ℝ} {states : Fin N → Snapshot 1}
     (i : Fin N) {v : Snapshot 1} (clock : (states i).time = t)
     (q : List (Delivery N)) (j : Jump (EmptyRouter 1) (states i) v)
     (silentQueue : j.deliveries = []) :
@@ -197,12 +197,51 @@ private theorem parallelJump {route : Router N} {t : ℝ} {states : Fin N → Sn
     exact ⟨lifted, ledger ▸ rfl, delivered⟩
 
 
+/-- Lift one scheduled local admission, consuming precisely its occurrence in
+the global queue and retaining both surrounding sublists. -/
+theorem parallel_arrival {route : Router N} {t : ℝ}
+    {states : Fin N → Snapshot 1} (i : Fin N) {v : Snapshot 1}
+    (clock : (states i).time = t) (q : List (Delivery N))
+    (j : Jump (EmptyRouter 1) (states i) v) (receipt : Delivery 1)
+    (delivered : j.deliveries = [receipt])
+    (before after : List (Delivery N))
+    (queue : q = before ++ ⟨i, receipt.port, receipt.due⟩ :: after) :
+    ∃ k : Jump route (assemble t states q)
+      (assemble t (Function.update states i v) (before ++ after)),
+      k.ledger.emissions = [] ∧ k.deliveries = [⟨i, receipt.port, receipt.due⟩] := by
+  cases j with
+  | arrive d l r _ due free =>
+    have same : d = receipt := List.cons.inj delivered |>.1
+    subst receipt
+    let k := Jump.arrive (route := route) (assemble t states q)
+      ⟨i, d.port, d.due⟩ before after queue (due.trans clock)
+      (by
+        change (states i).raw 0 d.port = none
+        have cell : d.cell = 0 := Subsingleton.elim _ _
+        simpa only [cell] using free)
+    have target : { (setRaw (assemble t states q) i d.port (some t)) with
+        pending := before ++ after } = assemble t (Function.update states i
+        { (setRaw (states i) d.cell d.port (some (states i).time)) with pending := l ++ r })
+        (before ++ after) := by
+      have cell : d.cell = 0 := Subsingleton.elim _ _
+      refine snapshot_eq ?_ ?_ ?_ ?_ ?_ ?_
+      · rfl
+      · funext c; by_cases eq : c = i <;> simp [assemble, setRaw, eq]
+      · funext c; by_cases eq : c = i <;> simp [assemble, setRaw, eq]
+      · funext c; by_cases eq : c = i <;> simp [assemble, setRaw, eq]
+      · funext c
+        by_cases eq : c = i <;> simp [assemble, setRaw, eq, cell, clock]
+      · rfl
+    obtain ⟨lifted, ledger, intake⟩ := cast_jump k target
+    exact ⟨lifted, (congrArg Ledger.emissions ledger).trans rfl, intake.trans rfl⟩
+  | _ => simp [Jump.deliveries] at delivered
+
 /-- The state and remaining execution of a cell at a product cut. -/
 structure Cursor (θ : Parameters) (finish : Snapshot 1) where
   start : Snapshot 1
   run : Execution (fun _ => θ) (EmptyRouter 1) start finish
 
-private def startsWithJump {θ : Parameters} {finish : Snapshot 1}
+def startsWithJump {θ : Parameters} {finish : Snapshot 1}
     (c : Cursor θ finish) : Prop :=
   ∃ (v : Snapshot 1) (j : Jump (EmptyRouter 1) c.start v)
     (rest : Execution (fun _ => θ) (EmptyRouter 1) v finish), c.run = .cons (.jump j) rest
@@ -248,7 +287,7 @@ inductive Weaves {θ : Fin N → Parameters} {route : Router N} {b : Fin N → S
         FollowsFlow h (next i) (fun t _ => f.path t i))
       {tail} (follow : Weaves next tail) : Weaves c (.cons (.flow f) tail)
 
-private theorem cursor_done {θ : Parameters} {finish : Snapshot 1} (c : Cursor θ finish)
+theorem cursor_done {θ : Parameters} {finish : Snapshot 1} (c : Cursor θ finish)
     (clock : c.start.time = finish.time) (noJump : ¬ startsWithJump c) :
     c = ⟨finish, .nil finish⟩ := by
   obtain ⟨_, e⟩ := c
@@ -261,7 +300,7 @@ private theorem cursor_done {θ : Parameters} {finish : Snapshot 1} (c : Cursor 
       simp only at clock
       exact False.elim (by linarith [f.positive, tail.time_monotone])
 
-private theorem cursor_flow {θ : Parameters} {finish : Snapshot 1} (c : Cursor θ finish)
+theorem cursor_flow {θ : Parameters} {finish : Snapshot 1} (c : Cursor θ finish)
     (clock : c.start.time < finish.time) (noJump : ¬ startsWithJump c) :
     Nonempty (FlowHead θ finish c) := by
   obtain ⟨_, e⟩ := c
@@ -272,7 +311,7 @@ private theorem cursor_flow {θ : Parameters} {finish : Snapshot 1} (c : Cursor 
     | jump j => exact (noJump ⟨v, j, tail, rfl⟩).elim
     | flow f => exact ⟨⟨v, f, tail, rfl⟩⟩
 
-private structure Advance (θ : Parameters) (finish : Snapshot 1) (c : Cursor θ finish) (t : ℝ) where
+structure Advance (θ : Parameters) (finish : Snapshot 1) (c : Cursor θ finish) (t : ℝ) where
   next : Cursor θ finish
   clock : next.start.time = t
   flow : Flow (fun _ => θ) c.start next.start
@@ -281,7 +320,7 @@ private structure Advance (θ : Parameters) (finish : Snapshot 1) (c : Cursor θ
   arrivals : next.run.deliveries = c.run.deliveries
   marks : ∀ p, flow.ledger.mark 0 p + next.run.ledger.mark 0 p = c.run.ledger.mark 0 p
 
-private theorem advance_exists {θ : Parameters} {finish : Snapshot 1} {c : Cursor θ finish}
+theorem advance_exists {θ : Parameters} {finish : Snapshot 1} {c : Cursor θ finish}
     (h : FlowHead θ finish c) {t : ℝ} (after : c.start.time < t)
     (before : t ≤ h.endState.time) :
     ∃ a : Advance θ finish c t, FollowsFlow h a.next a.flow.path ∧
@@ -678,16 +717,16 @@ theorem weak_training_wave {θ : Fin N → Parameters} {route : Router N} {ε : 
       · simpa [selected] using (leg i).pulse.error_other p selected
 
 
-private def waveTokens (t : ℝ) (port : Fin N → Port) (cells : List (Fin N)) :
+def waveTokens (t : ℝ) (port : Fin N → Port) (cells : List (Fin N)) :
     List (Delivery N) := cells.map fun i => ⟨i, port i, t⟩
 
-private def admittedWave (s : Snapshot N) (port : Fin N → Port) (cells : List (Fin N))
+def admittedWave (s : Snapshot N) (port : Fin N → Port) (cells : List (Fin N))
     (later : List (Delivery N)) : Snapshot N :=
   { s with
     pending := later
     raw := fun i p => if i ∈ cells ∧ p = port i then some s.time else s.raw i p }
 
-private theorem admit_wave {θ : Fin N → Parameters} {route : Router N} (s : Snapshot N)
+theorem admit_wave {θ : Fin N → Parameters} {route : Router N} (s : Snapshot N)
     (port : Fin N → Port) (cells : List (Fin N)) (unique : cells.Nodup)
     (later : List (Delivery N)) (queue : s.pending = waveTokens s.time port cells ++ later)
     (free : ∀ i ∈ cells, s.raw i (port i) = none) :

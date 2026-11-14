@@ -9,7 +9,7 @@ private theorem at_offset (q gain start offset : ℝ) :
     readyPulse q gain start (start + offset) = readyPulse q gain 0 offset := by
   simp only [readyPulse, add_sub_cancel_left, sub_zero]
 
-private theorem local_launch_clock {p : Parameters N} (accepted : p.check = true)
+theorem local_launch_clock {p : Parameters N} (accepted : p.check = true)
     (i : Fin N) (s : Snapshot 1) (port : Port) {θ}
     (leg : LocalLeg θ s port) (charge : s.x 0 .q = launchCharge p i)
     (gain : Real.exp (s.x 0 (.z port)) = launchAmplitude p i)
@@ -45,7 +45,7 @@ private theorem launch_prefix {θ} {s : Snapshot 1} {port : Port} (leg : LocalLe
   rw [silent, List.append_nil, leg.emissions] at emissions
   exact emissions.symm
 
-private theorem router_launch {p : Parameters N} (accepted : p.check = true) (i : Fin N) :
+theorem router_launch {p : Parameters N} (accepted : p.check = true) (i : Fin N) :
     router p i (launchDate p + latency p i) =
       [⟨p.successor i, 2, launchDate p + latency p i + (p.delay i : ℝ)⟩] := by
   obtain ⟨early, late, _, _⟩ := scalar_latency accepted i
@@ -60,7 +60,7 @@ private theorem launch_child_future {p : Parameters N} (accepted : p.check = tru
     simpa using (Rat.cast_lt (K := ℝ)).mpr lower
   linarith [(scalar_latency accepted i).1]
 
-private theorem emission_cell_perm {l : List (Fin N × ℝ)} {fire : Fin N → ℝ}
+theorem emission_cell_perm {l : List (Fin N × ℝ)} {fire : Fin N → ℝ}
     (one : ∀ i, (l.filter (fun e => e.1 = i)).map Prod.snd = [fire i]) :
     (l.map Prod.fst).Perm (List.finRange N) := by
   classical

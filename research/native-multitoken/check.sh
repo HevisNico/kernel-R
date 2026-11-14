@@ -29,20 +29,20 @@ mkdir "$build/SelfCertifyingLearning"
   done
 )
 
-expected=$(printf '%s\n' LaunchWave.lean NativeMultiTokenAudit.lean NativeMultiTokenMilestone.lean \
-  NativeMultiTokenTarget.lean ProtectedReceipt.lean SynchronizedProduct.lean)
+modules=(NativeMultiTokenTarget NativeMultiTokenMilestone SynchronizedProduct
+  LaunchWave ProtectedReceipt PhysicalRefinement PrefixAccounting ReceiptProduct
+  ReceiptTiming ReceiptWave LaunchReceiptChain TrainingClock TrainingStage)
+expected=$(printf '%s.lean\n' NativeMultiTokenAudit "${modules[@]}" | sort)
 actual=$(find . -name '*.lean' -printf '%P\n' | sort)
 if [[ "$expected" != "$actual" ]]; then
   diff -u <(printf '%s\n' "$expected") <(printf '%s\n' "$actual")
   exit 1
 fi
 
-lean -DwarningAsError=true -o "$build/NativeMultiTokenTarget.olean" NativeMultiTokenTarget.lean
-lean -DwarningAsError=true -o "$build/NativeMultiTokenMilestone.olean" NativeMultiTokenMilestone.lean
-lean -DwarningAsError=true -o "$build/SynchronizedProduct.olean" SynchronizedProduct.lean
 failed=0
-lean -DwarningAsError=true -o "$build/LaunchWave.olean" LaunchWave.lean || failed=1
-lean -DwarningAsError=true -o "$build/ProtectedReceipt.olean" ProtectedReceipt.lean || failed=1
+for module in "${modules[@]}"; do
+  lean -DwarningAsError=true -o "$build/$module.olean" "$module.lean" || failed=1
+done
 if ((failed)); then
   exit 1
 fi
