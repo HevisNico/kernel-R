@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'research/network-stability/**'
+      - 'research/learned-coincidence/**'
       - 'research/self-certifying-learning/SelfCertifyingLearning/Budget.lean'
       - 'research/self-certifying-learning/SelfCertifyingLearning/Composition.lean'
       - 'proof/lean/**'
@@ -13,6 +14,7 @@ on:
     branches: [main]
     paths:
       - 'research/network-stability/**'
+      - 'research/learned-coincidence/**'
       - 'research/self-certifying-learning/SelfCertifyingLearning/Budget.lean'
       - 'research/self-certifying-learning/SelfCertifyingLearning/Composition.lean'
       - 'proof/lean/**'
@@ -34,5 +36,7 @@ jobs:
       - uses: ./.github/actions/build-lean
         with:
           package-directory: proof/lean
+      - name: Compile the learned coincidence target and audit its declarations
+        run: lean -DwarningAsError=true research/learned-coincidence/Target.lean
       - name: Compile network proofs, audit axioms, and check mutations
         run: bash research/network-stability/check.sh
