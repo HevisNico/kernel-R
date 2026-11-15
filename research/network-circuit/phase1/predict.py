@@ -43,11 +43,12 @@ def noise(p, instance):
     return math.sqrt(p["noise_within_run_mV"] ** 2 + instance["noise_between_runs_mV"] ** 2 + p["need"] * instance["dose_noise_sd_mV"] ** 2)
 
 
-def budget(p, k, help_22, instance):
-    """(lo, hi) of the read error of a port, in mV. None without the noise measures. With k = 0: no noise at all."""
+def budget(p, k, help_22, instance, allowance=0.0):
+    """(lo, hi) of the read error of a port, in mV. None without the noise measures. With k = 0: no noise at all,
+    and `allowance` mV on each side for the simulator itself."""
     helps = [p["help_16_mV"], p["help_18_after_silent_mV"], p["help_18_after_fire_mV"]]
     if k == 0:
-        spread = p["bracket_half_mV"]
+        spread = allowance + p["bracket_half_mV"]
     elif "noise_within_run_mV" not in p or "noise_between_runs_mV" not in instance:
         return None
     else:
@@ -55,22 +56,22 @@ def budget(p, k, help_22, instance):
     return -(help_22 + spread), max(0.0, *helps) + spread
 
 
-def integers(instance, k, help_22):
+def integers(instance, k, help_22, allowance=0.0):
     gap, lo, hi = {}, {}, {}
     for name, p in instance["ports"].items():
-        b = budget(p, k, help_22, instance)
+        b = budget(p, k, help_22, instance, allowance)
         gap[name] = round(p["gap_doses"] * D)
         lo[name], hi[name] = math.floor(b[0] / p["dose_mV"] * D), math.ceil(b[1] / p["dose_mV"] * D)
     return gap, lo, hi
 
 
-def predict(instance, k, help_22, calendar):
+def predict(instance, k, help_22, calendar, allowance=0.0):
     ports = instance["ports"]
-    if any(budget(p, k, help_22, instance) is None for p in ports.values()):
+    if any(budget(p, k, help_22, instance, allowance) is None for p in ports.values()):
         return dict(k=k, verdict="no prediction: a port lacks its noise measures")
     counts = calendars.counts(calendar)
     pending, n = model.seed(*counts), model.steps(*counts)
-    gap, lo, hi = integers(instance, k, help_22)
+    gap, lo, hi = integers(instance, k, help_22, allowance)
     cases = model.outcomes(gap, lo, hi, pending, n)
     nominal, writes, left = model.run(gap, pending, n)
     assert not left and (tuple(writes[p] for p in model.PORTS), tuple(model.word(nominal, p).count("F") for p in model.PORTS)) in cases
