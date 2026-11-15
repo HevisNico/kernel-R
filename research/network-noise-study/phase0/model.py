@@ -14,8 +14,10 @@ States (default: all five) and the output of each:
           an ideal source, set by a DC sweep to where that comparator trips (the precharge cannot do it: below about
           0.65 V the discharge holds the sensor node at 0.4 V). The sensor's own noise is shorted here; it is not
           part of a decision point, and its sampled part is item V6
-  fire    the first stage of the FIRE comparator of the cell, v(x<c>.xcmpm.o1), with vr0 set where it trips
-  pulse   the main charge v(x<c>.vq), the port admitted and its mirror at the peak current of a pulse
+  fire    the first stage of the FIRE comparator of the cell, v(x<c>.xcmpm.o1), with the main charge held by an
+          ideal source where the comparator trips (DC sweep)
+  pulse   the main charge v(x<c>.vq), the port admitted and its mirror at the peak current of a pulse (173 nA), the
+          charge held near 1.03 V through a noiseless 1 Mohm so that the cell does not protect itself
 
 What every analysis deck changes, against the network deck: the bench resistors are noiseless; `vcm` gets `ac 1`, the
 input that the noise command requires; and every internal node of a NAND stack gets a noiseless 1e-12 S to ground.
@@ -48,11 +50,22 @@ def analysis_deck(section, cells, state, focus=None):
                 t = net.swap(t, f"s.x{c}.x{p}.srst x{c}.x{p}.sum x{c}.x{p}.drv x{c}.x{p}.rsti 0 swr",
                              f"r.hold{c}{p} x{c}.x{p}.sum x{c}.x{p}.drv 1e14 noisy=0")
     t = net.swap(t, "\nvcm vcm 0 {vcm}\n", "\nvcm vcm 0 {vcm} ac 1\n")
+    # The protection latch of a cell is bistable at DC, and each analysis (op, noise, ac) solves its own operating
+    # point: phase 0 saw `op` find the cell free and `noise` find it protected, in the same deck. Every frozen state
+    # is a state of a free cell, so the latch is held there by ideal sources (noiseless).
+    t = t.replace("\n.end\n", "\n" + "\n".join(f"vfp{c} x{c}.p 0 dc 0\nvfpb{c} x{c}.pb 0 dc 1.8" for c in cells) + "\n.end\n")
     if state == "window":                      # the sensor node is held where the comparator trips (see balance)
         c, p = focus
         t = t.replace("\n.end\n", f"\nvfrc x{c}.x{p}.vs 0 dc 0.6\n.end\n")
+    if state == "fire":                        # the main charge is held where the FIRE comparator trips (see balance)
+        c, _ = focus
+        t = t.replace("\n.end\n", f"\nvfrcq x{c}.vq 0 dc 0.8\n.end\n")
     if state == "pulse":
         c, p = focus
+        # at DC the mirror would pull the main charge below the FIRE level and the cell would protect itself:
+        # the charge is held near 1.03 V through a noiseless 1 Mohm, so the admitted current flows and its noise
+        # reaches v(vq)
+        t = t.replace("\n.end\n", f"\nvhq hq{c} 0 dc 1.2\nr.hq{c} x{c}.vq hq{c} 1e6 noisy=0\n.end\n")
         t = net.swap(t, f"vks{c}{p} ks{c}{p} 0 pulse(0 1 {net.NEVER} 1n 1n {net.TU - 1e-9:.12g} 2)", f"vks{c}{p} ks{c}{p} 0 dc 1")
         t = net.swap(t, f"vts{c}{p} ts{c}{p} 0 dc {net.NEVER}", f"vts{c}{p} ts{c}{p} 0 dc 0")
     out, nodes = [], set()
@@ -84,6 +97,8 @@ def devices(text):
 
 
 def outputs(state, cells):
+    if state == "pulse":                       # one port per cell is admitted at a time; port 1 and port 2 in turn
+        return [(c, p) for c in cells for p in net.PORTS]
     if state in ("hold", "preset", "window", "pulse"):
         return [(c, p) for c in cells for p in net.PORTS]
     return [(c, None) for c in cells]
@@ -99,7 +114,7 @@ def balance(state, c, p):
     if state == "window":
         src, lo, hi, node = "vfrc", 0.54, 0.66, f"x{c}.x{p}.xcmps.o2"
     elif state == "fire":
-        src, lo, hi, node = "vr0", 0.74, 0.86, f"x{c}.xcmpm.o2"
+        src, lo, hi, node = "vfrcq", 0.74, 0.86, f"x{c}.xcmpm.o2"
     else:
         return []
     return [f"dc {src} {lo} {hi} 0.0005", f"meas dc vtrip when v({node})=0.9", f"echo TRIP $&vtrip",

@@ -26,10 +26,38 @@ from pathlib import Path
 import numpy as np
 
 NT = 0.4e-6
+T_CAMPAIGN = 1e5          # s: the declared span of the slow part, so its lowest frequency is 1e-5 Hz
+RUN_GAP = 1000.0          # s: the virtual start of run k of an instance (its position in the instance's run list,
+                          # from 0, every run of the instance counted, measures and network runs) is k x RUN_GAP
+PER_DECADE = 20           # components of the slow part per decade
 
 
-def samples(noise_seed, index, n, A, B=0.0, alpha=1.0):
-    """n + 1 samples at 0, NT, ..., n NT of a source with one-sided density A + B / f^alpha."""
+def slow_part(instance_key, index, t, B, alpha, f_hi):
+    """The 1/f^alpha part from 1/T_CAMPAIGN up to f_hi, at the virtual times t, as a sum of components
+    a cos + b sin on log-spaced bands, a and b Gaussian with the variance of B/f^alpha over their band. One realization
+    per instance and source (keyed by instance_key, not by the noise seed of the run): the runs of an instance share
+    it, each at its own virtual time, so that two runs of an instance differ by what 1/f noise does over RUN_GAP."""
+    f_lo = 1.0 / T_CAMPAIGN
+    if B <= 0 or f_hi <= f_lo:
+        return np.zeros_like(t)
+    k = max(1, int(math.ceil(PER_DECADE * math.log10(f_hi / f_lo))))
+    edges = f_lo * (f_hi / f_lo) ** (np.arange(k + 1) / k)
+    if alpha == 1.0:
+        var = B * np.log(edges[1:] / edges[:-1])
+    else:
+        var = B * (edges[1:] ** (1 - alpha) - edges[:-1] ** (1 - alpha)) / (1 - alpha)
+    fc = np.sqrt(edges[1:] * edges[:-1])
+    rng = np.random.default_rng(np.random.SeedSequence([int(instance_key), int(index), 1]))
+    a, b = rng.standard_normal(k) * np.sqrt(var), rng.standard_normal(k) * np.sqrt(var)
+    w = 2 * np.pi * np.outer(t, fc)
+    return np.cos(w) @ a + np.sin(w) @ b
+
+
+def samples(noise_seed, index, n, A, B=0.0, alpha=1.0, slow=None):
+    """n + 1 samples at 0, NT, ..., n NT of a source with one-sided density A + B / f^alpha.
+    The 1/f^alpha part is shaped over m >= 2 (n + 1) samples: it holds the frequencies from 1/(m NT) up. With
+    slow = (instance_key, run_position), the part from 1/T_CAMPAIGN to 1/(2 m NT) is added from slow_part, at the
+    virtual times run_position x RUN_GAP + k NT; without it, nothing slower than about 1/(2 T_run) is present."""
     rng = np.random.default_rng(np.random.SeedSequence([int(noise_seed), int(index)]))
     x = rng.standard_normal(n + 1) * math.sqrt(A / (2 * NT))
     if B > 0:
@@ -43,6 +71,10 @@ def samples(noise_seed, index, n, A, B=0.0, alpha=1.0):
             z[-1] = z[-1].real * math.sqrt(2)
         y = np.fft.irfft(z, m)[: n + 1]
         x = x + y
+        if slow is not None:
+            key, pos = slow
+            t = pos * RUN_GAP + np.arange(n + 1) * NT
+            x = x + slow_part(key, index, t, B, alpha, 0.5 / (m * NT))
     x[0] = 0.0
     return x
 
@@ -57,15 +89,17 @@ def fingerprint(values):
     return hashlib.sha256(np.round(np.asarray(values) * 1e9).astype(np.int64).tobytes()).hexdigest()
 
 
-def psd_check(out, draws):
-    """The generator against its target: A = 1e-12, B = 1e-8 at alpha 0.84, 0.88, 1.0; 40 ms; DRAWS seeds."""
+def psd_check(out, draws, first_seed=1000):
+    """The generator against its target: A = 1e-12, B = 1e-8 at alpha 0.84, 0.88, 1.0; 40 ms; DRAWS seeds from
+    first_seed. Also the slow part: the variance of one run's value and of the difference between two runs RUN_GAP
+    apart, over DRAWS instance keys, against the integral of B/f^alpha over its band."""
     n = int(40e-3 / NT)
     res = {}
     for alpha in (0.84, 0.88, 1.0):
         A, B = 1e-12, 1e-8
         P = []
         for d in range(draws):
-            x = samples(1000 + d, 0, n, A, B, alpha)[1:]
+            x = samples(first_seed + d, 0, n, A, B, alpha)[1:]
             fr = np.fft.rfftfreq(len(x), NT)
             P.append(2 * NT / len(x) * abs(np.fft.rfft(x - x.mean())) ** 2)
         P = np.mean(P, 0)
@@ -77,9 +111,19 @@ def psd_check(out, draws):
             m = (fr >= lo) & (fr < hi)
             tgt = A + B / fr[m] ** alpha
             rows.append(dict(band_Hz=[float(lo), float(hi)], bins=int(m.sum()), ratio=float(np.mean(P[m]) / np.mean(tgt))))
-        res[f"{alpha:g}"] = rows
-        print(alpha, [round(r["ratio"], 3) for r in rows])
-    Path(out).write_text(json.dumps(dict(draws=draws, nt_s=NT, run_s=40e-3, bands=res), indent=1) + "\n")
+        m_ = 1 << int(math.ceil(math.log2(2 * (n + 1))))
+        f_hi = 0.5 / (m_ * NT)
+        v1, v2 = [], []
+        for d in range(draws):
+            y = slow_part(first_seed + d, 0, np.array([0.0, RUN_GAP]), B, alpha, f_hi)
+            v1.append(y[0]); v2.append(y[1] - y[0])
+        ff = np.logspace(math.log10(1 / T_CAMPAIGN), math.log10(f_hi), 40001)
+        slow = dict(f_hi_Hz=f_hi, var_ratio=float(np.var(v1) / np.trapezoid(B / ff ** alpha, ff)),
+                    diff_var_ratio=float(np.var(v2) / np.trapezoid(B / ff ** alpha * 4 * np.sin(np.pi * ff * RUN_GAP) ** 2, ff)))
+        res[f"{alpha:g}"] = dict(bands=rows, slow=slow)
+        print(alpha, [round(r["ratio"], 3) for r in rows], {k: round(v, 3) for k, v in slow.items()})
+    Path(out).write_text(json.dumps(dict(draws=draws, first_seed=first_seed, nt_s=NT, run_s=40e-3, numpy=np.__version__,
+                                         t_campaign_s=T_CAMPAIGN, run_gap_s=RUN_GAP, results=res), indent=1) + "\n")
 
 
 if __name__ == "__main__":
