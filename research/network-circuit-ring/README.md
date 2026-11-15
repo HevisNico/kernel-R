@@ -8,11 +8,13 @@ circuit, the simulator and its noise model are unchanged.
 
 The owner wants the release to show proof and measurement on the same family
 of networks. The one-token ring is proved for every N in
-[#161](https://github.com/HevisNico/kernel-R/pull/161), and the periodic ring
-is specified in [#163](https://github.com/HevisNico/kernel-R/pull/163): a root
-launches periodically, each relay takes doses until it transmits, then the
-return port trains and afterwards only acknowledges; the memory is frozen
-while pulses keep arriving. Campaign 2 asks whether that protocol, played by
+[#161](https://github.com/HevisNico/kernel-R/pull/161); the periodic ring is
+specified in [#163](https://github.com/HevisNico/kernel-R/pull/163) and its
+refinement is proved for every N in
+[#164](https://github.com/HevisNico/kernel-R/pull/164) (draft, read at
+`0a9b859`): a root launches periodically, each relay takes doses until it
+transmits, then the return port trains and afterwards only acknowledges; the
+memory is frozen while pulses keep arriving. Campaign 2 asks whether that protocol, played by
 three circuit cells with mismatch that no one has looked at, ends in the state
 computed beforehand from measures made on each port alone. The size is fixed
 by the owner: **N = 3**, six new instances.
@@ -77,8 +79,9 @@ without the guard.
 
 ### Departures from the native class
 
-The native periodic ring is `NativePeriodicRingTarget.lean` of #163. The
-circuit ring is not in that class, and this campaign does not refine it:
+The native periodic ring is `NativePeriodicRingTarget.lean` of #163, which
+#164 proves without changing it. The circuit ring is not in that class, and
+this campaign does not refine it:
 
 1. **Doses per port.** The native class allows at most 2 doses per port. A
    circuit port needs what its mismatch gives: 3 to 6 doses on the 20 ports
@@ -98,7 +101,11 @@ circuit ring is not in that class, and this campaign does not refine it:
    within 2 units, because a FIRE can rise up to 1.06 unit after the start of
    its pulse.
 6. **The cell.** Gain only: no MARK, no recovery memory, no FAST and SLOW
-   phases. The protection latch is the cell's own.
+   phases; the protection latch is the cell's own. The distance is smaller
+   than it looks: #164 proves that the native periodic ring writes no MARK
+   and no recovery either, and that each lap before the freeze writes one
+   dose, on the port at the head of the training order. That is the shape of
+   P2 below.
 7. **The frozen value.** Native: prepared + 3/5 x writes. Circuit: preset
    minus need x dose, in mV, with the dose measured on each port.
 8. **The cells exist from the start**, and one mismatch seed gives the three
@@ -291,6 +298,11 @@ noise constants fixed beforehand:
 F1s otherwise.
 
 Evidence: about 0.6 GB of waveforms per instance with F3s, 3.7 GB in all.
+**A waveform no longer fits in one GitHub file**: the rehearsal run without
+noise is 101 MB and the noisy one 168 MB, against a limit of 100 MiB per
+file (campaign 1 stayed under it); compressed, the noisy one is still about
+110 MB. How the waveforms are archived (split, or kept with their hashes
+only) must be said in `PREDICTION.md`.
 
 ## 5. The claim under noise
 
@@ -354,6 +366,7 @@ port-runs bound the failure rate under 10 % at 95 %.
 6. **Per-instance laps**: the calendar of a run is fixed by the measures of
    its instance (sum of the needs + 10), so the manifest of the network stage
    is written after the measures, as in campaign 1.
+7. **The waveforms**: how files above 100 MiB are archived.
 
 `PREDICTION.md` is not started: it waits for this review and for the owner to
 say who carries the campaign.
