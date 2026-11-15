@@ -66,6 +66,7 @@ def main():
     git("config", "user.name", "Rehearsal")
     git("config", "user.email", "rehearsal@example.invalid")
     sh(["git", "init", "--quiet", "--bare", remote], work)
+    sh(["git", "-C", remote, "config", "receive.shallowUpdate", "true"], work)     # this checkout may be shallow
     git("remote", "set-url", "origin", str(remote))
     git("checkout", "--quiet", "-b", "rehearsal")
     kit = [sys.executable, "-B", repo / plan.CLOSURE / "launchkit" / "launch.py"]
