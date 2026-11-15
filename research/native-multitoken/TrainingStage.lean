@@ -14,6 +14,9 @@ structure TrainingStage {p : Parameters N} (s : Snapshot N) (nextDate : ℝ) whe
   intake : Execution (nativeParameters N) (router p) s admitted
   wave : Execution (nativeParameters N) (router p) admitted settled
   quiet : Execution (nativeParameters N) (router p) settled next
+  settledComplete : CompleteThrough wave (s.time + 15 / 2)
+  settledReady : ∀ i, ReadyCoordinates settled i
+  settledRaw : ∀ i q, settled.raw i q = none
   settledDate : settled.time = s.time + 15 / 2
   date : next.time = nextDate
   intakeWord : intake.deliveries = waveTokens s.time (fun _ => 0) (List.finRange N)
@@ -72,6 +75,7 @@ theorem training_stage_exists {p : Parameters N} {ε : ℝ}
   refine ⟨{
     admitted := a, settled := settled, next := quietAt settled nextDate
     intake := intake, wave := wave, quiet := wait
+    settledComplete := complete, settledReady := readySettled, settledRaw := rawSettled
     settledDate := date, date := rfl
     intakeWord := intakeWord, noArrivals := ⟨deliveries, rfl⟩
     noFires := ⟨intakeSilent, fires, rfl⟩, pending := rfl
@@ -91,7 +95,8 @@ theorem training_stage_exists {p : Parameters N} {ε : ℝ}
       (afterSilent (s.x i .q) (Real.exp (s.x i (.z 0))) (settled.time - s.time))
       settled.time nextDate = _
     simp only [relax, afterSilent, add_sub_cancel_left, mul_assoc, ← Real.exp_add]
-    congr 3 <;> ring
+    congr 3
+    ring
   · intro i q
     have h := wave.gain_balance i q
     rw [((dose i).2.2.2 q).2] at h

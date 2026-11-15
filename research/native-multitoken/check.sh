@@ -31,7 +31,8 @@ mkdir "$build/SelfCertifyingLearning"
 
 modules=(NativeMultiTokenTarget NativeMultiTokenMilestone SynchronizedProduct
   LaunchWave ProtectedReceipt PhysicalRefinement PrefixAccounting ReceiptProduct
-  ReceiptTiming ReceiptWave LaunchReceiptChain TrainingClock TrainingStage GuardedReplay NativeHistory)
+  ReceiptTiming ReceiptWave LaunchReceiptChain TrainingClock TrainingStage GuardedReplay NativeHistory
+  ExecutionCuts ExactNativeExecution)
 expected=$(printf '%s.lean\n' NativeMultiTokenAudit "${modules[@]}" | sort)
 actual=$(find . -name '*.lean' -printf '%P\n' | sort)
 if [[ "$expected" != "$actual" ]]; then

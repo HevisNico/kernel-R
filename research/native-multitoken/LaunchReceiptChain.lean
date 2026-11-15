@@ -5,7 +5,7 @@ namespace NetworkStability.NativeMultiToken
 
 open KernelR.Hybrid NativeStrong
 
-private theorem receipt_after_fast_cut {p : Parameters N} (accepted : p.check = true) (i : Fin N) :
+theorem receipt_after_fast_cut {p : Parameters N} (accepted : p.check = true) (i : Fin N) :
     launchDate p + 19 / 10 < receiptDate p i := by
   have h := (of_decide_eq_true accepted : p.Valid).2.2.2.2.1 i
   have delay : (8 / 5 : ℚ) < p.delay i := by linarith
@@ -88,8 +88,7 @@ theorem launch_through_fast {p : Parameters N} (accepted : p.check = true) {ε :
     have fastGain (q : Port) : fast.final.x 0 (.z q) = s.x i (.z q) :=
       (fast.gains 0 q).trans (F.gain_preserved 0 q)
     have fastEmpty : fast.final.pending = [] := by
-      rw [fast.pending, F.pending]
-      rfl
+      rw [fast.pending, F.pending] <;> rfl
     obtain ⟨u, slow, time, mode, qClock, b, z, aux, raw, _, hd, he, _⟩ :=
       slow_span_to_receipt (route := EmptyRouter 1) accepted (sourceOf accepted i) fast.final T
         afterFast (receipt_after_fast_cut accepted _).le fast.main_slow
@@ -98,8 +97,8 @@ theorem launch_through_fast {p : Parameters N} (accepted : p.check = true) {ε :
         (by simp [fastEmpty])
     let run := F.execution.append (fast.execution.append slow)
     refine ⟨u, run, time, ?_, ?_, mode, qClock, b, aux, raw, fun q => (z q).trans (fastGain q)⟩
-    · rw [Execution.emissions_append, Execution.emissions_append, F.emissions, fast.emissions, he, fireDate]
-      rfl
+    · rw [Execution.emissions_append, Execution.emissions_append, F.emissions, fast.emissions, he]
+      rw [← F.date, fireDate]
     · rw [Execution.deliveries_append, Execution.deliveries_append, F.deliveries, fast.deliveries, hd]
       rfl
   choose cuts legs time fires delivered mode qClock b aux raw z using localLeg
@@ -134,7 +133,7 @@ theorem launch_through_fast {p : Parameters N} (accepted : p.check = true) {ε :
         rw [timeOf event mem, router_launch accepted]
         rfl
       _ = (body.ledger.emissions.map (token ∘ Prod.fst)).flatMap (fun d => [d]) :=
-        (List.flatMap_map _ _ _).symm
+        (List.flatMap_map (token ∘ Prod.fst) (fun d => [d]) body.ledger.emissions).symm
       _ = _ := List.flatMap_singleton' _
   have perm := (emission_cell_perm exactFires).map token
   let run := body.cast_source begins.symm
@@ -149,8 +148,9 @@ theorem launch_through_fast {p : Parameters N} (accepted : p.check = true) {ε :
     exact perm.trans (launch_receipt_order accepted)
   · intro i
     refine ⟨mode i, ?_, b i, aux i, raw i, z i⟩
-    rw [qClock i, time i]
-    rfl
+    change (cuts i).x 0 .q = (1 / 4) * Real.exp (-(9 / 50) *
+      (T - receiverFastEnd p (sourceOf accepted i)))
+    simpa only [time i] using qClock i
 
 /-- From the post-intake launch section to the common horizon, every
 launched child is consumed, and the final quiet suffix is complete. -/

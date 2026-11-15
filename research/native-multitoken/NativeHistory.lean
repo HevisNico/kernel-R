@@ -66,6 +66,7 @@ structure NativeHistory (p : Parameters N) where
   launchIntake : Execution (nativeParameters N) (router p) second.next launched
   launch : Execution (nativeParameters N) (router p) launched wireCut
   receipts : Execution (nativeParameters N) (router p) wireCut last
+  startSilent : start.ledger.emissions = []
   firstDate : firstStart.time = NetworkStability.NativeMultiToken.firstDate
   wireDate : wireCut.time = launchDate p + 19 / 10
   complete : CompleteThrough receipts (horizon p)
@@ -85,6 +86,12 @@ noncomputable def NativeHistory.run {p : Parameters N} (h : NativeHistory p) :
     (h.first.intake.append (h.first.wave.append (h.first.quiet.append
       (h.second.intake.append (h.second.wave.append (h.second.quiet.append
         (h.launchIntake.append (h.launch.append h.receipts))))))))
+
+theorem NativeHistory.emissions {p : Parameters N} (h : NativeHistory p) :
+    h.run.ledger.emissions = h.launch.ledger.emissions := by
+  simp only [run, Execution.emissions_append, h.startSilent, h.first.noFires.1, h.first.noFires.2.1,
+    h.first.noFires.2.2, h.second.noFires.1, h.second.noFires.2.1, h.second.noFires.2.2,
+    h.launchSilent, h.receiptNoFires, List.nil_append, List.append_nil]
 
 theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
     Nonempty (NativeHistory p) := by
@@ -123,7 +130,7 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
   have ampA (i : Fin N) : Real.exp (a.x i (.z 0)) = (p.amplitude i : ℝ) := by
     change Real.exp (Real.log (p.amplitude i : ℝ)) = _
     exact Real.exp_log (amplitude_windows accepted i).1
-  obtain ⟨first, queueB⟩ := training_stage_exists box a physA rawA
+  obtain ⟨first, queueB⟩ := training_stage_exists (p := p) box a physA rawA
     (fun i => quietAt_ready_coordinates s i (ready i) (by change (0 : ℝ) ≤ firstDate; norm_num [firstDate]))
     (fun _ _ => rfl) (fun i => by rw [ampA]; exact (amplitude_windows accepted i).2.1)
     (fun i => weak_headroom (by rw [ampA]; exact (amplitude_windows accepted i).2.1))
@@ -141,7 +148,7 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
   have headroomB (i : Fin N) : Real.exp (first.next.x i (.z 0)) ≤ 7 / 6 := by
     rw [ampB]
     exact (amplitude_windows accepted i).2.2.1
-  obtain ⟨second, queueC⟩ := training_stage_exists box first.next first.physical first.valid first.ready
+  obtain ⟨second, queueC⟩ := training_stage_exists (p := p) box first.next first.physical first.valid first.ready
     first.raw headroomB (fun i => weak_headroom (headroomB i)) (waveAt N (launchDate p))
     (by rw [queueB, first.date]; rfl) (launchDate p)
     (by rw [first.date]; exact secondGap)
@@ -181,7 +188,7 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
   refine ⟨{
     firstStart := a, start := initial, first := first, second := second, launched := b
     wireCut := wire, last := last, launchIntake := intake, launch := launch, receipts := receipts
-    firstDate := rfl, wireDate := wireDate, complete := complete, finalQueue := finalQueue
+    startSilent := rfl, firstDate := rfl, wireDate := wireDate, complete := complete, finalQueue := finalQueue
     launchInputs := intakeWord.trans (by rw [second.date]; rfl), launchSilent := noIntakeFire
     launchNoArrivals := noArrive, receiptNoFires := noFire, fires := fires, receiptInputs := paid
     endpointGain := ?_, endpointRecovery := ?_ }⟩

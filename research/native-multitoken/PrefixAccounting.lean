@@ -135,6 +135,34 @@ theorem prefix_correspondence_of_cuts {p : Parameters N} {last : Snapshot N}
   exact ⟨mid, matching, first, rest, prefix_unissued_balance head first intake children,
     noReceipt, settled mid first⟩
 
+/-- A consumed receipt is later than the entire FIRE wave. Therefore the
+native prefix already contains the complete ordered FIRE word. -/
+theorem prefix_fires_before_receipt {p : Parameters N} {cut last : Snapshot N}
+    (head : Execution (nativeParameters N) (router p) (prepared p) cut)
+    (tail : Execution (nativeParameters N) (router p) cut last)
+    {rows : List (Row N)} (clock : ℝ)
+    (admitted : rows.map rowAdmission = NativeReciprocal.nativeAdmissions (head.append tail))
+    (early : ∀ fire ∈ (head.append tail).ledger.emissions, fire.2 ≤ clock)
+    (late : ∀ row ∈ rows, row.probe.input.2 = .receipt → clock < row.probe.due)
+    (row : Row N) (mem : row ∈ rows.take head.deliveries.length)
+    (receipt : row.probe.input.2 = .receipt) :
+    head.ledger.emissions = (head.append tail).ledger.emissions := by
+  have count : (NativeReciprocal.nativeAdmissions head).length = head.deliveries.length := by
+    simpa only [List.length_map] using congrArg List.length (NativeReciprocal.admissions_deliveries head)
+  have prefixWord : (rows.take head.deliveries.length).map rowAdmission = NativeReciprocal.nativeAdmissions head := by
+    rw [List.map_take, admitted, admissions_append, ← count, List.take_left]
+  have token : toDelivery row.probe ∈ head.deliveries := by
+    rw [← NativeReciprocal.admissions_deliveries head, ← prefixWord, List.map_map]
+    exact List.mem_map.mpr ⟨row, mem, rfl⟩
+  have after : clock < cut.time :=
+    (late row (List.mem_of_mem_take mem) receipt).trans_le (head.delivery_time_bounds _ token).2
+  have drained : tail.ledger.emissions = [] := by
+    apply List.eq_nil_iff_forall_not_mem.mpr
+    intro event member
+    have before := early event (by rw [Execution.emissions_append]; exact List.mem_append_right _ member)
+    exact (not_lt_of_ge ((tail.emission_time_bounds _ member).1.trans before)) after
+  rw [Execution.emissions_append, drained, List.append_nil]
+
 /-- The child of every matched launch belongs to the issued or unissued
 part according to whether the launch FIRE is in the native prefix. -/
 theorem issued_unissued_partition {p : Parameters N} {rows : List (Row N)}
