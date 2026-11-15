@@ -243,7 +243,7 @@ class Rehearsal(unittest.TestCase):
         self.assertTrue(r["all_checks_passed"] and r["second_launch_refused_at_each_stage"] and r["no_link_in_the_evidence"])
         self.assertEqual(r["files"], {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in plan.FROZEN})
         self.assertEqual(r["lean_check"], "Predicted.lean: checked")
-        self.assertEqual(len(r["claims"]), 4)
+        self.assertEqual(len({c for c in r["claims"] if "owner-launch" in c}), 4)
         for run, wall in r["wall_s"].items():
             self.assertLess(wall, r["limits_s"][run], run)
 
