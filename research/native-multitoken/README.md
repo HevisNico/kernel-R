@@ -269,6 +269,23 @@ children of launches whose FIRE has yet to occur, and identifies the
 guarded counters with physical memory at both settled training clocks.
 The accounting also applies to cuts between jumps at the same clock.
 
+## Native refinement
+
+[`native_multi_token_refinement`](NativeExternalRows.lean) proves the
+frozen `NativeMultiTokenRefinement` for every accepted parameter tuple.
+The single native execution carries the exact ERROR and MARK doses for
+all $4N$ rows and inherits the FIRE and MARK transversality of its local
+legs. Its final suffix starts at $t_3+19/2$ and stays READY, with RAW
+inactive and no deliveries or FIREs, through $t_3+10$.
+
+[`guarded_trace_refinement`](GuardedTraceWords.lean) uses
+`dated_network_memory` for the memory bound and terminal counts. Swapping
+eligible tied choices preserves their recorded decisions. Every admissible
+guarded prefix therefore extends to the same complete decision multiset.
+`Execution.observational_unique` gives the final native snapshot up to
+observational equality and the native FIRE multiset for any complete
+execution through the same horizon.
+
 ## Negative controls for the new membership tests
 
 Use the accepted family above with $N=2$ unless a change is stated.

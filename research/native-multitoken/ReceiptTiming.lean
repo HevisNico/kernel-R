@@ -55,7 +55,7 @@ theorem slow_span_to_receipt {p : Parameters N} (accepted : p.check = true) (sou
       u.x 0 .b = 9 / 50 ∧ (∀ q, u.x 0 (.z q) = s.x 0 (.z q)) ∧
       (∀ q, u.aux 0 q = .ready ∧ RestBand (u.x 0 (.m q))) ∧
       (∀ q, u.raw 0 q = none) ∧ u.pending = s.pending ∧
-      run.deliveries = [] ∧ run.ledger.emissions = [] ∧
+      run.deliveries = [] ∧ run.ledger.emissions = [] ∧ run.ContactsTransversal ∧
       (∀ q, run.ledger.mark 0 q = 0) := by
   classical
   obtain ⟨_, budget, _⟩ := receipt_timing accepted source
@@ -97,7 +97,7 @@ theorem slow_span_to_receipt {p : Parameters N} (accepted : p.check = true) (sou
         simp only [ite_true, rawInputScale, mul_zero, auxPulse_zero_eq_relax]
         exact relax_lt (by norm_num) ht.1 (below 0 2) (by norm_num)) pending
   refine ⟨_, .cons (.flow flow) (.nil _), rfl, main, ?_, recovery, (fun _ => rfl),
-    ?_, raw, rfl, rfl, rfl, ?_⟩
+    ?_, raw, rfl, rfl, rfl, trivial, ?_⟩
   · simpa only [protectedMainEnd, protectedMainValues, ite_true, protectedMainRate,
       reduceCtorEq, ite_false] using chargeClock T
   · intro q

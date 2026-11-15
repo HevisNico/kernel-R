@@ -20,6 +20,8 @@ import NativeReceiptRows
 import GuardedReceiptRows
 import GuardedExternalRows
 import ExactPrefixCorrespondence
+import GuardedTraceWords
+import NativeExternalRows
 import Lean.Elab.Command
 import Lean.Util.CollectAxioms
 
@@ -37,7 +39,8 @@ run_cmd do
         mod == `TrainingClock || mod == `TrainingStage || mod == `GuardedReplay ||
         mod == `NativeHistory || mod == `ExecutionCuts || mod == `ExactNativeExecution ||
         mod == `ReceiptWindow || mod == `NativeReceiptRows || mod == `GuardedReceiptRows ||
-        mod == `GuardedExternalRows || mod == `ExactPrefixCorrespondence then
+        mod == `GuardedExternalRows || mod == `ExactPrefixCorrespondence ||
+        mod == `GuardedTraceWords || mod == `NativeExternalRows then
       modules := modules + 1
       for name in data.constNames do
         let some info := env.constants.find? name
@@ -48,7 +51,7 @@ run_cmd do
           unless allowed.contains axiomName do
             throwError "Unexpected axiom {axiomName} in {name}"
         count := count + 1
-  if modules != 22 || count == 0 then
+  if modules != 24 || count == 0 then
     throwError "Expected the target and all native multi-token proof modules in the audit"
   for result in #[``NetworkStability.NativeMultiToken.guarded_conjuncts,
       ``NetworkStability.NativeMultiToken.scalar_latency,
@@ -68,7 +71,13 @@ run_cmd do
       ``NetworkStability.NativeMultiToken.external_row_matches,
       ``NetworkStability.NativeMultiToken.native_with_exact_guarded_replay,
       ``NetworkStability.NativeMultiToken.exact_prefix_correspondence,
-      ``NetworkStability.NativeMultiToken.native_with_prefix_correspondence] do
+      ``NetworkStability.NativeMultiToken.native_with_prefix_correspondence,
+      ``NetworkStability.NativeMultiToken.native_exact_quiet_suffix,
+      ``NetworkStability.NativeMultiToken.exact_training_row_doses,
+      ``NetworkStability.NativeMultiToken.exact_launch_row_doses,
+      ``NetworkStability.NativeMultiToken.guarded_trace_refinement,
+      ``NetworkStability.NativeMultiToken.native_with_exact_row_doses,
+      ``NetworkStability.NativeMultiToken.native_multi_token_refinement] do
     let some (.thmInfo _) := env.constants.find? result
       | throwError "Missing milestone theorem {result}"
   let some (.defnInfo target) := env.constants.find?

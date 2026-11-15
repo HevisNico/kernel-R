@@ -54,6 +54,17 @@ private theorem receipt_fires {p : Parameters N} (rows : List (Row N))
   simp [tag] at date
   simp [date]
 
+theorem scheduled_row_fires {p : Parameters N} (receipts : List (Row N))
+    (receipt : ∀ r ∈ receipts, ∃ source, r = receiptRow p source) :
+    Transaction.fires inputCell (((List.finRange N).map (externalRow p firstDate .first) ++
+      (List.finRange N).map (externalRow p (secondDate p) .second) ++
+      (List.finRange N).map (externalRow p (launchDate p) .launch)) ++ receipts) =
+      (List.finRange N).map (fun i => (i, launchDate p + latency p i)) := by
+  rw [fires_append, external_fires, receipt_fires, List.append_nil]
+  intro row mem
+  obtain ⟨i, rfl⟩ := receipt row mem
+  exact ⟨rfl, receipt_row_matches p i⟩
+
 /-- The native prefix has issued precisely the children of the consumed
 rows whose FIRE occurs in that prefix. A receipt cannot occur before the
 complete FIRE wave, including for prefixes that end between tied jumps. -/
@@ -87,12 +98,9 @@ theorem prefix_launch_and_receipt_accounting {p : Parameters N} (accepted : p.ch
   have firedLength : (head.append tail).ledger.emissions.length = N := by
     simpa only [List.length_map, List.length_finRange] using fired.length_eq
   have wholeUnique : (Transaction.fires inputCell rows).Nodup := by
-    change (Transaction.fires inputCell (_ ++ receipts)).Nodup
-    rw [fires_append, external_fires, receipt_fires receipts, List.append_nil]
-    · exact (List.nodup_finRange N).map (fun _ _ same => congrArg Prod.fst same)
-    · intro row mem
-      obtain ⟨i, rfl⟩ := receipt row mem
-      exact ⟨rfl, receipt_row_matches p i⟩
+    dsimp only [rows]
+    rw [scheduled_row_fires receipts receipt]
+    exact (List.nodup_finRange N).map (fun _ _ same => congrArg Prod.fst same)
   have prefixUnique : head.ledger.emissions.Nodup := by
     have all := fired.nodup_iff.mpr ((List.nodup_finRange N).map (fun _ _ same => congrArg Prod.fst same))
     rw [Execution.emissions_append] at all

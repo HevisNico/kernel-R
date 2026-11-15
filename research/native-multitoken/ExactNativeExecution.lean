@@ -179,4 +179,62 @@ theorem exact_training_cuts {p : Parameters N} (accepted : p.check = true)
     exact compare refRun refComplete history.second.settledReady history.second.settledRaw
       (by simp [exactCutDates])
 
+def QuietSuffix (p : Parameters N) {last : Snapshot N}
+    (run : Execution (nativeParameters N) (router p) (prepared p) last) : Prop :=
+    ∃ (cut : Snapshot N)
+      (head : Execution (nativeParameters N) (router p) (prepared p) cut)
+      (tail : Execution (nativeParameters N) (router p) cut last),
+      run = head.append tail ∧ cut.time = launchDate p + 19 / 2 ∧
+      CompleteThrough tail (horizon p) ∧ tail.deliveries = [] ∧ tail.ledger.emissions = [] ∧
+      tail.AllStates (fun s => ∀ i, s.main i = .ready ∧ ∀ q, s.raw i q = none ∧ s.aux i q = .ready)
+
+/-- On the same witness, the final suffix starts at the planned settled
+receipt cut and stays quiet through the frozen horizon. -/
+theorem native_exact_quiet_suffix {p : Parameters N} (accepted : p.check = true)
+    (history : NativeHistory p)
+    (run : Execution (nativeParameters N) (router p) (prepared p) history.last)
+    (cuts : ∀ date ∈ exactCutDates p, HasExecutionCut run date)
+    (fires : run.ledger.emissions = history.run.ledger.emissions) : QuietSuffix p run := by
+  obtain ⟨reference, refPart, _, _, refComplete, refQueue, refReady⟩ := history.receiptQuiet
+  let refHead := history.throughWire.append refPart
+  have before : CompleteThrough refHead (launchDate p + 19 / 2) := refComplete
+  obtain ⟨cut, head, tail, complete, split⟩ := cuts (launchDate p + 19 / 2) (by simp [exactCutDates])
+  have same := (head.observational_unique refHead (native_box N) (prepared_physical accepted) complete before).1
+  have empty : cut.pending = [] := by
+    have queue := same.pending
+    rw [refQueue] at queue
+    exact queue.eq_nil
+  have noFire : tail.ledger.emissions = [] := by
+    apply List.eq_nil_iff_forall_not_mem.mpr
+    intro event member
+    have inRun : event ∈ run.ledger.emissions := by
+      rw [split, Execution.emissions_append]
+      exact List.mem_append_right _ member
+    rw [fires, history.emissions] at inRun
+    have when : event.2 ∈ history.launch.emissionTimes event.1 := List.mem_map_of_mem
+      (List.mem_filter.mpr ⟨inRun, by simp⟩)
+    rw [history.fires, List.mem_singleton] at when
+    have tooLate := (tail.emission_time_bounds event member).1
+    rw [complete.1, when] at tooLate
+    linarith [(scalar_latency accepted event.1).2.1]
+  have noInput : tail.deliveries = [] := by
+    have balance := native_prefix_balance tail
+    rw [history.finalQueue, empty, noFire, List.flatMap_nil, List.nil_append] at balance
+    exact balance.eq_nil
+  refine ⟨cut, head, tail, split, complete.1, history.complete, noInput, noFire, ?_⟩
+  have isolated (i : Fin N) (q : Port) : NoArrivalAt tail i q := by simp [NoArrivalAt, noInput]
+  apply tail.allStates_forall
+  intro i
+  apply tail.allStates_and
+  · apply tail.ready_states_of_no_emissions i
+    · rw [same.main]; exact (refReady i).1.ready
+    · simp [Execution.emissionTimes, noFire]
+  · apply tail.allStates_forall
+    intro q
+    have raw : cut.raw i q = none := by rw [same.raw]; exact (refReady i).2 q
+    have aux : cut.aux i q = .ready := by rw [same.aux]; exact ((refReady i).1.auxiliary q).1
+    have band : RestBand (cut.x i (.m q)) := by rw [same.values]; exact ((refReady i).1.auxiliary q).2
+    exact tail.allStates_and (tail.raw_none_states i q raw (isolated i q))
+      (tail.aux_ready_without_input_band i q aux band.2 raw (isolated i q))
+
 end NetworkStability.NativeMultiToken

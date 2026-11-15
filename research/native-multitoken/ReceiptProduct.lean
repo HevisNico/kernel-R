@@ -51,6 +51,11 @@ private theorem delivery_in_remaining {θ : Fin N → KernelR.Hybrid.Parameters}
     receiptAt i d ∈ remainingReceipts c := by
   exact List.mem_flatMap.mpr ⟨i, List.mem_finRange i, List.mem_map_of_mem mem⟩
 
+private theorem delivery_has_no_contact {route : Router N} {s u : Snapshot N}
+    (θ : Fin N → KernelR.Hybrid.Parameters) (jump : Jump route s u)
+    (delivered : jump.deliveries ≠ []) : jump.ContactTransversal θ := by
+  cases jump <;> simp_all [Jump.deliveries, Jump.ContactTransversal]
+
 private theorem silent_lift {route : Router N} {t : ℝ}
     {c : Fin N → Snapshot 1} (i : Fin N) {v : Snapshot 1}
     (clock : (c i).time = t) (q : List (Delivery N))
@@ -59,14 +64,15 @@ private theorem silent_lift {route : Router N} {t : ℝ}
     ∃ (out : List (Delivery N)) (k : Jump route (assemble t c q)
       (assemble t (Function.update c i v) out)),
       k.ledger.emissions = [] ∧ k.deliveries = j.deliveries.map (receiptAt i) ∧
-      q.Perm (k.deliveries ++ out) := by
+      q.Perm (k.deliveries ++ out) ∧
+      (∀ θ, j.ContactTransversal (fun _ => θ i) → k.ContactTransversal θ) := by
   classical
   by_cases no : j.deliveries = []
-  · obtain ⟨lifted, em, delivered⟩ := parallelJump (route := route) i clock q j no
+  · obtain ⟨lifted, em, delivered, contacts⟩ := parallelJump (route := route) i clock q j no
     have empty : q ++ issuedBy route i j.ledger.emissions = q := by
       simp [issuedBy, fires]
-    obtain ⟨k, ledger, hk⟩ := cast_jump lifted (congrArg (assemble t (Function.update c i v)) empty)
-    refine ⟨q, k, ?_, ?_, ?_⟩
+    obtain ⟨k, ledger, hk, kept⟩ := cast_jump_with_contacts lifted (congrArg (assemble t (Function.update c i v)) empty)
+    refine ⟨q, k, ?_, ?_, ?_, fun θ localProof => kept θ (contacts θ localProof)⟩
     · rw [ledger, em, fires]; rfl
     · rw [hk, delivered, no]; rfl
     · rw [hk, delivered]; exact .rfl
@@ -79,10 +85,12 @@ private theorem silent_lift {route : Router N} {t : ℝ}
     obtain ⟨before, after, split⟩ := List.append_of_mem member
     obtain ⟨lifted, em, delivered⟩ :=
       parallel_arrival (route := route) i clock q j receipt delivers before after split
-    refine ⟨before ++ after, lifted, em, ?_, ?_⟩
+    refine ⟨before ++ after, lifted, em, ?_, ?_, ?_⟩
     · rw [delivered, delivers]; rfl
     · rw [delivered, split]
       exact List.perm_middle
+    · intro θ _
+      exact delivery_has_no_contact θ lifted (by rw [delivered]; simp)
 
 /-- Synchronize overlapping local legs that can consume scheduled receipts.
 The queue consists of the union of their remaining deliveries. The
@@ -94,9 +102,10 @@ theorem synchronized_receipt_execution
     (legs : ∀ i, Execution (fun _ => θ i) (EmptyRouter 1) (a i) (b i))
     (start : ∀ i, (a i).time = t) (finish : ∀ i, (b i).time = T) (interval : t ≤ T)
     (silent : ∀ i, (legs i).ledger.emissions = []) (queue : List (Delivery N))
-    (schedule : queue.Perm ((List.finRange N).flatMap fun i => (legs i).deliveries.map (receiptAt i))) :
+    (schedule : queue.Perm ((List.finRange N).flatMap fun i => (legs i).deliveries.map (receiptAt i)))
+    (transversal : ∀ i, (legs i).ContactsTransversal) :
     ∃ run : Execution θ route (assemble t a queue) (assemble T b []),
-      run.ledger.emissions = [] ∧ queue.Perm run.deliveries ∧
+      run.ledger.emissions = [] ∧ queue.Perm run.deliveries ∧ run.ContactsTransversal ∧
       (∀ i p, run.ledger.mark i p = (legs i).ledger.mark 0 p) := by
   classical
   let init : ∀ i, Cursor (θ i) (b i) := fun i => ⟨a i, legs i⟩
@@ -104,15 +113,15 @@ theorem synchronized_receipt_execution
       (q : List (Delivery N)),
       (∑ i, (c i).run.moveCount) = n → date ≤ T →
       (∀ i, (c i).start.time = date) → (∀ i, (c i).run.ledger.emissions = []) →
-      q.Perm (remainingReceipts c) →
+      q.Perm (remainingReceipts c) → (∀ i, (c i).run.ContactsTransversal) →
       ∃ run : Execution θ route (assemble date (fun i => (c i).start) q) (assemble T b []),
-        run.ledger.emissions = [] ∧ q.Perm run.deliveries ∧
+        run.ledger.emissions = [] ∧ q.Perm run.deliveries ∧ run.ContactsTransversal ∧
         (∀ i p, run.ledger.mark i p = (c i).run.ledger.mark 0 p) from
-    loop _ init t queue rfl interval start silent schedule
+    loop _ init t queue rfl interval start silent schedule transversal
   intro n
   induction n using Nat.strong_induction_on with
   | h n ih =>
-    intro c date q size dateLe clocks quiet queued
+    intro c date q size dateLe clocks quiet queued localProof
     let current := fun i => (c i).start
     by_cases jump : ∃ i, startsWithJump (c i)
     · obtain ⟨i, v, j, rest, head⟩ := jump
@@ -133,9 +142,9 @@ theorem synchronized_receipt_execution
         apply delivery_in_remaining (c := c)
         rw [head]
         exact List.mem_append_left _ mem
-      obtain ⟨qNext, k, kFire, kArrival, kQueue⟩ :=
+      obtain ⟨qNext, k, kFire, kArrival, kQueue, kContact⟩ :=
         silent_lift (route := route) (c := current) i (clocks i) q j silentStep.1 member
-      obtain ⟨lifted, liftLedger, liftArrival⟩ := cast_jump k
+      obtain ⟨lifted, liftLedger, liftArrival, liftContact⟩ := cast_jump_with_contacts k
         (congrArg (fun states => assemble date states qNext) starts.symm)
       have liftedFire := (congrArg Ledger.emissions liftLedger).trans kFire
       have countAt : (next i).run.moveCount = rest.moveCount :=
@@ -168,9 +177,16 @@ theorem synchronized_receipt_execution
         have balance := queued.trans (remaining_at c i j.deliveries ⟨v, rest⟩ (by rw [head]; rfl))
         rw [← kArrival] at balance
         exact (List.perm_append_left_iff _).mp (kQueue.symm.trans balance)
-      obtain ⟨tail, tailFire, tailQueue, tailMark⟩ :=
-        ih _ smaller next date qNext rfl dateLe nextClock nextSilence nextQueue
-      refine ⟨.cons (.jump lifted) tail, ?_, ?_, ?_⟩
+      have chosen := localProof i
+      rw [head] at chosen
+      have nextContacts (k : Fin N) : (next k).run.ContactsTransversal := by
+        by_cases eq : k = i
+        · subst k
+          exact (congrArg (fun cursor => cursor.run.ContactsTransversal) nextAt).mpr chosen.2
+        · exact (congrArg (fun cursor => cursor.run.ContactsTransversal) (others k eq)).mpr (localProof k)
+      obtain ⟨tail, tailFire, tailQueue, tailContact, tailMark⟩ :=
+        ih _ smaller next date qNext rfl dateLe nextClock nextSilence nextQueue nextContacts
+      refine ⟨.cons (.jump lifted) tail, ?_, ?_, ⟨liftContact θ (kContact θ chosen.1), tailContact⟩, ?_⟩
       · change lifted.ledger.emissions ++ tail.ledger.emissions = []
         rw [liftedFire, tailFire]
         rfl
@@ -199,7 +215,7 @@ theorem synchronized_receipt_execution
           rw [nil] at queued
           exact queued.eq_nil
         subst q
-        exact ⟨.nil _, rfl, .rfl, fun _ _ => rfl⟩
+        exact ⟨.nil _, rfl, .rfl, trivial, fun _ _ => rfl⟩
       · have beforeEnd : date < T := lt_of_le_of_ne dateLe terminal
         have available (i : Fin N) : Nonempty (FlowHead (θ i) (b i) (c i)) :=
           cursor_flow (c i) (by rw [clocks i, finish i]; exact beforeEnd) (fun h => jump ⟨i, h⟩)
@@ -234,9 +250,11 @@ theorem synchronized_receipt_execution
             apply List.flatMap_congr
             intro i _
             exact congrArg (List.map (receiptAt i)) (step i).arrivals
-          obtain ⟨tail, tailFire, tailQueue, tailMark⟩ := ih _ smaller next cut q rfl cutLe
-            (fun i => (step i).clock) (fun i => (step i).fires.trans (quiet i)) (sameQueue ▸ queued)
-          refine ⟨.cons (.flow flow) tail, tailFire, tailQueue, ?_⟩
+          have nextContacts (i : Fin N) : (next i).run.ContactsTransversal :=
+            (Classical.choose_spec (steps i)).1.contacts (localProof i)
+          obtain ⟨tail, tailFire, tailQueue, tailContacts, tailMark⟩ := ih _ smaller next cut q rfl cutLe
+            (fun i => (step i).clock) (fun i => (step i).fires.trans (quiet i)) (sameQueue ▸ queued) nextContacts
+          refine ⟨.cons (.flow flow) tail, tailFire, tailQueue, tailContacts, ?_⟩
           intro i p
           change flow.ledger.mark i p + tail.ledger.mark i p = _
           rw [tailMark]
@@ -256,6 +274,6 @@ theorem synchronized_receipt_execution
           subst q
           let allFlows (i : Fin N) : Flow (fun _ => θ i) (c i).start (b i) := (empty i).elim
           let flow := parallelFlow clocks finish beforeEnd allFlows [] (by simp)
-          exact ⟨.cons (.flow flow) (.nil _), rfl, .rfl, fun i => (empty i).elim⟩
+          exact ⟨.cons (.flow flow) (.nil _), rfl, .rfl, trivial, fun i => (empty i).elim⟩
 
 end NetworkStability.NativeMultiToken

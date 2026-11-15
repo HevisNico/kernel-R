@@ -33,7 +33,7 @@ modules=(NativeMultiTokenTarget NativeMultiTokenMilestone SynchronizedProduct
   LaunchWave ProtectedReceipt PhysicalRefinement PrefixAccounting ReceiptProduct
   ReceiptTiming ReceiptWave LaunchReceiptChain TrainingClock TrainingStage GuardedReplay NativeHistory
   ExecutionCuts ExactNativeExecution ReceiptWindow NativeReceiptRows GuardedReceiptRows GuardedExternalRows
-  ExactPrefixCorrespondence)
+  ExactPrefixCorrespondence GuardedTraceWords NativeExternalRows)
 expected=$(printf '%s.lean\n' NativeMultiTokenAudit "${modules[@]}" | sort)
 actual=$(find . -name '*.lean' -printf '%P\n' | sort)
 if [[ "$expected" != "$actual" ]]; then

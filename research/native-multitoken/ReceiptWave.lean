@@ -34,6 +34,30 @@ structure WireSection (p : Parameters N) (s : Snapshot N) : Prop where
   raw : ∀ i q, s.raw i q = none
   queue : s.pending.Perm ((List.finRange N).map (receiptToken p))
 
+/-- The receipt construction has settled before its final quiet flow. -/
+def ReceiptQuietCut (p : Parameters N) {s u : Snapshot N}
+    (run : Execution (nativeParameters N) (router p) s u) : Prop :=
+  ∃ (settled : Snapshot N)
+    (head : Execution (nativeParameters N) (router p) s settled)
+    (tail : Execution (nativeParameters N) (router p) settled u),
+    run = head.append tail ∧ CompleteThrough head (launchDate p + 19 / 2) ∧ settled.pending = [] ∧
+      ∀ i, ReadyCoordinates settled i ∧ ∀ q, settled.raw i q = none
+
+private theorem empty_ready_complete {θ : Fin N → KernelR.Hybrid.Parameters} {route : Router N}
+    {s u : Snapshot N} (run : Execution θ route s u) (ready : ∀ i, ReadyCoordinates u i)
+    (ended : ∀ i q, u.raw i q = none) (empty : u.pending = []) : CompleteThrough run u.time := by
+  refine ⟨rfl, ?_, by simp [empty]⟩
+  have guards : BeforeGuards u u.x := by
+    constructor
+    · intro i
+      rw [(ready i).ready]
+      linarith [(ready i).charge.2]
+    · intro i q
+      rw [((ready i).auxiliary q).1]
+      linarith [((ready i).auxiliary q).2.2]
+  exact guards.no_jump (fun i q origin active => by rw [ended i q] at active; cases active)
+    (by simp [empty])
+
 /-- All receipts run from the common SLOW cut. Each local queue contains
 its own one-cell occurrence, lifted to the native queue by synchronization. -/
 theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {ε : ℝ}
@@ -50,7 +74,8 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
       (fun i => ⟨i, 2, receiptDate p (sourceOf accepted i)⟩))) :
     ∃ (u : Snapshot N) (run : Execution (nativeParameters N) (router p) s u),
       CompleteThrough run (horizon p) ∧ u.pending = [] ∧
-      s.pending.Perm run.deliveries ∧ run.ledger.emissions = [] ∧
+      s.pending.Perm run.deliveries ∧ run.ledger.emissions = [] ∧ run.ContactsTransversal ∧
+      ReceiptQuietCut p run ∧
       ∀ i, ReadyCoordinates u i ∧ (∀ q, u.raw i q = none) ∧
         run.ledger.recovery i = 1 / 10 ∧
         (∀ q, run.ledger.error i q = 0 ∧
@@ -61,7 +86,7 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
   let T := launchDate p + 19 / 2
   have leg (i : Fin N) :
       ∃ (u : Snapshot 1) (run : Execution (fun _ => nativeParameters N i) (EmptyRouter 1) (start i) u),
-        u.time = T ∧ u.pending = [] ∧ run.deliveries = [receipt i] ∧ run.ledger.emissions = [] ∧
+        u.time = T ∧ u.pending = [] ∧ run.deliveries = [receipt i] ∧ run.ledger.emissions = [] ∧ run.ContactsTransversal ∧
         ReadyCoordinates u 0 ∧ (∀ q, u.raw 0 q = none) ∧
         run.ledger.recovery 0 = 1 / 10 ∧
         (∀ q, run.ledger.error 0 q = 0 ∧ run.ledger.mark 0 q = if q = 2 then 1 / 10 else 0) := by
@@ -72,7 +97,7 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
       ⟨fun _ => physical.region i, fun _ q => physical.gain_cap i q,
         fun _ => physical.recovery_cap i, fun _ => physical.reserve i⟩
     have localValid : RawValid (start i) := fun _ q o h => valid i q o h
-    obtain ⟨atDate, wait, date, mode, x, b, gains, sensor, noRaw, token, silent, noFire, waitMark⟩ :=
+    obtain ⟨atDate, wait, date, mode, x, b, gains, sensor, noRaw, token, silent, noFire, waitContact, waitMark⟩ :=
       slow_span_to_receipt (route := EmptyRouter 1) (θ := θ) accepted source (start i)
         (receiptDate p source) (before i) le_rfl (slow i) (charge i) (recovery i)
         (aux i) (raw i) (by intro d mem; rcases List.mem_singleton.mp mem with rfl; exact le_rfl)
@@ -81,7 +106,7 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
         (atDate.time - (launchDate p + latency p (p.successor source) + 1))) := x
     have actualQueue : atDate.pending = [⟨0, 2, atDate.time⟩] := by
       rw [token, date]
-    obtain ⟨reopened, learn, _, readyDate, ready, _, ended, queueDone, delivered, emitted, dose, doses⟩ :=
+    obtain ⟨reopened, learn, _, readyDate, ready, _, ended, queueDone, delivered, emitted, dose, learnContact, doses⟩ :=
       protected_slow_admission (route := EmptyRouter 1) accepted source localBox atDate
         (wait.physical_invariant localBox localPhysical) (wait.raw_valid localValid) mode clock exactCharge b
         sensor noRaw [] actualQueue (by simp)
@@ -106,13 +131,14 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
     have idleMark (q : Port) : idle.ledger.mark 0 q = 0 := by
       change (∫ v in reopened.time..T, markAct θ reopened (idleFlow.path v) 0 q) + 0 = 0
       simp [markAct, (ready.auxiliary q).1]
-    refine ⟨quietAt reopened T, trace, rfl, queueDone, ?_, ?_,
+    refine ⟨quietAt reopened T, trace, rfl, queueDone, ?_, ?_, ?_,
       quietAt_ready_coordinates reopened 0 ready enough.le, ended, ?_, ?_⟩
     · change (wait.append (learn.append idle)).deliveries = _
       rw [Execution.deliveries_append, Execution.deliveries_append, silent, delivered]
       simp [idle, Execution.deliveries, Move.deliveries, date, receipt, source]
     · simp [trace, Execution.emissions_append, noFire, emitted, idle,
         Execution.ledger, Move.ledger, Flow.ledger, Ledger.add, Ledger.zero]
+    · simp [trace, waitContact, learnContact, idle]
     · have h := trace.recovery_balance 0
       have hLearn := learn.recovery_balance 0
       change reopened.x 0 .b = (start i).x 0 .b + trace.ledger.recovery 0 at h
@@ -133,7 +159,7 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
       · change (wait.append (learn.append idle)).ledger.mark 0 q = _
         rw [Execution.mark_append, Execution.mark_append, waitMark, idleMark, zero_add,
           add_zero, (doses q).2]
-  choose finals legs finish empty delivered fired ready ended recoveryDose doses using leg
+  choose finals legs finish empty delivered fired contacts ready ended recoveryDose doses using leg
   have scheduled : s.pending.Perm ((List.finRange N).flatMap fun i => (legs i).deliveries.map (receiptAt i)) := by
     refine pending.trans ?_
     have same : ((List.finRange N).flatMap fun i => (legs i).deliveries.map (receiptAt i)) =
@@ -150,14 +176,14 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
                 (fun d => [d]) (List.finRange N)).symm
         _ = _ := List.flatMap_singleton' _
     rw [same]
-  obtain ⟨woven, noFire, consumed, marks⟩ :=
+  obtain ⟨woven, noFire, consumed, wovenContacts, marks⟩ :=
     synchronized_receipt_execution (route := router p) start finals legs (fun _ => rfl) finish
       (by
         have nonempty : 2 ≤ N := (of_decide_eq_true accepted : p.Valid).1
         let i : Fin N := ⟨0, by omega⟩
         have bound := (receipt_timing accepted (sourceOf accepted i)).2.2
         change s.time ≤ launchDate p + 19 / 2
-        linarith [before i]) fired s.pending scheduled
+        linarith [before i]) fired s.pending scheduled contacts
   have begin : assemble s.time start s.pending = s := by
     cases s
     rfl
@@ -177,23 +203,8 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
   let run := part.append suffix
   have readyFinal (i : Fin N) : ReadyCoordinates (quietAt t (horizon p)) i :=
     quietAt_ready_coordinates t i (readyAt i) idleTime.le
-  have complete : CompleteThrough run (horizon p) := by
-    refine ⟨rfl, ?_, by simp [quietAt, t, assemble]⟩
-    intro v
-    apply BeforeGuards.no_jump
-    · constructor
-      · intro i
-        rw [(readyFinal i).ready]
-        linarith [(readyFinal i).charge.2]
-      · intro i q
-        rw [((readyFinal i).auxiliary q).1]
-        linarith [((readyFinal i).auxiliary q).2.2]
-    · intro i q o h
-      have absent : (quietAt t (horizon p)).raw i q = none := ended i q
-      rw [absent] at h
-      cases h
-    · simp [quietAt, t, assemble]
-  refine ⟨_, run, complete, rfl, ?_, ?_, ?_⟩
+  have complete : CompleteThrough run (horizon p) := empty_ready_complete run readyFinal ended rfl
+  refine ⟨_, run, complete, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · change s.pending.Perm (part.append suffix).deliveries
     rw [Execution.deliveries_append, woven.cast_source_deliveries begin.symm]
     have none : suffix.deliveries = [] := rfl
@@ -202,6 +213,9 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
   · change (part.append suffix).ledger.emissions = []
     rw [Execution.emissions_append, partLedger, noFire]
     rfl
+  · exact (Execution.contactsTransversal_append _ _).mpr ⟨(cast_source_contacts woven begin.symm).2 wovenContacts, trivial⟩
+  · exact ⟨t, part, suffix, rfl, empty_ready_complete part readyAt ended rfl, rfl,
+      fun i => ⟨readyAt i, ended i⟩⟩
   · intro i
     refine ⟨readyFinal i, ended i, ?_, ?_⟩
     · have global := run.recovery_balance i

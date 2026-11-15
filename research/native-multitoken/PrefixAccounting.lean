@@ -163,6 +163,19 @@ theorem prefix_fires_before_receipt {p : Parameters N} {cut last : Snapshot N}
     exact (not_lt_of_ge ((tail.emission_time_bounds _ member).1.trans before)) after
   rw [Execution.emissions_append, drained, List.append_nil]
 
+theorem planned_children_word {p : Parameters N} {rows : List (Row N)}
+    (matching : ∀ r ∈ rows, RowMatches p r) :
+    rows.flatMap (fun r => r.children.map toDelivery) =
+      (Transaction.fires inputCell rows).flatMap (fun e => router p e.1 e.2) := by
+  induction rows with
+  | nil => rfl
+  | cons row rest ih =>
+    have children := (matching row List.mem_cons_self).2.2.2.2
+    have restExact := ih (fun row mem => matching row (List.mem_cons_of_mem _ mem))
+    cases date : row.fireDate with
+    | none => simp [Transaction.fires, children, date]; exact restExact
+    | some time => simp [Transaction.fires, children, inputCell, date]; exact restExact
+
 /-- The child of every matched launch belongs to the issued or unissued
 part according to whether the launch FIRE is in the native prefix. -/
 theorem issued_unissued_partition {p : Parameters N} {rows : List (Row N)}
@@ -176,18 +189,8 @@ theorem issued_unissued_partition {p : Parameters N} {rows : List (Row N)}
   let planned := Transaction.fires inputCell rows
   let issue := fun e : Fin N × ℝ => router p e.1 e.2
   let fired := fun e : Fin N × ℝ => decide (e ∈ fires)
-  have plannedExact : rows.flatMap (fun r => r.children.map toDelivery) = planned.flatMap issue := by
-    dsimp only [planned]
-    clear uniqueFires uniqueRows seen
-    induction rows with
-    | nil => rfl
-    | cons row rest ih =>
-      have good := matching row (List.mem_cons_self)
-      have children := good.2.2.2.2
-      have restExact := ih (fun row mem => matching row (List.mem_cons_of_mem _ mem))
-      cases date : row.fireDate with
-      | none => simp [Transaction.fires, issue, children, date]; exact restExact
-      | some time => simp [Transaction.fires, issue, children, inputCell, date]; exact restExact
+  have plannedExact : rows.flatMap (fun r => r.children.map toDelivery) = planned.flatMap issue :=
+    planned_children_word matching
   have unissuedExact : unissued rows fires = (planned.filter (fun e => !fired e)).flatMap issue := by
     dsimp only [planned]
     clear uniqueFires uniqueRows seen plannedExact

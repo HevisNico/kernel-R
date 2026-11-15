@@ -68,10 +68,13 @@ structure NativeHistory (p : Parameters N) where
   launch : Execution (nativeParameters N) (router p) launched wireCut
   receipts : Execution (nativeParameters N) (router p) wireCut last
   startNoArrivals : start.deliveries = []
+  startContacts : start.ContactsTransversal
   startSilent : start.ledger.emissions = []
   startGain : ∀ i q, firstStart.x i (.z q) = (prepared p).x i (.z q)
   startRecovery : ∀ i, firstStart.x i .b = (prepared p).x i .b
   firstDate : firstStart.time = NetworkStability.NativeMultiToken.firstDate
+  launchContacts : launchIntake.ContactsTransversal ∧ launch.ContactsTransversal ∧ receipts.ContactsTransversal
+  receiptQuiet : ReceiptQuietCut p receipts
   wireDate : wireCut.time = launchDate p + 19 / 10
   wireSection : WireSection p wireCut
   complete : CompleteThrough receipts (horizon p)
@@ -101,6 +104,13 @@ theorem NativeHistory.emissions {p : Parameters N} (h : NativeHistory p) :
   simp only [NativeHistory.run, NativeHistory.throughWire, Execution.emissions_append, h.startSilent, h.first.noFires.1, h.first.noFires.2.1,
     h.first.noFires.2.2, h.second.noFires.1, h.second.noFires.2.1, h.second.noFires.2.2,
     h.launchSilent, h.receiptNoFires, List.nil_append, List.append_nil]
+
+theorem NativeHistory.contacts_transversal {p : Parameters N} (h : NativeHistory p) :
+    h.run.ContactsTransversal := by
+  simp [NativeHistory.run, NativeHistory.throughWire, h.startContacts,
+    h.first.contacts.1, h.first.contacts.2.1, h.first.contacts.2.2,
+    h.second.contacts.1, h.second.contacts.2.1, h.second.contacts.2.2,
+    h.launchContacts.1, h.launchContacts.2.1, h.launchContacts.2.2]
 
 theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
     Nonempty (NativeHistory p) := by
@@ -176,7 +186,7 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
   have recoveryC (i : Fin N) : second.next.x i .b = 9 / 50 :=
     (second.recovery i).trans (first.recovery i)
   let b := admittedWave second.next (fun _ => 0) (List.finRange N) []
-  obtain ⟨intake, intakeWord, noIntakeFire⟩ :=
+  obtain ⟨intake, intakeWord, noIntakeFire, intakeContacts⟩ :=
     admit_wave (θ := nativeParameters N) (route := router p) second.next (fun _ => 0)
       (List.finRange N) (List.nodup_finRange N) [] (by rw [queueC, List.append_nil, second.date]; rfl)
       (fun i _ => second.raw i 0)
@@ -189,15 +199,18 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
       change 17999 / 100000 ≤ second.next.x i .b ∧ second.next.x i .b ≤ 18001 / 100000
       rw [recoveryC]
       norm_num, (second.ready i).auxiliary⟩
-  obtain ⟨wire, last, launch, receipts, wireDate, complete, finalQueue, noArrive, noFire, fires, paid, wireSection, outcome⟩ :=
+  obtain ⟨wire, last, launch, receipts, wireDate, complete, finalQueue, noArrive, noFire, fires, paid,
+      wireSection, launchContacts, receiptContacts, receiptQuiet, outcome⟩ :=
     launch_receipt_chain accepted box b (intake.physical_invariant box second.physical)
       (intake.raw_valid second.valid) second.date sectionB secondCharge ampC bWindow recoveryC
       (fun i => by simp [b, admittedWave]) (fun i q ne => by simp [b, admittedWave, ne, second.raw]) rfl
   refine ⟨{
     firstStart := a, start := initial, first := first, second := second, launched := b
     wireCut := wire, last := last, launchIntake := intake, launch := launch, receipts := receipts
-    startNoArrivals := rfl, startSilent := rfl, startGain := fun _ _ => rfl,
-    startRecovery := fun _ => rfl, firstDate := rfl, wireDate := wireDate, wireSection := wireSection
+    startNoArrivals := rfl, startSilent := rfl, startContacts := trivial, startGain := fun _ _ => rfl,
+    startRecovery := fun _ => rfl, firstDate := rfl,
+    launchContacts := ⟨intakeContacts, launchContacts, receiptContacts⟩, receiptQuiet := receiptQuiet
+    wireDate := wireDate, wireSection := wireSection
     complete := complete, finalQueue := finalQueue
     launchInputs := intakeWord.trans (by rw [second.date]; rfl), launchSilent := noIntakeFire
     launchNoArrivals := noArrive, receiptNoFires := noFire, fires := fires, receiptInputs := paid
@@ -215,5 +228,38 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
     have warm := receipts.recovery_balance i
     rw [(outcome i).2.2.1, wireSection.recovery i] at warm
     linarith
+
+/-- Parameter headroom at the prepared snapshot and at the first settled
+training cut. These are the anchors of the two exact weak-pulse windows. -/
+theorem native_training_headroom {p : Parameters N} (accepted : p.check = true)
+    (history : NativeHistory p) (i : Fin N) :
+    (prepared p).x i (.z 0) ≤ Real.log (6 / 5) + 1 / 1000 ∧
+      history.first.settled.x i (.z 0) ≤ Real.log (6 / 5) + 1 / 1000 := by
+  obtain ⟨positive, first, second, _⟩ := amplitude_windows accepted i
+  have initial : Real.exp ((prepared p).x i (.z 0)) = (p.amplitude i : ℝ) := by
+    change Real.exp (Real.log (p.amplitude i : ℝ)) = _
+    exact Real.exp_log positive
+  refine ⟨weak_headroom (initial ▸ first), weak_headroom ?_⟩
+  rw [history.first.settledGains, history.startGain, ite_eq_left rfl, Real.exp_add, initial]
+  exact second
+
+theorem native_endpoint_below_rail {p : Parameters N} (accepted : p.check = true)
+    (history : NativeHistory p) : BelowRail history.last.x := by
+  constructor
+  · intro i q
+    rw [history.endpointGain]
+    by_cases selected : q = 0
+    · subst q
+      have positive := (amplitude_windows accepted i).1
+      have bound := (amplitude_windows accepted i).2.2.2.2
+      change Real.log (p.amplitude i : ℝ) + (6 / 5) < Real.log 4
+      apply Real.exp_lt_exp.mp
+      rw [Real.exp_add, Real.exp_log positive, Real.exp_log (by norm_num : (0 : ℝ) < 4)]
+      exact bound.trans_lt (by norm_num)
+    · have bound : (0 : ℝ) < Real.log 4 := Real.log_pos (by norm_num)
+      simpa [prepared, selected, nativeParameters, KernelR.FutureControls.parameters] using bound
+  · intro i
+    rw [history.endpointRecovery]
+    norm_num
 
 end NetworkStability.NativeMultiToken

@@ -47,7 +47,7 @@ theorem launch_through_fast {p : Parameters N} (accepted : p.check = true) {ε :
     (active : ∀ i, s.raw i 0 = some s.time)
     (other : ∀ i q, q ≠ 0 → s.raw i q = none) (empty : s.pending = []) :
     ∃ (u : Snapshot N) (run : Execution (nativeParameters N) (router p) s u),
-      u.time = launchDate p + 19 / 10 ∧ run.deliveries = [] ∧
+      u.time = launchDate p + 19 / 10 ∧ run.deliveries = [] ∧ run.ContactsTransversal ∧
       (∀ i, run.emissionTimes i = [launchDate p + latency p i]) ∧
       u.pending.Perm ((List.finRange N).map (fun i => ⟨i, 2, receiptDate p (sourceOf accepted i)⟩)) ∧
       ∀ i, u.main i = .slow ∧
@@ -60,7 +60,7 @@ theorem launch_through_fast {p : Parameters N} (accepted : p.check = true) {ε :
       ∃ (u : Snapshot 1) (run : Execution (fun _ => nativeParameters N i)
         (EmptyRouter 1) (localView s i) u),
         u.time = T ∧ run.ledger.emissions = [(0, launchDate p + latency p i)] ∧
-        run.deliveries = [] ∧ u.main 0 = .slow ∧
+        run.deliveries = [] ∧ run.ContactsTransversal ∧ u.main 0 = .slow ∧
         u.x 0 .q = (1 / 4) * Real.exp (-(9 / 50) * (u.time - receiverFastEnd p (sourceOf accepted i))) ∧
         u.x 0 .b = 9 / 50 ∧ (∀ q, u.aux 0 q = .ready ∧ RestBand (u.x 0 (.m q))) ∧
         (∀ q, u.raw 0 q = none) ∧ (∀ q, u.x 0 (.z q) = s.x i (.z q)) := by
@@ -88,21 +88,23 @@ theorem launch_through_fast {p : Parameters N} (accepted : p.check = true) {ε :
     have fastEmpty : fast.final.pending = [] := by
       rw [fast.pending, F.pending]
       rfl
-    obtain ⟨u, slow, time, mode, qClock, b, z, aux, raw, _, hd, he, _⟩ :=
+    obtain ⟨u, slow, time, mode, qClock, b, z, aux, raw, _, hd, he, slowContact, _⟩ :=
       slow_span_to_receipt (route := EmptyRouter 1) accepted (sourceOf accepted i) fast.final T
         afterFast (receipt_after_fast_cut accepted _).le fast.main_slow
         (by rw [fastDate]; simp [fast.charge]) fastRecovery
         (fun q => ⟨fast.auxiliary 0 q, fast.rest q⟩) (fast.raw_none 0)
         (by simp [fastEmpty])
     let run := F.execution.append (fast.execution.append slow)
-    refine ⟨u, run, time, ?_, ?_, mode, qClock, b, aux, raw, fun q => (z q).trans (fastGain q)⟩
+    refine ⟨u, run, time, ?_, ?_, ?_, mode, qClock, b, aux, raw, fun q => (z q).trans (fastGain q)⟩
     · rw [Execution.emissions_append, Execution.emissions_append, F.emissions, fast.emissions, he]
       rw [← F.date, fireDate]
       simp only [List.append_nil]
     · rw [Execution.deliveries_append, Execution.deliveries_append, F.deliveries, fast.deliveries, hd]
       rfl
-  choose cuts legs time fires delivered mode qClock b aux raw z using localLeg
-  obtain ⟨out, body, noArrivals, queued, fireClocks, _, _, _, _, _⟩ :=
+    · exact (Execution.contactsTransversal_append _ _).mpr ⟨F.contacts_transversal,
+        (Execution.contactsTransversal_append _ _).mpr ⟨fast.contacts_transversal, slowContact⟩⟩
+  choose cuts legs time fires delivered contacts mode qClock b aux raw z using localLeg
+  obtain ⟨out, body, noArrivals, queued, fireClocks, _, _, _, _, woven⟩ :=
     synchronized_ledger (route := router p) (localView s) cuts legs (fun _ => date) time
       (by dsimp [T]; linarith) delivered [] (by simp)
       (fun i e mem child childMem => by
@@ -138,7 +140,8 @@ theorem launch_through_fast {p : Parameters N} (accepted : p.check = true) {ε :
   have perm := (emission_cell_perm exactFires).map token
   let run := body.cast_source begins.symm
   have led : run.ledger = body.ledger := body.cast_source_ledger begins.symm
-  refine ⟨_, run, rfl, (body.cast_source_deliveries begins.symm).trans noArrivals, ?_, ?_, ?_⟩
+  refine ⟨_, run, rfl, (body.cast_source_deliveries begins.symm).trans noArrivals,
+    (cast_source_contacts body begins.symm).2 (woven.contacts_transversal contacts), ?_, ?_, ?_⟩
   · intro i
     change ((run.ledger.emissions.filter fun e => e.1 = i).map Prod.snd) = _
     rw [led]
@@ -172,14 +175,15 @@ theorem launch_receipt_chain {p : Parameters N} (accepted : p.check = true) {ε 
       launch.deliveries = [] ∧ receipt.ledger.emissions = [] ∧
       (∀ i, launch.emissionTimes i = [launchDate p + latency p i]) ∧
       cut.pending.Perm receipt.deliveries ∧
-      WireSection p cut ∧
+      WireSection p cut ∧ launch.ContactsTransversal ∧ receipt.ContactsTransversal ∧
+      ReceiptQuietCut p receipt ∧
       ∀ i, ReadyCoordinates last i ∧ (∀ q, last.raw i q = none) ∧
         receipt.ledger.recovery i = 1 / 10 ∧
         ∀ q, last.x i (.z q) = s.x i (.z q) ∧
           receipt.ledger.mark i q = if q = 2 then 1 / 10 else 0 := by
-  obtain ⟨cut, launch, cutDate, launched, fires, queue, sections⟩ :=
+  obtain ⟨cut, launch, cutDate, launched, launchContacts, fires, queue, sections⟩ :=
     launch_through_fast accepted box s physical valid date prepared charge gain window recovery active other empty
-  obtain ⟨last, receipt, complete, finalQueue, taken, quiet, doses⟩ :=
+  obtain ⟨last, receipt, complete, finalQueue, taken, quiet, receiptContacts, receiptQuietCut, doses⟩ :=
     protected_receipt_wave accepted box cut (launch.physical_invariant box physical) (launch.raw_valid valid)
       (fun i => by rw [cutDate]; exact receipt_after_fast_cut accepted _)
       (fun i => (sections i).1) (fun i => (sections i).2.1) (fun i => (sections i).2.2.1)
@@ -191,7 +195,7 @@ theorem launch_receipt_chain {p : Parameters N} (accepted : p.check = true) {ε 
       simpa only [sourceOf_successor] using (sections (p.successor i)).2.1
     · exact queue.trans (launch_receipt_order accepted).symm
   refine ⟨cut, last, launch, receipt, cutDate, complete, finalQueue, launched, quiet, fires, taken,
-    wire, ?_⟩
+    wire, launchContacts, receiptContacts, receiptQuietCut, ?_⟩
   intro i
   obtain ⟨ready, inactive, recoveryDose, doses⟩ := doses i
   refine ⟨ready, inactive, recoveryDose, fun q => ⟨?_, (doses q).2⟩⟩

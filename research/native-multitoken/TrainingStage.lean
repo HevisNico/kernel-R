@@ -14,6 +14,7 @@ structure TrainingStage {p : Parameters N} (s : Snapshot N) (nextDate : ℝ) whe
   intake : Execution (nativeParameters N) (router p) s admitted
   wave : Execution (nativeParameters N) (router p) admitted settled
   quiet : Execution (nativeParameters N) (router p) settled next
+  contacts : intake.ContactsTransversal ∧ wave.ContactsTransversal ∧ quiet.ContactsTransversal
   settledComplete : CompleteThrough wave (s.time + 15 / 2)
   settledReady : ∀ i, ReadyCoordinates settled i
   settledRaw : ∀ i q, settled.raw i q = none
@@ -46,7 +47,7 @@ theorem training_stage_exists {p : Parameters N} {ε : ℝ}
     ∃ stage : TrainingStage (p := p) s nextDate, stage.next.pending = later := by
   let port : Fin N → Port := fun _ => 0
   let a := admittedWave s port (List.finRange N) later
-  obtain ⟨intake, intakeWord, intakeSilent⟩ :=
+  obtain ⟨intake, intakeWord, intakeSilent, intakeContacts⟩ :=
     admit_wave (θ := nativeParameters N) (route := router p) s port _ (List.nodup_finRange N)
       later queue (fun i _ => raw i 0)
   have active (i : Fin N) : a.raw i 0 = some a.time := by
@@ -57,7 +58,7 @@ theorem training_stage_exists {p : Parameters N} {ε : ℝ}
     ⟨(ready i).ready, (ready i).charge, (ready i).auxiliary⟩
   have aPhysical := intake.physical_invariant box physical
   have aValid := intake.raw_valid valid
-  obtain ⟨settled, wave, complete, pending, deliveries, fires, dose⟩ :=
+  obtain ⟨settled, wave, complete, pending, deliveries, fires, waveContacts, dose⟩ :=
     weak_training_wave (route := router p) box a port aPhysical aValid aReady active inactive
       window headroom (fun token mem => next.trans_le (future token mem))
   have date : settled.time = s.time + 15 / 2 := complete.1
@@ -85,6 +86,7 @@ theorem training_stage_exists {p : Parameters N} {ε : ℝ}
   refine ⟨{
     admitted := a, settled := settled, next := quietAt settled nextDate
     intake := intake, wave := wave, quiet := wait
+    contacts := ⟨intakeContacts, waveContacts, trivial⟩
     settledComplete := complete, settledReady := readySettled, settledRaw := rawSettled
     settledGains := gains, settledRecovery := recovery
     settledDate := date, date := rfl
