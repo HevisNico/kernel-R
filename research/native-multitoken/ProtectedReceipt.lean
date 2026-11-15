@@ -7,7 +7,7 @@ namespace NetworkStability.NativeMultiToken
 open KernelR.Hybrid Set MeasureTheory
 open scoped BigOperators
 
-private theorem quarter_above_reopen {cost : ℝ} (bound : cost < 9 / 10) :
+theorem quarter_above_reopen {cost : ℝ} (bound : cost < 9 / 10) :
     1 / 10 < (1 / 4) * Real.exp (-cost) := by
   have ref : Real.exp (- Real.log (5 / 2)) = (2 / 5 : ℝ) := by
     rw [Real.exp_neg, Real.exp_log (by norm_num : (0 : ℝ) < 5 / 2)]
@@ -264,7 +264,7 @@ theorem protected_receipt_body {θ ε route} (hb : @PhysicalBox 1 θ ε)
     ∃ (u : Snapshot 1) (run : Execution θ route s u),
       s.time < u.time ∧ u.time < s.time + 19 / 5 ∧ ReadyCoordinates u 0 ∧
       u.x 0 .q = 1 / 10 ∧ (∀ q, u.raw 0 q = none) ∧ u.pending = s.pending ∧
-      run.deliveries = [] ∧ run.ledger.emissions = [] ∧ run.ledger.recovery 0 = 1 / 10 ∧
+      run.deliveries = [] ∧ run.ledger.emissions = [] ∧ run.ledger.recovery 0 = 1 / 10 ∧ run.ContactsTransversal ∧
       ∀ q, run.ledger.error 0 q = 0 ∧
         run.ledger.mark 0 q = if q = p then 1 / 10 else 0 := by
   obtain ⟨m⟩ := receipt_mark_prefix_exists (route := route) hb s p hf hv hm fastEnd earlier
@@ -396,9 +396,12 @@ theorem protected_receipt_body {θ ε route} (hb : @PhysicalBox 1 θ ε)
     rw [run.recovery_sum_marks, sum] at total
     exact total
   refine ⟨reopened, run, ?_, hdeadline, hready 0, hthreshold, hraw 0, hpending,
-    delivered, emitted, total, ?_⟩
+    delivered, emitted, total, ?_, ?_⟩
   · change s.time < T
     exact lt_of_le_of_lt (m.execution.time_monotone.trans a.execution.time_monotone) hT
+  · simpa only [run, Execution.contactsTransversal_append] using
+      And.intro m.contacts_transversal (And.intro a.contacts_transversal
+        (show head.ContactsTransversal from ⟨trivial, trivial⟩))
   · intro q
     refine ⟨gainZero q, ?_⟩
     by_cases eq : q = p
@@ -440,7 +443,7 @@ theorem protected_slow_admission {p : Parameters N} (accepted : p.check = true) 
       s.time < u.time ∧ u.time < s.time + 19 / 5 ∧ ReadyCoordinates u 0 ∧
       u.x 0 .q = 1 / 10 ∧ (∀ q, u.raw 0 q = none) ∧ u.pending = later ∧
       run.deliveries = [⟨0, 2, s.time⟩] ∧ run.ledger.emissions = [] ∧
-      run.ledger.recovery 0 = 1 / 10 ∧
+      run.ledger.recovery 0 = 1 / 10 ∧ run.ContactsTransversal ∧
       ∀ q, run.ledger.error 0 q = 0 ∧
         run.ledger.mark 0 q = if q = 2 then 1 / 10 else 0 := by
   let token : Delivery 1 := ⟨0, 2, s.time⟩
@@ -450,13 +453,13 @@ theorem protected_slow_admission {p : Parameters N} (accepted : p.check = true) 
   let fastEnd := launchDate p + latency p (p.successor i) + 1
   obtain ⟨early, budget⟩ := receipt_calendar_budget accepted i
   have clock : a.time = launchDate p + latency p i + (p.delay i : ℝ) := date
-  obtain ⟨u, body, after, finish, ready, qRest, rawRest, pending, delivered, emitted, dose, doses⟩ :=
+  obtain ⟨u, body, after, finish, ready, qRest, rawRest, pending, delivered, emitted, dose, contacts, doses⟩ :=
     protected_receipt_body (route := route) hb a 2 (first.physical_invariant hb physical)
       (first.raw_valid valid) mode fastEnd (by rw [clock]; exact early.le) charge recovery
       (by rw [clock]; exact budget) aux (by simp [a, setRaw])
       (fun q ne => by simp [a, setRaw, ne, raw]) future
   refine ⟨u, .cons (.jump intake) body, after, finish, ready, qRest, rawRest, pending,
-    ?_, emitted, ?_, ?_⟩
+    ?_, emitted, ?_, ⟨trivial, contacts⟩, ?_⟩
   · change [token] ++ body.deliveries = _
     rw [delivered]
     rfl

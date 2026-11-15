@@ -14,14 +14,14 @@ noncomputable def assemble (t : ℝ) (states : Fin N → Snapshot 1)
   ⟨t, fun i => (states i).x 0, fun i => (states i).main 0,
     fun i => (states i).aux 0, fun i => (states i).raw 0, queue⟩
 
-private theorem assemble_field (θ : Fin N → Parameters) (t : ℝ)
+theorem assemble_field (θ : Fin N → Parameters) (t : ℝ)
     (states : Fin N → Snapshot 1) (q : List (Delivery N)) (path : ℝ → Values N)
     (v : ℝ) (i : Fin N) (c : Coord) :
     field θ (assemble t states q) (path v) v i c =
       field (fun _ => θ i) (states i) (fun _ => path v i) v 0 c := by
   cases c <;> rfl
 
-private noncomputable def parallelFlow {θ : Fin N → Parameters} {t u : ℝ}
+noncomputable def parallelFlow {θ : Fin N → Parameters} {t u : ℝ}
     {a b : Fin N → Snapshot 1} (start : ∀ i, (a i).time = t)
     (finish : ∀ i, (b i).time = u) (positive : t < u)
     (f : ∀ i, Flow (fun _ => θ i) (a i) (b i))
@@ -95,20 +95,41 @@ private theorem assemble_raw (t : ℝ) (a : Fin N → Snapshot 1) (q : List (Del
   refine snapshot_eq rfl ?_ ?_ ?_ ?_ rfl <;> funext j <;>
     by_cases h : j = i <;> simp [assemble, setRaw, h]
 
-private theorem cast_jump {route : Router N} {s a b : Snapshot N}
+theorem cast_source_contacts {θ : Fin N → Parameters} {route : Router N} {s u v : Snapshot N}
+    (run : Execution θ route s v) (eq : u = s) :
+    (run.cast_source eq).ContactsTransversal ↔ run.ContactsTransversal := by
+  subst u
+  rfl
+
+theorem cast_jump {route : Router N} {s a b : Snapshot N}
     (j : Jump route s a) (target : a = b) :
     ∃ k : Jump route s b, k.ledger = j.ledger ∧ k.deliveries = j.deliveries := by
   subst b
   exact ⟨j, rfl, rfl⟩
 
-private theorem parallelJump {route : Router N} {t : ℝ} {states : Fin N → Snapshot 1}
+theorem cast_jump_with_contacts {route : Router N} {s a b : Snapshot N}
+    (j : Jump route s a) (target : a = b) :
+    ∃ k : Jump route s b, k.ledger = j.ledger ∧ k.deliveries = j.deliveries ∧
+      ∀ θ, j.ContactTransversal θ → k.ContactTransversal θ := by
+  subst b
+  exact ⟨j, rfl, rfl, fun _ proof => proof⟩
+
+private theorem cast_jump_append_nil {route : Router N} {s v : Snapshot N} {t : ℝ}
+    {states : Fin N → Snapshot 1} {q : List (Delivery N)} (j : Jump route s v)
+    (target : v = assemble t states q) :
+    ∃ k : Jump route s (assemble t states (q ++ [])), k.ledger = j.ledger ∧
+      k.deliveries = j.deliveries ∧ ∀ θ, j.ContactTransversal θ → k.ContactTransversal θ :=
+  cast_jump_with_contacts j (target.trans (congrArg (assemble t states) (List.append_nil q).symm))
+
+theorem parallelJump {route : Router N} {t : ℝ} {states : Fin N → Snapshot 1}
     (i : Fin N) {v : Snapshot 1} (clock : (states i).time = t)
     (q : List (Delivery N)) (j : Jump (EmptyRouter 1) (states i) v)
     (silentQueue : j.deliveries = []) :
     ∃ k : Jump route (assemble t states q)
       (assemble t (Function.update states i v) (q ++ issuedBy route i j.ledger.emissions)),
       k.ledger.emissions = j.ledger.emissions.map (emissionAt i) ∧
-      k.deliveries = [] := by
+      k.deliveries = [] ∧
+      (∀ θ, j.ContactTransversal (fun _ => θ i) → k.ContactTransversal θ) := by
   cases j with
   | arrive d before after queue due free => simp [Jump.deliveries] at silentQueue
   | fire cell mode guard =>
@@ -122,68 +143,72 @@ private theorem parallelJump {route : Router N} {t : ℝ} {states : Fin N → Sn
       simp only [List.append_nil, issuedBy, Jump.ledger, List.flatMap_cons, List.flatMap_nil, clock]
       refine snapshot_eq rfl ?_ ?_ ?_ ?_ rfl <;> funext j <;>
         by_cases h : j = i <;> simp [assemble, setMain, h]
-    obtain ⟨lifted, ledger, delivered⟩ := cast_jump k target
-    exact ⟨lifted, by rw [ledger]; simp [k, Jump.ledger, emissionAt, assemble, clock], delivered⟩
+    obtain ⟨lifted, ledger, delivered, contacts⟩ := cast_jump_with_contacts k target
+    refine ⟨lifted, by rw [ledger]; simp [k, Jump.ledger, emissionAt, assemble, clock], delivered, ?_⟩
+    intro θ positive
+    apply contacts θ
+    change 0 < field θ (assemble t states q) (assemble t states q).x t i .q
+    rw [assemble_field θ t states q (fun _ => (assemble t states q).x) t i .q, ← clock]
+    exact positive
   | fastEnd cell mode guard =>
     have h : cell = 0 := Subsingleton.elim _ _
     subst cell
     let k := Jump.fastEnd (route := route) (assemble t states q) i mode guard
     change ∃ lifted : Jump route (assemble t states q)
         (assemble t (Function.update states i (setMain (states i) 0 .slow)) (q ++ [])),
-      lifted.ledger.emissions = [] ∧ lifted.deliveries = []
-    obtain ⟨lifted, ledger, delivered⟩ := cast_jump k (assemble_main t states q i _).symm
-    rw [List.append_nil]
-    exact ⟨lifted, ledger ▸ rfl, delivered⟩
+      lifted.ledger.emissions = [] ∧ lifted.deliveries = [] ∧ _
+    obtain ⟨lifted, ledger, delivered, contacts⟩ := cast_jump_append_nil k (assemble_main t states q i _).symm
+    exact ⟨lifted, ledger ▸ rfl, delivered, fun θ _ => contacts θ trivial⟩
   | reopen cell mode guard =>
     have h : cell = 0 := Subsingleton.elim _ _
     subst cell
     let k := Jump.reopen (route := route) (assemble t states q) i mode guard
     change ∃ lifted : Jump route (assemble t states q)
         (assemble t (Function.update states i (setMain (states i) 0 .ready)) (q ++ [])),
-      lifted.ledger.emissions = [] ∧ lifted.deliveries = []
-    obtain ⟨lifted, ledger, delivered⟩ := cast_jump k (assemble_main t states q i _).symm
-    rw [List.append_nil]
-    exact ⟨lifted, ledger ▸ rfl, delivered⟩
+      lifted.ledger.emissions = [] ∧ lifted.deliveries = [] ∧ _
+    obtain ⟨lifted, ledger, delivered, contacts⟩ := cast_jump_append_nil k (assemble_main t states q i _).symm
+    exact ⟨lifted, ledger ▸ rfl, delivered, fun θ _ => contacts θ trivial⟩
   | mark cell port mode guard =>
     have h : cell = 0 := Subsingleton.elim _ _
     subst cell
     let k := Jump.mark (route := route) (assemble t states q) i port mode guard
     change ∃ lifted : Jump route (assemble t states q)
         (assemble t (Function.update states i (setAux (states i) 0 port .mark)) (q ++ [])),
-      lifted.ledger.emissions = [] ∧ lifted.deliveries = []
-    obtain ⟨lifted, ledger, delivered⟩ := cast_jump k (assemble_aux t states q i port _).symm
-    rw [List.append_nil]
-    exact ⟨lifted, ledger ▸ rfl, delivered⟩
+      lifted.ledger.emissions = [] ∧ lifted.deliveries = [] ∧ _
+    obtain ⟨lifted, ledger, delivered, contacts⟩ := cast_jump_append_nil k (assemble_aux t states q i port _).symm
+    refine ⟨lifted, ledger ▸ rfl, delivered, ?_⟩
+    intro θ positive
+    apply contacts θ
+    change 0 < field θ (assemble t states q) (assemble t states q).x t i (.m port)
+    rw [assemble_field θ t states q (fun _ => (assemble t states q).x) t i (.m port), ← clock]
+    exact positive
   | silent cell port mode guard =>
     have h : cell = 0 := Subsingleton.elim _ _
     subst cell
     let k := Jump.silent (route := route) (assemble t states q) i port mode guard
     change ∃ lifted : Jump route (assemble t states q)
         (assemble t (Function.update states i (setAux (states i) 0 port .silent)) (q ++ [])),
-      lifted.ledger.emissions = [] ∧ lifted.deliveries = []
-    obtain ⟨lifted, ledger, delivered⟩ := cast_jump k (assemble_aux t states q i port _).symm
-    rw [List.append_nil]
-    exact ⟨lifted, ledger ▸ rfl, delivered⟩
+      lifted.ledger.emissions = [] ∧ lifted.deliveries = [] ∧ _
+    obtain ⟨lifted, ledger, delivered, contacts⟩ := cast_jump_append_nil k (assemble_aux t states q i port _).symm
+    exact ⟨lifted, ledger ▸ rfl, delivered, fun θ _ => contacts θ trivial⟩
   | error cell port mode guard =>
     have h : cell = 0 := Subsingleton.elim _ _
     subst cell
     let k := Jump.error (route := route) (assemble t states q) i port mode guard
     change ∃ lifted : Jump route (assemble t states q)
         (assemble t (Function.update states i (setAux (states i) 0 port .error)) (q ++ [])),
-      lifted.ledger.emissions = [] ∧ lifted.deliveries = []
-    obtain ⟨lifted, ledger, delivered⟩ := cast_jump k (assemble_aux t states q i port _).symm
-    rw [List.append_nil]
-    exact ⟨lifted, ledger ▸ rfl, delivered⟩
+      lifted.ledger.emissions = [] ∧ lifted.deliveries = [] ∧ _
+    obtain ⟨lifted, ledger, delivered, contacts⟩ := cast_jump_append_nil k (assemble_aux t states q i port _).symm
+    exact ⟨lifted, ledger ▸ rfl, delivered, fun θ _ => contacts θ trivial⟩
   | auxReady cell port mode guard =>
     have h : cell = 0 := Subsingleton.elim _ _
     subst cell
     let k := Jump.auxReady (route := route) (assemble t states q) i port mode guard
     change ∃ lifted : Jump route (assemble t states q)
         (assemble t (Function.update states i (setAux (states i) 0 port .ready)) (q ++ [])),
-      lifted.ledger.emissions = [] ∧ lifted.deliveries = []
-    obtain ⟨lifted, ledger, delivered⟩ := cast_jump k (assemble_aux t states q i port _).symm
-    rw [List.append_nil]
-    exact ⟨lifted, ledger ▸ rfl, delivered⟩
+      lifted.ledger.emissions = [] ∧ lifted.deliveries = [] ∧ _
+    obtain ⟨lifted, ledger, delivered, contacts⟩ := cast_jump_append_nil k (assemble_aux t states q i port _).symm
+    exact ⟨lifted, ledger ▸ rfl, delivered, fun θ _ => contacts θ trivial⟩
   | rawEnd cell port origin active due =>
     have h : cell = 0 := Subsingleton.elim _ _
     subst cell
@@ -191,18 +216,56 @@ private theorem parallelJump {route : Router N} {t : ℝ} {states : Fin N → Sn
       (by simpa [assemble, clock] using due)
     change ∃ lifted : Jump route (assemble t states q)
         (assemble t (Function.update states i (setRaw (states i) 0 port none)) (q ++ [])),
-      lifted.ledger.emissions = [] ∧ lifted.deliveries = []
-    obtain ⟨lifted, ledger, delivered⟩ := cast_jump k (assemble_raw t states q i port _).symm
-    rw [List.append_nil]
-    exact ⟨lifted, ledger ▸ rfl, delivered⟩
+      lifted.ledger.emissions = [] ∧ lifted.deliveries = [] ∧ _
+    obtain ⟨lifted, ledger, delivered, contacts⟩ := cast_jump_append_nil k (assemble_raw t states q i port _).symm
+    exact ⟨lifted, ledger ▸ rfl, delivered, fun θ _ => contacts θ trivial⟩
 
+
+/-- Lift one scheduled local admission, consuming precisely its occurrence in
+the global queue and retaining both surrounding sublists. -/
+theorem parallel_arrival {route : Router N} {t : ℝ}
+    {states : Fin N → Snapshot 1} (i : Fin N) {v : Snapshot 1}
+    (clock : (states i).time = t) (q : List (Delivery N))
+    (j : Jump (EmptyRouter 1) (states i) v) (receipt : Delivery 1)
+    (delivered : j.deliveries = [receipt])
+    (before after : List (Delivery N))
+    (queue : q = before ++ ⟨i, receipt.port, receipt.due⟩ :: after) :
+    ∃ k : Jump route (assemble t states q)
+      (assemble t (Function.update states i v) (before ++ after)),
+      k.ledger.emissions = [] ∧ k.deliveries = [⟨i, receipt.port, receipt.due⟩] := by
+  cases j with
+  | arrive d l r _ due free =>
+    have same : d = receipt := List.cons.inj delivered |>.1
+    subst receipt
+    let k := Jump.arrive (route := route) (assemble t states q)
+      ⟨i, d.port, d.due⟩ before after queue (due.trans clock)
+      (by
+        change (states i).raw 0 d.port = none
+        have cell : d.cell = 0 := Subsingleton.elim _ _
+        simpa only [cell] using free)
+    have target : { (setRaw (assemble t states q) i d.port (some t)) with
+        pending := before ++ after } = assemble t (Function.update states i
+        { (setRaw (states i) d.cell d.port (some (states i).time)) with pending := l ++ r })
+        (before ++ after) := by
+      have cell : d.cell = 0 := Subsingleton.elim _ _
+      refine snapshot_eq ?_ ?_ ?_ ?_ ?_ ?_
+      · rfl
+      · funext c; by_cases eq : c = i <;> simp [assemble, setRaw, eq]
+      · funext c; by_cases eq : c = i <;> simp [assemble, setRaw, eq]
+      · funext c; by_cases eq : c = i <;> simp [assemble, setRaw, eq]
+      · funext c
+        by_cases eq : c = i <;> simp [assemble, setRaw, eq, cell, clock]
+      · rfl
+    obtain ⟨lifted, ledger, intake⟩ := cast_jump k target
+    exact ⟨lifted, (congrArg Ledger.emissions ledger).trans rfl, intake.trans rfl⟩
+  | _ => simp [Jump.deliveries] at delivered
 
 /-- The state and remaining execution of a cell at a product cut. -/
 structure Cursor (θ : Parameters) (finish : Snapshot 1) where
   start : Snapshot 1
   run : Execution (fun _ => θ) (EmptyRouter 1) start finish
 
-private def startsWithJump {θ : Parameters} {finish : Snapshot 1}
+def startsWithJump {θ : Parameters} {finish : Snapshot 1}
     (c : Cursor θ finish) : Prop :=
   ∃ (v : Snapshot 1) (j : Jump (EmptyRouter 1) c.start v)
     (rest : Execution (fun _ => θ) (EmptyRouter 1) v finish), c.run = .cons (.jump j) rest
@@ -223,6 +286,12 @@ inductive FollowsFlow {θ : Parameters} {finish : Snapshot 1}
   | cut {t : ℝ} (after : c.start.time < t) (before : t < h.endState.time) :
       FollowsFlow h ⟨h.flow.at t, .cons (.flow (h.flow.suffix after.le before)) h.tail⟩ h.flow.path
 
+theorem FollowsFlow.contacts {θ : Parameters} {finish : Snapshot 1} {c next : Cursor θ finish}
+    {h : FlowHead θ finish c} {path : ℝ → Values 1} (advance : FollowsFlow h next path)
+    (before : c.run.ContactsTransversal) : next.run.ContactsTransversal := by
+  rw [h.unfoldRun] at before
+  cases advance <;> exact before
+
 /-- The global execution follows the supplied local legs. A jump advances
 one cell and leaves the other cursors intact. A flow advances every cell
 along the original path to the next cut. -/
@@ -239,6 +308,7 @@ inductive Weaves {θ : Fin N → Parameters} {route : Router N} {b : Fin N → S
         (assemble date (fun k => (Function.update c i ⟨v, rest⟩ k).start)
           (q ++ issuedBy route i j.ledger.emissions))}
       (fires : lifted.ledger.emissions = j.ledger.emissions.map (emissionAt i))
+      (contacts : j.ContactTransversal (fun _ => θ i) → lifted.ContactTransversal θ)
       {tail} (follow : Weaves (Function.update c i ⟨v, rest⟩) tail) :
       Weaves c (.cons (.jump lifted) tail)
   | flow {c next : ∀ i, Cursor (θ i) (b i)} {date cut q}
@@ -248,7 +318,32 @@ inductive Weaves {θ : Fin N → Parameters} {route : Router N} {b : Fin N → S
         FollowsFlow h (next i) (fun t _ => f.path t i))
       {tail} (follow : Weaves next tail) : Weaves c (.cons (.flow f) tail)
 
-private theorem cursor_done {θ : Parameters} {finish : Snapshot 1} (c : Cursor θ finish)
+theorem Weaves.contacts_transversal {θ : Fin N → Parameters} {route : Router N}
+    {b : Fin N → Snapshot 1} {T : ℝ} {out : List (Delivery N)}
+    {c : ∀ i, Cursor (θ i) (b i)} {date : ℝ} {q : List (Delivery N)}
+    {run : Execution θ route (assemble date (fun i => (c i).start) q) (assemble T b out)}
+    (weaves : Weaves c run) (localProof : ∀ i, (c i).run.ContactsTransversal) :
+    run.ContactsTransversal := by
+  induction weaves with
+  | done => trivial
+  | @jump c date q i v j rest head lifted fires contacts tail follow ih =>
+    have selected := localProof i
+    rw [head] at selected
+    refine ⟨contacts selected.1, ih ?_⟩
+    intro k
+    by_cases eq : k = i
+    · subst k
+      have chosen : Function.update c i ⟨v, rest⟩ i = ⟨v, rest⟩ := Function.update_self _ _ _
+      exact (congrArg (fun cursor => cursor.run.ContactsTransversal) chosen).mpr selected.2
+    · have other : Function.update c i ⟨v, rest⟩ k = c k := Function.update_of_ne eq _ _
+      exact (congrArg (fun cursor => cursor.run.ContactsTransversal) other).mpr (localProof k)
+  | flow paths follow ih =>
+    apply ih
+    intro i
+    obtain ⟨h, advance⟩ := paths i
+    exact advance.contacts (localProof i)
+
+theorem cursor_done {θ : Parameters} {finish : Snapshot 1} (c : Cursor θ finish)
     (clock : c.start.time = finish.time) (noJump : ¬ startsWithJump c) :
     c = ⟨finish, .nil finish⟩ := by
   obtain ⟨_, e⟩ := c
@@ -261,7 +356,7 @@ private theorem cursor_done {θ : Parameters} {finish : Snapshot 1} (c : Cursor 
       simp only at clock
       exact False.elim (by linarith [f.positive, tail.time_monotone])
 
-private theorem cursor_flow {θ : Parameters} {finish : Snapshot 1} (c : Cursor θ finish)
+theorem cursor_flow {θ : Parameters} {finish : Snapshot 1} (c : Cursor θ finish)
     (clock : c.start.time < finish.time) (noJump : ¬ startsWithJump c) :
     Nonempty (FlowHead θ finish c) := by
   obtain ⟨_, e⟩ := c
@@ -272,7 +367,7 @@ private theorem cursor_flow {θ : Parameters} {finish : Snapshot 1} (c : Cursor 
     | jump j => exact (noJump ⟨v, j, tail, rfl⟩).elim
     | flow f => exact ⟨⟨v, f, tail, rfl⟩⟩
 
-private structure Advance (θ : Parameters) (finish : Snapshot 1) (c : Cursor θ finish) (t : ℝ) where
+structure Advance (θ : Parameters) (finish : Snapshot 1) (c : Cursor θ finish) (t : ℝ) where
   next : Cursor θ finish
   clock : next.start.time = t
   flow : Flow (fun _ => θ) c.start next.start
@@ -281,7 +376,7 @@ private structure Advance (θ : Parameters) (finish : Snapshot 1) (c : Cursor θ
   arrivals : next.run.deliveries = c.run.deliveries
   marks : ∀ p, flow.ledger.mark 0 p + next.run.ledger.mark 0 p = c.run.ledger.mark 0 p
 
-private theorem advance_exists {θ : Parameters} {finish : Snapshot 1} {c : Cursor θ finish}
+theorem advance_exists {θ : Parameters} {finish : Snapshot 1} {c : Cursor θ finish}
     (h : FlowHead θ finish c) {t : ℝ} (after : c.start.time < t)
     (before : t ≤ h.endState.time) :
     ∃ a : Advance θ finish c t, FollowsFlow h a.next a.flow.path ∧
@@ -378,10 +473,10 @@ theorem synchronized_execution {θ : Fin N → Parameters} {route : Router N} {t
         · subst k; simp [nextAt]
         · simp [others k h, current, h]
       let issued := issuedBy route i j.ledger.emissions
-      obtain ⟨localLift, localFires, localArrived⟩ :=
+      obtain ⟨localLift, localFires, localArrived, localContacts⟩ :=
         parallelJump (route := route) (states := current) i (clocks i) q j noIntake.1
-      obtain ⟨lifted, liftLedger, liftDeliveries⟩ :=
-        cast_jump localLift (congrArg (fun states => assemble date states (q ++ issued)) starts.symm)
+      obtain ⟨lifted, liftLedger, liftDeliveries, liftedContacts⟩ :=
+        cast_jump_with_contacts localLift (congrArg (fun states => assemble date states (q ++ issued)) starts.symm)
       have fires := (congrArg Ledger.emissions liftLedger).trans localFires
       have arrived := liftDeliveries.trans localArrived
       have countAt : (next i).run.moveCount = rest.moveCount :=
@@ -428,7 +523,7 @@ theorem synchronized_execution {θ : Fin N → Parameters} {route : Router N} {t
         · exact firesOther k h ▸ he
       obtain ⟨out, tail, hd, hq, hf, hm, hw⟩ :=
         ih _ smaller next date (q ++ issued) rfl dateLe nextClock nextDelivery issuedFuture nextRoute
-      refine ⟨out, .cons (.jump lifted) tail, ?_, ?_, ?_, ?_, .jump i j rest head fires hw⟩
+      refine ⟨out, .cons (.jump lifted) tail, ?_, ?_, ?_, ?_, .jump i j rest head fires (fun contact => liftedContacts θ (localContacts θ contact)) hw⟩
       · simp [Execution.deliveries, Move.deliveries, arrived, hd]
       · change out = q ++ (lifted.ledger.emissions ++ tail.ledger.emissions).flatMap
           (fun e => route e.1 e.2)
@@ -593,7 +688,7 @@ theorem weak_training_wave {θ : Fin N → Parameters} {route : Router N} {ε : 
     (later : ∀ token ∈ s.pending, s.time + 15 / 2 < token.due) :
     ∃ (u : Snapshot N) (run : Execution θ route s u),
       CompleteThrough run (s.time + 15 / 2) ∧ u.pending = s.pending ∧
-      run.deliveries = [] ∧ run.ledger.emissions = [] ∧
+      run.deliveries = [] ∧ run.ledger.emissions = [] ∧ run.ContactsTransversal ∧
       (∀ i, ReadyCoordinates u i ∧ (∀ p, u.raw i p = none) ∧
         run.ledger.recovery i = 0 ∧
         ∀ p, run.ledger.mark i p = 0 ∧
@@ -616,7 +711,7 @@ theorem weak_training_wave {θ : Fin N → Parameters} {route : Router N} {ε : 
     · simp [localView]
   let leg (i : Fin N) := Classical.choice (localLeg i)
   let T := s.time + 15 / 2
-  obtain ⟨out, run, arrivals, pending, fires, _, _, doses, recovery, _⟩ :=
+  obtain ⟨out, run, arrivals, pending, fires, _, _, doses, recovery, woven⟩ :=
     synchronized_ledger (route := route) (localView s) (fun i => (leg i).final)
       (fun i => (leg i).execution) (fun _ => rfl) (fun i => (leg i).date)
       (by linarith) (fun i => (leg i).deliveries) s.pending
@@ -660,7 +755,8 @@ theorem weak_training_wave {θ : Fin N → Parameters} {route : Router N} {ε : 
   let answer := run.cast_source hstart.symm
   have ledger : answer.ledger = run.ledger := run.cast_source_ledger hstart.symm
   refine ⟨u, answer, ⟨rfl, quiet, fun token mem => later token (pendingExact ▸ mem)⟩,
-    pendingExact, (run.cast_source_deliveries hstart.symm).trans arrivals, ?_, ?_⟩
+    pendingExact, (run.cast_source_deliveries hstart.symm).trans arrivals, ?_, (cast_source_contacts run hstart.symm).2
+      (woven.contacts_transversal (fun i => (leg i).contacts_transversal)), ?_⟩
   · rw [ledger, noFire]
   · intro i
     refine ⟨settled i, raw i, ?_, ?_⟩
@@ -678,21 +774,21 @@ theorem weak_training_wave {θ : Fin N → Parameters} {route : Router N} {ε : 
       · simpa [selected] using (leg i).pulse.error_other p selected
 
 
-private def waveTokens (t : ℝ) (port : Fin N → Port) (cells : List (Fin N)) :
+def waveTokens (t : ℝ) (port : Fin N → Port) (cells : List (Fin N)) :
     List (Delivery N) := cells.map fun i => ⟨i, port i, t⟩
 
-private def admittedWave (s : Snapshot N) (port : Fin N → Port) (cells : List (Fin N))
+def admittedWave (s : Snapshot N) (port : Fin N → Port) (cells : List (Fin N))
     (later : List (Delivery N)) : Snapshot N :=
   { s with
     pending := later
     raw := fun i p => if i ∈ cells ∧ p = port i then some s.time else s.raw i p }
 
-private theorem admit_wave {θ : Fin N → Parameters} {route : Router N} (s : Snapshot N)
+theorem admit_wave {θ : Fin N → Parameters} {route : Router N} (s : Snapshot N)
     (port : Fin N → Port) (cells : List (Fin N)) (unique : cells.Nodup)
     (later : List (Delivery N)) (queue : s.pending = waveTokens s.time port cells ++ later)
     (free : ∀ i ∈ cells, s.raw i (port i) = none) :
     ∃ run : Execution θ route s (admittedWave s port cells later),
-      run.deliveries = waveTokens s.time port cells ∧ run.ledger.emissions = [] := by
+      run.deliveries = waveTokens s.time port cells ∧ run.ledger.emissions = [] ∧ run.ContactsTransversal := by
   induction cells generalizing s with
   | nil =>
     have same : admittedWave s port [] later = s := by
@@ -704,7 +800,7 @@ private theorem admit_wave {θ : Fin N → Parameters} {route : Router N} (s : S
       · simp [admittedWave]
       · exact queue.symm
     rw [same]
-    exact ⟨.nil s, rfl, rfl⟩
+    exact ⟨.nil s, rfl, rfl, trivial⟩
   | cons i cells ih =>
     obtain ⟨fresh, tailUnique⟩ := List.nodup_cons.mp unique
     let token : Delivery N := ⟨i, port i, s.time⟩
@@ -715,7 +811,7 @@ private theorem admit_wave {θ : Fin N → Parameters} {route : Router N} (s : S
     have stillFree (j : Fin N) (mem : j ∈ cells) : next.raw j (port j) = none := by
       have ne : j ≠ i := fun same => fresh (same ▸ mem)
       simpa [next, setRaw, ne] using free j (List.mem_cons_of_mem i mem)
-    obtain ⟨tail, delivered, fires⟩ := ih next tailUnique rfl stillFree
+    obtain ⟨tail, delivered, fires, contacts⟩ := ih next tailUnique rfl stillFree
     have finish : admittedWave s port (i :: cells) later = admittedWave next port cells later := by
       refine snapshot_eq rfl rfl rfl rfl ?_ rfl
       funext j p
@@ -723,7 +819,7 @@ private theorem admit_wave {θ : Fin N → Parameters} {route : Router N} (s : S
       · subst j; by_cases same : p = port i <;> simp [admittedWave, next, setRaw, fresh, same]
       · simp [admittedWave, next, setRaw, eq]
     rw [finish]
-    refine ⟨.cons (.jump jump) tail, ?_, fires⟩
+    refine ⟨.cons (.jump jump) tail, ?_, fires, trivial, contacts⟩
     change [token] ++ tail.deliveries = _
     rw [delivered]
     rfl
@@ -747,10 +843,10 @@ theorem weak_training_transaction {θ : Fin N → Parameters} {route : Router N}
         run.ledger.recovery i = 0 ∧
         ∀ p, run.ledger.mark i p = 0 ∧
           run.ledger.error i p = if p = port i then 3 / 5 else 0) := by
-  obtain ⟨intake, delivered, noFire⟩ := admit_wave (θ := θ) (route := route) s port
+  obtain ⟨intake, delivered, noFire, _⟩ := admit_wave (θ := θ) (route := route) s port
     (List.finRange N) (List.nodup_finRange N) later queue (fun i _ => raw i (port i))
   let a := admittedWave s port (List.finRange N) later
-  obtain ⟨u, body, complete, pending, noArrivals, noEmissions, doses⟩ :=
+  obtain ⟨u, body, complete, pending, noArrivals, noEmissions, _, doses⟩ :=
     weak_training_wave (route := route) box a port (intake.physical_invariant box physical)
       (intake.raw_valid valid)
       (fun i => ⟨(ready i).ready, (ready i).charge, (ready i).auxiliary⟩)
