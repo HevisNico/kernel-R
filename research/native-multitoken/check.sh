@@ -23,19 +23,29 @@ mkdir "$build/SelfCertifyingLearning"
   modules=(RoutedCalendar AutonomousFeedback PerpetualFeedback ScheduleCounterexample
     ScheduleConfluence FairMemory NetworkTheorem PortMemory MarkFeedback NativeReciprocal
     NativeEndpoint NativeMarkTrace NativeRefinement PhaseAdmission
-    NativeAdmissions DatedFairness DatedReplay DatedNetwork)
+    NativeAdmissions DatedFairness DatedReplay DatedNetwork NativeStrongStep)
   for module in "${modules[@]}"; do
     lean -DwarningAsError=true -o "$build/$module.olean" "$module.lean"
   done
 )
 
-expected=$(printf '%s\n' NativeMultiTokenAudit.lean NativeMultiTokenMilestone.lean NativeMultiTokenTarget.lean)
+modules=(NativeMultiTokenTarget NativeMultiTokenMilestone SynchronizedProduct
+  LaunchWave ProtectedReceipt PhysicalRefinement PrefixAccounting ReceiptProduct
+  ReceiptTiming ReceiptWave LaunchReceiptChain TrainingClock TrainingStage GuardedReplay NativeHistory
+  ExecutionCuts ExactNativeExecution ReceiptWindow NativeReceiptRows GuardedReceiptRows GuardedExternalRows
+  ExactPrefixCorrespondence GuardedTraceWords NativeExternalRows)
+expected=$(printf '%s.lean\n' NativeMultiTokenAudit "${modules[@]}" | sort)
 actual=$(find . -name '*.lean' -printf '%P\n' | sort)
 if [[ "$expected" != "$actual" ]]; then
   diff -u <(printf '%s\n' "$expected") <(printf '%s\n' "$actual")
   exit 1
 fi
 
-lean -DwarningAsError=true -o "$build/NativeMultiTokenTarget.olean" NativeMultiTokenTarget.lean
-lean -DwarningAsError=true -o "$build/NativeMultiTokenMilestone.olean" NativeMultiTokenMilestone.lean
+failed=0
+for module in "${modules[@]}"; do
+  lean -DwarningAsError=true -o "$build/$module.olean" "$module.lean" || failed=1
+done
+if ((failed)); then
+  exit 1
+fi
 lean -DwarningAsError=true NativeMultiTokenAudit.lean

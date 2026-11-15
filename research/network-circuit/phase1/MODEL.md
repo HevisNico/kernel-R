@@ -47,8 +47,9 @@ each port has its own unit; nothing in the model adds scores of two ports.
 ## 2. What is proved
 
 `CircuitNetwork.lean` builds on `AutonomousFeedback.certified_feedback` and
-adds no axiom (`check.sh` compiles it with warnings as errors and audits the
-axioms: `propext`, `Classical.choice`, `Quot.sound` only).
+adds no axiom (`check.sh` compiles it and `DatedOrder.lean` with warnings as
+errors and audits the axioms: `propext`, `Classical.choice`, `Quot.sound`
+only).
 
 For **every** gap and **every** number of sources `a0`, `a1` (A, before and
 inside its gate), `b0`, `b1` (B):
@@ -73,6 +74,52 @@ For numbers, the margins are a finite check, done by the Lean kernel
 cell of phase 0 on the calendar of phase 1; [`Instances.lean`](Instances.lean),
 written by `predict.py`, does it for each measured instance.
 
+### The order of the dates
+
+The model reads its queue from the head: every source of A, then every
+source of B, then the wire pulses. The circuit reads its pulses in the order
+of their dates, where a wire pulse comes 1.3 units after its source.
+[`DatedOrder.lean`](DatedOrder.lean) proves that the two runs are the same
+run, port by port:
+
+5. `circuit_dated_eq_queue`: if the sources of each cell have increasing
+   dates and a wire pulse is dated by an increasing function of the date of
+   its source, every zero-error run that serves the pulses in the order of
+   their dates and ends with nothing pending has the writes of the queue
+   run and, on every port, the same reads: same scores, same decisions, in
+   the same order.
+6. `circuit_dated_predicted`: the same for a run with errors inside the
+   budgets, when every read of the zero-error queue run has room. This is
+   the statement a prediction uses: its hypothesis is the one that
+   `Instances.lean` checks.
+7. `circuit_dated_run_exists`: such a run exists, so 5 and 6 are not empty.
+
+The hypothesis on dates is "no same-date tie on a port": two pulses that
+wait on one port never have the same date, and wait in the order of their
+dates (`PortSorted`, kept along the run by `Inv`). Two pulses on different
+ports may share a date. The calendar of section 4 gives it: the sources of a
+cell are 18 units apart, and a wire pulse starts between 0.35 and 1.43 units
+after the start of its source pulse, so wire dates increase with source
+dates.
+
+The general statement, `PortOrder.dated_run_eq_queue_run`, holds for any
+guarded model whose reads on two different ports send their pulses in an
+order that does not matter, whose reads send at most one pulse, and whose
+sent pulses send nothing.
+
+**Why not from the dated theorem of the theory.**
+`PhaseAdmission.dated_network_memory`
+([`DatedNetwork.lean`](../../network-stability/DatedNetwork.lean)) compares
+runs that all respect the dates. The queue run does not respect them. For
+both runs to be earliest-date runs of one order on dates, a source before
+its gate and a source inside its gate would have to tie on one port, and
+the tie condition of that theorem (`TieRoom`) fails there at the last
+silent read. `DatedOrder.lean` uses a third description that both runs
+satisfy: each port keeps its pulses in order of arrival, and a move serves
+the first pulse of any port. Two moves on different ports commute exactly,
+because in the gain-only model a read depends only on the writes of its own
+port; that is the property the general theorem cannot assume.
+
 ## 3. The error budget E
 
 The threshold of a port is measured with reads that come 22 units after the
@@ -82,18 +129,20 @@ previous pulse of the cell. A read of the network differs from those by:
 |---|---|---|---|
 | Help of a recent pulse on the same cell, either port | toward FIRE | the largest of the help measured at 16 units and at 18 units, over the 22-unit reference | `cellscan.py` (one read 16 units after a FIRE), `noisechar.py quiet` (trains 18 units apart) |
 | No recent pulse at all | toward silence | 0.015 mV: what a pulse 22 units earlier gives, phase 0, nominal cell. Not measured per instance | [`../PERCELL.json`](../PERCELL.json) |
-| Noise of the read | both | `K` standard deviations; the deviation is that of the FIRE latency in a noisy train, as an equivalent stored voltage | `noisechar.py noise` |
+| Noise of the read inside a run | both | `K` standard deviations; the deviation is that of the FIRE latency about the mean of its run, as an equivalent stored voltage, pooled over the noisy trains of the port | `noisechar.py noise` |
+| Noise between runs | both | added in quadrature: what a noisy run adds to every read of a port, the same for the whole run. Root mean square, over the noisy trains of the four ports of the instance, of (FIRE latency without noise - mean FIRE latency of the run). Missing from the version reviewed: [`NOISE.md`](NOISE.md) | `noisechar.py noise`, five simulator processes per instance |
 | Noise of the doses already written | both | added in quadrature to the noise of the read: `need` times the square of the dose deviation, one value per instance | `noisechar.py noise` |
 | Threshold bracket | both | half the bracket of the bisection, 8 or 16 uV | `cellscan.py` |
 
-    noise = sqrt(read noise^2 + need x dose noise^2)
+    noise = sqrt(within a run^2 + between runs^2 + need x dose noise^2)
     hi = + help + K x noise + half bracket
     lo = - 0.015 mV - K x noise - half bracket
 
 The noise is not bounded, so `K` gives a rate and not a certificate
-(departure 6). With `K = 3` and about fourteen FIRE reads on a source port,
-a port that sits exactly at the edge of its room would miss once in about
-fifty runs; a port with more room, much less often. The value of `K` is for
+(departure 6). The larger part of it is the same for all the reads of a
+port in a run: with `K = 3`, a port that sits exactly at the edge of its
+room departs in about one run in a few hundred; a port with more room, much
+less often. The value of `K` is for
 the preregistration to fix. Section 6 lists what is left out of E.
 
 ## 4. Conditions that hold by construction
@@ -144,25 +193,12 @@ Rows of [`../DEPARTURES.md`](../DEPARTURES.md):
 
 ## 6. What is not proved, and what is left out
 
-- **The order of the reads.** The Lean model reads its queue in order: all
-  the sources of A, then those of B, then the wire pulses. The circuit reads
-  in the order of the dates, where a wire pulse comes 1.3 units after its
-  source. The two orders give the same word on every port, because in this
-  model a read depends only on the writes of its own port and a port's
-  pulses keep their order. `predict.py` checks it on every instance
-  (`model.dated_run`). It is **not a Lean theorem**. The general
-  order-independence result of the theory, `Schedule.network_memory`, does
-  not apply: its hypothesis fails for two pending reads of one port when the
-  first is the last silent one, the obstruction already recorded in
-  [`RECIPROCAL_CLOSURE.md`](../../network-stability/RECIPROCAL_CLOSURE.md).
-- **Ports without room.** `circuit_predicted` needs room at every read of
-  the network. When one port has a read without room, the theorem as stated
-  says nothing about the other ports either. `predict.py` then takes that
-  read both ways and follows every case; a port keeps a prediction when its
-  own reads have room. This rests on the same argument as the previous
-  point and is **not a Lean theorem**. Two ways to close it: admit only
-  instances where all four ports have room, or prove that a port's word
-  depends only on its own errors and on the number of pulses it receives.
+- **Ports without room.** `circuit_predicted` and `circuit_dated_predicted`
+  need room at every read of the network. When one port has a read without
+  room, the theorems as stated say nothing about the other ports either.
+  `predict.py` then takes that read both ways and follows every case; this
+  is **not a Lean theorem** and is kept out of every claim. An instance
+  with a read without room is run and reported, with no claim.
 - **The help of a pulse on the other port of the cell.** Measured in phase 0
   on the nominal cell (same size as on the same port). On the instances, the
   help at 16 and 18 units is measured on the same port only.

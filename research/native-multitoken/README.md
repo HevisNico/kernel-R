@@ -210,9 +210,81 @@ reuse does not depend on unfinished branch symbols.
 | [`quiet_source_arrival_exists` and `quiet_complete_exists`][quiet] | Quiet scalar waits and complete cuts. | Admit the full minimal-date batch and assemble overlapping local flow/jump segments at the union of their event dates. The former lemma's updated snapshot has a single intake and cannot construct the active batch. Show preservation of pending multiplicities. |
 | [`weak_input_cycle_exists`][weak] | Local ERROR cycle, $3/5$ dose and restoration of `ReadyCoordinates`. G supplies the amplitude bound for both visits. | Construct each one-cell leg with a local queue and an empty router, then synchronize the product. Reuse [the existing autonomous projection][project] for local observations when its premises hold. It does not supply the converse product. Prove exact transport of the per-cell ledger. Bound the residual charge from the first wave and establish the second wave's silence margin with that residual. |
 | [`first_learned_fire_exists` and `readyPulse_first_learned_crossing_transversal`][fire] | Exact root and local FIRE segment. Reuse the single-token construction's planned FAST/SLOW legs where their assumptions hold. | Cut active product traces at distinct or tied FIRE clocks. Evaluate the real router at each global FIRE jump and amend the pending queue there. Build the protected receiver path with its early incoming receipt instead of requiring a complete, quiet SLOW return before it. |
-| [`predicted_phase_after_fire`][timing], [`Execution.cadence_mark_only_pulse`][mark], and [`ProtectedReceipt.recovery_dose`][native] | The phase-window comparison, one-input recovery budget, and nominal MARK/ERROR ledger accounts. The cadence lemma inspects a supplied sufficiently long run. | Use [the one-cell cadence constructor][mark-exists] as a local reference. Generalize its charge-window premises to T3 and construct and synchronize the protected intake, MARK, auxiliary return and main reopening. Establish the budget before invoking T3. A synchronized constructor for these parameters and dates remains open. |
+| [`predicted_phase_after_fire`][timing], [`Execution.cadence_mark_only_pulse`][mark], and [`ProtectedReceipt.recovery_dose`][native] | The phase-window comparison, one-input recovery budget, and nominal MARK/ERROR ledger accounts. The cadence lemma inspects a supplied sufficiently long run. | Use [the one-cell cadence constructor][mark-exists] as a local reference. Generalize its charge-window premises to T3 and construct and synchronize the protected intake, MARK, auxiliary return and main reopening. Establish the budget before invoking T3. The [receipt product](ReceiptWave.lean) supplies the synchronized constructor for these dates. |
 | [`Execution.token_balance`][balance], [`native_queue_replay`][native], [`TransactionReplay.append`][replay], and [`dated_network_memory`][dated] | Token conservation, replay algebra, and guarded convergence. #148's [`nominal_reciprocal_refinement`][reciprocal] is the reference for aligning admission/FIRE words, retaining pending occurrences, and comparing memory coordinatewise. | Compile exact clocks and phases and construct replay rows; prove the in-flight accounting, per-wave dose fold, uniform reserve and rank, and the distinct-cell tie condition. #148's fixed transaction table and counts depend on its witness. |
 | [`Execution.observational_unique`][unique] | Transport endpoint and FIRE multiset to any complete execution from the same snapshot. | Match the completeness horizon and verify the nominal physical invariant for the compiled snapshot. |
+
+## Synchronized execution milestone
+
+[`synchronized_ledger`](SynchronizedProduct.lean) combines finite families
+of arrival-free one-cell legs with common start and end dates. It cuts
+flows at local event dates and admits distinct-cell jumps at equal dates.
+A `Weaves` witness records which local jump or flow fragment each global
+move follows.
+Each FIRE evaluates the native router at its clock. The output queue is
+the input list followed by the router outputs in execution order, with
+later admissions left for subsequent segments. The proof preserves each
+cell's ordered FIRE times, ERROR and MARK doses, and recovery dose. It
+also gives the exact issued and delivered counts.
+
+[`weak_training_transaction`](SynchronizedProduct.lean) admits the batch
+of tokens at the wave date and applies the product to the overlapping
+weak legs. It settles at that date plus $15/2$, with ERROR dose $3/5$
+at each selected port, zero dose at the other ports, and no FIREs.
+
+## Launch and protected receipt milestone
+
+[`launch_wave`](LaunchWave.lean) cuts the isolated strong legs at
+$t_3+9/10$ and synchronizes their prefixes. The actual FIRE of cell $i$
+is at $t_3+\ell_i$. Each FIRE appends its own routed child, and the
+resulting queue contains exactly $N$ children with their actual dates.
+
+[`protected_slow_admission`](ProtectedReceipt.lean) consumes one child
+at its calendar date in SLOW, starting from the charge carried from
+the receiver's own FAST end. The partial MARK drain bounds recovery
+by $7/25$ before T3 is applied to the main guard. The local execution
+completes the auxiliary cycle before reopening and contributes exactly
+$1/10$ MARK at port 2, zero ERROR, and zero FIREs.
+
+[`native_exact_receipt_rows`](NativeReceiptRows.lean) proves the frozen
+`RowDose` for every receipt on the same complete execution. Each dose is
+measured on the slice ending at its own auxiliary deadline, including
+when other cells have jumps on that slice. The selected cell stays SLOW
+throughout and ends with RAW inactive and its auxiliary modes READY.
+[`exact_receipt_replay`](GuardedReceiptRows.lean) consumes the routed queue
+in the actual native receipt order, with the same admission word and one
+additional recovery write per cell. It takes the guarded state at the
+wire cut as input, with zero writes on the receipt gain coordinate.
+
+[`native_with_exact_guarded_replay`](GuardedExternalRows.lean) joins the
+two guarded training batches and the launch batch to that receipt suffix.
+The resulting $4N$ rows have the native admission word, match the frozen
+calendar, and reconstruct terminal native memory from the guarded
+counts. Its physical per-row dose certificate covers the receipts.
+
+[`native_with_prefix_correspondence`](ExactPrefixCorrespondence.lean)
+proves the frozen `prefixCorrespondence` on that construction. It matches
+the consumed native admissions to the guarded prefix, accounts for the
+children of launches whose FIRE has yet to occur, and identifies the
+guarded counters with physical memory at both settled training clocks.
+The accounting also applies to cuts between jumps at the same clock.
+
+## Native refinement
+
+[`native_multi_token_refinement`](NativeExternalRows.lean) proves the
+frozen `NativeMultiTokenRefinement` for every accepted parameter tuple.
+The single native execution carries the exact ERROR and MARK doses for
+all $4N$ rows and inherits the FIRE and MARK transversality of its local
+legs. Its final suffix starts at $t_3+19/2$ and stays READY, with RAW
+inactive and no deliveries or FIREs, through $t_3+10$.
+
+[`guarded_trace_refinement`](GuardedTraceWords.lean) uses
+`dated_network_memory` for the memory bound and terminal counts. Swapping
+eligible tied choices preserves their recorded decisions. Every admissible
+guarded prefix therefore extends to the same complete decision multiset.
+`Execution.observational_unique` gives the final native snapshot up to
+observational equality and the native FIRE multiset for any complete
+execution through the same horizon.
 
 ## Negative controls for the new membership tests
 

@@ -20,6 +20,11 @@ import DatedTrainingControl
 import NativeRingTarget
 import NativeRingExamples
 import NativeStrongStep
+import NativeWeakStep
+import NativeRingRefinement
+import NativeRingTwo
+import NativePeriodicRingTarget
+import NativePeriodicRingExecution
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -36,7 +41,9 @@ run_cmd do
     `PhaseAdmission, `NativeAdmissions, `NativeTransactions, `DatedFairness, `NativeTiming,
     `NativeWireTransactions, `NativeComposition, `DatedReplay, `ReciprocalClosure, `DatedNetwork, `DatedTrainingControl,
     `ReciprocalLearning, `ReciprocalReverseRows, `ReciprocalDated, `ReciprocalReplay, `ReciprocalPostBirth,
-    `NativeRingTarget, `NativeRingExamples, `NativeStrongStep]
+    `NativeRingTarget, `NativeRingExamples, `NativeStrongStep, `NativeWeakStep,
+    `NativeRingRefinement, `NativeRingTwo, `NativePeriodicRingTarget, `NativePeriodicRingSteps,
+    `NativePeriodicRingProfile, `NativePeriodicRingTiming, `NativePeriodicRingExecution]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -186,7 +193,12 @@ run_cmd do
       ``NetworkStability.NativeRing.allStrong_valid,
       ``NetworkStability.NativeStrong.local_leg_exists,
       ``NetworkStability.NativeStrong.splice_execution,
-      ``NetworkStability.NativeStrong.strong_transaction_exists] do
+      ``NetworkStability.NativeStrong.strong_transaction_exists,
+      ``NetworkStability.NativeStrong.weak_step_exists,
+      ``NetworkStability.NativeRing.native_ring_refinement,
+      ``NetworkStability.NativeRing.all_strong_two_refines,
+      ``NetworkStability.NativeRing.stopping_two_refines,
+      ``NetworkStability.NativePeriodicRing.native_periodic_ring_refinement] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."

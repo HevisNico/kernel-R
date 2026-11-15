@@ -1,0 +1,4160 @@
+>>> set numdgt=16
+ERROR: (external)  no graphics interface;
+ please check if X-server is running,
+ or ngspice is compiled properly (see INSTALL)
+
+Note: Compatibility modes selected: hs a
+
+Warning: m=xx on .subckt line will override multiplier m hierarchy!
+
+
+Circuit: * 2 r cells, pulses at any date (phase 0 of the network experiment, exploratory)
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+>>> setseed 7203
+>>> reset
+Reset re-loads circuit * 2 r cells, pulses at any date (phase 0 of the network experiment, exploratory)
+
+Circuit: * 2 r cells, pulses at any date (phase 0 of the network experiment, exploratory)
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+>>> save v(xa.p) v(xa.vq) v(xa.vmem1) v(xa.x1.sum) v(xa.x1.si) v(ksa1) v(ampa1) v(xa.vmem2) v(xa.x2.sum) v(xa.x2.si) v(ksa2) v(ampa2) v(xa.nzm) v(xa.x1.nzo) v(xa.x1.nzc) v(xa.x2.nzo) v(xa.x2.nzc) v(xb.p) v(xb.vq) v(xb.vmem1) v(xb.x1.sum) v(xb.x1.si) v(ksb1) v(ampb1) v(xb.vmem2) v(xb.x2.sum) v(xb.x2.si) v(ksb2) v(ampb2) v(xb.nzm) v(xb.x1.nzo) v(xb.x1.nzc) v(xb.x2.nzo) v(xb.x2.nzc) v(gl)
+>>> delete all
+>>> stop when time >= 9.81e-05
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> save v(xa.p) v(xa.vq) v(xa.vmem1) v(xa.x1.sum) v(xa.x1.si) v(ksa1) v(ampa1) v(xa.vmem2) v(xa.x2.sum) v(xa.x2.si) v(ksa2) v(ampa2) v(xa.nzm) v(xa.x1.nzo) v(xa.x1.nzc) v(xa.x2.nzo) v(xa.x2.nzc) v(xb.p) v(xb.vq) v(xb.vmem1) v(xb.x1.sum) v(xb.x1.si) v(ksb1) v(ampb1) v(xb.vmem2) v(xb.x2.sum) v(xb.x2.si) v(ksb2) v(ampb2) v(xb.nzm) v(xb.x1.nzo) v(xb.x1.nzc) v(xb.x2.nzo) v(xb.x2.nzc) v(gl)
+>>> tran 1u 0.01015 0 200n
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        1.8
+vr0                                       1.25
+vfire                                      0.8
+vreopen                                    1.2
+vcm                                        0.4
+vhi                                        0.6
+vlo                                        0.5
+vpre                                       1.3
+vinita1                                 0.3895
+ksa1                                         0
+kra1                                         1
+kpa1                                         0
+tsa1                                         1
+ampa1                                        1
+vinita2                                 0.3895
+ksa2                                         0
+kra2                                         1
+kpa2                                         0
+tsa2                                         1
+ampa2                                        1
+xa.x1.gm                              0.861334
+xa.x1.sen0                                   0
+xa.x1.rst0                                 1.8
+xa.x1.preb0                                  0
+xa.x1.sen                                    0
+xa.x1.rst                                  1.8
+xa.x1.preb                                   0
+xa.x1.ibs                             0.508787
+xa.x1.ibo                              0.50835
+xa.x1.dq                               1.10565
+xa.vmem1                              0.390322
+xa.x1.admb                                 1.8
+xa.pb                                      1.8
+xa.x1.xnad.n1                      9.90553e-11
+xa.x1.adm                          4.71074e-07
+xa.vq                                     1.25
+xa.x1.vs                               1.29987
+xa.x1.vgd                              1.01864
+xa.x1.x                               0.400009
+xa.x1.si                           7.22689e-07
+xa.x1.sum                             0.408219
+xa.x1.sd                                   1.8
+xa.x1.xop.tail                         1.09916
+xa.x1.xop.o1m                         0.691421
+xa.x1.xop.o1                          0.698136
+xa.x1.vcmn                                 0.4
+xa.x1.xop.oz                          0.698136
+xa.x1.vcmn0                                0.4
+xa.x1.nzo                                    0
+gl                                           0
+xa.x1.drv                             0.408219
+xa.x1.rsti0                                1.8
+xa.x1.rsti                                 1.8
+xa.x1.xcmps.tail                       1.51346
+xa.x1.xcmps.o1m                       0.864861
+xa.x1.vrefsn                               0.6
+xa.x1.xcmps.o1                     6.58689e-06
+xa.x1.xcmps.o2                             1.8
+xa.x1.xcmps.o3                     5.62004e-07
+xa.x1.cmps                                 1.8
+xa.x1.vrefsn0                              0.6
+xa.x1.vrefs                                0.6
+xa.x1.nzc                                    0
+xa.x1.adb                                  1.8
+xa.x1.ad                           6.28662e-07
+xa.x1.nzi                                    0
+xa.x1.en                           5.34517e-07
+xa.x1.cmpb                         5.28891e-07
+xa.x1.sba                                  1.8
+xa.x1.xnsa.n1                        0.0497902
+xa.x1.a                             1.1945e-06
+xa.x1.ab                                   1.8
+xa.x1.xla.x1.n1                    5.94324e-07
+xa.x1.xla.x2.n1                      0.0430773
+xa.x1.ad1                           1.1945e-06
+xa.x1.sbc0                                 1.8
+xa.x1.xnsc.n1                      8.08994e-11
+xa.x1.c                            1.60904e-06
+xa.x1.cbar                                 1.8
+xa.x1.xlc.x1.n1                    8.05176e-07
+xa.x1.xlc.x2.n1                      0.0668366
+xa.x1.cd1                          1.60904e-06
+xa.x1.cd2                                  1.8
+xa.x1.cdel                         1.14964e-06
+xa.x1.sbb                                  1.8
+xa.x1.xnsb.n1                        0.0546516
+xa.x1.b                            1.29117e-06
+xa.x1.bb                                   1.8
+xa.x1.xlb.x1.n1                    6.43975e-07
+xa.x1.xlb.x2.n1                      0.0861327
+xa.x1.sib                                  1.8
+xa.x1.xnsi.n1                      1.76981e-10
+xa.x1.xnsi.n2                      8.90874e-11
+xa.x2.gm                              0.860795
+xa.x2.sen0                                   0
+xa.x2.rst0                                 1.8
+xa.x2.preb0                                  0
+xa.x2.sen                                    0
+xa.x2.rst                                  1.8
+xa.x2.preb                                   0
+xa.x2.ibs                             0.508299
+xa.x2.ibo                             0.506652
+xa.x2.dq                               1.09578
+xa.vmem2                               0.39022
+xa.x2.admb                                 1.8
+xa.x2.xnad.n1                      7.63735e-11
+xa.x2.adm                          5.02889e-07
+xa.x2.vs                               1.29985
+xa.x2.vgd                              1.01308
+xa.x2.x                                0.40001
+xa.x2.si                           4.69533e-07
+xa.x2.sum                             0.407199
+xa.x2.sd                                   1.8
+xa.x2.xop.tail                         1.09739
+xa.x2.xop.o1m                          0.69561
+xa.x2.xop.o1                          0.698405
+xa.x2.vcmn                                 0.4
+xa.x2.xop.oz                          0.698405
+xa.x2.vcmn0                                0.4
+xa.x2.nzo                                    0
+xa.x2.drv                             0.407199
+xa.x2.rsti0                                1.8
+xa.x2.rsti                                 1.8
+xa.x2.xcmps.tail                         1.508
+xa.x2.xcmps.o1m                       0.860381
+xa.x2.vrefsn                               0.6
+xa.x2.xcmps.o1                     6.99771e-06
+xa.x2.xcmps.o2                             1.8
+xa.x2.xcmps.o3                     3.88385e-07
+xa.x2.cmps                                 1.8
+xa.x2.vrefsn0                              0.6
+xa.x2.vrefs                                0.6
+xa.x2.nzc                                    0
+xa.x2.adb                                  1.8
+xa.x2.ad                           4.84634e-07
+xa.x2.nzi                                    0
+xa.x2.en                           7.20119e-07
+xa.x2.cmpb                         7.35156e-07
+xa.x2.sba                                  1.8
+xa.x2.xnsa.n1                        0.0306693
+xa.x2.a                            1.02021e-06
+xa.x2.ab                                   1.8
+xa.x2.xla.x1.n1                    5.12078e-07
+xa.x2.xla.x2.n1                      0.0691495
+xa.x2.ad1                          1.02021e-06
+xa.x2.sbc0                                 1.8
+xa.x2.xnsc.n1                       1.0372e-10
+xa.x2.c                             1.1108e-06
+xa.x2.cbar                                 1.8
+xa.x2.xlc.x1.n1                    5.57665e-07
+xa.x2.xlc.x2.n1                      0.0518723
+xa.x2.cd1                           1.1108e-06
+xa.x2.cd2                                  1.8
+xa.x2.cdel                         4.67123e-07
+xa.x2.sbb                                  1.8
+xa.x2.xnsb.n1                        0.0314031
+xa.x2.b                            1.46333e-06
+xa.x2.bb                                   1.8
+xa.x2.xlb.x1.n1                    7.46345e-07
+xa.x2.xlb.x2.n1                      0.0467478
+xa.x2.sib                                  1.8
+xa.x2.xnsi.n1                      1.31636e-10
+xa.x2.xnsi.n2                      6.70713e-11
+xa.ibm                                0.509972
+xa.nzm                                       0
+xa.vrefmn0                                 0.8
+xa.vrefm                                   0.8
+xa.vrefmn                                  0.8
+xa.xcmpm.tail                          1.78644
+xa.xcmpm.o1m                          0.613572
+xa.xcmpm.o1                            1.77771
+xa.xcmpm.o2                          0.0192397
+xa.xcmpm.o3                                1.8
+xa.cmpm                            1.47414e-06
+xa.cmpmb                                   1.8
+xa.sbp                                     1.8
+xa.pbdel                                   1.8
+xa.xnsp.n1                         6.17627e-11
+xa.rbp                                     1.8
+xa.pdel                            8.53864e-07
+xa.xnrp.n1                             1.50061
+xa.p                               1.74089e-06
+xa.xlp.x1.n1                       8.84352e-07
+xa.xlp.x2.n1                           1.51119
+xa.pd1                             1.74089e-06
+vinitb1                                 0.3895
+ksb1                                         0
+krb1                                         1
+kpb1                                         0
+tsb1                                         1
+ampb1                                        1
+vinitb2                                 0.3895
+ksb2                                         0
+krb2                                         1
+kpb2                                         0
+tsb2                                         1
+ampb2                                        1
+xb.x1.gm                              0.862093
+xb.x1.sen0                                   0
+xb.x1.rst0                                 1.8
+xb.x1.preb0                                  0
+xb.x1.sen                                    0
+xb.x1.rst                                  1.8
+xb.x1.preb                                   0
+xb.x1.ibs                             0.505506
+xb.x1.ibo                             0.507657
+xb.x1.dq                               1.07735
+xb.vmem1                              0.388868
+xb.x1.admb                                 1.8
+xb.pb                                      1.8
+xb.x1.xnad.n1                      8.23514e-11
+xb.x1.adm                          4.01651e-07
+xb.vq                                     1.25
+xb.x1.vs                               1.29987
+xb.x1.vgd                              1.01385
+xb.x1.x                               0.400009
+xb.x1.si                           5.41794e-07
+xb.x1.sum                              0.39368
+xb.x1.sd                                   1.8
+xb.x1.xop.tail                         1.09426
+xb.x1.xop.o1m                         0.693126
+xb.x1.xop.o1                          0.699021
+xb.x1.vcmn                                 0.4
+xb.x1.xop.oz                          0.699021
+xb.x1.vcmn0                                0.4
+xb.x1.nzo                                    0
+xb.x1.drv                              0.39368
+xb.x1.rsti0                                1.8
+xb.x1.rsti                                 1.8
+xb.x1.xcmps.tail                       1.52192
+xb.x1.xcmps.o1m                       0.861938
+xb.x1.vrefsn                               0.6
+xb.x1.xcmps.o1                     1.00071e-05
+xb.x1.xcmps.o2                             1.8
+xb.x1.xcmps.o3                     9.43911e-07
+xb.x1.cmps                                 1.8
+xb.x1.vrefsn0                              0.6
+xb.x1.vrefs                                0.6
+xb.x1.nzc                                    0
+xb.x1.adb                                  1.8
+xb.x1.ad                           1.27878e-06
+xb.x1.nzi                                    0
+xb.x1.en                           8.81643e-07
+xb.x1.cmpb                         3.98425e-07
+xb.x1.sba                                  1.8
+xb.x1.xnsa.n1                        0.0942263
+xb.x1.a                            1.62079e-06
+xb.x1.ab                                   1.8
+xb.x1.xla.x1.n1                      8.111e-07
+xb.x1.xla.x2.n1                      0.0846018
+xb.x1.ad1                          1.62079e-06
+xb.x1.sbc0                                 1.8
+xb.x1.xnsc.n1                      4.29374e-11
+xb.x1.c                            1.58737e-06
+xb.x1.cbar                                 1.8
+xb.x1.xlc.x1.n1                    7.79249e-07
+xb.x1.xlc.x2.n1                      0.0567955
+xb.x1.cd1                          1.58737e-06
+xb.x1.cd2                                  1.8
+xb.x1.cdel                         3.33864e-07
+xb.x1.sbb                                  1.8
+xb.x1.xnsb.n1                        0.0871678
+xb.x1.b                            5.73456e-07
+xb.x1.bb                                   1.8
+xb.x1.xlb.x1.n1                    2.85729e-07
+xb.x1.xlb.x2.n1                      0.0623399
+xb.x1.sib                                  1.8
+xb.x1.xnsi.n1                       9.8053e-11
+xb.x1.xnsi.n2                      4.92905e-11
+xb.x2.gm                              0.863805
+xb.x2.sen0                                   0
+xb.x2.rst0                                 1.8
+xb.x2.preb0                                  0
+xb.x2.sen                                    0
+xb.x2.rst                                  1.8
+xb.x2.preb                                   0
+xb.x2.ibs                             0.505127
+xb.x2.ibo                             0.508909
+xb.x2.dq                               1.09462
+xb.vmem2                              0.389532
+xb.x2.admb                                 1.8
+xb.x2.xnad.n1                      6.40312e-11
+xb.x2.adm                           7.7507e-07
+xb.x2.vs                               1.29987
+xb.x2.vgd                              1.01255
+xb.x2.x                               0.400009
+xb.x2.si                           7.02028e-07
+xb.x2.sum                             0.400318
+xb.x2.sd                                   1.8
+xb.x2.xop.tail                         1.09252
+xb.x2.xop.o1m                         0.695099
+xb.x2.xop.o1                          0.698178
+xb.x2.vcmn                                 0.4
+xb.x2.xop.oz                          0.698178
+xb.x2.vcmn0                                0.4
+xb.x2.nzo                                    0
+xb.x2.drv                             0.400318
+xb.x2.rsti0                                1.8
+xb.x2.rsti                                 1.8
+xb.x2.xcmps.tail                       1.52283
+xb.x2.xcmps.o1m                       0.858135
+xb.x2.vrefsn                               0.6
+xb.x2.xcmps.o1                     9.28705e-06
+xb.x2.xcmps.o2                             1.8
+xb.x2.xcmps.o3                     8.62201e-07
+xb.x2.cmps                                 1.8
+xb.x2.vrefsn0                              0.6
+xb.x2.vrefs                                0.6
+xb.x2.nzc                                    0
+xb.x2.adb                                  1.8
+xb.x2.ad                           6.97431e-07
+xb.x2.nzi                                    0
+xb.x2.en                            7.2294e-07
+xb.x2.cmpb                         3.06849e-07
+xb.x2.sba                                  1.8
+xb.x2.xnsa.n1                        0.0565204
+xb.x2.a                            1.13116e-06
+xb.x2.ab                                   1.8
+xb.x2.xla.x1.n1                    5.68318e-07
+xb.x2.xla.x2.n1                      0.0720687
+xb.x2.ad1                          1.13116e-06
+xb.x2.sbc0                                 1.8
+xb.x2.xnsc.n1                      2.59625e-11
+xb.x2.c                             1.1696e-06
+xb.x2.cbar                                 1.8
+xb.x2.xlc.x1.n1                    5.89307e-07
+xb.x2.xlc.x2.n1                      0.0929239
+xb.x2.cd1                           1.1696e-06
+xb.x2.cd2                                  1.8
+xb.x2.cdel                         7.79928e-07
+xb.x2.sbb                                  1.8
+xb.x2.xnsb.n1                        0.0583068
+xb.x2.b                            1.35775e-06
+xb.x2.bb                                   1.8
+xb.x2.xlb.x1.n1                     6.8759e-07
+xb.x2.xlb.x2.n1                      0.0974163
+xb.x2.sib                                  1.8
+xb.x2.xnsi.n1                      8.21603e-11
+xb.x2.xnsi.n2                       4.1711e-11
+xb.ibm                                0.505942
+xb.nzm                                       0
+xb.vrefmn0                                 0.8
+xb.vrefm                                   0.8
+xb.vrefmn                                  0.8
+xb.xcmpm.tail                          1.78755
+xb.xcmpm.o1m                          0.616017
+xb.xcmpm.o1                            1.77978
+xb.xcmpm.o2                          0.0197813
+xb.xcmpm.o3                                1.8
+xb.cmpm                            3.37413e-07
+xb.cmpmb                                   1.8
+xb.sbp                                     1.8
+xb.pbdel                                   1.8
+xb.xnsp.n1                         7.27972e-11
+xb.rbp                                     1.8
+xb.pdel                            9.82734e-07
+xb.xnrp.n1                             1.49014
+xb.p                               7.96302e-07
+xb.xlp.x1.n1                       3.88163e-07
+xb.xlp.x2.n1                           1.51973
+xb.pd1                             7.96302e-07
+b.xb.bvrm#branch                             0
+b.xb.x2.bvrs#branch                          0
+b.xb.x2.bdrv#branch               -1.24583e-15
+b.xb.x2.bvcmn#branch                         0
+b.xb.x2.bpreb#branch                         0
+b.xb.x2.brst#branch                          0
+b.xb.x2.bsen#branch                          0
+b.xb.x1.bvrs#branch                          0
+b.xb.x1.bdrv#branch               -1.24514e-15
+b.xb.x1.bvcmn#branch                         0
+b.xb.x1.bpreb#branch                         0
+b.xb.x1.brst#branch                          0
+b.xb.x1.bsen#branch                          0
+b.xa.bvrm#branch                             0
+b.xa.x2.bvrs#branch                 1.0842e-19
+b.xa.x2.bdrv#branch               -1.24578e-15
+b.xa.x2.bvcmn#branch                         0
+b.xa.x2.bpreb#branch                         0
+b.xa.x2.brst#branch                          0
+b.xa.x2.bsen#branch                          0
+b.xa.x1.bvrs#branch                -1.0842e-19
+b.xa.x1.bdrv#branch               -1.25056e-15
+b.xa.x1.bvcmn#branch                         0
+b.xa.x1.bpreb#branch                         0
+b.xa.x1.brst#branch                          0
+b.xa.x1.bsen#branch                          0
+vgl#branch                                   0
+v.xb.vnzm#branch                             0
+v.xb.x2.vnzi#branch                          0
+v.xb.x2.vnzo#branch                          0
+v.xb.x2.vnzc#branch                          0
+v.xb.x2.vrsti#branch                         0
+v.xb.x1.vnzi#branch                          0
+v.xb.x1.vnzo#branch                          0
+v.xb.x1.vnzc#branch                          0
+v.xb.x1.vrsti#branch                         0
+vampb2#branch                                0
+vtsb2#branch                                 0
+vkpb2#branch                                 0
+vkrb2#branch                                 0
+vksb2#branch                                 0
+vinitb2#branch                               0
+vampb1#branch                                0
+vtsb1#branch                                 0
+vkpb1#branch                                 0
+vkrb1#branch                                 0
+vksb1#branch                                 0
+vinitb1#branch                               0
+v.xa.vnzm#branch                             0
+v.xa.x2.vnzi#branch                          0
+v.xa.x2.vnzo#branch                          0
+v.xa.x2.vnzc#branch                          0
+v.xa.x2.vrsti#branch                         0
+v.xa.x1.vnzi#branch                          0
+v.xa.x1.vnzo#branch                          0
+v.xa.x1.vnzc#branch                          0
+v.xa.x1.vrsti#branch                         0
+vampa2#branch                                0
+vtsa2#branch                                 0
+vkpa2#branch                                 0
+vkra2#branch                                 0
+vksa2#branch                                 0
+vinita2#branch                               0
+vampa1#branch                                0
+vtsa1#branch                                 0
+vkpa1#branch                                 0
+vkra1#branch                                 0
+vksa1#branch                                 0
+vinita1#branch                               0
+vpre#branch                       -3.40226e-08
+vlo#branch                         2.22059e-14
+vhi#branch                         9.27297e-15
+vcm#branch                         2.66822e-07
+vreopen#branch                     3.39488e-16
+vfire#branch                        1.6116e-15
+vr0#branch                        -2.85757e-07
+vdd#branch                        -0.000413374
+
+ Reference value :  0.00000e+00
+ Reference value :  1.90997e-05
+ Reference value :  4.28997e-05
+ Reference value :  7.28997e-05
+36: condition met: stop  when time >= 9.81e-05
+doAnalyses: Too many iterations without convergence
+
+tran simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.8100000000000013e-05
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7408929415270777e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.9630215746863844e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0001001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 9.91e-05 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0001001 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0001001
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0001381
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.81360e-05
+ Reference value :  9.91095e-05
+ Reference value :  1.05135e-04
+ Reference value :  1.20103e-04
+ Reference value :  1.36641e-04
+ Reference value :  1.36959e-04
+ Reference value :  1.36959e-04
+ Reference value :  1.36970e-04
+ Reference value :  1.36974e-04
+ Reference value :  1.36974e-04
+ Reference value :  1.36988e-04
+74: condition met: stop  when time >= 0.0001381
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.3825368238503229e-04
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7553040707671231e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.9630215751986297e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0001401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0001391 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0001401 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0001401
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0004581
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.39117e-04
+ Reference value :  1.40102e-04
+ Reference value :  1.43623e-04
+ Reference value :  1.43624e-04
+ Reference value :  1.43624e-04
+ Reference value :  1.43870e-04
+ Reference value :  1.60105e-04
+ Reference value :  1.75421e-04
+ Reference value :  1.75696e-04
+ Reference value :  1.75696e-04
+ Reference value :  1.75710e-04
+ Reference value :  1.75711e-04
+ Reference value :  1.75712e-04
+ Reference value :  1.75727e-04
+ Reference value :  1.81029e-04
+ Reference value :  1.81030e-04
+ Reference value :  1.81030e-04
+ Reference value :  1.81636e-04
+ Reference value :  2.04036e-04
+ Reference value :  2.20104e-04
+ Reference value :  2.20110e-04
+ Reference value :  2.20110e-04
+ Reference value :  2.20116e-04
+ Reference value :  2.20121e-04
+ Reference value :  2.20205e-04
+ Reference value :  2.45589e-04
+ Reference value :  2.60105e-04
+ Reference value :  2.60112e-04
+ Reference value :  2.60113e-04
+ Reference value :  2.60118e-04
+ Reference value :  2.60120e-04
+ Reference value :  2.60136e-04
+ Reference value :  2.81113e-04
+ Reference value :  3.09513e-04
+ Reference value :  3.37713e-04
+ Reference value :  3.63913e-04
+ Reference value :  3.96313e-04
+ Reference value :  4.27313e-04
+77: condition met: stop  when time >= 0.0004581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.5811318501421332e-04
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7772095243078447e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.8851697653535257e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0004601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0004591 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0004601 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0004601
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0004981
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.58313e-04
+ Reference value :  4.60134e-04
+ Reference value :  4.80063e-04
+ Reference value :  4.80102e-04
+ Reference value :  4.96905e-04
+ Reference value :  4.96936e-04
+ Reference value :  4.96936e-04
+ Reference value :  4.96950e-04
+ Reference value :  4.96951e-04
+ Reference value :  4.96951e-04
+ Reference value :  4.96965e-04
+80: condition met: stop  when time >= 0.0004981
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.9812003515705805e-04
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.6622049105504119e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.8319319066468289e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0005001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0004991 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0005001 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0005001
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0008181
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.99106e-04
+ Reference value :  5.00101e-04
+ Reference value :  5.03600e-04
+ Reference value :  5.03601e-04
+ Reference value :  5.03601e-04
+ Reference value :  5.13664e-04
+ Reference value :  5.24841e-04
+ Reference value :  5.35695e-04
+ Reference value :  5.35696e-04
+ Reference value :  5.35696e-04
+ Reference value :  5.35710e-04
+ Reference value :  5.35711e-04
+ Reference value :  5.35724e-04
+ Reference value :  5.35896e-04
+ Reference value :  5.41030e-04
+ Reference value :  5.41030e-04
+ Reference value :  5.41030e-04
+ Reference value :  5.54007e-04
+ Reference value :  5.80055e-04
+ Reference value :  5.80102e-04
+ Reference value :  5.80102e-04
+ Reference value :  5.80109e-04
+ Reference value :  5.80109e-04
+ Reference value :  5.80117e-04
+ Reference value :  5.80124e-04
+ Reference value :  5.80133e-04
+ Reference value :  6.02044e-04
+ Reference value :  6.20111e-04
+ Reference value :  6.20113e-04
+ Reference value :  6.20114e-04
+ Reference value :  6.20119e-04
+ Reference value :  6.20127e-04
+ Reference value :  6.27174e-04
+ Reference value :  6.53974e-04
+ Reference value :  6.82574e-04
+ Reference value :  7.09774e-04
+ Reference value :  7.37974e-04
+ Reference value :  7.67174e-04
+ Reference value :  7.93574e-04
+83: condition met: stop  when time >= 0.0008181
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.1817432227523782e-04
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.6785980910230565e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.5981997436901334e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0008201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0008191 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0008201 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0008201
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0008581
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.19062e-04
+ Reference value :  8.19101e-04
+ Reference value :  8.20101e-04
+ Reference value :  8.37316e-04
+ Reference value :  8.40101e-04
+ Reference value :  8.48317e-04
+ Reference value :  8.56950e-04
+ Reference value :  8.56950e-04
+ Reference value :  8.56964e-04
+ Reference value :  8.56965e-04
+ Reference value :  8.56965e-04
+ Reference value :  8.56980e-04
+86: condition met: stop  when time >= 0.0008581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.5810498337653921e-04
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7074785015809598e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.0919600550281107e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0008601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0008591 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0008601 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0008601
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0011781
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.59109e-04
+ Reference value :  8.60101e-04
+ Reference value :  8.62015e-04
+ Reference value :  8.63615e-04
+ Reference value :  8.63616e-04
+ Reference value :  8.63625e-04
+ Reference value :  8.80124e-04
+ Reference value :  8.94966e-04
+ Reference value :  8.95696e-04
+ Reference value :  8.95696e-04
+ Reference value :  8.95709e-04
+ Reference value :  8.95710e-04
+ Reference value :  8.95710e-04
+ Reference value :  8.95724e-04
+ Reference value :  9.00995e-04
+ Reference value :  9.01029e-04
+ Reference value :  9.01030e-04
+ Reference value :  9.03925e-04
+ Reference value :  9.36725e-04
+ Reference value :  9.40102e-04
+ Reference value :  9.40102e-04
+ Reference value :  9.40109e-04
+ Reference value :  9.40109e-04
+ Reference value :  9.40117e-04
+ Reference value :  9.40123e-04
+ Reference value :  9.40257e-04
+ Reference value :  9.65740e-04
+ Reference value :  9.80112e-04
+ Reference value :  9.80114e-04
+ Reference value :  9.80119e-04
+ Reference value :  9.80126e-04
+ Reference value :  9.82737e-04
+ Reference value :  1.01114e-03
+ Reference value :  1.03714e-03
+ Reference value :  1.06434e-03
+ Reference value :  1.08754e-03
+ Reference value :  1.11314e-03
+ Reference value :  1.14074e-03
+ Reference value :  1.16854e-03
+89: condition met: stop  when time >= 0.0011781
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.1781368454654431e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7433780021839285e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.8130862960123468e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0011801 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0011791 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0011801 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0011801
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0012181
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.17911e-03
+ Reference value :  1.18010e-03
+ Reference value :  1.18668e-03
+ Reference value :  1.20013e-03
+ Reference value :  1.21692e-03
+ Reference value :  1.21695e-03
+ Reference value :  1.21695e-03
+ Reference value :  1.21696e-03
+ Reference value :  1.21696e-03
+ Reference value :  1.21696e-03
+ Reference value :  1.21698e-03
+92: condition met: stop  when time >= 0.0012181
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.2181834322751242e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.6689643177784871e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.2883879784901864e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0012201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0012191 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0012201 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0012201
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0015381
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.21911e-03
+ Reference value :  1.22010e-03
+ Reference value :  1.22358e-03
+ Reference value :  1.22361e-03
+ Reference value :  1.22361e-03
+ Reference value :  1.22369e-03
+ Reference value :  1.23819e-03
+ Reference value :  1.23828e-03
+97: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.2382771599183720e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7817338893785994e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.6582666947022910e-01
+>>> meas tran f118 when v(xb.p)=0.9 rise=last from=0
+f118                =  1.238277e-03
+>>> delete all
+>>> stop when time >= 0.0015381
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.23828e-03
+ Reference value :  1.23828e-03
+ Reference value :  1.23828e-03
+ Reference value :  1.23841e-03
+ Reference value :  1.23842e-03
+ Reference value :  1.25400e-03
+ Reference value :  1.25570e-03
+ Reference value :  1.25570e-03
+ Reference value :  1.25571e-03
+ Reference value :  1.25571e-03
+ Reference value :  1.25571e-03
+ Reference value :  1.25573e-03
+ Reference value :  1.25908e-03
+ Reference value :  1.26099e-03
+ Reference value :  1.26099e-03
+ Reference value :  1.26853e-03
+ Reference value :  1.29893e-03
+ Reference value :  1.30010e-03
+ Reference value :  1.30011e-03
+ Reference value :  1.30011e-03
+ Reference value :  1.30012e-03
+ Reference value :  1.30012e-03
+ Reference value :  1.30429e-03
+ Reference value :  1.32495e-03
+ Reference value :  1.32497e-03
+ Reference value :  1.32497e-03
+ Reference value :  1.32497e-03
+ Reference value :  1.32497e-03
+ Reference value :  1.32508e-03
+ Reference value :  1.32511e-03
+ Reference value :  1.33846e-03
+ Reference value :  1.34011e-03
+ Reference value :  1.34011e-03
+ Reference value :  1.34011e-03
+ Reference value :  1.34012e-03
+ Reference value :  1.34012e-03
+ Reference value :  1.34017e-03
+ Reference value :  1.36431e-03
+ Reference value :  1.39271e-03
+ Reference value :  1.41591e-03
+ Reference value :  1.44531e-03
+ Reference value :  1.47531e-03
+ Reference value :  1.50171e-03
+ Reference value :  1.53071e-03
+98: condition met: stop  when time >= 0.0015381
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.5381095321544619e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7599645349100162e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.0022848715829236e-06
+>>> alter @vksa1[pulse] = [ 0 1 0.0015401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0015391 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0015401 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0015401
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0015781
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.53910e-03
+ Reference value :  1.54009e-03
+ Reference value :  1.55084e-03
+ Reference value :  1.56243e-03
+ Reference value :  1.57694e-03
+ Reference value :  1.57694e-03
+ Reference value :  1.57694e-03
+ Reference value :  1.57696e-03
+ Reference value :  1.57696e-03
+ Reference value :  1.57696e-03
+ Reference value :  1.57697e-03
+100: condition met: stop  when time >= 0.0015781
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.5781120628769203e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.6853940297957269e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.9633478311208636e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0015801 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0015791 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0015801 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0015801
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0018981
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.57911e-03
+ Reference value :  1.58010e-03
+ Reference value :  1.58361e-03
+ Reference value :  1.58361e-03
+ Reference value :  1.58361e-03
+ Reference value :  1.59816e-03
+ Reference value :  1.59828e-03
+105: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.5982763593935844e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.6894830490160139e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.3626748167181884e-01
+>>> meas tran f153 when v(xb.p)=0.9 rise=last from=0.001238277
+f153                =  1.598276e-03
+>>> delete all
+>>> stop when time >= 0.0018981
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.59828e-03
+ Reference value :  1.59828e-03
+ Reference value :  1.59828e-03
+ Reference value :  1.59841e-03
+ Reference value :  1.59917e-03
+ Reference value :  1.61535e-03
+ Reference value :  1.61570e-03
+ Reference value :  1.61570e-03
+ Reference value :  1.61570e-03
+ Reference value :  1.61571e-03
+ Reference value :  1.61571e-03
+ Reference value :  1.61572e-03
+ Reference value :  1.61580e-03
+ Reference value :  1.62098e-03
+ Reference value :  1.62099e-03
+ Reference value :  1.62239e-03
+ Reference value :  1.64999e-03
+ Reference value :  1.66010e-03
+ Reference value :  1.66010e-03
+ Reference value :  1.66011e-03
+ Reference value :  1.66011e-03
+ Reference value :  1.66012e-03
+ Reference value :  1.66012e-03
+ Reference value :  1.66013e-03
+ Reference value :  1.67414e-03
+ Reference value :  1.68497e-03
+ Reference value :  1.68497e-03
+ Reference value :  1.68497e-03
+ Reference value :  1.68497e-03
+ Reference value :  1.68497e-03
+ Reference value :  1.68510e-03
+ Reference value :  1.68511e-03
+ Reference value :  1.69847e-03
+ Reference value :  1.70012e-03
+ Reference value :  1.70017e-03
+ Reference value :  1.72398e-03
+ Reference value :  1.75218e-03
+ Reference value :  1.78038e-03
+ Reference value :  1.80858e-03
+ Reference value :  1.83978e-03
+ Reference value :  1.87258e-03
+106: condition met: stop  when time >= 0.0018981
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.8981814202980716e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.6508120911143273e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.7989499875887556e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0019001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0018991 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0019001 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0019001
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0019381
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.89910e-03
+ Reference value :  1.90017e-03
+ Reference value :  1.91994e-03
+109: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.9199409444271925e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.5167509458555533e-01
+>>> meas tran f174 when v(xa.p)=0.9 rise=last from=0
+f174                =  1.919941e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.4612277375657011e-07
+>>> delete all
+>>> stop when time >= 0.0019381
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.91994e-03
+ Reference value :  1.91994e-03
+ Reference value :  1.91994e-03
+ Reference value :  1.92008e-03
+ Reference value :  1.92010e-03
+ Reference value :  1.93693e-03
+ Reference value :  1.93697e-03
+ Reference value :  1.93697e-03
+ Reference value :  1.93699e-03
+ Reference value :  1.93699e-03
+ Reference value :  1.93699e-03
+ Reference value :  1.93700e-03
+111: condition met: stop  when time >= 0.0019381
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.9381980608925832e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8000003333554260e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.5808844951890986e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0019401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0019391 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0019401 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0019401
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0022581
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.93910e-03
+ Reference value :  1.94009e-03
+ Reference value :  1.94010e-03
+ Reference value :  1.94232e-03
+ Reference value :  1.94232e-03
+ Reference value :  1.94853e-03
+ Reference value :  1.95828e-03
+114: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.9582780085226504e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8000000104005265e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.4145014705543917e-01
+>>> meas tran f196 when v(xb.p)=0.9 rise=last from=0.001598276
+f196                =  1.958278e-03
+>>> delete all
+>>> stop when time >= 0.0022581
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.95828e-03
+ Reference value :  1.95828e-03
+ Reference value :  1.95828e-03
+ Reference value :  1.95829e-03
+ Reference value :  1.95842e-03
+ Reference value :  1.96013e-03
+ Reference value :  1.97569e-03
+ Reference value :  1.97570e-03
+ Reference value :  1.97570e-03
+ Reference value :  1.97571e-03
+ Reference value :  1.97571e-03
+ Reference value :  1.97572e-03
+ Reference value :  1.97573e-03
+ Reference value :  1.98098e-03
+ Reference value :  1.98098e-03
+ Reference value :  1.98198e-03
+ Reference value :  2.01278e-03
+ Reference value :  2.01520e-03
+ Reference value :  2.01520e-03
+ Reference value :  2.01520e-03
+ Reference value :  2.01521e-03
+ Reference value :  2.01521e-03
+ Reference value :  2.01535e-03
+ Reference value :  2.01537e-03
+ Reference value :  2.02010e-03
+ Reference value :  2.02010e-03
+ Reference value :  2.02010e-03
+ Reference value :  2.02011e-03
+ Reference value :  2.02011e-03
+ Reference value :  2.02012e-03
+ Reference value :  2.02013e-03
+ Reference value :  2.02511e-03
+ Reference value :  2.04497e-03
+ Reference value :  2.04497e-03
+ Reference value :  2.04497e-03
+ Reference value :  2.04497e-03
+ Reference value :  2.04497e-03
+ Reference value :  2.04497e-03
+ Reference value :  2.04511e-03
+ Reference value :  2.04632e-03
+ Reference value :  2.06010e-03
+ Reference value :  2.06010e-03
+ Reference value :  2.06011e-03
+ Reference value :  2.06011e-03
+ Reference value :  2.06011e-03
+ Reference value :  2.06012e-03
+ Reference value :  2.06013e-03
+ Reference value :  2.06439e-03
+ Reference value :  2.09619e-03
+ Reference value :  2.13039e-03
+ Reference value :  2.16439e-03
+ Reference value :  2.19839e-03
+ Reference value :  2.23099e-03
+115: condition met: stop  when time >= 0.0022581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.2581937916192783e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.6834846747896780e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.5593093321083467e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0022601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0022591 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0022601 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0022601
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0022981
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.25910e-03
+ Reference value :  2.25910e-03
+ Reference value :  2.26253e-03
+ Reference value :  2.27965e-03
+117: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.2796550329318012e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.6195510316292454e-01
+>>> meas tran f216 when v(xa.p)=0.9 rise=last from=0.001919941
+f216                =  2.279655e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.4128447225608866e-07
+>>> delete all
+>>> stop when time >= 0.0022981
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.27966e-03
+ Reference value :  2.27966e-03
+ Reference value :  2.27966e-03
+ Reference value :  2.27966e-03
+ Reference value :  2.27979e-03
+ Reference value :  2.28011e-03
+ Reference value :  2.29686e-03
+ Reference value :  2.29694e-03
+ Reference value :  2.29694e-03
+ Reference value :  2.29695e-03
+ Reference value :  2.29695e-03
+ Reference value :  2.29696e-03
+ Reference value :  2.29697e-03
+119: condition met: stop  when time >= 0.0022981
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.2981180832749477e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999995730403910e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.6257233703645094e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0023001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0022991 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0023001 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0023001
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0026181
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.30009e-03
+ Reference value :  2.30229e-03
+ Reference value :  2.30229e-03
+ Reference value :  2.30241e-03
+ Reference value :  2.31826e-03
+122: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.3182644903167252e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999997679785944e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.3982384327863955e-01
+>>> meas tran f238 when v(xb.p)=0.9 rise=last from=0.001958278
+f238                =  2.318264e-03
+>>> delete all
+>>> stop when time >= 0.0026181
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.31826e-03
+ Reference value :  2.31826e-03
+ Reference value :  2.31827e-03
+ Reference value :  2.31827e-03
+ Reference value :  2.31841e-03
+ Reference value :  2.32016e-03
+ Reference value :  2.33569e-03
+ Reference value :  2.33569e-03
+ Reference value :  2.33570e-03
+ Reference value :  2.33571e-03
+ Reference value :  2.33571e-03
+ Reference value :  2.33572e-03
+ Reference value :  2.34042e-03
+ Reference value :  2.34098e-03
+ Reference value :  2.34098e-03
+ Reference value :  2.34792e-03
+ Reference value :  2.37485e-03
+ Reference value :  2.37492e-03
+ Reference value :  2.37492e-03
+ Reference value :  2.37492e-03
+ Reference value :  2.37492e-03
+ Reference value :  2.37492e-03
+ Reference value :  2.37506e-03
+ Reference value :  2.37513e-03
+ Reference value :  2.38010e-03
+ Reference value :  2.38010e-03
+ Reference value :  2.38011e-03
+ Reference value :  2.38011e-03
+ Reference value :  2.38012e-03
+ Reference value :  2.38012e-03
+ Reference value :  2.38013e-03
+ Reference value :  2.39441e-03
+ Reference value :  2.40496e-03
+ Reference value :  2.40496e-03
+ Reference value :  2.40496e-03
+ Reference value :  2.40496e-03
+ Reference value :  2.40496e-03
+ Reference value :  2.40496e-03
+ Reference value :  2.40510e-03
+ Reference value :  2.40521e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42012e-03
+ Reference value :  2.42594e-03
+ Reference value :  2.45414e-03
+ Reference value :  2.48174e-03
+ Reference value :  2.50654e-03
+ Reference value :  2.52834e-03
+ Reference value :  2.55054e-03
+ Reference value :  2.57854e-03
+ Reference value :  2.60834e-03
+123: condition met: stop  when time >= 0.0026181
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.6181448227731623e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8078168792614998e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.2389497905296112e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0026201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0026191 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0026201 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0026201
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0026581
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.61910e-03
+ Reference value :  2.62003e-03
+ Reference value :  2.62745e-03
+ Reference value :  2.63976e-03
+125: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.6397588460858952e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.8258707025352066e-01
+>>> meas tran f258 when v(xa.p)=0.9 rise=last from=0.002279655
+f258                =  2.639759e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.0686859788302291e-07
+>>> delete all
+>>> stop when time >= 0.0026581
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.63976e-03
+ Reference value :  2.63976e-03
+ Reference value :  2.63976e-03
+ Reference value :  2.63979e-03
+ Reference value :  2.63990e-03
+ Reference value :  2.64739e-03
+ Reference value :  2.65695e-03
+ Reference value :  2.65695e-03
+ Reference value :  2.65696e-03
+ Reference value :  2.65696e-03
+ Reference value :  2.65696e-03
+ Reference value :  2.65698e-03
+127: condition met: stop  when time >= 0.0026581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.6582499122307099e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8000002614496406e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.6965604874461632e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0026601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0026591 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0026601 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0026601
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0029781
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.65910e-03
+ Reference value :  2.66010e-03
+ Reference value :  2.66230e-03
+ Reference value :  2.66230e-03
+ Reference value :  2.66231e-03
+ Reference value :  2.67817e-03
+ Reference value :  2.67819e-03
+130: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.6781868891606960e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999999974091805e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.0705618570771540e-01
+>>> meas tran f280 when v(xb.p)=0.9 rise=last from=0.002318264
+f280                =  2.678187e-03
+>>> delete all
+>>> stop when time >= 0.0029781
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.67819e-03
+ Reference value :  2.67819e-03
+ Reference value :  2.67819e-03
+ Reference value :  2.67833e-03
+ Reference value :  2.68025e-03
+ Reference value :  2.69568e-03
+ Reference value :  2.69568e-03
+ Reference value :  2.69568e-03
+ Reference value :  2.69570e-03
+ Reference value :  2.69570e-03
+ Reference value :  2.69570e-03
+ Reference value :  2.69571e-03
+ Reference value :  2.70097e-03
+ Reference value :  2.70097e-03
+ Reference value :  2.70098e-03
+ Reference value :  2.72386e-03
+ Reference value :  2.73502e-03
+ Reference value :  2.73502e-03
+ Reference value :  2.73502e-03
+ Reference value :  2.73502e-03
+ Reference value :  2.73503e-03
+ Reference value :  2.73516e-03
+ Reference value :  2.73517e-03
+ Reference value :  2.73981e-03
+ Reference value :  2.74010e-03
+ Reference value :  2.74011e-03
+ Reference value :  2.74011e-03
+ Reference value :  2.74012e-03
+ Reference value :  2.74013e-03
+ Reference value :  2.74376e-03
+ Reference value :  2.76488e-03
+ Reference value :  2.76488e-03
+ Reference value :  2.76488e-03
+ Reference value :  2.76488e-03
+ Reference value :  2.76488e-03
+ Reference value :  2.76502e-03
+ Reference value :  2.76503e-03
+ Reference value :  2.78012e-03
+ Reference value :  2.78014e-03
+ Reference value :  2.78965e-03
+ Reference value :  2.81965e-03
+ Reference value :  2.84805e-03
+ Reference value :  2.87605e-03
+ Reference value :  2.90805e-03
+ Reference value :  2.94125e-03
+ Reference value :  2.97365e-03
+131: condition met: stop  when time >= 0.0029781
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.9782520169524210e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.6734275550782117e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.0702140573926392e-06
+>>> alter @vksa1[pulse] = [ 0 1 0.0029801 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0029791 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0029801 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0029801
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0033381
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.98010e-03
+ Reference value :  2.99808e-03
+ Reference value :  2.99977e-03
+133: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.9997672059480988e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.4125133791835314e-01
+>>> meas tran f300 when v(xa.p)=0.9 rise=last from=0.002639759
+f300                =  2.999767e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.1127628838823094e-06
+>>> delete all
+>>> stop when time >= 0.0030049
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.99977e-03
+ Reference value :  2.99977e-03
+ Reference value :  2.99977e-03
+ Reference value :  2.99990e-03
+ Reference value :  3.00013e-03
+135: condition met: stop  when time >= 0.0030049
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.0050860882247987e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8000032935887336e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 5.6241079502645537e-07
+>>> alter @vksb1[pulse] = [ 0 1 0.0030069 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0030059 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0030069 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0030069
+>>> alter vampb1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0033381
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.00687e-03
+ Reference value :  3.00690e-03
+ Reference value :  3.01695e-03
+ Reference value :  3.01695e-03
+ Reference value :  3.01697e-03
+ Reference value :  3.01697e-03
+ Reference value :  3.01698e-03
+ Reference value :  3.01943e-03
+ Reference value :  3.02230e-03
+ Reference value :  3.02230e-03
+ Reference value :  3.02281e-03
+ Reference value :  3.02704e-03
+ Reference value :  3.04284e-03
+ Reference value :  3.04285e-03
+ Reference value :  3.04285e-03
+ Reference value :  3.04286e-03
+ Reference value :  3.04286e-03
+ Reference value :  3.04287e-03
+ Reference value :  3.04719e-03
+ Reference value :  3.04734e-03
+ Reference value :  3.04734e-03
+ Reference value :  3.04736e-03
+ Reference value :  3.07021e-03
+ Reference value :  3.09498e-03
+ Reference value :  3.09503e-03
+ Reference value :  3.09503e-03
+ Reference value :  3.09503e-03
+ Reference value :  3.09503e-03
+ Reference value :  3.09517e-03
+ Reference value :  3.09542e-03
+ Reference value :  3.10010e-03
+ Reference value :  3.10011e-03
+ Reference value :  3.10011e-03
+ Reference value :  3.10012e-03
+ Reference value :  3.10012e-03
+ Reference value :  3.10923e-03
+ Reference value :  3.12690e-03
+ Reference value :  3.12691e-03
+ Reference value :  3.12691e-03
+ Reference value :  3.12692e-03
+ Reference value :  3.12693e-03
+ Reference value :  3.13400e-03
+ Reference value :  3.16140e-03
+ Reference value :  3.18680e-03
+ Reference value :  3.21220e-03
+ Reference value :  3.23980e-03
+ Reference value :  3.27000e-03
+ Reference value :  3.29500e-03
+ Reference value :  3.32520e-03
+137: condition met: stop  when time >= 0.0033381
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.3381956343774949e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8461551391467677e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.4414642157222014e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0033401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0033391 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0033401 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0033401
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0036981
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.33910e-03
+ Reference value :  3.34010e-03
+ Reference value :  3.34875e-03
+ Reference value :  3.35977e-03
+140: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.3597698913548570e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.4613656459028206e-01
+>>> meas tran f334 when v(xa.p)=0.9 rise=last from=0.002999767
+f334                =  3.359770e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.4696805772956257e-07
+>>> delete all
+>>> stop when time >= 0.0033649
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.35977e-03
+ Reference value :  3.35977e-03
+ Reference value :  3.35977e-03
+ Reference value :  3.35991e-03
+ Reference value :  3.36013e-03
+142: condition met: stop  when time >= 0.0033649
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.3649163418538177e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999978751970749e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.3650048657778057e-07
+>>> alter @vksb1[pulse] = [ 0 1 0.0033669 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0033659 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0033669 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0033669
+>>> alter vampb1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0036981
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.36590e-03
+ Reference value :  3.36684e-03
+ Reference value :  3.37666e-03
+ Reference value :  3.37695e-03
+ Reference value :  3.37695e-03
+ Reference value :  3.37696e-03
+ Reference value :  3.37697e-03
+ Reference value :  3.37698e-03
+ Reference value :  3.38096e-03
+ Reference value :  3.38230e-03
+ Reference value :  3.38230e-03
+ Reference value :  3.38691e-03
+ Reference value :  3.40284e-03
+ Reference value :  3.40285e-03
+ Reference value :  3.40285e-03
+ Reference value :  3.40286e-03
+ Reference value :  3.40286e-03
+ Reference value :  3.40287e-03
+ Reference value :  3.40289e-03
+ Reference value :  3.40734e-03
+ Reference value :  3.40734e-03
+ Reference value :  3.40734e-03
+ Reference value :  3.42168e-03
+ Reference value :  3.45008e-03
+ Reference value :  3.45503e-03
+ Reference value :  3.45503e-03
+ Reference value :  3.45503e-03
+ Reference value :  3.45503e-03
+ Reference value :  3.45504e-03
+ Reference value :  3.45515e-03
+ Reference value :  3.45518e-03
+ Reference value :  3.46001e-03
+ Reference value :  3.46010e-03
+ Reference value :  3.46010e-03
+ Reference value :  3.46011e-03
+ Reference value :  3.46011e-03
+ Reference value :  3.46011e-03
+ Reference value :  3.46012e-03
+ Reference value :  3.46013e-03
+ Reference value :  3.46437e-03
+ Reference value :  3.48689e-03
+ Reference value :  3.48691e-03
+ Reference value :  3.48691e-03
+ Reference value :  3.48691e-03
+ Reference value :  3.48692e-03
+ Reference value :  3.48692e-03
+ Reference value :  3.49139e-03
+ Reference value :  3.51939e-03
+ Reference value :  3.55159e-03
+ Reference value :  3.57939e-03
+ Reference value :  3.60839e-03
+ Reference value :  3.63999e-03
+ Reference value :  3.66599e-03
+ Reference value :  3.69479e-03
+144: condition met: stop  when time >= 0.0036981
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.6981874656219433e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8511665450249479e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.2704360574125842e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0037001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0036991 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0037001 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0037001
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0040581
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.69910e-03
+ Reference value :  3.70011e-03
+ Reference value :  3.71971e-03
+ Reference value :  3.71978e-03
+147: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.7197830775510085e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.4408998656120979e-01
+>>> meas tran f368 when v(xa.p)=0.9 rise=last from=0.00335977
+f368                =  3.719783e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.5163276570188557e-07
+>>> delete all
+>>> stop when time >= 0.0037249
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.71978e-03
+ Reference value :  3.71979e-03
+ Reference value :  3.71990e-03
+ Reference value :  3.71992e-03
+ Reference value :  3.72115e-03
+149: condition met: stop  when time >= 0.0037249
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.7249487615420391e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8000006286997077e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.7490666581708718e-07
+>>> alter @vksb1[pulse] = [ 0 1 0.0037269 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0037259 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0037269 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0037269
+>>> alter vampb1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0040581
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.72590e-03
+ Reference value :  3.72690e-03
+ Reference value :  3.73315e-03
+ Reference value :  3.73695e-03
+ Reference value :  3.73695e-03
+ Reference value :  3.73696e-03
+ Reference value :  3.73697e-03
+ Reference value :  3.73697e-03
+ Reference value :  3.73698e-03
+ Reference value :  3.73957e-03
+ Reference value :  3.74231e-03
+ Reference value :  3.74231e-03
+ Reference value :  3.74686e-03
+ Reference value :  3.74690e-03
+ Reference value :  3.75868e-03
+ Reference value :  3.76285e-03
+ Reference value :  3.76285e-03
+ Reference value :  3.76286e-03
+ Reference value :  3.76286e-03
+ Reference value :  3.76286e-03
+ Reference value :  3.76288e-03
+ Reference value :  3.76734e-03
+ Reference value :  3.76734e-03
+ Reference value :  3.76734e-03
+ Reference value :  3.76735e-03
+ Reference value :  3.78967e-03
+ Reference value :  3.81490e-03
+ Reference value :  3.81505e-03
+ Reference value :  3.81505e-03
+ Reference value :  3.81505e-03
+ Reference value :  3.81505e-03
+ Reference value :  3.81517e-03
+ Reference value :  3.81519e-03
+ Reference value :  3.82014e-03
+ Reference value :  3.82015e-03
+ Reference value :  3.84119e-03
+ Reference value :  3.84691e-03
+ Reference value :  3.84691e-03
+ Reference value :  3.84692e-03
+ Reference value :  3.84692e-03
+ Reference value :  3.84710e-03
+ Reference value :  3.87960e-03
+ Reference value :  3.91340e-03
+ Reference value :  3.94540e-03
+ Reference value :  3.97840e-03
+ Reference value :  4.01100e-03
+ Reference value :  4.03940e-03
+151: condition met: stop  when time >= 0.0040581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.0581979907991965e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.9949771003565245e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.7993999078126639e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0040601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0040591 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0040601 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0040601
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0044181
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.05910e-03
+ Reference value :  4.05927e-03
+ Reference value :  4.06010e-03
+ Reference value :  4.07964e-03
+ Reference value :  4.07977e-03
+154: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.0797705161672764e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.4808575750100965e-01
+>>> meas tran f402 when v(xa.p)=0.9 rise=last from=0.003719783
+f402                =  4.079771e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.7355089283167438e-07
+>>> delete all
+>>> stop when time >= 0.0040849
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.07977e-03
+ Reference value :  4.07977e-03
+ Reference value :  4.07977e-03
+ Reference value :  4.07991e-03
+ Reference value :  4.08011e-03
+156: condition met: stop  when time >= 0.0040849
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.0849049231195863e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999984088217822e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.4536494587967674e-07
+>>> alter @vksb1[pulse] = [ 0 1 0.0040869 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0040859 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0040869 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0040869
+>>> alter vampb1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0044181
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.08690e-03
+ Reference value :  4.08792e-03
+ Reference value :  4.09695e-03
+ Reference value :  4.09695e-03
+ Reference value :  4.09696e-03
+ Reference value :  4.09696e-03
+ Reference value :  4.09696e-03
+ Reference value :  4.09698e-03
+ Reference value :  4.09826e-03
+ Reference value :  4.10230e-03
+ Reference value :  4.10230e-03
+ Reference value :  4.10688e-03
+ Reference value :  4.11593e-03
+ Reference value :  4.12285e-03
+ Reference value :  4.12285e-03
+ Reference value :  4.12285e-03
+ Reference value :  4.12286e-03
+ Reference value :  4.12286e-03
+ Reference value :  4.12287e-03
+ Reference value :  4.12734e-03
+ Reference value :  4.12734e-03
+ Reference value :  4.12734e-03
+ Reference value :  4.13004e-03
+ Reference value :  4.15784e-03
+ Reference value :  4.17503e-03
+ Reference value :  4.17503e-03
+ Reference value :  4.17503e-03
+ Reference value :  4.17503e-03
+ Reference value :  4.17504e-03
+ Reference value :  4.17506e-03
+ Reference value :  4.17518e-03
+ Reference value :  4.17628e-03
+ Reference value :  4.18010e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18013e-03
+ Reference value :  4.19540e-03
+ Reference value :  4.20690e-03
+ Reference value :  4.20690e-03
+ Reference value :  4.20691e-03
+ Reference value :  4.20691e-03
+ Reference value :  4.20692e-03
+ Reference value :  4.20693e-03
+ Reference value :  4.20857e-03
+ Reference value :  4.24117e-03
+ Reference value :  4.27157e-03
+ Reference value :  4.30377e-03
+ Reference value :  4.33457e-03
+ Reference value :  4.36617e-03
+ Reference value :  4.39457e-03
+158: condition met: stop  when time >= 0.0044181
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.4181674101625408e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7284641984837615e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 6.7992900319089688e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0044201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0044191 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0044201 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0044201
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0047781
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.41910e-03
+ Reference value :  4.41910e-03
+ Reference value :  4.42732e-03
+ Reference value :  4.43989e-03
+161: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.4398938553417248e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.7144004460084032e-01
+>>> meas tran f436 when v(xa.p)=0.9 rise=last from=0.004079771
+f436                =  4.439894e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.0410152971052712e-07
+>>> delete all
+>>> stop when time >= 0.0044449
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.43989e-03
+ Reference value :  4.43990e-03
+ Reference value :  4.43990e-03
+ Reference value :  4.44003e-03
+ Reference value :  4.44010e-03
+163: condition met: stop  when time >= 0.0044449
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.4449739789221322e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8000012559653793e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.6900500303183923e-07
+>>> alter @vksb1[pulse] = [ 0 1 0.0044469 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0044459 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0044469 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0044469
+>>> alter vampb1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0047781
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.44590e-03
+ Reference value :  4.44590e-03
+ Reference value :  4.44690e-03
+ Reference value :  4.45426e-03
+ Reference value :  4.45697e-03
+ Reference value :  4.45697e-03
+ Reference value :  4.45698e-03
+ Reference value :  4.45698e-03
+ Reference value :  4.45698e-03
+ Reference value :  4.45700e-03
+ Reference value :  4.46228e-03
+ Reference value :  4.46232e-03
+ Reference value :  4.46232e-03
+ Reference value :  4.46683e-03
+ Reference value :  4.48103e-03
+ Reference value :  4.48285e-03
+ Reference value :  4.48285e-03
+ Reference value :  4.48286e-03
+ Reference value :  4.48286e-03
+ Reference value :  4.48286e-03
+ Reference value :  4.48287e-03
+ Reference value :  4.48709e-03
+ Reference value :  4.48734e-03
+ Reference value :  4.48734e-03
+ Reference value :  4.48834e-03
+ Reference value :  4.52194e-03
+ Reference value :  4.53516e-03
+ Reference value :  4.53516e-03
+ Reference value :  4.53516e-03
+ Reference value :  4.53516e-03
+ Reference value :  4.53516e-03
+ Reference value :  4.53529e-03
+ Reference value :  4.53530e-03
+ Reference value :  4.54011e-03
+ Reference value :  4.54012e-03
+ Reference value :  4.54013e-03
+ Reference value :  4.54025e-03
+ Reference value :  4.56680e-03
+ Reference value :  4.56690e-03
+ Reference value :  4.56690e-03
+ Reference value :  4.56691e-03
+ Reference value :  4.56691e-03
+ Reference value :  4.56691e-03
+ Reference value :  4.56692e-03
+ Reference value :  4.56692e-03
+ Reference value :  4.56705e-03
+ Reference value :  4.59424e-03
+ Reference value :  4.62104e-03
+ Reference value :  4.65104e-03
+ Reference value :  4.68144e-03
+ Reference value :  4.70904e-03
+ Reference value :  4.73524e-03
+ Reference value :  4.76484e-03
+165: condition met: stop  when time >= 0.0047781
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.7782438378631501e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7508299128543104e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.9704929117685680e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0047801 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0047791 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0047801 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0047801
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0051381
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.77910e-03
+ Reference value :  4.78017e-03
+ Reference value :  4.79969e-03
+168: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.7996964867280190e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.4764107392116681e-01
+>>> meas tran f470 when v(xa.p)=0.9 rise=last from=0.004439894
+f470                =  4.799696e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.9874825627460596e-07
+>>> delete all
+>>> stop when time >= 0.0048049
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.79970e-03
+ Reference value :  4.79970e-03
+ Reference value :  4.79970e-03
+ Reference value :  4.79970e-03
+ Reference value :  4.79983e-03
+ Reference value :  4.80010e-03
+170: condition met: stop  when time >= 0.0048049
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.8050371541534615e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8000006749612616e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.0308519052117117e-07
+>>> alter @vksb1[pulse] = [ 0 1 0.0048069 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0048059 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0048069 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0048069
+>>> alter vampb1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0051381
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.80590e-03
+ Reference value :  4.80590e-03
+ Reference value :  4.80690e-03
+ Reference value :  4.81501e-03
+ Reference value :  4.81694e-03
+ Reference value :  4.81694e-03
+ Reference value :  4.81696e-03
+ Reference value :  4.81696e-03
+ Reference value :  4.81696e-03
+ Reference value :  4.81697e-03
+ Reference value :  4.82225e-03
+ Reference value :  4.82230e-03
+ Reference value :  4.82230e-03
+ Reference value :  4.82430e-03
+173: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.8243046772234168e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999999659612143e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.1146804919979207e-01
+>>> meas tran f492 when v(xb.p)=0.9 rise=last from=0.002678187
+f492                =  4.824305e-03
+>>> delete all
+>>> stop when time >= 0.0051381
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.82430e-03
+ Reference value :  4.82431e-03
+ Reference value :  4.82431e-03
+ Reference value :  4.82431e-03
+ Reference value :  4.82444e-03
+ Reference value :  4.82851e-03
+ Reference value :  4.84284e-03
+ Reference value :  4.84285e-03
+ Reference value :  4.84285e-03
+ Reference value :  4.84286e-03
+ Reference value :  4.84286e-03
+ Reference value :  4.84286e-03
+ Reference value :  4.84287e-03
+ Reference value :  4.84805e-03
+ Reference value :  4.84813e-03
+ Reference value :  4.84813e-03
+ Reference value :  4.86114e-03
+ Reference value :  4.89194e-03
+ Reference value :  4.89496e-03
+ Reference value :  4.89496e-03
+ Reference value :  4.89496e-03
+ Reference value :  4.89496e-03
+ Reference value :  4.89501e-03
+ Reference value :  4.89511e-03
+ Reference value :  4.90009e-03
+ Reference value :  4.90010e-03
+ Reference value :  4.90011e-03
+ Reference value :  4.90011e-03
+ Reference value :  4.90011e-03
+ Reference value :  4.90012e-03
+ Reference value :  4.90013e-03
+ Reference value :  4.91078e-03
+ Reference value :  4.91100e-03
+ Reference value :  4.91100e-03
+ Reference value :  4.91100e-03
+ Reference value :  4.91100e-03
+ Reference value :  4.91100e-03
+ Reference value :  4.91114e-03
+ Reference value :  4.91115e-03
+ Reference value :  4.92690e-03
+ Reference value :  4.92691e-03
+ Reference value :  4.92691e-03
+ Reference value :  4.92693e-03
+ Reference value :  4.94858e-03
+ Reference value :  4.98098e-03
+ Reference value :  5.01358e-03
+ Reference value :  5.04618e-03
+ Reference value :  5.07498e-03
+ Reference value :  5.10478e-03
+ Reference value :  5.13398e-03
+174: condition met: stop  when time >= 0.0051381
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.1381772960402295e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8616638347359302e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.3463128722287502e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0051401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0051391 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0051401 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0051401
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0054981
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.13910e-03
+ Reference value :  5.14010e-03
+ Reference value :  5.15480e-03
+ Reference value :  5.15974e-03
+176: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.1597424446712011e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.6500172466144885e-01
+>>> meas tran f512 when v(xa.p)=0.9 rise=last from=0.004799696
+f512                =  5.159742e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.2608799297028501e-07
+>>> delete all
+>>> stop when time >= 0.0051649
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.15974e-03
+ Reference value :  5.15975e-03
+ Reference value :  5.15975e-03
+ Reference value :  5.15988e-03
+ Reference value :  5.16010e-03
+178: condition met: stop  when time >= 0.0051649
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.1650310807919795e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999982975089146e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.3785525734312093e-07
+>>> alter @vksb1[pulse] = [ 0 1 0.0051669 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0051659 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0051669 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0051669
+>>> alter vampb1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0054981
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.16590e-03
+ Reference value :  5.16590e-03
+ Reference value :  5.16690e-03
+ Reference value :  5.17657e-03
+ Reference value :  5.17695e-03
+ Reference value :  5.17695e-03
+ Reference value :  5.17696e-03
+ Reference value :  5.17696e-03
+ Reference value :  5.17696e-03
+ Reference value :  5.17698e-03
+ Reference value :  5.18230e-03
+ Reference value :  5.18230e-03
+ Reference value :  5.18428e-03
+ Reference value :  5.18431e-03
+181: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.1843050975960408e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999999868492336e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.0297051457846478e-01
+>>> meas tran f534 when v(xb.p)=0.9 rise=last from=0.004824305
+f534                =  5.184305e-03
+>>> delete all
+>>> stop when time >= 0.0054981
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.18431e-03
+ Reference value :  5.18431e-03
+ Reference value :  5.18431e-03
+ Reference value :  5.18444e-03
+ Reference value :  5.18764e-03
+ Reference value :  5.20285e-03
+ Reference value :  5.20285e-03
+ Reference value :  5.20285e-03
+ Reference value :  5.20286e-03
+ Reference value :  5.20286e-03
+ Reference value :  5.20288e-03
+ Reference value :  5.20811e-03
+ Reference value :  5.20813e-03
+ Reference value :  5.20949e-03
+ Reference value :  5.23829e-03
+ Reference value :  5.25500e-03
+ Reference value :  5.25501e-03
+ Reference value :  5.25501e-03
+ Reference value :  5.25501e-03
+ Reference value :  5.25501e-03
+ Reference value :  5.25515e-03
+ Reference value :  5.25523e-03
+ Reference value :  5.26010e-03
+ Reference value :  5.26011e-03
+ Reference value :  5.26011e-03
+ Reference value :  5.26012e-03
+ Reference value :  5.26012e-03
+ Reference value :  5.26016e-03
+ Reference value :  5.27100e-03
+ Reference value :  5.27100e-03
+ Reference value :  5.27100e-03
+ Reference value :  5.27100e-03
+ Reference value :  5.27100e-03
+ Reference value :  5.27114e-03
+ Reference value :  5.27115e-03
+ Reference value :  5.28691e-03
+ Reference value :  5.28693e-03
+ Reference value :  5.29655e-03
+ Reference value :  5.32555e-03
+ Reference value :  5.35295e-03
+ Reference value :  5.38015e-03
+ Reference value :  5.40795e-03
+ Reference value :  5.43555e-03
+ Reference value :  5.46175e-03
+ Reference value :  5.48935e-03
+182: condition met: stop  when time >= 0.0054981
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.4981535578965653e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7091611148921038e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.1386178451334975e-06
+>>> alter @vksa1[pulse] = [ 0 1 0.0055001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0054991 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0055001 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0055001
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0058581
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.49911e-03
+ Reference value :  5.50010e-03
+ Reference value :  5.50387e-03
+ Reference value :  5.51977e-03
+184: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.5197720641034422e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.6828810999361359e-01
+>>> meas tran f554 when v(xa.p)=0.9 rise=last from=0.005159742
+f554                =  5.519772e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.0878883619499511e-06
+>>> delete all
+>>> stop when time >= 0.0055249
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.51977e-03
+ Reference value :  5.51977e-03
+ Reference value :  5.51977e-03
+ Reference value :  5.51978e-03
+ Reference value :  5.51991e-03
+ Reference value :  5.52375e-03
+186: condition met: stop  when time >= 0.0055249
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.5249475989515191e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999977392706505e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 5.9572390228812975e-07
+>>> alter @vksb1[pulse] = [ 0 1 0.0055269 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0055259 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0055269 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0055269
+>>> alter vampb1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0058581
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.52590e-03
+ Reference value :  5.52675e-03
+ Reference value :  5.52690e-03
+ Reference value :  5.53694e-03
+ Reference value :  5.53695e-03
+ Reference value :  5.53695e-03
+ Reference value :  5.53697e-03
+ Reference value :  5.53697e-03
+ Reference value :  5.53698e-03
+ Reference value :  5.53765e-03
+ Reference value :  5.54230e-03
+ Reference value :  5.54230e-03
+ Reference value :  5.54430e-03
+189: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.5443053652192292e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999999797699702e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.2464619324648323e-01
+>>> meas tran f576 when v(xb.p)=0.9 rise=last from=0.005184305
+f576                =  5.544305e-03
+>>> delete all
+>>> stop when time >= 0.0058581
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.54431e-03
+ Reference value :  5.54431e-03
+ Reference value :  5.54431e-03
+ Reference value :  5.54443e-03
+ Reference value :  5.54445e-03
+ Reference value :  5.55037e-03
+ Reference value :  5.56284e-03
+ Reference value :  5.56285e-03
+ Reference value :  5.56286e-03
+ Reference value :  5.56286e-03
+ Reference value :  5.56286e-03
+ Reference value :  5.56288e-03
+ Reference value :  5.56813e-03
+ Reference value :  5.56813e-03
+ Reference value :  5.56813e-03
+ Reference value :  5.58833e-03
+ Reference value :  5.61485e-03
+ Reference value :  5.61504e-03
+ Reference value :  5.61504e-03
+ Reference value :  5.61504e-03
+ Reference value :  5.61504e-03
+ Reference value :  5.61504e-03
+ Reference value :  5.61518e-03
+ Reference value :  5.61612e-03
+ Reference value :  5.62010e-03
+ Reference value :  5.62010e-03
+ Reference value :  5.62011e-03
+ Reference value :  5.62011e-03
+ Reference value :  5.62011e-03
+ Reference value :  5.62012e-03
+ Reference value :  5.62013e-03
+ Reference value :  5.63095e-03
+ Reference value :  5.63100e-03
+ Reference value :  5.63100e-03
+ Reference value :  5.63100e-03
+ Reference value :  5.63100e-03
+ Reference value :  5.63109e-03
+ Reference value :  5.63115e-03
+ Reference value :  5.64388e-03
+ Reference value :  5.64693e-03
+ Reference value :  5.65072e-03
+ Reference value :  5.68312e-03
+ Reference value :  5.71392e-03
+ Reference value :  5.74132e-03
+ Reference value :  5.76932e-03
+ Reference value :  5.79592e-03
+ Reference value :  5.82012e-03
+ Reference value :  5.84832e-03
+190: condition met: stop  when time >= 0.0058581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.8581171370564395e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7789198498600183e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.5615503913361586e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0058601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0058591 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0058601 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0058601
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0062181
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.85910e-03
+ Reference value :  5.85913e-03
+ Reference value :  5.86010e-03
+ Reference value :  5.87034e-03
+ Reference value :  5.87977e-03
+192: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.8797724960501316e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.6819980586370258e-01
+>>> meas tran f596 when v(xa.p)=0.9 rise=last from=0.005519772
+f596                =  5.879772e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.8634086664954637e-07
+>>> delete all
+>>> stop when time >= 0.0058849
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.87977e-03
+ Reference value :  5.87977e-03
+ Reference value :  5.87978e-03
+ Reference value :  5.87991e-03
+ Reference value :  5.88001e-03
+194: condition met: stop  when time >= 0.0058849
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.8850358364468053e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999980273055283e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.9959355243795705e-07
+>>> alter @vksb1[pulse] = [ 0 1 0.0058869 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0058859 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0058869 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0058869
+>>> alter vampb1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0062181
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.88592e-03
+ Reference value :  5.88718e-03
+ Reference value :  5.89695e-03
+ Reference value :  5.89695e-03
+ Reference value :  5.89696e-03
+ Reference value :  5.89697e-03
+ Reference value :  5.89697e-03
+ Reference value :  5.89698e-03
+ Reference value :  5.90209e-03
+ Reference value :  5.90230e-03
+ Reference value :  5.90230e-03
+ Reference value :  5.90441e-03
+197: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.9044101643257654e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8000003658441803e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.6403855331425492e-01
+>>> meas tran f618 when v(xb.p)=0.9 rise=last from=0.005544305
+f618                =  5.904410e-03
+>>> delete all
+>>> stop when time >= 0.0062181
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.90441e-03
+ Reference value :  5.90441e-03
+ Reference value :  5.90441e-03
+ Reference value :  5.90454e-03
+ Reference value :  5.90456e-03
+ Reference value :  5.91455e-03
+ Reference value :  5.92287e-03
+ Reference value :  5.92287e-03
+ Reference value :  5.92288e-03
+ Reference value :  5.92288e-03
+ Reference value :  5.92289e-03
+ Reference value :  5.92349e-03
+ Reference value :  5.92815e-03
+ Reference value :  5.92815e-03
+ Reference value :  5.93621e-03
+ Reference value :  5.96401e-03
+ Reference value :  5.97504e-03
+ Reference value :  5.97504e-03
+ Reference value :  5.97504e-03
+ Reference value :  5.97504e-03
+ Reference value :  5.97504e-03
+ Reference value :  5.97517e-03
+ Reference value :  5.97518e-03
+ Reference value :  5.98010e-03
+ Reference value :  5.98010e-03
+ Reference value :  5.98011e-03
+ Reference value :  5.98011e-03
+ Reference value :  5.98012e-03
+ Reference value :  5.98012e-03
+ Reference value :  5.98013e-03
+ Reference value :  5.98024e-03
+ Reference value :  5.99110e-03
+ Reference value :  5.99111e-03
+ Reference value :  5.99111e-03
+ Reference value :  5.99111e-03
+ Reference value :  5.99111e-03
+ Reference value :  5.99123e-03
+ Reference value :  5.99125e-03
+ Reference value :  5.99902e-03
+ Reference value :  6.00690e-03
+ Reference value :  6.00690e-03
+ Reference value :  6.00691e-03
+ Reference value :  6.00691e-03
+ Reference value :  6.00692e-03
+ Reference value :  6.00693e-03
+ Reference value :  6.01374e-03
+ Reference value :  6.04014e-03
+ Reference value :  6.06734e-03
+ Reference value :  6.09274e-03
+ Reference value :  6.11494e-03
+ Reference value :  6.13534e-03
+ Reference value :  6.16154e-03
+ Reference value :  6.18894e-03
+198: condition met: stop  when time >= 0.0062181
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.2181443606135062e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7322733546589254e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.3154143657668053e-07
+>>> alter @vksa1[pulse] = [ 0 1 0.0062201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra1[pulse] = [ 1 0 0.0062191 1n 1n 0.000121 2 ]
+>>> alter @vkpa1[pulse] = [ 0 1 0.0062201 1n 1n 0.00012 2 ]
+>>> alter vtsa1 dc = 0.0062201
+>>> alter vampa1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0066181
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.21900e-03
+ Reference value :  6.21910e-03
+ Reference value :  6.22011e-03
+ Reference value :  6.23964e-03
+ Reference value :  6.23977e-03
+200: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.2397716055426940e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.4118999637658551e-01
+>>> meas tran f638 when v(xa.p)=0.9 rise=last from=0.005879772
+f638                =  6.239772e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.9633549445541627e-07
+>>> delete all
+>>> stop when time >= 0.0062449
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.23977e-03
+ Reference value :  6.23977e-03
+ Reference value :  6.23977e-03
+ Reference value :  6.23991e-03
+ Reference value :  6.24010e-03
+202: condition met: stop  when time >= 0.0062449
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.2449167755662645e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999970787791493e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.9633468437731478e-07
+>>> alter @vksb1[pulse] = [ 0 1 0.0062469 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0062459 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0062469 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0062469
+>>> alter vampb1 dc = 1
+>>> delete all
+>>> stop when time >= 0.0066181
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.24591e-03
+ Reference value :  6.24690e-03
+ Reference value :  6.25695e-03
+ Reference value :  6.25695e-03
+ Reference value :  6.25696e-03
+ Reference value :  6.25697e-03
+ Reference value :  6.25697e-03
+ Reference value :  6.25698e-03
+ Reference value :  6.26230e-03
+ Reference value :  6.26230e-03
+ Reference value :  6.26235e-03
+ Reference value :  6.26431e-03
+205: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.2643057598610139e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7999999644353726e+00
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.1415658591763826e-01
+>>> meas tran f660 when v(xb.p)=0.9 rise=last from=0.00590441
+f660                =  6.264306e-03
+>>> delete all
+>>> stop when time >= 0.0066181
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.26431e-03
+ Reference value :  6.26431e-03
+ Reference value :  6.26431e-03
+ Reference value :  6.26445e-03
+ Reference value :  6.26691e-03
+ Reference value :  6.28282e-03
+ Reference value :  6.28285e-03
+ Reference value :  6.28285e-03
+ Reference value :  6.28286e-03
+ Reference value :  6.28286e-03
+ Reference value :  6.28287e-03
+ Reference value :  6.28791e-03
+ Reference value :  6.28813e-03
+ Reference value :  6.28813e-03
+ Reference value :  6.30141e-03
+ Reference value :  6.33381e-03
+ Reference value :  6.33503e-03
+ Reference value :  6.33504e-03
+ Reference value :  6.33504e-03
+ Reference value :  6.33504e-03
+ Reference value :  6.33504e-03
+ Reference value :  6.33518e-03
+ Reference value :  6.33522e-03
+ Reference value :  6.34014e-03
+ Reference value :  6.34015e-03
+ Reference value :  6.35097e-03
+ Reference value :  6.35100e-03
+ Reference value :  6.35100e-03
+ Reference value :  6.35100e-03
+ Reference value :  6.35100e-03
+ Reference value :  6.35112e-03
+ Reference value :  6.35115e-03
+ Reference value :  6.36633e-03
+ Reference value :  6.36690e-03
+ Reference value :  6.36690e-03
+ Reference value :  6.36691e-03
+ Reference value :  6.36691e-03
+ Reference value :  6.36692e-03
+ Reference value :  6.36692e-03
+ Reference value :  6.36693e-03
+ Reference value :  6.37799e-03
+ Reference value :  6.39819e-03
+ Reference value :  6.42339e-03
+ Reference value :  6.45019e-03
+ Reference value :  6.47819e-03
+ Reference value :  6.50559e-03
+ Reference value :  6.53079e-03
+ Reference value :  6.55619e-03
+ Reference value :  6.58259e-03
+ Reference value :  6.61139e-03
+206: condition met: stop  when time >= 0.0066181
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.6181907079704951e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8350350876993417e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 6.6230238821456591e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0066201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0066191 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0066201 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0066201
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0069781
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.61910e-03
+ Reference value :  6.62088e-03
+ Reference value :  6.63828e-03
+209: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.6382851199999057e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8314651608480358e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.3292857589355760e-01
+>>> meas tran f681 when v(xb.p)=0.9 rise=last from=0.006264306
+f681                =  6.638285e-03
+>>> delete all
+>>> stop when time >= 0.0066433
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.63829e-03
+ Reference value :  6.63829e-03
+ Reference value :  6.63829e-03
+ Reference value :  6.63829e-03
+ Reference value :  6.63842e-03
+ Reference value :  6.64010e-03
+210: condition met: stop  when time >= 0.0066433
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.6434915040676831e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8019356241576031e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.8000018565229861e+00
+>>> alter @vksa2[pulse] = [ 0 1 0.0066453 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra2[pulse] = [ 1 0 0.0066443 1n 1n 0.000121 2 ]
+>>> alter @vkpa2[pulse] = [ 0 1 0.0066453 1n 1n 0.00012 2 ]
+>>> alter vtsa2 dc = 0.0066453
+>>> alter vampa2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0069781
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.64502e-03
+ Reference value :  6.64904e-03
+ Reference value :  6.65570e-03
+ Reference value :  6.65570e-03
+ Reference value :  6.65571e-03
+ Reference value :  6.65571e-03
+ Reference value :  6.65571e-03
+ Reference value :  6.65573e-03
+ Reference value :  6.66094e-03
+ Reference value :  6.66099e-03
+ Reference value :  6.66099e-03
+ Reference value :  6.66530e-03
+ Reference value :  6.67753e-03
+ Reference value :  6.67754e-03
+ Reference value :  6.67754e-03
+ Reference value :  6.67755e-03
+ Reference value :  6.67755e-03
+ Reference value :  6.67755e-03
+ Reference value :  6.67757e-03
+ Reference value :  6.68317e-03
+ Reference value :  6.68325e-03
+ Reference value :  6.68325e-03
+ Reference value :  6.68373e-03
+ Reference value :  6.71170e-03
+ Reference value :  6.72498e-03
+ Reference value :  6.72498e-03
+ Reference value :  6.72498e-03
+ Reference value :  6.72498e-03
+ Reference value :  6.72498e-03
+ Reference value :  6.72512e-03
+ Reference value :  6.72512e-03
+ Reference value :  6.73996e-03
+ Reference value :  6.74010e-03
+ Reference value :  6.74011e-03
+ Reference value :  6.74011e-03
+ Reference value :  6.74011e-03
+ Reference value :  6.74012e-03
+ Reference value :  6.74012e-03
+ Reference value :  6.74016e-03
+ Reference value :  6.76275e-03
+ Reference value :  6.76530e-03
+ Reference value :  6.76531e-03
+ Reference value :  6.76531e-03
+ Reference value :  6.76532e-03
+ Reference value :  6.76532e-03
+ Reference value :  6.76533e-03
+ Reference value :  6.78421e-03
+ Reference value :  6.81441e-03
+ Reference value :  6.84461e-03
+ Reference value :  6.87621e-03
+ Reference value :  6.90661e-03
+ Reference value :  6.93681e-03
+ Reference value :  6.96741e-03
+212: condition met: stop  when time >= 0.0069781
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.9782078590158430e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.9139733079311366e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.2092678099046040e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0069801 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0069791 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0069801 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0069801
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0073381
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.98005e-03
+ Reference value :  6.98010e-03
+ Reference value :  6.98997e-03
+ Reference value :  6.99828e-03
+216: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.9982801014651739e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7408981137107891e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.1266233189306267e-01
+>>> meas tran f715 when v(xb.p)=0.9 rise=last from=0.006638285
+f715                =  6.998280e-03
+>>> delete all
+>>> stop when time >= 0.0070033
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.99828e-03
+ Reference value :  6.99828e-03
+ Reference value :  6.99828e-03
+ Reference value :  6.99828e-03
+ Reference value :  6.99842e-03
+ Reference value :  7.00014e-03
+217: condition met: stop  when time >= 0.0070033
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.0033777522829641e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7408979902876336e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.7999998589187973e+00
+>>> alter @vksa2[pulse] = [ 0 1 0.0070053 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra2[pulse] = [ 1 0 0.0070043 1n 1n 0.000121 2 ]
+>>> alter @vkpa2[pulse] = [ 0 1 0.0070053 1n 1n 0.00012 2 ]
+>>> alter vtsa2 dc = 0.0070053
+>>> alter vampa2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0073381
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  7.00431e-03
+ Reference value :  7.00538e-03
+ Reference value :  7.01566e-03
+ Reference value :  7.01570e-03
+ Reference value :  7.01570e-03
+ Reference value :  7.01571e-03
+ Reference value :  7.01571e-03
+ Reference value :  7.01571e-03
+ Reference value :  7.01572e-03
+ Reference value :  7.02097e-03
+ Reference value :  7.02098e-03
+ Reference value :  7.02099e-03
+ Reference value :  7.02530e-03
+ Reference value :  7.03751e-03
+ Reference value :  7.03756e-03
+ Reference value :  7.03756e-03
+ Reference value :  7.03757e-03
+ Reference value :  7.03757e-03
+ Reference value :  7.03757e-03
+ Reference value :  7.03758e-03
+ Reference value :  7.03759e-03
+ Reference value :  7.04327e-03
+ Reference value :  7.04327e-03
+ Reference value :  7.04327e-03
+ Reference value :  7.06345e-03
+ Reference value :  7.08490e-03
+ Reference value :  7.08497e-03
+ Reference value :  7.08497e-03
+ Reference value :  7.08497e-03
+ Reference value :  7.08498e-03
+ Reference value :  7.08503e-03
+ Reference value :  7.08512e-03
+ Reference value :  7.09817e-03
+ Reference value :  7.10011e-03
+ Reference value :  7.10011e-03
+ Reference value :  7.10011e-03
+ Reference value :  7.10012e-03
+ Reference value :  7.10013e-03
+ Reference value :  7.10068e-03
+ Reference value :  7.12531e-03
+ Reference value :  7.12533e-03
+ Reference value :  7.12544e-03
+ Reference value :  7.15592e-03
+ Reference value :  7.18812e-03
+ Reference value :  7.22052e-03
+ Reference value :  7.25252e-03
+ Reference value :  7.28432e-03
+ Reference value :  7.31692e-03
+219: condition met: stop  when time >= 0.0073381
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.3381165561393234e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7325531778929860e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.9819265670758810e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0073401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0073391 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0073401 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0073401
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0076981
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  7.33910e-03
+ Reference value :  7.33919e-03
+ Reference value :  7.35148e-03
+ Reference value :  7.35830e-03
+223: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.3582989110611762e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7325227751870567e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.6158432175856912e-01
+>>> meas tran f749 when v(xb.p)=0.9 rise=last from=0.00699828
+f749                =  7.358299e-03
+>>> delete all
+>>> stop when time >= 0.0073633
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  7.35830e-03
+ Reference value :  7.35830e-03
+ Reference value :  7.35830e-03
+ Reference value :  7.35844e-03
+ Reference value :  7.36012e-03
+224: condition met: stop  when time >= 0.0073633
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.3634029584838502e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7473668892783112e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.8000005365412084e+00
+>>> alter @vksa2[pulse] = [ 0 1 0.0073653 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra2[pulse] = [ 1 0 0.0073643 1n 1n 0.000121 2 ]
+>>> alter @vkpa2[pulse] = [ 0 1 0.0073653 1n 1n 0.00012 2 ]
+>>> alter vtsa2 dc = 0.0073653
+>>> alter vampa2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0076981
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  7.36430e-03
+ Reference value :  7.36446e-03
+ Reference value :  7.37124e-03
+ Reference value :  7.37570e-03
+ Reference value :  7.37570e-03
+ Reference value :  7.37571e-03
+ Reference value :  7.37571e-03
+ Reference value :  7.37571e-03
+ Reference value :  7.37573e-03
+ Reference value :  7.38098e-03
+ Reference value :  7.38099e-03
+ Reference value :  7.38100e-03
+ Reference value :  7.38643e-03
+ Reference value :  7.39754e-03
+ Reference value :  7.39755e-03
+ Reference value :  7.39755e-03
+ Reference value :  7.39756e-03
+ Reference value :  7.39756e-03
+ Reference value :  7.39756e-03
+ Reference value :  7.39757e-03
+ Reference value :  7.40322e-03
+ Reference value :  7.40326e-03
+ Reference value :  7.40326e-03
+ Reference value :  7.40326e-03
+ Reference value :  7.42181e-03
+ Reference value :  7.44498e-03
+ Reference value :  7.44499e-03
+ Reference value :  7.44499e-03
+ Reference value :  7.44499e-03
+ Reference value :  7.44499e-03
+ Reference value :  7.44500e-03
+ Reference value :  7.44513e-03
+ Reference value :  7.44521e-03
+ Reference value :  7.46009e-03
+ Reference value :  7.46010e-03
+ Reference value :  7.46011e-03
+ Reference value :  7.46011e-03
+ Reference value :  7.46012e-03
+ Reference value :  7.46012e-03
+ Reference value :  7.46013e-03
+ Reference value :  7.47075e-03
+ Reference value :  7.48530e-03
+ Reference value :  7.48530e-03
+ Reference value :  7.48531e-03
+ Reference value :  7.48531e-03
+ Reference value :  7.48531e-03
+ Reference value :  7.48532e-03
+ Reference value :  7.48533e-03
+ Reference value :  7.49632e-03
+ Reference value :  7.52852e-03
+ Reference value :  7.55972e-03
+ Reference value :  7.58692e-03
+ Reference value :  7.61652e-03
+ Reference value :  7.64752e-03
+ Reference value :  7.67572e-03
+226: condition met: stop  when time >= 0.0076981
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.6981195668568156e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8243892070896631e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.8125107299262023e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0077001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0076991 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0077001 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0077001
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0080581
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  7.69909e-03
+ Reference value :  7.70010e-03
+ Reference value :  7.71199e-03
+ Reference value :  7.71828e-03
+230: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.7182799203593423e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8214452507646849e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.2560488562705945e-01
+>>> meas tran f783 when v(xb.p)=0.9 rise=last from=0.007358299
+f783                =  7.718280e-03
+>>> delete all
+>>> stop when time >= 0.0077233
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  7.71828e-03
+ Reference value :  7.71828e-03
+ Reference value :  7.71828e-03
+ Reference value :  7.71838e-03
+ Reference value :  7.71842e-03
+231: condition met: stop  when time >= 0.0077233
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.7233367823136643e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7974960338759376e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.8000019698258944e+00
+>>> alter @vksa2[pulse] = [ 0 1 0.0077253 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra2[pulse] = [ 1 0 0.0077243 1n 1n 0.000121 2 ]
+>>> alter @vkpa2[pulse] = [ 0 1 0.0077253 1n 1n 0.00012 2 ]
+>>> alter vtsa2 dc = 0.0077253
+>>> alter vampa2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0080581
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  7.72423e-03
+ Reference value :  7.72529e-03
+ Reference value :  7.72530e-03
+ Reference value :  7.73569e-03
+ Reference value :  7.73570e-03
+ Reference value :  7.73570e-03
+ Reference value :  7.73571e-03
+ Reference value :  7.73571e-03
+ Reference value :  7.73572e-03
+ Reference value :  7.73999e-03
+ Reference value :  7.74099e-03
+ Reference value :  7.74100e-03
+ Reference value :  7.75462e-03
+ Reference value :  7.75754e-03
+ Reference value :  7.75754e-03
+ Reference value :  7.75755e-03
+ Reference value :  7.75755e-03
+ Reference value :  7.75756e-03
+ Reference value :  7.75762e-03
+ Reference value :  7.76325e-03
+ Reference value :  7.76325e-03
+ Reference value :  7.76325e-03
+ Reference value :  7.78474e-03
+ Reference value :  7.80497e-03
+ Reference value :  7.80497e-03
+ Reference value :  7.80497e-03
+ Reference value :  7.80497e-03
+ Reference value :  7.80498e-03
+ Reference value :  7.80511e-03
+ Reference value :  7.80512e-03
+ Reference value :  7.82009e-03
+ Reference value :  7.82010e-03
+ Reference value :  7.82011e-03
+ Reference value :  7.82011e-03
+ Reference value :  7.82011e-03
+ Reference value :  7.82012e-03
+ Reference value :  7.82013e-03
+ Reference value :  7.82806e-03
+ Reference value :  7.84531e-03
+ Reference value :  7.84531e-03
+ Reference value :  7.84531e-03
+ Reference value :  7.84532e-03
+ Reference value :  7.84532e-03
+ Reference value :  7.84536e-03
+ Reference value :  7.87017e-03
+ Reference value :  7.89857e-03
+ Reference value :  7.92497e-03
+ Reference value :  7.95597e-03
+ Reference value :  7.98657e-03
+ Reference value :  8.01437e-03
+ Reference value :  8.04197e-03
+233: condition met: stop  when time >= 0.0080581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.0581666488796638e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7406750817915777e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.5043971478993298e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0080601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0080591 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0080601 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0080601
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0084181
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.05910e-03
+ Reference value :  8.05910e-03
+ Reference value :  8.06032e-03
+ Reference value :  8.07823e-03
+ Reference value :  8.07828e-03
+237: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.0782801630523079e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7462884837448401e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.4632933423119536e-01
+>>> meas tran f817 when v(xb.p)=0.9 rise=last from=0.00771828
+f817                =  8.078280e-03
+>>> delete all
+>>> stop when time >= 0.0080833
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.07828e-03
+ Reference value :  8.07828e-03
+ Reference value :  8.07828e-03
+ Reference value :  8.07842e-03
+ Reference value :  8.08012e-03
+238: condition met: stop  when time >= 0.0080833
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.0833995672475439e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7555126462819219e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.8000017876217813e+00
+>>> alter @vksa2[pulse] = [ 0 1 0.0080853 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra2[pulse] = [ 1 0 0.0080843 1n 1n 0.000121 2 ]
+>>> alter @vkpa2[pulse] = [ 0 1 0.0080853 1n 1n 0.00012 2 ]
+>>> alter vtsa2 dc = 0.0080853
+>>> alter vampa2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0084181
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.08430e-03
+ Reference value :  8.08530e-03
+ Reference value :  8.09569e-03
+ Reference value :  8.09570e-03
+ Reference value :  8.09570e-03
+ Reference value :  8.09571e-03
+ Reference value :  8.09571e-03
+ Reference value :  8.09572e-03
+ Reference value :  8.09573e-03
+ Reference value :  8.10099e-03
+ Reference value :  8.10099e-03
+ Reference value :  8.10102e-03
+ Reference value :  8.10530e-03
+ Reference value :  8.10641e-03
+ Reference value :  8.11754e-03
+ Reference value :  8.11754e-03
+ Reference value :  8.11754e-03
+ Reference value :  8.11755e-03
+ Reference value :  8.11755e-03
+ Reference value :  8.11756e-03
+ Reference value :  8.11757e-03
+ Reference value :  8.12325e-03
+ Reference value :  8.12325e-03
+ Reference value :  8.12325e-03
+ Reference value :  8.12852e-03
+ Reference value :  8.15972e-03
+ Reference value :  8.16497e-03
+ Reference value :  8.16497e-03
+ Reference value :  8.16497e-03
+ Reference value :  8.16497e-03
+ Reference value :  8.16498e-03
+ Reference value :  8.16511e-03
+ Reference value :  8.16512e-03
+ Reference value :  8.17772e-03
+ Reference value :  8.18010e-03
+ Reference value :  8.18010e-03
+ Reference value :  8.18011e-03
+ Reference value :  8.18011e-03
+ Reference value :  8.18012e-03
+ Reference value :  8.18013e-03
+ Reference value :  8.19186e-03
+ Reference value :  8.20531e-03
+ Reference value :  8.20531e-03
+ Reference value :  8.20531e-03
+ Reference value :  8.20532e-03
+ Reference value :  8.20532e-03
+ Reference value :  8.20543e-03
+ Reference value :  8.23267e-03
+ Reference value :  8.26367e-03
+ Reference value :  8.29207e-03
+ Reference value :  8.31887e-03
+ Reference value :  8.34627e-03
+ Reference value :  8.37887e-03
+ Reference value :  8.40307e-03
+240: condition met: stop  when time >= 0.0084181
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.4182720796832679e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7090084058686837e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.4743843895692575e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0084201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0084191 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0084201 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0084201
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0087781
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.41912e-03
+ Reference value :  8.42011e-03
+ Reference value :  8.43817e-03
+ Reference value :  8.43827e-03
+244: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.4382723638715580e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7716471850464590e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.3547002841064331e-01
+>>> meas tran f851 when v(xb.p)=0.9 rise=last from=0.00807828
+f851                =  8.438272e-03
+>>> delete all
+>>> stop when time >= 0.0084433
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.43827e-03
+ Reference value :  8.43828e-03
+ Reference value :  8.43828e-03
+ Reference value :  8.43841e-03
+ Reference value :  8.44156e-03
+245: condition met: stop  when time >= 0.0084433
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.4433601385774399e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7621543123897757e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.8000010756955873e+00
+>>> alter @vksa2[pulse] = [ 0 1 0.0084453 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra2[pulse] = [ 1 0 0.0084443 1n 1n 0.000121 2 ]
+>>> alter @vkpa2[pulse] = [ 0 1 0.0084453 1n 1n 0.00012 2 ]
+>>> alter vtsa2 dc = 0.0084453
+>>> alter vampa2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0087781
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.44430e-03
+ Reference value :  8.44530e-03
+ Reference value :  8.45569e-03
+ Reference value :  8.45570e-03
+ Reference value :  8.45571e-03
+ Reference value :  8.45571e-03
+ Reference value :  8.45571e-03
+ Reference value :  8.45573e-03
+ Reference value :  8.46098e-03
+ Reference value :  8.46098e-03
+ Reference value :  8.46098e-03
+ Reference value :  8.46533e-03
+ Reference value :  8.47725e-03
+ Reference value :  8.47754e-03
+ Reference value :  8.47754e-03
+ Reference value :  8.47755e-03
+ Reference value :  8.47755e-03
+ Reference value :  8.47755e-03
+ Reference value :  8.47757e-03
+ Reference value :  8.47989e-03
+ Reference value :  8.48325e-03
+ Reference value :  8.48325e-03
+ Reference value :  8.48331e-03
+ Reference value :  8.51221e-03
+ Reference value :  8.52496e-03
+ Reference value :  8.52496e-03
+ Reference value :  8.52497e-03
+ Reference value :  8.52497e-03
+ Reference value :  8.52497e-03
+ Reference value :  8.52511e-03
+ Reference value :  8.52511e-03
+ Reference value :  8.53849e-03
+ Reference value :  8.54014e-03
+ Reference value :  8.54186e-03
+ Reference value :  8.56531e-03
+ Reference value :  8.56531e-03
+ Reference value :  8.56531e-03
+ Reference value :  8.56532e-03
+ Reference value :  8.56532e-03
+ Reference value :  8.56614e-03
+ Reference value :  8.58974e-03
+ Reference value :  8.61634e-03
+ Reference value :  8.64514e-03
+ Reference value :  8.67174e-03
+ Reference value :  8.69874e-03
+ Reference value :  8.72774e-03
+ Reference value :  8.75754e-03
+247: condition met: stop  when time >= 0.0087781
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.7781412958338259e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7237491741300765e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.7497225158528581e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0087801 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0087791 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0087801 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0087801
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0091381
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.77910e-03
+ Reference value :  8.77910e-03
+ Reference value :  8.78233e-03
+ Reference value :  8.79828e-03
+251: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.7982877746191433e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7560769548928480e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.4117520298048662e-01
+>>> meas tran f885 when v(xb.p)=0.9 rise=last from=0.008438272
+f885                =  8.798288e-03
+>>> delete all
+>>> stop when time >= 0.0088033
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.79829e-03
+ Reference value :  8.79829e-03
+ Reference value :  8.79829e-03
+ Reference value :  8.79829e-03
+ Reference value :  8.79843e-03
+ Reference value :  8.79846e-03
+252: condition met: stop  when time >= 0.0088033
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.8034099801868188e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7344248181097766e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.7999984485667628e+00
+>>> alter @vksa2[pulse] = [ 0 1 0.0088053 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra2[pulse] = [ 1 0 0.0088043 1n 1n 0.000121 2 ]
+>>> alter @vkpa2[pulse] = [ 0 1 0.0088053 1n 1n 0.00012 2 ]
+>>> alter vtsa2 dc = 0.0088053
+>>> alter vampa2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0091381
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.80430e-03
+ Reference value :  8.80430e-03
+ Reference value :  8.80530e-03
+ Reference value :  8.80530e-03
+ Reference value :  8.81565e-03
+ Reference value :  8.81569e-03
+ Reference value :  8.81569e-03
+ Reference value :  8.81570e-03
+ Reference value :  8.81570e-03
+ Reference value :  8.81570e-03
+ Reference value :  8.81572e-03
+ Reference value :  8.82097e-03
+ Reference value :  8.82098e-03
+ Reference value :  8.82098e-03
+ Reference value :  8.82273e-03
+ Reference value :  8.82273e-03
+255: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 8.8227305040812706e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.8779955326506586e-01
+>>> meas tran f905 when v(xa.p)=0.9 rise=last from=0.006239772
+f905                =  8.822730e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.7999998449060262e+00
+>>> delete all
+>>> stop when time >= 0.0091381
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  8.82273e-03
+ Reference value :  8.82273e-03
+ Reference value :  8.82273e-03
+ Reference value :  8.82287e-03
+ Reference value :  8.82287e-03
+ Reference value :  8.82534e-03
+ Reference value :  8.83754e-03
+ Reference value :  8.83754e-03
+ Reference value :  8.83754e-03
+ Reference value :  8.83755e-03
+ Reference value :  8.83755e-03
+ Reference value :  8.83756e-03
+ Reference value :  8.83758e-03
+ Reference value :  8.84229e-03
+ Reference value :  8.84229e-03
+ Reference value :  8.84709e-03
+ Reference value :  8.87509e-03
+ Reference value :  8.88498e-03
+ Reference value :  8.88498e-03
+ Reference value :  8.88498e-03
+ Reference value :  8.88498e-03
+ Reference value :  8.88498e-03
+ Reference value :  8.88511e-03
+ Reference value :  8.88513e-03
+ Reference value :  8.89786e-03
+ Reference value :  8.90011e-03
+ Reference value :  8.90011e-03
+ Reference value :  8.90011e-03
+ Reference value :  8.90011e-03
+ Reference value :  8.90012e-03
+ Reference value :  8.91134e-03
+ Reference value :  8.91800e-03
+ Reference value :  8.91800e-03
+ Reference value :  8.91800e-03
+ Reference value :  8.91801e-03
+ Reference value :  8.91801e-03
+ Reference value :  8.91815e-03
+ Reference value :  8.91920e-03
+ Reference value :  8.92531e-03
+ Reference value :  8.92531e-03
+ Reference value :  8.92531e-03
+ Reference value :  8.92532e-03
+ Reference value :  8.92533e-03
+ Reference value :  8.92539e-03
+ Reference value :  8.94996e-03
+ Reference value :  8.97816e-03
+ Reference value :  9.00596e-03
+ Reference value :  9.03436e-03
+ Reference value :  9.06276e-03
+ Reference value :  9.09076e-03
+ Reference value :  9.11876e-03
+256: condition met: stop  when time >= 0.0091381
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.1381579740559705e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.4411101168074273e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 7.5685743679694416e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0091401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0091391 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0091401 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0091401
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0094981
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.13910e-03
+ Reference value :  9.14011e-03
+ Reference value :  9.15721e-03
+ Reference value :  9.15829e-03
+259: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.1582946190780102e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 2.0271194294173913e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.7000949050978635e-01
+>>> meas tran f927 when v(xb.p)=0.9 rise=last from=0.008798288
+f927                =  9.158295e-03
+>>> delete all
+>>> stop when time >= 0.0091633
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.15829e-03
+ Reference value :  9.15830e-03
+ Reference value :  9.15830e-03
+ Reference value :  9.15844e-03
+ Reference value :  9.16011e-03
+260: condition met: stop  when time >= 0.0091633
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.1634909352692803e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.9202888003005231e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.7999992287015159e+00
+>>> alter @vksa2[pulse] = [ 0 1 0.0091653 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra2[pulse] = [ 1 0 0.0091643 1n 1n 0.000121 2 ]
+>>> alter @vkpa2[pulse] = [ 0 1 0.0091653 1n 1n 0.00012 2 ]
+>>> alter vtsa2 dc = 0.0091653
+>>> alter vampa2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0094981
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.16530e-03
+ Reference value :  9.16530e-03
+ Reference value :  9.17570e-03
+ Reference value :  9.17570e-03
+ Reference value :  9.17570e-03
+ Reference value :  9.17571e-03
+ Reference value :  9.17571e-03
+ Reference value :  9.17573e-03
+ Reference value :  9.17685e-03
+ Reference value :  9.18099e-03
+ Reference value :  9.18099e-03
+ Reference value :  9.18273e-03
+263: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.1827312000817597e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.7043666603790901e-01
+>>> meas tran f947 when v(xa.p)=0.9 rise=last from=0.00882273
+f947                =  9.182731e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.8000001181443892e+00
+>>> delete all
+>>> stop when time >= 0.0094981
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.18273e-03
+ Reference value :  9.18273e-03
+ Reference value :  9.18273e-03
+ Reference value :  9.18284e-03
+ Reference value :  9.18287e-03
+ Reference value :  9.18530e-03
+ Reference value :  9.19752e-03
+ Reference value :  9.19754e-03
+ Reference value :  9.19754e-03
+ Reference value :  9.19755e-03
+ Reference value :  9.19755e-03
+ Reference value :  9.19756e-03
+ Reference value :  9.19757e-03
+ Reference value :  9.20228e-03
+ Reference value :  9.20229e-03
+ Reference value :  9.20267e-03
+ Reference value :  9.22884e-03
+ Reference value :  9.24499e-03
+ Reference value :  9.24499e-03
+ Reference value :  9.24499e-03
+ Reference value :  9.24499e-03
+ Reference value :  9.24499e-03
+ Reference value :  9.24512e-03
+ Reference value :  9.24514e-03
+ Reference value :  9.26010e-03
+ Reference value :  9.26011e-03
+ Reference value :  9.26011e-03
+ Reference value :  9.26012e-03
+ Reference value :  9.26012e-03
+ Reference value :  9.26013e-03
+ Reference value :  9.27403e-03
+ Reference value :  9.27800e-03
+ Reference value :  9.27800e-03
+ Reference value :  9.27800e-03
+ Reference value :  9.27801e-03
+ Reference value :  9.27801e-03
+ Reference value :  9.27815e-03
+ Reference value :  9.27886e-03
+ Reference value :  9.28530e-03
+ Reference value :  9.28531e-03
+ Reference value :  9.28531e-03
+ Reference value :  9.28532e-03
+ Reference value :  9.28532e-03
+ Reference value :  9.28533e-03
+ Reference value :  9.29842e-03
+ Reference value :  9.32662e-03
+ Reference value :  9.35422e-03
+ Reference value :  9.38182e-03
+ Reference value :  9.40922e-03
+ Reference value :  9.43602e-03
+ Reference value :  9.46262e-03
+ Reference value :  9.49182e-03
+264: condition met: stop  when time >= 0.0094981
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.4982225933548364e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8936515533632339e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.2622466236445289e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0095001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0094991 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0095001 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0095001
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0098581
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.50015e-03
+ Reference value :  9.51427e-03
+ Reference value :  9.51836e-03
+267: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.5183577795467170e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.5933042355353429e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.5890814469926888e-01
+>>> meas tran f969 when v(xb.p)=0.9 rise=last from=0.009158295
+f969                =  9.518358e-03
+>>> delete all
+>>> stop when time >= 0.0095237
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.51836e-03
+ Reference value :  9.51836e-03
+ Reference value :  9.51836e-03
+ Reference value :  9.51850e-03
+ Reference value :  9.52011e-03
+268: condition met: stop  when time >= 0.0095237
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.5237810438780872e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.6434116168091039e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.7999990745497507e+00
+>>> alter @vksa2[pulse] = [ 0 1 0.0095257 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra2[pulse] = [ 1 0 0.0095247 1n 1n 0.000121 2 ]
+>>> alter @vkpa2[pulse] = [ 0 1 0.0095257 1n 1n 0.00012 2 ]
+>>> alter vtsa2 dc = 0.0095257
+>>> alter vampa2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0098581
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.52470e-03
+ Reference value :  9.53036e-03
+ Reference value :  9.53571e-03
+ Reference value :  9.53571e-03
+ Reference value :  9.53572e-03
+ Reference value :  9.53572e-03
+ Reference value :  9.53572e-03
+ Reference value :  9.53574e-03
+ Reference value :  9.53576e-03
+ Reference value :  9.54100e-03
+ Reference value :  9.54100e-03
+ Reference value :  9.54101e-03
+ Reference value :  9.54320e-03
+271: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.5431964153269953e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.7080819865981471e-01
+>>> meas tran f989 when v(xa.p)=0.9 rise=last from=0.009182731
+f989                =  9.543196e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.8000000319504212e+00
+>>> delete all
+>>> stop when time >= 0.0098581
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.54320e-03
+ Reference value :  9.54320e-03
+ Reference value :  9.54320e-03
+ Reference value :  9.54333e-03
+ Reference value :  9.54428e-03
+ Reference value :  9.55771e-03
+ Reference value :  9.55795e-03
+ Reference value :  9.55795e-03
+ Reference value :  9.55797e-03
+ Reference value :  9.55797e-03
+ Reference value :  9.55797e-03
+ Reference value :  9.55798e-03
+ Reference value :  9.56270e-03
+ Reference value :  9.56270e-03
+ Reference value :  9.56270e-03
+ Reference value :  9.58125e-03
+ Reference value :  9.60493e-03
+ Reference value :  9.60505e-03
+ Reference value :  9.60505e-03
+ Reference value :  9.60505e-03
+ Reference value :  9.60505e-03
+ Reference value :  9.60505e-03
+ Reference value :  9.60519e-03
+ Reference value :  9.60642e-03
+ Reference value :  9.62010e-03
+ Reference value :  9.62010e-03
+ Reference value :  9.62011e-03
+ Reference value :  9.62011e-03
+ Reference value :  9.62012e-03
+ Reference value :  9.62012e-03
+ Reference value :  9.62013e-03
+ Reference value :  9.63828e-03
+ Reference value :  9.63847e-03
+ Reference value :  9.63847e-03
+ Reference value :  9.63847e-03
+ Reference value :  9.63847e-03
+ Reference value :  9.63847e-03
+ Reference value :  9.63861e-03
+ Reference value :  9.63874e-03
+ Reference value :  9.64570e-03
+ Reference value :  9.64571e-03
+ Reference value :  9.64571e-03
+ Reference value :  9.64572e-03
+ Reference value :  9.64573e-03
+ Reference value :  9.65191e-03
+ Reference value :  9.68251e-03
+ Reference value :  9.71411e-03
+ Reference value :  9.74591e-03
+ Reference value :  9.77751e-03
+ Reference value :  9.80591e-03
+ Reference value :  9.83591e-03
+272: condition met: stop  when time >= 0.0098581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.8581138633827853e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7156846451414723e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 8.2121132564336088e-07
+>>> alter @vksb2[pulse] = [ 0 1 0.0098601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0098591 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0098601 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0098601
+>>> alter vampb2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0101
+>>> stop when v(xa.p) > 0.9
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.85909e-03
+ Reference value :  9.86010e-03
+ Reference value :  9.87552e-03
+ Reference value :  9.87829e-03
+275: condition met: stop  when v(xb.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.8782857671971831e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.7047311814152957e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 9.3970870954910779e-01
+>>> meas tran f1011 when v(xb.p)=0.9 rise=last from=0.009518358
+f1011               =  9.878286e-03
+>>> delete all
+>>> stop when time >= 0.0098833
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.87829e-03
+ Reference value :  9.87829e-03
+ Reference value :  9.87829e-03
+ Reference value :  9.87829e-03
+ Reference value :  9.87843e-03
+ Reference value :  9.88078e-03
+276: condition met: stop  when time >= 0.0098833
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.8833761665900344e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 1.8054790995855372e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.8000001496958660e+00
+>>> alter @vksa2[pulse] = [ 0 1 0.0098853 1n 1n 1.9999e-05 2 ]
+>>> alter @vkra2[pulse] = [ 1 0 0.0098843 1n 1n 0.000121 2 ]
+>>> alter @vkpa2[pulse] = [ 0 1 0.0098853 1n 1n 0.00012 2 ]
+>>> alter vtsa2 dc = 0.0098853
+>>> alter vampa2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0101
+>>> stop when v(xa.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.88430e-03
+ Reference value :  9.88530e-03
+ Reference value :  9.89566e-03
+ Reference value :  9.89570e-03
+ Reference value :  9.89570e-03
+ Reference value :  9.89571e-03
+ Reference value :  9.89571e-03
+ Reference value :  9.89572e-03
+ Reference value :  9.89747e-03
+ Reference value :  9.90099e-03
+ Reference value :  9.90099e-03
+ Reference value :  9.90273e-03
+279: condition met: stop  when v(xa.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.9027335035560063e-03
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 9.9729809048432860e-01
+>>> meas tran f1031 when v(xa.p)=0.9 rise=last from=0.009543196
+f1031               =  9.902733e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.8000000151399467e+00
+>>> delete all
+>>> stop when time >= 0.0101
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.90273e-03
+ Reference value :  9.90274e-03
+ Reference value :  9.90274e-03
+ Reference value :  9.90287e-03
+ Reference value :  9.91204e-03
+ Reference value :  9.91752e-03
+ Reference value :  9.91752e-03
+ Reference value :  9.91753e-03
+ Reference value :  9.91754e-03
+ Reference value :  9.91754e-03
+ Reference value :  9.91755e-03
+ Reference value :  9.91954e-03
+ Reference value :  9.92227e-03
+ Reference value :  9.92227e-03
+ Reference value :  9.92669e-03
+ Reference value :  9.95989e-03
+ Reference value :  9.96498e-03
+ Reference value :  9.96498e-03
+ Reference value :  9.96498e-03
+ Reference value :  9.96498e-03
+ Reference value :  9.96498e-03
+ Reference value :  9.96512e-03
+ Reference value :  9.96512e-03
+ Reference value :  9.97488e-03
+ Reference value :  9.98012e-03
+ Reference value :  9.98013e-03
+ Reference value :  9.99172e-03
+ Reference value :  9.99801e-03
+ Reference value :  9.99801e-03
+ Reference value :  9.99801e-03
+ Reference value :  9.99801e-03
+ Reference value :  9.99801e-03
+ Reference value :  9.99814e-03
+ Reference value :  9.99815e-03
+ Reference value :  1.00052e-02
+ Reference value :  1.00053e-02
+ Reference value :  1.00053e-02
+ Reference value :  1.00053e-02
+ Reference value :  1.00053e-02
+ Reference value :  1.00053e-02
+ Reference value :  1.00054e-02
+ Reference value :  1.00276e-02
+ Reference value :  1.00540e-02
+ Reference value :  1.00764e-02
+ Reference value :  1.00996e-02
+280: condition met: stop  when time >= 0.0101
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.0100188758615604e-02
+>>> print v(xa.p)[length(time)-1]
+v(xa.p)[length(time)-1] = 2.0435943711879992e-06
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 6.9416923112455942e-07
+>>> set filetype=binary
+>>> write trace.raw v(xa.p) v(xa.vq) v(xa.vmem1) v(xa.x1.sum) v(xa.x1.si) v(ksa1) v(ampa1) v(xa.vmem2) v(xa.x2.sum) v(xa.x2.si) v(ksa2) v(ampa2) v(xa.nzm) v(xa.x1.nzo) v(xa.x1.nzc) v(xa.x2.nzo) v(xa.x2.nzc) v(xb.p) v(xb.vq) v(xb.vmem1) v(xb.x1.sum) v(xb.x1.si) v(ksb1) v(ampb1) v(xb.vmem2) v(xb.x2.sum) v(xb.x2.si) v(ksb2) v(ampb2) v(xb.nzm) v(xb.x1.nzo) v(xb.x1.nzc) v(xb.x2.nzo) v(xb.x2.nzc) v(gl)
+binary raw file "trace.raw"
