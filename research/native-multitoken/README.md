@@ -262,6 +262,13 @@ The resulting $4N$ rows have the native admission word, match the frozen
 calendar, and reconstruct terminal native memory from the guarded
 counts. Its physical per-row dose certificate covers the receipts.
 
+[`native_with_prefix_correspondence`](ExactPrefixCorrespondence.lean)
+proves the frozen `prefixCorrespondence` on that construction. It matches
+the consumed native admissions to the guarded prefix, accounts for the
+children of launches whose FIRE has yet to occur, and identifies the
+guarded counters with physical memory at both settled training clocks.
+The accounting also applies to cuts between jumps at the same clock.
+
 ## Negative controls for the new membership tests
 
 Use the accepted family above with $N=2$ unless a change is stated.

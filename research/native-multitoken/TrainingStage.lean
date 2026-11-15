@@ -17,6 +17,8 @@ structure TrainingStage {p : Parameters N} (s : Snapshot N) (nextDate : ℝ) whe
   settledComplete : CompleteThrough wave (s.time + 15 / 2)
   settledReady : ∀ i, ReadyCoordinates settled i
   settledRaw : ∀ i q, settled.raw i q = none
+  settledGains : ∀ i q, settled.x i (.z q) = s.x i (.z q) + if q = 0 then 3 / 5 else 0
+  settledRecovery : ∀ i, settled.x i .b = s.x i .b
   settledDate : settled.time = s.time + 15 / 2
   date : next.time = nextDate
   intakeWord : intake.deliveries = waveTokens s.time (fun _ => 0) (List.finRange N)
@@ -72,15 +74,24 @@ theorem training_stage_exists {p : Parameters N} {ε : ℝ}
     .cons (.flow flow) (.nil _)
   have noArrival (i : Fin N) (q : Port) : NoArrivalAt wave i q := by
     simp [NoArrivalAt, deliveries]
+  have gains (i : Fin N) (q : Port) : settled.x i (.z q) = s.x i (.z q) + if q = 0 then 3 / 5 else 0 := by
+    have balance := wave.gain_balance i q
+    rw [((dose i).2.2.2 q).2] at balance
+    exact balance
+  have recovery (i : Fin N) : settled.x i .b = s.x i .b := by
+    have balance := wave.recovery_balance i
+    rw [(dose i).2.2.1, add_zero] at balance
+    exact balance
   refine ⟨{
     admitted := a, settled := settled, next := quietAt settled nextDate
     intake := intake, wave := wave, quiet := wait
     settledComplete := complete, settledReady := readySettled, settledRaw := rawSettled
+    settledGains := gains, settledRecovery := recovery
     settledDate := date, date := rfl
     intakeWord := intakeWord, noArrivals := ⟨deliveries, rfl⟩
     noFires := ⟨intakeSilent, fires, rfl⟩, pending := rfl
     ready := fun i => quietAt_ready_coordinates settled i (readySettled i) readyDate.le
-    raw := rawSettled, charge := ?_, gains := ?_, recovery := ?_
+    raw := rawSettled, charge := ?_, gains := gains, recovery := recovery
     physical := wait.physical_invariant box (wave.physical_invariant box aPhysical)
     valid := wait.raw_valid (wave.raw_valid aValid)
     }, pendingSettled⟩
@@ -97,13 +108,5 @@ theorem training_stage_exists {p : Parameters N} {ε : ℝ}
     simp only [relax, afterSilent, add_sub_cancel_left, mul_assoc, ← Real.exp_add]
     congr 3
     ring
-  · intro i q
-    have h := wave.gain_balance i q
-    rw [((dose i).2.2.2 q).2] at h
-    exact h
-  · intro i
-    have h := wave.recovery_balance i
-    rw [(dose i).2.2.1, add_zero] at h
-    exact h
 
 end NetworkStability.NativeMultiToken

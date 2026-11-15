@@ -189,6 +189,7 @@ theorem exact_receipt_replay {p : Parameters N} (accepted : p.check = true)
       TransactionReplay (calendar p) d (· ≤ ·) start rows out ∧ out.pending = [] ∧
       rows.map rowAdmission = NativeReciprocal.nativeAdmissions receiptTail ∧
       (∀ row ∈ rows, RowMatches p row ∧ RowDose p run row) ∧
+      (∀ row ∈ rows, ∃ source, row = receiptRow p source) ∧
       ∀ i c, out.writes (Address.mk i c).encode =
         start.writes (Address.mk i c).encode + if c = .recovery then 1 else 0 := by
   have physical := receipt_row_doses_in_tail accepted launchHead receiptTail wireSection delivered run split cuts
@@ -219,7 +220,7 @@ theorem exact_receipt_replay {p : Parameters N} (accepted : p.check = true)
       _ = _ := by
         rw [← NativeReciprocal.admissions_deliveries, List.map_map]
         all_goals rfl
-  refine ⟨rows, out, replay, drained, ?_, ?_, counts⟩
+  refine ⟨rows, out, replay, drained, ?_, ?_, kinds, counts⟩
   · rw [labels, ← word, List.map_map]
     apply List.map_congr_left
     intro row mem

@@ -72,6 +72,20 @@ def writesAfter (C : Calendar N ℝ (Input N)) (rows : List (Row N))
   rows.foldl (fun counts tx i =>
     counts i + MarkFeedback.footprint C.model tx.probe tx.decision i) before
 
+theorem writesAfter_append (C : Calendar N ℝ (Input N)) (left right : List (Row N))
+    (counts : Fin (3 * N) → Nat) :
+    writesAfter C (left ++ right) counts = writesAfter C right (writesAfter C left counts) :=
+  List.foldl_append
+
+theorem replay_writes {p : Parameters N} {s out : State N} {rows : List (Row N)}
+    (replay : TransactionReplay (calendar p) d (· ≤ ·) s rows out) :
+    out.writes = writesAfter (calendar p) rows s.writes := by
+  induction replay with
+  | nil => rfl
+  | @cons _ _ _ tx _ _ _ _ _ _ _ _ dose _ _ ih =>
+    rw [ih, show _ = _ from funext dose]
+    rfl
+
 /-- Check the guards against the counters at each boundary. The queue
 induction can then change the order of pending occurrences freely. -/
 def RowGuards (C : Calendar N ℝ (Input N)) (d : Nat) :

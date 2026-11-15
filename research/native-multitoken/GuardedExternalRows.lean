@@ -138,6 +138,30 @@ private theorem external_children (p : Parameters N) (date : ℝ) (stage : Stage
     simp only [List.map_cons, List.flatMap_cons, ih]
     by_cases fire : stage = .launch <;> simp [externalRow, fire]
 
+/-- Guarded counts at the two training boundaries, independent of the
+queue presentation chosen by the replay. -/
+theorem guarded_training_counts (p : Parameters N) :
+    let first := (List.finRange N).map (externalRow p firstDate .first)
+    let second := (List.finRange N).map (externalRow p (secondDate p) .second)
+    let counts := (MarkFeedback.initial N (seed p)).writes
+    (∀ i c, writesAfter (calendar p) first counts (Address.mk i c).encode =
+      if c = .port0 then 1 else 0) ∧
+    (∀ i c, writesAfter (calendar p) (first ++ second) counts (Address.mk i c).encode =
+      if c = .port0 then 2 else 0) := by
+  intro first second counts
+  have one := (external_rows_fold p firstDate .first 0 (by decide) (by decide)
+    (List.finRange N) (List.nodup_finRange N) counts (fun _ _ => rfl)).2
+  have firstCounts (i : Fin N) (c : Coordinate) :
+      writesAfter (calendar p) first counts (Address.mk i c).encode = if c = .port0 then 1 else 0 := by
+    simpa [counts, MarkFeedback.initial, List.mem_finRange] using one i c
+  have two := (external_rows_fold p (secondDate p) .second 1 (by decide) (by decide)
+    (List.finRange N) (List.nodup_finRange N) (writesAfter (calendar p) first counts)
+    (fun i _ => by rw [firstCounts]; rfl)).2
+  refine ⟨firstCounts, ?_⟩
+  intro i c
+  rw [writesAfter_append, two, firstCounts]
+  by_cases chosen : c = .port0 <;> simp [chosen, List.mem_finRange]
+
 /-- Replay both training batches and the launch batch from the seed.
 The remaining guarded queue is exactly the set of routed receipts. -/
 theorem guarded_through_launch {p : Parameters N} (accepted : p.check = true) :
@@ -278,6 +302,7 @@ theorem exact_guarded_replay {p : Parameters N} (accepted : p.check = true)
       rows.map rowAdmission = NativeReciprocal.nativeAdmissions run ∧
       rows.length = 4 * N ∧ out.pending = [] ∧
       (∀ row ∈ receipts, row.probe.input.2 = .receipt ∧ RowMatches p row ∧ RowDose p run row) ∧
+      (∀ row ∈ receipts, ∃ source, row = receiptRow p source) ∧
       ∀ i c, out.writes (Address.mk i c).encode =
         match c with | .port0 => 2 | .port1 => 0 | .recovery => 1 := by
   obtain ⟨wire, head, tail, _, split, wired, _, _, delivered⟩ := native_exact_wire_cut accepted history run cuts fires
@@ -289,7 +314,7 @@ theorem exact_guarded_replay {p : Parameters N} (accepted : p.check = true)
   have receiptOnly (probe : Probe N) (mem : probe ∈ start.pending) : probe.input.2 = .receipt := by
     obtain ⟨source, _, rfl⟩ := List.mem_map.mp (pending.mem_iff.mp mem)
     rfl
-  obtain ⟨receipts, out, receiptReplay, drained, receiptWord, physical, dose⟩ :=
+  obtain ⟨receipts, out, receiptReplay, drained, receiptWord, physical, kinds, dose⟩ :=
     exact_receipt_replay accepted head tail wired delivered run split cuts start receiptQueue receiptOnly
       (fun i => by rw [counts]; rfl)
   let external := (List.finRange N).map (externalRow p firstDate .first) ++
@@ -307,7 +332,7 @@ theorem exact_guarded_replay {p : Parameters N} (accepted : p.check = true)
     have same := admitted
     rw [split, NativeHistory.run, admissions_append, admissions_append] at same
     exact (List.append_inj_left' same lastLength).trans official
-  refine ⟨receipts, out, replay.append receiptReplay, ?_, ?_, drained, ?_, ?_⟩
+  refine ⟨receipts, out, replay.append receiptReplay, ?_, ?_, drained, ?_, kinds, ?_⟩
   · rw [split, List.map_append, admissions_append, receiptWord, headWord]
   · have receiptLength := congrArg List.length receiptWord
     have wordLength := congrArg List.length (NativeReciprocal.admissions_deliveries tail)
@@ -318,15 +343,9 @@ theorem exact_guarded_replay {p : Parameters N} (accepted : p.check = true)
     simp only [external, List.length_append, List.length_map, List.length_finRange]
     omega
   · intro row mem
-    have actual : (rowAdmission row).token ∈ tail.deliveries := by
-      rw [← NativeReciprocal.admissions_deliveries, ← receiptWord]
-      exact List.mem_map_of_mem (List.mem_map_of_mem mem)
-    obtain ⟨source, _, eq⟩ := List.mem_map.mp (delivered.mem_iff.mp actual)
-    have port : inputPort row.probe.input = 2 := (congrArg Delivery.port eq).symm
-    have receipt : row.probe.input.2 = .receipt := by
-      by_contra other
-      simp [inputPort, other] at port
-    exact ⟨receipt, physical row mem⟩
+    refine ⟨?_, physical row mem⟩
+    obtain ⟨source, rfl⟩ := kinds row mem
+    rfl
   · intro i c
     rw [dose, counts]
     cases c <;> rfl
@@ -398,7 +417,7 @@ theorem native_with_exact_guarded_replay {p : Parameters N} (accepted : p.check 
       (∀ i c, out.writes (Address.mk i c).encode =
         match c with | .port0 => 2 | .port1 => 0 | .recovery => 1) := by
   obtain ⟨history, run, complete, drained, cuts, _, admitted, fires, _⟩ := native_exact_execution accepted
-  obtain ⟨receipts, out, replay, word, length, outDrained, physical, writes⟩ :=
+  obtain ⟨receipts, out, replay, word, length, outDrained, physical, _, writes⟩ :=
     exact_guarded_replay accepted history run cuts admitted fires
   refine ⟨history.last, run, _, out, complete, drained, outDrained, replay, length, word, ?_,
     native_fires_frozen history run fires, settled_replay_memory history out writes, writes⟩
