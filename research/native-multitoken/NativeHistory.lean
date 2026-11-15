@@ -196,7 +196,10 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
     have h := ((outcome i).2.2.2 q).1
     change last.x i (.z q) = second.next.x i (.z q) at h
     rw [h, second.gains, first.gains]
-    by_cases selected : q = 0 <;> simp [selected] <;> ring
+    by_cases selected : q = 0
+    · simp only [selected, if_true]
+      ring
+    · simp [selected]
   · intro i
     have warm := receipts.recovery_balance i
     rw [(outcome i).2.2.1, cold i] at warm

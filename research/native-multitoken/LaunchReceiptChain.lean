@@ -88,7 +88,8 @@ theorem launch_through_fast {p : Parameters N} (accepted : p.check = true) {ε :
     have fastGain (q : Port) : fast.final.x 0 (.z q) = s.x i (.z q) :=
       (fast.gains 0 q).trans (F.gain_preserved 0 q)
     have fastEmpty : fast.final.pending = [] := by
-      rw [fast.pending, F.pending] <;> rfl
+      rw [fast.pending, F.pending]
+      rfl
     obtain ⟨u, slow, time, mode, qClock, b, z, aux, raw, _, hd, he, _⟩ :=
       slow_span_to_receipt (route := EmptyRouter 1) accepted (sourceOf accepted i) fast.final T
         afterFast (receipt_after_fast_cut accepted _).le fast.main_slow
@@ -99,6 +100,7 @@ theorem launch_through_fast {p : Parameters N} (accepted : p.check = true) {ε :
     refine ⟨u, run, time, ?_, ?_, mode, qClock, b, aux, raw, fun q => (z q).trans (fastGain q)⟩
     · rw [Execution.emissions_append, Execution.emissions_append, F.emissions, fast.emissions, he]
       rw [← F.date, fireDate]
+      simp only [List.append_nil]
     · rw [Execution.deliveries_append, Execution.deliveries_append, F.deliveries, fast.deliveries, hd]
       rfl
   choose cuts legs time fires delivered mode qClock b aux raw z using localLeg
