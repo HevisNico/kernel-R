@@ -38,6 +38,11 @@ import pilot                                   # noqa: E402
 from pilot import net, raw_ascii, spice, seeded, vec, ALPHA, BENCH, BAND, COVER   # noqa: E402
 
 STATES = ("hold", "preset", "window", "fire", "pulse")
+# On some mismatch samples (7101, 7103) the operating point that the noise and AC analyses solve for themselves
+# fails (gmin and source stepping) where `op` succeeds, and the analysis hangs; a .nodeset from `op` does not help.
+# Tried and rejected: a shunt of 1e-13 S from every node (ngspice `rshunt`) lets the analysis finish, but the
+# operating point it prints for 7101 is NaN and it changes the device transfers of the nominal cell. Not used.
+RSHUNT = None
 STACK = re.compile(r"\.n[12]$")
 
 
@@ -79,7 +84,7 @@ def analysis_deck(section, cells, state, focus=None):
         out.append(line)
     cond = [f"r.cond{k} {n} 0 1e12 noisy=0" for k, n in enumerate(sorted(nodes))]
     text = "\n".join(out) + "\n"
-    return text.replace("\n.end\n", "\n" + "\n".join(cond) + "\n.end\n"), len(cond)
+    return text.replace("\n.end\n", "\n" + "\n".join(cond + ([RSHUNT] if RSHUNT else [])) + "\n.end\n"), len(cond)
 
 
 def devices(text):
@@ -123,11 +128,27 @@ def balance(state, c, p):
 
 def one_output(work, text, devs, seed, state, c, p, ngspice, pdk):
     out = out_expr(state, c, p)
-    pre = [".control", "set numdgt=16", "set filetype=ascii"] + seeded(seed) + balance(state, c, p) + ["op"]
+    # Pass 1: the operating point (after the trip sweep, if any), written out. Each later analysis solves its own
+    # operating point from scratch, and on some mismatch samples that solve fails (gmin and source stepping) where
+    # `op` succeeds: pass 2 gives it the solution of pass 1 as .nodeset.
     body = text.replace("\n.end\n", "\n")
-    stdout = spice(work / "noise", body + "\n".join(pre + [f"noise {out} vcm dec 20 1 1e8 1", "setplot noise1",
-                                                         "write noise.raw all", "quit", ".endc", ".end"]) + "\n", ngspice, pdk)
+    first = [".control", "set numdgt=16", "set filetype=ascii"] + seeded(seed) + balance(state, c, p) + [
+        "op", "write op.raw all", "quit", ".endc", ".end"]
+    stdout = spice(work / "op", body + "\n".join(first) + "\n", ngspice, pdk)
     trip = next((float(l.split()[1]) for l in stdout.splitlines() if l.startswith("TRIP ")), None)
+    if not (work / "op" / "op.raw").exists():
+        return dict(state=state, cell=c, port=p, output=out, error="no operating point", trip=trip)
+    op = raw_ascii(work / "op" / "op.raw")
+    nodeset = [f".nodeset v({k[2:-1]})={float(v[0]):.15g}" for k, v in op.items()
+               if k.startswith("v(") and "#" not in k and "," not in k]
+    fixed = []
+    if trip is not None:                       # the swept source stays where the comparator trips
+        src = {"window": "vfrc", "fire": "vfrcq"}[state]
+        fixed = [f"alter {src} dc = {trip:.15g}"]
+    body = body + "\n".join(nodeset) + "\n"
+    pre = [".control", "set numdgt=16", "set filetype=ascii"] + seeded(seed) + fixed + ["op"]
+    spice(work / "noise", body + "\n".join(pre + [f"noise {out} vcm dec 20 1 1e8 1", "setplot noise1",
+                                                "write noise.raw all", "quit", ".endc", ".end"]) + "\n", ngspice, pdk)
     if not (work / "noise" / "noise.raw").exists():
         return dict(state=state, cell=c, port=p, output=out, error="no noise result", trip=trip)
     r = raw_ascii(work / "noise" / "noise.raw")

@@ -2,6 +2,8 @@
 
   cost3.py runs  WORK OUT.json NGSPICE PDK READS
   cost3.py parse WORK OUT.json NGSPICE PDK MS [MS ...]
+  cost3.py dnf   WORK OUT.json NGSPICE PDK DNF_PATH      campaign 4's run (need 4), quiet / injected / the model's
+                                                          devices (pwlmodel) / every analog transistor (pwl46)
 
 `runs`: four network runs of the nominal cell (section tt), three cells a, b, c, four at a time as in the
 campaigns. The calendar: each port of each cell READS reads 18 units apart, cell b 6 units after cell a and cell c
@@ -41,6 +43,36 @@ def calendar(reads):
                 horizon=18 * 2 * reads + 12)
 
 
+def dnf_calendar(dnf_path):
+    """Campaign 4's network run, need 4 everywhere (`dnf.calendar(4, 4, 4, 4)` of research/learned-dnf-circuit, read
+    from DNF_PATH, a copy of that file: code, no data), as a calendar of the router: the external inputs as sources,
+    the routed lines as edges from a and b to the ports of c, open over the decision window of each routed slot.
+    An emulation for the cost only: every input at amplitude 1 (not 0.49 on layer 1) and no read-only gate."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("dnf", dnf_path)
+    dnf = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(dnf)
+    slots = dnf.calendar(4, 4, 4, 4)
+    src, edges = [], []
+    for s in slots:
+        for n, off in s["inputs"].items():
+            c, p = dnf.INPUTS[n]
+            src.append((s["date"] + off, c, p))
+        if s["routed"]:
+            for line, (c, p) in dnf.LINES.items():
+                edges.append(dict(name=f"{line}->{c}{p}@{s['date']}", source=line, gate=[s["date"], s["date"] + dnf.WINDOW],
+                                  delay=dnf.WIRE, cell=c, port=p))
+    return dict(name="campaign 4, need 4 (emulated)", sources=sorted(src), edges=edges,
+                horizon=slots[-1]["date"] + dnf.SLOT + dnf.SETTLE)
+
+
+MODEL_DEVICES = None        # set by --model: the union of the kept devices of EXTRACT_nominal.json, per cell
+
+
+def chosen_model(c):
+    return [d.replace("xa.", f"x{c}.", 1) for d in MODEL_DEVICES]
+
+
 def pwl_sources(text, per_cell, tstop, noise_seed=1):
     model = json.loads((HERE / "MODEL_nominal.json").read_text())
     ref = next(m for m in model["model"] if m["device"] == "xa.x1.xop.xm3")
@@ -49,7 +81,7 @@ def pwl_sources(text, per_cell, tstop, noise_seed=1):
         f = line.split()
         if f and "sky130_fd_pr__" in line:
             nodes[f[0]] = (f[1], f[3])
-    names = sorted(d for c in CELLS for d in cost.chosen(c, per_cell))
+    names = sorted(d for c in CELLS for d in (chosen_model(c) if per_cell == 0 else cost.chosen(c, per_cell)))
     n = int(math.ceil(tstop / noisegen.NT)) + 2
     out = []
     for k, d in enumerate(names):
@@ -68,16 +100,21 @@ def pwl_sources(text, per_cell, tstop, noise_seed=1):
     return out, len(names) + 6
 
 
-def _run(work, mode, ngspice, pdk, reads):
+def _run(work, mode, ngspice, pdk, reads, dnf_path=None):
+    global MODEL_DEVICES
     original, info = net.deck, {}
-    cal = calendar(reads)
+    cal = dnf_calendar(dnf_path) if dnf_path else calendar(reads)
+    if mode == "pwlmodel":
+        ex = json.loads((HERE / "EXTRACT_nominal.json").read_text())
+        MODEL_DEVICES = sorted({k["device"] for o in ex["outputs"] if o["state"] != "preset" for k in o.get("kept", [])
+                                if k["kind"] != "res"})
     horizon = router.ORIGIN + cal["horizon"] * net.TU + 50e-6
 
     def deck(**kw):
         t = original(**kw)
         if mode.startswith("pwl"):
             t0 = time.time()
-            lines, info["sources"] = pwl_sources(t, int(mode[3:]), horizon)
+            lines, info["sources"] = pwl_sources(t, 0 if mode == "pwlmodel" else int(mode[3:]), horizon)
             t = t.replace("\n.end\n", "\n" + "\n".join(lines) + "\n.end\n")
             info["generation_s"] = time.time() - t0
             info["deck_MB"] = len(t) / 1e6
@@ -92,17 +129,17 @@ def _run(work, mode, ngspice, pdk, reads):
                           peak_rss_MB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024)))
 
 
-def runs(work, out, ngspice, pdk, reads):
-    modes = ["quiet", "injected", "pwl10", "pwl46"]
+def runs(work, out, ngspice, pdk, reads, dnf_path=None, modes=("quiet", "injected", "pwl10", "pwl46")):
 
     def one(m):
-        p = subprocess.run([sys.executable, "-B", __file__, "_run", work, m, ngspice, pdk, str(reads)], capture_output=True, text=True)
+        p = subprocess.run([sys.executable, "-B", __file__, "_run", work, m, ngspice, pdk, str(reads)] + ([dnf_path] if dnf_path else []),
+                           capture_output=True, text=True)
         return json.loads(p.stdout.strip().splitlines()[-1]) if p.returncode == 0 else dict(mode=m, error=p.stderr[-3000:])
     with ThreadPoolExecutor(4) as ex:
         res = list(ex.map(one, modes))
     for r in res:
         print(json.dumps(r))
-    Path(out).write_text(json.dumps(dict(cells=CELLS, reads=reads, runs=res), indent=1) + "\n")
+    Path(out).write_text(json.dumps(dict(cells=CELLS, reads=reads, calendar="dnf need 4" if dnf_path else "reads", runs=res), indent=1) + "\n")
 
 
 def parse(work, out, ngspice, pdk, lengths):
@@ -134,8 +171,10 @@ def parse(work, out, ngspice, pdk, lengths):
 if __name__ == "__main__":
     a = sys.argv[2:]
     if sys.argv[1] == "_run":
-        _run(a[0], a[1], a[2], a[3], int(a[4]))
+        _run(a[0], a[1], a[2], a[3], int(a[4]), *(a[5:6] or [None]))
     elif sys.argv[1] == "runs":
         runs(a[0], a[1], a[2], a[3], int(a[4]))
+    elif sys.argv[1] == "dnf":                 # cost3.py dnf WORK OUT.json NGSPICE PDK DNF_PATH
+        runs(a[0], a[1], a[2], a[3], 0, a[4], ("quiet", "injected", "pwlmodel", "pwl46"))
     elif sys.argv[1] == "parse":
         parse(a[0], a[1], a[2], a[3], [float(x) for x in a[4:]])
