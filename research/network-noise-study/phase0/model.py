@@ -39,7 +39,7 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import pilot                                   # noqa: E402
-from pilot import net, raw_ascii, spice, seeded, vec, ALPHA, BENCH, BAND, COVER   # noqa: E402
+from pilot import net, raw_ascii, seeded, vec, ALPHA, BENCH, BAND, COVER   # noqa: E402
 
 STATES = ("hold", "preset", "window", "fire", "pulse")
 # On some mismatch samples (7101, 7103) the operating point that the noise and AC analyses solve for themselves
@@ -47,6 +47,30 @@ STATES = ("hold", "preset", "window", "fire", "pulse")
 # Tried and rejected: a shunt of 1e-13 S from every node (ngspice `rshunt`) lets the analysis finish, but the
 # operating point it prints for 7101 is NaN and it changes the device transfers of the nominal cell. Not used.
 RSHUNT = None
+NODESET = True            # pass 2 of the per-cell method; the full-deck reference of V2c runs without it
+TIMEOUT = None            # seconds per simulator call; the full-deck reference of V2c uses 1200
+
+
+def spice(work, text, ngspice, pdk):
+    """pilot.spice with the time limit TIMEOUT: a call that does not finish leaves no result (and a TIMEOUT file)."""
+    import subprocess as sp
+    try:
+        return _spice(work, text, ngspice, pdk)
+    except sp.TimeoutExpired:
+        (work / "TIMEOUT").write_text(f"{TIMEOUT} s\n")
+        return ""
+
+
+def _spice(work, text, ngspice, pdk):
+    import os, shutil, subprocess as sp
+    work.mkdir(parents=True, exist_ok=False)
+    (work / "pdk").symlink_to(Path(pdk).resolve(), target_is_directory=True)
+    shutil.copyfile(pilot.CIRCUIT / "spiceinit.txt", work / ".spiceinit")
+    (work / "deck.spice").write_text(text)
+    env = dict(os.environ, SPICE_SCRIPTS=str(pilot.sim.SPINIT.parent))
+    p = sp.run([ngspice, "-b", "deck.spice"], cwd=work, env=env, capture_output=True, text=True, timeout=TIMEOUT)
+    (work / "log.txt").write_text(p.stdout + p.stderr)
+    return p.stdout
 STACK = re.compile(r"\.n[12]$")
 
 
@@ -91,6 +115,9 @@ def analysis_deck(section, cells, state, focus=None):
     return text.replace("\n.end\n", "\n" + "\n".join(cond + ([RSHUNT] if RSHUNT else [])) + "\n.end\n"), len(cond)
 
 
+FOUR_TERMINAL = ("sky130_fd_pr__nfet_01v8", "sky130_fd_pr__pfet_01v8", "sky130_fd_pr__pfet_01v8_lvt")
+
+
 def isolate(text, keep, cells):
     """The deck of the instance with every cell but `keep` taken out of the circuit, its mismatch draws kept: each
     transistor of another cell stays, in its place, with its four terminals on ground (so the PDK draws the same
@@ -105,6 +132,9 @@ def isolate(text, keep, cells):
             out.append(line)
             continue
         if any(f[0].startswith(o) for o in others) and "sky130_fd_pr__" in line:
+            # only the three four-terminal transistors of the cell may be grounded this way: any other PDK device
+            # (a resistor, a capacitor, a diode) has another number of terminals and would be corrupted
+            assert f[5] in FOUR_TERMINAL, f"isolate: device type {f[5]} of {f[0]} is not a four-terminal transistor"
             out.append(" ".join([f[0], "0", "0", "0", "0"] + f[5:]))
         elif any(o in tok for tok in f[:6] for o in others) or any(f[0] in (f"vfp{c}", f"vfpb{c}") for c in cells if c != keep):
             continue
@@ -189,7 +219,7 @@ def one_output(work, text, devs, seed, state, c, p, ngspice, pdk):
     if trip is not None:                       # the swept source stays where the comparator trips
         src = {"window": "vfrc", "fire": "vfrcq"}[state]
         fixed = [f"alter {src} dc = {trip:.15g}"]
-    body = body + "\n".join(nodeset) + "\n"
+    body = body + ("\n".join(nodeset) + "\n" if NODESET else "")
     pre = [".control", "set numdgt=16", "set filetype=ascii"] + seeded(seed) + fixed + ["op"]
     spice(work / "noise", body + "\n".join(pre + [f"noise {out} vcm dec 20 1 1e8 1", "setplot noise1",
                                                 "write noise.raw all", "quit", ".endc", ".end"]) + "\n", ngspice, pdk)
@@ -262,6 +292,8 @@ if __name__ == "__main__":
     a = sys.argv[2:]
     if sys.argv[1] == "extract":
         per_cell = "--per-cell" in a
-        a = [x for x in a if x != "--per-cell"]
+        if "--reference" in a:                 # the full-deck reference of V2c: no .nodeset, 1200 s per call
+            NODESET, TIMEOUT = False, 1200
+        a = [x for x in a if x not in ("--per-cell", "--reference")]
         extract(Path(a[0]), Path(a[1]), a[2], None if a[3] == "none" else int(a[3]), tuple(a[4].split(",")), a[5], a[6],
                 a[7:] or list(STATES), per_cell)
