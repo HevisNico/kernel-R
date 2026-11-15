@@ -15,6 +15,9 @@ import GuardedReplay
 import NativeHistory
 import ExecutionCuts
 import ExactNativeExecution
+import ReceiptWindow
+import NativeReceiptRows
+import GuardedReceiptRows
 import Lean.Elab.Command
 import Lean.Util.CollectAxioms
 
@@ -30,7 +33,8 @@ run_cmd do
         mod == `PhysicalRefinement || mod == `PrefixAccounting || mod == `ReceiptProduct ||
         mod == `ReceiptTiming || mod == `ReceiptWave || mod == `LaunchReceiptChain ||
         mod == `TrainingClock || mod == `TrainingStage || mod == `GuardedReplay ||
-        mod == `NativeHistory || mod == `ExecutionCuts || mod == `ExactNativeExecution then
+        mod == `NativeHistory || mod == `ExecutionCuts || mod == `ExactNativeExecution ||
+        mod == `ReceiptWindow || mod == `NativeReceiptRows || mod == `GuardedReceiptRows then
       modules := modules + 1
       for name in data.constNames do
         let some info := env.constants.find? name
@@ -41,7 +45,7 @@ run_cmd do
           unless allowed.contains axiomName do
             throwError "Unexpected axiom {axiomName} in {name}"
         count := count + 1
-  if modules != 17 || count == 0 then
+  if modules != 20 || count == 0 then
     throwError "Expected the target and all native multi-token proof modules in the audit"
   for result in #[``NetworkStability.NativeMultiToken.guarded_conjuncts,
       ``NetworkStability.NativeMultiToken.scalar_latency,
@@ -52,7 +56,11 @@ run_cmd do
       ``NetworkStability.NativeMultiToken.provisional_mark_recovery,
       ``NetworkStability.NativeMultiToken.protected_slow_admission,
       ``NetworkStability.NativeMultiToken.native_exact_execution,
-      ``NetworkStability.NativeMultiToken.native_exact_admission_windows] do
+      ``NetworkStability.NativeMultiToken.native_exact_admission_windows,
+      ``NetworkStability.NativeMultiToken.native_exact_receipt_rows,
+      ``NetworkStability.NativeMultiToken.guarded_receipt_replay,
+      ``NetworkStability.NativeMultiToken.guarded_replay_in_native_receipt_order,
+      ``NetworkStability.NativeMultiToken.exact_receipt_replay] do
     let some (.thmInfo _) := env.constants.find? result
       | throwError "Missing milestone theorem {result}"
   let some (.defnInfo target) := env.constants.find?

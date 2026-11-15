@@ -23,9 +23,7 @@ private theorem launch_receipt_order {p : Parameters N} (accepted : p.check = tr
     intro i j eq
     have hw := congrArg p.successor eq
     simpa only [source, sourceOf_receives] using hw
-  have onto (i : Fin N) : source (p.successor i) = i := by
-    apply (of_decide_eq_true accepted : p.Valid).2.2.2.1.1
-    exact sourceOf_receives accepted (p.successor i)
+  have onto (i : Fin N) : source (p.successor i) = i := sourceOf_successor accepted i
   have perm : ((List.finRange N).map source).Perm (List.finRange N) := by
     apply (List.perm_ext_iff_of_nodup ((List.nodup_finRange N).map injective)
       (List.nodup_finRange N)).mpr
@@ -174,7 +172,7 @@ theorem launch_receipt_chain {p : Parameters N} (accepted : p.check = true) {ε 
       launch.deliveries = [] ∧ receipt.ledger.emissions = [] ∧
       (∀ i, launch.emissionTimes i = [launchDate p + latency p i]) ∧
       cut.pending.Perm receipt.deliveries ∧
-      (∀ i, cut.x i .b = 9 / 50) ∧
+      WireSection p cut ∧
       ∀ i, ReadyCoordinates last i ∧ (∀ q, last.raw i q = none) ∧
         receipt.ledger.recovery i = 1 / 10 ∧
         ∀ q, last.x i (.z q) = s.x i (.z q) ∧
@@ -186,8 +184,14 @@ theorem launch_receipt_chain {p : Parameters N} (accepted : p.check = true) {ε 
       (fun i => by rw [cutDate]; exact receipt_after_fast_cut accepted _)
       (fun i => (sections i).1) (fun i => (sections i).2.1) (fun i => (sections i).2.2.1)
       (fun i => (sections i).2.2.2.1) (fun i => (sections i).2.2.2.2.1) queue
+  have wire : WireSection p cut := by
+    refine ⟨fun i => (sections i).1, ?_, fun i => (sections i).2.2.1,
+      fun i => (sections i).2.2.2.1, fun i => (sections i).2.2.2.2.1, ?_⟩
+    · intro i
+      simpa only [sourceOf_successor] using (sections (p.successor i)).2.1
+    · exact queue.trans (launch_receipt_order accepted).symm
   refine ⟨cut, last, launch, receipt, cutDate, complete, finalQueue, launched, quiet, fires, taken,
-    (fun i => (sections i).2.2.1), ?_⟩
+    wire, ?_⟩
   intro i
   obtain ⟨ready, inactive, recoveryDose, doses⟩ := doses i
   refine ⟨ready, inactive, recoveryDose, fun q => ⟨?_, (doses q).2⟩⟩

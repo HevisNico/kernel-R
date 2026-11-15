@@ -70,6 +70,7 @@ structure NativeHistory (p : Parameters N) where
   startSilent : start.ledger.emissions = []
   firstDate : firstStart.time = NetworkStability.NativeMultiToken.firstDate
   wireDate : wireCut.time = launchDate p + 19 / 10
+  wireSection : WireSection p wireCut
   complete : CompleteThrough receipts (horizon p)
   finalQueue : last.pending = []
   launchInputs : launchIntake.deliveries = waveAt N (launchDate p)
@@ -81,16 +82,20 @@ structure NativeHistory (p : Parameters N) where
   endpointGain : ∀ i q, last.x i (.z q) = (prepared p).x i (.z q) + if q = 0 then 6 / 5 else 0
   endpointRecovery : ∀ i, last.x i .b = 7 / 25
 
-noncomputable def NativeHistory.run {p : Parameters N} (h : NativeHistory p) :
-    Execution (nativeParameters N) (router p) (prepared p) h.last :=
+noncomputable def NativeHistory.throughWire {p : Parameters N} (h : NativeHistory p) :
+    Execution (nativeParameters N) (router p) (prepared p) h.wireCut :=
   h.start.append
     (h.first.intake.append (h.first.wave.append (h.first.quiet.append
       (h.second.intake.append (h.second.wave.append (h.second.quiet.append
-        (h.launchIntake.append (h.launch.append h.receipts))))))))
+        (h.launchIntake.append h.launch)))))))
+
+noncomputable def NativeHistory.run {p : Parameters N} (h : NativeHistory p) :
+    Execution (nativeParameters N) (router p) (prepared p) h.last :=
+  h.throughWire.append h.receipts
 
 theorem NativeHistory.emissions {p : Parameters N} (h : NativeHistory p) :
     h.run.ledger.emissions = h.launch.ledger.emissions := by
-  simp only [NativeHistory.run, Execution.emissions_append, h.startSilent, h.first.noFires.1, h.first.noFires.2.1,
+  simp only [NativeHistory.run, NativeHistory.throughWire, Execution.emissions_append, h.startSilent, h.first.noFires.1, h.first.noFires.2.1,
     h.first.noFires.2.2, h.second.noFires.1, h.second.noFires.2.1, h.second.noFires.2.2,
     h.launchSilent, h.receiptNoFires, List.nil_append, List.append_nil]
 
@@ -181,14 +186,15 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
       change 17999 / 100000 ≤ second.next.x i .b ∧ second.next.x i .b ≤ 18001 / 100000
       rw [recoveryC]
       norm_num, (second.ready i).auxiliary⟩
-  obtain ⟨wire, last, launch, receipts, wireDate, complete, finalQueue, noArrive, noFire, fires, paid, cold, outcome⟩ :=
+  obtain ⟨wire, last, launch, receipts, wireDate, complete, finalQueue, noArrive, noFire, fires, paid, wireSection, outcome⟩ :=
     launch_receipt_chain accepted box b (intake.physical_invariant box second.physical)
       (intake.raw_valid second.valid) second.date sectionB secondCharge ampC bWindow recoveryC
       (fun i => by simp [b, admittedWave]) (fun i q ne => by simp [b, admittedWave, ne, second.raw]) rfl
   refine ⟨{
     firstStart := a, start := initial, first := first, second := second, launched := b
     wireCut := wire, last := last, launchIntake := intake, launch := launch, receipts := receipts
-    startSilent := rfl, firstDate := rfl, wireDate := wireDate, complete := complete, finalQueue := finalQueue
+    startSilent := rfl, firstDate := rfl, wireDate := wireDate, wireSection := wireSection
+    complete := complete, finalQueue := finalQueue
     launchInputs := intakeWord.trans (by rw [second.date]; rfl), launchSilent := noIntakeFire
     launchNoArrivals := noArrive, receiptNoFires := noFire, fires := fires, receiptInputs := paid
     endpointGain := ?_, endpointRecovery := ?_ }⟩
@@ -203,7 +209,7 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
     · simp [selected]
   · intro i
     have warm := receipts.recovery_balance i
-    rw [(outcome i).2.2.1, cold i] at warm
+    rw [(outcome i).2.2.1, wireSection.recovery i] at warm
     linarith
 
 end NetworkStability.NativeMultiToken

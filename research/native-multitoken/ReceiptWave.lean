@@ -16,6 +16,24 @@ theorem sourceOf_receives {p : Parameters N} (accepted : p.check = true) (i : Fi
     (Finite.injective_iff_bijective.mp (fun {_ _} h =>
       (of_decide_eq_true accepted : p.Valid).2.2.2.1.1 _ _ h))).apply_symm_apply i
 
+theorem sourceOf_successor {p : Parameters N} (accepted : p.check = true) (i : Fin N) :
+    sourceOf accepted (p.successor i) = i := by
+  apply (of_decide_eq_true accepted : p.Valid).2.2.2.1.1
+  exact sourceOf_receives accepted (p.successor i)
+
+noncomputable def receiptToken (p : Parameters N) (source : Fin N) : Delivery N :=
+  ⟨p.successor source, 2, receiptDate p source⟩
+
+/-- The all-children-in-flight section at the end of the launch product. -/
+structure WireSection (p : Parameters N) (s : Snapshot N) : Prop where
+  slow : ∀ i, s.main i = .slow
+  charge : ∀ source, s.x (p.successor source) .q = (1 / 4) * Real.exp
+    (-(9 / 50) * (s.time - receiverFastEnd p source))
+  recovery : ∀ i, s.x i .b = 9 / 50
+  aux : ∀ i q, s.aux i q = .ready ∧ RestBand (s.x i (.m q))
+  raw : ∀ i q, s.raw i q = none
+  queue : s.pending.Perm ((List.finRange N).map (receiptToken p))
+
 /-- All receipts run from the common SLOW cut. Each local queue contains
 its own one-cell occurrence, lifted to the native queue by synchronization. -/
 theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {ε : ℝ}

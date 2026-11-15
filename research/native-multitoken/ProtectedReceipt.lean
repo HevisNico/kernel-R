@@ -7,7 +7,7 @@ namespace NetworkStability.NativeMultiToken
 open KernelR.Hybrid Set MeasureTheory
 open scoped BigOperators
 
-private theorem quarter_above_reopen {cost : ℝ} (bound : cost < 9 / 10) :
+theorem quarter_above_reopen {cost : ℝ} (bound : cost < 9 / 10) :
     1 / 10 < (1 / 4) * Real.exp (-cost) := by
   have ref : Real.exp (- Real.log (5 / 2)) = (2 / 5 : ℝ) := by
     rw [Real.exp_neg, Real.exp_log (by norm_num : (0 : ℝ) < 5 / 2)]

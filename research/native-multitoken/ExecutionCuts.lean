@@ -118,7 +118,7 @@ theorem HasExecutionCut.after_prefix {N : Nat} {θ : Fin N → KernelR.Hybrid.Pa
       · exact later
       · exact ⟨cut, rest, after, clock, eq_of_heq sameTail⟩
 
-private theorem jump_admission_of_delivery {N : Nat} {route : Router N}
+theorem jump_admission_of_delivery {N : Nat} {route : Router N}
     {before admitted : Snapshot N} (jump : Jump route before admitted)
     (admission : NativeReciprocal.Admission N) (arrivals : jump.deliveries = [admission.token])
     (mode : before.main admission.token.cell = admission.mode) :
