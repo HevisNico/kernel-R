@@ -11,6 +11,8 @@ import ReceiptWave
 import LaunchReceiptChain
 import TrainingClock
 import TrainingStage
+import GuardedReplay
+import NativeHistory
 import Lean.Elab.Command
 import Lean.Util.CollectAxioms
 
@@ -25,7 +27,8 @@ run_cmd do
         mod == `SynchronizedProduct || mod == `LaunchWave || mod == `ProtectedReceipt ||
         mod == `PhysicalRefinement || mod == `PrefixAccounting || mod == `ReceiptProduct ||
         mod == `ReceiptTiming || mod == `ReceiptWave || mod == `LaunchReceiptChain ||
-        mod == `TrainingClock || mod == `TrainingStage then
+        mod == `TrainingClock || mod == `TrainingStage || mod == `GuardedReplay ||
+        mod == `NativeHistory then
       modules := modules + 1
       for name in data.constNames do
         let some info := env.constants.find? name
@@ -36,7 +39,7 @@ run_cmd do
           unless allowed.contains axiomName do
             throwError "Unexpected axiom {axiomName} in {name}"
         count := count + 1
-  if modules != 13 || count == 0 then
+  if modules != 15 || count == 0 then
     throwError "Expected the target and all native multi-token proof modules in the audit"
   for result in #[``NetworkStability.NativeMultiToken.guarded_conjuncts,
       ``NetworkStability.NativeMultiToken.scalar_latency,

@@ -155,21 +155,21 @@ theorem prefix_correspondence_of_cuts {p : Parameters N} {last : Snapshot N}
   have length : (NativeReciprocal.nativeAdmissions head).length = head.deliveries.length := by
     have h := congrArg List.length (NativeReciprocal.admissions_deliveries head)
     simpa only [List.length_map] using h
-  have matches : NativeReciprocal.nativeAdmissions head = consumed.map rowAdmission := by
+  have matching : NativeReciprocal.nativeAdmissions head = consumed.map rowAdmission := by
     dsimp only [consumed]
     rw [List.map_take, admitted, split, admissions_append, ← length, List.take_left]
   have intake : consumed.map (fun r => toDelivery r.probe) = head.deliveries := by
-    rw [← NativeReciprocal.admissions_deliveries head, matches, List.map_map]
+    rw [← NativeReciprocal.admissions_deliveries head, matching, List.map_map]
     rfl
   obtain ⟨mid, first, rest⟩ := replay_take_drop replay head.deliveries.length
   obtain ⟨children, noReceipt, settled⟩ := cuts cut head tail split
-  exact ⟨mid, matches, first, rest, prefix_unissued_balance head first intake children,
+  exact ⟨mid, matching, first, rest, prefix_unissued_balance head first intake children,
     noReceipt, settled mid first⟩
 
 /-- The child of every matched launch belongs to the issued or unissued
 part according to whether the launch FIRE is in the native prefix. -/
 theorem issued_unissued_partition {p : Parameters N} {rows : List (Row N)}
-    (matches : ∀ r ∈ rows, RowMatches p r)
+    (matching : ∀ r ∈ rows, RowMatches p r)
     (fires : List (Fin N × ℝ))
     (uniqueFires : fires.Nodup) (uniqueRows : (Transaction.fires inputCell rows).Nodup)
     (seen : ∀ e ∈ fires, e ∈ Transaction.fires inputCell rows) :
@@ -185,9 +185,9 @@ theorem issued_unissued_partition {p : Parameters N} {rows : List (Row N)}
     induction rows with
     | nil => rfl
     | cons row rest ih =>
-      have good := matches row (List.mem_cons_self)
+      have good := matching row (List.mem_cons_self)
       have children := good.2.2.2.2
-      have restExact := ih (fun row mem => matches row (List.mem_cons_of_mem _ mem))
+      have restExact := ih (fun row mem => matching row (List.mem_cons_of_mem _ mem))
       cases date : row.fireDate with
       | none => simp [Transaction.fires, issue, children, date, ← restExact]
       | some time => simp [Transaction.fires, issue, children, inputCell, date, ← restExact]
@@ -197,9 +197,9 @@ theorem issued_unissued_partition {p : Parameters N} {rows : List (Row N)}
     induction rows with
     | nil => rfl
     | cons row rest ih =>
-      have good := matches row (List.mem_cons_self)
+      have good := matching row (List.mem_cons_self)
       have children := good.2.2.2.2
-      have restExact := ih (fun row mem => matches row (List.mem_cons_of_mem _ mem))
+      have restExact := ih (fun row mem => matching row (List.mem_cons_of_mem _ mem))
       cases date : row.fireDate with
       | none => simp [unissued, Transaction.fires, date, ← restExact]
       | some time =>

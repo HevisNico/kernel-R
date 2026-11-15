@@ -172,6 +172,7 @@ theorem launch_receipt_chain {p : Parameters N} (accepted : p.check = true) {ε 
       launch.deliveries = [] ∧ receipt.ledger.emissions = [] ∧
       (∀ i, launch.emissionTimes i = [launchDate p + latency p i]) ∧
       cut.pending.Perm receipt.deliveries ∧
+      (∀ i, cut.x i .b = 9 / 50) ∧
       ∀ i, ReadyCoordinates last i ∧ (∀ q, last.raw i q = none) ∧
         receipt.ledger.recovery i = 1 / 10 ∧
         ∀ q, last.x i (.z q) = s.x i (.z q) ∧
@@ -183,7 +184,8 @@ theorem launch_receipt_chain {p : Parameters N} (accepted : p.check = true) {ε 
       (fun i => by rw [cutDate]; exact receipt_after_fast_cut accepted _)
       (fun i => (sections i).1) (fun i => (sections i).2.1) (fun i => (sections i).2.2.1)
       (fun i => (sections i).2.2.2.1) (fun i => (sections i).2.2.2.2.1) queue
-  refine ⟨cut, last, launch, receipt, cutDate, complete, finalQueue, launched, quiet, fires, taken, ?_⟩
+  refine ⟨cut, last, launch, receipt, cutDate, complete, finalQueue, launched, quiet, fires, taken,
+    (fun i => (sections i).2.2.1), ?_⟩
   intro i
   obtain ⟨ready, inactive, recoveryDose, doses⟩ := doses i
   refine ⟨ready, inactive, recoveryDose, fun q => ⟨?_, (doses q).2⟩⟩
