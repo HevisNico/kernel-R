@@ -300,3 +300,128 @@ This update checks the closest comparisons against the sources and
 locations identified above. It does not turn the wider reading list into
 a systematic review, or infer the absence of a result from its absence in
 an abstract.
+
+## The network results: finite learning, order, refinement and prediction
+
+This section covers the network results that follow v0.5.0: the dated
+network theorem, the native ring refinement and the preregistered
+transistor-level prediction. As above, it is a reading of the closest works
+found, not a systematic priority search. Two kinds of claims must be kept
+apart. Learning that stops after finitely many updates, and a final state
+that does not depend on the order of events, are classical ideas; this work
+instantiates them. Where no precedent was found is in the combination of a
+machine-checked refinement from an analog cell model to the network model
+and a preregistered transistor-level prediction of the exact final memory.
+
+### Finitely many updates
+
+[Novikoff (1962)](https://apps.dtic.mil/sti/tr/pdf/AD0298258.pdf) bounds
+the number of perceptron updates on separable data with a margin; Block
+(Rev. Mod. Phys. 34, 1962) gives an independent proof. These are the
+conceptual ancestors of a cell that writes only when it stays silent and
+stops once it fires. Senn and Fusi analyse convergence of stochastic
+learning with bounded binary synapses in
+[Phys. Rev. E 71, 061907 (2005)](https://doi.org/10.1103/PhysRevE.71.061907),
+alongside the Neural Computation paper cited above. The convergence of the
+perceptron has been machine-checked in Coq by
+[Murphy and Stewart (MAPL 2017)](https://doi.org/10.1145/3088525.3088673).
+None of these covers a closed-loop, asynchronous network of analog cells,
+per-read error budgets, or a circuit.
+
+Stop-learning in silicon is also established:
+[Mitra, Fusi and Indiveri (2009)](https://doi.org/10.1109/TBCAS.2008.2005781)
+switch off weight updates once a neuron classifies correctly, and the
+ROLLS processor ([Qiao et al., 2015](https://doi.org/10.3389/fnins.2015.00141))
+and the Noack et al. chip cited above implement stop-learning synapses.
+Their evidence is experimental, with stochastic bistable transitions; no
+termination proof or advance prediction of the final state was found.
+
+### A final state independent of the order of events
+
+This is the closest mathematical precedent and must be cited as such. The
+abelian sandpile ([Dhar, PRL 64, 1613, 1990](https://doi.org/10.1103/PhysRevLett.64.1613))
+and chip-firing on graphs (Björner, Lovász and Shor, Eur. J. Combin. 12,
+1991) have final configurations that do not depend on the order of
+topplings. [Bond and Levine, *Abelian Networks I*](https://doi.org/10.1137/15M1030984)
+([arXiv:1309.3445](https://arxiv.org/abs/1309.3445)) generalize this to
+networks of automata, with halting, order-independence and a least action
+principle. Kahn (IFIP 1974) proves determinacy of asynchronous dataflow
+networks, and P. Cousot (research report, 1977; not read here) studies
+asynchronous iteration of monotone operators. A rule in which a port's gain
+only grows until the port fires is plausibly an instance of these
+frameworks. The repository already contains a chip-firing formalization
+([`ChipFiring.lean`](../research/network-stability/ChipFiring.lean));
+chip-firing and graph Riemann–Roch have also been formalized in Lean 4 by
+[Mavani and Pflueger (2026)](https://arxiv.org/abs/2606.16679).
+
+The contribution here is therefore not confluence itself, but its proof
+for this network model under explicit per-read error budgets, with a
+dated admission order, rails and perpetual traffic
+([`DatedNetwork.lean`](../research/network-stability/DatedNetwork.lean),
+[`PerpetualFeedback.lean`](../research/network-stability/PerpetualFeedback.lean)).
+No application of abelian-network theory to learning hardware was found.
+
+### Refinement from an analog cell model to a network model
+
+Theorem-proved analog dynamics exist:
+[Peng and Greenstreet (NFM 2015)](https://doi.org/10.1007/978-3-319-17524-9_22)
+prove global convergence of a digital phase-locked loop in ACL2 with Z3.
+Hybrid-system verification and refinement are supported by KeYmaera X and
+Isabelle/HOL developments such as IsaVODEs (cited above). Neuron models
+have been verified in Rocq/Coq (cited above). No machine-checked refinement
+from a continuous model of a learning cell to a discrete network model, for
+a parameterized class of networks, was found. The frozen statement is
+[`NativeRingRefinement`](../research/network-stability/NativeRingTarget.lean);
+its proof for every N ≥ 2 and every checked parameter tuple is
+[`native_ring_refinement`](https://github.com/HevisNico/kernel-R/blob/419e4c66aae2921416993dd4e7c64996e05dc98f/research/network-stability/NativeRingRefinement.lean).
+
+### Predicting the learned state from per-device measurements
+
+Work on device mismatch aims at accuracy that survives it, not at an exact
+predicted state: [Cramer et al. (PNAS 119, e2109194119, 2022)](https://doi.org/10.1073/pnas.2109194119)
+train with the BrainScaleS-2 chip in the loop, so that training absorbs
+mismatch; Büchel et al. (cited above) train for robustness;
+[Moro et al. (arXiv:2202.05094)](https://arxiv.org/abs/2202.05094)
+calibrate off-chip training on measured RRAM heterogeneity. No work was
+found that computes, before a network runs, the exact final memory of each
+learning element from measurements of each cell alone, and then checks it.
+The one link found between formal models and SPICE checks simulation traces
+against properties after the fact, rather than predicting an outcome.
+
+The network campaign does this in simulation
+([report](https://github.com/HevisNico/kernel-R/blob/94d0f7f93bc7a8dcef825d0ed4df420938ff69cb/research/network-circuit-campaign/REPORT.md)):
+on four new mismatched instances, the 16 port words of a two-cell
+closed-loop network were those computed beforehand; the final stored
+voltages agreed with the predicted values within 2.4 µV for a dose of about
+1.35 mV; a nominal predictor would have been wrong on 11 of the 16 ports;
+and the negative control outside the timing condition failed as predicted.
+The claim is noise-free and simulation-only.
+
+### Preregistration
+
+Preregistration has been used in machine learning, for example at the
+NeurIPS 2020 and 2021 pre-registration workshops (PMLR volume 148). No
+preregistered circuit or hardware simulation study was found.
+
+### Summary
+
+| Claim | Position |
+|---|---|
+| Learning stops after finitely many writes, even while pulses continue | Partially known: perceptron convergence, Senn–Fusi, stop-learning chips without proofs |
+| Final memory independent of the order of events | Known in mathematics (sandpile, chip-firing, abelian networks); not found for learning hardware |
+| Memory never saturates, with proofs | Partially known: bounded synapses are standard; a proved rail bound with per-read budgets was not found |
+| Machine-checked refinement from an analog cell model to a network model, for a parameterized class | No precedent found |
+| Exact final memory predicted before the run from per-cell measurements, validated at transistor level | No precedent found |
+| Preregistration of a circuit experiment | Known in machine learning; not found for circuits |
+
+Suggested wording: learning that stops once a unit responds correctly is
+classical, and order-independent halting is well understood for abelian
+networks and monotone asynchronous iteration. To our knowledge, this work
+is the first to give machine-checked proofs that a closed-loop network of
+analog learning cells makes finitely many writes, never saturates and ends
+in a memory independent of the schedule, under explicit per-read error
+budgets; to prove a refinement from a continuous cell model to that network
+model for a parameterized family of ring networks; and to validate the
+theory by a preregistered transistor-level prediction of the exact final
+memory, computed from measurements of each cell alone. The results are
+noise-free and in simulation, and the search was not exhaustive.
