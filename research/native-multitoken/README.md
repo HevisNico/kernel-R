@@ -232,6 +232,20 @@ of tokens at the wave date and applies the product to the overlapping
 weak legs. It settles at that date plus $15/2$, with ERROR dose $3/5$
 at each selected port, zero dose at the other ports, and no FIREs.
 
+## Launch and protected receipt milestone
+
+[`launch_wave`](LaunchWave.lean) cuts the isolated strong legs at
+$t_3+9/10$ and synchronizes their prefixes. The actual FIRE of cell $i$
+is at $t_3+\ell_i$. Each FIRE appends its own routed child, and the
+resulting queue contains exactly $N$ children with their actual dates.
+
+[`protected_slow_admission`](ProtectedReceipt.lean) consumes one child
+at its calendar date in SLOW, starting from the charge carried from
+the receiver's own FAST end. The partial MARK drain bounds recovery
+by $7/25$ before T3 is applied to the main guard. The local execution
+completes the auxiliary cycle before reopening and contributes exactly
+$1/10$ MARK at port 2, zero ERROR, and zero FIREs.
+
 ## Negative controls for the new membership tests
 
 Use the accepted family above with $N=2$ unless a change is stated.

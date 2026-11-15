@@ -29,7 +29,8 @@ mkdir "$build/SelfCertifyingLearning"
   done
 )
 
-expected=$(printf '%s\n' NativeMultiTokenAudit.lean NativeMultiTokenMilestone.lean NativeMultiTokenTarget.lean SynchronizedProduct.lean)
+expected=$(printf '%s\n' LaunchWave.lean NativeMultiTokenAudit.lean NativeMultiTokenMilestone.lean \
+  NativeMultiTokenTarget.lean ProtectedReceipt.lean SynchronizedProduct.lean)
 actual=$(find . -name '*.lean' -printf '%P\n' | sort)
 if [[ "$expected" != "$actual" ]]; then
   diff -u <(printf '%s\n' "$expected") <(printf '%s\n' "$actual")
@@ -39,4 +40,10 @@ fi
 lean -DwarningAsError=true -o "$build/NativeMultiTokenTarget.olean" NativeMultiTokenTarget.lean
 lean -DwarningAsError=true -o "$build/NativeMultiTokenMilestone.olean" NativeMultiTokenMilestone.lean
 lean -DwarningAsError=true -o "$build/SynchronizedProduct.olean" SynchronizedProduct.lean
+failed=0
+lean -DwarningAsError=true -o "$build/LaunchWave.olean" LaunchWave.lean || failed=1
+lean -DwarningAsError=true -o "$build/ProtectedReceipt.olean" ProtectedReceipt.lean || failed=1
+if ((failed)); then
+  exit 1
+fi
 lean -DwarningAsError=true NativeMultiTokenAudit.lean
