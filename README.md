@@ -130,11 +130,12 @@ campaign.
 ## Limits
 
 - **Simulation only**; no silicon.
-- **Noise.** The claims under noise hold for the simulator's noise model,
-  with constants fixed in advance; in campaign 3 the measured noise was
-  larger than those constants. A separate study with a noise model drawn
+- **Noise.** The claims under noise hold for the injected noise model of the
+  simulations ([`noise.py`](research/circuit/noise.py)), with constants fixed
+  in advance; in campaign 3 the measured noise was larger than those
+  constants. A separate study with a noise model drawn
   from the transistors themselves is
-  [committed](https://github.com/HevisNico/kernel-R/blob/0cfe85ace1073391bca18fb73ab877c69b419665/research/network-noise-study/COMMITMENT.md).
+  [committed](research/network-noise-study/COMMITMENT.md).
 - **Two objects.** The simulated networks are predicted through the network
   theorem, with its hypotheses checked on each run; the refinement from the
   analog cell model is proved for the native classes, not for the
