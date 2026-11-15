@@ -1,5 +1,4 @@
 import NativeMultiTokenMilestone
-import PrefixAccounting
 
 namespace NetworkStability.NativeMultiToken
 
@@ -21,7 +20,7 @@ private theorem next_probe {queue : List (Probe N)} (nonempty : queue ≠ []) :
     | nil => exact (h rfl).elim
     | cons x xs ih =>
       by_cases empty : xs = []
-      · subst xs; exact ⟨x, by simp, by intro y mem; simpa using (List.mem_singleton.mp mem).symm.le⟩
+      · subst xs; exact ⟨x, by simp, by intro y mem; rcases List.mem_singleton.mp mem with rfl; exact le_rfl⟩
       · obtain ⟨first, member, best⟩ := ih empty
         by_cases earlier : x.due ≤ first.due
         · refine ⟨x, by simp, fun y mem => ?_⟩

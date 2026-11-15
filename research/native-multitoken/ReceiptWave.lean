@@ -7,12 +7,14 @@ open KernelR.Hybrid NativeStrong MeasureTheory
 
 noncomputable def sourceOf {p : Parameters N} (accepted : p.check = true) (i : Fin N) : Fin N :=
   (Equiv.ofBijective p.successor
-    (Finite.injective_iff_bijective.mp (of_decide_eq_true accepted : p.Valid).2.2.2.1)).symm i
+    (Finite.injective_iff_bijective.mp (fun {_ _} h =>
+      (of_decide_eq_true accepted : p.Valid).2.2.2.1.1 _ _ h))).symm i
 
 theorem sourceOf_receives {p : Parameters N} (accepted : p.check = true) (i : Fin N) :
     p.successor (sourceOf accepted i) = i :=
   (Equiv.ofBijective p.successor
-    (Finite.injective_iff_bijective.mp (of_decide_eq_true accepted : p.Valid).2.2.2.1)).apply_symm_apply i
+    (Finite.injective_iff_bijective.mp (fun {_ _} h =>
+      (of_decide_eq_true accepted : p.Valid).2.2.2.1.1 _ _ h))).apply_symm_apply i
 
 /-- All receipts run from the common SLOW cut. Each local queue contains
 its own one-cell occurrence, lifted to the native queue by synchronization. -/
@@ -37,7 +39,7 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
           run.ledger.mark i q = if q = 2 then 1 / 10 else 0) := by
   classical
   let receipt (i : Fin N) : Delivery 1 := ⟨0, 2, receiptDate p (sourceOf accepted i)⟩
-  let start (i : Fin N) := (localView s i).requeue [receipt i]
+  let start (i : Fin N) := { localView s i with pending := [receipt i] }
   let T := launchDate p + 19 / 2
   have leg (i : Fin N) :
       ∃ (u : Snapshot 1) (run : Execution (fun _ => nativeParameters N i) (EmptyRouter 1) (start i) u),
@@ -61,7 +63,6 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
         (atDate.time - (launchDate p + latency p (p.successor source) + 1))) := x
     have actualQueue : atDate.pending = [⟨0, 2, atDate.time⟩] := by
       rw [token, date]
-      rfl
     obtain ⟨reopened, learn, _, readyDate, ready, _, ended, queueDone, delivered, emitted, dose, doses⟩ :=
       protected_slow_admission (route := EmptyRouter 1) accepted source localBox atDate
         (wait.physical_invariant localBox localPhysical) (wait.raw_valid localValid) mode clock exactCharge b
@@ -125,9 +126,11 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
           intro i _
           rw [delivered]
           rfl
-        _ = _ := by
-          rw [← List.flatMap_map (g := fun d : Delivery N => [d])]
-          exact List.flatMap_singleton' _
+        _ = ((List.finRange N).map (fun i => (⟨i, 2, receiptDate p (sourceOf accepted i)⟩ : Delivery N))).flatMap
+              (fun d => [d]) := (List.flatMap_map
+                (fun i => (⟨i, 2, receiptDate p (sourceOf accepted i)⟩ : Delivery N))
+                (fun d => [d]) (List.finRange N)).symm
+        _ = _ := List.flatMap_singleton' _
     rw [same]
   obtain ⟨woven, noFire, consumed, marks⟩ :=
     synchronized_receipt_execution (route := router p) start finals legs (fun _ => rfl) finish
@@ -135,6 +138,7 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
         have nonempty : 2 ≤ N := (of_decide_eq_true accepted : p.Valid).1
         let i : Fin N := ⟨0, by omega⟩
         have bound := (receipt_timing accepted (sourceOf accepted i)).2.2
+        change s.time ≤ launchDate p + 19 / 2
         linarith [before i]) fired s.pending scheduled
   have begin : assemble s.time start s.pending = s := by
     cases s
@@ -167,11 +171,15 @@ theorem protected_receipt_wave {p : Parameters N} (accepted : p.check = true) {�
         rw [((readyFinal i).auxiliary q).1]
         linarith [((readyFinal i).auxiliary q).2.2]
     · intro i q o h
-      exact Option.noConfusion ((ended i q).symm.trans h)
+      have absent : (quietAt t (horizon p)).raw i q = none := ended i q
+      rw [absent] at h
+      cases h
     · simp [quietAt, t, assemble]
   refine ⟨_, run, complete, rfl, ?_, ?_, ?_⟩
   · change s.pending.Perm (part.append suffix).deliveries
     rw [Execution.deliveries_append, woven.cast_source_deliveries begin.symm]
+    have none : suffix.deliveries = [] := rfl
+    rw [none, List.append_nil]
     exact consumed
   · change (part.append suffix).ledger.emissions = []
     rw [Execution.emissions_append, partLedger, noFire]

@@ -135,8 +135,8 @@ theorem native_training_clock {route : Router N} {s u : Snapshot N}
       (by rw [readyPulse_initial]) (head.allFlows_mono (fun _ h t ht => (h t ht).le) drive)
     have lower := head.ready_drive_lower i headReady (s.x i .q) (Real.exp (s.x i (.z p))) s.time
       (by rw [readyPulse_initial]) (head.allFlows_mono (fun _ h t ht => (h t ht).ge) drive)
-    rw [← cut.date]
-    exact le_antisymm upper lower
+    exact (le_antisymm upper lower).trans (congrArg
+      (readyPulse (s.x i .q) (Real.exp (s.x i (.z p))) s.time) cut.date)
   obtain ⟨rest⟩ := cut.isPrefix.continuation
   have quiet : rest.tail.emissionTimes i = [] :=
     (List.append_eq_nil_iff.mp ((rest.emissionTimes i).symm.trans pulse.emissions)).2
@@ -167,5 +167,6 @@ theorem native_training_clock {route : Router N} {s u : Snapshot N}
   have shift : s.time + 1 - s.time = (1 : ℝ) := by ring
   rw [show u.time - (s.time + 1) = u.time - s.time - 1 by ring]
   simp only [readyPulse, shift, sub_zero]
+  rw [show -(1 / 2 : ℝ) * (u.time - s.time - 1) = -(u.time - s.time - 1) / 2 by ring]
 
 end NetworkStability.NativeMultiToken

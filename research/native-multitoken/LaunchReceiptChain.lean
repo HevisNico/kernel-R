@@ -24,7 +24,7 @@ private theorem launch_receipt_order {p : Parameters N} (accepted : p.check = tr
     have hw := congrArg p.successor eq
     simpa only [source, sourceOf_receives] using hw
   have onto (i : Fin N) : source (p.successor i) = i := by
-    apply (of_decide_eq_true accepted : p.Valid).2.2.2.1
+    apply (of_decide_eq_true accepted : p.Valid).2.2.2.1.1
     exact sourceOf_receives accepted (p.successor i)
   have perm : ((List.finRange N).map source).Perm (List.finRange N) := by
     apply (List.perm_ext_iff_of_nodup ((List.nodup_finRange N).map injective)

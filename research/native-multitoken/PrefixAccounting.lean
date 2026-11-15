@@ -1,4 +1,5 @@
 import NativeMultiTokenTarget
+import KernelR.HybridInputBalance
 
 namespace NetworkStability.NativeMultiToken
 
@@ -11,40 +12,8 @@ theorem native_prefix_balance {θ : Fin N → KernelR.Hybrid.Parameters} {route 
     {s u : Snapshot N} (run : Execution θ route s u) :
     (u.pending ++ run.deliveries).Perm
       (s.pending ++ run.ledger.emissions.flatMap (fun e => route e.1 e.2)) := by
-  induction run with
-  | nil => simp [Execution.deliveries, Execution.ledger, Ledger.zero]
-  | @cons source cut target step rest ih =>
-    have head : (cut.pending ++ step.deliveries).Perm
-        (source.pending ++ step.ledger.emissions.flatMap (fun e => route e.1 e.2)) := by
-      cases step with
-      | flow f =>
-        simp [Move.deliveries, Move.ledger, Flow.ledger, f.queue_fixed]
-      | jump j =>
-        cases j with
-        | arrive d before after queue due free =>
-          change ((before ++ after) ++ [d]).Perm (_ ++ [])
-          rw [List.append_nil, queue]
-          simp only [List.append_assoc]
-          exact (List.perm_append_singleton d after).append_left before
-        | fire i mode guard => simp [Move.deliveries, Jump.deliveries, Move.ledger, Jump.ledger]
-        | _ => simp [Move.deliveries, Jump.deliveries, Move.ledger, Jump.ledger, Ledger.zero,
-            setMain, setAux, setRaw]
-    change (_ ++ (step.deliveries ++ rest.deliveries)).Perm
-      (_ ++ (step.ledger.emissions ++ rest.ledger.emissions).flatMap (fun e => route e.1 e.2))
-    rw [List.flatMap_append]
-    calc
-      _ ~ (_ ++ rest.deliveries) ++ step.deliveries := by
-        rw [List.append_assoc]
-        exact (List.perm_append_comm (l₁ := step.deliveries) (l₂ := rest.deliveries)).append_left _
-      _ ~ (_ ++ rest.ledger.emissions.flatMap (fun e => route e.1 e.2)) ++ step.deliveries :=
-        ih.append_right _
-      _ ~ (_ ++ step.deliveries) ++ rest.ledger.emissions.flatMap (fun e => route e.1 e.2) := by
-        simp only [List.append_assoc]
-        exact (List.perm_append_comm (l₁ := rest.ledger.emissions.flatMap (fun e => route e.1 e.2))
-          (l₂ := step.deliveries)).append_left _
-      _ ~ _ := by
-        rw [← List.append_assoc]
-        exact head.append_right _
+  apply Multiset.coe_eq_coe.mp
+  simpa only [← Multiset.coe_add] using run.token_balance
 
 /-- An abstract replay queues a row's children when the row is admitted. -/
 theorem guarded_prefix_balance {p : Parameters N} {s u : State N} {rows : List (Row N)}
@@ -189,11 +158,11 @@ theorem issued_unissued_partition {p : Parameters N} {rows : List (Row N)}
       have children := good.2.2.2.2
       have restExact := ih (fun row mem => matching row (List.mem_cons_of_mem _ mem))
       cases date : row.fireDate with
-      | none => simp [Transaction.fires, issue, children, date, ← restExact]
-      | some time => simp [Transaction.fires, issue, children, inputCell, date, ← restExact]
+      | none => simp [Transaction.fires, issue, children, date]; exact restExact
+      | some time => simp [Transaction.fires, issue, children, inputCell, date]; exact restExact
   have unissuedExact : unissued rows fires = (planned.filter (fun e => !fired e)).flatMap issue := by
     dsimp only [planned]
-    clear uniqueFires uniqueRows seen
+    clear uniqueFires uniqueRows seen plannedExact
     induction rows with
     | nil => rfl
     | cons row rest ih =>
@@ -201,10 +170,10 @@ theorem issued_unissued_partition {p : Parameters N} {rows : List (Row N)}
       have children := good.2.2.2.2
       have restExact := ih (fun row mem => matching row (List.mem_cons_of_mem _ mem))
       cases date : row.fireDate with
-      | none => simp [unissued, Transaction.fires, date, ← restExact]
+      | none => simp [unissued, Transaction.fires, date]; exact restExact
       | some time =>
         by_cases mem : (row.probe.input.1, time) ∈ fires <;>
-          simp [unissued, Transaction.fires, issue, fired, inputCell, children, date, mem, ← restExact]
+          (simp [unissued, Transaction.fires, issue, fired, inputCell, children, date, mem]; exact restExact)
   have issuedExact : (planned.filter fired).Perm fires := by
     apply (List.perm_ext_iff_of_nodup (uniqueRows.filter _) uniqueFires).mpr
     intro e
