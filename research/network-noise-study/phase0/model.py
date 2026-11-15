@@ -1,6 +1,10 @@
 """Phase 0, feasibility, no claim: the per-instance generator of a noise model drawn from the device models.
 
-  model.py extract WORK OUT.json SECTION SEED|none CELLS NGSPICE PDK [STATE ...]
+  model.py extract WORK OUT.json SECTION SEED|none CELLS NGSPICE PDK [STATE ...] [--per-cell]
+
+With --per-cell (the method fixed for every instance), each cell is extracted in the deck of the instance with the
+other cells taken out of the circuit but their mismatch draws kept (`isolate`), after a check that each cell's
+operating point is the one of the full deck (`op_match`).
 
 CELLS is a comma-separated list of cell names, the cells of the deck of the instance (for example a,b): the mismatch
 sample of a seed belongs to the whole deck, so the extraction runs on that deck, with its seed (`setseed`, `reset`),
@@ -85,6 +89,46 @@ def analysis_deck(section, cells, state, focus=None):
     cond = [f"r.cond{k} {n} 0 1e12 noisy=0" for k, n in enumerate(sorted(nodes))]
     text = "\n".join(out) + "\n"
     return text.replace("\n.end\n", "\n" + "\n".join(cond + ([RSHUNT] if RSHUNT else [])) + "\n.end\n"), len(cond)
+
+
+def isolate(text, keep, cells):
+    """The deck of the instance with every cell but `keep` taken out of the circuit, its mismatch draws kept: each
+    transistor of another cell stays, in its place, with its four terminals on ground (so the PDK draws the same
+    AGAUSS values in the same order, and `keep` gets exactly the mismatch it has in the full deck), and every other
+    element of another cell is removed. Device noise is local, and the cells are joined only by the router outside
+    the simulator and by ideal supplies."""
+    others = [f"x{c}." for c in cells if c != keep]
+    out = []
+    for line in text.splitlines():
+        f = line.split()
+        if not f or not others:
+            out.append(line)
+            continue
+        if any(f[0].startswith(o) for o in others) and "sky130_fd_pr__" in line:
+            out.append(" ".join([f[0], "0", "0", "0", "0"] + f[5:]))
+        elif any(o in tok for tok in f[:6] for o in others) or any(f[0] in (f"vfp{c}", f"vfpb{c}") for c in cells if c != keep):
+            continue
+        else:
+            out.append(line)
+    return "\n".join(out) + "\n"
+
+
+def op_match(work, section, seed, cells, ngspice, pdk, state="hold"):
+    """The operating point of each cell in its isolated deck against the full deck: the largest difference over the
+    nodes of the cell. The full deck's `op` converges where its noise analysis does not."""
+    full, _ = analysis_deck(section, cells, state, focus=(cells[0], 1))
+    ctl = lambda: "\n".join([".control", "set numdgt=16", "set filetype=ascii"] + seeded(seed) + ["op", "write op.raw all", "quit", ".endc", ".end"]) + "\n"
+    spice(work / "full", full.replace("\n.end\n", "\n") + ctl(), ngspice, pdk)
+    ref = raw_ascii(work / "full" / "op.raw")
+    res = {}
+    for c in cells:
+        spice(work / f"cell_{c}", isolate(full, c, cells).replace("\n.end\n", "\n") + ctl(), ngspice, pdk)
+        r = raw_ascii(work / f"cell_{c}" / "op.raw")
+        keys = [k for k in ref if k.startswith(f"v(x{c}.") and k in r and "#" not in k]
+        d = max(abs(float(ref[k][0]) - float(r[k][0])) for k in keys)
+        worst = max(keys, key=lambda k: abs(float(ref[k][0]) - float(r[k][0])))
+        res[c] = dict(nodes=len(keys), max_abs_diff_V=d, worst_node=worst)
+    return res
 
 
 def devices(text):
@@ -194,11 +238,16 @@ def one_output(work, text, devs, seed, state, c, p, ngspice, pdk):
                 onoise=dict(f=f[::4].tolist(), total=total[::4].tolist()))
 
 
-def extract(work, out, section, seed, cells, ngspice, pdk, states):
-    res = dict(section=section, seed=seed, cells=cells, band_Hz=BAND, cover=COVER, outputs=[])
+def extract(work, out, section, seed, cells, ngspice, pdk, states, per_cell=False):
+    res = dict(section=section, seed=seed, cells=cells, per_cell=per_cell, band_Hz=BAND, cover=COVER, outputs=[])
+    if per_cell:
+        res["op_match"] = op_match(work / "opmatch", section, seed, cells, ngspice, pdk)
+        print("op match", res["op_match"], flush=True)
     for state in states:
         for c, p in outputs(state, cells):
             text, ncond = analysis_deck(section, cells, state, focus=(c, p))
+            if per_cell:
+                text = isolate(text, c, cells)
             devs = devices(text)
             r = one_output(work / f"{state}_{c}{p or ''}", text, devs, seed, state, c, p, ngspice, pdk)
             r["conditioned_nodes"] = ncond
@@ -212,5 +261,7 @@ def extract(work, out, section, seed, cells, ngspice, pdk, states):
 if __name__ == "__main__":
     a = sys.argv[2:]
     if sys.argv[1] == "extract":
+        per_cell = "--per-cell" in a
+        a = [x for x in a if x != "--per-cell"]
         extract(Path(a[0]), Path(a[1]), a[2], None if a[3] == "none" else int(a[3]), tuple(a[4].split(",")), a[5], a[6],
-                a[7:] or list(STATES))
+                a[7:] or list(STATES), per_cell)

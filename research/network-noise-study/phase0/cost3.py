@@ -2,7 +2,7 @@
 
   cost3.py runs  WORK OUT.json NGSPICE PDK READS
   cost3.py parse WORK OUT.json NGSPICE PDK MS [MS ...]
-  cost3.py dnf   WORK OUT.json NGSPICE PDK DNF_PATH      campaign 4's run (need 4), quiet / injected / the model's
+  cost3.py dnf   WORK OUT.json NGSPICE PDK DNF_PATH NEED campaign 4's run (dnf.calendar(NEED x 4)), quiet / injected / the model's
                                                           devices (pwlmodel) / every analog transistor (pwl46)
 
 `runs`: four network runs of the nominal cell (section tt), three cells a, b, c, four at a time as in the
@@ -43,7 +43,7 @@ def calendar(reads):
                 horizon=18 * 2 * reads + 12)
 
 
-def dnf_calendar(dnf_path):
+def dnf_calendar(dnf_path, need=4):
     """Campaign 4's network run, need 4 everywhere (`dnf.calendar(4, 4, 4, 4)` of research/learned-dnf-circuit, read
     from DNF_PATH, a copy of that file: code, no data), as a calendar of the router: the external inputs as sources,
     the routed lines as edges from a and b to the ports of c, open over the decision window of each routed slot.
@@ -52,7 +52,7 @@ def dnf_calendar(dnf_path):
     spec = importlib.util.spec_from_file_location("dnf", dnf_path)
     dnf = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(dnf)
-    slots = dnf.calendar(4, 4, 4, 4)
+    slots = dnf.calendar(need, need, need, need)
     src, edges = [], []
     for s in slots:
         for n, off in s["inputs"].items():
@@ -62,7 +62,7 @@ def dnf_calendar(dnf_path):
             for line, (c, p) in dnf.LINES.items():
                 edges.append(dict(name=f"{line}->{c}{p}@{s['date']}", source=line, gate=[s["date"], s["date"] + dnf.WINDOW],
                                   delay=dnf.WIRE, cell=c, port=p))
-    return dict(name="campaign 4, need 4 (emulated)", sources=sorted(src), edges=edges,
+    return dict(name=f"campaign 4, need {need} (emulated)", sources=sorted(src), edges=edges,
                 horizon=slots[-1]["date"] + dnf.SLOT + dnf.SETTLE)
 
 
@@ -101,9 +101,10 @@ def pwl_sources(text, per_cell, tstop, noise_seed=1):
 
 
 def _run(work, mode, ngspice, pdk, reads, dnf_path=None):
+    """`reads` is the need of the campaign-4 calendar when dnf_path is given."""
     global MODEL_DEVICES
     original, info = net.deck, {}
-    cal = dnf_calendar(dnf_path) if dnf_path else calendar(reads)
+    cal = dnf_calendar(dnf_path, reads) if dnf_path else calendar(reads)
     if mode == "pwlmodel":
         ex = json.loads((HERE / "EXTRACT_nominal.json").read_text())
         MODEL_DEVICES = sorted({k["device"] for o in ex["outputs"] if o["state"] != "preset" for k in o.get("kept", [])
@@ -139,7 +140,7 @@ def runs(work, out, ngspice, pdk, reads, dnf_path=None, modes=("quiet", "injecte
         res = list(ex.map(one, modes))
     for r in res:
         print(json.dumps(r))
-    Path(out).write_text(json.dumps(dict(cells=CELLS, reads=reads, calendar="dnf need 4" if dnf_path else "reads", runs=res), indent=1) + "\n")
+    Path(out).write_text(json.dumps(dict(cells=CELLS, reads=reads, calendar=f"dnf need {reads}" if dnf_path else "reads", runs=res), indent=1) + "\n")
 
 
 def parse(work, out, ngspice, pdk, lengths):
@@ -174,7 +175,7 @@ if __name__ == "__main__":
         _run(a[0], a[1], a[2], a[3], int(a[4]), *(a[5:6] or [None]))
     elif sys.argv[1] == "runs":
         runs(a[0], a[1], a[2], a[3], int(a[4]))
-    elif sys.argv[1] == "dnf":                 # cost3.py dnf WORK OUT.json NGSPICE PDK DNF_PATH
-        runs(a[0], a[1], a[2], a[3], 0, a[4], ("quiet", "injected", "pwlmodel", "pwl46"))
+    elif sys.argv[1] == "dnf":                 # cost3.py dnf WORK OUT.json NGSPICE PDK DNF_PATH NEED
+        runs(a[0], a[1], a[2], a[3], int(a[5]), a[4], ("quiet", "injected", "pwlmodel", "pwl46"))
     elif sys.argv[1] == "parse":
         parse(a[0], a[1], a[2], a[3], [float(x) for x in a[4:]])
