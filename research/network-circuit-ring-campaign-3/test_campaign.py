@@ -41,7 +41,11 @@ class Protocol(unittest.TestCase):
         self.assertEqual(plan.SEEDS, dict(a=list(range(7401, 7407)), b=list(range(7407, 7413))))
         self.assertEqual((plan.N, plan.PORTS, plan.UNUSED, plan.SECTION), (3, ["a1", "b1", "c1", "a2"], ["b2", "c2"], "tt_mm"))
         self.assertIn("Measures: a robust scan **640 s** (changed), the train 730 s.", FLAT)
-        self.assertEqual(plan.TIMEOUT_S, dict(scan=640, train=730))
+        self.assertEqual(plan.TIMEOUT_S, dict(scan=860, train=730))
+        A3 = " ".join((HERE / "AMENDMENT_3.md").read_text().split())
+        self.assertIn("**640 s becomes 860 s**", A3)
+        self.assertIn("| measures (scans 860 s, trains 730 s) | 7 200 s | 14 400 s |", A3)
+        self.assertIn("**28 565 s (7.9 h)**", A3)
         self.assertIn("expected = 3 x (3.7746 s x simulated ms + 3.9820 s x pulses) x (1.3861 if the run has noise) limit = 1.3 x expected, rounded up to 10 s", FLAT)
         self.assertEqual(plan.COST, dict(per_cell_ms_s=3.7746, per_cell_pulse_s=3.9820, noise=1.3861, margin=1.3))
         self.assertIn("`L = S_3 + 10` for the run without noise and the control, `L' = S_3 + 3` for the noisy run", FLAT)
@@ -54,7 +58,7 @@ class Protocol(unittest.TestCase):
         self.assertEqual((predicted.ALLOWANCE_MV, predicted.K, predicted.HELP_22_MV, predicted.D), (0.030, 3.0, 0.015, 100000))
         self.assertIn("its **need** is the least `n >= 0` with `n x 100 000 >= gap`", FLAT)
         self.assertEqual((analyze.TOLERANCE_MV, analyze.SEPARATION), (0.01, 16))
-        self.assertIn("5 750 s per machine for the measures, 7 280 s and 6 885 s for the network runs, **25 665 s in all**", FLAT)
+        self.assertIn("5 750 s per machine for the measures, 7 280 s and 6 885 s for the network runs, **25 665 s in all**", FLAT)   # before amendment 3
 
     def test_frozen_files_exist(self):
         for name in plan.FROZEN:
@@ -106,12 +110,13 @@ class Plan(unittest.TestCase):
 
     def test_budget_at_five_doses_per_port(self):
         m = launch.check_budget([plan.entry(r, "measure") for r in plan.measure_runs()], 14400, plan.JOBS)
-        self.assertEqual(m["wall_cap_s"], dict(a=5750.0, b=5750.0))
+        self.assertEqual(m["wall_cap_s"], dict(a=7200.0, b=7200.0))
+        self.assertLessEqual(m["aggregate_cap_s"], launch.MAX_BUDGET_S)
         runs, removed = plan.network_runs({s: [5] * 4 for s in ALL}, 7401)
         self.assertEqual(removed, [])
         r = launch.check_budget([plan.entry(x, "network") for x in runs], plan.MAX_BUDGET_S, plan.JOBS)
         self.assertEqual(r["wall_cap_s"], dict(a=7280.0, b=6885.0))
-        self.assertEqual(round(m["aggregate_cap_s"] + r["aggregate_cap_s"]), 25665)
+        self.assertEqual(round(m["aggregate_cap_s"] + r["aggregate_cap_s"]), 28565)
 
     def test_noisy_runs_removed_for_the_budget(self):
         needs = {s: [8] * 4 for s in ALL}

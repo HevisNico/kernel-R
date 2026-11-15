@@ -36,14 +36,14 @@ NOISY_RUNS = 1                                          # noisy network runs per
 GUARD = ring.SEPARATION                                 # 16 units
 AFTER_QUIET, AFTER_NOISY = 10, 3                        # laps after the predicted freeze
 ESTIMATE_S = dict(scan=400, train=570)
-TIMEOUT_S = dict(scan=640, train=730)
+TIMEOUT_S = dict(scan=860, train=730)                   # the scan limit of amendment 3
 COST = dict(per_cell_ms_s=3.7746, per_cell_pulse_s=3.9820, noise=1.3861, margin=1.3)
 JOBS = 4
 CLEANUP_S = 10                                          # the allowance of the launch kit per run
 MAX_BUDGET_S = 14400                                    # per manifest, the two machines together
 EXECUTOR = "a Claude Code cloud session on behalf of the owner, on two cloud containers whose inventories are recorded"
 OUTPUTS = ["evidence/input.spice", "evidence/session.log", "evidence/trace.raw", "evidence/result.json", "evidence/record.json", "evidence/noise.sha256"]
-FROZEN = [f"{BASE}/PREDICTION.md", f"{BASE}/COMMITMENT.md", f"{BASE}/AMENDMENT_1.md", f"{BASE}/AMENDMENT_2.md",
+FROZEN = [f"{BASE}/PREDICTION.md", f"{BASE}/COMMITMENT.md", f"{BASE}/AMENDMENT_1.md", f"{BASE}/AMENDMENT_2.md", f"{BASE}/AMENDMENT_3.md", f"{BASE}/ROBUST_SCAN_REHEARSAL.json",
           f"{BASE}/run.py", f"{BASE}/plan.py", f"{BASE}/predicted.py", f"{BASE}/analyze.py", f"{BASE}/check.sh", f"{BASE}/robustscan.py",
           f"{RING}/ring.py", f"{RING}/RingNetwork.lean",
           f"{NET}/net.py", f"{NET}/router.py", f"{NET}/measure.py",
