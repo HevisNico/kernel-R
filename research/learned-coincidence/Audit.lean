@@ -1,11 +1,12 @@
 import Recognition
 import TwoLayerTarget
+import MonotoneTarget
 
 open Lean Elab Command in
 run_cmd do
   let env ← getEnv
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
-  let modules := #[`Target, `Recognition, `TwoLayerTarget]
+  let modules := #[`Target, `Recognition, `TwoLayerTarget, `MonotoneTarget]
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
       unless modules.contains env.header.moduleNames[idx.toNat]! do continue
