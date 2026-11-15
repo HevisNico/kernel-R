@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Compiles the guarded model of ../../network-stability, its instance for the circuit network and the generated
-# instances, with warnings as errors, then audits the axioms. Needs only the pinned Lean, no Lake package.
+# Compiles the guarded model of ../../network-stability, its instance for the circuit network, the lemma on the
+# order of the dates and the generated instances, with warnings as errors, then audits the axioms. Needs only the pinned Lean, no Lake package.
 set -euo pipefail
 
 cd "$(dirname "$0")"
@@ -21,10 +21,10 @@ mkdir "$build/SelfCertifyingLearning"
     lean -DwarningAsError=true -o "$build/$module.olean" "$module.lean"
   done
 )
-if grep -nE '\b(sorry|admit|native_decide|axiom|unsafe|implemented_by|extern)\b' CircuitNetwork.lean Instances.lean; then
+if grep -nE '\b(sorry|admit|native_decide|axiom|unsafe|implemented_by|extern)\b' CircuitNetwork.lean DatedOrder.lean Instances.lean; then
   exit 1
 fi
-for module in CircuitNetwork Instances; do
+for module in CircuitNetwork DatedOrder Instances; do
   lean -DwarningAsError=true -o "$build/$module.olean" "$module.lean"
 done
 lean -DwarningAsError=true Audit.lean

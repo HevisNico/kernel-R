@@ -15,7 +15,7 @@ seeds.
 | File | What it is |
 |---|---|
 | [`MODEL.md`](MODEL.md) | the model, what is proved, the error budget, the conditions that hold by construction, what is not proved |
-| [`CircuitNetwork.lean`](CircuitNetwork.lean), [`check.sh`](check.sh), [`Audit.lean`](Audit.lean) | the instance of the network theorem for this circuit network |
+| [`CircuitNetwork.lean`](CircuitNetwork.lean), [`DatedOrder.lean`](DatedOrder.lean), [`check.sh`](check.sh), [`Audit.lean`](Audit.lean) | the instance of the network theorem for this circuit network, and the lemma on the order of the dates |
 | [`calendars.py`](calendars.py) | the calendar with pulses 18 units apart, and the 8-unit negative control |
 | [`cellscan.py`](cellscan.py), [`noisechar.py`](noisechar.py) | the per-port measures: threshold, dose, help of a recent pulse; trains alone, without and with noise |
 | [`collect.py`](collect.py), [`MEASURES.json`](MEASURES.json) | what each pulse of those runs did, and the hashes of decks and waveforms |
@@ -40,13 +40,15 @@ can have its own leak control; a memory fault of the bench, see section 6),
   the queue empties, no port takes more writes than there are sources, and,
   **if every read of the zero-error run has room for the error budget of its
   port, the run with errors is the zero-error run** (`circuit_predicted`).
-  No new axiom; 34 s to check.
+  No new axiom; under a minute to check.
 - The recent-past effect and the noise are in the budget E, per port, as
   measured (section 3).
-- Not proved in Lean, and said so in `MODEL.md`: that the order of the dates
-  gives the same run as the order of the model's queue, and what remains of a
-  prediction when one port has a read without room. Both rest on the same
-  simple argument, checked numerically by `predict.py`.
+- [`DatedOrder.lean`](DatedOrder.lean), added after the review of phase 1:
+  with no same-date tie on a port, the run in the order of the dates is the
+  queue run of the model, read for read, with errors inside the budgets
+  (`circuit_dated_predicted`).
+- Not proved in Lean, and kept out of every claim: what remains of a
+  prediction when one port has a read without room.
 
 ## 2. Conditions that hold by construction
 
@@ -223,8 +225,8 @@ tried; nothing between the cells is extracted.
   (`../../sky130-supervisor-closure/sim.py`) has the same two lines; it is
   frozen and was not changed.
 - **The 8-unit control lacks a measure**: the help at 8 units, per instance.
-- **Two arguments are not Lean theorems** (order of the dates; ports without
-  room). `MODEL.md`, section 6.
+- **One argument is not a Lean theorem**: ports without room. `MODEL.md`,
+  section 6. The order of the dates is now proved (`DatedOrder.lean`).
 - **The noise of a silent read is assumed** equal to that of a FIRE read.
 - **One noisy train per port.** The noise of a read rests on about 22 reads
   per port: a standard deviation known to about 15 %.
