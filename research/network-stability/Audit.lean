@@ -20,6 +20,8 @@ import DatedTrainingControl
 import NativeRingTarget
 import NativeRingExamples
 import NativeStrongStep
+import NativeWeakStep
+import NativeRingTwo
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 
@@ -36,7 +38,7 @@ run_cmd do
     `PhaseAdmission, `NativeAdmissions, `NativeTransactions, `DatedFairness, `NativeTiming,
     `NativeWireTransactions, `NativeComposition, `DatedReplay, `ReciprocalClosure, `DatedNetwork, `DatedTrainingControl,
     `ReciprocalLearning, `ReciprocalReverseRows, `ReciprocalDated, `ReciprocalReplay, `ReciprocalPostBirth,
-    `NativeRingTarget, `NativeRingExamples, `NativeStrongStep]
+    `NativeRingTarget, `NativeRingExamples, `NativeStrongStep, `NativeWeakStep, `NativeRingTwo]
   let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -186,7 +188,10 @@ run_cmd do
       ``NetworkStability.NativeRing.allStrong_valid,
       ``NetworkStability.NativeStrong.local_leg_exists,
       ``NetworkStability.NativeStrong.splice_execution,
-      ``NetworkStability.NativeStrong.strong_transaction_exists] do
+      ``NetworkStability.NativeStrong.strong_transaction_exists,
+      ``NetworkStability.NativeStrong.weak_step_exists,
+      ``NetworkStability.NativeRing.all_strong_two_refines,
+      ``NetworkStability.NativeRing.stopping_two_refines] do
     let some info := env.find? name | throwError "Missing theorem {name}"
     unless info.isTheorem do throwError "Required declaration is not a theorem: {name}"
   logInfo m!"Network stability audit: {count} theorems."
