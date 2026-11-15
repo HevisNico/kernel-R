@@ -21,10 +21,10 @@ private theorem calibrated_silence {p : Parameters N M} {i : Fin N} {k : Nat} {x
   have upper := h.2.2.2.2.2.2
   exact decide_eq_false (by omega)
 
-private def ReadMargin (level budget value : Nat) (decision : Bool) : Prop :=
+def ReadMargin (level budget value : Nat) (decision : Bool) : Prop :=
   if decision then level + budget ≤ value else value + budget < level
 
-private theorem read_of_margin {p : Parameters N M} {i : Fin N} {k : Nat} {x : Pattern M}
+theorem read_of_margin {p : Parameters N M} {i : Fin N} {k : Nat} {x : Pattern M}
     {budget : Nat} {timing : SlotTiming} {r : ReadObservation M} {decision : Bool}
     (h : CalibratedAdditiveRead p i k x budget timing r)
     (margin : ReadMargin (p.threshold i) budget (score p i k x) decision) : r.fired = decision := by
@@ -175,7 +175,7 @@ private theorem disjunction_cell {p : Disjunctions B A} (check : p.check = true)
   unfold Disjunctions.check at check
   exact Bool.and_eq_true_iff.mp (allPorts (Bool.and_eq_true_iff.mp check).2 i)
 
-private theorem line_certificate {p : Disjunctions B A} (check : p.check = true) (i : Fin B) (a : Fin A)
+theorem line_certificate {p : Disjunctions B A} (check : p.check = true) (i : Fin B) (a : Fin A)
     (selected : p.lines i a = true) :
     lineNeed p i a ≤ p.maxWrites ∧
     (∀ k, k < lineNeed p i a → lineScore p i a k + p.trainingError i < p.threshold i) ∧
@@ -273,7 +273,7 @@ private theorem count_full_schedule (p : Cascade A B M) (i : Fin B) (a : Fin A)
 private theorem singleton_teaching {p : Cascade A B M}
     (firstCheck : checkConjunctions p.first = true) (reachable : p.reachable = true)
     {o : Observations A B M} {left right : SlotTiming}
-    (calibration : CascadeCalibration p left right o)
+    (calibration : CascadeTrainingCalibration p left right o)
     (cert : LearningCertificate p.first o.firstTrain) {n : Nat} {L : Lesson A B}
     (atIndex : (lessons p)[n]? = some L) : (o.secondTrain n).input = singleton L.line := by
   have selected := lesson_selected atIndex
@@ -282,21 +282,21 @@ private theorem singleton_teaching {p : Cascade A B M}
   have reach := allPorts reachable L.line
   rw [used] at reach
   simp only [Bool.not_true, Bool.false_or] at reach
-  obtain ⟨teach, route, _⟩ := calibration.2.1 n L atIndex
+  obtain ⟨teach, route, _⟩ := calibration.2 n L atIndex
   funext a
   rw [routed_input route a, first_read p.first firstCheck cert (teach a)]
   exact (beq_iff_eq ..).mp (allPorts reach a)
 
 private theorem second_decision {p : Cascade A B M} (check : p.second.check = true)
     {o : Observations A B M} {left right : SlotTiming}
-    (calibration : CascadeCalibration p left right o) {n : Nat} {L : Lesson A B}
+    (calibration : CascadeTrainingCalibration p left right o) {n : Nat} {L : Lesson A B}
     (atIndex : (lessons p)[n]? = some L) (isolated : (o.secondTrain n).input = singleton L.line)
     (count : lessonCounts p o n L.cell L.line =
       min (attempts p n L.cell L.line) (expectedWrites p.second L.cell L.line)) :
     (o.secondTrain n).fired = decide (lineNeed p.second L.cell L.line ≤ attempts p n L.cell L.line) := by
   have selected := lesson_selected atIndex
   obtain ⟨_, early, firesAtNeed, _⟩ := line_certificate check L.cell L.line selected
-  have read := (calibration.2.1 n L atIndex).2.2
+  have read := (calibration.2 n L atIndex).2.2
   rw [isolated] at read
   have scoreEq :
       score (readView p.second (lessonCounts p o n)) L.cell 0 (singleton L.line) =
@@ -316,7 +316,7 @@ private theorem second_decision {p : Cascade A B M} (check : p.second.check = tr
 
 private theorem counts_on_lessons {p : Cascade A B M} (check : p.second.check = true)
     {o : Observations A B M} {left right : SlotTiming}
-    (calibration : CascadeCalibration p left right o)
+    (calibration : CascadeTrainingCalibration p left right o)
     (isolation : ∀ n L, (lessons p)[n]? = some L → (o.secondTrain n).input = singleton L.line) :
     ∀ n, n ≤ (lessons p).length → ∀ i a,
       lessonCounts p o n i a = min (attempts p n i a) (expectedWrites p.second i a) := by
@@ -365,18 +365,21 @@ private theorem completed_counts {p : Cascade A B M} {o : Observations A B M}
     have bound := expected_le check i a
     exact Nat.min_eq_right (by omega)
 
-private theorem second_margin (p : Disjunctions B A) (check : p.check = true)
+theorem constant_margin {p : Disjunctions B A} (check : p.check = true) (i : Fin B)
+    (mode : p.alwaysFire i = true) : p.threshold i + p.testingError i ≤ p.help i := by
+  have cell := (disjunction_cell check i).2
+  rw [ite_eq_left mode] at cell
+  exact of_decide_eq_true (Bool.and_eq_true_iff.mp cell).2
+
+theorem second_margin (p : Disjunctions B A) (check : p.check = true)
     (i : Fin B) (x : Pattern A) :
     ReadMargin (p.threshold i) (p.testingError i) (score (readView p (expectedWrites p)) i 0 x)
       (p.alwaysFire i || (List.finRange A).any fun a => p.lines i a && x a) := by
   have cell := (disjunction_cell check i).2
   cases mode : p.alwaysFire i with
   | true =>
-    rw [ite_eq_left mode] at cell
-    have margin : p.threshold i + p.testingError i ≤ p.help i :=
-      of_decide_eq_true (Bool.and_eq_true_iff.mp cell).2
     simp only [Bool.true_or]
-    exact Nat.le_trans margin (Nat.le_add_right ..)
+    exact Nat.le_trans (constant_margin check i mode) (Nat.le_add_right ..)
   | false =>
     rw [ite_eq_right (by simp [mode])] at cell
     simp only [Bool.false_or]
@@ -407,6 +410,16 @@ private theorem second_margin (p : Disjunctions B A) (check : p.check = true)
       have lesser := score_le (readView p (expectedWrites p)) i (Nat.le_refl 0) support
       exact Nat.lt_of_le_of_lt (Nat.add_le_add_right lesser _) margin
 
+theorem second_test_input {p : Cascade A B M} (check : checkConjunctions p.first = true)
+    {o : Observations A B M} {timing : SlotTiming}
+    (cert : LearningCertificate p.first o.firstTrain) {x : Pattern M} {i : Fin B}
+    (reads : ∀ a, CalibratedAdditiveRead p.first a (settledCount p.first o.firstTrain a)
+      x (p.first.testingError a) timing (o.firstTest x a))
+    (route : RoutedBatch (p.delay i) (o.firstTest x) (o.secondTest x i)) :
+    (o.secondTest x i).input = fun a => predicted p.first x a := by
+  funext a
+  rw [routed_input route a, first_read p.first check cert (reads a)]
+
 /-- At settled memory, the two guarded thresholds are increasing in their
 active sets because each port contributes a natural-valued gain. -/
 theorem output_monotone (p : Cascade A B M) (valid : p.Valid) (i : Fin B) :
@@ -432,10 +445,10 @@ theorem output_monotone (p : Cascade A B M) (valid : p.Valid) (i : Fin B) :
   exact decide_eq_true (Nat.le_trans (of_decide_eq_true active)
     (score_le (readView p.second (expectedWrites p.second)) i (Nat.le_refl 0) upstream))
 
-/-- The same calibrated observations that determine the routed singleton
-lessons also determine every post-training decision on the Boolean cube. -/
-theorem two_layer_monotone_recognition : TwoLayerMonotoneRecognition := by
-  intro A B M p valid left right o _separation calibration
+/-- The calibrated teaching prefix determines all training decisions and writes. -/
+theorem monotone_training {p : Cascade A B M} (valid : p.Valid)
+    {left right : SlotTiming} {o : Observations A B M}
+    (calibration : CascadeTrainingCalibration p left right o) : CascadeTrainingCertificate p o := by
   simp only [Cascade.Valid, Cascade.check, Bool.and_eq_true] at valid
   obtain ⟨⟨⟨⟨firstCheck, secondCheck⟩, reachable⟩, _⟩, _⟩ := valid
   have firstCert := first_certificate p.first firstCheck left o.firstTrain calibration.1
@@ -443,7 +456,7 @@ theorem two_layer_monotone_recognition : TwoLayerMonotoneRecognition := by
     singleton_teaching firstCheck reachable calibration firstCert atIndex
   have counts := counts_on_lessons secondCheck calibration isolated
   have settled := completed_counts secondCheck counts
-  refine ⟨firstCert, ?_, ?_, settled, ?_⟩
+  refine ⟨firstCert, ?_, ?_, settled⟩
   · intro n L atIndex
     have bound : n < (lessons p).length := (List.getElem?_eq_some_iff.mp atIndex).choose
     exact ⟨isolated n L atIndex, second_decision secondCheck calibration atIndex
@@ -454,16 +467,23 @@ theorem two_layer_monotone_recognition : TwoLayerMonotoneRecognition := by
     exact ⟨count, Nat.le_trans le (expected_le secondCheck i a),
       Nat.lt_of_le_of_lt (line_gain_le p.second i a le)
         (of_decide_eq_true (allPorts (disjunction_cell secondCheck i).1 a))⟩
-  · intro x i
-    obtain ⟨route, read⟩ := calibration.2.2.2 x i
-    have sameCounts : lessonCounts p o (lessons p).length = expectedWrites p.second :=
-      funext fun j => funext (settled j)
-    rw [sameCounts] at read
-    have input : (o.secondTest x i).input = fun a => predicted p.first x a := by
-      funext a
-      rw [routed_input route a, first_read p.first firstCheck firstCert (calibration.2.2.1 x a)]
-    have decision := read_of_margin read (second_margin p.second secondCheck i (o.secondTest x i).input)
-    rw [decision, input]
-    rfl
+/-- The same calibrated observations that determine the routed singleton
+lessons also determine every post-training decision on the Boolean cube. -/
+theorem two_layer_monotone_recognition : TwoLayerMonotoneRecognition := by
+  intro A B M p valid left right o _separation calibration
+  obtain ⟨firstCert, decisions, counts, settled⟩ :=
+    monotone_training valid (⟨calibration.1, calibration.2.1⟩ : CascadeTrainingCalibration p left right o)
+  simp only [Cascade.Valid, Cascade.check, Bool.and_eq_true] at valid
+  obtain ⟨⟨⟨⟨firstCheck, secondCheck⟩, _⟩, _⟩, _⟩ := valid
+  refine ⟨firstCert, decisions, counts, settled, ?_⟩
+  intro x i
+  obtain ⟨route, read⟩ := calibration.2.2.2 x i
+  have sameCounts : lessonCounts p o (lessons p).length = expectedWrites p.second :=
+    funext fun j => funext (settled j)
+  rw [sameCounts] at read
+  have input := second_test_input firstCheck firstCert (calibration.2.2.1 x) route
+  have decision := read_of_margin read (second_margin p.second secondCheck i (o.secondTest x i).input)
+  rw [decision, input]
+  rfl
 
 end LearnedCoincidence.MonotoneDNF
