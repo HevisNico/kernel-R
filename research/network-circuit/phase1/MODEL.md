@@ -129,18 +129,20 @@ previous pulse of the cell. A read of the network differs from those by:
 |---|---|---|---|
 | Help of a recent pulse on the same cell, either port | toward FIRE | the largest of the help measured at 16 units and at 18 units, over the 22-unit reference | `cellscan.py` (one read 16 units after a FIRE), `noisechar.py quiet` (trains 18 units apart) |
 | No recent pulse at all | toward silence | 0.015 mV: what a pulse 22 units earlier gives, phase 0, nominal cell. Not measured per instance | [`../PERCELL.json`](../PERCELL.json) |
-| Noise of the read | both | `K` standard deviations; the deviation is that of the FIRE latency in a noisy train, as an equivalent stored voltage | `noisechar.py noise` |
+| Noise of the read inside a run | both | `K` standard deviations; the deviation is that of the FIRE latency about the mean of its run, as an equivalent stored voltage, pooled over the noisy trains of the port | `noisechar.py noise` |
+| Noise between runs | both | added in quadrature: what a noisy run adds to every read of a port, the same for the whole run. Root mean square, over the noisy trains of the four ports of the instance, of (FIRE latency without noise - mean FIRE latency of the run). Missing from the version reviewed: [`NOISE.md`](NOISE.md) | `noisechar.py noise`, five simulator processes per instance |
 | Noise of the doses already written | both | added in quadrature to the noise of the read: `need` times the square of the dose deviation, one value per instance | `noisechar.py noise` |
 | Threshold bracket | both | half the bracket of the bisection, 8 or 16 uV | `cellscan.py` |
 
-    noise = sqrt(read noise^2 + need x dose noise^2)
+    noise = sqrt(within a run^2 + between runs^2 + need x dose noise^2)
     hi = + help + K x noise + half bracket
     lo = - 0.015 mV - K x noise - half bracket
 
 The noise is not bounded, so `K` gives a rate and not a certificate
-(departure 6). With `K = 3` and about fourteen FIRE reads on a source port,
-a port that sits exactly at the edge of its room would miss once in about
-fifty runs; a port with more room, much less often. The value of `K` is for
+(departure 6). The larger part of it is the same for all the reads of a
+port in a run: with `K = 3`, a port that sits exactly at the edge of its
+room departs in about one run in a few hundred; a port with more room, much
+less often. The value of `K` is for
 the preregistration to fix. Section 6 lists what is left out of E.
 
 ## 4. Conditions that hold by construction
