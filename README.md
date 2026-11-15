@@ -97,7 +97,7 @@ campaign.
 |---|---|---|---|---|
 | [1](research/network-circuit-campaign/REPORT.md) | two cells in closed loop | 4 of 6 | **16 of 16 ports exact** | no claim |
 | [2](research/network-circuit-ring-campaign/REPORT.md) | periodic ring of three cells | 2 of 6 | **8 of 8 exact**, freeze lap exact | exact words 6 of 6; learned state reported as failed (below) |
-| [3](https://github.com/HevisNico/kernel-R/blob/3fe6505a6988c71bcb3cff869498d980bb7376a6/research/network-circuit-ring-campaign-3/REPORT.md) | the same ring, corrected measurement, twelve instances | 7 of 12 | **28 of 28 exact**, freeze lap exact | **learned states 21 of 21, exact words 11 of 11** |
+| [3](research/network-circuit-ring-campaign-3/REPORT.md) | the same ring, corrected measurement, twelve instances | 7 of 12 | **28 of 28 exact**, freeze lap exact | **learned states 21 of 21, exact words 11 of 11** |
 
 - Final stored voltages agree with the predictions within a few µV, and
   every port keeps its memory through all the pulses it receives after its
@@ -112,7 +112,7 @@ campaign.
   wrote nothing, but a 4 ns spike from a testbench edge was counted as a
   write. The verdict stays "fails", the rule accepted in advance.
   Campaign 3 kept that rule and added a write that must last 1 µs; both held.
-  [diagnosis](https://github.com/HevisNico/kernel-R/blob/3fe6505a6988c71bcb3cff869498d980bb7376a6/research/network-circuit-ring-campaign-3/DIAGNOSIS_N_OWN.md)
+  [diagnosis](research/network-circuit-ring-campaign-3/DIAGNOSIS_N_OWN.md)
 - Every waveform is public on its `evidence/…` branch with its SHA-256 list.
 
 ## 4. Also in this release
