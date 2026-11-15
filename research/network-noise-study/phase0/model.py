@@ -10,8 +10,10 @@ States (default: all five) and the output of each:
   hold    the stored voltage v(x<c>.vmem<p>), preset ended, no pulse (as in pilot.py)
   preset  the voltage across the integrating capacitor, v(x<c>.vmem<p>) - v(x<c>.x<p>.sum), preset switch closed:
           what the end of the preset freezes. The out-of-band part is reported, not modelled
-  window  the first stage of the window comparator of the port, v(x<c>.x<p>.xcmps.o1), with the precharge voltage
-          vpre set by a DC sweep to where that comparator trips (one port at a time; the other ports share vpre)
+  window  the first stage of the window comparator of the port, v(x<c>.x<p>.xcmps.o1), with the sensor node held by
+          an ideal source, set by a DC sweep to where that comparator trips (the precharge cannot do it: below about
+          0.65 V the discharge holds the sensor node at 0.4 V). The sensor's own noise is shorted here; it is not
+          part of a decision point, and its sampled part is item V6
   fire    the first stage of the FIRE comparator of the cell, v(x<c>.xcmpm.o1), with vr0 set where it trips
   pulse   the main charge v(x<c>.vq), the port admitted and its mirror at the peak current of a pulse
 
@@ -46,6 +48,9 @@ def analysis_deck(section, cells, state, focus=None):
                 t = net.swap(t, f"s.x{c}.x{p}.srst x{c}.x{p}.sum x{c}.x{p}.drv x{c}.x{p}.rsti 0 swr",
                              f"r.hold{c}{p} x{c}.x{p}.sum x{c}.x{p}.drv 1e14 noisy=0")
     t = net.swap(t, "\nvcm vcm 0 {vcm}\n", "\nvcm vcm 0 {vcm} ac 1\n")
+    if state == "window":                      # the sensor node is held where the comparator trips (see balance)
+        c, p = focus
+        t = t.replace("\n.end\n", f"\nvfrc x{c}.x{p}.vs 0 dc 0.6\n.end\n")
     if state == "pulse":
         c, p = focus
         t = net.swap(t, f"vks{c}{p} ks{c}{p} 0 pulse(0 1 {net.NEVER} 1n 1n {net.TU - 1e-9:.12g} 2)", f"vks{c}{p} ks{c}{p} 0 dc 1")
@@ -92,12 +97,12 @@ def out_expr(state, c, p):
 def balance(state, c, p):
     """Control lines that set the shared source where the comparator of (c, p) trips, before the noise analysis."""
     if state == "window":
-        src, lo, hi, node = "vpre", 0.45, 0.75, f"x{c}.x{p}.xcmps.o2"
+        src, lo, hi, node = "vfrc", 0.54, 0.66, f"x{c}.x{p}.xcmps.o2"
     elif state == "fire":
-        src, lo, hi, node = "vr0", 0.65, 0.95, f"x{c}.xcmpm.o2"
+        src, lo, hi, node = "vr0", 0.74, 0.86, f"x{c}.xcmpm.o2"
     else:
         return []
-    return [f"dc {src} {lo} {hi} 0.0002", f"meas dc vtrip when v({node})=0.9", f"echo TRIP $&vtrip",
+    return [f"dc {src} {lo} {hi} 0.0005", f"meas dc vtrip when v({node})=0.9", f"echo TRIP $&vtrip",
             f"alter {src} dc = $&vtrip"]
 
 
