@@ -256,6 +256,12 @@ in the actual native receipt order, with the same admission word and one
 additional recovery write per cell. It takes the guarded state at the
 wire cut as input, with zero writes on the receipt gain coordinate.
 
+[`native_with_exact_guarded_replay`](GuardedExternalRows.lean) joins the
+two guarded training batches and the launch batch to that receipt suffix.
+The resulting $4N$ rows have the native admission word, match the frozen
+calendar, and reconstruct terminal native memory from the guarded
+counts. Its physical per-row dose certificate covers the receipts.
+
 ## Negative controls for the new membership tests
 
 Use the accepted family above with $N=2$ unless a change is stated.

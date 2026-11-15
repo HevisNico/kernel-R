@@ -18,6 +18,7 @@ import ExactNativeExecution
 import ReceiptWindow
 import NativeReceiptRows
 import GuardedReceiptRows
+import GuardedExternalRows
 import Lean.Elab.Command
 import Lean.Util.CollectAxioms
 
@@ -34,7 +35,8 @@ run_cmd do
         mod == `ReceiptTiming || mod == `ReceiptWave || mod == `LaunchReceiptChain ||
         mod == `TrainingClock || mod == `TrainingStage || mod == `GuardedReplay ||
         mod == `NativeHistory || mod == `ExecutionCuts || mod == `ExactNativeExecution ||
-        mod == `ReceiptWindow || mod == `NativeReceiptRows || mod == `GuardedReceiptRows then
+        mod == `ReceiptWindow || mod == `NativeReceiptRows || mod == `GuardedReceiptRows ||
+        mod == `GuardedExternalRows then
       modules := modules + 1
       for name in data.constNames do
         let some info := env.constants.find? name
@@ -45,7 +47,7 @@ run_cmd do
           unless allowed.contains axiomName do
             throwError "Unexpected axiom {axiomName} in {name}"
         count := count + 1
-  if modules != 20 || count == 0 then
+  if modules != 21 || count == 0 then
     throwError "Expected the target and all native multi-token proof modules in the audit"
   for result in #[``NetworkStability.NativeMultiToken.guarded_conjuncts,
       ``NetworkStability.NativeMultiToken.scalar_latency,
@@ -60,7 +62,10 @@ run_cmd do
       ``NetworkStability.NativeMultiToken.native_exact_receipt_rows,
       ``NetworkStability.NativeMultiToken.guarded_receipt_replay,
       ``NetworkStability.NativeMultiToken.guarded_replay_in_native_receipt_order,
-      ``NetworkStability.NativeMultiToken.exact_receipt_replay] do
+      ``NetworkStability.NativeMultiToken.exact_receipt_replay,
+      ``NetworkStability.NativeMultiToken.exact_guarded_replay,
+      ``NetworkStability.NativeMultiToken.external_row_matches,
+      ``NetworkStability.NativeMultiToken.native_with_exact_guarded_replay] do
     let some (.thmInfo _) := env.constants.find? result
       | throwError "Missing milestone theorem {result}"
   let some (.defnInfo target) := env.constants.find?

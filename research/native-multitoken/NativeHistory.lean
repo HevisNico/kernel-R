@@ -67,6 +67,7 @@ structure NativeHistory (p : Parameters N) where
   launchIntake : Execution (nativeParameters N) (router p) second.next launched
   launch : Execution (nativeParameters N) (router p) launched wireCut
   receipts : Execution (nativeParameters N) (router p) wireCut last
+  startNoArrivals : start.deliveries = []
   startSilent : start.ledger.emissions = []
   firstDate : firstStart.time = NetworkStability.NativeMultiToken.firstDate
   wireDate : wireCut.time = launchDate p + 19 / 10
@@ -193,7 +194,7 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
   refine ⟨{
     firstStart := a, start := initial, first := first, second := second, launched := b
     wireCut := wire, last := last, launchIntake := intake, launch := launch, receipts := receipts
-    startSilent := rfl, firstDate := rfl, wireDate := wireDate, wireSection := wireSection
+    startNoArrivals := rfl, startSilent := rfl, firstDate := rfl, wireDate := wireDate, wireSection := wireSection
     complete := complete, finalQueue := finalQueue
     launchInputs := intakeWord.trans (by rw [second.date]; rfl), launchSilent := noIntakeFire
     launchNoArrivals := noArrive, receiptNoFires := noFire, fires := fires, receiptInputs := paid
