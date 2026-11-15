@@ -23,7 +23,7 @@ private theorem exact_cut_dates_in_range {p : Parameters N} (accepted : p.check 
   have g2 : (8 : ℝ) ≤ p.gap2 := by exact_mod_cast gaps.2
   intro date mem
   rcases List.mem_append.mp mem with external | receipt
-  · simp only [List.mem_cons, List.mem_singleton] at external
+  · simp only [List.mem_cons, List.not_mem_nil, or_false] at external
     rcases external with rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
       norm_num [prepared, horizon, launchDate, secondDate, firstDate, auxDeadline] <;> linarith
   · obtain ⟨i, _, rfl⟩ := List.mem_map.mp receipt
@@ -43,9 +43,10 @@ theorem native_history_admission_deadline {p : Parameters N} (accepted : p.check
     List.mem_append_right _ seen)
   rcases List.mem_append.mp provenance with seeded | routed
   · change token ∈ (seed p).map toDelivery at seeded
-    obtain ⟨probe, seeded, rfl⟩ := List.mem_map.mp seeded
-    simp only [seed, List.mem_append] at seeded
-    rcases seeded with (first | second) | launch
+    obtain ⟨probe, sourceMem, identifies⟩ := List.mem_map.mp seeded
+    rw [← identifies]
+    simp only [seed, List.mem_append] at sourceMem
+    rcases sourceMem with (first | second) | launch
     · obtain ⟨i, _, rfl⟩ := List.mem_map.mp first
       simp [exactCutDates, toDelivery]
     · obtain ⟨i, _, rfl⟩ := List.mem_map.mp second

@@ -51,7 +51,7 @@ private theorem waveAt_due (N : Nat) (date : ℝ) (token : Delivery N)
 
 private theorem seed_queue (p : Parameters N) :
     (prepared p).pending = waveAt N firstDate ++ waveAt N (secondDate p) ++ waveAt N (launchDate p) := by
-  simp [prepared, seed, waveAt, waveTokens, toDelivery, inputPort, inputCell, List.map_map]
+  simp only [prepared, seed, waveAt, waveTokens, List.map_append, List.map_map]
 
 /-- A native witness with the training cuts and the all-children-in-flight
 cut retained as actual execution factors. -/
@@ -89,7 +89,7 @@ noncomputable def NativeHistory.run {p : Parameters N} (h : NativeHistory p) :
 
 theorem NativeHistory.emissions {p : Parameters N} (h : NativeHistory p) :
     h.run.ledger.emissions = h.launch.ledger.emissions := by
-  simp only [run, Execution.emissions_append, h.startSilent, h.first.noFires.1, h.first.noFires.2.1,
+  simp only [NativeHistory.run, Execution.emissions_append, h.startSilent, h.first.noFires.1, h.first.noFires.2.1,
     h.first.noFires.2.2, h.second.noFires.1, h.second.noFires.2.1, h.second.noFires.2.2,
     h.launchSilent, h.receiptNoFires, List.nil_append, List.append_nil]
 
@@ -154,14 +154,13 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
     (by rw [first.date]; exact secondGap)
     (fun token mem => by rw [waveAt_due _ _ _ mem])
   have ampC (i : Fin N) : Real.exp (second.next.x i (.z 0)) = launchAmplitude p i := by
-    rw [second.gains i 0]
-    simp only [ite_true, Real.exp_add, ampB, mul_assoc, ← Real.exp_add]
     unfold launchAmplitude
+    rw [second.gains i 0, if_pos rfl, Real.exp_add, ampB, mul_assoc, ← Real.exp_add]
     norm_num
   have firstCharge (i : Fin N) :
       first.next.x i .q = afterSilent (1 / 10) (p.amplitude i : ℝ) p.gap1 := by
     rw [first.charge, chargeA, ampA]
-    simp [secondDate]
+    simp [secondDate, show a.time = firstDate from rfl]
   have secondCharge (i : Fin N) : second.next.x i .q = launchCharge p i := by
     rw [second.charge, firstCharge, ampB, launchCharge]
     simp [launchDate, first.date]
