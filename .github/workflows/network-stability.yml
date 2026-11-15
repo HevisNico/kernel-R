@@ -36,7 +36,7 @@ jobs:
       - uses: ./.github/actions/build-lean
         with:
           package-directory: proof/lean
-      - name: Compile the learned coincidence target and audit its declarations
-        run: lean -DwarningAsError=true research/learned-coincidence/Target.lean
+      - name: Compile and audit learned coincidence
+        run: bash research/learned-coincidence/check.sh
       - name: Compile network proofs, audit axioms, and check mutations
         run: bash research/network-stability/check.sh
