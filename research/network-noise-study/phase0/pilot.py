@@ -123,7 +123,11 @@ def read_op(stdout):
     return {l.split()[1]: float(l.split()[2]) for l in stdout.splitlines() if l.startswith("OP ")}
 
 
+ALLOWED_SEEDS = (7101, 7102, 7103)        # the development instances; every other seed is refused (7501-7520: campaign 4)
+
+
 def seeded(seed):
+    assert seed is None or seed in ALLOWED_SEEDS, f"seed {seed} is not a development instance of the noise study"
     return [f"setseed {seed}", "reset"] if seed is not None else []
 
 
