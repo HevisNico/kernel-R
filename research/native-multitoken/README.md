@@ -214,6 +214,38 @@ reuse does not depend on unfinished branch symbols.
 | [`Execution.token_balance`][balance], [`native_queue_replay`][native], [`TransactionReplay.append`][replay], and [`dated_network_memory`][dated] | Token conservation, replay algebra, and guarded convergence. #148's [`nominal_reciprocal_refinement`][reciprocal] is the reference for aligning admission/FIRE words, retaining pending occurrences, and comparing memory coordinatewise. | Compile exact clocks and phases and construct replay rows; prove the in-flight accounting, per-wave dose fold, uniform reserve and rank, and the distinct-cell tie condition. #148's fixed transaction table and counts depend on its witness. |
 | [`Execution.observational_unique`][unique] | Transport endpoint and FIRE multiset to any complete execution from the same snapshot. | Match the completeness horizon and verify the nominal physical invariant for the compiled snapshot. |
 
+## Synchronized execution milestone
+
+[`synchronized_ledger`](SynchronizedProduct.lean) combines finite families
+of arrival-free one-cell legs with common start and end dates. It cuts
+flows at local event dates and admits distinct-cell jumps at equal dates.
+A `Weaves` witness records which local jump or flow fragment each global
+move follows.
+Each FIRE evaluates the native router at its clock. The output queue is
+the input list followed by the router outputs in execution order, with
+later admissions left for subsequent segments. The proof preserves each
+cell's ordered FIRE times, ERROR and MARK doses, and recovery dose. It
+also gives the exact issued and delivered counts.
+
+[`weak_training_transaction`](SynchronizedProduct.lean) admits the batch
+of tokens at the wave date and applies the product to the overlapping
+weak legs. It settles at that date plus $15/2$, with ERROR dose $3/5$
+at each selected port, zero dose at the other ports, and no FIREs.
+
+## Launch and protected receipt milestone
+
+[`launch_wave`](LaunchWave.lean) cuts the isolated strong legs at
+$t_3+9/10$ and synchronizes their prefixes. The actual FIRE of cell $i$
+is at $t_3+\ell_i$. Each FIRE appends its own routed child, and the
+resulting queue contains exactly $N$ children with their actual dates.
+
+[`protected_slow_admission`](ProtectedReceipt.lean) consumes one child
+at its calendar date in SLOW, starting from the charge carried from
+the receiver's own FAST end. The partial MARK drain bounds recovery
+by $7/25$ before T3 is applied to the main guard. The local execution
+completes the auxiliary cycle before reopening and contributes exactly
+$1/10$ MARK at port 2, zero ERROR, and zero FIREs.
+
 ## Negative controls for the new membership tests
 
 Use the accepted family above with $N=2$ unless a change is stated.
