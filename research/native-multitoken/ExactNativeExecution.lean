@@ -21,15 +21,19 @@ private theorem exact_cut_dates_in_range {p : Parameters N} (accepted : p.check 
   have gaps := (of_decide_eq_true accepted : p.Valid).2.2.1
   have g1 : (8 : ℝ) ≤ p.gap1 := by exact_mod_cast gaps.1
   have g2 : (8 : ℝ) ≤ p.gap2 := by exact_mod_cast gaps.2
+  have firstNonneg : 0 ≤ firstDate := by norm_num [firstDate]
+  have secondAfterFirst : firstDate + 15 / 2 < secondDate p := by unfold secondDate; linarith
+  have launchAfterSecond : secondDate p + 15 / 2 < launchDate p := by unfold launchDate; linarith
+  have auxNonneg : 0 ≤ (auxDeadline : ℝ) := by norm_num [auxDeadline]
+  have auxUpper : (auxDeadline : ℝ) < 2 := by norm_num [auxDeadline]
   intro date mem
+  change 0 ≤ date ∧ date < launchDate p + 10
   rcases List.mem_append.mp mem with external | receipt
   · simp only [List.mem_cons, List.not_mem_nil, or_false] at external
-    rcases external with rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
-      norm_num [prepared, horizon, launchDate, secondDate, firstDate, auxDeadline] <;> linarith
+    rcases external with rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> constructor <;> linarith
   · obtain ⟨i, _, rfl⟩ := List.mem_map.mp receipt
     have early := receipt_after_fast_cut accepted i
     have late := (receipt_timing accepted i).2.2
-    norm_num [prepared, horizon, auxDeadline, launchDate, secondDate, firstDate] at early late ⊢
     constructor <;> linarith
 
 /-- Every actual admission belongs to the prescribed clock schedule. The
@@ -155,7 +159,7 @@ theorem exact_training_cuts {p : Parameters N} (accepted : p.check = true)
     · rw [same.raw]; exact refRaw i q
     · rw [same.aux]; exact ((refReady i).auxiliary q).1
   intro date mem
-  simp only [List.mem_cons, List.mem_singleton] at mem
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at mem
   rcases mem with rfl | rfl
   · let refRun := history.start.append (history.first.intake.append history.first.wave)
     have refComplete : CompleteThrough refRun (firstDate + 15 / 2) := by
@@ -166,8 +170,12 @@ theorem exact_training_cuts {p : Parameters N} (accepted : p.check = true)
   · let refRun := history.start.append (history.first.intake.append (history.first.wave.append
       (history.first.quiet.append (history.second.intake.append history.second.wave))))
     have refComplete : CompleteThrough refRun (secondDate p + 15 / 2) := by
-      rw [← history.first.date]
-      exact history.second.settledComplete
+      have settled := history.second.settledComplete
+      refine ⟨settled.1.trans (congrArg (fun t => t + 15 / 2) history.first.date), settled.2.1, ?_⟩
+      intro token mem
+      have later := settled.2.2 token mem
+      rw [history.first.date] at later
+      exact later
     exact compare refRun refComplete history.second.settledReady history.second.settledRaw
       (by simp [exactCutDates])
 

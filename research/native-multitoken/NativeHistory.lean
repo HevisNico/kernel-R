@@ -52,6 +52,7 @@ private theorem waveAt_due (N : Nat) (date : ℝ) (token : Delivery N)
 private theorem seed_queue (p : Parameters N) :
     (prepared p).pending = waveAt N firstDate ++ waveAt N (secondDate p) ++ waveAt N (launchDate p) := by
   simp only [prepared, seed, waveAt, waveTokens, List.map_append, List.map_map]
+  all_goals rfl
 
 /-- A native witness with the training cuts and the all-children-in-flight
 cut retained as actual execution factors. -/
@@ -155,7 +156,7 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
     (fun token mem => by rw [waveAt_due _ _ _ mem])
   have ampC (i : Fin N) : Real.exp (second.next.x i (.z 0)) = launchAmplitude p i := by
     unfold launchAmplitude
-    rw [second.gains i 0, if_pos rfl, Real.exp_add, ampB, mul_assoc, ← Real.exp_add]
+    rw [second.gains i 0, ite_eq_left rfl, Real.exp_add, ampB, mul_assoc, ← Real.exp_add]
     norm_num
   have firstCharge (i : Fin N) :
       first.next.x i .q = afterSilent (1 / 10) (p.amplitude i : ℝ) p.gap1 := by
@@ -194,9 +195,10 @@ theorem native_history_exists {p : Parameters N} (accepted : p.check = true) :
   · intro i q
     have h := ((outcome i).2.2.2 q).1
     change last.x i (.z q) = second.next.x i (.z q) at h
-    rw [h, second.gains, first.gains]
+    have startGain : a.x i (.z q) = (prepared p).x i (.z q) := rfl
+    rw [h, second.gains, first.gains, startGain]
     by_cases selected : q = 0
-    · simp only [selected, if_true]
+    · simp only [ite_eq_left selected]
       ring
     · simp [selected]
   · intro i
