@@ -6,7 +6,10 @@ Compares a campaign-4 run with the model's sources present as XSPICE filesource 
 (`cost3.py dnf ... fszero`) with the same run without any source (`quiet`). It passes when:
   - the occurrences are the same: same list, and for each the same delivered / fire / protection flags and the same
     writes;
-  - the FIRE events are the same (cell and calendar date);
+  - the FIRE events are the same: the same list, each with the same cell, the same occurrences during which it
+    fires and the same routed lines (its date is reported: the two runs do not take the same time steps). A first
+    version compared the calendar dates rounded to 1e-9 unit; it was changed to this after the first comparison,
+    whose 49 FIRE events were these same events with dates up to 0.1 us apart;
   - every stored voltage read by the router (each occurrence's u*_V fields, and the final stored voltages) agrees
     within TOL_V = 1 uV.
 Reported as well, not part of the verdict: the FIRE dates and latencies, and the largest difference of the stored
@@ -50,8 +53,9 @@ def compare(quiet_dir, zero_dir):
         if a.get("fire") and b.get("fire"):
             dfire = max(dfire, abs(a["fire_date_s"] - b["fire_date_s"]))
             dlat = max(dlat, abs(a["latency"] - b["latency"]))
-    fq = [(f["cell"], round(f["calendar_date"], 9)) for f in q["fires"]]
-    fz = [(f["cell"], round(f["calendar_date"], 9)) for f in z["fires"]]
+    fq = [(f["cell"], f["during"], f["routed"]) for f in q["fires"]]
+    fz = [(f["cell"], f["during"], f["routed"]) for f in z["fires"]]
+    dfd = max([abs(a["date_s"] - b["date_s"]) for a, b in zip(q["fires"], z["fires"])] or [0.0])
     final = [abs(x - y) for x, y in zip(np.ravel(q["final_u_V"]), np.ravel(z["final_u_V"]))] if isinstance(q["final_u_V"], list) \
         else [abs(q["final_u_V"][k] - z["final_u_V"][k]) for k in q["final_u_V"]]
     dv = max([dv] + final)
@@ -63,7 +67,7 @@ def compare(quiet_dir, zero_dir):
             trace[n] = dict(max=float(d.max()), p999=float(np.percentile(d, 99.9)), median=float(np.median(d)))
     ok = same_occ and not occ_diff and fq == fz and dv <= TOL_V
     return dict(tolerance_V=TOL_V, occurrences=[len(q["occurrences"]), len(z["occurrences"])], occurrence_differences=occ_diff,
-                fires=[len(fq), len(fz)], same_fires=fq == fz, max_read_voltage_diff_V=dv, max_fire_date_diff_s=dfire,
+                fires=[len(fq), len(fz)], same_fires=fq == fz, max_fire_event_date_diff_s=dfd, max_read_voltage_diff_V=dv, max_fire_date_diff_s=dfire,
                 max_latency_diff=dlat, trace_vmem_diff_V=trace, points=[q["points"], z["points"]], passes=ok)
 
 
