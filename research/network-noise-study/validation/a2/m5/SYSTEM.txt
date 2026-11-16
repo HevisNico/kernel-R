@@ -26,3 +26,12 @@ $ dmesg -T | grep -i -E "oom|killed process|out of memory"
 $ df -h /tmp
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda        252G  9.7G   29G  26% /
+
+$ what failed (machine 5, attempt 2)
+The container restarted between 15:15 UTC (last write of MEMORY.txt) and 16:10 UTC (uptime 0 min at 16:11:25).
+The process "vplan.py run /tmp/a2_m5 machine=5" is gone; plan.log has no "done machine=5" line.
+plan.log: 25 runs, all exit 0, none non-zero.
+Runs started (a .stderr file exists) but with no line in plan.log, cut by the restart, missing:
+  v3_7103_window_a1_r213, v3_7103_fire_b_r237, v3_7103_pulse_a1_r245, v3_7103_pulse_b2_r253
+The remaining runs of machine 5's share never started. Nothing was re-run and no second copy was started.
+The kernel log of the earlier boot is lost (dmesg above is of the new boot only; no journal).
