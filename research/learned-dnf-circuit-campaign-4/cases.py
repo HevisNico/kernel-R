@@ -180,6 +180,10 @@ class Mirror:
         self.firstTest = {k: [Read(c) for c in row] for k, row in o["firstTest"].items()}
         self.secondTest = {k: Read(c) for k, c in o["secondTest"].items()}
         self.scores = o["scores"]
+        # mutation overrides (mirror_mutations.py); the cases use the constants
+        self.rail1, self.rail2 = x.get("rail1", P.RAIL), x.get("rail2", P.RAIL)
+        self.delay = F(x.get("delay", "3/2"))
+        self.timing2 = tuple(F(v) for v in x["timing2"]) if "timing2" in x else (P.SKEW_C, P.DEADLINE_C, P.DURATION_C)
         self.out = []
 
     def add(self, checker, kind, where, ok):
@@ -219,7 +223,7 @@ class Mirror:
             self.add(VALID, "need in 1..maxWrites", f"cell {a} need {nd}", 0 < nd <= self.Q1)
             self.add(VALID, "guarded margin (stop, training)", f"cell {a} stage {nd}", th + tr <= self.score(a, nd, T))
             for j in range(4):
-                self.add(VALID, "rail", f"cell {a} port {INPUTS[j]} at need", self.gain(a, nd, j) < P.RAIL)
+                self.add(VALID, "rail", f"cell {a} port {INPUTS[j]} at need", self.gain(a, nd, j) < self.rail1)
             self.add(VALID, "guarded margin (positive, testing)", f"cell {a} stage {nd}", th + te <= self.score(a, nd, T))
             for j in sorted(T):
                 omits = set(range(4)) - {j}
@@ -228,7 +232,7 @@ class Mirror:
         self.add(VALID, "dose", "layer 2", 0 < self.d2)
         for j in (0, 1):
             k = self.line_need(j)
-            self.add(VALID, "rail", f"cell c line {'ab'[j]} at need", self.line_gain(j, k) < P.RAIL)
+            self.add(VALID, "rail", f"cell c line {'ab'[j]} at need", self.line_gain(j, k) < self.rail2)
             self.add(VALID, "need in 1..maxWrites", f"cell c line {'ab'[j]} need {k}", 0 < k <= self.Q2)
             for m in range(k):
                 self.add(VALID, "guarded margin (line silence, training)", f"cell c line {'ab'[j]} stage {m}",
@@ -239,10 +243,10 @@ class Mirror:
         for a in FIRST:
             for bb in FIRST:
                 self.add(VALID, "reachable", f"line {a}, cell {bb}", (TARGET[a] >= TARGET[bb]) == (a == bb))
-        self.add(VALID, "delay nonnegative", "both lines", F(3, 2) >= 0)
+        self.add(VALID, "delay nonnegative", "both lines", self.delay >= 0)
 
     def separation(self):
-        L, R = P.DURATION_A, P.DURATION_C
+        L, R = P.DURATION_A, self.timing2[2]
         ft, te, st = self.firstTrain, self.teach, self.secondTrain
         for r in range(self.Q1):
             for i, a in enumerate(FIRST):
@@ -291,7 +295,7 @@ class Mirror:
         self.add(CAL, "decoder: FIRE bit is the threshold comparison", where, r.fired == (P.THETA <= r.value))
 
     def additive(self, where, r, x, expected, budget, layer):
-        skew, deadline, duration = ((P.SKEW_A, P.DEADLINE_A, P.DURATION_A) if layer == 1 else (P.SKEW_C, P.DEADLINE_C, P.DURATION_C))
+        skew, deadline, duration = ((P.SKEW_A, P.DEADLINE_A, P.DURATION_A) if layer == 1 else self.timing2)
         self.threshold_read(where, r, skew, deadline, duration)
         self.add(CAL, "input mask", where, r.input == set(x))
         res = r.value - expected
@@ -300,7 +304,7 @@ class Mirror:
     def route(self, where, left, right):
         for j in (0, 1):
             e = left[j].emissions
-            want = e[0] + F(3, 2) if e else None
+            want = e[0] + self.delay if e else None
             self.add(CAL, "route", f"{where}, line {'ab'[j]}", right.arrival[j] == want)
 
     def calibration(self):
@@ -333,7 +337,7 @@ class Mirror:
             where = f"secondTest {k}"
             self.route(where, self.firstTest[k], r)
             if r.input:
-                self.threshold_read(where, r, P.SKEW_C, P.DEADLINE_C, P.DURATION_C)
+                self.threshold_read(where, r, *self.timing2)
                 sc = self.scores[k]
                 at = lambda y: sc["".join(str(j + 1) for j in sorted(y)) or "-"]
                 self.add(CAL, "measured score = scoreAt(input)", where, at(r.input) == r.value)
