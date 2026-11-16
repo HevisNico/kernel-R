@@ -88,6 +88,24 @@ def inventory():
     return dict(environment=env, identical_to_reference=env == REFERENCE, inventory=inv)
 
 
+def released():
+    """The code a machine runs: `GO` names the released commit C; the checked-out HEAD must be the commit that adds
+    `GO` alone, whose only parent is C (a commit cannot hold its own hash)."""
+    git = lambda *a: subprocess.run(["git", "-C", str(HERE), *a], capture_output=True, text=True).stdout.strip()
+    go = HERE / "GO"
+    if not go.exists():
+        return dict(ok=False, why="no GO file")
+    import re as _re
+    m = _re.search(r"\b([0-9a-f]{40})\b", go.read_text())
+    C = m.group(1) if m else None
+    head = git("rev-parse", "HEAD")
+    parents = git("rev-list", "--parents", "-n", "1", "HEAD").split()[1:]
+    changed = git("diff", "--name-only", C or "HEAD", "HEAD").splitlines() if C else []
+    clean = git("status", "--porcelain", "--untracked-files=no") == ""
+    ok = C is not None and parents == [C] and changed == ["research/network-noise-study/validation/GO"] and clean
+    return dict(ok=ok, released_commit=C, head=head, head_parents=parents, changed_from_released=changed, clean=clean)
+
+
 def command(work, r):
     kind, name = r[0], r[1]
     out = Path(work) / (name if kind == "train" else f"{name}.json")
@@ -102,8 +120,10 @@ def run(work, filt=""):
     if filt.startswith("machine="):
         inv = inventory()
         inv["machine"] = int(filt.split("=")[1])
+        inv["code"] = released()
         (Path(work) / f"MACHINE_{inv['machine']}.json").write_text(json.dumps(inv, indent=1) + "\n")
         assert inv["identical_to_reference"], "this machine's environment differs from the reference: it runs nothing"
+        assert inv["code"]["ok"], "this machine is not on the commit that GO releases: it runs nothing"
         os.environ["VAL_MACHINE"] = str(inv["machine"])
     if filt.startswith("machine="):
         R = runs()

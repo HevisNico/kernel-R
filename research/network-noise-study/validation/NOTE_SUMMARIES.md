@@ -23,5 +23,11 @@ The owner's two additions, pushed before `GO`.
 
    The verdict comes from one final analysis (`vanalyze.py`, `vextract.py`) over all machines, as in the campaigns.
 
+3. **The released code.** `GO` states the full hash of the commit C whose code it releases (`vrun.summarize` and
+   every run). The commit that adds `GO` changes nothing else, and its only parent is C (a commit cannot hold its
+   own hash). Each machine, after its `merge --ff-only` and before its first run, checks that its HEAD is that
+   commit, with nothing changed but `GO` and a clean tree (`vplan.released`). It records C and its HEAD in
+   `MACHINE_K.json`. A machine on another commit runs nothing.
+
 The extractions (V2, V2b, V2c and their equality with phase 0) are deterministic and gate `GO`. They are checked
 before it, as the protocol says.
