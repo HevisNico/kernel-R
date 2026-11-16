@@ -1,6 +1,9 @@
 """Phase 0: the per-instance extraction without the operating point of a whole-cell noise analysis.
 
-  devnoise.py extract WORK OUT.json SECTION SEED|none CELLS NGSPICE PDK [STATE ...]
+  devnoise.py extract [--full] WORK OUT.json SECTION SEED|none CELLS NGSPICE PDK [STATE ...]
+  devnoise.py idcheck WORK OUT.json      the drain-current check of an extraction, from its logs
+
+`--full` runs the same method without isolating the cell (V2c's reference, on the nominal cell and 7102).
 
 Why: in the frozen decks of model.py, the operating point that ngspice's `noise` command solves for itself fails
 (gmin stepping, then source stepping) on almost every state and instance, nominal included, where `op` and `ac`
@@ -176,7 +179,7 @@ def extract_cell(work, section, seed, cells, c, ngspice, pdk, states):
         for focus in focus_list:
             _, p = focus
             text, _ = model.analysis_deck(section, cells, state, focus=focus)
-            iso = model.isolate(text, c, cells)
+            iso = text if FULL else model.isolate(text, c, cells)
             w = work / f"{state}_{c}{p or ''}"
             T = transistors(iso)
             cands = sorted(d for d in T if d.startswith(f"x{c}.") and not LOGIC.search(d))
@@ -230,8 +233,11 @@ def extract_cell(work, section, seed, cells, c, ngspice, pdk, states):
     return res
 
 
+FULL = False          # --full: the reference of V2c, the same method in the full deck (no isolation), where its AC converges
+
+
 def extract(work, out, section, seed, cells, ngspice, pdk, states):
-    res = dict(method="devnoise", section=section, seed=seed, cells=cells, band_Hz=BAND, cover=COVER,
+    res = dict(method="devnoise", full_deck=FULL, section=section, seed=seed, cells=cells, band_Hz=BAND, cover=COVER,
                op_match=model.op_match(work / "opmatch", section, seed, cells, ngspice, pdk), outputs=[])
     print("op match", res["op_match"], flush=True)
     for c in cells:
@@ -245,6 +251,8 @@ if __name__ == "__main__":
         r = id_check(a[0])
         Path(a[1]).write_text(json.dumps(r, indent=1) + "\n")
         print(max(v["max_error"] for v in r.values()), [k for k, v in r.items() if v["max_error"] > 1 or v["checked"] < v["devices"]])
-    elif sys.argv[1] == "extract":
+    elif sys.argv[1] == "extract":          # devnoise.py extract [--full] WORK OUT.json SECTION SEED|none CELLS NGSPICE PDK [STATE ...]
+        if a[0] == "--full":
+            FULL, a = True, a[1:]
         extract(Path(a[0]), Path(a[1]), a[2], None if a[3] == "none" else int(a[3]), tuple(a[4].split(",")), a[5], a[6],
                 a[7:] or ["hold", "window", "fire", "pulse"])
