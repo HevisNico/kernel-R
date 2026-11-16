@@ -73,6 +73,31 @@ def op_run(work, text, seed, state, c, p, ngspice, pdk, cands=(), T=None):
     return raw_ascii(work / "op.raw"), trip, ids
 
 
+ID_REL, ID_ABS = 1e-3, 1e-12     # the drain-current check: |id(device deck) - id(op)| <= ID_REL |id(op)| + ID_ABS
+
+
+def id_error(ids, id_op):
+    """The largest ||id| - |id_op|| / (ID_REL |id_op| + ID_ABS) over the candidates: the check passes at <= 1. Magnitudes:
+    the sign of @m[id] follows ngspice's conventions (type, and the device's own mode: a transistor conducting from
+    source to drain, such as xms2 at hold, reads with the opposite sign), while the terminal voltages, which set the
+    noise, are forced to those of step 1. ID_ABS: off devices carry fA, at the floor of gmin, and add no noise of note."""
+    return max((abs(abs(ids[d]) - abs(id_op[d])) / (ID_REL * abs(id_op[d]) + ID_ABS) for d in id_op if d in ids), default=None)
+
+
+def id_check(work):
+    """The drain-current check recomputed from the logs of an extraction's work directory (WORK/<state>_<cell><port>)."""
+    out = {}
+    for w in sorted(Path(work).glob("*_*")):
+        if not (w / "op" / "log.txt").exists() or not (w / "dev" / "log.txt").exists():
+            continue
+        T = transistors((w / "op" / "deck.spice").read_text())
+        sign = {d: (1.0 if t["kind"].startswith("nfet") else -1.0) for d, t in T.items()}
+        op = {l.split()[1]: sign[l.split()[1]] * float(l.split()[2]) for l in open(w / "op" / "log.txt") if l.startswith("IDOP ")}
+        dev = {l.split()[1]: float(l.split()[2]) for l in open(w / "dev" / "log.txt") if l.startswith("ID ")}
+        out[w.name] = dict(devices=len(op), checked=len(set(op) & set(dev)), max_error=id_error(dev, op))
+    return out
+
+
 SUFFIX = {"f": 1e-15, "p": 1e-12, "n": 1e-9, "u": 1e-6, "m": 1e-3, "k": 1e3, "meg": 1e6, "g": 1e9, "t": 1e12}
 PARAMS = {"rleak": 2 * 20e-6 / 5e-12}          # cell.spice: rleak = 2 tu / cq
 
@@ -120,9 +145,8 @@ def device_noise(work, full_text, cands, op, seed, ngspice, pdk):
         f"noise v({prev}) vref {FREQ} 1", "setplot noise1", "write noise.raw all", "quit", ".endc", ".end"]
     text = "\n".join(keep) + "\n" + "\n".join(drv) + "\n" + "\n".join(ctl) + "\n"
     stdout = model.spice(work, text, ngspice, pdk)
-    # ngspice's branch current of vprobe is positive from dd{k} through the source to dd{k}x, out of the drain: the
-    # current into the drain is minus it (checked: the same magnitude as step 1, opposite sign, for nfets and pfets)
-    ids = {l.split()[1]: -float(l.split()[2]) for l in stdout.splitlines() if l.startswith("ID ")}
+    # ngspice's branch current of vprobe (from dd{k}x through the source to dd{k}) is the current into the drain
+    ids = {l.split()[1]: float(l.split()[2]) for l in stdout.splitlines() if l.startswith("ID ")}
     r = raw_ascii(work / "noise.raw")
     f = r["frequency"]
     S = {}
@@ -193,7 +217,7 @@ def extract_cell(work, section, seed, cells, c, ngspice, pdk, states):
                                      spread_flicker=float(np.percentile((fl * f ** a)[band], 95) / np.percentile((fl * f ** a)[band], 5))))
                 else:
                     kept.append(dict(device=d, kind="res", share=share[d]))
-            id_err = max((abs(ids[d] - id_op[d]) / max(abs(id_op[d]), 1e-12) for d in cands if d in id_op and d in ids), default=None)
+            id_err = id_error(ids, id_op)
             parts = {f"{lo:g}-{hi:g}": float(np.sqrt(np.trapezoid(total[(f >= lo) & (f <= hi)], f[(f >= lo) & (f <= hi)])))
                      for lo, hi in ((1, BAND[0]), BAND, (BAND[1], 1e8))}
             r = dict(state=state, cell=c, port=p, output=out, trip=trip, candidates=len(cands), resistors=len(R),
@@ -217,6 +241,10 @@ def extract(work, out, section, seed, cells, ngspice, pdk, states):
 
 if __name__ == "__main__":
     a = sys.argv[2:]
-    if sys.argv[1] == "extract":
+    if sys.argv[1] == "idcheck":            # devnoise.py idcheck WORK OUT.json
+        r = id_check(a[0])
+        Path(a[1]).write_text(json.dumps(r, indent=1) + "\n")
+        print(max(v["max_error"] for v in r.values()), [k for k, v in r.items() if v["max_error"] > 1 or v["checked"] < v["devices"]])
+    elif sys.argv[1] == "extract":
         extract(Path(a[0]), Path(a[1]), a[2], None if a[3] == "none" else int(a[3]), tuple(a[4].split(",")), a[5], a[6],
                 a[7:] or ["hold", "window", "fire", "pulse"])
