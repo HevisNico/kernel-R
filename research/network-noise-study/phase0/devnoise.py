@@ -172,7 +172,7 @@ def transfers(work, text, cands, nodes, out, seed, state, c, p, ngspice, pdk):
 def extract_cell(work, section, seed, cells, c, ngspice, pdk, states):
     res = []
     for state in states:
-        focus_list = [(c, p) for p in net.PORTS] if state in ("hold", "window", "pulse") else [(c, None)]
+        focus_list = [o for o in model.outputs(state, cells) if o[0] == c]      # the outputs of model.py, per port but fire
         for focus in focus_list:
             _, p = focus
             text, _ = model.analysis_deck(section, cells, state, focus=focus)
