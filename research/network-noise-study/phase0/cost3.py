@@ -68,6 +68,10 @@ def dnf_calendar(dnf_path, need=4):
 
 
 CODEMODEL = "/usr/lib/x86_64-linux-gnu/ngspice/analog.cm"     # XSPICE analog code models of the ngspice 42 package
+# With any XSPICE 'A' device in the circuit ngspice lowers trtol, for the whole circuit, from its default 7 to 1
+# ("Reducing trtol to 1 for xspice 'A' devices"): a different time-step control, under which the network deck stops
+# with "timestep too small" at 1 us even with every source at zero. xtrtol keeps the default of the other runs.
+XTRTOL = os.environ.get("XTRTOL", "7")
 MODEL_DEVICES = None        # set by --model: the union of the kept devices of EXTRACT_nominal.json, per cell
 
 
@@ -75,17 +79,27 @@ def chosen_model(c):
     return [d.replace("xa.", f"x{c}.", 1) for d in MODEL_DEVICES]
 
 
+FS_GROUP = 8      # columns per filesource: one file of 76 columns (lines of ~1 100 characters) stops the deck at 1 us
+
+
 def filesource(name, columns, path):
-    """The samples of every source as one XSPICE `filesource` (analog.cm), read sequentially from one text file:
-    one row per sample time, one column per source, linear between samples. Its outputs are the nodes nzp<k>."""
+    """The samples of the sources as XSPICE `filesource` instances (analog.cm), each reading its own text file
+    sequentially: one row per sample time, FS_GROUP sources per file, linear between samples. Their outputs are the
+    nodes nzp<k>. One file for every source fails: the deck stops ("timestep too small") at 1 us even with every
+    amplitude at zero, while one column works (phase 0); hence the groups."""
     n = len(columns[0])
     t = np.arange(n) * noisegen.NT
-    np.savetxt(path, np.column_stack([t] + list(columns)), fmt="%.9g")
-    nodes = " ".join(f"%v(nzp{k})" for k in range(len(columns)))
-    ones, zeros = " ".join(["1"] * len(columns)), " ".join(["0"] * len(columns))
-    return [f"a{name} [{nodes}] fs{name}",
-            f'.model fs{name} filesource (file="{path}" amploffset=[{zeros}] amplscale=[{ones}] timeoffset=0 timescale=1 '
-            f"timerelative=false amplstep=false)"]
+    out = []
+    for g in range(0, len(columns), FS_GROUP):
+        cols = columns[g:g + FS_GROUP]
+        f = Path(f"{path}.{g // FS_GROUP}")
+        np.savetxt(f, np.column_stack([t] + list(cols)), fmt="%.9g")
+        nodes = " ".join(f"%v(nzp{g + k})" for k in range(len(cols)))
+        ones, zeros = " ".join(["1"] * len(cols)), " ".join(["0"] * len(cols))
+        out += [f"a{name}{g // FS_GROUP} [{nodes}] fs{name}{g // FS_GROUP}",
+                f'.model fs{name}{g // FS_GROUP} filesource (file="{f}" amploffset=[{zeros}] amplscale=[{ones}] '
+                f"timeoffset=0 timescale=1 timerelative=false amplstep=false)"]
+    return out
 
 
 def pwl_sources(text, per_cell, tstop, noise_seed=1, kind="pwl", fs_path=None):
@@ -141,7 +155,8 @@ def _run(work, mode, ngspice, pdk, reads, dnf_path=None):
             t = t.replace("\n.end\n", "\n" + "\n".join(lines) + "\n.end\n")
             info["generation_s"] = time.time() - t0
             info["deck_MB"] = len(t) / 1e6
-            info["samples_file_MB"] = fs_path.stat().st_size / 1e6 if kind == "fs" else None
+            info["samples_file_MB"] = (sum(f.stat().st_size for f in fs_path.parent.glob(fs_path.name + ".*")) / 1e6
+                                       if kind == "fs" else None)
         return t
     net.deck = deck
     if mode.startswith("fs"):            # the code model is loaded at start-up, before the deck, as ngspice requires
@@ -152,7 +167,7 @@ def _run(work, mode, ngspice, pdk, reads, dnf_path=None):
             r = copy(src, dst, *a, **k)
             if Path(dst).name == ".spiceinit":
                 with open(dst, "a") as f:
-                    f.write(f"codemodel {CODEMODEL}\n")
+                    f.write(f"codemodel {CODEMODEL}\nset xtrtol={XTRTOL}\n")
             return r
         net.shutil.copyfile = with_codemodel
     r = router.run(Path(work) / mode, cal, Path(ngspice), Path(pdk), cells=CELLS, seed=None, section="tt",
