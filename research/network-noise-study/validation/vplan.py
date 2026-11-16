@@ -1,9 +1,10 @@
 """Validation: the list of runs of PROTOCOL.md, run four at a time; a run whose result exists is not run again.
 
   vplan.py list          print the runs
-  vplan.py run WORK [FILTER]   run them (those whose name contains FILTER), results in WORK/<name>.json or WORK/<name>/
+  vplan.py run WORK [FILTER]   run them (those whose name contains FILTER, or machine=1|2), results in WORK/<name>.json
+                               or WORK/<name>/
 """
-import subprocess, sys, time
+import re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -49,6 +50,16 @@ def runs():
     return R
 
 
+def machine(name):
+    """The share of each machine (the owner's two machines): 2 runs V5 (the injected model), and V3 at window, fire
+    and pulse of the nominal cell and 7103; 1 runs the rest."""
+    if name.startswith("v5_") or (name.startswith("tr_") and "_inj" in name):
+        return 2
+    if re.match(r"v3_(nominal|7103)_(window|fire|pulse)_", name):
+        return 2
+    return 1
+
+
 def command(work, r):
     kind, name = r[0], r[1]
     out = Path(work) / (name if kind == "train" else f"{name}.json")
@@ -56,8 +67,12 @@ def command(work, r):
 
 
 def run(work, filt=""):
+    """FILT: a substring of the run names, or `machine=1` / `machine=2`."""
     Path(work).mkdir(parents=True, exist_ok=True)
-    todo = [r for r in runs() if filt in r[1]]
+    if filt.startswith("machine="):
+        todo = [r for r in runs() if machine(r[1]) == int(filt.split("=")[1])]
+    else:
+        todo = [r for r in runs() if filt in r[1]]
     log = open(Path(work) / "plan.log", "a")
 
     def one(r):

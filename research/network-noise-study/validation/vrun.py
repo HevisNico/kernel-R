@@ -92,7 +92,22 @@ def finish(files):
     return out
 
 
+ANALOG_CM_SHA256 = "98c7c296dfd04e81f568db91c8261a07f00d8d63e63e5cc1d331451ccda30941"
+_CHECKED = []
+
+
+def environment():
+    """The pinned environment (criteria: each hash checked before the runs), once per process."""
+    if not _CHECKED:
+        assert pilot.sim.digest(NGSPICE) == pilot.sim.NGSPICE_SHA256, "not the pinned ngspice 42 binary"
+        assert subprocess.check_output(["git", "-C", str(PDK.resolve()), "rev-parse", "HEAD"], text=True).strip() == pilot.sim.PDK_COMMIT
+        assert np.__version__ == "2.3.5", np.__version__
+        assert hashlib.sha256(Path(CODEMODEL).read_bytes()).hexdigest() == ANALOG_CM_SHA256, "not the pinned analog.cm"
+        _CHECKED.append(True)
+
+
 def spice(work, text, timeout=None):
+    environment()
     work = Path(work)
     work.mkdir(parents=True, exist_ok=False)
     (work / "pdk").symlink_to(PDK.resolve(), target_is_directory=True)
@@ -151,10 +166,40 @@ def frozen(out, instance, state, cell, port, t_s, rnd, kind):
     d = np.loadtxt(work / "out.txt")
     np.save(work / "y.npy", d[:, 1::2])                 # one column per output, every 0.2 us from 0
     (work / "out.txt").unlink()
+    summary = {o: summarize(d[:, 2 * i + 1], 0.2e-6) for i, o in enumerate(outs)}
     Path(out).write_text(json.dumps(dict(run="frozen", instance=instance, state=state, cell=cell, port=port, kind=kind,
                                          round=rnd, noise_seed=nseed, position=position(instance, rnd) if kind != "injected" else None,
                                          t_s=t_s, dt_s=0.2e-6, outputs=outs, aborted=bad, wall_s=wall,
-                                         samples_sha256=hashes, points=int(len(d)), y_file=str(work / "y.npy"))) + "\n")
+                                         samples_sha256=hashes, points=int(len(d)), y_file=str(work / "y.npy"),
+                                         summary=summary)) + "\n")
+
+
+LAGS = (0.36e-3, 2e-3, 5e-3, 10e-3, 19e-3)       # V4
+READ = 40e-6
+GRID = [10 ** (k / 3) for k in range(0, 20)]      # V3: the third-decade grid
+
+
+def summarize(y, dt):
+    """What V3, V4 and V5 use of one output of one draw (PROTOCOL.md), so that a draw needs no waveform: the mean;
+    per lag, the sum of squared drifts of the 40 us reads and their count; the Hann periodogram's mean over each
+    band of the grid; its integral from 25 Hz to 1 kHz."""
+    w = np.hanning(len(y))
+    P = 2 * dt * np.abs(np.fft.rfft((y - y.mean()) * w)) ** 2 / np.sum(w ** 2)
+    fr = np.fft.rfftfreq(len(y), dt)
+    m = int(round(READ / dt))
+    reads = y[: len(y) // m * m].reshape(-1, m).mean(axis=1)
+    drift = {}
+    for lag in LAGS:
+        k = int(round(lag / READ))
+        d = reads[k:] - reads[:-k]
+        drift[f"{lag:g}"] = dict(sum_sq=float(np.sum(d ** 2)), n=int(len(d)))
+    bands = []
+    for lo, hi in zip(GRID[:-1], GRID[1:]):
+        b = (fr >= lo) & (fr < hi)
+        bands.append(dict(lo=lo, hi=hi, bins=int(b.sum()), P_mean=float(P[b].mean()) if b.any() else None))
+    mb = (fr >= 25) & (fr <= 1000)
+    return dict(points=int(len(y)), dt_s=dt, mean_V=float(y.mean()), drift=drift, bands=bands,
+                band_25_1000_V2=float(np.trapezoid(P[mb], fr[mb])))
 
 
 def instance_deck(instance):
@@ -230,6 +275,7 @@ def train(outdir, instance, rnd):
                     f.write(f"codemodel {CODEMODEL}\nset xtrtol={XTRTOL}\n")
             return r
         net.shutil.copyfile = with_codemodel
+    environment()
     r = router.run(Path(outdir), cal, NGSPICE, PDK, seed=seed, section=section, noise=rnd == "injected")
     meta = dict(run="train", instance=instance, round=rnd, noise_seed=info.get("seed") if rnd not in ("quiet", "zero", "injected") else None,
                 position=position(instance, rnd) if rnd not in ("quiet", "zero", "injected") else None,

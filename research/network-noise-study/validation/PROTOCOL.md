@@ -97,6 +97,17 @@ device's share with and without the conductance within 0.01 (1 % of the output p
   rms of every run offset; within-run, the pooled scatter; per dose, the rms of every dose deviation. The same under
   the injected model for V5.
 
+## Two machines
+
+The owner's budget runs the plan on two machines of four processors. Machine 2 (a second session of the same
+environment) runs V5 (every injected draw and train) and V3 at `window`, `fire`, `pulse` of the nominal cell and
+7103 (`vplan.py run WORK machine=2`); machine 1 runs the rest. Every run checks the pinned environment first
+(ngspice, the PDK commit, numpy 2.3.5, `analog.cm`). The draws are the same on either machine (their samples follow
+from the seeds alone). A frozen draw keeps, besides its waveform, the summary that V3, V4 and V5 use
+(`vrun.summarize`: the mean; per lag, the sum of squared drifts of the 40 µs reads and their count; the
+periodogram's mean over each band of the grid; its integral from 25 Hz to 1 kHz), so that machine 2 sends only
+the summaries (`validation/m2/`), and the trains' `result.json`.
+
 ## Harness tests
 
 Before the draws, the harness is tested on short runs under rounds 900 and up, which belong to no criterion and

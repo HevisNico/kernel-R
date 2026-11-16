@@ -21,8 +21,12 @@ for _i in DEV:
 
 
 def load(work, name):
-    p = Path(work) / f"{name}.json"
-    return json.loads(p.read_text()) if p.exists() else None
+    """WORK is one folder or several, separated by ':' (the two machines)."""
+    for w in str(work).split(":"):
+        p = Path(w) / f"{name}.json"
+        if p.exists():
+            return json.loads(p.read_text())
+    return None
 
 
 def reference(instance, state, cell, port):
@@ -52,54 +56,53 @@ def integral(ref, w, lo=1e-9, hi=1e8, n=200001):
     return float(np.trapezoid(S_at(ref, x) * w(x), x))
 
 
-def periodograms(ys):
-    w = np.hanning(len(ys[0]))
-    P = [2 * DT * np.abs(np.fft.rfft((y - y.mean()) * w)) ** 2 / np.sum(w ** 2) for y in ys]
-    return np.fft.rfftfreq(len(ys[0]), DT), np.array(P)
-
-
-def v3(work, instance, state, cell, port, names, col=0):
-    ys = []
+def summaries(work, names, out_expr):
+    S = []
     for n in names:
         r = load(work, n)
         if r is None or r["aborted"]:
-            return dict(error=f"{n} missing or aborted")
-        ys.append(np.load(r["y_file"])[:, col])
-    L = min(len(y) for y in ys)
-    ys = [y[:L] for y in ys]
-    T = L * DT
-    fr, P = periodograms(ys)
+            return None, f"{n} missing or aborted"
+        S.append(r["summary"][out_expr])
+    return S, None
+
+
+def v3(work, instance, state, cell, port, names, out_expr):
+    """From the per-draw summaries of vrun.summarize (the definitions of PROTOCOL.md)."""
+    S, err = summaries(work, names, out_expr)
+    if err:
+        return dict(error=err), None, None
+    N, dt = S[0]["points"], S[0]["dt_s"]
+    T = N * dt
+    fr = np.fft.rfftfreq(N, dt)
     ref = reference(instance, state, cell, port)
-    edges = [10 ** (k / 3) for k in range(0, 20)]
-    edges = [e for e in edges if 4 / T <= e <= 464159.0]
     bands = []
-    for lo, hi in zip(edges[:-1], edges[1:]):
+    for k, b in enumerate(S[0]["bands"]):
+        lo, hi = b["lo"], b["hi"]
+        if lo < 4 / T or hi > 464159.0:
+            continue
         m = (fr >= lo) & (fr < hi)
         R = S_at(ref, fr[m]).mean()
-        per = P[:, m].mean(axis=1)
+        per = np.array([s["bands"][k]["P_mean"] for s in S])
         ratio = float(per.mean() / R)
         se = float(per.std(ddof=1) / math.sqrt(len(per)) / per.mean())
         ok = abs(ratio - 1) <= TOL3 or (hi <= 1000.1 and se > TOL3 and abs(ratio - 1) <= 3 * se)
         bands.append(dict(band_Hz=[lo, hi], ratio=ratio, rel_se=se, pass_=bool(ok)))
-    return dict(draws=len(ys), T_s=T, bands=bands, pass_=all(b["pass_"] for b in bands)), ys, fr, P, ref
+    return dict(draws=len(S), T_s=T, bands=bands, pass_=all(b["pass_"] for b in bands)), S, ref
 
 
-def v4(instance, ys, fr, P, ref, positions):
+def v4(instance, S, ref, positions):
     tol_d, tol_b, tol_r = TOL4[instance]
-    m = int(round(READ / DT))
-    reads = [y[: len(y) // m * m].reshape(-1, m).mean(axis=1) for y in ys]
     drifts = []
     for lag in LAGS:
-        k = int(round(lag / READ))
-        d = np.concatenate([r[k:] - r[:-k] for r in reads])
-        meas = float(np.sqrt(np.mean(d ** 2)))
+        ss = sum(s["drift"][f"{lag:g}"]["sum_sq"] for s in S)
+        nn = sum(s["drift"][f"{lag:g}"]["n"] for s in S)
+        meas = math.sqrt(ss / nn)
         refv = math.sqrt(integral(ref, lambda f: np.sinc(f * READ) ** 2 * 4 * np.sin(np.pi * f * lag) ** 2, lo=1e-3))
         drifts.append(dict(lag_s=lag, rms_V=meas, reference_V=refv, ratio=meas / refv, pass_=abs(meas / refv - 1) <= tol_d))
-    mb = (fr >= 25) & (fr <= 1000)
-    pb = float(np.trapezoid(P[:, mb].mean(axis=0), fr[mb]))
+    pb = float(np.mean([s["band_25_1000_V2"] for s in S]))
     rb = integral(ref, lambda f: ((f >= 25) & (f <= 1000)).astype(float), lo=20, hi=1100, n=20001)
-    T = len(ys[0]) * DT
-    means = [float(y.mean()) for y in ys]
+    T = S[0]["points"] * S[0]["dt_s"]
+    means = [s["mean_V"] for s in S]
     diffs = [means[i + 1] - means[i] for i in range(len(means) - 1) if positions[i + 1] - positions[i] == 1]
     meas_r = float(np.sqrt(np.mean(np.square(diffs))))
     w = lambda f: np.sinc(f * T) ** 2 * 4 * np.sin(np.pi * f * 1000.0) ** 2
@@ -123,10 +126,9 @@ def hold_outputs(instance):
     return [("a", 1)] if instance == "nominal" else [(c, p) for c in "ab" for p in net.PORTS]
 
 
-def drift_only(instance, ys, fr, P, ref, kind):
-    r = v4(instance, ys, fr, P, ref, list(range(len(ys))))
-    if kind == "injected":                       # injected draws have no virtual time: between-run is that of draws in a row
-        r["between_runs"]["note"] = "injected model: consecutive draws, no virtual time"
+def drift_only(instance, S, ref):
+    r = v4(instance, S, ref, list(range(len(S))))
+    r["between_runs"]["note"] = "injected model: consecutive draws, no virtual time"
     return r
 
 
@@ -137,21 +139,21 @@ def main(work, out):
     for i in ("nominal",) + DEV:
         for kind in ("model", "injected"):
             names, pos = hold_names(i, kind)
-            for col, (c, p) in enumerate(hold_outputs(i)):
-                got = v3(work, i, "hold", c, p, names, col)
-                if isinstance(got, dict):
-                    (res["V3"] if kind == "model" else res["V5"])[f"{i} hold {c}{p}"] = got
+            for c, p in hold_outputs(i):
+                key = f"{i} hold {c}{p}"
+                r3, S, ref = v3(work, i, "hold", c, p, names, vrun.model.out_expr("hold", c, p))
+                if S is None:
+                    (res["V3"] if kind == "model" else res["V5"])[key] = r3
                     if kind == "model":
                         ok["V3"] = ok["V4"] = False
                     continue
-                r3, ys, fr, P, ref = got
                 if kind == "model":
-                    res["V3"][f"{i} hold {c}{p}"] = r3
-                    res["V4"][f"{i} hold {c}{p}"] = v4(i, ys, fr, P, ref, pos)
+                    res["V3"][key] = r3
+                    res["V4"][key] = v4(i, S, ref, pos)
                     ok["V3"] &= r3["pass_"]
-                    ok["V4"] &= res["V4"][f"{i} hold {c}{p}"]["pass_"]
+                    ok["V4"] &= res["V4"][key]["pass_"]
                 else:
-                    res["V5"][f"{i} hold {c}{p}"] = dict(spectrum=r3, low_frequency=drift_only(i, ys, fr, P, ref, kind))
+                    res["V5"][key] = dict(spectrum=r3, low_frequency=drift_only(i, S, ref))
     # V3 window, fire, pulse
     from vplan import runs
     groups = {}
@@ -159,8 +161,8 @@ def main(work, out):
         if r[0] == "frozen" and r[8] == "model" and r[3] != "hold":
             groups.setdefault((r[2], r[3], r[4], r[5]), []).append(r[1])
     for (i, st, c, p), names in groups.items():
-        got = v3(work, i, st, c, None if p == "-" else int(p), names)
-        r3 = got if isinstance(got, dict) else got[0]
+        pp = None if p == "-" else int(p)
+        r3, _, _ = v3(work, i, st, c, pp, names, vrun.model.out_expr(st, c, pp))
         res["V3"][f"{i} {st} {c}{p.strip('-')}"] = r3
         ok["V3"] &= bool(r3.get("pass_"))
     # V6
@@ -193,8 +195,15 @@ def main(work, out):
 
 
 def train_result(work, name):
-    p = Path(work) / name / "result.json"
-    return json.loads(p.read_text()) if p.exists() else None
+    for w in str(work).split(":"):
+        p = Path(w) / name / "result.json"
+        if p.exists():
+            return json.loads(p.read_text())
+    return None
+
+
+def train_dir(work, name):
+    return next(Path(w) / name for w in str(work).split(":") if (Path(w) / name / "result.json").exists())
 
 
 def pulse(o, port):
@@ -269,7 +278,7 @@ def v7(work):
             res[i] = dict(error="missing"); ok = False
             continue
         same = q1["raw_sha256"] == q2["raw_sha256"]
-        zc = zerocheck.compare(Path(work) / f"tr_{i}_quiet1", Path(work) / f"tr_{i}_zero")
+        zc = zerocheck.compare(train_dir(work, f"tr_{i}_quiet1"), train_dir(work, f"tr_{i}_zero"))
         I = dict(section="tt_mm", seed=int(i), scans=M["instances"][i]["scans"], quiet_train=as_train(q1, "quiet1"), noisy_trains=[])
         ports = C.instance(I)["ports"]
         dl, dd = 0.0, 0.0
