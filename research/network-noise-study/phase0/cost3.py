@@ -154,6 +154,7 @@ def _run(work, mode, ngspice, pdk, reads, dnf_path=None):
             kind = mode[:3] if mode.startswith("pwl") else "fs"
             per_cell = 0 if mode.endswith(("model", "zero")) else int(mode[len(kind):])
             fs_path = (Path(work) / f"{mode}.samples.txt").resolve()
+            fs_path.parent.mkdir(parents=True, exist_ok=True)
             lines, info["sources"] = pwl_sources(t, per_cell, horizon, kind=kind, fs_path=fs_path,
                                                  fs_scale="0" if mode == "fszero" else "1")
             t = t.replace("\n.end\n", "\n" + "\n".join(lines) + "\n.end\n")
@@ -189,7 +190,12 @@ def runs(work, out, ngspice, pdk, reads, dnf_path=None, modes=("quiet", "injecte
     def one(m):
         p = subprocess.run([sys.executable, "-B", __file__, "_run", work, m, ngspice, pdk, str(reads)] + ([dnf_path] if dnf_path else []),
                            capture_output=True, text=True)
-        return json.loads(p.stdout.strip().splitlines()[-1]) if p.returncode == 0 else dict(mode=m, error=p.stderr[-3000:])
+        if p.returncode != 0:
+            print(f"{m} failed:\n{p.stderr[-3000:]}", file=sys.stderr, flush=True)
+            return dict(mode=m, error=p.stderr[-3000:])
+        r = json.loads(p.stdout.strip().splitlines()[-1])
+        print(json.dumps(r), file=sys.stderr, flush=True)
+        return r
     with ThreadPoolExecutor(4) as ex:
         res = list(ex.map(one, modes))
     for r in res:
