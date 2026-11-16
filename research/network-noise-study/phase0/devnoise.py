@@ -237,7 +237,7 @@ FULL = False          # --full: the reference of V2c, the same method in the ful
 
 
 def extract(work, out, section, seed, cells, ngspice, pdk, states):
-    res = dict(method="devnoise", full_deck=FULL, section=section, seed=seed, cells=cells, band_Hz=BAND, cover=COVER,
+    res = dict(method="devnoise", full_deck=FULL, stack_conductance=model.COND, section=section, seed=seed, cells=cells, band_Hz=BAND, cover=COVER,
                op_match=model.op_match(work / "opmatch", section, seed, cells, ngspice, pdk), outputs=[])
     print("op match", res["op_match"], flush=True)
     for c in cells:
@@ -254,5 +254,7 @@ if __name__ == "__main__":
     elif sys.argv[1] == "extract":          # devnoise.py extract [--full] WORK OUT.json SECTION SEED|none CELLS NGSPICE PDK [STATE ...]
         if a[0] == "--full":
             FULL, a = True, a[1:]
+        if a[0] == "--no-cond":                  # V2's conditioning check: the stack nodes without their conductance
+            model.COND, a = False, a[1:]
         extract(Path(a[0]), Path(a[1]), a[2], None if a[3] == "none" else int(a[3]), tuple(a[4].split(",")), a[5], a[6],
                 a[7:] or ["hold", "window", "fire", "pulse"])

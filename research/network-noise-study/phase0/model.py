@@ -48,6 +48,7 @@ STATES = ("hold", "preset", "window", "fire", "pulse")
 # operating point it prints for 7101 is NaN and it changes the device transfers of the nominal cell. Not used.
 RSHUNT = None
 NODESET = True            # pass 2 of the per-cell method; the full-deck reference of V2c runs without it
+COND = True               # the stack-node conductance; False only for the conditioning check of V2 (devnoise --no-cond)
 TIMEOUT = None            # seconds per simulator call; the full-deck reference of V2c uses 1200
 
 
@@ -110,7 +111,7 @@ def analysis_deck(section, cells, state, focus=None):
         if f and "sky130_fd_pr__" in line:
             nodes.update(n for n in f[1:5] if STACK.search(n))
         out.append(line)
-    cond = [f"r.cond{k} {n} 0 1e12 noisy=0" for k, n in enumerate(sorted(nodes))]
+    cond = [f"r.cond{k} {n} 0 1e12 noisy=0" for k, n in enumerate(sorted(nodes))] if COND else []
     text = "\n".join(out) + "\n"
     return text.replace("\n.end\n", "\n" + "\n".join(cond + ([RSHUNT] if RSHUNT else [])) + "\n.end\n"), len(cond)
 
