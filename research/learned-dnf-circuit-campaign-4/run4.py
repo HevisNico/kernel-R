@@ -73,13 +73,27 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def stage_check(stage):
+    """Safeguard (i) (amendment 5, section 1, item 2): the governing protocol named by the stage file has, in the
+    repository, the SHA-256 the stage file records; otherwise the run is refused, before any simulation."""
+    if stage is None:
+        return None
+    import plan
+    st = plan.read_stage(stage)
+    gov = c4.ROOT / st["governing_protocol"]["path"]
+    got = hashlib.sha256(gov.read_bytes()).hexdigest()
+    assert got == st["governing_protocol"]["sha256"], f"refused (safeguard i): {gov.name} has SHA-256 {got}, not that of stage {st['stage']}"
+    return dict(stage=st["stage"], governing_protocol=st["governing_protocol"], stage_file_sha256=sha(stage))
+
+
 def run(a):
     began = time.time()
     out = Path(a.out)
+    stage = stage_check(a.stage)
     seed = None if a.seed == "none" else int(a.seed)
     guard(seed, a.instances, out)
     section = "tt" if seed is None else c4.SECTION
-    rec = dict(id=a.id, kind=a.kind, section=section, seed=seed)
+    rec = dict(id=a.id, kind=a.kind, section=section, seed=seed, stage=stage)
     if a.kind == "extract":
         import devnoise, pilot
         pilot.ALLOWED_SEEDS = (seed,) if seed is not None else ()
@@ -178,6 +192,7 @@ def main():
     p.add_argument("--extraction")
     p.add_argument("--extraction-sha256")
     p.add_argument("--scale", default="1", choices=("1", "0"))
+    p.add_argument("--stage", help="the stage file of this run's stage (amendment 5): its governing protocol is checked first")
     r = run(p.parse_args())
     print(json.dumps(dict(id=r["id"], kind=r["kind"], reached_its_last_date=r["reached_its_last_date"], wall_s=round(r["wall_s"]))))
 

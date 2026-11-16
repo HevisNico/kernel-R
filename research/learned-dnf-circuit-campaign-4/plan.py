@@ -2,8 +2,11 @@
 
   plan.py size [COSTS.json]                                  the expected compute and stage caps for I = 1..15
   plan.py before-m DECISIONS.json BEFORE_M.md                 BEFORE_M.md from the noise study's outcome
-  plan.py manifest STAGE PROTOCOL_COMMIT SOURCE_COMMIT OUT.json     a manifest of the kit (STAGE: M, M1, M2, E1, ..., Q,
+  plan.py stage-file STAGE                                    STAGE_<STAGE>.md, the stage's protocol (amendment 5, section 1)
+  plan.py runs STAGE                                          STAGE_<STAGE>_RUNS.json, the stage's runs (M, M1, M2, E1, ..., Q,
                                                               N1, N2, N3; E from MEASURED.json, Q and N from PREDICTED.json)
+  plan.py manifest STAGE STAGE_COMMIT SOURCE_COMMIT FROZEN_COMMIT OUT.json   the stage's manifest of the kit, from its
+                                                              run list, after safeguard (ii) on SOURCE_COMMIT
   plan.py measured MEASURES_DIR... MEASURED.json              the measured instances after stage M (for the E manifests)
 
 Stages, in the fixed order of PREDICTION.md: M (M1, M2 if needed: the calibration decks), E1, E2, ... (the
@@ -40,7 +43,7 @@ COSTS = dict(quiet_need4_s=814.0, noisy_need4_s=dict(device=1033.0, injected=131
 OUTPUTS = dict(cal=["evidence/input.spice", "evidence/session.log", "evidence/trace.raw", "evidence/result.json", "record.json", "noise.sha256"],
                network=["evidence/input.spice", "evidence/session.log", "evidence/trace.raw", "evidence/result.json", "record.json", "noise.sha256"],
                extract=["part.json", "record.json", "noise.sha256"])
-FROZEN = [f"{BASE}/{n}" for n in ("PREDICTION.md", "AMENDMENT_1.md", "AMENDMENT_2.md", "AMENDMENT_3.md", "c4.py", "noisemodel.py", "session4.py", "plans4.py", "reads4.py", "run4.py", "predicted.py",
+FROZEN = [f"{BASE}/{n}" for n in ("PREDICTION.md", "AMENDMENT_1.md", "AMENDMENT_2.md", "AMENDMENT_3.md", "AMENDMENT_4.md", "AMENDMENT_5.md", "c4.py", "noisemodel.py", "session4.py", "plans4.py", "reads4.py", "run4.py", "predicted.py",
                                    "gate4.py", "cases.py", "mirror_mutations.py", "plan.py", "analyze.py", "rehearsal.py", "test_campaign.py",
                                    "check.sh", "noise/devnoise.py", "noise/model.py", "noise/pilot.py", "noise/noisegen.py", "noise/compare.py",
                                    "noise/README.md")] + [
@@ -94,6 +97,8 @@ def ceil10(x):
 
 def run_kind(run):
     """The kind of a run for its time limit: cal, extract, quiet, untrained, noisy_device, noisy_injected."""
+    if run["kind"] == "extract":
+        return "extract_reuse" if run.get("reuse_trip") else "extract_noreuse"
     if run["kind"] != "network":
         return run["kind"]
     if run["control"] == "untrained":
@@ -258,9 +263,11 @@ def before_m(decisions):
 
 # ---------------------------------------------------------------------------------------------- the manifests
 
-def argv(r, I):
+def argv(r, I, stage=None):
     out = ["{python}", "{repo}/" + f"{BASE}/run4.py", "--out", "{out}", "--ngspice", "{ngspice}", "--pdk", "{pdk}", "--id", r["id"],
            "--kind", r["kind"], "--seed", "none" if r["seed"] is None else str(r["seed"]), "--instances", str(I)]
+    if stage is not None:
+        out += ["--stage", "{repo}/" + stage_path(stage)]
     if r["kind"] == "cal":
         out += ["--guard", r["guard"]]
     elif r["kind"] == "extract" and r["state"] == "all":
@@ -286,9 +293,9 @@ def extra_frozen(runs):
     return sorted(out)
 
 
-def entry(r, I, scenario):
+def entry(r, I, scenario, stage=None):
     return dict(id=r["id"], machine=r["machine"], scenario=scenario, deck="research/circuit/cell.spice", runner=f"{BASE}/run4.py",
-                argv=argv(r, I), estimate_s=r["estimate_s"], timeout_s=r["timeout_s"],
+                argv=argv(r, I, stage), estimate_s=r["estimate_s"], timeout_s=r["timeout_s"],
                 required_outputs=["extraction.json", "record.json", "noise.sha256"] if r.get("state") == "all" else OUTPUTS[r["kind"]],
                 diagnostic_logs=[] if r["kind"] == "extract" else ["evidence/session.log"], noise_fingerprint="noise.sha256")
 
@@ -316,10 +323,63 @@ def stage_runs(name, here=HERE):
     return [r for r in p["network_runs"] if want(r)], "PREDICTED.json", I
 
 
-def manifest(name, runs, I, protocol_commit, protocol, source_commit, root=ROOT):
+# ------------------------------------------------------------------------- the stages' protocols (amendment 5)
+
+GOVERNING = dict(M="PREDICTION.md", E="PREDICTION.md", Q="PREDICTED.json", N="PREDICTED.json")
+STAGE_BEGIN = "```json stage"
+# Safeguard (ii): besides the frozen files, unchanged, a stage's source commit may differ from the frozen commit only in
+# these files of the campaign's folder (fnmatch patterns, relative to it).
+ALLOWED_AFTER_FREEZE = ("STAGE_*.md", "STAGE_*_RUNS.json", "BEFORE_M.md", "MEASURED.json", "PREDICTED.json", "extractions/*",
+                        "Gate4.lean", "REHEARSAL.json", "INVENTORY_a.json", "INVENTORY_b.json", "CAMPAIGN_*.json", "RUN_ATTEMPT_*.json",
+                        "evidence/*")
+
+
+def stage_path(name):
+    return f"{BASE}/STAGE_{name}.md"
+
+
+def governing_of(name):
+    """The governing protocol of a stage: PREDICTION.md for M, E (and the rehearsal's measure stages), PREDICTED.json for
+    Q, N1 to N3 (and the rehearsal's network stages)."""
+    key = dict(X="M", GUARD="M", MEMD="N", MEMI="N").get(name, name[0])
+    return f"{BASE}/{GOVERNING[key]}"
+
+
+def stage_file_text(name, governing, commit, digest):
+    block = dict(stage=name, governing_protocol=dict(path=governing, commit=commit, sha256=digest))
+    return "\n".join([f"# Campaign 4: the protocol of stage {name}", "",
+                      "Written by `plan.py stage-file` (the frozen code) and pushed alone before the stage's launch (amendment 5,",
+                      f"section 1). Its governing protocol is `{governing}` at commit `{commit}`, SHA-256 `{digest}`;",
+                      "`run4.py` refuses every run of the stage if that file has another SHA-256 in the repository.", "",
+                      STAGE_BEGIN, json.dumps(block, indent=1, sort_keys=True), "```", ""])
+
+
+def read_stage(path):
+    text = Path(path).read_text()
+    i = text.index(STAGE_BEGIN) + len(STAGE_BEGIN)
+    return json.loads(text[i:text.index("```", i)])
+
+
+def check_after_freeze(frozen_commit, source_commit, root=ROOT):
+    """Safeguard (ii) (amendment 5, section 1, item 3): no frozen file differs, and every other changed file is in the
+    closed list. Returns the changed files; raises otherwise."""
+    import fnmatch
+    changed = subprocess.run(["git", "-C", str(root), "diff", "--name-only", frozen_commit, source_commit], check=True,
+                             capture_output=True, text=True).stdout.split()
+    bad = [f for f in changed if f in FROZEN or not f.startswith(BASE + "/")
+           or not any(fnmatch.fnmatch(f[len(BASE) + 1:], p) for p in ALLOWED_AFTER_FREEZE)]
+    if bad:
+        raise SystemExit(f"refused (safeguard ii): the source commit differs from the frozen commit in {bad}")
+    return changed
+
+
+def manifest(name, runs, I, protocol_commit, protocol, source_commit, root=ROOT, frozen_commit=None):
     def blob(commit, path):
         return subprocess.run(["git", "-C", str(root), "show", f"{commit}:{path}"], check=True, capture_output=True).stdout
-    entries = [entry(r, I, "stage") for r in runs]
+    if frozen_commit is not None:
+        check_after_freeze(frozen_commit, source_commit, root)
+    stage = name if protocol.startswith("STAGE_") else None
+    entries = [entry(r, I, "stage", stage) for r in runs]
     return dict(kind="registered", campaign_id=f"learned-dnf-circuit-4-{name.lower()}", attempt=1, executor=c4.EXECUTOR,
                 protocol_commit=protocol_commit, protocol_path=f"{BASE}/{protocol}",
                 protocol_sha256=hashlib.sha256(blob(protocol_commit, f"{BASE}/{protocol}")).hexdigest(),
@@ -347,11 +407,27 @@ def main():
         res = dict(what="the measured instances after stage M, written by plan.py measured", I=b["I"], before_m_sha256=b["sha256"],
                    instances=[{k: v for k, v in x.items() if k != "calibration"} for x in predicted.measures(b, sys.argv[2:-1])])
         Path(sys.argv[-1]).write_text(json.dumps(res, indent=1) + "\n")
+    elif sys.argv[1] == "stage-file":
+        print(c4.require_pinned())
+        name = sys.argv[2]
+        gov = governing_of(name)
+        commit = subprocess.run(["git", "-C", str(ROOT), "log", "-1", "--format=%H", "--", gov], check=True, capture_output=True, text=True).stdout.strip()
+        data = subprocess.run(["git", "-C", str(ROOT), "show", f"{commit}:{gov}"], check=True, capture_output=True).stdout
+        assert data == (ROOT / gov).read_bytes(), "the governing protocol differs from its last commit"
+        (ROOT / stage_path(name)).write_text(stage_file_text(name, gov, commit, hashlib.sha256(data).hexdigest()))
+    elif sys.argv[1] == "runs":
+        print(c4.require_pinned())
+        name = sys.argv[2]
+        runs, protocol, I = stage_runs(name)
+        assert governing_of(name).endswith(protocol)
+        (ROOT / f"{BASE}/STAGE_{name}_RUNS.json").write_text(json.dumps(dict(stage=name, I=I, runs=runs), indent=1) + "\n")
     elif sys.argv[1] == "manifest":
         print(c4.require_pinned())
-        name, protocol_commit, source_commit, out = sys.argv[2:6]
-        runs, protocol, I = stage_runs(name)
-        Path(out).write_text(json.dumps(manifest(name, runs, I, protocol_commit, protocol, source_commit), indent=1) + "\n")
+        name, stage_commit, source_commit, frozen_commit, out = sys.argv[2:7]
+        lst = json.loads((ROOT / f"{BASE}/STAGE_{name}_RUNS.json").read_text())
+        m = manifest(name, lst["runs"], lst["I"], stage_commit, f"STAGE_{name}.md", source_commit, frozen_commit=frozen_commit)
+        m["source_sha256"][f"{BASE}/STAGE_{name}_RUNS.json"] = hashlib.sha256((ROOT / f"{BASE}/STAGE_{name}_RUNS.json").read_bytes()).hexdigest()
+        Path(out).write_text(json.dumps(m, indent=1) + "\n")
 
 
 if __name__ == "__main__":
