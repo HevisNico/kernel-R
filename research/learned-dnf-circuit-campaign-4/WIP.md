@@ -1,7 +1,8 @@
 # Campaign 4: the work branch (research/learned-dnf-circuit-campaign-4-wip)
 
-**The frozen implementation is the tree of the commit that wrote this text** (the freeze, 2026-11-16), before its
-rehearsal. Its frozen files are `plan.FROZEN` (`plan.py`), byte for byte; after the freeze, a stage's source commit
+**The frozen implementation is the tree of the commit that wrote this text** (the refreeze, 2026-11-16), before its
+rehearsal. It supersedes the first freeze, `c69e21d`, under which no rehearsal run was started: a smoke run found
+that the device model's deck named its samples by an absolute path (`3e63391`, then this commit). Its frozen files are `plan.FROZEN` (`plan.py`), byte for byte; after the freeze, a stage's source commit
 may differ from it only as amendment 5 (section 1, item 3) allows, which `plan.check_after_freeze` checks.
 
 The campaign branch (`research/learned-dnf-circuit-campaign-4`) holds `PREDICTION.md` (commit `1596b36`) and

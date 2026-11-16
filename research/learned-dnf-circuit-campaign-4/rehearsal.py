@@ -337,9 +337,11 @@ def checks(work, collected, P, rb):
     import reads4
     out = {}
     # Two runs of one seed: their records may differ only in the run's id, its wall time and peak memory, and the SHA-256
-    # of the two files that carry the simulator's date line (trace.raw, session.log); the waveforms are compared apart,
-    # without their date line.
-    allowed = {"id", "wall_s", "peak_rss_MB", "files.trace.raw", "files.session.log"}
+    # of three files: trace.raw (the simulator's date line), result.json (its own wall_s field) and session.log (the
+    # simulator's progress lines, which depend on timing). The waveforms are compared apart without their date line,
+    # and result.json without wall_s (the smoke runs of two device runs of one seed, 17:28 UTC, showed these differences).
+    allowed = {"id", "wall_s", "peak_rss_MB", "files.trace.raw", "files.session.log", "files.result.json"}
+    result_wo_wall = lambda rid: {k: v for k, v in json.loads((folder_of(collected, rid) / "evidence" / "result.json").read_text()).items() if k != "wall_s"}
 
     def flat(d, pre=""):
         return {k2: v2 for k, v in d.items() for k2, v2 in (flat(v, pre + k + ".").items() if isinstance(v, dict) else [(pre + k, v)])}
@@ -355,6 +357,7 @@ def checks(work, collected, P, rb):
     for model, (x, y, z) in pairs.items():
         fx = first_point(x)
         r = dict(records_identical_but_wall_s=same_rec(x, y), waveforms_identical_but_the_date_line=without_date(raw(x)) == without_date(raw(y)),
+                 results_identical_but_wall_s=result_wo_wall(x) == result_wo_wall(y),
                  two_seeds_two_noises=record(collected, x)["noise_fingerprint"] != record(collected, z)["noise_fingerprint"],
                  same_operating_point=fx == first_point(y) == first_point(z))
         out[f"operating_point_against_the_run_without_noise_{model}"] = dict(max_abs_diff=max(abs(fx[k] - quiet[k]) for k in quiet if k in fx),
