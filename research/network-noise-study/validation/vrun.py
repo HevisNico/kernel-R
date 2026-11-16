@@ -159,10 +159,14 @@ def frozen(out, instance, state, cell, port, t_s, rnd, kind):
     if kind != "injected":
         text, files, nseed = add_sources(text, model_sources(instance, mcells), instance, rnd, t_s, work)
     names = [re.sub(r"[^a-z0-9]", "_", o) for o in outs]
-    ctl = pilot.seeded(seed) + [f"tran 0.2u {t_s:.9g} 0 200n", "linearize " + " ".join(outs),
-                                "wrdata out.txt " + " ".join(outs)]
+    ctl = pilot.seeded(seed) + [f"tran 0.2u {t_s:.9g} 0 200n", "write tran.raw " + " ".join(outs),
+                                "linearize " + " ".join(outs), "wrdata out.txt " + " ".join(outs)]
     stdout, wall, bad = spice(work, control(text, ctl))
     hashes = finish(files)
+    raw = work / "tran.raw"
+    raw_sha = hashlib.sha256(raw.read_bytes()).hexdigest() if raw.exists() else None
+    if raw.exists():
+        raw.unlink()
     d = np.loadtxt(work / "out.txt")
     np.save(work / "y.npy", d[:, 1::2])                 # one column per output, every 0.2 us from 0
     (work / "out.txt").unlink()
@@ -170,7 +174,9 @@ def frozen(out, instance, state, cell, port, t_s, rnd, kind):
     Path(out).write_text(json.dumps(dict(machine=os.environ.get("VAL_MACHINE"), run="frozen", instance=instance, state=state, cell=cell, port=port, kind=kind,
                                          round=rnd, noise_seed=nseed, position=position(instance, rnd) if kind != "injected" else None,
                                          t_s=t_s, dt_s=0.2e-6, outputs=outs, aborted=bad, wall_s=wall,
-                                         samples_sha256=hashes, points=int(len(d)), y_file=str(work / "y.npy"),
+                                         samples_sha256=hashes, raw_sha256=raw_sha,
+                                         y_sha256=hashlib.sha256((work / "y.npy").read_bytes()).hexdigest(),
+                                         points=int(len(d)), y_file=str(work / "y.npy"),
                                          summary=summary)) + "\n")
 
 
@@ -216,11 +222,14 @@ def preset(out, instance, rnd):
     text, files, nseed = add_sources(text, model_sources(instance, ("a", "b")), instance, 3 if zero and seed else (1 if zero else rnd),
                                      50e-6, work, scale="0" if zero else "1")
     meas = [f"meas tran u{c}{p} find v(x{c}.vmem{p},x{c}.x{p}.sum) at=3.1u" for c in "ab" for p in net.PORTS]
-    stdout, wall, bad = spice(work, control(text, pilot.seeded(seed) + ["tran 0.1u 50u 0 200n"] + meas))
+    stdout, wall, bad = spice(work, control(text, pilot.seeded(seed) + ["tran 0.1u 50u 0 200n",
+                                                                      "write tran.raw " + " ".join(f"v(x{c}.vmem{p}) v(x{c}.x{p}.sum)" for c in "ab" for p in net.PORTS)] + meas))
+    raw = work / "tran.raw"
+    raw_sha = hashlib.sha256(raw.read_bytes()).hexdigest() if raw.exists() else None
     u = {f"{c}{p}": float(re.search(rf"^u{c}{p}\s*=\s*(\S+)", stdout, re.M | re.I).group(1)) for c in "ab" for p in net.PORTS}
     Path(out).write_text(json.dumps(dict(machine=os.environ.get("VAL_MACHINE"), run="preset", instance=instance, round=None if zero else rnd, noise_seed=None if zero else nseed,
                                          position=None if zero else position(instance, rnd), aborted=bad, wall_s=wall,
-                                         samples_sha256=finish(files), u_V=u)) + "\n")
+                                         samples_sha256=finish(files), raw_sha256=raw_sha, u_V=u)) + "\n")
 
 
 def seeding(out, instance, rnd):
