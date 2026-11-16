@@ -256,6 +256,89 @@ expected. Two machines, four runs at a time each, and one quiet run per instance
 
 These are estimates, not measures of such a campaign. The budget is the owner's to set.
 
+## 6. After the first report: what phase 0 settled
+
+This section supersedes, where they differ, sections 3 to 5 above, which are kept as written.
+
+**The noise analysis of a whole cell is not used.** In the frozen decks of [`model.py`](model.py), the operating
+point that ngspice's `noise` command solves for itself fails (gmin, then source stepping) on almost every state and
+instance, nominal included, where `op` and `ac` converge; its result is then computed about another point. On 7102
+the same op-amp transistor, at the same `op` point (gm 6.561e-5 S, id 4.865 µA), came out 1.17 to 1.71 times
+noisier at `pulse` than at `hold`, by a factor common to every device of an output. The per-cell extractions of
+`model.py` (`EXTRACT_*.json`) are kept as evidence of that failure, not as a model. The method that replaces it,
+[`devnoise.py`](devnoise.py), takes the noise current of each candidate transistor at its own operating point, in a
+deck where all its terminals are forced (drain through a 0 V probe, the probes summed by CCVS: a transfer of
+exactly 1 Ω); the transfers come from AC in the isolated cell deck; the output density is Σ S_k |H_k|². Each
+candidate's drain current in the forced deck must equal its `op` current within 10⁻³ relative + 1 pA (magnitudes:
+`@m[id]` carries ngspice's type and mode signs).
+
+**Item 1 of section 3 (NAND stacks)** is moot for this method: the logic gates are not candidates, and their
+outputs are checked at the rails (10 mV) at every frozen state. The stack-node conductance stays in the decks.
+
+**Item 3 of section 3 (other operating points)** is done: `hold`, `window`, `fire`, `pulse` and `preset`, cells a
+and b, on the nominal cell and 7101, 7102, 7103 ([`DEVNOISE_*.json`](DEVNOISE_nominal.json),
+[`IDCHECK_*.json`](IDCHECK_nominal.json), [`CHECK_V2.json`](CHECK_V2.json)):
+- V2 passes on all 18 outputs of each instance: cover ≥ 0.99, flat A and B, no logic device, no DC failure, the
+  drain-current check at most 0.39 of its tolerance, the isolated operating point within 2.6 nV of the full deck;
+- V2b (stationarity) passes: a device kept in several states has the same A and B within 0.01 % (the 17.6 to
+  71.5 % of the `model.py` extractions came from the failed operating point);
+- V2c passes: the same method in the full two-cell deck (`devnoise.py --full`, [`FULLDECK_nominal.json`](FULLDECK_nominal.json),
+  [`FULLDECK_7102.json`](FULLDECK_7102.json)) gives the same devices, A, B, shares and band rms on all 36 outputs
+  within 3.1e-8 relative. The cells are joined only by ideal supplies, so the isolation changes nothing.
+- The model's devices are the same 23 per cell on all four instances (per port: op-amp `xm1`–`xm4`, window
+  comparator `xm1`–`xm4`, mirror `xmin`, `xmout`; per cell: FIRE comparator `xm1`, `xm3`, `xm4`).
+
+**The pilot of section 2 is not affected** ([`PILOT_CHECK.json`](PILOT_CHECK.json)): at the nominal hold point,
+`devnoise.py` keeps the same four devices with the same shares and A and B within 0.019 %, and 66.7 µV rms in band.
+The comparisons of section 2.2 (66 µV against 262 µV for the injected model; the drift ratio of 1.7 to 1.8) stand.
+
+**Item 2 of section 3 (preset)** is changed, not settled. Across the integrating capacitor at the preset point,
+`devnoise.py` gives 0.07 µV rms over 10 Hz to 1.25 MHz and 0.2 µV above, from the devices alone (the preset switch
+is noiseless by declaration). This agrees with the AC of the circuit at its converged point: from the op-amp's
+input to the capacitor voltage the gain is 1.55e-3 at preset (against 2.0 to the stored voltage at hold). The
+earlier 183 µV (and 38 µV in band) came from the whole-cell `noise`, whose operating point fails. V6 of the
+criteria (a transient preset) decides it.
+
+**Seeding** (owner's point 1): the noise is sampled outside the simulator by numpy, per run, from the noise seed
+10 × instance + round ([`noisegen.py`](noisegen.py), [`SEEDS_7101.json`](SEEDS_7101.json)); the slow 1/f part from
+1/T_c, T_c = 1e5 s, is a fixed realization per instance and source taken at the run's virtual time (1 000 s per run).
+
+**Item 4 (ideal sources)**: decided by the owner, the mirror's shot noise 2qI is kept as a declared non-device
+term, at the peak of `bip` (173 nA); the other ideal sources are noiseless and listed in the criteria.
+
+**Cost, superseding section 5** ([`cost3.py`](cost3.py), [`COST_C4_need4.json`](COST_C4_need4.json),
+[`COST_C4_need4_sources.json`](COST_C4_need4_sources.json)). Campaign 4's need-4 network run (three cells, about
+17 ms, emulated from `dnf.calendar(4, 4, 4, 4)`), four runs at a time:
+
+| Run | Sources | Wall, s | Peak memory, MB |
+|---|---|---|---|
+| quiet | 0 | 814 | 632 |
+| injected (campaigns 1 to 3) | 21 | 1 316 | 912 |
+| PWL, every analog transistor | 144 | 4 716 | 1 610 |
+| PWL, the model's union of `model.py` | 144 | 4 570 | 1 552 |
+| PWL, the model (devnoise) | 75 | running at the time of writing | |
+| filesource, every analog transistor | 144 | running at the time of writing | |
+| **filesource, the model (devnoise)** | **75** | **1 033** | **717** |
+| filesource, the model at zero amplitude | 75 | 827 | 659 |
+
+The device sources have placeholder amplitudes (those of op-amp `xm3` at hold): this measures cost. With the 75
+sources as XSPICE `filesource` instances, a noisy run costs 1.27 times a quiet run and 0.79 times the injected model;
+its deck is 0.1 MB and its samples 50 MB in 10 files (8 sources each), generated in 24 s. The 1.17 of section 5 was
+measured on 2.44 ms runs, where the PWL sources' cost had not yet grown with the run's length.
+
+**Two settings come with the filesource**, both found in phase 0:
+- one file of 76 columns stops the deck at 1 µs ("timestep too small", even at zero amplitude); one column, and
+  groups of 8, do not;
+- with an XSPICE device present, ngspice lowers trtol to 1 for the whole circuit; `set xtrtol=7` keeps the default
+  of the other runs. The check that it changes nothing the campaign uses ([`zerocheck.py`](zerocheck.py),
+  [`ZEROCHECK_need4.json`](ZEROCHECK_need4.json)): the need-4 run with the 75 sources at zero amplitude gives the
+  quiet run's 110 occurrences, writes and 49 FIRE events, every stored voltage read by the router within 87 nV
+  (tolerance 1 µV), FIRE dates within 0.1 µs. The full stored-voltage traces differ by up to 4.8 mV, only at write
+  edges shifted by up to 0.1 µs between the two runs' time steps (median difference about 1 nV); reads and events
+  are what the campaign uses. The first version of the check compared FIRE dates to 1e-9 unit; after the first
+  comparison it was changed to identify a FIRE by its cell, its occurrences and its routed lines.
+- The filesource returns its samples within 5e-9 of their rms across the stops and resumes of the router.
+
 ## Reproduction
 
 The venv must be at this path for the numpy hash to match:
@@ -272,6 +355,18 @@ $P -B pilot.py tran WORK TRAN_injected.json MODEL_nominal.json injected 0.04 8 /
 $P -B pilot.py tran WORK TRAN_quiet.json MODEL_nominal.json quiet 0.04 1 /usr/bin/ngspice $PDK
 $P -B pilot.py op WORK OP_7101.json tt_mm 7101 /usr/bin/ngspice $PDK      # and 7102, 7103
 $P -B cost.py WORK COST.json MODEL_nominal.json /usr/bin/ngspice $PDK 3
+```
+
+After the first report:
+
+```sh
+$P -B devnoise.py extract WORK DEVNOISE_nominal.json tt none a,b /usr/bin/ngspice $PDK hold window fire pulse preset
+$P -B devnoise.py extract WORK DEVNOISE_7101.json tt_mm 7101 a,b /usr/bin/ngspice $PDK hold window fire pulse preset   # and 7102, 7103
+$P -B devnoise.py extract --full WORK FULLDECK_nominal.json tt none a,b /usr/bin/ngspice $PDK hold window fire pulse preset   # and 7102
+$P -B devnoise.py idcheck WORK_OF_AN_EXTRACTION IDCHECK_nominal.json
+$P -B compare.py CHECK_V2.json DEVNOISE_nominal.json:FULLDECK_nominal.json DEVNOISE_7102.json:FULLDECK_7102.json -- DEVNOISE_7101.json DEVNOISE_7103.json
+$P -B cost3.py dnf WORK COST_C4_need4_sources.json /usr/bin/ngspice $PDK DNF_PY 4 pwlmodel fs46 fsmodel fszero   # DNF_PY: a copy of research/learned-dnf-circuit's dnf.py
+$P -B zerocheck.py ZEROCHECK_need4.json QUIET_RUN_DIR FSZERO_RUN_DIR
 ```
 
 Each WORK must be a new folder. The noise of a run is seeded by the simulator's process number, so no transient
