@@ -316,7 +316,7 @@ term, at the peak of `bip` (173 nA); the other ideal sources are noiseless and l
 | injected (campaigns 1 to 3) | 21 | 1 316 | 912 |
 | PWL, every analog transistor | 144 | 4 716 | 1 610 |
 | PWL, the model's union of `model.py` | 144 | 4 570 | 1 552 |
-| PWL, the model (devnoise) | 75 | running at the time of writing | |
+| PWL, the model (devnoise) | 75 | 2 461 | 1 216 |
 | filesource, every analog transistor | 144 | 1 305 | 785 |
 | **filesource, the model (devnoise)** | **75** | **1 033** | **717** |
 | filesource, the model at zero amplitude | 75 | 827 | 659 |
