@@ -303,8 +303,10 @@ def v7(work):
             continue
         same = q1["raw_nodate_sha256"] is not None and q1["raw_nodate_sha256"] == q2["raw_nodate_sha256"]     # the data, not the dated header
         zc = events(q1, z)
-        I = dict(section="tt_mm", seed=int(i), scans=M["instances"][i]["scans"], quiet_train=as_train(q1, "quiet1"), noisy_trains=[])
-        ports = C.instance(I)["ports"]
+        # constants.port per port (constants.instance needs at least one noisy train, which V7 has none of): the slope of
+        # the quiet train, train_18_quiet.slope_per_mV, is the same value
+        qt = as_train(q1, "quiet1")["ports"]
+        ports = {pn: C.port(pn, scan, qt[pn], []) for pn, scan in M["instances"][i]["scans"].items()}
         dl, dd = 0.0, 0.0
         for a, b in zip(q1["occurrences"], z["occurrences"]):
             pn = f"{a['cell']}{a['port']}"
