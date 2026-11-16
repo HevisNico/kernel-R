@@ -7,7 +7,8 @@ P0's table (amendment 1, section 8, item 5): a and b are the nominal cell at amp
 file's four decimals in integer units; the latency the file's; c's 0.3-late pair equal to its aligned pair; the dose
 of a port at stage k the difference of the stored voltages of stages k and k + 1 (stage 7: that of stage 6), as the
 file gives them for port 1, for both ports. The noisy budget uses the constants of decision 5 (the rehearsal has no
-validated value). Each case is P0 with the single change of the table of PREDICTION.md, P4 and P4′ by amendment 2:
+validated value). Every number is read exactly (decimals as Decimal, amendment 3). Each case is P0 with the single
+change of the table of PREDICTION.md, P4 and P4′ by amendment 2:
 
   P1  the pair read of a at stage 3, Z set to theta - 1                       a measure; everything recomputed
   P2  the pair read of a at stage 4, Z set to theta                           a measure; everything recomputed
@@ -34,6 +35,7 @@ gate file of gate4.py, that decides the three checkers separately on every case 
 verdict per checker, so that it compiles only if Lean agrees), and, for P4, the three propositions of amendment 2 on
 c's test read on ABCD.
 """
+from decimal import Decimal
 from fractions import Fraction as F
 import copy
 import json
@@ -52,7 +54,7 @@ AMPLITUDE = dict(a="049", b="049", c="10")
 
 
 def nominal():
-    d = json.loads(CALIBRATION.read_text())
+    d = json.loads(CALIBRATION.read_text(), parse_float=Decimal)      # decimals at their exact value (amendment 3)
     t, dose = {}, {}
     for c in c4.CELLS:
         rows = sorted(d["amplitudes"][AMPLITUDE[c]]["table"], key=lambda r: r["stage"])
@@ -68,7 +70,7 @@ def nominal():
                 t[(c, k, P.SKEWED)] = dict(t[(c, k, "both")])
         u = [r["u_mV"] for r in rows]
         for k in range(c4.STAGES):
-            mv = u[k] - u[k + 1] if k + 1 < c4.STAGES else u[k - 1] - u[k]
+            mv = P.exact(u[k] - u[k + 1] if k + 1 < c4.STAGES else u[k - 1] - u[k])
             for p in (1, 2):
                 dose[(c, p, k)] = mv
     return t, dose
@@ -112,7 +114,7 @@ def build():
 
     t = copy.deepcopy(t0)
     key = ("b", n["b"], "both")
-    t[key]["latency"] = float(F(str(t0[key]["latency"])) + F(1, 10))
+    t[key]["latency"] = P.exact(t0[key]["latency"]) + F(1, 10)
     p4p = predict(t, dose)
     x = copy.deepcopy(p4p)
     d = x["observation"]["secondTest"]["ABCD"]
@@ -404,6 +406,7 @@ def lean_targets(cases, verdicts, gate_module):
 
 
 def main():
+    print(c4.require_pinned())
     cases = build()
     Path(sys.argv[1]).write_text(json.dumps(dict(source="CALIBRATION.json, #172, 49684af", cases=cases), indent=1, default=str))
     verdicts = {}

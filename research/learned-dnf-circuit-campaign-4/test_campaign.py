@@ -112,5 +112,32 @@ class Timing(unittest.TestCase):
             self.assertTrue(0 <= skew <= deadline < duration)
 
 
+class ExactArithmetic(unittest.TestCase):
+    """Amendment 3, section 2: rounding ties to even, exact rounding-up of one or two square roots, exact solve."""
+
+    def test_ties_to_even(self):
+        self.assertEqual([round(F(20735, 2)), round(F(20737, 2)), P.zint(F(1, 200000)), P.zint(F(3, 200000))], [10368, 10368, 0, 2])
+        self.assertEqual(P.q(F(5, 100000)), F(0))
+        self.assertEqual(P.q(F(15, 100000)), F(2, 10000))
+
+    def test_ceil_sum_sqrt_against_decimal(self):
+        import decimal
+        import random
+        ctx = decimal.Context(prec=80)
+        rnd = random.Random(4)
+        for _ in range(3000):
+            sq = [F(rnd.randint(0, 10 ** 8), rnd.randint(1, 10 ** 4)) for _ in range(rnd.choice((1, 2)))]
+            s = sum(ctx.sqrt(decimal.Decimal(v.numerator) / decimal.Decimal(v.denominator)) for v in sq)
+            want = int(s.to_integral_value(rounding=decimal.ROUND_CEILING))
+            if abs(s - want) > decimal.Decimal(10) ** -40 and abs(s - (want - 1)) > decimal.Decimal(10) ** -40:
+                self.assertEqual(P.ceil_sum_sqrt(sq), want, sq)
+        self.assertEqual(P.ceil_sum_sqrt([F(4), F(9)]), 5)
+        self.assertEqual(P.ceil_sum_sqrt([F(0)]), 0)
+
+    def test_solve_is_exact(self):
+        rows = [[1, 0], [1, 1], [1, 2]]
+        self.assertEqual(P.solve(rows, [1, 2, 4]), [F(5, 6), F(3, 2)])
+
+
 if __name__ == "__main__":
     unittest.main()

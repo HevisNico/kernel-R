@@ -7,6 +7,11 @@ Everything is computed on the numbers written in PREDICTED.json: scores as integ
 (theta = 100 000), dates as rationals in time units, rounded to 0.0001 unit (fractions.Fraction), never on floats
 after rounding. The Lean file of the kernel gate (gate4.py) is written from the same numbers.
 
+Amendment 3 (commit 41cf88b): every number that becomes an integer is computed in exact rationals. A measure is taken
+at its exact value (`exact`: a float at its binary value, a Decimal read from a file at its decimal value); the
+guarded tuple is the exact solution of the normal equations; rounding to the nearest is ties to even (`round` on a
+Fraction); the noise terms are rounded up exactly (`ceil_sum_sqrt`). Floats remain in the geometric fit and M5 only.
+
 Open points of the implementation, named here so that an amendment can change them in one place (reported to the
 owner before any freeze): DURATION_C (c's read duration in the kernel's SlotTiming), RAIL, the per-cell budgets
 (the largest per-read budget over a cell's training or test reads), EMPTY_IN_EPSILON.
@@ -30,7 +35,7 @@ RAIL = 10 * THETA
 DURATION_A, DURATION_C = 22, 19
 SKEW_A, DEADLINE_A = F(1, 50), F(11, 10)
 SKEW_C, DEADLINE_C = F(11, 10), F(11, 5)
-ALLOWANCE_MV = 0.030
+ALLOWANCE_MV = F("0.030")
 EMPTY_IN_EPSILON = True
 GUARDED_READS_1 = ("empty", "port 1", "port 2", "both")      # the empty read identifies the help
 GUARDED_READS_2 = ("empty", "port 1", "port 2")
@@ -41,12 +46,62 @@ TARGET = dict(a=("A", "B"), b=("C", "D"))
 PORT_OF = {n: p for n, (c, p) in dnf.INPUTS.items()}
 
 
+def exact(x):
+    """A measure as an exact rational: a float at its binary value, a Decimal at its decimal value (amendment 3, 1)."""
+    if isinstance(x, (int, F)):
+        return F(x)
+    from decimal import Decimal
+    if isinstance(x, (float, Decimal)):
+        return F(x)
+    raise TypeError(f"not a measure: {x!r}")
+
+
 def q(x):
-    return F(round(x * 10000), 10000)
+    """A date or latency rounded to 0.0001 unit, to the nearest, ties to even."""
+    return F(round(exact(x) * 10000), 10000)
 
 
 def zint(qpeak):
-    return int(round(qpeak * UNITS))
+    """A score in integer units (Z times 100 000), to the nearest, ties to even."""
+    return round(exact(qpeak) * UNITS)
+
+
+def solve(rows, rhs):
+    """The exact rational least-squares solution: the normal equations A^T A x = A^T b, by Gauss-Jordan elimination."""
+    n = len(rows[0])
+    a = [[sum(F(r[i]) * r[j] for r in rows) for j in range(n)] + [sum(F(r[i]) * y for r, y in zip(rows, rhs))] for i in range(n)]
+    for c in range(n):
+        piv = next(i for i in range(c, n) if a[i][c] != 0)
+        a[c], a[piv] = a[piv], a[c]
+        a[c] = [v / a[c][c] for v in a[c]]
+        for i in range(n):
+            if i != c and a[i][c] != 0:
+                f = a[i][c]
+                a[i] = [v - f * w for v, w in zip(a[i], a[c])]
+    return [a[i][n] for i in range(n)]
+
+
+def ceil_sum_sqrt(squares):
+    """The least integer m >= 0 with m >= sqrt(X_1) + ... (one or two terms), decided on the exact rational squares
+    (amendment 3, 2.5): one term, m^2 >= X; two terms, m^2 >= X, m^2 + X - Y >= 0 and (m^2 + X - Y)^2 >= 4 m^2 X. The
+    float below is only a starting point; the result is decided by the exact predicate."""
+    sq = [F(v) for v in squares]
+    assert 1 <= len(sq) <= 2 and all(v >= 0 for v in sq)
+
+    def enough(m):
+        if m < 0:
+            return False
+        if len(sq) == 1:
+            return m * m >= sq[0]
+        X, Y = sq
+        u = m * m + X - Y
+        return m * m >= X and u >= 0 and u * u >= 4 * m * m * X
+    m = max(0, int(sum(math.sqrt(v) for v in sq)) - 2)
+    while not enough(m):
+        m += 1
+    while m > 0 and enough(m - 1):
+        m -= 1
+    return m
 
 
 def mask_read(ports):
@@ -71,13 +126,13 @@ def table(on_rows, off_rows):
                 z = zint(off[key]["q_peak"])
                 if on[key]["fire"] != (z >= THETA):
                     bad.append(f"FIRE bit {on[key]['fire']} and Z = {z} disagree at {key}")
-                t[key] = dict(Z=z, fire=on[key]["fire"], latency=None if on[key]["latency"] is None else float(q(on[key]["latency"])))
+                t[key] = dict(Z=z, fire=on[key]["fire"], latency=None if on[key]["latency"] is None else q(on[key]["latency"]))
             jd = on.get((c, k, "joint dose"))
             if jd is None:
                 bad.append(f"missing joint dose {(c, k)}")
             else:
                 for p in (1, 2):
-                    dose[(c, p, k)] = jd["ports"][str(p)]["move_mV"]
+                    dose[(c, p, k)] = exact(jd["ports"][str(p)]["move_mV"])
     return t, dose, bad
 
 
@@ -132,8 +187,8 @@ def guarded(t, cells, Q, reads):
                     row[-1] += k
                 rows.append(row)
                 rhs.append(t[(c, k, r)]["Z"])
-    x, *_ = np.linalg.lstsq(np.array(rows), np.array(rhs, float), rcond=None)
-    v = {n: int(round(val)) for n, val in zip(names, x)}
+    x = solve(rows, rhs)
+    v = {n: round(val) for n, val in zip(names, x)}
     return dict(help={c: v[f"h_{c}"] for c in cells}, gain={(c, p): v[f"g_{c}{p}"] for c in cells for p in (1, 2)}, dose=v["d"])
 
 
@@ -146,19 +201,21 @@ def G(tup, c, k, ps, writes=None):
 
 def sensitivity(tup, dose, c, p):
     """Score per mV of stored voltage: the guarded score step of one dose over the measured dose in mV."""
-    mv = np.mean([dose[(c, p, k)] for k in range(c4.STAGES)])
-    return tup["dose"] / mv
+    mv = sum(exact(dose[(c, p, k)]) for k in range(c4.STAGES)) / c4.STAGES
+    return F(tup["dose"]) / mv
 
 
-def sigma_term(s, n, const):
-    return s * math.sqrt(const["within_mV"] ** 2 + const["between_mV"] ** 2 + n * const["per_dose_mV"] ** 2)
+def noise_square(s, n, const):
+    """(3 sigma)^2 of one port, exactly: 9 s^2 (w^2 + b^2 + n d^2), the constants at their decimal values."""
+    w, b, d = (F(str(const[k])) for k in ("within_mV", "between_mV", "per_dose_mV"))
+    return 9 * F(s) ** 2 * (w * w + b * b + n * d * d)
 
 
 def read_budget(eps, sens, writes, kind, const):
     """kind 0: the noise-free budget; kind 3: K = 3. sens and writes per active port; two ports added linearly."""
     if kind == 0:
-        return eps + math.ceil(ALLOWANCE_MV * sum(sens))
-    return eps + math.ceil(3 * sum(sigma_term(s, n, const) for s, n in zip(sens, writes)))
+        return eps + math.ceil(ALLOWANCE_MV * sum(F(s) for s in sens))
+    return eps + ceil_sum_sqrt([noise_square(s, n, const) for s, n in zip(sens, writes)])
 
 
 # ---------------------------------------------------------------------------------------------- one instance
@@ -286,7 +343,12 @@ def observation(t, n, Q1, Q2):
     calendar, the routing delay 3/2, one emission per predicted FIRE at its start plus the measured latency, scores
     from the calibration. Serialized as strings of rationals and integers."""
     Z = lambda c, k, r: t[(c, k, r)]["Z"]
-    lat = lambda c, k, r: q(t[(c, k, r)]["latency"]) if t[(c, k, r)]["latency"] is not None else F(1, 2)
+    def lat(c, k, r):
+        """The measured guard-on latency of a predicted FIRE; a predicted FIRE without one is an error."""
+        v = t[(c, k, r)]["latency"]
+        if v is None:
+            raise ValueError(f"a predicted FIRE without a measured latency: {(c, k, r)}")
+        return q(v)
     obs = dict(firstTrain=[], teach=[], secondTrain=[], firstTest={}, secondTest={}, scores={})
 
     def rd(start, arrivals, emissions, value):

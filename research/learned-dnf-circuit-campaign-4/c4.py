@@ -38,6 +38,38 @@ FIRST_SEED = 7501
 NOMINAL_KEY = 90000                                     # instance_key of the nominal cell (noise criteria, item 1.5)
 REHEARSAL_ROUND_BASE = 950                              # the rehearsal's nominal rounds: 951, 952, ... (no criterion uses them)
 DECISION5 = dict(between_mV=0.111, within_mV=0.094, per_dose_mV=0.009)
+
+# Amendment 3, section 3: the interpreter of every run.
+PINNED_VENV = "/home/user/owner-prep/venv312"
+PINNED = dict(python_version="3.12.3", numpy_version="2.3.5",
+              python_sha256="e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+              numpy_record_sha256="064003bdb6f9f7bb06e46e07cc3398cbfdc3c114dfe55b89d239e564917be2fb")
+
+
+def interpreter():
+    """What this process runs on: the Python and numpy versions, the SHA-256 of the interpreter's executable and of
+    numpy's RECORD file (read as the launch kit reads it), and the venv."""
+    import hashlib
+    import importlib.metadata
+    import os
+    import platform
+    import numpy
+    exe = os.path.realpath(sys.executable)
+    return dict(python_version=platform.python_version(), numpy_version=numpy.__version__,
+                python_sha256=hashlib.sha256(Path(exe).read_bytes()).hexdigest(),
+                numpy_record_sha256=hashlib.sha256(importlib.metadata.distribution("numpy").read_text("RECORD").encode()).hexdigest(),
+                executable=sys.executable, prefix=sys.prefix)
+
+
+def require_pinned():
+    """Refuses any interpreter but the pinned one. In the pinned venv every value must match; elsewhere (the CI runner,
+    whose venv path, and so numpy's RECORD, differs) the Python and numpy versions must. Returns what was seen."""
+    seen = interpreter()
+    keys = PINNED if seen["prefix"] == PINNED_VENV else ("python_version", "numpy_version")
+    bad = {k: seen[k] for k in keys if seen[k] != PINNED[k]}
+    if bad:
+        raise SystemExit(f"refused: not the pinned interpreter (amendment 3, section 3): {bad}")
+    return "interpreter: " + json.dumps(dict(seen, checked=sorted(keys)), sort_keys=True)
 POSITIONS = dict(cal_on=0, cal_off=1, quiet=2, n1=3, n2=4, n3=5, untrained=6)
 EXECUTOR = "a Claude Code cloud session on behalf of the owner, on two cloud containers whose inventories are recorded"
 

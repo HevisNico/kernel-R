@@ -132,6 +132,7 @@ def lean_file(muts, verdicts):
 
 
 def main():
+    print(cases.c4.require_pinned())
     p0 = next(x for x in cases.build() if x["tag"] == "P0")
     assert all(ok for *_, ok in cases.conditions(p0, 0))
     muts = mutations(p0)
