@@ -96,7 +96,3 @@ def instance_key(seed):
     return NOMINAL_KEY if seed is None else seed
 
 
-def before_m(path=None):
-    """BEFORE_M.json, the record pushed alone before stage M, or None while it does not exist (rehearsal)."""
-    p = Path(path) if path else HERE / "BEFORE_M.json"
-    return json.loads(p.read_text()) if p.exists() else None

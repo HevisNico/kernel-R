@@ -42,13 +42,17 @@ def writes(tr, c, p, start):
     return len(out), sum(1 for x in out if x["width_s"] >= c4.WRITE_PRIME_S), out
 
 
-def read(tr, c, start, fire_lo, fire_hi, gated):
+def read(tr, c, start, fire_lo, fire_hi, gated, slot_lo=None, slot_hi=None):
+    """slot_lo, slot_hi: the physical slot. Every FIRE crossing over it is recorded (`slot_fires_s`), so that an
+    emission outside the decision window is seen (amendment 1, point 1)."""
     fires = tr.crossings(f"v(x{c}.p)", fire_lo, fire_hi)
     late = tr.crossings(f"v(x{c}.p)", fire_hi, start + CYCLE)
+    slot_fires = tr.crossings(f"v(x{c}.p)", slot_lo, slot_hi) if slot_lo is not None else None
     r = dict(cell=c, start_s=start, gated=gated, fire=bool(fires), fire_date_s=fires[0] if fires else None,
              latency=(fires[0] - start) / TU if fires else None, late_fires=len(late),
              q_peak=q_peak(tr, c, start, start + 3 * TU),
-             q_peak_before_fire=q_peak(tr, c, start, fires[0]) if fires else None, ports={})
+             q_peak_before_fire=q_peak(tr, c, start, fires[0]) if fires else None, ports={},
+             slot_fires_s=slot_fires, slot_latencies=None if slot_fires is None else [(f - start) / TU for f in slot_fires])
     for p in net.PORTS:
         w, wp, detail = writes(tr, c, p, start)
         before = tr.u(c, p, start - 30e-6, start - 2e-6)
@@ -70,7 +74,7 @@ def calibration_reads(tr, result, reads):
                 continue
             starts = by.get((round(x["date"]), c), [])
             start = min(starts) if starts else net.snap(c4_at(x["date"]))
-            rec = read(tr, c, start, start, start + c4.WINDOW * TU, x["gated"])
+            rec = read(tr, c, start, start, start + c4.WINDOW * TU, x["gated"], c4_at(x["date"]), c4_at(x["date"] + dnf.SLOT))
             out.append(dict(rec, stage=x["stage"], read=x["read"]))
     return out
 
@@ -100,11 +104,11 @@ def network_reads(tr, result, slots):
             mine = [o for o in here if o["cell"] == c]
             if mine:
                 start = min(o["date_s"] for o in mine)
-                rec["reads"][c] = read(tr, c, start, start, start + c4.WINDOW * TU, gated=c not in s["writes"])
+                rec["reads"][c] = read(tr, c, start, start, start + c4.WINDOW * TU, c not in s["writes"], lo, hi)
         arr = [o for o in here if o["cell"] == "c"]
         if arr:
             first, last = min(o["date_s"] for o in arr), max(o["date_s"] for o in arr)
-            r = read(tr, "c", first, last, first + c4.DEADLINE_C * TU, gated="c" not in s["writes"])
+            r = read(tr, "c", first, last, first + c4.DEADLINE_C * TU, "c" not in s["writes"], lo, hi)
             r["arrivals"] = [dict(port=o["port"], date_s=o["date_s"], origin=o["origin"], fire_date_s=o.get("fire_date_s")) for o in arr]
             r["skew_units"] = (last - first) / TU
             rec["reads"]["c"] = r

@@ -139,5 +139,48 @@ class ExactArithmetic(unittest.TestCase):
         self.assertEqual(P.solve(rows, [1, 2, 4]), [F(5, 6), F(3, 2)])
 
 
+class Stages(unittest.TestCase):
+    """plan.py's record before stage M and the runs of each stage, without simulation."""
+
+    def setUp(self):
+        import tempfile
+        self.dir = Path(tempfile.mkdtemp())
+        d = dict(noise_model="device", noise_model_source="test", constants_source="test", costs_source="test", reuse_trip=True,
+                 reuse_trip_source="test")
+        (self.dir / "BEFORE_M.md").write_text(plan.before_m_text(plan.before_m(d)))
+        self.b = plan.read_before_m(self.dir / "BEFORE_M.md")
+
+    def test_before_m_round_trip(self):
+        self.assertEqual((self.b["I"], self.b["noise_model"], self.b["reuse_trip"]), (9, "device", True))
+        self.assertEqual(self.b["seeds"], dict(a=[7501, 7502, 7503, 7504, 7505], b=[7506, 7507, 7508, 7509]))
+        self.assertEqual(len(self.b["sha256"]), 64)
+
+    def test_stage_m_and_e(self):
+        M, protocol, I = plan.stage_runs("M", here=self.dir)
+        self.assertEqual((len(M), protocol, I), (18, "PREDICTION.md", 9))
+        self.assertTrue(all(c4.FIRST_SEED <= r["seed"] <= 7509 and r["machine"] == c4.machine_of(r["seed"], 9) for r in M))
+        self.assertLessEqual(plan.stage_cap(M), c4.MAX_BUDGET_S)
+        (self.dir / "MEASURED.json").write_text(json.dumps(dict(before_m_sha256=self.b["sha256"], instances=[
+            dict(seed=s, measured=s != 7503) for s in range(7501, 7510)])))
+        E, protocol, _ = plan.stage_runs("E1", here=self.dir)
+        self.assertEqual({r["seed"] for r in E}, set(range(7501, 7510)) - {7503})
+        self.assertEqual(len(E), 8 * 21)
+        self.assertTrue(all(r["reuse_trip"] for r in E))
+        self.assertLessEqual(plan.stage_cap(E), c4.MAX_BUDGET_S)
+        a = plan.argv(E[0], 9)
+        self.assertEqual(a[a.index("--instances") + 1], "9")
+
+    def test_limits_follow_the_rehearsal(self):
+        cost = plan.costs(self.b)
+        run = plan.network_run(7501, "a", (4, 4, 4, 4), "n1", "device", dict(path="x", sha256="0" * 64))
+        free = plan.with_limits(run, cost, "device")
+        self.assertEqual(free["timeout_s"], plan.ceil10(1.3 * free["expected_s"]))
+        fast = plan.with_limits(run, cost, "device", {"noisy_device": 0.5})
+        self.assertEqual(fast["timeout_s"], plan.ceil10(1.3 * 0.5 * fast["expected_s"]))
+        slow = plan.with_limits(run, cost, "device", {"noisy_device": 2.0})
+        self.assertEqual(slow["timeout_s"], free["timeout_s"])          # never above 1.3 times the cost model
+        self.assertLessEqual(slow["estimate_s"], slow["timeout_s"])
+
+
 if __name__ == "__main__":
     unittest.main()

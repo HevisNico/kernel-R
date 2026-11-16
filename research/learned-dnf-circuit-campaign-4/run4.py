@@ -2,8 +2,9 @@
 
   run4.py --out DIR --ngspice BIN --pdk DIR --id ID --seed S|none --kind cal --guard on|off
   run4.py ... --kind extract --cell a --state hold --port 1|none --isolation 0|1 --reuse-trip 0|1 --instances I
+  run4.py ... --kind extract --state all --reuse-trip 0|1 --seed none   the single-run extraction (rehearsal, nominal cell)
   run4.py ... --kind network --needs 4,4,4,4 --control skew|untrained|none --noise none|device|injected
-              [--round n --extraction FILE --extraction-sha256 HEX]
+              [--round n --extraction FILE --extraction-sha256 HEX] [--scale 0 (rehearsal, nominal cell)]
 
 Written in DIR: what the simulation recorded of itself (`result.json`, or `part.json` for an extraction part),
 `record.json` (what was asked, that the run reached its last date, the SHA-256 of its files, the simulator's peak
@@ -12,7 +13,7 @@ model, of its first trnoise values under the injected model, of zeros without no
 noise" for an extraction. No word, output or score is computed or printed here.
 
 Seed guard (PREDICTION.md, Noise-model extraction): a mismatch seed is accepted only if it is one of 7501 to
-7500 + I (I from --instances, which the manifests take from BEFORE_M.json) and the run is inside a launch of the
+7500 + I (I from --instances, which the manifests take from BEFORE_M.md) and the run is inside a launch of the
 kit (its folder holds the record the kit wrote for it, status `started`, in the STATE.json of the folder above).
 The nominal cell (no seed) is for the rehearsal.
 """
@@ -83,14 +84,20 @@ def run(a):
         import devnoise, pilot
         pilot.ALLOWED_SEEDS = (seed,) if seed is not None else ()
         devnoise.REUSE_TRIP = bool(a.reuse_trip)
-        port = None if a.port == "none" else int(a.port)
         out.mkdir(parents=True, exist_ok=True)
-        part = devnoise.extract_part(out / "work", out / "part.json", section, seed, list(c4.CELLS), a.cell, a.state, port,
-                                     bool(a.isolation), a.ngspice, a.pdk)
-        unlink_pdk_links(out)
+        if a.state == "all":
+            assert seed is None, "the single-run extraction is for the rehearsal on the nominal cell only"
+            devnoise.extract(out / "work", out / "extraction.json", section, seed, list(c4.CELLS), a.ngspice, a.pdk, list(noisemodel.MODEL_STATES))
+            unlink_pdk_links(out)
+            rec.update(state="all", reuse_trip=bool(a.reuse_trip), reached_its_last_date=True, files={"extraction.json": sha(out / "extraction.json")})
+        else:
+            port = None if a.port == "none" else int(a.port)
+            part = devnoise.extract_part(out / "work", out / "part.json", section, seed, list(c4.CELLS), a.cell, a.state, port,
+                                         bool(a.isolation), a.ngspice, a.pdk)
+            unlink_pdk_links(out)
+            rec.update(cell=a.cell, state=a.state, port=port, isolation=bool(a.isolation), reuse_trip=bool(a.reuse_trip),
+                       outputs=len(part["outputs"]), reached_its_last_date=True, files={"part.json": sha(out / "part.json")})
         mark = NO_NOISE
-        rec.update(cell=a.cell, state=a.state, port=port, isolation=bool(a.isolation), reuse_trip=bool(a.reuse_trip),
-                   outputs=len(part["outputs"]), reached_its_last_date=True, files={"part.json": sha(out / "part.json")})
     else:
         if a.kind == "cal":
             plan, reads = plans4.calibration()
@@ -112,8 +119,9 @@ def run(a):
                 (out / "samples").mkdir(parents=True)
                 ns = c4.noise_seed(seed, a.round)
                 position = c4.POSITIONS[f"n{a.round}"]
+                assert a.scale == "1" or seed is None, "the zero-amplitude run is for the rehearsal on the nominal cell only"
                 text, files, info = noisemodel.device_text(net.deck(cells=c4.CELLS, section=section), extraction, c4.CELLS, ns,
-                                                           c4.instance_key(seed), position, horizon, out / "samples" / "nz")
+                                                           c4.instance_key(seed), position, horizon, out / "samples" / "nz", a.scale)
                 info["extraction_sha256"] = a.extraction_sha256
             elif a.noise == "injected":
                 out.mkdir(parents=True, exist_ok=True)
@@ -159,7 +167,7 @@ def main():
     p.add_argument("--instances", type=int, default=0)
     p.add_argument("--guard", choices=("on", "off"))
     p.add_argument("--cell", choices=c4.CELLS)
-    p.add_argument("--state", choices=noisemodel.MODEL_STATES)
+    p.add_argument("--state", choices=noisemodel.MODEL_STATES + ("all",))
     p.add_argument("--port", default="none")
     p.add_argument("--isolation", type=int, default=0)
     p.add_argument("--reuse-trip", type=int, default=0)
@@ -169,6 +177,7 @@ def main():
     p.add_argument("--round", type=int, default=0)
     p.add_argument("--extraction")
     p.add_argument("--extraction-sha256")
+    p.add_argument("--scale", default="1", choices=("1", "0"))
     r = run(p.parse_args())
     print(json.dumps(dict(id=r["id"], kind=r["kind"], reached_its_last_date=r["reached_its_last_date"], wall_s=round(r["wall_s"]))))
 

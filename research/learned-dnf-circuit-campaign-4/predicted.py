@@ -127,6 +127,8 @@ def table(on_rows, off_rows):
                 if on[key]["fire"] != (z >= THETA):
                     bad.append(f"FIRE bit {on[key]['fire']} and Z = {z} disagree at {key}")
                 t[key] = dict(Z=z, fire=on[key]["fire"], latency=None if on[key]["latency"] is None else q(on[key]["latency"]))
+                if c == "c":    # every FIRE crossing of c over the whole physical slot (amendment 1, point 1)
+                    t[key]["slot_latencies"] = [q(x) for x in on[key]["slot_latencies"]]
             jd = on.get((c, k, "joint dose"))
             if jd is None:
                 bad.append(f"missing joint dose {(c, k)}")
@@ -267,6 +269,8 @@ def instance(seed, t, dose, bad, const):
         b["c"] = dict(training=tr, testing=te)
         budgets[f"K{K}"] = b
     out["budgets"] = budgets
+    gains = [tup["gain"][(c, p)] + tup["dose"][c] * (n[c] if c != "c" else n[f"c{p}"]) for c in c4.CELLS for p in (1, 2)]
+    out["largest_gain_over_rail"] = str(F(max(gains), RAIL))     # amendment 1, point 2
     out["room"] = {f"K{K}": room(t, n, lay, budgets[f"K{K}"]) for K in (0, 3)}
     ok0 = all(v["all"] for v in out["room"]["K0"].values())
     out["eligible"] = ok0
@@ -351,6 +355,17 @@ def observation(t, n, Q1, Q2):
         return q(v)
     obs = dict(firstTrain=[], teach=[], secondTrain=[], firstTest={}, secondTest={}, scores={})
 
+    def emc(k, r, start, fire):
+        """The emissions of a read of c: every FIRE crossing of its calibration read over the whole physical slot
+        (amendment 1, point 1), at the read's start plus its latency. A table without that record (phase 0's
+        CALIBRATION.json, for the cases) gives the one in-window FIRE of a predicted FIRE."""
+        sl = t[("c", k, r)].get("slot_latencies")
+        if sl is None:
+            return [start + lat("c", k, r)] if fire else []
+        if fire:
+            assert lat("c", k, r) in sl, (k, r)
+        return [start + x for x in sl]
+
     def rd(start, arrivals, emissions, value):
         return dict(start=str(start), arrivals=[None if a is None else str(a) for a in arrivals], emissions=[str(e) for e in emissions], value=int(value))
 
@@ -382,7 +397,7 @@ def observation(t, n, Q1, Q2):
         k = writes[p]
         fire = k >= n[f"c{p}"]
         arrivals = [arrive if x == p else None for x in (1, 2)]
-        obs["secondTrain"].append(rd(arrive, arrivals, [arrive + lat("c", k, f"port {p}")] if fire else [], Z("c", k, f"port {p}")))
+        obs["secondTrain"].append(rd(arrive, arrivals, emc(k, f"port {p}", arrive, fire), Z("c", k, f"port {p}")))
         if not fire:
             writes[p] += 1
     t1 = t0 + c4.SLOT * 2 * (Q2 + 1)
@@ -406,16 +421,16 @@ def observation(t, n, Q1, Q2):
         got = [a for a in arrivals if a is not None]
         mask = "".join(str(p) for p, a in zip((1, 2), arrivals) if a is not None) or "-"
         if not got:
-            obs["secondTest"][key] = rd(start + F(3, 2), arrivals, [], scores["-"])
+            obs["secondTest"][key] = rd(start + F(3, 2), arrivals, emc(max(n1, n2), "empty", start + F(3, 2), False), scores["-"])
         else:
             first, last = min(got), max(got)
             if mask == "12":
                 skewed = last - first > F(15, 100)
-                e = first + lat("c", min(n1, n2), SKEWED if skewed else "both")
+                e = emc(min(n1, n2), SKEWED if skewed else "both", first, True)
             else:
                 pp = int(mask)
-                e = first + lat("c", n[f"c{pp}"], f"port {pp}")
-            obs["secondTest"][key] = rd(first, arrivals, [e], scores[mask])
+                e = emc(n[f"c{pp}"], f"port {pp}", first, True)
+            obs["secondTest"][key] = rd(first, arrivals, e, scores[mask])
     return obs
 
 
@@ -434,7 +449,167 @@ def load(on_dir, off_dir):
     return rows["on"], rows["off"]
 
 
+# ------------------------------------------------------------------------------- the pipeline after stage M and E
+
+def state_records(*dirs):
+    """Every run record of the kit in the collected folders: id -> the record, with the folder of the run."""
+    out = {}
+    for d in dirs:
+        for st in Path(d).rglob("STATE.json"):
+            for r in json.loads(st.read_text())["records"]:
+                out[r["id"]] = dict(r, folder=str(st.parent / r["id"]))
+    return out
+
+
+def counts(rec):
+    """A run counts when the launcher recorded it complete and its own record says it reached its last date."""
+    if rec is None or rec.get("status") != "complete":
+        return False
+    own = Path(rec["folder"]) / "record.json"
+    return own.exists() and json.loads(own.read_text()).get("reached_its_last_date") is True
+
+
+def before_m(repo=HERE):
+    """The record before stage M: the JSON block of BEFORE_M.md, which plan.py writes."""
+    import plan
+    return plan.read_before_m(Path(repo) / "BEFORE_M.md")
+
+
+def measures(before, dirs):
+    """Per instance of BEFORE_M.md: its two calibration runs, whether it is measured (and why not), its needs."""
+    recs = state_records(*dirs)
+    out = []
+    for seed in sorted((s for m in ("a", "b") for s in before["seeds"][m]), key=lambda s: -1 if s is None else s):
+        mach = before.get("machine_of", {}).get(str(seed)) or c4.machine_of(seed, before["I"])   # machine_of: the rehearsal's nominal cell
+        on, off = (recs.get(f"{mach}-{seed}-cal-{g}") for g in ("on", "off"))
+        x = dict(seed=seed, machine=mach)
+        if not (counts(on) and counts(off)):
+            x.update(measured=False, why_not_measured=["a calibration run does not count"])
+        else:
+            t, dose, bad = table(*load(on["folder"], off["folder"]))
+            x.update(measured=not bad, why_not_measured=bad, needs=needs(t) if not bad else None,
+                     calibration=dict(on=on["folder"], off=off["folder"]))
+        out.append(x)
+    return out
+
+
+def extraction_of(seed, mach, recs):
+    """The merged extraction of an instance from its per-output runs (stage E), or why there is none."""
+    import plan
+    sys.path.insert(0, str(HERE / "noise"))
+    import devnoise
+    parts, missing = [], []
+    for r in plan.extract_runs(seed, mach, False):
+        rec = recs.get(r["id"])
+        if not counts(rec):
+            missing.append(r["id"])
+            continue
+        parts.append(json.loads((Path(rec["folder"]) / "part.json").read_text()))
+    if missing:
+        return None, missing
+    return devnoise.merge(parts, c4.SECTION, seed, list(c4.CELLS), list(noisemodel_states())), []
+
+
+def noisemodel_states():
+    import noisemodel
+    return noisemodel.MODEL_STATES
+
+
+def extraction_check(ex):
+    """The rule for campaign 4 of the noise study's criteria (section 2): V2, V2b and the 1 uV isolation check, by
+    the noise study's own compare.py (noise/compare.py, unchanged copy)."""
+    sys.path.insert(0, str(HERE / "noise"))
+    import compare
+    v2, v2b = compare.v2(ex), compare.v2b(ex)
+    return dict(V2=v2["all_pass"], V2b=v2b["all_pass"], isolation=v2["op_pass"] is True,
+                failing_outputs=[r for r in v2["outputs"] if not r["pass"]], worst_V2b=v2b["worst"],
+                passed=v2["all_pass"] and v2b["all_pass"] and v2["op_pass"] is True)
+
+
+def control_instance(instances):
+    """Among the eligible instances, the one whose layer-1 pair at stage 0 scores highest (the higher of a and b),
+    the lowest seed on a tie."""
+    el = [x for x in instances if x.get("eligible")]
+    if not el:
+        return None
+    best = lambda x: max(int(x["observation"]["firstTrain"][0][i]["value"]) for i in (0, 1))
+    return min(el, key=lambda x: (-best(x), x["seed"]))["seed"]
+
+
+def predictions(before, measure_dirs, extraction_dirs=(), rehearsal=None, extraction_path=lambda seed: f"{c4.BASE}/extractions/EXTRACTION_{seed}.json"):
+    """PREDICTED.json (as a dict) and the merged extractions to commit beside it (path -> dict)."""
+    import plan
+    const = {k: before["constants"][k] for k in c4.DECISION5}
+    model = before["noise_model"]
+    recs = state_records(*measure_dirs, *extraction_dirs)
+    instances, files, extractions = [], {}, {}
+    for m in measures(before, measure_dirs):
+        if not m["measured"]:
+            instances.append(dict(seed=m["seed"], machine=m["machine"], measured=False, why_not_measured=m["why_not_measured"]))
+            continue
+        t, dose, bad = table(*load(m["calibration"]["on"], m["calibration"]["off"]))
+        x = dict(instance(m["seed"], t, dose, bad, const), machine=m["machine"])
+        instances.append(x)
+        if model == "device":
+            ex, missing = extraction_of(m["seed"], m["machine"], recs)
+            if ex is None:
+                extractions[str(m["seed"])] = dict(passed=False, why="extraction runs that do not count: " + ", ".join(missing))
+            else:
+                path = extraction_path(m["seed"])
+                text = json.dumps(ex, indent=1) + "\n"
+                files[path] = text
+                import hashlib
+                extractions[str(m["seed"])] = dict(extraction_check(ex), path=path, sha256=hashlib.sha256(text.encode()).hexdigest())
+    control = control_instance(instances)
+    cost = plan.costs(before)
+    runs = []
+    for x in instances:
+        if not x["measured"]:
+            continue
+        nd = plan.calendar_needs((x["needs"]["a"], x["needs"]["b"], x["needs"]["c1"], x["needs"]["c2"]))
+        runs.append(plan.with_limits(plan.network_run(x["seed"], x["machine"], nd, "quiet", model), cost, model, rehearsal))
+        if control is not None and x["seed"] == control:
+            runs.append(plan.with_limits(plan.network_run(x["seed"], x["machine"], nd, "untrained", model), cost, model, rehearsal))
+    for k in (1, 2, 3):
+        for x in instances:
+            if not x["measured"]:
+                continue
+            ex = extractions.get(str(x["seed"]))
+            if model == "device" and not (ex and ex["passed"]):
+                continue                 # no noisy runs: missing (PREDICTION.md, Noise-model extraction)
+            nd = plan.calendar_needs((x["needs"]["a"], x["needs"]["b"], x["needs"]["c1"], x["needs"]["c2"]))
+            r = plan.network_run(x["seed"], x["machine"], nd, f"n{k}", model, dict(path=ex["path"], sha256=ex["sha256"]) if model == "device" else None)
+            runs.append(dict(plan.with_limits(r, cost, model, rehearsal), noise_seed=c4.noise_seed(x["seed"], k), position=c4.POSITIONS[f"n{k}"]))
+    for r in runs:
+        r.setdefault("position", c4.POSITIONS[r["scenario"]])
+    return dict(what="the predictions of campaign 4 (PREDICTION.md, amendments 1 to 3), written by predicted.py; no network run exists when "
+                     "this file is written", I=before["I"], noise_model=model, constants=const, before_m_sha256=before["sha256"],
+                instances=instances, extractions=extractions, control_instance=control, network_runs=runs,
+                missing_noisy_runs=[f"{x['machine']}-{x['seed']}-n{k}" for x in instances if x["measured"] and model == "device"
+                                    and not extractions.get(str(x["seed"]), {}).get("passed") for k in (1, 2, 3)]), files
+
+
 def main():
+    if sys.argv[1] == "predictions":       # predicted.py predictions OUT_DIR MEASURES_DIR... [--extractions DIR...] [--rehearsal REHEARSAL.json]
+        args = sys.argv[3:]
+        reh = None
+        if "--rehearsal" in args:
+            i = args.index("--rehearsal")
+            reh = json.loads(Path(args[i + 1]).read_text())["limits_basis"]
+            args = args[:i] + args[i + 2:]
+        ext = []
+        if "--extractions" in args:
+            i = args.index("--extractions")
+            args, ext = args[:i], args[i + 1:]
+        print(c4.require_pinned())
+        res, files = predictions(before_m(), args, ext, reh)
+        out = Path(sys.argv[2])
+        for path, text in files.items():
+            (out / path).parent.mkdir(parents=True, exist_ok=True)
+            (out / path).write_text(text)
+        (out / c4.BASE).mkdir(parents=True, exist_ok=True)
+        (out / c4.BASE / "PREDICTED.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
+        return
     if sys.argv[1] == "instance":
         on, off = load(sys.argv[2], sys.argv[3])
         seed = None if len(sys.argv) < 5 or sys.argv[4] == "none" else int(sys.argv[4])

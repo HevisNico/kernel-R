@@ -1,4 +1,4 @@
-"""Campaign 4: the two noise models a noisy network run can use, chosen by BEFORE_M.json, not by this code.
+"""Campaign 4: the two noise models a noisy network run can use, chosen by BEFORE_M.md, not by this code.
 
 - **device**: the noise study's device model (VALIDATION_CRITERIA.md, commit 5a24d10, section 1, items 2 to 6; its
   PROTOCOL.md for the validation's own runs). Per instance, the sources are built from the instance's merged

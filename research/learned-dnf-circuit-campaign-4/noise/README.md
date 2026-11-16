@@ -1,7 +1,7 @@
 # Campaign 4's frozen copy of the noise study's code
 
 PREDICTION.md (commit `1596b36`), Noise-model extraction: "a frozen copy of the noise study's extraction code in
-this folder", with its own seed guard. The four files come from the noise study's branch
+this folder", with its own seed guard. The files come from the noise study's branch
 `research/network-noise-study-phase0` at **commit `74e93b4`**, the code that the GO of the validation's attempt 2
 released (`validation/GO`, commit `341aac1`). Their SHA-256 there:
 
@@ -11,6 +11,7 @@ released (`validation/GO`, commit `341aac1`). Their SHA-256 there:
 | `phase0/model.py` | `38630ca29a81619b0793d918ea9b026da0ade18858a48fd544f1d08484917cce` | yes |
 | `phase0/pilot.py` | `40ea3b678c61ae2a135bc01447dfd0b6a769ecb9cc1b846a9dc14abe4ca5c0c6` | yes |
 | `phase0/noisegen.py` | `2415336b5f31de902ae47d573f76081dd855c6f20355df82d73374ddd2085b45` | no |
+| `phase0/compare.py` | `a94946ee5bacf75574700ca614ec4cfa4aa6ff4c96d5ada1844860a9883af0fb` | no (added later: the V2 and V2b checks of the rule for campaign 4, `v2` and `v2b`) |
 
 The changes, and nothing else (`git diff` against the originals shows them):
 
