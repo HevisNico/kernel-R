@@ -67,9 +67,12 @@ def columns(sources, noise_seed, instance_key, position, t_s):
     return cols, gains
 
 
+DECK_STEM = "../samples/nz"   # the deck names the samples by this path, relative to the folder where ngspice runs (the run's
+                              # evidence folder): lowercase (ngspice lowercases a filesource's file name) and the same in every run
+
+
 def write_samples(cols, stem):
-    """The samples files of a run, FS_GROUP sources each; returns their paths in order."""
-    assert str(stem) == str(stem).lower(), "ngspice lowercases the file name of a filesource: the path must be lowercase"
+    """The samples files of a run, FS_GROUP sources each, written at `stem` (an absolute path); their paths in order."""
     t = np.arange(len(cols[0])) * noisegen.NT
     files = []
     for g in range(0, len(cols), FS_GROUP):
@@ -80,6 +83,7 @@ def write_samples(cols, stem):
 
 
 def deck_lines(sources, gains, stem, scale="1"):
+    assert str(stem) == str(stem).lower(), "ngspice lowercases the file name of a filesource: the path must be lowercase"
     lines = []
     for k, (s, g) in enumerate(zip(sources, gains)):
         lines += [f"rnzp{k} nzp{k} 0 1k noisy=0", f"gnzp{k} {s['nodes'][0]} {s['nodes'][1]} nzp{k} 0 {g:.10g}"]
@@ -108,8 +112,9 @@ def device_text(text, extraction, cells, noise_seed, instance_key, position, t_s
     """The deck with the device model's sources, the samples files written; returns (text, files, info)."""
     sources = model_sources(extraction, cells)
     cols, gains = columns(sources, noise_seed, instance_key, position, t_s)
+    assert Path(stem).parent.name == "samples" and Path(stem).name == "nz", stem       # out/samples/nz, as DECK_STEM names it
     files = write_samples(cols, stem)
-    lines = deck_lines(sources, gains, stem, scale)
+    lines = deck_lines(sources, gains, DECK_STEM, scale)
     info = dict(model="device", sources=len(sources), source_names=[s["name"] for s in sources], noise_seed=noise_seed,
                 instance_key=instance_key, position=position, samples_t_s=t_s, scale=scale)
     return text.replace("\n.end\n", "\n" + "\n".join(lines) + "\n.end\n"), files, info

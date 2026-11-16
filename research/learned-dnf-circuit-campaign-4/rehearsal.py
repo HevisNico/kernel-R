@@ -336,8 +336,18 @@ def checks(work, collected, P, rb):
     import plans4
     import reads4
     out = {}
-    skip = ("id", "wall_s", "peak_rss_MB")
-    same_rec = lambda x, y: {k: v for k, v in record(collected, x).items() if k not in skip} == {k: v for k, v in record(collected, y).items() if k not in skip}
+    # Two runs of one seed: their records may differ only in the run's id, its wall time and peak memory, and the SHA-256
+    # of the two files that carry the simulator's date line (trace.raw, session.log); the waveforms are compared apart,
+    # without their date line.
+    allowed = {"id", "wall_s", "peak_rss_MB", "files.trace.raw", "files.session.log"}
+
+    def flat(d, pre=""):
+        return {k2: v2 for k, v in d.items() for k2, v2 in (flat(v, pre + k + ".").items() if isinstance(v, dict) else [(pre + k, v)])}
+
+    def differ(x, y):
+        a_, b_ = flat(record(collected, x)), flat(record(collected, y))
+        return sorted(k for k in set(a_) | set(b_) if a_.get(k) != b_.get(k))
+    same_rec = lambda x, y: set(differ(x, y)) <= allowed
     raw = lambda rid: (folder_of(collected, rid) / "evidence" / "trace.raw").read_bytes()
     first_point = lambda rid: (lambda tr: {k: float(v[0]) for k, v in tr.v.items()})(measure.Trace(folder_of(collected, rid) / "evidence" / "trace.raw"))
     pairs = dict(device=("a-None-n1", "b-None-n1-again", "a-None-n2"), injected=("b-None-injected-r1", "b-None-injected-r1-again", "b-None-injected-r2"))
@@ -354,6 +364,7 @@ def checks(work, collected, P, rb):
             regen = noisemodel.regenerate_sha256(ex, c4.CELLS, record(collected, x)["noise"], work / "regen" / "nz")
             r["samples_regenerated_to_the_same_sha256"] = regen == record(collected, x)["noise"]["samples_sha256"]
         out[f"reproducibility_{model}"] = r
+        out[f"record_fields_that_differ_{model}"] = differ(x, y)
     # zero amplitude (device model, xtrtol=7) against the run without noise of the same calendar
     plan_, slots = plans4.network((4, 4, 4, 4), None)
 
