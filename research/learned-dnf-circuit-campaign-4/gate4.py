@@ -48,8 +48,6 @@ def key_of(word):
 
 def cascade_lean(name, x, K):
     g, h, d, b = x["guarded"]["gain"], x["guarded"]["help"], x["guarded"]["dose"], x["budgets"][f"K{K}"]
-    held = [k for k in (key_of(w) for w in range(16)) if k not in ("AB", "CD")]
-    pat = lambda k: "pattern [" + ", ".join(str("ABCD".index(v)) for v in k if v != "-") + "]"
     return f"""def {name} : Cascade 2 1 4 where
   first := {{
     target := term, tests := [],
@@ -66,7 +64,7 @@ def cascade_lean(name, x, K):
     dose := {d['c']}, maxWrites := {x['Q2']}, rail := {P.RAIL}
   }}
   delay := fun _ _ => 3 / 2
-  heldOut := [{", ".join(pat(k) for k in held)}]
+  heldOut := []                                      -- amendment 1, point 6
 """
 
 
