@@ -327,7 +327,7 @@ def checks(work, collected, P, rb):
                                                                             vectors=len([k for k in quiet if k in fx]))
         if model == "device":
             ex = json.loads((rb.parent.parent / P["extractions"]["None"]["path"]).read_text())
-            regen = noisemodel.regenerate_sha256(ex, c4.CELLS, record(collected, x)["noise"], work / "regen")
+            regen = noisemodel.regenerate_sha256(ex, c4.CELLS, record(collected, x)["noise"], work / "regen" / "nz")
             r["samples_regenerated_to_the_same_sha256"] = regen == record(collected, x)["noise"]["samples_sha256"]
         out[f"reproducibility_{model}"] = r
     # zero amplitude (device model, xtrtol=7) against the run without noise of the same calendar

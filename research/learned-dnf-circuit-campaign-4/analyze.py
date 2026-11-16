@@ -141,6 +141,9 @@ def main(argv=None, here=HERE, predicted_path=None):
         res["runs"][rid] = dict(status=rec["status"], kind=r["kind"], wall_s=rec.get("wall_s"), record_is_the_waveform=ok)
     # (2) the regeneration check, before any word, output or score of a noisy run
     regen = dict(checked=0, dropped=[])
+    import os
+    import tempfile
+    regen_dir = Path(tempfile.gettempdir()) / f"c4-regeneration-{os.getpid()}"     # never in the collected evidence; lowercase for ngspice
     noisy_ok = {}
     for r in predicted["network_runs"]:
         if r["noise"] == "none":
@@ -152,7 +155,7 @@ def main(argv=None, here=HERE, predicted_path=None):
         own = json.loads((Path(rec["folder"]) / "record.json").read_text())
         if r["noise"] == "device":
             ex = json.loads((here.parent.parent / r["extraction"]["path"]).read_text())
-            sha = noisemodel.regenerate_sha256(ex, c4.CELLS, own["noise"], Path(rec["folder"]) / "regen")
+            sha = noisemodel.regenerate_sha256(ex, c4.CELLS, own["noise"], regen_dir / r["id"].lower() / "nz")
             regen["checked"] += 1
             if sha != own["noise"]["samples_sha256"]:
                 regen["dropped"].append(r["id"])

@@ -120,6 +120,7 @@ def regenerate_sha256(extraction, cells, info, stem):
     sources = model_sources(extraction, cells)
     assert [s["name"] for s in sources] == info["source_names"]
     cols, _ = columns(sources, info["noise_seed"], info["instance_key"], info["position"], info["samples_t_s"])
+    Path(stem).parent.mkdir(parents=True, exist_ok=True)
     files = write_samples(cols, stem)
     whole, _ = samples_sha256(files)
     for f in files:
