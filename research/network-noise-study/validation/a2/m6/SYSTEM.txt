@@ -1,28 +1,28 @@
 $ date -u
-Mon Nov 16 14:08:37 UTC 2026
+Mon Nov 16 15:08:57 UTC 2026
 $ uptime
- 14:08:37 up  4:21,  0 user,  load average: 4.00, 4.00, 4.00
+ 15:08:57 up  5:21,  0 user,  load average: 4.00, 4.02, 4.00
 $ free -m
                total        used        free      shared  buff/cache   available
-Mem:           16087        1976       13850          16         505       14111
+Mem:           16087        2002       13761          16         568       14084
 Swap:              0           0           0
 $ ps -eo pid,etimes,rss,args --sort=-rss | head -15
   PID ELAPSED   RSS COMMAND
- 4550    2594 367460 /usr/bin/ngspice -b deck.spice
- 4768    1762 363088 /usr/bin/ngspice -b deck.spice
- 4787    1697 362516 /usr/bin/ngspice -b deck.spice
- 4597    2412 361876 /usr/bin/ngspice -b deck.spice
-  172   15662 284972 /opt/claude-code/bin/claude --preload /home/claude/.claude/remote/spare.sock
-  156   15662 41868 /usr/local/bin/environment-manager task-run --stdin --session cse_01TzF7ZYUsPamYZDkepvLC4c --session-mode resume-cached --upgrade-claude-code=False
- 4763    1769 38256 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m6/v3_7103_window_a1_r214.json 7103 window a 1 0.02 214 model
- 4782    1703 38252 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m6/v3_7103_window_b2_r222.json 7103 window b 2 0.02 222 model
- 4592    2418 38244 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m6/v3_7102_fire_b_r238.json 7102 fire b - 0.02 238 model
- 4544    2600 38152 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m6/v3_7102_fire_a_r230.json 7102 fire a - 0.02 230 model
- 1950   10892 29580 /home/user/owner-prep/venv312/bin/python -B vplan.py run /tmp/a2_m6 machine=6
-    1   15664  7736 /process_api --firecracker-init --addr 0.0.0.0:2024 --max-ws-buffer-size 32768 --block-local-connections --log-vsock-port 5002 --control-vsock-port 5001 --listen-vsock-port 2024 --tcp-readiness-only
- 5210       0  4164 ps -eo pid,etimes,rss,args --sort=-rss
- 5176       0  3416 /bin/bash -c source /root/.claude/shell-snapshots/snapshot-bash-1794822466074-ytu59o.sh 2>/dev/null || true && \builtin export BUN_OPTIONS="--smol${BUN_OPTIONS:+ $BUN_OPTIONS}" && \builtin shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'which'; \builtin unset -f -- 'which'; } >/dev/null 2>&1 || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'cat /tmp/claude-0/-home-user-kernel-R/953e4f68-8662-5d82-9381-5eaab7c6a91c/tasks/bwfm2m8fk.output; grep -c " exit " /tmp/a2_m6/plan.log; grep " exit " /tmp/a2_m6/plan.log | grep -vc " exit 0 "; /tmp/claude-0/-home-user-kernel-R/953e4f68-8662-5d82-9381-5eaab7c6a91c/scratchpad/collect.sh 2>&1 | tail -1; t=0' < /dev/null && pwd -P >| /tmp/claude-ff7c-cwd
+ 6249     472 376292 /usr/bin/ngspice -b deck.spice
+ 6334     114 369448 /usr/bin/ngspice -b deck.spice
+ 5750    2025 364436 /usr/bin/ngspice -b deck.spice
+ 5775    1935 359432 /usr/bin/ngspice -b deck.spice
+  172   19282 289252 /opt/claude-code/bin/claude --preload /home/claude/.claude/remote/spare.sock
+  156   19282 41680 /usr/local/bin/environment-manager task-run --stdin --session cse_01TzF7ZYUsPamYZDkepvLC4c --session-mode resume-cached --upgrade-claude-code=False
+ 5742    2032 38252 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m6/v3_7103_fire_a_r230.json 7103 fire a - 0.02 230 model
+ 5767    1942 38212 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m6/v3_7103_fire_b_r238.json 7103 fire b - 0.02 238 model
+ 6244     472 35192 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m6/v5_nominal_hold_inj5.json nominal hold a 1 0.08 - injected
+ 6329     114 35176 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m6/v5_nominal_hold_inj13.json nominal hold a 1 0.08 - injected
+ 1950   14512 29584 /home/user/owner-prep/venv312/bin/python -B vplan.py run /tmp/a2_m6 machine=6
+    1   19284  7748 /process_api --firecracker-init --addr 0.0.0.0:2024 --max-ws-buffer-size 32768 --block-local-connections --log-vsock-port 5002 --control-vsock-port 5001 --listen-vsock-port 2024 --tcp-readiness-only
+ 6453       0  4148 ps -eo pid,etimes,rss,args --sort=-rss
+ 6381       0  3444 /bin/bash -c source /root/.claude/shell-snapshots/snapshot-bash-1794822466074-ytu59o.sh 2>/dev/null || true && \builtin export BUN_OPTIONS="--smol${BUN_OPTIONS:+ $BUN_OPTIONS}" && \builtin shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'which'; \builtin unset -f -- 'which'; } >/dev/null 2>&1 || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'cat /tmp/claude-0/-home-user-kernel-R/953e4f68-8662-5d82-9381-5eaab7c6a91c/tasks/br4x41wpg.output; grep -c " exit " /tmp/a2_m6/plan.log; grep " exit " /tmp/a2_m6/plan.log | grep -vc " exit 0 "; /tmp/claude-0/-home-user-kernel-R/953e4f68-8662-5d82-9381-5eaab7c6a91c/scratchpad/collect.sh 2>&1 | tail -1' < /dev/null && pwd -P >| /tmp/claude-69b9-cwd
 $ dmesg -T | grep -i -E "oom|killed process|out of memory"
 $ df -h /tmp
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/vda        252G  9.7G   29G  26% /
+/dev/vda        252G  9.8G   29G  26% /
