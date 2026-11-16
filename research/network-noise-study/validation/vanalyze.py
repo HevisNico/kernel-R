@@ -12,6 +12,7 @@ import vrun                                  # noqa: E402
 from vrun import net, INSTANCES, MODEL_STATES     # noqa: E402
 
 DEV = ("7101", "7102", "7103")
+from vplan import OFFSET                     # noqa: E402  amendment 2
 LAGS = (0.36e-3, 2e-3, 5e-3, 10e-3, 19e-3)
 READ = 40e-6
 DT = 0.2e-6
@@ -116,7 +117,7 @@ def v4(instance, S, ref, positions):
 
 def hold_names(instance, kind="model"):
     if kind == "model":
-        rr = range(1, 33) if instance == "nominal" else range(5, 13)
+        rr = range(1 + OFFSET, 33 + OFFSET) if instance == "nominal" else range(5 + OFFSET, 13 + OFFSET)
         return [f"v3_{instance}_hold_r{r}" for r in rr], [r - (1 if instance == "nominal" else 3) for r in rr]
     k = 32 if instance == "nominal" else 8
     return [f"v5_{instance}_hold_inj{j}" for j in range(k)], list(range(k))
@@ -169,7 +170,7 @@ def main(work, out):
     ex = {i: json.loads((HERE / f"DEVNOISE_{i}.json").read_text()) for i in ("nominal",) + DEV}
     for i in ("nominal",) + DEV:
         z = load(work, f"v6_{i}_zero")
-        first = 57 if i == "nominal" else 61
+        first = (57 if i == "nominal" else 61) + OFFSET
         D = [load(work, f"v6_{i}_r{r}") for r in range(first, first + 32)]
         if z is None or any(d is None for d in D):
             res["V6"][i] = dict(error="missing"); ok["V6"] = False
@@ -200,7 +201,8 @@ def train_result(work, name):
         if p.exists():
             r = json.loads(p.read_text())
             m = p.parent / "meta.json"
-            r["machine"] = json.loads(m.read_text()).get("machine") if m.exists() else None
+            meta = json.loads(m.read_text()) if m.exists() else {}
+            r["machine"], r["raw_data_sha256"] = meta.get("machine"), meta.get("raw_data_sha256")
             return r
     return None
 
@@ -228,7 +230,7 @@ def constants(work, kind):
     out, offsets, squares, count, devs = {}, [], 0.0, 0, []
     for i in DEV:
         q = train_result(work, f"tr_{i}_quiet1")
-        names = [f"tr_{i}_r{r}" for r in range(93, 98)] if kind == "model" else [f"tr_{i}_inj{k}" for k in range(5)]
+        names = [f"tr_{i}_r{r}" for r in range(93 + OFFSET, 98 + OFFSET)] if kind == "model" else [f"tr_{i}_inj{k}" for k in range(5)]
         noisy = [train_result(work, n) for n in names]
         if q is None or any(x is None for x in noisy):
             out[i] = dict(error="missing")
@@ -299,7 +301,7 @@ def v7(work):
         if None in (q1, q2, z):
             res[i] = dict(error="missing"); ok = False
             continue
-        same = q1["raw_sha256"] == q2["raw_sha256"]
+        same = q1["raw_data_sha256"] is not None and q1["raw_data_sha256"] == q2["raw_data_sha256"]     # the data, not the dated header
         zc = events(q1, z)
         I = dict(section="tt_mm", seed=int(i), scans=M["instances"][i]["scans"], quiet_train=as_train(q1, "quiet1"), noisy_trains=[])
         ports = C.instance(I)["ports"]
@@ -327,14 +329,14 @@ def op_nodes(text):
 def v8(work):
     res, ok = {}, True
     for i in DEV:
-        r3, r4, ra, q = (load(work, f"v8_{i}_{k}") for k in ("r3", "r4", "r3again", "quiet"))
+        r3, r4, ra, q = (load(work, f"v8_{i}_{k}") for k in (f"r{3 + OFFSET}", f"r{4 + OFFSET}", f"r{3 + OFFSET}again", "quiet"))
         if None in (r3, r4, ra, q):
             res[i] = dict(error="missing"); ok = False
             continue
         o3, o4, oq = op_nodes(r3["op"]), op_nodes(r4["op"]), op_nodes(q["op"])
         common = sorted(set(o3) & set(oq))
         op_same = all(o3[k] == o4[k] == oq[k] for k in common) and len(common) > 100
-        rerun = r3["raw_sha256"] == ra["raw_sha256"]
+        rerun = r3["raw_data_sha256"] is not None and r3["raw_data_sha256"] == ra["raw_data_sha256"]   # the data, not the dated header
         y3, y4, yq = (np.array(x["y"]) for x in (r3, r4, q))
         L = min(len(y3), len(y4), len(yq))
         corr = [float(np.corrcoef(y3[:L, k] - yq[:L, k], y4[:L, k] - yq[:L, k])[0, 1]) for k in range(y3.shape[1])]

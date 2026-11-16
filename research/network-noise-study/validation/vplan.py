@@ -5,7 +5,7 @@
   vplan.py run WORK [FILTER]   run them (those whose name contains FILTER, or machine=1|2), results in WORK/<name>.json
                                or WORK/<name>/
 """
-import re, subprocess, sys, time
+import os, re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -14,35 +14,41 @@ PY = "/home/user/owner-prep/venv312/bin/python"
 DEV = ("7101", "7102", "7103")
 
 
+OFFSET = 200      # amendment 2: attempt 2, every round of the plan + 200
+
+
 def runs():
+    """The plan of PROTOCOL.md, attempt 2 (amendment 2): the rounds shifted by OFFSET."""
+    O = OFFSET
     R = []
     # V8
     for i in DEV:
-        R += [("seeding", f"v8_{i}_r3", i, "3"), ("seeding", f"v8_{i}_r4", i, "4"), ("seeding", f"v8_{i}_r3again", i, "3"),
+        R += [("seeding", f"v8_{i}_r{3 + O}", i, str(3 + O)), ("seeding", f"v8_{i}_r{4 + O}", i, str(4 + O)),
+              ("seeding", f"v8_{i}_r{3 + O}again", i, str(3 + O)),
               ("seeding", f"v8_{i}_quiet", i, "quiet")]
     # V3/V4 hold
-    R += [("frozen", f"v3_nominal_hold_r{r}", "nominal", "hold", "a", "1", "0.08", str(r), "model") for r in range(1, 33)]
+    R += [("frozen", f"v3_nominal_hold_r{r}", "nominal", "hold", "a", "1", "0.08", str(r), "model") for r in range(1 + O, 33 + O)]
     for i in DEV:
-        R += [("frozen", f"v3_{i}_hold_r{r}", i, "hold", "all", "-", "0.08", str(r), "model") for r in range(5, 13)]
+        R += [("frozen", f"v3_{i}_hold_r{r}", i, "hold", "all", "-", "0.08", str(r), "model") for r in range(5 + O, 13 + O)]
     # V3 window, fire, pulse
     outs = {"nominal": [("window", "a", "1"), ("fire", "a", "-"), ("pulse", "a", "1")]}
     for i in DEV:
         outs[i] = [("window", "a", "1"), ("window", "b", "2"), ("fire", "a", "-"), ("fire", "b", "-"), ("pulse", "a", "1"),
                    ("pulse", "b", "2")]
-    for i, first in (("nominal", 33),) + tuple((i, 13) for i in DEV):
+    for i, first in (("nominal", 33 + O),) + tuple((i, 13 + O) for i in DEV):
         r = first
         for st, c, p in outs[i]:
             for _ in range(8):
                 R.append(("frozen", f"v3_{i}_{st}_{c}{p.strip('-')}_r{r}", i, st, c, p, "0.02", str(r), "model"))
                 r += 1
     # V6
-    for i, first in (("nominal", 57),) + tuple((i, 61) for i in DEV):
+    for i, first in (("nominal", 57 + O),) + tuple((i, 61 + O) for i in DEV):
         R.append(("preset", f"v6_{i}_zero", i, "zero"))
         R += [("preset", f"v6_{i}_r{r}", i, str(r)) for r in range(first, first + 32)]
     # V7 and section 3
     for i in DEV:
         R += [("train", f"tr_{i}_quiet1", i, "quiet"), ("train", f"tr_{i}_quiet2", i, "quiet"), ("train", f"tr_{i}_zero", i, "zero")]
-        R += [("train", f"tr_{i}_r{r}", i, str(r)) for r in range(93, 98)]
+        R += [("train", f"tr_{i}_r{r}", i, str(r)) for r in range(93 + O, 98 + O)]
     # V5: the injected model
     R += [("frozen", f"v5_nominal_hold_inj{k}", "nominal", "hold", "a", "1", "0.08", "-", "injected") for k in range(32)]
     for i in DEV:
@@ -51,7 +57,7 @@ def runs():
     return R
 
 
-MACHINES = 4
+MACHINES = 8      # amendment 2
 
 
 def machine(name):
@@ -115,7 +121,7 @@ def command(work, r):
 def run(work, filt=""):
     """FILT: a substring of the run names, or `machine=K` (K = 1 to 4: that machine's share, after its environment is
     checked against the reference; a machine whose hashes differ runs nothing)."""
-    import json, os
+    import json
     Path(work).mkdir(parents=True, exist_ok=True)
     if filt.startswith("machine="):
         inv = inventory()
@@ -138,13 +144,29 @@ def run(work, filt=""):
         if done.exists():
             return
         t0 = time.time()
-        p = subprocess.run(cmd, capture_output=True, text=True)
-        msg = f"{r[1]} exit {p.returncode} {time.time() - t0:.0f} s"
-        if p.returncode:
-            msg += "\n" + p.stderr[-2000:]
+        with open(str(out) + ".stderr", "w") as fe:
+            p = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=fe, text=True)
+            _, status, ru = os.wait4(p.pid, 0)
+        code = os.waitstatus_to_exitcode(status)
+        msg = f"{r[1]} exit {code} {time.time() - t0:.0f} s peak {ru.ru_maxrss / 1024:.0f} MB"
+        if code:
+            msg += "\n" + Path(str(out) + ".stderr").read_text()[-2000:]
         print(msg, file=log, flush=True)
+    import threading
+    stop = threading.Event()
+
+    def memory():                         # the machine's peak memory in use (amendment 2), every 10 s
+        peak = 0
+        while not stop.is_set():
+            m = {l.split(":")[0]: int(l.split()[1]) for l in Path("/proc/meminfo").read_text().splitlines()}
+            peak = max(peak, (m["MemTotal"] - m["MemAvailable"]) // 1024)
+            (Path(work) / "MEMORY.txt").write_text(f"peak memory in use, MB: {peak}\n")
+            stop.wait(10)
+    th = threading.Thread(target=memory, daemon=True)
+    th.start()
     with ThreadPoolExecutor(4) as ex:
         list(ex.map(one, todo))
+    stop.set()
     print("done", filt, file=log, flush=True)
 
 
