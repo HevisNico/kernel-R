@@ -212,3 +212,23 @@ Traceback (most recent call last):
     raise FileNotFoundError(f"{path} not found.")
 FileNotFoundError: /tmp/val_m2/v3_7101_window_a1_r14/out.txt not found.
 
+v3_7101_window_a1_r18 exit 1 1015 s
+Traceback (most recent call last):
+  File "/home/user/kernel-R/research/network-noise-study/validation/vrun.py", line 303, in <module>
+    frozen(a[1], a[2], a[3], a[4], a[5], float(a[6]), a[7] if a[8] != "injected" else None, a[8])
+  File "/home/user/kernel-R/research/network-noise-study/validation/vrun.py", line 171, in frozen
+    d = np.loadtxt(work / "out.txt")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/owner-prep/venv312/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py", line 1397, in loadtxt
+    arr = _read(fname, dtype=dtype, comment=comment, delimiter=delimiter,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/owner-prep/venv312/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py", line 1024, in _read
+    fh = np.lib._datasource.open(fname, 'rt', encoding=encoding)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/owner-prep/venv312/lib/python3.12/site-packages/numpy/lib/_datasource.py", line 192, in open
+    return ds.open(path, mode, encoding=encoding, newline=newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/owner-prep/venv312/lib/python3.12/site-packages/numpy/lib/_datasource.py", line 529, in open
+    raise FileNotFoundError(f"{path} not found.")
+FileNotFoundError: /tmp/val_m2/v3_7101_window_a1_r18/out.txt not found.
+
