@@ -26,9 +26,10 @@ Added at the independent review's request before the freeze: the parameter condi
 kinds that exist in both layers.
 
   rail              layer 1's rail set to its largest guarded gain at the need (the check is gain < rail)
-  delay             the routing delay set to -1/100; every arrival on c moved with it (upstream emission - 1/100), and
-                    each read of c with an arrival starts at its first arrival, so that the route and the decoder
-                    still hold
+  delay             the routing delay set to -1/100; every arrival on c moved with it (upstream emission - 1/100), each
+                    read of c with an arrival starts at its first arrival, and its emission moves by the same shift as
+                    its start, so that the route and the decoder still hold (the first version of this mutation,
+                    commit 7e444b4, left c's emissions in place: they fell past the deadline, and the test failed)
   need in range     layer 1's maxWrites set to 3, below the need 4 (the trace keeps its first 4 training rows)
   timing valid      c's timing set to skew 11/10, deadline 19, duration 19 (deadline >= duration); held by
                     checkThresholdRead, so by checkCascadeCalibrationOneSided
@@ -146,16 +147,17 @@ def mutations(p0):
     o = x["observation"]
     d = F(-1, 100)
     x["delay"] = str(d)
-    for nn, r in enumerate(o["secondTrain"]):
-        row = o["teach"][nn]
-        r["arrivals"] = [None if v is None else str(F(row[j]["emissions"][0]) + d) for j, v in enumerate(r["arrivals"])]
-        r["start"] = str(min(F(v) for v in r["arrivals"] if v is not None))
-    for k, r in o["secondTest"].items():
-        row = o["firstTest"][k]
+    def reroute(r, row):
         r["arrivals"] = [None if v is None else str(F(row[j]["emissions"][0]) + d) for j, v in enumerate(r["arrivals"])]
         got = [F(v) for v in r["arrivals"] if v is not None]
         if got:
+            shift = min(got) - F(r["start"])
             r["start"] = str(min(got))
+            r["emissions"] = [str(F(e) + shift) for e in r["emissions"]]
+    for nn, r in enumerate(o["secondTrain"]):
+        reroute(r, o["teach"][nn])
+    for k, r in o["secondTest"].items():
+        reroute(r, o["firstTest"][k])
     out["delay"] = x
 
     x = new()
