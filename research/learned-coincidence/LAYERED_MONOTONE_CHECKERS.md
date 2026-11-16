@@ -55,3 +55,49 @@ proving equivalence to the direct checker. Fan-in two bounds the local submask l
 by four masks; the complete external test loop still has `2^M` rows. Measure kernel
 reduction separately from loading the fixture. A campaign's gate should require a
 kernel proof that each checker returns `true` before running the network.
+
+## Measured kernel time
+
+These are medians of three successful `decide +kernel` runs per cell of the tables.
+Each run checked one closed theorem in Lean 4.35.0 on an AMD EPYC 9V74 with
+`LEAN_NUM_THREADS=1`. Times are from Lean's type-checking profiler and exclude
+import loading. The calibration and calendar columns exercise the complete
+acceptance path.
+
+`CheckerBench.depth` starts with the saturated AND–copy–OR trace and adds one
+trained copy per layer. All cases enumerate the same 16 external masks.
+
+| Layers | Validity | Separation | Training calibration | Test calibration | Batch order alone | External calendar alone |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 3 | 25 ms | 1.80 s | 173 ms | 262 ms | 409 ms | 1.53 s |
+| 5 | 29 ms | 4.85 s | 375 ms | 382 ms | 1.11 s | 3.28 s |
+| 7 | 32 ms | 8.66 s | 646 ms | 550 ms | 2.49 s | 6.39 s |
+
+`CheckerBench.width` keeps three trained copy cells and adds unconnected
+external inputs. This measures the two checks that traverse all `2^M` masks
+without changing the number of trained cells. Each calendar time in this table
+calls `Checker.externalSeparation` directly.
+
+| External bits | Masks | Test calibration | External calendar |
+| ---: | ---: | ---: | ---: |
+| 4 | 16 | 171 ms | 351 ms |
+| 6 | 64 | 803 ms | 1.66 s |
+| 8 | 256 | 3.67 s | 7.48 s |
+
+After compiling the benchmark module, the following profiles one full external
+calibration check. Change the fixture or checked expression to reproduce a
+different column. Calendar subchecks were timed independently of the full check.
+
+```lean
+import LayeredMonotoneCheckerBench
+
+open LearnedCoincidence.Layered LearnedCoincidence.Layered.CheckerBench
+
+set_option maxRecDepth 200000
+set_option maxHeartbeats 0
+set_option profiler true
+set_option profiler.threshold 0
+
+theorem measured : let f := width 7; checkLayeredReadCalibration f.circuit f.train f.test = true :=
+  by decide +kernel
+```

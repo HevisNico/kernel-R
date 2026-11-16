@@ -9,7 +9,8 @@ for module in Target Recognition TwoLayerTarget MonotoneTarget MonotoneSupport \
   MonotoneOneSidedRecognition MonotonePremiseTargets MonotonePremiseCompletenessTargets \
   MonotonePremiseSoundness MonotonePremiseCompleteness MonotonePremiseExamples \
   LayeredMonotoneTarget LayeredMonotoneRecognition LayeredMonotoneCharacterization \
-  LayeredMonotoneExample; do
+  LayeredMonotoneExample LayeredMonotoneCheckerTargets LayeredMonotoneCheckerProofs \
+  LayeredMonotoneCheckerExamples LayeredMonotoneCheckerBench; do
   lean -DwarningAsError=true -o "$build/$module.olean" "$module.lean"
 done
 lean -DwarningAsError=true Audit.lean

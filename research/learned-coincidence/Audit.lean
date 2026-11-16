@@ -2,7 +2,8 @@ import Recognition
 import MonotoneCharacterization
 import MonotonePremiseCompleteness
 import MonotonePremiseExamples
-import LayeredMonotoneExample
+import LayeredMonotoneCheckerExamples
+import LayeredMonotoneCheckerBench
 
 open Lean Elab Command in
 run_cmd do
@@ -14,7 +15,8 @@ run_cmd do
     `MonotonePremiseTargets, `MonotonePremiseCompletenessTargets, `MonotonePremiseSoundness,
     `MonotonePremiseCompleteness, `MonotonePremiseExamples,
     `LayeredMonotoneTarget, `LayeredMonotoneRecognition, `LayeredMonotoneCharacterization,
-    `LayeredMonotoneExample]
+    `LayeredMonotoneExample, `LayeredMonotoneCheckerTargets, `LayeredMonotoneCheckerProofs,
+    `LayeredMonotoneCheckerExamples, `LayeredMonotoneCheckerBench]
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
       unless modules.contains env.header.moduleNames[idx.toNat]! do continue
@@ -42,7 +44,23 @@ run_cmd do
     (``LearnedCoincidence.Layered.layered_monotone_recognition_one_sided,
       ``LearnedCoincidence.Layered.LayeredMonotoneRecognitionOneSided),
     (``LearnedCoincidence.Layered.layered_monotone_characterization,
-      ``LearnedCoincidence.Layered.LayeredMonotoneCharacterization)]
+      ``LearnedCoincidence.Layered.LayeredMonotoneCharacterization),
+    (``LearnedCoincidence.Layered.layered_valid_checker_sound,
+      ``LearnedCoincidence.Layered.LayeredValidCheckerSound),
+    (``LearnedCoincidence.Layered.layered_valid_checker_complete,
+      ``LearnedCoincidence.Layered.LayeredValidCheckerComplete),
+    (``LearnedCoincidence.Layered.layered_separation_checker_sound,
+      ``LearnedCoincidence.Layered.LayeredSeparationCheckerSound),
+    (``LearnedCoincidence.Layered.layered_separation_checker_complete,
+      ``LearnedCoincidence.Layered.LayeredSeparationCheckerComplete),
+    (``LearnedCoincidence.Layered.layered_training_calibration_checker_sound,
+      ``LearnedCoincidence.Layered.LayeredTrainingCalibrationCheckerSound),
+    (``LearnedCoincidence.Layered.layered_training_calibration_checker_complete,
+      ``LearnedCoincidence.Layered.LayeredTrainingCalibrationCheckerComplete),
+    (``LearnedCoincidence.Layered.layered_read_calibration_checker_sound,
+      ``LearnedCoincidence.Layered.LayeredReadCalibrationCheckerSound),
+    (``LearnedCoincidence.Layered.layered_read_calibration_checker_complete,
+      ``LearnedCoincidence.Layered.LayeredReadCalibrationCheckerComplete)]
   for (theoremName, target) in required do
     let some info := env.find? theoremName | throwError "Missing theorem {theoremName}"
     unless info.isTheorem && info.type.isConstOf target do

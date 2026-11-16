@@ -240,7 +240,9 @@ private theorem train_correct (c : Cascade M L N) (valid : c.Valid) (train : Tra
     · intro g active r bound
       exact (calibrated.2 i g active r bound).2.2
 
-/-- The dated routed pulses supply every lesson and determine each settled output. -/
+/-- The dated routed pulses supply every lesson and determine each settled output.
+Training separation is a calendar premise of the protocol. The proof derives its
+conclusion from validity and the two calibration premises alone. -/
 theorem layered_monotone_recognition_one_sided : LayeredMonotoneRecognitionOneSided := by
   intro M L N c valid train test _separation training readings
   have trained := train_correct c valid train training

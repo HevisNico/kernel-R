@@ -34,7 +34,7 @@ private theorem check_emissions_complete {timing : SlotTiming} {r : ReadObservat
       rw [emissions] at h
       exact False.elim h
 
-private theorem check_threshold_read_complete {level : Nat} {timing : SlotTiming}
+theorem check_threshold_read_complete {level : Nat} {timing : SlotTiming}
     {r : ReadObservation M} (h : ThresholdRead level timing r) :
     checkThresholdRead level timing r = true := by
   obtain ⟨valid, arrivals, emissions, decoder⟩ := h

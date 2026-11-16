@@ -31,7 +31,7 @@ private theorem allMasks₄ (P : Pattern 4 → Prop) (h : ∀ a b c d, P (mask�
   rw [same]
   exact h _ _ _ _
 
-private def clock : SlotTiming := ⟨0, 1, 2⟩
+def clock : SlotTiming := ⟨0, 1, 2⟩
 
 private theorem clock_valid : clock.Valid := by
   unfold SlotTiming.Valid
@@ -52,14 +52,14 @@ private def copyNode (i : Fin 2) : Node 4 2 :=
 private def orNode : Node 4 2 :=
   ⟨canonical .either, some, fun _ => 0, term⟩
 
-private def firstLayer : Cascade 4 1 2 := .layer .input clock firstNode
-private def copyLayer : Cascade 4 2 2 := .layer firstLayer clock copyNode
-private def circuit : Cascade 4 3 1 := .layer copyLayer clock (fun _ => orNode)
+def firstLayer : Cascade 4 1 2 := .layer .input clock firstNode
+def copyLayer : Cascade 4 2 2 := .layer firstLayer clock copyNode
+def circuit : Cascade 4 3 1 := .layer copyLayer clock (fun _ => orNode)
 
 private def arrivals (start : Rat) (x : Pattern M) : Fin M → Option Rat :=
   fun i => if x i then some start else none
 
-private def slot (start : Rat) (x : Pattern 2) (value : Int) (fires : Bool) : ReadObservation 2 :=
+def slot (start : Rat) (x : Pattern 2) (value : Int) (fires : Bool) : ReadObservation 2 :=
   ⟨start, arrivals start x, if fires then [start + 1] else [], value⟩
 
 private theorem slot_timed (start : Rat) (x : Pattern 2) (value : Int) (fires : Bool) (level : Nat)
@@ -109,10 +109,12 @@ private def copyReplay (t : Rat) (x : Pattern 4) : ReadTrace copyLayer :=
     fun i => slot (t + 1) (copyMask x i) (copyScore (copyMask x i)) (termFires x i),
     fun _ => copyScore⟩
 
-private def test (x : Pattern 4) : ReadTrace circuit :=
-  ⟨copyReplay 120 x,
-    fun _ => slot 122 (termFires x) (orScore (termFires x)) (termFires x 0 || termFires x 1),
+def replay (t : Rat) (x : Pattern 4) : ReadTrace circuit :=
+  ⟨copyReplay t x,
+    fun _ => slot (t + 2) (termFires x) (orScore (termFires x)) (termFires x 0 || termFires x 1),
     fun _ => orScore⟩
+
+def test (x : Pattern 4) : ReadTrace circuit := replay 120 x
 
 private def tFirst (i : Fin 2) (r : Nat) : Rat := (20 * i.val + 10 * r : Nat)
 private def tCopy (i : Fin 2) (r : Nat) : Rat := (40 + 20 * i.val + 10 * r : Nat)
@@ -126,7 +128,7 @@ private def copyTrain : TrainingTrace copyLayer :=
   ⟨firstTrain, fun i _ r => firstReplay (tCopy i r) (fun _ => true),
     fun i _ r => slot (tCopy i r + 1) (singleton 0) (if r = 0 then 0 else 4) (decide (r ≠ 0))⟩
 
-private def train : TrainingTrace circuit :=
+def train : TrainingTrace circuit :=
   ⟨copyTrain, fun _ g r => copyReplay (tOr g r) (term g),
     fun _ g r => slot (tOr g r + 2) (singleton g) (if r = 0 then 0 else 4) (decide (r ≠ 0))⟩
 
