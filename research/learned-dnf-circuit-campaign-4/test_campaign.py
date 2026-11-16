@@ -174,9 +174,10 @@ class Stages(unittest.TestCase):
         cost = plan.costs(self.b)
         run = plan.network_run(7501, "a", (4, 4, 4, 4), "n1", "device", dict(path="x", sha256="0" * 64))
         free = plan.with_limits(run, cost, "device")
-        self.assertEqual(free["timeout_s"], plan.ceil10(1.3 * free["expected_s"]))
+        self.assertEqual(free["timeout_s"], min(plan.ceil10(1.3 * free["expected_s"]), 1.3 * free["expected_s"]))
         fast = plan.with_limits(run, cost, "device", {"noisy_device": 0.5})
-        self.assertEqual(fast["timeout_s"], plan.ceil10(1.3 * 0.5 * fast["expected_s"]))
+        self.assertEqual(fast["timeout_s"], min(plan.ceil10(1.3 * 0.5 * fast["expected_s"]), 1.3 * fast["expected_s"]))
+        self.assertLessEqual(free["timeout_s"], 1.3 * free["expected_s"])
         slow = plan.with_limits(run, cost, "device", {"noisy_device": 2.0})
         self.assertEqual(slow["timeout_s"], free["timeout_s"])          # never above 1.3 times the cost model
         self.assertLessEqual(slow["estimate_s"], slow["timeout_s"])

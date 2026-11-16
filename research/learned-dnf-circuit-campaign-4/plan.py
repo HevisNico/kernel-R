@@ -110,8 +110,8 @@ def with_limits(run, cost, model, rehearsal=None):
     e = expected(run, cost, model)
     ratio = (rehearsal or {}).get(run_kind(run))
     est = e if ratio is None else ratio * e
-    limit = min(c4.MARGIN * est, c4.MARGIN * e)
-    return dict(run, estimate_s=ceil10(min(est, limit)), timeout_s=ceil10(limit), expected_s=e)
+    limit = min(ceil10(c4.MARGIN * est), c4.MARGIN * e)        # rounded up to 10 s, then capped (amendment 4, a)
+    return dict(run, estimate_s=min(ceil10(est), limit), timeout_s=limit, expected_s=e)
 
 
 def machine_cap(runs):
