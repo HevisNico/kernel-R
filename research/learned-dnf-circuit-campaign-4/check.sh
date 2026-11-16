@@ -4,7 +4,7 @@
 # 1. Compiles the theory of research/learned-coincidence the gate imports, with warnings as errors.
 # 2. Writes, with the campaign code, the gate on the cases P0 to P6 and P4' (cases.py, gate4.py) and the mirror
 #    mutations (mirror_mutations.py), from CALIBRATION.json of #172 only, and requires them to equal, byte for
-#    byte, the files committed under rehearsal/ (gate-cases-3, mirror-mutations-2: the runs under the pinned
+#    byte, the files committed under rehearsal/ (gate-cases-4, mirror-mutations-3: the runs under the pinned
 #    interpreter and the exact arithmetic of amendment 3).
 # 3. Compiles each generated file with warnings as errors, refuses sorry, admit, native_decide, axiom, unsafe,
 #    implemented_by and extern, and requires `#print axioms` of every theorem to be exactly
@@ -65,12 +65,12 @@ PY
 }
 
 "$python" -B cases.py "$build/CASES.json" "$build/Gate4CasesTargets.lean" Gate4Cases > "$build/cases.log"
-tail -n +2 "$build/cases.log" | cmp - <(tail -n +2 rehearsal/gate-cases-3/python.log)
+tail -n +2 "$build/cases.log" | cmp - <(tail -n +2 rehearsal/gate-cases-4/python.log)
 "$python" -B gate4.py cases "$build/CASES.json" "$build/Gate4Cases.lean"
 "$python" -B mirror_mutations.py "$build/MUTATIONS.json" "$build/MirrorMutations.lean" > "$build/mutations.log"
 grep -q "^mirror mutation test: passed$" "$build/mutations.log"
-for pair in gate-cases-3/CASES.json gate-cases-3/Gate4Cases.lean gate-cases-3/Gate4CasesTargets.lean \
-  mirror-mutations-2/MUTATIONS.json mirror-mutations-2/MirrorMutations.lean; do
+for pair in gate-cases-4/CASES.json gate-cases-4/Gate4Cases.lean gate-cases-4/Gate4CasesTargets.lean \
+  mirror-mutations-3/MUTATIONS.json mirror-mutations-3/MirrorMutations.lean; do
   cmp "$build/$(basename "$pair")" "rehearsal/$pair"
 done
 echo "generated files: equal to rehearsal/"
