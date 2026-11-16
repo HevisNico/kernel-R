@@ -1,0 +1,68 @@
+interpreter: {"checked": ["numpy_record_sha256", "numpy_version", "python_sha256", "python_version"], "executable": "/home/user/owner-prep/venv312/bin/python", "numpy_record_sha256": "064003bdb6f9f7bb06e46e07cc3398cbfdc3c114dfe55b89d239e564917be2fb", "numpy_version": "2.3.5", "prefix": "/home/user/owner-prep/venv312", "python_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f", "python_version": "3.12.3"}
+P0 K0: gate yes; mirror checkCascadeValid=T, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=T; 3866 conditions, 0 failing | none
+P0 K3: gate no; mirror checkCascadeValid=F, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=T; 3866 conditions, 4 failing
+    FAIL checkCascadeValid: guarded margin (early silence): cell a stage 3
+    FAIL checkCascadeValid: guarded margin (early silence): cell b stage 3
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line a stage 4
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line b stage 4
+P1 K0: gate no; mirror checkCascadeValid=F, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=T; 3866 conditions, 1 failing | pair of a at stage 3: Z = theta - 1
+    FAIL checkCascadeValid: guarded margin (early silence): cell a stage 3
+P1 K3: gate no; mirror checkCascadeValid=F, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=T; 3866 conditions, 4 failing
+    FAIL checkCascadeValid: guarded margin (early silence): cell a stage 3
+    FAIL checkCascadeValid: guarded margin (early silence): cell b stage 3
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line a stage 4
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line b stage 4
+P2 K0: gate no; mirror checkCascadeValid=F, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=T; 3866 conditions, 4 failing | pair of a at stage 4: Z = theta
+    FAIL checkCascadeValid: guarded margin (early silence): cell a stage 3
+    FAIL checkCascadeValid: guarded margin (stop, training): cell a stage 4
+    FAIL checkCascadeValid: guarded margin (positive, testing): cell a stage 4
+    FAIL checkCascadeValid: guarded margin (early silence): cell b stage 3
+P2 K3: gate no; mirror checkCascadeValid=F, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=T; 3866 conditions, 6 failing
+    FAIL checkCascadeValid: guarded margin (early silence): cell a stage 3
+    FAIL checkCascadeValid: guarded margin (stop, training): cell a stage 4
+    FAIL checkCascadeValid: guarded margin (positive, testing): cell a stage 4
+    FAIL checkCascadeValid: guarded margin (early silence): cell b stage 3
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line a stage 4
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line b stage 4
+P3 K0: gate no; mirror checkCascadeValid=T, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=F; 3866 conditions, 2 failing | aligned pair of c at stage 4: Z = line a alone at stage 4 minus 1
+    FAIL checkCascadeCalibrationOneSided: submask comparison: secondTest ABCD, submask a
+    FAIL checkCascadeCalibrationOneSided: submask comparison: secondTest ABCD, submask b
+P3 K3: gate no; mirror checkCascadeValid=F, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=F; 3866 conditions, 6 failing
+    FAIL checkCascadeValid: guarded margin (early silence): cell a stage 3
+    FAIL checkCascadeValid: guarded margin (early silence): cell b stage 3
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line a stage 4
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line b stage 4
+    FAIL checkCascadeCalibrationOneSided: submask comparison: secondTest ABCD, submask a
+    FAIL checkCascadeCalibrationOneSided: submask comparison: secondTest ABCD, submask b
+P4 K0: gate no; mirror checkCascadeValid=T, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=F; 3866 conditions, 1 failing | b's latency at stage 4 + 1/10; then the emission of c's test read on ABCD at the midpoint 79443/100 of its arrivals 39719/50 and 19862/25
+    FAIL checkCascadeCalibrationOneSided: decoder: v <= t: secondTest ABCD, arrival 1
+P4 K3: gate no; mirror checkCascadeValid=F, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=F; 3866 conditions, 5 failing
+    FAIL checkCascadeValid: guarded margin (early silence): cell a stage 3
+    FAIL checkCascadeValid: guarded margin (early silence): cell b stage 3
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line a stage 4
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line b stage 4
+    FAIL checkCascadeCalibrationOneSided: decoder: v <= t: secondTest ABCD, arrival 1
+P4p K0: gate yes; mirror checkCascadeValid=T, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=T; 3866 conditions, 0 failing | b's latency at stage 4 + 1/10 only
+P4p K3: gate no; mirror checkCascadeValid=F, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=T; 3866 conditions, 4 failing
+    FAIL checkCascadeValid: guarded margin (early silence): cell a stage 3
+    FAIL checkCascadeValid: guarded margin (early silence): cell b stage 3
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line a stage 4
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line b stage 4
+P5 K0: gate no; mirror checkCascadeValid=T, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=F; 3866 conditions, 1 failing | arrival of line a on c in test slot AB moved 1/10 later
+    FAIL checkCascadeCalibrationOneSided: route: secondTest AB, line a
+P5 K3: gate no; mirror checkCascadeValid=F, checkTrainingSeparation=T, checkCascadeCalibrationOneSided=F; 3866 conditions, 5 failing
+    FAIL checkCascadeValid: guarded margin (early silence): cell a stage 3
+    FAIL checkCascadeValid: guarded margin (early silence): cell b stage 3
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line a stage 4
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line b stage 4
+    FAIL checkCascadeCalibrationOneSided: route: secondTest AB, line a
+P6 K0: gate no; mirror checkCascadeValid=T, checkTrainingSeparation=F, checkCascadeCalibrationOneSided=T; 3866 conditions, 2 failing | start of a's firstTest read in test slot - (the first) moved 1/100 earlier
+    FAIL checkTrainingSeparation: separation: teach 13 a before firstTest - a
+    FAIL checkTrainingSeparation: separation: teach 13 b before firstTest - a
+P6 K3: gate no; mirror checkCascadeValid=F, checkTrainingSeparation=F, checkCascadeCalibrationOneSided=T; 3866 conditions, 6 failing
+    FAIL checkCascadeValid: guarded margin (early silence): cell a stage 3
+    FAIL checkCascadeValid: guarded margin (early silence): cell b stage 3
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line a stage 4
+    FAIL checkCascadeValid: guarded margin (line fire, testing): cell c line b stage 4
+    FAIL checkTrainingSeparation: separation: teach 13 a before firstTest - a
+    FAIL checkTrainingSeparation: separation: teach 13 b before firstTest - a
