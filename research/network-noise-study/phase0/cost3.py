@@ -15,6 +15,9 @@ campaigns. The calendar: each port of each cell READS reads 18 units apart, cell
 The amplitudes of the device sources are placeholders (those of op-amp xm3 at the hold point of the nominal cell):
 this measures cost, not noise. The words of these runs are not looked at.
 
+  fsmodel / fs46 / fszero   the same sources as XSPICE filesource instances (groups of 8 columns, xtrtol=7);
+              fszero: the model's sources present with every amplitude at zero, against `quiet` (zerocheck.py)
+
 `parse`: the pwl46 deck of three cells for a run of MS ms, loaded, solved at its operating point and run for 10 us
 only: what the samples alone cost in generation, parse time and memory, for runs as long as a campaign's.
 Each value is the wall time and the peak resident memory of the simulator process (from wait4).
@@ -82,7 +85,7 @@ def chosen_model(c):
 FS_GROUP = 8      # columns per filesource: one file of 76 columns (lines of ~1 100 characters) stops the deck at 1 us
 
 
-def filesource(name, columns, path):
+def filesource(name, columns, path, scale="1"):
     """The samples of the sources as XSPICE `filesource` instances (analog.cm), each reading its own text file
     sequentially: one row per sample time, FS_GROUP sources per file, linear between samples. Their outputs are the
     nodes nzp<k>. One file for every source fails: the deck stops ("timestep too small") at 1 us even with every
@@ -95,14 +98,14 @@ def filesource(name, columns, path):
         f = Path(f"{path}.{g // FS_GROUP}")
         np.savetxt(f, np.column_stack([t] + list(cols)), fmt="%.9g")
         nodes = " ".join(f"%v(nzp{g + k})" for k in range(len(cols)))
-        ones, zeros = " ".join(["1"] * len(cols)), " ".join(["0"] * len(cols))
+        ones, zeros = " ".join([scale] * len(cols)), " ".join(["0"] * len(cols))
         out += [f"a{name}{g // FS_GROUP} [{nodes}] fs{name}{g // FS_GROUP}",
                 f'.model fs{name}{g // FS_GROUP} filesource (file="{f}" amploffset=[{zeros}] amplscale=[{ones}] '
                 f"timeoffset=0 timescale=1 timerelative=false amplstep=false)"]
     return out
 
 
-def pwl_sources(text, per_cell, tstop, noise_seed=1, kind="pwl", fs_path=None):
+def pwl_sources(text, per_cell, tstop, noise_seed=1, kind="pwl", fs_path=None, fs_scale="1"):
     model = json.loads((HERE / "MODEL_nominal.json").read_text())
     ref = next(m for m in model["model"] if m["device"] == "xa.x1.xop.xm3")
     nodes = {}
@@ -129,7 +132,7 @@ def pwl_sources(text, per_cell, tstop, noise_seed=1, kind="pwl", fs_path=None):
             out.append(noisegen.pwl(f"vnzp{k}", f"nzp{k}", cols[k]))
         out += [f"rnzp{k} nzp{k} 0 1k noisy=0", f"gnzp{k} {a} {b} nzp{k} 0 {g:.10g}"]
     if kind == "fs":
-        out += filesource("nz", cols, fs_path)
+        out += filesource("nz", cols, fs_path, fs_scale)
     return out, len(gains)
 
 
@@ -138,7 +141,7 @@ def _run(work, mode, ngspice, pdk, reads, dnf_path=None):
     global MODEL_DEVICES
     original, info = net.deck, {}
     cal = dnf_calendar(dnf_path, reads) if dnf_path else calendar(reads)
-    if mode in ("pwlmodel", "fsmodel"):      # the union of the kept devices of the devnoise extraction, per cell
+    if mode in ("pwlmodel", "fsmodel", "fszero"):      # the union of the kept devices of the devnoise extraction, per cell
         ex = json.loads((HERE / "DEVNOISE_nominal.json").read_text())
         MODEL_DEVICES = sorted({k["device"] for o in ex["outputs"] if o["state"] != "preset" and o["cell"] == "a"
                                 for k in o["kept"] if k["kind"] != "res"})
@@ -149,9 +152,10 @@ def _run(work, mode, ngspice, pdk, reads, dnf_path=None):
         if mode.startswith(("pwl", "fs")):
             t0 = time.time()
             kind = mode[:3] if mode.startswith("pwl") else "fs"
-            per_cell = 0 if mode.endswith("model") else int(mode[len(kind):])
+            per_cell = 0 if mode.endswith(("model", "zero")) else int(mode[len(kind):])
             fs_path = (Path(work) / f"{mode}.samples.txt").resolve()
-            lines, info["sources"] = pwl_sources(t, per_cell, horizon, kind=kind, fs_path=fs_path)
+            lines, info["sources"] = pwl_sources(t, per_cell, horizon, kind=kind, fs_path=fs_path,
+                                                 fs_scale="0" if mode == "fszero" else "1")
             t = t.replace("\n.end\n", "\n" + "\n".join(lines) + "\n.end\n")
             info["generation_s"] = time.time() - t0
             info["deck_MB"] = len(t) / 1e6
