@@ -143,6 +143,7 @@ def main():
     before = plan.read_before_m(rb / "BEFORE_M.md")
     cost, I = plan.costs(before), 1
     frozen = git("rev-parse", "HEAD~1")             # the frozen commit: the clone's head before the rehearsal's first commit
+    assert frozen == head, (frozen, head)
 
     def lim(r, model="device"):
         """A rehearsal run is a measurement (amendment 5, section 5): its time limit is 3 times its expected cost."""
@@ -150,6 +151,7 @@ def main():
         return dict(r, estimate_s=plan.ceil10(e), timeout_s=plan.ceil10(3 * e), expected_s=e)
     report = dict(scope="rehearsal of campaign 4 on the nominal cell (no mismatch, no seed), which is not an instance of the campaign; the launch "
                         "kit's synthetic kind, a local Git remote; not a registered run", source_commit=head,
+                  frozen_commit=head, frozen_tree=sh(["git", "-C", ROOT, "rev-parse", head + "^{tree}"], work).strip(),
                   frozen_files={n: hashlib.sha256((ROOT / n).read_bytes()).hexdigest() for n in plan.FROZEN},
                   interpreter=c4.interpreter(), stages={}, checks={}, reuse_trip=before["reuse_trip"],
                   no_reuse_supplement="not run: the trip value is reused in the rehearsal (amendment 5, section 5)")
@@ -325,6 +327,9 @@ def record(collected, rid):
     return json.loads((folder_of(collected, rid) / "record.json").read_text())
 
 
+PROGRESS = b" Reference value : "   # the simulator's progress line during a transient, printed at wall-clock intervals (amendment 6)
+
+
 def without_date(raw):
     return b"\n".join(l for l in raw.split(b"\n") if not l.startswith(b"Date:"))
 
@@ -336,10 +341,10 @@ def checks(work, collected, P, rb):
     import plans4
     import reads4
     out = {}
-    # Two runs of one seed: their records may differ only in the run's id, its wall time and peak memory, and the SHA-256
-    # of three files: trace.raw (the simulator's date line), result.json (its own wall_s field) and session.log (the
-    # simulator's progress lines, which depend on timing). The waveforms are compared apart without their date line,
-    # and result.json without wall_s (the smoke runs of two device runs of one seed, 17:28 UTC, showed these differences).
+    # Two runs of one seed (amendment 6): their records may differ only in the run's id, its wall time and peak memory,
+    # and the SHA-256 of three files: trace.raw (the simulator's date line), result.json (its own wall_s field) and
+    # session.log (the simulator's progress lines, printed at wall-clock intervals). Those three files are compared
+    # apart: the waveforms without their date line, result.json without wall_s, session.log without its progress lines.
     allowed = {"id", "wall_s", "peak_rss_MB", "files.trace.raw", "files.session.log", "files.result.json"}
     result_wo_wall = lambda rid: {k: v for k, v in json.loads((folder_of(collected, rid) / "evidence" / "result.json").read_text()).items() if k != "wall_s"}
 
@@ -351,6 +356,8 @@ def checks(work, collected, P, rb):
         return sorted(k for k in set(a_) | set(b_) if a_.get(k) != b_.get(k))
     same_rec = lambda x, y: set(differ(x, y)) <= allowed
     raw = lambda rid: (folder_of(collected, rid) / "evidence" / "trace.raw").read_bytes()
+    log = lambda rid: (folder_of(collected, rid) / "evidence" / "session.log").read_bytes().split(b"\n")
+    without_progress = lambda rid: [l for l in log(rid) if not l.startswith(PROGRESS)]
     first_point = lambda rid: (lambda tr: {k: float(v[0]) for k, v in tr.v.items()})(measure.Trace(folder_of(collected, rid) / "evidence" / "trace.raw"))
     pairs = dict(device=("a-None-n1", "b-None-n1-again", "a-None-n2"), injected=("b-None-injected-r1", "b-None-injected-r1-again", "b-None-injected-r2"))
     quiet = first_point("a-None-quiet-nocontrol")
@@ -358,6 +365,7 @@ def checks(work, collected, P, rb):
         fx = first_point(x)
         r = dict(records_identical_but_wall_s=same_rec(x, y), waveforms_identical_but_the_date_line=without_date(raw(x)) == without_date(raw(y)),
                  results_identical_but_wall_s=result_wo_wall(x) == result_wo_wall(y),
+                 session_logs_identical_but_progress_lines=without_progress(x) == without_progress(y),
                  two_seeds_two_noises=record(collected, x)["noise_fingerprint"] != record(collected, z)["noise_fingerprint"],
                  same_operating_point=fx == first_point(y) == first_point(z))
         out[f"operating_point_against_the_run_without_noise_{model}"] = dict(max_abs_diff=max(abs(fx[k] - quiet[k]) for k in quiet if k in fx),
@@ -468,7 +476,8 @@ def stage_tamper(repo, rb, a, work):
     out["i_stage_file_with_another_sha256"] = dict(refused=p.returncode != 0 and "safeguard i" in p.stderr,
                                                    simulated=(work / "tampered-stage").exists() and any((work / "tampered-stage").rglob("input.spice")))
     frozen = git("rev-parse", "HEAD")
-    for label, path in (("ii_a_frozen_file_changed", f"{BASE}/c4.py"), ("ii_a_file_outside_the_folder", "research/circuit/noise.json")):
+    for label, path in (("ii_a_frozen_file_changed", f"{BASE}/c4.py"), ("ii_a_frozen_amendment_changed", f"{BASE}/AMENDMENT_5.md"),
+                        ("ii_a_file_outside_the_folder", "research/circuit/noise.json")):
         git("checkout", "--quiet", "-b", "tamper-" + label)
         f = repo / path
         keep = f.read_bytes()
@@ -482,6 +491,16 @@ def stage_tamper(repo, rb, a, work):
         git("checkout", "--quiet", "rehearsal")
         git("branch", "--quiet", "-D", "tamper-" + label)
     out["all_refused"] = all(v["refused"] and not v.get("simulated") for k, v in out.items() if isinstance(v, dict))
+    git("checkout", "--quiet", "-b", "later-amendment")
+    (rb / "AMENDMENT_6.md").write_text("A later amendment (the rehearsal's test of safeguard ii).\n")
+    git("add", f"{BASE}/AMENDMENT_6.md")
+    git("commit", "--quiet", "-m", "a later amendment")
+    try:
+        out["ii_a_later_amendment_accepted"] = plan.check_after_freeze(frozen, git("rev-parse", "HEAD"), repo) == [f"{BASE}/AMENDMENT_6.md"]
+    except SystemExit:
+        out["ii_a_later_amendment_accepted"] = False
+    git("checkout", "--quiet", "rehearsal")
+    git("branch", "--quiet", "-D", "later-amendment")
     return out
 
 
@@ -489,7 +508,7 @@ def all_passed(r):
     c = r["checks"]
     mem_ok = all(v["peak_fraction"] < 0.8 for v in c["memory"].values())
     return bool(c["split_extraction_identity"]["identical"] and c["seed_guard"]["all_refused_before_simulation"] and c["zero_amplitude"]["passed"]
-                and c["stage_safeguards"]["all_refused"]
+                and c["stage_safeguards"]["all_refused"] and c["stage_safeguards"]["ii_a_later_amendment_accepted"]
                 and all(all(v.values()) for k, v in c.items() if k.startswith("reproducibility_")) and mem_ok
                 and r["no_seed_from_7501_simulated"]["none_from_7501"] and c["analysis"]["predicted_is_reproduced"]
                 and all(v is not False for v in c["analysis"]["records_are_the_waveforms"].values())

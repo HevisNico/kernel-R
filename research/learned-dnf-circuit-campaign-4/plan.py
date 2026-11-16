@@ -331,7 +331,7 @@ STAGE_BEGIN = "```json stage"
 # these files of the campaign's folder (fnmatch patterns, relative to it).
 ALLOWED_AFTER_FREEZE = ("STAGE_*.md", "STAGE_*_RUNS.json", "BEFORE_M.md", "MEASURED.json", "PREDICTED.json", "extractions/*",
                         "Gate4.lean", "REHEARSAL.json", "INVENTORY_a.json", "INVENTORY_b.json", "CAMPAIGN_*.json", "RUN_ATTEMPT_*.json",
-                        "evidence/*")
+                        "evidence/*", "AMENDMENT_*.md")     # a later amendment only: amendments 1 to 5 are frozen files (amendment 6)
 
 
 def stage_path(name):
