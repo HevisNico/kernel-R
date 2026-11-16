@@ -202,7 +202,7 @@ def train_result(work, name):
             r = json.loads(p.read_text())
             m = p.parent / "meta.json"
             meta = json.loads(m.read_text()) if m.exists() else {}
-            r["machine"], r["raw_data_sha256"] = meta.get("machine"), meta.get("raw_data_sha256")
+            r["machine"], r["raw_nodate_sha256"] = meta.get("machine"), meta.get("raw_nodate_sha256")
             return r
     return None
 
@@ -301,7 +301,7 @@ def v7(work):
         if None in (q1, q2, z):
             res[i] = dict(error="missing"); ok = False
             continue
-        same = q1["raw_data_sha256"] is not None and q1["raw_data_sha256"] == q2["raw_data_sha256"]     # the data, not the dated header
+        same = q1["raw_nodate_sha256"] is not None and q1["raw_nodate_sha256"] == q2["raw_nodate_sha256"]     # the data, not the dated header
         zc = events(q1, z)
         I = dict(section="tt_mm", seed=int(i), scans=M["instances"][i]["scans"], quiet_train=as_train(q1, "quiet1"), noisy_trains=[])
         ports = C.instance(I)["ports"]
@@ -336,7 +336,7 @@ def v8(work):
         o3, o4, oq = op_nodes(r3["op"]), op_nodes(r4["op"]), op_nodes(q["op"])
         common = sorted(set(o3) & set(oq))
         op_same = all(o3[k] == o4[k] == oq[k] for k in common) and len(common) > 100
-        rerun = r3["raw_data_sha256"] is not None and r3["raw_data_sha256"] == ra["raw_data_sha256"]   # the data, not the dated header
+        rerun = r3["raw_nodate_sha256"] is not None and r3["raw_nodate_sha256"] == ra["raw_nodate_sha256"]   # the data, not the dated header
         y3, y4, yq = (np.array(x["y"]) for x in (r3, r4, q))
         L = min(len(y3), len(y4), len(yq))
         corr = [float(np.corrcoef(y3[:L, k] - yq[:L, k], y4[:L, k] - yq[:L, k])[0, 1]) for k in range(y3.shape[1])]

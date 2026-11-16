@@ -3,7 +3,7 @@
   vproof.py WORK PROOF_A2.json
 
 Identity: one draw of each kind made with and without the save (VAL_NOSAVE=1), the saved vectors byte-identical
-(raw_data_sha256: the raw file's vectors, without its dated header; and y_sha256, or the stored values); the train,
+(raw_nodate_sha256: the raw file's vectors, without its dated header; and y_sha256, or the stored values); the train,
 whose save is the router's and unchanged, made twice. Memory: one full-length draw of each kind with the save, four at
 a time, its peak memory recorded. Stops at the first differing pair.
 """
@@ -42,7 +42,7 @@ def run(work, name, args, nosave=False):
     _, status, ru = os.wait4(p.pid, 0)
     r = json.loads(((out / "meta.json") if kind == "train" else out).read_text()) if os.waitstatus_to_exitcode(status) == 0 else {}
     return dict(name=name, exit=os.waitstatus_to_exitcode(status), wall_s=time.time() - t0, peak_rss_MB=ru.ru_maxrss / 1024,
-                save=r.get("save"), raw_data_sha256=r.get("raw_data_sha256"), y_sha256=r.get("y_sha256"),
+                save=r.get("save"), raw_nodate_sha256=r.get("raw_nodate_sha256"), y_sha256=r.get("y_sha256"),
                 y=r.get("y") if kind == "seeding" else None, u_V=r.get("u_V"))
 
 
@@ -58,14 +58,14 @@ def main(work, out):
     ok = True
     for kind, _ in PAIRS:
         a, b = got[f"id_{kind}_save"], got[f"id_{kind}_nosave"]
-        same = a["exit"] == 0 and b["exit"] == 0 and a["raw_data_sha256"] is not None and \
-            a["raw_data_sha256"] == b["raw_data_sha256"] and a["y_sha256"] == b["y_sha256"] and a["y"] == b["y"] and a["u_V"] == b["u_V"]
-        res["identity"].append(dict(kind=kind, identical=same, **{f"{k}_save": a[k] for k in ("exit", "peak_rss_MB", "raw_data_sha256", "y_sha256")},
-                                    **{f"{k}_nosave": b[k] for k in ("exit", "peak_rss_MB", "raw_data_sha256", "y_sha256")}))
+        same = a["exit"] == 0 and b["exit"] == 0 and a["raw_nodate_sha256"] is not None and \
+            a["raw_nodate_sha256"] == b["raw_nodate_sha256"] and a["y_sha256"] == b["y_sha256"] and a["y"] == b["y"] and a["u_V"] == b["u_V"]
+        res["identity"].append(dict(kind=kind, identical=same, **{f"{k}_save": a[k] for k in ("exit", "peak_rss_MB", "raw_nodate_sha256", "y_sha256")},
+                                    **{f"{k}_nosave": b[k] for k in ("exit", "peak_rss_MB", "raw_nodate_sha256", "y_sha256")}))
         ok &= same
     a, b = got["id_train_a"], got["id_train_b"]
-    res["train"] = dict(identical=a["exit"] == 0 and b["exit"] == 0 and a["raw_data_sha256"] == b["raw_data_sha256"] and a["raw_data_sha256"] is not None,
-                        raw_data_sha256=[a["raw_data_sha256"], b["raw_data_sha256"]], peak_rss_MB=[a["peak_rss_MB"], b["peak_rss_MB"]],
+    res["train"] = dict(identical=a["exit"] == 0 and b["exit"] == 0 and a["raw_nodate_sha256"] == b["raw_nodate_sha256"] and a["raw_nodate_sha256"] is not None,
+                        raw_nodate_sha256=[a["raw_nodate_sha256"], b["raw_nodate_sha256"]], peak_rss_MB=[a["peak_rss_MB"], b["peak_rss_MB"]],
                         exit=[a["exit"], b["exit"]])
     ok &= res["train"]["identical"]
     res["identity_pass"] = bool(ok)

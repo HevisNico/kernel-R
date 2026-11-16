@@ -87,15 +87,14 @@ def add_sources(text, sources, instance, rnd, t_s, work, scale="1"):
     return text.replace("\n.end\n", "\n" + "\n".join(lines) + "\n.end\n"), files, seed
 
 
-def raw_data_sha256(path):
-    """SHA-256 of a raw file's data block only (after 'Binary:' or 'Values:'): its vectors, without the header,
-    whose 'Date:' line differs between two runs of the same draw (amendment 2: 'restricted to those vectors')."""
+def raw_nodate_sha256(path):
+    """SHA-256 of a raw file without its 'Date:' line (the owner's decision, NOTE_RAW_HASH.md): the header fields,
+    the variable list, the point count and the data block, everything but the date ngspice writes at each run. The
+    identity checks of amendment 2's proof, of V7 and of V8 use it; the full-file raw_sha256 is recorded too."""
     b = Path(path).read_bytes()
-    for mark in (b"Binary:\n", b"Values:\n"):
-        i = b.find(mark)
-        if i >= 0:
-            return hashlib.sha256(b[i + len(mark):]).hexdigest()
-    return None
+    k = min([i for i in (b.find(b"Binary:\n"), b.find(b"Values:\n")) if i >= 0] or [len(b)])
+    head = b"".join(l for l in b[:k].splitlines(keepends=True) if not l.startswith(b"Date:"))
+    return hashlib.sha256(head + b[k:]).hexdigest()
 
 
 def finish(files):
@@ -184,7 +183,7 @@ def frozen(out, instance, state, cell, port, t_s, rnd, kind):
     hashes = finish(files)
     raw = work / "tran.raw"
     raw_sha = hashlib.sha256(raw.read_bytes()).hexdigest() if raw.exists() else None
-    raw_data = raw_data_sha256(raw) if raw.exists() else None
+    raw_nodate = raw_nodate_sha256(raw) if raw.exists() else None
     if raw.exists():
         raw.unlink()
     d = np.loadtxt(work / "out.txt")
@@ -194,7 +193,7 @@ def frozen(out, instance, state, cell, port, t_s, rnd, kind):
     Path(out).write_text(json.dumps(dict(machine=os.environ.get("VAL_MACHINE"), run="frozen", save=SAVE, peak_rss_MB=max(PEAK) if PEAK else None, instance=instance, state=state, cell=cell, port=port, kind=kind,
                                          round=rnd, noise_seed=nseed, position=position(instance, rnd) if kind != "injected" else None,
                                          t_s=t_s, dt_s=0.2e-6, outputs=outs, aborted=bad, wall_s=wall,
-                                         samples_sha256=hashes, raw_sha256=raw_sha, raw_data_sha256=raw_data,
+                                         samples_sha256=hashes, raw_sha256=raw_sha, raw_nodate_sha256=raw_nodate,
                                          y_sha256=hashlib.sha256((work / "y.npy").read_bytes()).hexdigest(),
                                          points=int(len(d)), y_file=str(work / "y.npy"),
                                          summary=summary)) + "\n")
@@ -248,12 +247,12 @@ def preset(out, instance, rnd):
                                                                       "write tran.raw " + " ".join(f"v(x{c}.vmem{p}) v(x{c}.x{p}.sum)" for c in "ab" for p in net.PORTS)] + meas))
     raw = work / "tran.raw"
     raw_sha = hashlib.sha256(raw.read_bytes()).hexdigest() if raw.exists() else None
-    raw_data = raw_data_sha256(raw) if raw.exists() else None
+    raw_nodate = raw_nodate_sha256(raw) if raw.exists() else None
     got = lambda k: float(re.search(rf"^{k}\s*=\s*(\S+)", stdout, re.M | re.I).group(1))
     u = {f"{c}{p}": got(f"m{c}{p}") - got(f"s{c}{p}") for c in "ab" for p in net.PORTS}
     Path(out).write_text(json.dumps(dict(machine=os.environ.get("VAL_MACHINE"), run="preset", save=SAVE, peak_rss_MB=max(PEAK) if PEAK else None, instance=instance, round=None if zero else rnd, noise_seed=None if zero else nseed,
                                          position=None if zero else position(instance, rnd), aborted=bad, wall_s=wall,
-                                         samples_sha256=finish(files), raw_sha256=raw_sha, raw_data_sha256=raw_data, u_V=u)) + "\n")
+                                         samples_sha256=finish(files), raw_sha256=raw_sha, raw_nodate_sha256=raw_nodate, u_V=u)) + "\n")
 
 
 def seeding(out, instance, rnd):
@@ -274,7 +273,7 @@ def seeding(out, instance, rnd):
                                          position=None if rnd == "quiet" else position(instance, rnd), aborted=bad, wall_s=wall,
                                          samples_sha256=finish(files), op_sha256=hashlib.sha256(op.encode()).hexdigest(), op=op,
                                          raw_sha256=hashlib.sha256((work / "tran.raw").read_bytes()).hexdigest(),
-                                         raw_data_sha256=raw_data_sha256(work / "tran.raw"),
+                                         raw_nodate_sha256=raw_nodate_sha256(work / "tran.raw"),
                                          outputs=outs, y=d[:, 1::2].tolist())) + "\n")
     np.save(work / "y.npy", d[:, 1::2])
     (work / "out.txt").unlink()
@@ -313,7 +312,7 @@ def train(outdir, instance, rnd):
     r = router.run(Path(outdir), cal, NGSPICE, PDK, seed=seed, section=section, noise=rnd == "injected")
     import resource
     PEAK.append(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024)   # the router's simulator, waited for
-    meta = dict(raw_data_sha256=raw_data_sha256(Path(outdir) / "trace.raw") if (Path(outdir) / "trace.raw").exists() else None,
+    meta = dict(raw_nodate_sha256=raw_nodate_sha256(Path(outdir) / "trace.raw") if (Path(outdir) / "trace.raw").exists() else None,
                 machine=os.environ.get("VAL_MACHINE"), run="train", save="router (net.Session), unchanged", peak_rss_MB=max(PEAK) if PEAK else None, instance=instance, round=rnd, noise_seed=info.get("seed") if rnd not in ("quiet", "zero", "injected") else None,
                 position=position(instance, rnd) if rnd not in ("quiet", "zero", "injected") else None,
                 samples_sha256=finish(info.get("files", [])), word=router.word(r), wall_s=r["wall_s"])
