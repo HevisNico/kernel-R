@@ -5,7 +5,7 @@ namespace LearnedCoincidence.MonotoneDNF
 open TwoLayer (SlotTiming ReadObservation CalibratedAdditiveRead RoutedBatch)
 open PremiseCheck
 
-private theorem patterns_complete (x : Pattern M) : x ∈ patterns M := by
+theorem patterns_complete (x : Pattern M) : x ∈ patterns M := by
   induction M with
   | zero =>
     have empty : x = Fin.elim0 := funext fun j => j.elim0
@@ -60,7 +60,7 @@ private theorem emissions_sound {timing : SlotTiming} {r : ReadObservation M}
     | cons u rest =>
       simp [checkEmissions, emissions] at h
 
-private theorem threshold_read_sound {level : Nat} {timing : SlotTiming} {r : ReadObservation M}
+theorem threshold_read_sound {level : Nat} {timing : SlotTiming} {r : ReadObservation M}
     (h : checkThresholdRead level timing r = true) : ThresholdRead level timing r := by
   simp only [checkThresholdRead, Bool.and_eq_true, and_assoc] at h
   obtain ⟨valid, arrivals, emissions, decoder⟩ := h
