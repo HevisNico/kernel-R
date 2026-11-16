@@ -97,16 +97,22 @@ device's share with and without the conductance within 0.01 (1 % of the output p
   rms of every run offset; within-run, the pooled scatter; per dose, the rms of every dose deviation. The same under
   the injected model for V5.
 
-## Two machines
+## Four machines (the owner's change; the split is in [`SPLIT.md`](SPLIT.md))
 
-The owner's budget runs the plan on two machines of four processors. Machine 2 (a second session of the same
-environment) runs V5 (every injected draw and train) and V3 at `window`, `fire`, `pulse` of the nominal cell and
-7103 (`vplan.py run WORK machine=2`); machine 1 runs the rest. Every run checks the pinned environment first
-(ngspice, the PDK commit, numpy 2.3.5, `analog.cm`). The draws are the same on either machine (their samples follow
-from the seeds alone). A frozen draw keeps, besides its waveform, the summary that V3, V4 and V5 use
+The plan runs on four machines of four processors: this session (machine 1) and three sessions of the same
+environment (machines 2 to 4), four runs at a time on each. Every machine records its environment and inventory
+(`vplan.py run WORK machine=K` writes `MACHINE_K.json` first) and runs nothing if any hash differs from the
+reference (ngspice 42, the PDK commit, Python 3.12.3, numpy 2.3.5 as the launch kit hashes its `RECORD`, and
+`analog.cm`). Every run records its machine. The draws do not depend on the machine (their samples follow from the
+seeds alone), and what the analysis uses travels with the results: the summaries of the frozen draws
 (`vrun.summarize`: the mean; per lag, the sum of squared drifts of the 40 µs reads and their count; the
-periodogram's mean over each band of the grid; its integral from 25 Hz to 1 kHz), so that machine 2 sends only
-the summaries (`validation/m2/`), and the trains' `result.json`.
+periodogram's mean over each band of the grid; its integral from 25 Hz to 1 kHz), the V6 and V8 results (V8 with
+its stored voltages), and the trains' `result.json`; V7 compares the trains from their `result.json`
+(`vanalyze.events`, the same comparison as `../phase0/zerocheck.py` without the traces). Each machine pushes its
+folder `validation/m<K>/` to its own branch `research/network-noise-study-validation-m<K>`; they are merged into
+this branch at the end, and the analysis is one, over all machines. Machine 1 first runs the extractions, the V2c
+references, the conditioning check and the shot terms' AC; machines 2 to 4 start when the extractions have been
+checked against phase 0 (`validation/GO` on this branch).
 
 ## Harness tests
 

@@ -167,7 +167,7 @@ def frozen(out, instance, state, cell, port, t_s, rnd, kind):
     np.save(work / "y.npy", d[:, 1::2])                 # one column per output, every 0.2 us from 0
     (work / "out.txt").unlink()
     summary = {o: summarize(d[:, 2 * i + 1], 0.2e-6) for i, o in enumerate(outs)}
-    Path(out).write_text(json.dumps(dict(run="frozen", instance=instance, state=state, cell=cell, port=port, kind=kind,
+    Path(out).write_text(json.dumps(dict(machine=os.environ.get("VAL_MACHINE"), run="frozen", instance=instance, state=state, cell=cell, port=port, kind=kind,
                                          round=rnd, noise_seed=nseed, position=position(instance, rnd) if kind != "injected" else None,
                                          t_s=t_s, dt_s=0.2e-6, outputs=outs, aborted=bad, wall_s=wall,
                                          samples_sha256=hashes, points=int(len(d)), y_file=str(work / "y.npy"),
@@ -218,7 +218,7 @@ def preset(out, instance, rnd):
     meas = [f"meas tran u{c}{p} find v(x{c}.vmem{p},x{c}.x{p}.sum) at=3.1u" for c in "ab" for p in net.PORTS]
     stdout, wall, bad = spice(work, control(text, pilot.seeded(seed) + ["tran 0.1u 50u 0 200n"] + meas))
     u = {f"{c}{p}": float(re.search(rf"^u{c}{p}\s*=\s*(\S+)", stdout, re.M | re.I).group(1)) for c in "ab" for p in net.PORTS}
-    Path(out).write_text(json.dumps(dict(run="preset", instance=instance, round=None if zero else rnd, noise_seed=None if zero else nseed,
+    Path(out).write_text(json.dumps(dict(machine=os.environ.get("VAL_MACHINE"), run="preset", instance=instance, round=None if zero else rnd, noise_seed=None if zero else nseed,
                                          position=None if zero else position(instance, rnd), aborted=bad, wall_s=wall,
                                          samples_sha256=finish(files), u_V=u)) + "\n")
 
@@ -237,11 +237,11 @@ def seeding(out, instance, rnd):
     stdout, wall, bad = spice(work, control(text, ctl))
     op = (work / "op.txt").read_text()
     d = np.loadtxt(work / "out.txt")
-    Path(out).write_text(json.dumps(dict(run="seeding", instance=instance, round=rnd, noise_seed=nseed,
+    Path(out).write_text(json.dumps(dict(machine=os.environ.get("VAL_MACHINE"), run="seeding", instance=instance, round=rnd, noise_seed=nseed,
                                          position=None if rnd == "quiet" else position(instance, rnd), aborted=bad, wall_s=wall,
                                          samples_sha256=finish(files), op_sha256=hashlib.sha256(op.encode()).hexdigest(), op=op,
                                          raw_sha256=hashlib.sha256((work / "tran.raw").read_bytes()).hexdigest(),
-                                         outputs=outs, y_file=str(work / "y.npy"))) + "\n")
+                                         outputs=outs, y=d[:, 1::2].tolist())) + "\n")
     np.save(work / "y.npy", d[:, 1::2])
     (work / "out.txt").unlink()
 
@@ -277,7 +277,7 @@ def train(outdir, instance, rnd):
         net.shutil.copyfile = with_codemodel
     environment()
     r = router.run(Path(outdir), cal, NGSPICE, PDK, seed=seed, section=section, noise=rnd == "injected")
-    meta = dict(run="train", instance=instance, round=rnd, noise_seed=info.get("seed") if rnd not in ("quiet", "zero", "injected") else None,
+    meta = dict(machine=os.environ.get("VAL_MACHINE"), run="train", instance=instance, round=rnd, noise_seed=info.get("seed") if rnd not in ("quiet", "zero", "injected") else None,
                 position=position(instance, rnd) if rnd not in ("quiet", "zero", "injected") else None,
                 samples_sha256=finish(info.get("files", [])), word=router.word(r), wall_s=r["wall_s"])
     (Path(outdir) / "meta.json").write_text(json.dumps(meta) + "\n")

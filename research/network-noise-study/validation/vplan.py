@@ -1,6 +1,7 @@
 """Validation: the list of runs of PROTOCOL.md, run four at a time; a run whose result exists is not run again.
 
   vplan.py list          print the runs
+  vplan.py env           the machine's environment (against the reference) and inventory
   vplan.py run WORK [FILTER]   run them (those whose name contains FILTER, or machine=1|2), results in WORK/<name>.json
                                or WORK/<name>/
 """
@@ -50,14 +51,41 @@ def runs():
     return R
 
 
+MACHINES = 4
+
+
 def machine(name):
-    """The share of each machine (the owner's two machines): 2 runs V5 (the injected model), and V3 at window, fire
-    and pulse of the nominal cell and 7103; 1 runs the rest."""
-    if name.startswith("v5_") or (name.startswith("tr_") and "_inj" in name):
-        return 2
-    if re.match(r"v3_(nominal|7103)_(window|fire|pulse)_", name):
-        return 2
-    return 1
+    """The fixed split (the owner's four machines, VALIDATION_SPLIT.md): the run of index i in the list of runs()
+    goes to machine 1 + i mod 4. No run is moved or repeated afterwards."""
+    names = [r[1] for r in runs()]
+    return 1 + names.index(name) % MACHINES
+
+
+REFERENCE = dict(ngspice_sha256="820658317b0b54035208da41936fd6871ce924036e5ea4113a4168b821b7fc45",
+                 pdk_commit="1232782c1b9fab3aacda74d67ce7c92bf7da8105", python_version="3.12.3",
+                 python_sha256="e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f", numpy_version="2.3.5",
+                 numpy_record_sha256="064003bdb6f9f7bb06e46e07cc3398cbfdc3c114dfe55b89d239e564917be2fb",
+                 analog_cm_sha256="98c7c296dfd04e81f568db91c8261a07f00d8d63e63e5cc1d331451ccda30941")
+
+
+def inventory():
+    """The machine's environment (as the launch kit computes it) and inventory."""
+    import hashlib, importlib.metadata, os, platform
+    sha = lambda b: hashlib.sha256(b).hexdigest()
+    pdk = HERE.parent.parent / "circuit" / "pdk"
+    py = subprocess.run([PY, "-c", "import importlib.metadata, hashlib, numpy, platform, os, sys; "
+                         "print(platform.python_version(), numpy.__version__, "
+                         "hashlib.sha256(importlib.metadata.distribution('numpy').read_text('RECORD').encode()).hexdigest(), "
+                         "os.path.realpath(sys.executable))"], capture_output=True, text=True, cwd="/").stdout.split()
+    env = dict(ngspice_sha256=sha(Path("/usr/bin/ngspice").read_bytes()),
+               pdk_commit=subprocess.check_output(["git", "-C", str(pdk.resolve()), "rev-parse", "HEAD"], text=True).strip(),
+               python_version=py[0], python_sha256=sha(Path(py[3]).read_bytes()), numpy_version=py[1], numpy_record_sha256=py[2],
+               analog_cm_sha256=sha(Path("/usr/lib/x86_64-linux-gnu/ngspice/analog.cm").read_bytes()))
+    mem = next(l for l in Path("/proc/meminfo").read_text().splitlines() if l.startswith("MemTotal"))
+    cpu = next((l.split(":", 1)[1].strip() for l in Path("/proc/cpuinfo").read_text().splitlines() if l.startswith("model name")), "")
+    inv = dict(hostname=platform.node(), processors=os.cpu_count(), memory=mem.split(":")[1].strip(), cpu=cpu,
+               os=platform.platform(), venv=PY)
+    return dict(environment=env, identical_to_reference=env == REFERENCE, inventory=inv)
 
 
 def command(work, r):
@@ -67,10 +95,19 @@ def command(work, r):
 
 
 def run(work, filt=""):
-    """FILT: a substring of the run names, or `machine=1` / `machine=2`."""
+    """FILT: a substring of the run names, or `machine=K` (K = 1 to 4: that machine's share, after its environment is
+    checked against the reference; a machine whose hashes differ runs nothing)."""
+    import json, os
     Path(work).mkdir(parents=True, exist_ok=True)
     if filt.startswith("machine="):
-        todo = [r for r in runs() if machine(r[1]) == int(filt.split("=")[1])]
+        inv = inventory()
+        inv["machine"] = int(filt.split("=")[1])
+        (Path(work) / f"MACHINE_{inv['machine']}.json").write_text(json.dumps(inv, indent=1) + "\n")
+        assert inv["identical_to_reference"], "this machine's environment differs from the reference: it runs nothing"
+        os.environ["VAL_MACHINE"] = str(inv["machine"])
+    if filt.startswith("machine="):
+        R = runs()
+        todo = [r for i, r in enumerate(R) if 1 + i % MACHINES == int(filt.split("=")[1])]
     else:
         todo = [r for r in runs() if filt in r[1]]
     log = open(Path(work) / "plan.log", "a")
@@ -92,7 +129,10 @@ def run(work, filt=""):
 
 
 if __name__ == "__main__":
-    if sys.argv[1] == "list":
+    if sys.argv[1] == "env":                  # vplan.py env: the machine's environment and inventory
+        import json
+        print(json.dumps(inventory(), indent=1))
+    elif sys.argv[1] == "list":
         for r in runs():
             print(" ".join(r))
         print(len(runs()), "runs")

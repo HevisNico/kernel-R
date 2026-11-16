@@ -198,7 +198,10 @@ def train_result(work, name):
     for w in str(work).split(":"):
         p = Path(w) / name / "result.json"
         if p.exists():
-            return json.loads(p.read_text())
+            r = json.loads(p.read_text())
+            m = p.parent / "meta.json"
+            r["machine"] = json.loads(m.read_text()).get("machine") if m.exists() else None
+            return r
     return None
 
 
@@ -265,6 +268,25 @@ def constants(work, kind):
     return dict(per_instance=out, pooled=pooled)
 
 
+def events(q, z):
+    """As ../phase0/zerocheck.py, from the two result.json alone (the runs may be on different machines)."""
+    flags = ("cell", "port", "origin", "calendar_date", "id", "delivered", "protected_when_scheduled", "protected_at_start", "fire")
+    diff, dv = [], 0.0
+    for a, b in zip(q["occurrences"], z["occurrences"]):
+        bad = [k for k in a if (k in flags or k.startswith("writes")) and a.get(k) != b.get(k)]
+        if bad:
+            diff.append(dict(id=a.get("id"), fields=bad))
+        for k in a:
+            if k.endswith("_V") and isinstance(a[k], (int, float)) and isinstance(b.get(k), (int, float)):
+                dv = max(dv, abs(a[k] - b[k]))
+    dv = max([dv] + [abs(q["final_u_V"][k] - z["final_u_V"][k]) for k in q["final_u_V"]])
+    fq = [(f["cell"], f["during"], f["routed"]) for f in q["fires"]]
+    fz = [(f["cell"], f["during"], f["routed"]) for f in z["fires"]]
+    ok = len(q["occurrences"]) == len(z["occurrences"]) and not diff and fq == fz and dv <= 1e-6
+    return dict(occurrences=[len(q["occurrences"]), len(z["occurrences"])], occurrence_differences=diff, same_fires=fq == fz,
+                max_read_voltage_diff_V=dv, passes=ok)
+
+
 def v7(work):
     sys.path.insert(0, str(HERE.parent / "phase0"))
     import zerocheck
@@ -278,7 +300,7 @@ def v7(work):
             res[i] = dict(error="missing"); ok = False
             continue
         same = q1["raw_sha256"] == q2["raw_sha256"]
-        zc = zerocheck.compare(train_dir(work, f"tr_{i}_quiet1"), train_dir(work, f"tr_{i}_zero"))
+        zc = events(q1, z)
         I = dict(section="tt_mm", seed=int(i), scans=M["instances"][i]["scans"], quiet_train=as_train(q1, "quiet1"), noisy_trains=[])
         ports = C.instance(I)["ports"]
         dl, dd = 0.0, 0.0
@@ -292,7 +314,7 @@ def v7(work):
                 sb = (b[f"u{p}_after_V"] - b[f"u{p}_before_V"]) * 1e3
                 dd = max(dd, abs(sa - sb))
         pas = same and zc["passes"] and dl <= 0.005 and dd <= 0.002
-        res[i] = dict(quiet_identical=same, zerocheck={k: v for k, v in zc.items() if k != "trace_vmem_diff_V"},
+        res[i] = dict(quiet_identical=same, zerocheck=zc, machines=[q1.get("machine"), q2.get("machine"), z.get("machine")],
                       max_latency_diff_mV_equivalent=dl, max_dose_diff_mV=dd, pass_=pas)
         ok &= pas
     return res, ok
@@ -313,7 +335,7 @@ def v8(work):
         common = sorted(set(o3) & set(oq))
         op_same = all(o3[k] == o4[k] == oq[k] for k in common) and len(common) > 100
         rerun = r3["raw_sha256"] == ra["raw_sha256"]
-        y3, y4, yq = (np.load(x["y_file"]) for x in (r3, r4, q))
+        y3, y4, yq = (np.array(x["y"]) for x in (r3, r4, q))
         L = min(len(y3), len(y4), len(yq))
         corr = [float(np.corrcoef(y3[:L, k] - yq[:L, k], y4[:L, k] - yq[:L, k])[0, 1]) for k in range(y3.shape[1])]
         pas = op_same and rerun and all(abs(c) < 0.1 for c in corr)
