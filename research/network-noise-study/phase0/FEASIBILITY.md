@@ -317,7 +317,7 @@ term, at the peak of `bip` (173 nA); the other ideal sources are noiseless and l
 | PWL, every analog transistor | 144 | 4 716 | 1 610 |
 | PWL, the model's union of `model.py` | 144 | 4 570 | 1 552 |
 | PWL, the model (devnoise) | 75 | running at the time of writing | |
-| filesource, every analog transistor | 144 | running at the time of writing | |
+| filesource, every analog transistor | 144 | 1 305 | 785 |
 | **filesource, the model (devnoise)** | **75** | **1 033** | **717** |
 | filesource, the model at zero amplitude | 75 | 827 | 659 |
 
@@ -325,6 +325,36 @@ The device sources have placeholder amplitudes (those of op-amp `xm3` at hold): 
 sources as XSPICE `filesource` instances, a noisy run costs 1.27 times a quiet run and 0.79 times the injected model;
 its deck is 0.1 MB and its samples 50 MB in 10 files (8 sources each), generated in 24 s. The 1.17 of section 5 was
 measured on 2.44 ms runs, where the PWL sources' cost had not yet grown with the run's length.
+
+**Extraction time per instance** ([`EXTRACTION_TIME.json`](EXTRACTION_TIME.json), from the work files of the
+extractions above, four instances at a time on four processors, so about one processor each). A two-cell instance
+took 3 484 s (nominal) to 4 290 s (7102), all five states; per cell, on average:
+
+| State | Outputs per cell | s per cell | Of which the trip sweeps |
+|---|---|---|---|
+| `window` | 2 | about 920 | about 790 (one sweep in `op`, the same sweep again before the transfers, about 200 s each) |
+| `fire` | 1 | about 490 | about 400 |
+| `hold` | 2 | about 195 | none |
+| `pulse` | 2 | about 190 | none |
+| `preset` | 2 | about 190 | none |
+| operating-point check | per instance | about 40 | none |
+
+Per output: the operating point about 14 s (plus a sweep of about 200 s at `window` and `fire`), the device-noise
+run about 13 s, the transfers about 70 s (78 AC runs, plus the repeated sweep at `window` and `fire`).
+Section 5 of the criteria estimates the extractions at about 1 h 45 for the four instances four at a time; they
+took 58 to 72 min.
+
+For campaign 4 (three cells per instance, every instance extracted in stage M):
+- as the code stands, all five states: about 3 × 2 000 s, **about 1 h 40 of one processor per instance**;
+- `preset` serves V6 only, a criterion of the validation, so campaign 4 does not need it: about 3 × 1 815 s,
+  **about 1 h 30**;
+- `hold`, `window`, `fire` and `pulse` are all needed: the model takes each device's A and B from the state of its
+  largest share, and the rule for campaign 4 withholds noisy runs from an instance that fails V2 or V2b, which are
+  checked on those four states. Both ports and every cell are needed, as each device has its own mismatch;
+- the transfers repeat the trip sweep that the operating point has just done, and set the source to the same trip
+  value. Reusing the value would give the same extraction and save about 200 s per `window` and `fire` output: about
+  3 × 1 215 s, **about 1 h per instance**. This is a change to `devnoise.py` after the criteria were pushed, so it is
+  not made; it needs the owner's decision, and a check that it reproduces `DEVNOISE_*.json` to the last digit.
 
 **Two settings come with the filesource**, both found in phase 0:
 - one file of 76 columns stops the deck at 1 µs ("timestep too small", even at zero amplitude); one column, and
