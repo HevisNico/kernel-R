@@ -1,15 +1,16 @@
-# Campaign 4: unfrozen work in progress (branch research/learned-dnf-circuit-campaign-4-wip)
+# Campaign 4: the work branch (research/learned-dnf-circuit-campaign-4-wip)
 
-**Not the frozen implementation.** Nothing here has been reviewed, frozen or rehearsed through the kit. The
-campaign branch (`research/learned-dnf-circuit-campaign-4`) holds only `PREDICTION.md` (commit `1596b36`).
+**The frozen implementation is the tree of the commit that wrote this text** (the freeze, 2026-11-16), before its
+rehearsal. Its frozen files are `plan.FROZEN` (`plan.py`), byte for byte; after the freeze, a stage's source commit
+may differ from it only as amendment 5 (section 1, item 3) allows, which `plan.check_after_freeze` checks.
 
-- `drafts/AMENDMENT_1.md`: **draft** of amendment 1, final for the owner's review (SHA-256
-  `47c9743b97bdef4aa1e39eb7f18cd62b95332a05ff35889dcaf55ff7090d77fd`), not pushed to the campaign branch. Its top
-  line says "Pushed alone": that becomes true only when the owner's review is done and it is pushed there, alone,
-  as `AMENDMENT_1.md`, before any prediction code is committed to the campaign branch.
-- The code follows PREDICTION.md and the seven points of the draft amendment, as named constants in `predicted.py`
-  (`DURATION_C`, `RAIL`, `EMPTY_IN_EPSILON`, `GUARDED_READS_1`, `GUARDED_READS_2`) and `plan.py` (`MISSING_NEED`).
-- Tested: `test_campaign.py` (11 checks, no simulation). Run by hand on the nominal cell only (no mismatch seed):
-  one untrained run without noise, two calibration decks (guard on, off), the Python prediction on them and on
-  phase 0's CALIBRATION.json (P0). Not yet run: any extraction, any noisy run (device or injected), the Lean gate,
-  the analysis, the manifests, the kit.
+The campaign branch (`research/learned-dnf-circuit-campaign-4`) holds `PREDICTION.md` (commit `1596b36`) and
+amendments 1 to 5 (commits `c14124f`, `d6a75a9`, `41cf88b`, `a167f3c`, `6c5630f`), merged into this branch.
+
+- Not yet run on the frozen commit: the rehearsal (`rehearsal.py`), which is run on this commit next.
+- Rehearsed before the freeze, as smoke runs on the nominal cell only (amendment 5, section 7): the calibration decks,
+  the runs without noise, the 21 extraction runs without the trip value reused and their merge, one noisy run under
+  each model, two real launches of the kit (the seed guard and the stage files), and one pass of the analysis.
+- `rehearsal/gate-cases-4` and `rehearsal/mirror-mutations-3`: the kernel gate on P0 to P6 and P4' and the mirror
+  mutations, under the pinned interpreter; `check.sh` regenerates and compares them.
+- `drafts/AMENDMENT_1.md`: the outgoing director's draft, superseded by the pushed `AMENDMENT_1.md`.
