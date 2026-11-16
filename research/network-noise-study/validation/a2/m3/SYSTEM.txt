@@ -1,0 +1,103 @@
+== date -u
+Mon Nov 16 12:07:56 UTC 2026
+== uptime
+ 12:07:56 up  4:50,  0 user,  load average: 4.17, 4.05, 3.99
+== free -m
+               total        used        free      shared  buff/cache   available
+Mem:           16087        2109       13780          16         475       13978
+Swap:              0           0           0
+== ps
+  PID ELAPSED   RSS COMMAND
+ 5187    3286 386728 /usr/bin/ngspice -b deck.spice
+ 5295    2642 382988 /usr/bin/ngspice -b deck.spice
+ 5328    2482 368708 /usr/bin/ngspice -b deck.spice
+ 5680      20 353956 /usr/bin/ngspice -b deck.spice
+  166   17414 298460 /opt/claude-code/bin/claude --preload /home/claude/.claude/remote/spare.sock
+  156   17414 41948 /usr/local/bin/environment-manager task-run --stdin --session cse_01TzF7ZUiLuH6eDQE9KuUcWV --session-mode resume-cached --upgrade-claude-code=False
+ 5180    3291 39092 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m3/v3_nominal_window_a1_r239.json nominal window a 1 0.02 239 model
+ 5323    2488 38308 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m3/v3_7101_window_b2_r227.json 7101 window b 2 0.02 227 model
+ 5286    2648 38228 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m3/v3_nominal_fire_a_r247.json nominal fire a - 0.02 247 model
+ 5675      26 38184 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m3/v3_7101_fire_a_r235.json 7101 fire a - 0.02 235 model
+ 4906    3635 29636 /home/user/owner-prep/venv312/bin/python -B vplan.py run /tmp/a2_m3 machine=3
+    1   17415  7776 /process_api --firecracker-init --addr 0.0.0.0:2024 --max-ws-buffer-size 32768 --block-local-connections --log-vsock-port 5002 --control-vsock-port 5001 --listen-vsock-port 2024 --tcp-readiness-only
+ 5709       0  4168 ps -eo pid,etimes,rss,args --sort=-rss
+ 5055    3600  3400 /bin/bash -c source /root/.claude/shell-snapshots/snapshot-bash-1794813473651-zlxbct.sh 2>/dev/null || true && \builtin export BUN_OPTIONS="--smol${BUN_OPTIONS:+ $BUN_OPTIONS}" && \builtin shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'which'; \builtin unset -f -- 'which'; } >/dev/null 2>&1 || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'S=/tmp/claude-0/-home-user-kernel-R/2ccf1d14-a17a-502b-a176-d78859c1c149/scratchpad; k=0; until grep -q "^done machine=3" /tmp/a2_m3/plan.log; do sleep 300; k=$((k+1)); [ $((k%12)) -eq 0 ] && { $S/collect_a2.sh || echo "collect failed $(date -u)"; }; done; echo "plan done $(date -u)"' < /dev/null && pwd -P >| /tmp/claude-e228-cwd
+== dmesg oom
+[Mon Nov 16 08:52:52 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 08:52:52 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 08:52:52 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 08:52:52 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2305,uid=0
+[Mon Nov 16 08:52:52 2026] Memory cgroup out of memory: Killed process 2305 (ngspice) total-vm:6455624kB, anon-rss:3479304kB, file-rss:2592kB, shmem-rss:0kB, UID:0 pgtables:12676kB oom_score_adj:0
+[Mon Nov 16 08:54:34 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 08:54:34 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 08:54:34 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 08:54:34 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2313,uid=0
+[Mon Nov 16 08:54:34 2026] Memory cgroup out of memory: Killed process 2313 (ngspice) total-vm:6455624kB, anon-rss:4306836kB, file-rss:2552kB, shmem-rss:0kB, UID:0 pgtables:12672kB oom_score_adj:0
+[Mon Nov 16 08:56:42 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 08:56:42 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 08:56:42 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 08:56:42 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2315,uid=0
+[Mon Nov 16 08:56:42 2026] Memory cgroup out of memory: Killed process 2315 (ngspice) total-vm:6455624kB, anon-rss:5369364kB, file-rss:2376kB, shmem-rss:0kB, UID:0 pgtables:12672kB oom_score_adj:0
+[Mon Nov 16 09:03:33 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 09:03:33 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:03:33 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:03:33 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2383,uid=0
+[Mon Nov 16 09:03:33 2026] Memory cgroup out of memory: Killed process 2383 (ngspice) total-vm:6455624kB, anon-rss:5285020kB, file-rss:2548kB, shmem-rss:0kB, UID:0 pgtables:12676kB oom_score_adj:0
+[Mon Nov 16 09:06:46 2026] ngspice invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=0
+[Mon Nov 16 09:06:46 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:06:46 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:06:46 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2403,uid=0
+[Mon Nov 16 09:06:46 2026] Memory cgroup out of memory: Killed process 2403 (ngspice) total-vm:6455624kB, anon-rss:6165652kB, file-rss:2572kB, shmem-rss:0kB, UID:0 pgtables:12668kB oom_score_adj:0
+[Mon Nov 16 09:11:29 2026] python invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 09:11:29 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:11:29 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:11:29 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2425,uid=0
+[Mon Nov 16 09:11:29 2026] Memory cgroup out of memory: Killed process 2425 (ngspice) total-vm:5685892kB, anon-rss:4984340kB, file-rss:2572kB, shmem-rss:0kB, UID:0 pgtables:11164kB oom_score_adj:0
+[Mon Nov 16 09:16:23 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 09:16:23 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:16:23 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:16:23 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2455,uid=0
+[Mon Nov 16 09:16:23 2026] Memory cgroup out of memory: Killed process 2455 (ngspice) total-vm:5685892kB, anon-rss:5294560kB, file-rss:2464kB, shmem-rss:0kB, UID:0 pgtables:11164kB oom_score_adj:0
+[Mon Nov 16 09:21:58 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 09:21:58 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:21:58 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:21:58 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2498,uid=0
+[Mon Nov 16 09:21:58 2026] Memory cgroup out of memory: Killed process 2498 (ngspice) total-vm:5685896kB, anon-rss:5387288kB, file-rss:2584kB, shmem-rss:0kB, UID:0 pgtables:11168kB oom_score_adj:0
+[Mon Nov 16 09:26:17 2026] ngspice invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=0
+[Mon Nov 16 09:26:17 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:26:17 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:26:17 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2536,uid=0
+[Mon Nov 16 09:26:17 2026] Memory cgroup out of memory: Killed process 2536 (ngspice) total-vm:5685892kB, anon-rss:5594788kB, file-rss:2532kB, shmem-rss:0kB, UID:0 pgtables:11164kB oom_score_adj:0
+[Mon Nov 16 09:30:50 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 09:30:50 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:30:50 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:30:50 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2658,uid=0
+[Mon Nov 16 09:30:50 2026] Memory cgroup out of memory: Killed process 2658 (ngspice) total-vm:5660808kB, anon-rss:4949444kB, file-rss:2376kB, shmem-rss:0kB, UID:0 pgtables:11116kB oom_score_adj:0
+[Mon Nov 16 09:34:36 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 09:34:36 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:34:36 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:34:36 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2680,uid=0
+[Mon Nov 16 09:34:36 2026] Memory cgroup out of memory: Killed process 2680 (ngspice) total-vm:5660812kB, anon-rss:5278928kB, file-rss:2400kB, shmem-rss:0kB, UID:0 pgtables:11116kB oom_score_adj:0
+[Mon Nov 16 09:38:34 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 09:38:34 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:38:34 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:38:34 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2731,uid=0
+[Mon Nov 16 09:38:34 2026] Memory cgroup out of memory: Killed process 2731 (ngspice) total-vm:5642784kB, anon-rss:5334568kB, file-rss:2688kB, shmem-rss:0kB, UID:0 pgtables:11084kB oom_score_adj:0
+[Mon Nov 16 09:43:51 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 09:43:51 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:43:51 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:43:51 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2782,uid=0
+[Mon Nov 16 09:43:51 2026] Memory cgroup out of memory: Killed process 2782 (ngspice) total-vm:5642780kB, anon-rss:5437976kB, file-rss:2608kB, shmem-rss:0kB, UID:0 pgtables:11084kB oom_score_adj:0
+[Mon Nov 16 09:49:14 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 09:49:14 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 09:49:14 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 09:49:14 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2828,uid=0
+[Mon Nov 16 09:49:14 2026] Memory cgroup out of memory: Killed process 2828 (ngspice) total-vm:17398976kB, anon-rss:8871348kB, file-rss:2348kB, shmem-rss:0kB, UID:0 pgtables:21632kB oom_score_adj:0
+[Mon Nov 16 10:18:44 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[Mon Nov 16 10:18:44 2026]  oom_kill_process.cold+0x8/0x8a
+[Mon Nov 16 10:18:44 2026] [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+[Mon Nov 16 10:18:44 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task_memcg=/process_api/01a1e338-06cf-7331-9a5b-6be408fce0df/claude-code-bash,task=ngspice,pid=2866,uid=0
+[Mon Nov 16 10:18:44 2026] Memory cgroup out of memory: Killed process 2866 (ngspice) total-vm:15227192kB, anon-rss:13949364kB, file-rss:2492kB, shmem-rss:0kB, UID:0 pgtables:29836kB oom_score_adj:0
+== df -h /tmp
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G  9.7G   29G  26% /
