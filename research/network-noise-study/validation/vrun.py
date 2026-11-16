@@ -79,6 +79,7 @@ def add_sources(text, sources, instance, rnd, t_s, work, scale="1"):
         lines += [f"rnzp{k} nzp{k} 0 1k noisy=0", f"gnzp{k} {s['nodes'][0]} {s['nodes'][1]} nzp{k} 0 {g:.10g}"]
     FS_DIR.mkdir(parents=True, exist_ok=True)
     stem = FS_DIR / f"{Path(work).name}.samples.txt"
+    assert str(stem) == str(stem).lower(), "ngspice lowercases the file name of a filesource: the path must be lowercase"
     lines += filesource("nz", cols, stem, scale)
     files = sorted(FS_DIR.glob(stem.name + ".*"))
     return text.replace("\n.end\n", "\n" + "\n".join(lines) + "\n.end\n"), files, seed
@@ -221,12 +222,14 @@ def preset(out, instance, rnd):
     zero = rnd == "zero"
     text, files, nseed = add_sources(text, model_sources(instance, ("a", "b")), instance, 3 if zero and seed else (1 if zero else rnd),
                                      50e-6, work, scale="0" if zero else "1")
-    meas = [f"meas tran u{c}{p} find v(x{c}.vmem{p},x{c}.x{p}.sum) at=3.1u" for c in "ab" for p in net.PORTS]
+    meas = [f"meas tran m{c}{p} find v(x{c}.vmem{p}) at=3.1u" for c in "ab" for p in net.PORTS] + \
+           [f"meas tran s{c}{p} find v(x{c}.x{p}.sum) at=3.1u" for c in "ab" for p in net.PORTS]
     stdout, wall, bad = spice(work, control(text, pilot.seeded(seed) + ["tran 0.1u 50u 0 200n",
                                                                       "write tran.raw " + " ".join(f"v(x{c}.vmem{p}) v(x{c}.x{p}.sum)" for c in "ab" for p in net.PORTS)] + meas))
     raw = work / "tran.raw"
     raw_sha = hashlib.sha256(raw.read_bytes()).hexdigest() if raw.exists() else None
-    u = {f"{c}{p}": float(re.search(rf"^u{c}{p}\s*=\s*(\S+)", stdout, re.M | re.I).group(1)) for c in "ab" for p in net.PORTS}
+    got = lambda k: float(re.search(rf"^{k}\s*=\s*(\S+)", stdout, re.M | re.I).group(1))
+    u = {f"{c}{p}": got(f"m{c}{p}") - got(f"s{c}{p}") for c in "ab" for p in net.PORTS}
     Path(out).write_text(json.dumps(dict(machine=os.environ.get("VAL_MACHINE"), run="preset", instance=instance, round=None if zero else rnd, noise_seed=None if zero else nseed,
                                          position=None if zero else position(instance, rnd), aborted=bad, wall_s=wall,
                                          samples_sha256=finish(files), raw_sha256=raw_sha, u_V=u)) + "\n")
