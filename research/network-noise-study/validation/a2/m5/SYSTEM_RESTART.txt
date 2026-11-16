@@ -1,0 +1,19 @@
+$ date -u
+Mon Nov 16 16:32:49 UTC 2026
+$ uptime -s
+2026-11-16 16:28:36
+$ uptime
+ 16:32:49 up 4 min,  0 user,  load average: 0.05, 0.01, 0.00
+$ dmesg -T | head -1
+[Mon Nov 16 16:28:36 2026] Linux version 6.18.44-fc-v470 (builder@sandboxing) (gcc (GCC) 15.3.0, GNU ld (GNU Binutils) 2.46) #1 SMP PREEMPT_DYNAMIC @0
+$ pgrep -af "vplan.py|vrun.py|ngspice" || echo "no plan process"
+no plan process
+$ /tmp/a2_m5
+exists, 86 entries
+$ cut runs
+v3_7103_window_a1_r213: folder exists; stdout.txt: 0 matching lines
+v3_7103_fire_b_r237: folder exists; stdout.txt: 0 matching lines
+v3_7103_pulse_a1_r245: folder exists; stdout.txt: 0 matching lines
+v3_7103_pulse_b2_r253: folder exists; stdout.txt: 0 matching lines
+$ dmesg -T | grep -i -E "oom|killed process|out of memory"
+none in the current boot's kernel log
