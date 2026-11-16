@@ -1,27 +1,27 @@
 == date -u
-Mon Nov 16 11:08:13 UTC 2026
+Mon Nov 16 12:08:33 UTC 2026
 == uptime
- 11:08:13 up  3:50,  0 user,  load average: 2.49, 0.68, 0.25
+ 12:08:33 up  4:50,  0 user,  load average: 4.00, 4.00, 3.98
 == free -m
                total        used        free      shared  buff/cache   available
-Mem:           16087        2018       13840          16         506       14068
+Mem:           16087        2084       13795          16         485       14003
 Swap:              0           0           0
 == ps
   PID ELAPSED   RSS COMMAND
- 5191      20 402392 /usr/bin/ngspice -b deck.spice
- 5193      18 402312 /usr/bin/ngspice -b deck.spice
- 5230       9 338636 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m4/v3_nominal_hold_r232.json nominal hold a 1 0.08 232 model
-  172   13829 305996 /opt/claude-code/bin/claude --preload /home/claude/.claude/remote/spare.sock
- 5226       9 80588 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m4/v3_nominal_hold_r224.json nominal hold a 1 0.08 224 model
- 5167      40 45996 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m4/v3_nominal_hold_r208.json nominal hold a 1 0.08 208 model
- 5168      40 45800 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m4/v3_nominal_hold_r216.json nominal hold a 1 0.08 216 model
-  156   13829 41776 /usr/local/bin/environment-manager task-run --stdin --session cse_01TzF7ZUhDvo8Y9ZJymeLWva --session-mode resume-cached --upgrade-claude-code=False
- 5130      41 29592 /home/user/owner-prep/venv312/bin/python -B vplan.py run /tmp/a2_m4 machine=4
-    1   13831  7632 /process_api --firecracker-init --addr 0.0.0.0:2024 --max-ws-buffer-size 32768 --block-local-connections --log-vsock-port 5002 --control-vsock-port 5001 --listen-vsock-port 2024 --tcp-readiness-only
- 5255       0  4124 ps -eo pid,etimes,rss,args --sort=-rss
- 5238       0  3444 /bin/bash -c source /root/.claude/shell-snapshots/snapshot-bash-1794813478688-5uqwva.sh 2>/dev/null || true && \builtin export BUN_OPTIONS="--smol${BUN_OPTIONS:+ $BUN_OPTIONS}" && \builtin shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'which'; \builtin unset -f -- 'which'; } >/dev/null 2>&1 || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'S=/tmp/claude-0/-home-user-kernel-R/78752293-eac0-5e71-b252-4af408b727fd/scratchpad; cat > $S/collect_a2.sh <<'"'"'EOF'"'"' #!/bin/sh set -e cd /home/user/kernel-R [ "$(git rev-parse --abbrev-ref HEAD)" = research/network-noise-study-validation-a2-m4 ] || { echo wrong-branch; exit 1; } D=research/network-noise-study/validation/a2/m4 mkdir -p $D for f in MACHINE_4.json plan.log MEMORY.txt; do [ -f /tmp/a2_m4/$f ] && cp /tmp/a2_m4/$f $D/; done for f in /tmp/a2_m4/*.json; do [ -f "$f" ] && cp "$f" $D/; done for t in /tmp/a2_m4/tr_*/; do [ -d "$t" ] || continue; n=$(basename "$t"); mkdir -p $D/$n   for g in result.json meta.json; do [ -f "$t$g" ] && cp "$t$g" $D/$n/; done; done { echo "== date -u"; date -u; echo "== uptime"; uptime; echo "== free -m"; free -m   echo "== ps"; ps -eo pid,etimes,rss,args --sort=-rss | head -15   echo "== dmesg oom"; dmesg -T 2>&1 | grep -i -E "oom|killed process|out of memory" || true   echo "== df -h /tmp"; df -h /tmp; } > $D/SYSTEM.txt N=$(grep -c '"'"' exit '"'"' /tmp/a2_m4/plan.log || true) git add $D if git diff --cached --quiet; then echo nothing-new; else git commit -q -m "Noise study, validation, attempt 2, machine 4: results so far ($N runs)"; fi for i in 1 2 3 4 5; do git push -q -u origin research/network-noise-study-validation-a2-m4 && break; sleep $((2**i)); done git log -1 --oneline; echo "exit0=$(grep -c '"'"' exit 0 '"'"' /tmp/a2_m4/plan.log || true) total=$N" EOF sh $S/collect_a2.sh 2>&1 | grep -v '"'"'^remote:'"'"'' && pwd -P >| /tmp/claude-3377-cwd
-   88   13830  2968 sbx-telemetry-collector
- 5240       0  2036 sh /tmp/claude-0/-home-user-kernel-R/78752293-eac0-5e71-b252-4af408b727fd/scratchpad/collect_a2.sh
+ 5528    3251 383104 /usr/bin/ngspice -b deck.spice
+ 5669    2474 379220 /usr/bin/ngspice -b deck.spice
+ 5682    2461 366144 /usr/bin/ngspice -b deck.spice
+ 5724    2275 365196 /usr/bin/ngspice -b deck.spice
+  172   17449 307872 /opt/claude-code/bin/claude --preload /home/claude/.claude/remote/spare.sock
+  156   17449 41860 /usr/local/bin/environment-manager task-run --stdin --session cse_01TzF7ZUhDvo8Y9ZJymeLWva --session-mode resume-cached --upgrade-claude-code=False
+ 5520    3259 38972 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m4/v3_nominal_window_a1_r240.json nominal window a 1 0.02 240 model
+ 5718    2282 38296 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m4/v3_7101_window_b2_r228.json 7101 window b 2 0.02 228 model
+ 5674    2467 38256 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m4/v3_7101_window_a1_r220.json 7101 window a 1 0.02 220 model
+ 5661    2481 38100 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m4/v3_nominal_fire_a_r248.json nominal fire a - 0.02 248 model
+ 5130    3661 29628 /home/user/owner-prep/venv312/bin/python -B vplan.py run /tmp/a2_m4 machine=4
+    1   17451  7632 /process_api --firecracker-init --addr 0.0.0.0:2024 --max-ws-buffer-size 32768 --block-local-connections --log-vsock-port 5002 --control-vsock-port 5001 --listen-vsock-port 2024 --tcp-readiness-only
+ 6158       0  4164 ps -eo pid,etimes,rss,args --sort=-rss
+ 6135       0  3420 /bin/bash -c { \builtin typeset +x '__CLAUDE_CC_COMMAND_TEXT' 2>/dev/null || \builtin true; } && source /root/.claude/shell-snapshots/snapshot-bash-1794813478688-5uqwva.sh 2>/dev/null || true && \builtin export BUN_OPTIONS="--smol${BUN_OPTIONS:+ $BUN_OPTIONS}" && \builtin shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'which'; \builtin unset -f -- 'which'; } >/dev/null 2>&1 || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && { \builtin [ -n "${__CLAUDE_CC_COMMAND_TEXT:+1}" ] || { \builtin echo '__CLAUDE_CC_COMMAND_TEXT?' >&2; \builtin exit 126; }; } && 'eval' "\builtin 'unset' -v '__CLAUDE_CC_COMMAND_TEXT'; 'eval' $__CLAUDE_CC_COMMAND_TEXT" && pwd -P >| /tmp/claude-70f5-cwd
 == dmesg oom
 [Mon Nov 16 08:55:19 2026] ngspice invoked oom-killer: gfp_mask=0x100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
 [Mon Nov 16 08:55:19 2026]  oom_kill_process.cold+0x8/0x8a
@@ -90,4 +90,4 @@ Swap:              0           0           0
 [Mon Nov 16 10:18:44 2026] Memory cgroup out of memory: Killed process 3088 (ngspice) total-vm:21051800kB, anon-rss:13945896kB, file-rss:2384kB, shmem-rss:0kB, UID:0 pgtables:32452kB oom_score_adj:0
 == df -h /tmp
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/vda        252G  9.8G   29G  26% /
+/dev/vda        252G  9.7G   29G  26% /
