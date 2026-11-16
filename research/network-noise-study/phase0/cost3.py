@@ -20,6 +20,7 @@ only: what the samples alone cost in generation, parse time and memory, for runs
 Each value is the wall time and the peak resident memory of the simulator process (from wait4).
 """
 import json, math, os, subprocess, sys, time
+import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -66,6 +67,7 @@ def dnf_calendar(dnf_path, need=4):
                 horizon=slots[-1]["date"] + dnf.SLOT + dnf.SETTLE)
 
 
+CODEMODEL = "/usr/lib/x86_64-linux-gnu/ngspice/analog.cm"     # XSPICE analog code models of the ngspice 42 package
 MODEL_DEVICES = None        # set by --model: the union of the kept devices of EXTRACT_nominal.json, per cell
 
 
@@ -73,7 +75,20 @@ def chosen_model(c):
     return [d.replace("xa.", f"x{c}.", 1) for d in MODEL_DEVICES]
 
 
-def pwl_sources(text, per_cell, tstop, noise_seed=1):
+def filesource(name, columns, path):
+    """The samples of every source as one XSPICE `filesource` (analog.cm), read sequentially from one text file:
+    one row per sample time, one column per source, linear between samples. Its outputs are the nodes nzp<k>."""
+    n = len(columns[0])
+    t = np.arange(n) * noisegen.NT
+    np.savetxt(path, np.column_stack([t] + list(columns)), fmt="%.9g")
+    nodes = " ".join(f"%v(nzp{k})" for k in range(len(columns)))
+    ones, zeros = " ".join(["1"] * len(columns)), " ".join(["0"] * len(columns))
+    return [f"a{name} [{nodes}] fs{name}",
+            f'.model fs{name} filesource (file="{path}" amploffset=[{zeros}] amplscale=[{ones}] timeoffset=0 timescale=1 '
+            f"timerelative=false amplstep=false)"]
+
+
+def pwl_sources(text, per_cell, tstop, noise_seed=1, kind="pwl", fs_path=None):
     model = json.loads((HERE / "MODEL_nominal.json").read_text())
     ref = next(m for m in model["model"] if m["device"] == "xa.x1.xop.xm3")
     nodes = {}
@@ -83,21 +98,25 @@ def pwl_sources(text, per_cell, tstop, noise_seed=1):
             nodes[f[0]] = (f[1], f[3])
     names = sorted(d for c in CELLS for d in (chosen_model(c) if per_cell == 0 else cost.chosen(c, per_cell)))
     n = int(math.ceil(tstop / noisegen.NT)) + 2
-    out = []
+    out, cols, gains = [], [], []
     for k, d in enumerate(names):
         g = math.sqrt(ref["white_A2_Hz"] / (2 * noisegen.NT)) / 1e-3
-        x = noisegen.samples(noise_seed, k, n, ref["white_A2_Hz"] / g ** 2, ref["flicker_B"] / g ** 2, ref["alpha"],
-                             slow=(90000, 0))
-        out += [noisegen.pwl(f"vnzp{k}", f"nzp{k}", x), f"rnzp{k} nzp{k} 0 1k noisy=0",
-                f"gnzp{k} {nodes[d][0]} {nodes[d][1]} nzp{k} 0 {g:.10g}"]
+        cols.append(noisegen.samples(noise_seed, k, n, ref["white_A2_Hz"] / g ** 2, ref["flicker_B"] / g ** 2, ref["alpha"],
+                                     slow=(90000, 0)))
+        gains.append((nodes[d][0], nodes[d][1], g))
     base = len(names)
     for j, (c, p) in enumerate((c, p) for c in CELLS for p in net.PORTS):       # the declared shot terms, 2qI
         A = 2 * Q * IPK
         g = math.sqrt(A / (2 * noisegen.NT)) / 1e-3
-        x = noisegen.samples(noise_seed, base + j, n, A / g ** 2)
-        out += [noisegen.pwl(f"vnzs{j}", f"nzs{j}", x), f"rnzs{j} nzs{j} 0 1k noisy=0",
-                f"gnzs{j} x{c}.x{p}.dq x{c}.vmem{p} nzs{j} 0 {g:.10g}"]
-    return out, len(names) + 6
+        cols.append(noisegen.samples(noise_seed, base + j, n, A / g ** 2))
+        gains.append((f"x{c}.x{p}.dq", f"x{c}.vmem{p}", g))
+    for k, (a, b, g) in enumerate(gains):
+        if kind == "pwl":
+            out.append(noisegen.pwl(f"vnzp{k}", f"nzp{k}", cols[k]))
+        out += [f"rnzp{k} nzp{k} 0 1k noisy=0", f"gnzp{k} {a} {b} nzp{k} 0 {g:.10g}"]
+    if kind == "fs":
+        out += filesource("nz", cols, fs_path)
+    return out, len(gains)
 
 
 def _run(work, mode, ngspice, pdk, reads, dnf_path=None):
@@ -105,28 +124,44 @@ def _run(work, mode, ngspice, pdk, reads, dnf_path=None):
     global MODEL_DEVICES
     original, info = net.deck, {}
     cal = dnf_calendar(dnf_path, reads) if dnf_path else calendar(reads)
-    if mode == "pwlmodel":
-        ex = json.loads((HERE / "EXTRACT_nominal.json").read_text())
-        MODEL_DEVICES = sorted({k["device"] for o in ex["outputs"] if o["state"] != "preset" for k in o.get("kept", [])
-                                if k["kind"] != "res"})
+    if mode in ("pwlmodel", "fsmodel"):      # the union of the kept devices of the devnoise extraction, per cell
+        ex = json.loads((HERE / "DEVNOISE_nominal.json").read_text())
+        MODEL_DEVICES = sorted({k["device"] for o in ex["outputs"] if o["state"] != "preset" and o["cell"] == "a"
+                                for k in o["kept"] if k["kind"] != "res"})
     horizon = router.ORIGIN + cal["horizon"] * net.TU + 50e-6
 
     def deck(**kw):
         t = original(**kw)
-        if mode.startswith("pwl"):
+        if mode.startswith(("pwl", "fs")):
             t0 = time.time()
-            lines, info["sources"] = pwl_sources(t, 0 if mode == "pwlmodel" else int(mode[3:]), horizon)
+            kind = mode[:3] if mode.startswith("pwl") else "fs"
+            per_cell = 0 if mode.endswith("model") else int(mode[len(kind):])
+            fs_path = (Path(work) / f"{mode}.samples.txt").resolve()
+            lines, info["sources"] = pwl_sources(t, per_cell, horizon, kind=kind, fs_path=fs_path)
             t = t.replace("\n.end\n", "\n" + "\n".join(lines) + "\n.end\n")
             info["generation_s"] = time.time() - t0
             info["deck_MB"] = len(t) / 1e6
+            info["samples_file_MB"] = fs_path.stat().st_size / 1e6 if kind == "fs" else None
         return t
     net.deck = deck
+    if mode.startswith("fs"):            # the code model is loaded at start-up, before the deck, as ngspice requires
+        import shutil
+        copy = shutil.copyfile
+
+        def with_codemodel(src, dst, *a, **k):
+            r = copy(src, dst, *a, **k)
+            if Path(dst).name == ".spiceinit":
+                with open(dst, "a") as f:
+                    f.write(f"codemodel {CODEMODEL}\n")
+            return r
+        net.shutil.copyfile = with_codemodel
     r = router.run(Path(work) / mode, cal, Path(ngspice), Path(pdk), cells=CELLS, seed=None, section="tt",
                    noise=mode == "injected")
     import resource
     print(json.dumps(dict(mode=mode, sources=info.get("sources", 21 if mode == "injected" else 0), wall_s=r["wall_s"],
                           points=r["points"], simulated_ms=horizon * 1e3, pulses=sum(o["delivered"] for o in r["occurrences"]),
                           generation_s=info.get("generation_s"), deck_MB=info.get("deck_MB"),
+                          samples_file_MB=info.get("samples_file_MB"),
                           peak_rss_MB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024)))
 
 
@@ -176,6 +211,6 @@ if __name__ == "__main__":
     elif sys.argv[1] == "runs":
         runs(a[0], a[1], a[2], a[3], int(a[4]))
     elif sys.argv[1] == "dnf":                 # cost3.py dnf WORK OUT.json NGSPICE PDK DNF_PATH NEED
-        runs(a[0], a[1], a[2], a[3], int(a[5]), a[4], ("quiet", "injected", "pwlmodel", "pwl46"))
+        runs(a[0], a[1], a[2], a[3], int(a[5]), a[4], tuple(a[6:]) or ("quiet", "injected", "pwlmodel", "pwl46"))
     elif sys.argv[1] == "parse":
         parse(a[0], a[1], a[2], a[3], [float(x) for x in a[4:]])
