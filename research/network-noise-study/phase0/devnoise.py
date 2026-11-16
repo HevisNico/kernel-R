@@ -66,7 +66,10 @@ def op_run(work, text, seed, state, c, p, ngspice, pdk, cands=(), T=None):
     ctl += ["write op.raw all", "quit", ".endc", ".end"]
     stdout = model.spice(work, text.replace("\n.end\n", "\n") + "\n".join(ctl) + "\n", ngspice, pdk)
     trip = next((float(l.split()[1]) for l in stdout.splitlines() if l.startswith("TRIP ")), None)
-    ids = {l.split()[1]: float(l.split()[2]) for l in stdout.splitlines() if l.startswith("IDOP ")}
+    # @m[id] is the drain current of an nfet and minus the drain current of a pfet (ngspice's type sign): made the
+    # current into the drain for both
+    sign = {d: (1.0 if T[d]["kind"].startswith("nfet") else -1.0) for d in cands}
+    ids = {l.split()[1]: sign[l.split()[1]] * float(l.split()[2]) for l in stdout.splitlines() if l.startswith("IDOP ")}
     return raw_ascii(work / "op.raw"), trip, ids
 
 
@@ -117,7 +120,9 @@ def device_noise(work, full_text, cands, op, seed, ngspice, pdk):
         f"noise v({prev}) vref {FREQ} 1", "setplot noise1", "write noise.raw all", "quit", ".endc", ".end"]
     text = "\n".join(keep) + "\n" + "\n".join(drv) + "\n" + "\n".join(ctl) + "\n"
     stdout = model.spice(work, text, ngspice, pdk)
-    ids = {l.split()[1]: float(l.split()[2]) for l in stdout.splitlines() if l.startswith("ID ")}
+    # ngspice's branch current of vprobe is positive from dd{k} through the source to dd{k}x, out of the drain: the
+    # current into the drain is minus it (checked: the same magnitude as step 1, opposite sign, for nfets and pfets)
+    ids = {l.split()[1]: -float(l.split()[2]) for l in stdout.splitlines() if l.startswith("ID ")}
     r = raw_ascii(work / "noise.raw")
     f = r["frequency"]
     S = {}
