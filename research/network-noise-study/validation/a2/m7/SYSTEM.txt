@@ -1,0 +1,33 @@
+$ date -u
+Mon Nov 16 11:08:19 UTC 2026
+
+$ uptime
+ 11:08:19 up  1:20,  0 user,  load average: 2.78, 0.79, 0.27
+
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           16087        1869       13798          16         663       14217
+Swap:              0           0           0
+
+$ ps -eo pid,etimes,rss,args --sort=-rss | head -15
+  PID ELAPSED   RSS COMMAND
+ 2084      27 402508 /usr/bin/ngspice -b deck.spice
+ 2082      27 402480 /usr/bin/ngspice -b deck.spice
+ 2080      27 402412 /usr/bin/ngspice -b deck.spice
+  166    4844 295696 /opt/claude-code/bin/claude --preload /home/claude/.claude/remote/spare.sock
+ 2032      51 46024 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m7/v3_nominal_hold_r203.json nominal hold a 1 0.08 203 model
+ 2155      16 45960 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m7/v3_nominal_hold_r227.json nominal hold a 1 0.08 227 model
+ 2034      51 45900 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m7/v3_nominal_hold_r211.json nominal hold a 1 0.08 211 model
+ 2035      51 45880 /home/user/owner-prep/venv312/bin/python -B /home/user/kernel-R/research/network-noise-study/validation/vrun.py frozen /tmp/a2_m7/v3_nominal_hold_r219.json nominal hold a 1 0.08 219 model
+  156    4844 41768 /usr/local/bin/environment-manager task-run --stdin --session cse_01TzF7ZURMTFfUHd6GZNci8b --session-mode resume-cached --upgrade-claude-code=False
+ 2210       0 31352 /usr/bin/ngspice -b deck.spice
+ 1997      52 29580 /home/user/owner-prep/venv312/bin/python -B vplan.py run /tmp/a2_m7 machine=7
+    1    4845  7708 /process_api --firecracker-init --addr 0.0.0.0:2024 --max-ws-buffer-size 32768 --block-local-connections --log-vsock-port 5002 --control-vsock-port 5001 --listen-vsock-port 2024 --tcp-readiness-only
+ 2223       0  4172 ps -eo pid,etimes,rss,args --sort=-rss
+ 2182       7  3400 /bin/bash -c source /root/.claude/shell-snapshots/snapshot-bash-1794822464855-y1byzl.sh 2>/dev/null || true && \builtin export BUN_OPTIONS="--smol${BUN_OPTIONS:+ $BUN_OPTIONS}" && \builtin shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'which'; \builtin unset -f -- 'which'; } >/dev/null 2>&1 || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'for h in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24; do for m in $(seq 1 60); do grep -q "done machine=7" /tmp/a2_m7/plan.log 2>/dev/null && { echo DONE; exit 0; }; sleep 60; done; echo "hour $h"; /tmp/claude-0/scr/collect.sh; done' < /dev/null && pwd -P >| /tmp/claude-51d6-cwd
+
+$ dmesg -T | grep -i -E "oom|killed process|out of memory"
+
+$ df -h /tmp
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G  9.9G   29G  26% /
