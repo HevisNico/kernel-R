@@ -507,7 +507,8 @@ def extraction_of(seed, mach, recs):
         parts.append(json.loads((Path(rec["folder"]) / "part.json").read_text()))
     if missing:
         return None, missing
-    return devnoise.merge(parts, c4.SECTION, seed, list(c4.CELLS), list(noisemodel_states())), []
+    section = "tt" if seed is None else c4.SECTION         # the nominal cell (rehearsal) has no mismatch, as run4.py runs it
+    return devnoise.merge(parts, section, seed, list(c4.CELLS), list(noisemodel_states())), []
 
 
 def noisemodel_states():
@@ -602,8 +603,8 @@ def main():
             i = args.index("--extractions")
             args, ext = args[:i], args[i + 1:]
         print(c4.require_pinned())
-        res, files = predictions(before_m(), args, ext, reh)
         out = Path(sys.argv[2])
+        res, files = predictions(before_m(out / c4.BASE), args, ext, reh)
         for path, text in files.items():
             (out / path).parent.mkdir(parents=True, exist_ok=True)
             (out / path).write_text(text)
