@@ -1,5 +1,8 @@
 # Campaign 4: report
 
+This report is written by hand: the frozen analysis (`analyze.py`) starts from `PREDICTED.json`, which does not
+exist.
+
 ## In plain language
 
 **What campaign 4 set out to show.** Three SKY130 cells, wired as a small network, learn the Boolean function
@@ -12,9 +15,12 @@ the networks without noise (Q) and with noise (N1, N2, N3) and compare.
 
 1. The noise study did not validate its device noise model, so campaign 4 took the injected default noise model
    ([amendment 7][a7]).
-2. The rehearsal of the frozen code on the nominal cell was run, its first attempt interrupted by an operator error
-   and its second completed after a defect in a final audit ([amendments 8][a8] and [9][a9]). Its record set the
-   time limits of every stage.
+2. The rehearsal of the frozen code on the nominal cell was run: its first attempt was interrupted by an operator
+   error, and its second was completed after a defect in a final audit was fixed ([amendment 8][a8]). Its record
+   ([`REHEARSAL.json`][rehearsal]) shows every check passed (reproducibility under both models, the operating point,
+   memory, the split extraction's identity, the gate on the rehearsal's prediction, the seed guard, the stage files'
+   safeguards and the analysis) except the zero-amplitude check, which concerns only the device model
+   ([amendment 9][a9]). The record set the time limits of every stage.
 3. Stage M ran the 24 calibration decks of the 12 instances, two per instance (guard on, guard off), on two
    machines. Every guard-on deck, and one guard-off deck (seed 7511), reached its time limit of 660 s; the other 11
    decks completed ([amendment 11][a11]).
@@ -62,6 +68,7 @@ states no cause.
 | The rehearsal's zero-amplitude check failed ([amendment 9][a9]): FIRE dates up to 0.358 µs apart (tolerance 0.1 µs) | the check tests `xtrtol=7`, the solver setting of the device model's runs | after the record, before `BEFORE_M.md` | none under the injected model, which has no XSPICE source; it blocks any run under the device model; `all_checks_passed` stays false |
 | [Amendment 10][a10]: `BEFORE_M.md`'s caps are upper bounds; limits computed at each stage | amendment 5 has the caps use the rehearsal's limits; the frozen code uses 1.3 times the expected cost | before `BEFORE_M.md` | none: it records the 660 s limit |
 | Machine `b`'s numpy reinstalled, and its remote URL set | its RECORD differed (script shebang); its remote's letter case | before its inventory; before its launch | none |
+| Machine `a` restarted while nothing ran: before rehearsal attempt 2 (`uptime -s` 05:34:37, [attempt 1's note][run1]) and before the completion (12:25:44, [the completion's note][run2c]) | not known | before attempt 2; before the completion | none |
 | Machine `b` restarted before its launch (boot 14:36:37, inventory 14:11:18) | not known | before any run on `b` | none: only the boot differed from the inventory; launched by the owner's decision, the boot recorded at launch |
 | Machine `b` launched (14:54:45) before the coordinator's hold on it arrived | the hold arrived after the launch | at its launch | none: the owner lifted the hold; nothing was relaunched |
 | Restarts after the stage: `a` at 16:03:27, `b` at 15:42:22 and 16:09:36 | not known | after every run had ended | none |
