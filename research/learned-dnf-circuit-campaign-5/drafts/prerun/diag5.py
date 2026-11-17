@@ -35,7 +35,7 @@ def exact_layer1(t, Q1):
     for c in cells:
         for k in range(Q1 + 1):
             for r in reads:
-                row = [0.0] * len(names)
+                row = [0] * len(names)
                 row[names.index(f"h_{c}")] = 1
                 for q in P.ports(r):
                     row[names.index(f"g_{c}{q}")] = 1
