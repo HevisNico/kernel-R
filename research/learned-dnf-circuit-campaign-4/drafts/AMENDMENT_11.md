@@ -44,8 +44,8 @@ Eleven runs completed; the thirteen others reached their time limit and are miss
 
 ## 2. The collection
 
-The kit's `collect` refused machine `a`'s evidence ("Evidence symlink cannot be silently copied or omitted"): each run
-stopped at its limit left a symbolic link `evidence/pdk -> /home/user/campaign/pdk` in its folder (6 on `a`, 7 on
+The kit's `collect` refused machine `a`'s evidence ("Evidence symlink cannot be silently copied or omitted"): each
+run stopped at its limit left a symbolic link `evidence/pdk -> /home/user/campaign/pdk` in its folder (6 on `a`, 7 on
 `b`). The refusal left a partial copy of 17 of the 90 files of `a`, which stays as it is and is not used. On `b`, the
 kit's `collect` was not run.
 
