@@ -17,10 +17,10 @@ computes them otherwise. This file states what `BEFORE_M.md` records and where e
 3. **`I` is sized by the expected cost alone** (amendment 5, section 2), and is 12 either way: with the costs of
    `BEFORE_M.md`, 12 instances need 7.61 h of expected compute and 13 would need 8.07 h, with or without the
    rehearsal's limits.
-4. **Under the limits basis** (calibration deck 0.549, run without noise 0.700, untrained control run 0.363, noisy run
-   under the injected model 0.782), the frozen code gives, for `I` = 12: M, 24 calibration decks at 660 s each, cap
-   5 360 s; Q, at need 4, the runs without noise at 770 s and the untrained control run at 180 s, cap 3 752 s; N1, N2
-   and N3, at need 4, the noisy runs at 1 340 s, cap 6 412 s each. The real limits of Q's and N's runs come later,
-   from the needs in `PREDICTED.json`.
-5. **`reuse_trip: false`** in `BEFORE_M.md` means **not applicable**: there is no extraction under the injected default
-   (amendment 7, section 2, item 2), and the frozen code writes the Boolean for that case.
+4. **Under the limits basis** (calibration deck 0.549, run without noise 0.700, untrained control run 0.363, noisy
+   run under the injected model 0.782), the frozen code gives, for `I` = 12: M, 24 calibration decks at 660 s each,
+   cap 5 360 s; Q, at need 4, the runs without noise at 770 s and the untrained control run at 180 s, cap 3 752 s;
+   N1, N2 and N3, at need 4, the noisy runs at 1 340 s, cap 6 412 s each. The real limits of Q's and N's runs come
+   later, from the needs in `PREDICTED.json`.
+5. **`reuse_trip: false`** in `BEFORE_M.md` means **not applicable**: there is no extraction under the injected
+   default (amendment 7, section 2, item 2), and the frozen code writes the Boolean for that case.
