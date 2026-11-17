@@ -1,4 +1,5 @@
-"""Campaign 4, amendment 8: the structural comparison of two JSON files of the gate (CASES.json, MUTATIONS.json), for a
+"""Campaign 5 (campaign 4's structural_compare.py at 093995b, unchanged but this line; its amendment 8, PREDICTION.md
+10.2): the structural comparison of two JSON files of the gate (CASES.json, MUTATIONS.json), for a
 CI runner without AVX-512, where OpenBLAS cannot run the SkylakeX kernel the committed files were written with.
 
     structural_compare.py GENERATED.json COMMITTED.json

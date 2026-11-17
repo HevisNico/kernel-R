@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Campaign 4, amendment 8: the cases of check.sh's audit (the subset rule).
+# Campaign 5 (campaign 4's audit_cases.sh at 093995b, adapted to campaign 5's folders): the cases of check.sh's audit
+# (the subset rule, PREDICTION.md 7.3).
 #
 # Each negative case is a file of audit-cases/, written by hand and never by the campaign code, whose theorem rests on
 # an axiom outside [propext, Classical.choice, Quot.sound] with no forbidden token in its text. check.sh must refuse
@@ -27,7 +28,7 @@ expect_refused NegNative NativeTest.four_native._native.native_decide.ax_1_1 "$h
 expect_refused NegSorry sorryAx "$here/audit-cases/NegSorry.lean"
 expect_refused NegOwnAxiom OwnAxiomTest.own_false "$here/audit-cases/OwnAxiomDecl.lean" "$here/audit-cases/NegOwnAxiom.lean"
 
-campaign=$(find rehearsal -name '*.lean' -not -path '*/audit-cases/*' | sort)
+campaign=$(find expected drafts/prerun -name '*.lean' -not -path '*/audit-cases/*' | sort)
 [[ -n "$campaign" ]] || fail "no campaign Lean file found"
 if grep -nE 'run_cmd|addDecl|axiomDecl|sorryAx|warningAsError|_native|trustCompiler|ofReduceBool|^import Lean$' $campaign; then
   fail "a campaign Lean file uses a construct of the negative cases"

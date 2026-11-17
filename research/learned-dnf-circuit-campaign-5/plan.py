@@ -48,14 +48,24 @@ COSTS = dict(quiet_need4_s=814.0, noisy_need4_s=dict(device=1033.0, injected=131
 OUTPUTS = dict(cal=["evidence/input.spice", "evidence/session.log", "evidence/trace.raw", "evidence/result.json", "record.json", "noise.sha256"],
                network=["evidence/input.spice", "evidence/session.log", "evidence/trace.raw", "evidence/result.json", "record.json", "noise.sha256"],
                extract=["part.json", "record.json", "noise.sha256"])
-FROZEN = [f"{BASE}/{n}" for n in ("PREDICTION.md", "AMENDMENT_1.md", "AMENDMENT_2.md", "AMENDMENT_3.md", "AMENDMENT_4.md", "AMENDMENT_5.md", "c4.py", "noisemodel.py", "session4.py", "plans4.py", "reads4.py", "run4.py", "predicted.py",
-                                   "gate4.py", "cases.py", "mirror_mutations.py", "plan.py", "analyze.py", "rehearsal.py", "test_campaign.py",
-                                   "check.sh", "noise/devnoise.py", "noise/model.py", "noise/pilot.py", "noise/noisegen.py", "noise/compare.py",
-                                   "noise/README.md")] + [
-    "research/learned-dnf-circuit/dnf.py", "research/network-circuit/net.py", "research/network-circuit/router.py",
-    "research/network-circuit/measure.py", "research/circuit/cell.spice", "research/circuit/blocks.spice", "research/circuit/noise.json",
-    "research/circuit/spiceinit.txt", "research/circuit/repetition/fakepid.c", f"{CLOSURE}/launchkit/launch.py", f"{CLOSURE}/runtime/spinit",
-    f"{CLOSURE}/sim.py", f"{CLOSURE}/junction/netlist.py", f"{CLOSURE}/junction/areas.csv"]
+# The frozen files (PREDICTION.md, 10.6): every file of the campaign's folder that the runs, the predictions, the gate,
+# the analysis, the rehearsal and CI read, and the files outside it that they import or launch. A stage's source commit
+# may differ from the frozen commit in none of them (safeguard ii), and every manifest binds each by its SHA-256.
+FROZEN = [f"{BASE}/{n}" for n in (
+    "PREDICTION.md", "c4.py", "noisemodel.py", "session4.py", "plans4.py", "reads4.py", "run4.py", "predicted.py", "gate4.py", "cases.py",
+    "mirror_mutations.py", "plan.py", "analyze.py", "rehearsal.py", "collect.py", "test_campaign.py", "check.sh", "audit_cases.sh",
+    "structural_compare.py", "m8_case.py", "noise/devnoise.py", "noise/model.py", "noise/pilot.py", "noise/noisegen.py", "noise/compare.py",
+    "noise/README.md", "audit-cases/NativeDecl.lean", "audit-cases/NegNative.lean", "audit-cases/NegOwnAxiom.lean", "audit-cases/NegSorry.lean",
+    "audit-cases/OwnAxiomDecl.lean", "expected/CASES.json", "expected/Gate5Cases.lean", "expected/Gate5CasesTargets.lean",
+    "expected/MUTATIONS.json", "expected/MirrorMutations.lean", "expected/mutations.log", "expected/python.log")] + [
+    "research/learned-dnf-circuit/dnf.py", "research/learned-dnf-circuit/CALIBRATION.json", "research/network-circuit/net.py",
+    "research/network-circuit/router.py", "research/network-circuit/measure.py", "research/circuit/cell.spice", "research/circuit/blocks.spice",
+    "research/circuit/noise.json", "research/circuit/spiceinit.txt", "research/circuit/repetition/fakepid.c", f"{CLOSURE}/launchkit/launch.py",
+    f"{CLOSURE}/runtime/spinit", f"{CLOSURE}/sim.py", f"{CLOSURE}/junction/netlist.py", f"{CLOSURE}/junction/areas.csv",
+    ".github/workflows/learned-dnf-circuit-campaign-5.yml"] + [f"research/learned-coincidence/{m}.lean" for m in (
+    "Target", "Recognition", "TwoLayerTarget", "MonotoneTarget", "MonotoneSupport", "MonotoneRecognition", "MonotoneCharacterization",
+    "MonotoneOneSidedTarget", "MonotoneOneSidedRecognition", "MonotonePremiseTargets", "MonotonePremiseCompletenessTargets",
+    "MonotonePremiseSoundness", "MonotonePremiseCompleteness")]
 WORKFLOWS = ["Learned DNF circuit campaign 5"]
 
 
