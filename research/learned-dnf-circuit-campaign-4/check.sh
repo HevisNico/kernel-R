@@ -17,12 +17,31 @@
 #
 # PYTHON names the interpreter; it must be the pinned one (amendment 3, section 3: Python 3.12.3, numpy 2.3.5, and in
 # the pinned venv the SHA-256 of both), which is recorded and checked first. Default: the pinned venv.
+#
+# The kernel (amendment 8): numpy's OpenBLAS is pinned to its SkylakeX kernel, the one the files under rehearsal/ were
+# written with, on a CPU with avx512f; on another CPU check.sh refuses, except in CI with C4_CI_STRUCTURAL=1, where the
+# JSON files are compared structurally (structural_compare.py) instead of byte for byte. The Lean files are compared
+# byte for byte, compiled and audited on every CPU.
 set -euo pipefail
 
 cd "$(dirname "$0")"
 here=$PWD
 theory=$(cd ../learned-coincidence && pwd)
 python=${PYTHON:-/home/user/owner-prep/venv312/bin/python}
+cpu=$(grep -m1 '^model name' /proc/cpuinfo | cut -d: -f2- | sed 's/^ *//')
+if grep -qw avx512f /proc/cpuinfo; then
+  export OPENBLAS_CORETYPE=SkylakeX
+  compare=bytes
+elif [[ "${C4_CI_STRUCTURAL:-}" == 1 ]]; then
+  compare=structural
+else
+  echo "check.sh: refused (amendment 8): this CPU ($cpu) has no avx512f, so OpenBLAS cannot run the SkylakeX kernel the" \
+    "files under rehearsal/ were written with" >&2
+  exit 1
+fi
+core=$(OPENBLAS_VERBOSE=2 "$python" -B -c 'import numpy' 2>&1 | grep -m1 -o 'Core: .*' || true)
+[[ "$compare" != bytes || "$core" == "Core: SkylakeX" ]] || { echo "check.sh: OpenBLAS reports '$core', not SkylakeX" >&2; exit 1; }
+echo "check.sh: CPU $cpu; OpenBLAS ${core:-core not reported}; comparison of the generated JSON files: $compare"
 "$python" -B -c 'import c4; print(c4.require_pinned())'
 build=$(mktemp -d)
 trap 'rm -rf "$build"' EXIT
@@ -73,11 +92,17 @@ tail -n +2 "$build/cases.log" | cmp - <(tail -n +2 rehearsal/gate-cases-4/python
 "$python" -B gate4.py cases "$build/CASES.json" "$build/Gate4Cases.lean"
 "$python" -B mirror_mutations.py "$build/MUTATIONS.json" "$build/MirrorMutations.lean" > "$build/mutations.log"
 grep -q "^mirror mutation test: passed$" "$build/mutations.log"
-for pair in gate-cases-4/CASES.json gate-cases-4/Gate4Cases.lean gate-cases-4/Gate4CasesTargets.lean \
-  mirror-mutations-3/MUTATIONS.json mirror-mutations-3/MirrorMutations.lean; do
+for pair in gate-cases-4/Gate4Cases.lean gate-cases-4/Gate4CasesTargets.lean mirror-mutations-3/MirrorMutations.lean; do
   cmp "$build/$(basename "$pair")" "rehearsal/$pair"
 done
-echo "generated files: equal to rehearsal/"
+for pair in gate-cases-4/CASES.json mirror-mutations-3/MUTATIONS.json; do
+  if [[ "$compare" == bytes ]]; then
+    cmp "$build/$(basename "$pair")" "rehearsal/$pair"
+  else
+    "$python" -B structural_compare.py "$build/$(basename "$pair")" "rehearsal/$pair"
+  fi
+done
+echo "generated files: equal to rehearsal/ (Lean files byte for byte; JSON files: $compare)"
 
 audit "$build/Gate4Cases.lean"
 audit "$build/Gate4CasesTargets.lean"

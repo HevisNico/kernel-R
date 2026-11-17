@@ -25,6 +25,10 @@ jobs:
   campaign:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    env:
+      # amendment 8: on a runner without AVX-512, check.sh compares the generated JSON files structurally; it states the
+      # CPU, the OpenBLAS core and the comparison it made
+      C4_CI_STRUCTURAL: "1"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Python 3.12.3 with numpy 2.3.5 (amendment 3, section 3)

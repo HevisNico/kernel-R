@@ -16,6 +16,7 @@ tested again here, on the frozen code of this commit.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -37,6 +38,20 @@ STAGES = ("M", "X", "E", "N", "MEMD", "MEMI", "GUARD")      # attempt 2's stages
 
 def git_of(repo):
     return lambda *args: R.sh(["git", *args], repo).strip()
+
+
+def kernel():
+    """Amendment 8: the completion's numbers are those of OpenBLAS's SkylakeX kernel, as attempt 2's were. It refuses
+    to run on a CPU without avx512f, or without OPENBLAS_CORETYPE=SkylakeX set by its wrapper (numpy reads it once,
+    when it is loaded), and records the CPU model and the core OpenBLAS reports."""
+    info = Path("/proc/cpuinfo").read_text()
+    cpu = next(l.split(":", 1)[1].strip() for l in info.splitlines() if l.startswith("model name"))
+    assert "avx512f" in info.split(), f"refused (amendment 8): this CPU ({cpu}) has no avx512f"
+    assert os.environ.get("OPENBLAS_CORETYPE") == "SkylakeX", "refused (amendment 8): OPENBLAS_CORETYPE=SkylakeX must be set by the wrapper"
+    p = subprocess.run([sys.executable, "-B", "-c", "import numpy"], env=dict(os.environ, OPENBLAS_VERBOSE="2"), capture_output=True, text=True)
+    core = re.search(r"Core: (\S+)", p.stdout + p.stderr)
+    assert core and core.group(1) == "SkylakeX", f"refused (amendment 8): OpenBLAS reports {core.group(0) if core else 'no core'}"
+    return dict(cpu_model=cpu, avx512f=True, OPENBLAS_CORETYPE=os.environ["OPENBLAS_CORETYPE"], openblas_core=core.group(1))
 
 
 def attempt_checks(attempt, meta):
@@ -79,6 +94,7 @@ def main():
     p.add_argument("--report", type=Path, required=True)
     a = p.parse_args()
     print(c4.require_pinned())
+    numerics = kernel()
     started = time.time()
     attempt, work = a.attempt.resolve(), a.work.resolve()
     work.mkdir(parents=True, exist_ok=False)
@@ -106,7 +122,7 @@ def main():
                   runs_commit=RUNS_COMMIT, frozen_commit=head, frozen_tree=tree, source_commit=head, differing_files=differing,
                   frozen_files={n: hashlib.sha256((ROOT / n).read_bytes()).hexdigest() for n in plan.FROZEN},
                   attempt=dict(work=str(attempt), log_tail=(a.meta / "rehearsal.log").read_text().splitlines()[-3:], checks_before_completion=pre),
-                  interpreter=c4.interpreter(), stages={}, checks={}, reuse_trip=before["reuse_trip"],
+                  interpreter=c4.interpreter(), numerics=numerics, stages={}, checks={}, reuse_trip=before["reuse_trip"],
                   no_reuse_supplement="not run: the trip value is reused in the rehearsal (amendment 5, section 5)")
     for st in STAGES:                                  # attempt 2's stages, from the kit's records (their stage wall times were lost)
         for m in "ab":
