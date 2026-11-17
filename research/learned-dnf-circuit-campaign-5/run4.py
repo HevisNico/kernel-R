@@ -1,4 +1,5 @@
-"""One run of campaign 4, as the launch kit starts it.
+"""One run of campaign 5, as the launch kit starts it (campaign 4's run4.py at 093995b, adapted: the seed guard of
+campaign 5, the noise-model guard, the refusal of extraction runs).
 
   run4.py --out DIR --ngspice BIN --pdk DIR --id ID --seed S|none --kind cal --guard on|off
   run4.py ... --kind extract --cell a --state hold --port 1|none --isolation 0|1 --reuse-trip 0|1 --instances I
@@ -12,10 +13,15 @@ memory) and `noise.sha256`, the fingerprint of the noise the run drew: the SHA-2
 model, of its first trnoise values under the injected model, of zeros without noise, and of the text "no transient
 noise" for an extraction. No word, output or score is computed or printed here.
 
-Seed guard (PREDICTION.md, Noise-model extraction): a mismatch seed is accepted only if it is one of 7501 to
-7500 + I (I from --instances, which the manifests take from BEFORE_M.md) and the run is inside a launch of the
-kit (its folder holds the record the kit wrote for it, status `started`, in the STATE.json of the folder above).
-The nominal cell (no seed) is for the rehearsal.
+Seed guard (PREDICTION.md, 10.6): a campaign seed is accepted only if it is one of 7601 to 7600 + I (I from
+--instances, which the manifests take from BEFORE_M.md) and the run is inside a launch of the kit (its folder holds
+the record the kit wrote for it, status `started`, in the STATE.json of the folder above). A development seed (7691 to
+7693) is accepted only inside a launch of the kit for a rehearsal stage (--stage naming RC, RM, RQ, RN or RMEM). The
+nominal cell (no seed) is for the rehearsal and CI. Every other seed, 7501 to 7512 included, is refused before any
+deck is written.
+
+Noise-model guard (PREDICTION.md, 10.6 and section 6): a run that asks for any noise model but none or the injected
+one, and any extraction run, is refused before any simulation.
 """
 import argparse
 import hashlib
@@ -49,11 +55,25 @@ def inside_kit(out):
     return s.get("status") == "running" and any(r.get("id") == Path(out).name and r.get("status") == "started" for r in s.get("records", []))
 
 
-def guard(seed, instances, out):
+REHEARSAL_STAGES = ("RC", "RM", "RQ", "RN", "RMEM")
+
+
+def guard(seed, instances, out, stage_name=None):
     if seed is None:
         return
-    assert instances >= 1 and c4.FIRST_SEED <= seed < c4.FIRST_SEED + instances, f"seed {seed} is not one of 7501 to 7500 + {instances}"
-    assert inside_kit(out), "a mismatch seed of campaign 4 runs only inside a launch of the kit"
+    if seed in c4.DEV_SEEDS:
+        assert stage_name in REHEARSAL_STAGES, f"refused: development seed {seed} runs only in a rehearsal stage, not {stage_name}"
+        assert inside_kit(out), "refused: a development seed of campaign 5 runs only inside a launch of the kit"
+        return
+    assert instances >= 1 and c4.FIRST_SEED <= seed < c4.FIRST_SEED + instances, f"refused: seed {seed} is not one of 7601 to 7600 + {instances}"
+    assert stage_name not in REHEARSAL_STAGES, f"refused: campaign seed {seed} in rehearsal stage {stage_name}"
+    assert inside_kit(out), "refused: a mismatch seed of campaign 5 runs only inside a launch of the kit"
+
+
+def noise_guard(kind, noise):
+    """Refuses, before any simulation, a run under any noise model but none or the injected one, and any extraction."""
+    assert kind != "extract", "refused: no extraction in campaign 5 (the injected model only, PREDICTION.md, section 6)"
+    assert noise in c4.NOISE_MODELS, f"refused: noise model {noise!r}; campaign 5 runs the injected model only (PREDICTION.md, section 6)"
 
 
 def trnoise_fingerprint(tr, cells):
@@ -74,7 +94,7 @@ def sha(path):
 
 
 def stage_check(stage):
-    """Safeguard (i) (amendment 5, section 1, item 2): the governing protocol named by the stage file has, in the
+    """Safeguard (i) (PREDICTION.md, 10.6): the governing protocol named by the stage file has, in the
     repository, the SHA-256 the stage file records; otherwise the run is refused, before any simulation."""
     if stage is None:
         return None
@@ -89,9 +109,10 @@ def stage_check(stage):
 def run(a):
     began = time.time()
     out = Path(a.out)
+    noise_guard(a.kind, a.noise)
     stage = stage_check(a.stage)
     seed = None if a.seed == "none" else int(a.seed)
-    guard(seed, a.instances, out)
+    guard(seed, a.instances, out, stage and stage["stage"])
     section = "tt" if seed is None else c4.SECTION
     rec = dict(id=a.id, kind=a.kind, section=section, seed=seed, stage=stage)
     if a.kind == "extract":

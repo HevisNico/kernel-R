@@ -1,19 +1,24 @@
-"""Campaign 4: the runs of each stage, their costs, the sizing rule, BEFORE_M.md and the manifests of the kit.
+"""Campaign 5: the runs of each stage, their costs, the sizing rule, BEFORE_M.md and the manifests of the kit.
 
-  plan.py size [COSTS.json]                                  the expected compute and stage caps for I = 1..15
-  plan.py before-m DECISIONS.json BEFORE_M.md                 BEFORE_M.md from the noise study's outcome
-  plan.py stage-file STAGE                                    STAGE_<STAGE>.md, the stage's protocol (amendment 5, section 1)
-  plan.py runs STAGE                                          STAGE_<STAGE>_RUNS.json, the stage's runs (M, M1, M2, E1, ..., Q,
-                                                              N1, N2, N3; E from MEASURED.json, Q and N from PREDICTED.json)
+Campaign 4's plan.py (093995b), adapted to campaign 5's PREDICTION.md: the time limit of a run is twice its expected
+cost rounded up to 10 s (10.4), or the rehearsal's min(3 x, 3 580 s) (11.2), never a ratio from a rehearsal; Q and each
+N stage are split by seed by the rule of M when they do not fit the kit (10.5); every stage name is mapped to its
+governing protocol from a closed list (10.6); the injected model only (section 6).
+
+  plan.py size [COSTS.json]                                  I, the expected compute and the stage caps for I = 1..20
+  plan.py before-m DECISIONS.json BEFORE_M.md                 BEFORE_M.md (10.8); DECISIONS.json names the rehearsal's record
+  plan.py stage-file STAGE                                    STAGE_<STAGE>.md, the stage's protocol (PREDICTION.md, 10.6)
+  plan.py runs STAGE                                          STAGE_<STAGE>_RUNS.json, the stage's runs (M1, M2 from
+                                                              BEFORE_M.md; Q, N1, N2, N3 and their parts from PREDICTED.json)
   plan.py manifest STAGE STAGE_COMMIT SOURCE_COMMIT FROZEN_COMMIT OUT.json   the stage's manifest of the kit, from its
                                                               run list, after safeguard (ii) on SOURCE_COMMIT
-  plan.py measured MEASURES_DIR... MEASURED.json              the measured instances after stage M (for the E manifests)
 
-Stages, in the fixed order of PREDICTION.md: M (M1, M2 if needed: the calibration decks), E1, E2, ... (the
-extraction per cell, state and output, device model only), Q (the runs without noise with the skew control, and the
-untrained control run), N1, N2, N3 (the noisy runs of round 1, 2, 3). M and E have PREDICTION.md as their protocol;
-Q and N1 to N3 have PREDICTED.json. Nothing here is chosen at launch time: the runs follow from BEFORE_M.md,
-from the measured instances (MEASURED.json, written by `predicted.py` from stage M), and from PREDICTED.json.
+Stages, in the fixed order of PREDICTION.md (10.5): M1, M2 (the calibration decks), Q (the runs without noise with the
+skew control, and the untrained control run), N1, N2, N3 (the noisy runs of round 1, 2, 3), each cut into parts by
+seed if it does not fit the kit. M1 and M2 have PREDICTION.md as their governing protocol; Q and N1 to N3 have
+PREDICTED.json. Nothing here is chosen at launch time: the runs follow from BEFORE_M.md and from PREDICTED.json.
+The functions of campaign 4's E stages (extract_runs, the device model) are kept unchanged and unused: the runner
+refuses them (PREDICTION.md, section 6).
 
 The cost model (COST_MODEL_DECISION.md, 2ffe04d): wall times measured on the nominal cell, three-cell decks, four
 at a time, scaled to a run's calendar by the ratio of `dnf.cost` for that calendar to `dnf.cost` for the measured
@@ -51,7 +56,7 @@ FROZEN = [f"{BASE}/{n}" for n in ("PREDICTION.md", "AMENDMENT_1.md", "AMENDMENT_
     "research/network-circuit/measure.py", "research/circuit/cell.spice", "research/circuit/blocks.spice", "research/circuit/noise.json",
     "research/circuit/spiceinit.txt", "research/circuit/repetition/fakepid.c", f"{CLOSURE}/launchkit/launch.py", f"{CLOSURE}/runtime/spinit",
     f"{CLOSURE}/sim.py", f"{CLOSURE}/junction/netlist.py", f"{CLOSURE}/junction/areas.csv"]
-WORKFLOWS = ["Learned DNF circuit campaign 4"]
+WORKFLOWS = ["Learned DNF circuit campaign 5"]
 
 
 def ms(slots):
@@ -91,8 +96,7 @@ def expected(run, cost, model):
     return base * dcost(slots) / REF
 
 
-def ceil10(x):
-    return 10 * math.ceil(x / 10 - 1e-9)
+ceil10 = c4.ceil10
 
 
 def run_kind(run):
@@ -106,17 +110,16 @@ def run_kind(run):
     return "quiet" if run["noise"] == "none" else "noisy_" + run["noise"]
 
 
-def with_limits(run, cost, model, rehearsal=None):
-    """expected_s: the cost model's expected cost (it sizes I and the expected compute). With the rehearsal's limits
-    basis (REHEARSAL.json: per run kind, the largest ratio of a rehearsal run's measured wall time to its expected
-    cost), the estimate is that ratio times the expected cost, and the time limit 1.3 times it, never above 1.3
-    times the cost model (PREDICTION.md, Time limits). Without it (sizing before the rehearsal), 1.3 times the cost
-    model."""
+def with_limits(run, cost, model, rehearsal=False):
+    """expected_s: the cost model's expected cost (it sizes I and the expected compute). timeout_s: the campaign's limit,
+    10 ceil(2 x expected / 10) (PREDICTION.md, 10.4), or, for a run of the rehearsal, min(10 ceil(3 x expected / 10),
+    3 580 s) (11.2); campaign_limit_s: the campaign's limit in both cases, against which the 0.75 rule judges a
+    rehearsal run (11.4). estimate_s: the expected cost rounded up to 10 s, never above the limit. No ratio from any
+    run enters a limit."""
     e = expected(run, cost, model)
-    ratio = (rehearsal or {}).get(run_kind(run))
-    est = e if ratio is None else ratio * e
-    limit = min(ceil10(c4.MARGIN * est), c4.MARGIN * e)        # rounded up to 10 s, then capped (amendment 4, a)
-    return dict(run, estimate_s=min(ceil10(est), limit), timeout_s=limit, expected_s=e)
+    campaign = c4.limit(e)
+    limit = c4.rehearsal_limit(e) if rehearsal else campaign
+    return dict(run, estimate_s=min(ceil10(e), limit), timeout_s=limit, campaign_limit_s=campaign, expected_s=e)
 
 
 def machine_cap(runs):
@@ -150,6 +153,7 @@ def extract_runs(seed, machine, reuse_trip):
 
 
 def network_run(seed, machine, needs, scenario, model, extraction=None):
+    assert model == "injected", "the injected model only (PREDICTION.md, section 6)"
     noise = "none" if scenario in ("quiet", "untrained") else model
     control = dict(quiet="skew", untrained="untrained").get(scenario)
     rnd = int(scenario[1]) if scenario.startswith("n") else 0
@@ -168,7 +172,7 @@ def split(runs_of, items_a, items_b, limit=c4.MAX_BUDGET_S):
     raise ValueError("a single instance does not fit a stage")
 
 
-def stages(I, model, reuse_trip, cost, measured=None, needs=None, control=None, rehearsal=None, extractions=None):
+def stages(I, model, reuse_trip, cost, measured=None, needs=None, control=None, rehearsal=False, extractions=None):
     """Every stage of the campaign for I instances. measured: the measured seeds (default: the first
     round(0.92 I) of each machine, for sizing); needs: per measured seed (default 4 everywhere); control: the seed of
     the control instance (default the first measured seed)."""
@@ -183,28 +187,30 @@ def stages(I, model, reuse_trip, cost, measured=None, needs=None, control=None, 
     out = []
     M = split(lambda seed: [lim(r) for r in cal_runs(seed, c4.machine_of(seed, I))], s["a"], s["b"])
     out += [(f"M{j + 1}" if len(M) > 1 else "M", x) for j, x in enumerate(M)]
+    if model != "injected":
+        raise ValueError("the injected model only (PREDICTION.md, section 6)")
     meas = dict(a=[x for x in s["a"] if x in measured], b=[x for x in s["b"] if x in measured])
-    if model == "device":
-        E = split(lambda seed: [lim(r) for r in extract_runs(seed, c4.machine_of(seed, I), reuse_trip)], meas["a"], meas["b"])
-        out += [(f"E{j + 1}", x) for j, x in enumerate(E)]
-    Q = []
-    for mach in ("a", "b"):
-        for seed in meas[mach]:
-            Q.append(lim(network_run(seed, mach, needs[seed], "quiet", model)))
-            if seed == control:
-                Q.append(lim(network_run(seed, mach, needs[seed], "untrained", model)))
-    out.append(("Q", Q))
+    def q_of(seed):
+        mach = c4.machine_of(seed, I)
+        r = [lim(network_run(seed, mach, needs[seed], "quiet", model))]
+        return r + ([lim(network_run(seed, mach, needs[seed], "untrained", model))] if seed == control else [])
+    out += parts("Q", split(q_of, meas["a"], meas["b"]))
     for k in (1, 2, 3):
-        N = [lim(network_run(seed, mach, needs[seed], f"n{k}", model, (extractions or {}).get(seed))) for mach in ("a", "b") for seed in meas[mach]]
-        out.append((f"N{k}", N))
+        n_of = lambda seed, k=k: [lim(network_run(seed, c4.machine_of(seed, I), needs[seed], f"n{k}", model))]
+        out += parts(f"N{k}", split(n_of, meas["a"], meas["b"]))
     return out
+
+
+def parts(name, pieces):
+    """The stage's name, or its parts' names (name.1, name.2, ...) when the rule of split cut it (PREDICTION.md, 10.5)."""
+    return [(name if len(pieces) == 1 else f"{name}.{j + 1}", x) for j, x in enumerate(pieces)]
 
 
 def expected_compute(st):
     return sum(machine_expected([r for r in runs if r["machine"] == m]) for _, runs in st for m in ("a", "b"))
 
 
-def size(cost, model, reuse_trip=True, rehearsal=None, I_max=15):
+def size(cost, model="injected", reuse_trip=False, rehearsal=False, I_max=20):
     rows = []
     for I in range(1, I_max + 1):
         st = stages(I, model, reuse_trip, cost, rehearsal=rehearsal)
@@ -225,40 +231,57 @@ def read_before_m(path):
 
 
 def before_m_text(b):
-    """BEFORE_M.md: what PREDICTION.md (The record before stage M) lists, in words, then the same as a JSON block that
-    the frozen code reads."""
-    lines = ["# Campaign 4: the record before stage M", "",
-             "Written by `plan.py before-m` (the frozen code), pushed alone before the first launch of stage M",
-             "(PREDICTION.md, The record before stage M). Nothing in it is chosen by hand: it follows from the decisions file",
-             "below, which cites its sources.", "",
-             f"1. **The noise model applied**: {b['noise_model']} ({b['noise_model_source']}).",
+    """BEFORE_M.md: what PREDICTION.md (10.8) lists, in words, then the same as a JSON block that the frozen code reads."""
+    lim = b["limits"]
+    lines = ["# Campaign 5: the record before stage M", "",
+             "Written by `plan.py before-m` (the frozen code), pushed alone after the rehearsal's record and before the first launch",
+             "of M1 (PREDICTION.md, 10.8). Nothing in it is chosen by hand.", "",
+             f"1. **The noise model**: {b['noise_model']} ({b['noise_model_source']}).",
              f"2. **The noise constants**: b = {b['constants']['between_mV']} mV between runs, w = {b['constants']['within_mV']} mV within a run,"
              f" d = {b['constants']['per_dose_mV']} mV per dose ({b['constants_source']}).",
              f"3. **The costs**: {json.dumps(b['costs'], sort_keys=True)} ({b['costs_source']}).",
-             f"4. **I = {b['I']}** (machine a: seeds {b['seeds']['a']}; machine b: seeds {b['seeds']['b']}), expected compute {b['expected_compute_h']:.2f} h, stage caps "
-             f"{json.dumps(b['stage_caps_s'], sort_keys=True)} s; expected {json.dumps(b['expected'], sort_keys=True)}.",
-             f"5. **The reuse of the trip value**: {b['reuse_trip']} ({b['reuse_trip_source']}).", "",
+             f"4. **I = {b['I']}** (machine a: seeds {b['seeds']['a']}; machine b: seeds {b['seeds']['b']}), expected compute "
+             f"{b['expected_compute_s']:.2f} s = {b['expected_compute_h']:.4f} h; expected {json.dumps(b['expected'], sort_keys=True)}.",
+             f"5. **The time limits**: {lim['rule']}. At need 4: {json.dumps(lim['need4_s'], sort_keys=True)} s; at need 7: "
+             f"{json.dumps(lim['need7_s'], sort_keys=True)} s. The exact limits and caps of the stages of M, which depend on no need and are"
+             f" those their manifests hold: {json.dumps(b['measure_stages'], sort_keys=True)}. The caps of Q and N1 to N3 at need 4, which the"
+             f" frozen code recomputes from the needs of PREDICTED.json (and splits by the rule of 10.5 if they exceed 14 400 s):"
+             f" {json.dumps(b['network_stage_caps_need4_s'], sort_keys=True)} s.",
+             f"6. **The rehearsal's record**: `{b['rehearsal']['path']}` at commit `{b['rehearsal']['commit']}`, SHA-256 "
+             f"`{b['rehearsal']['sha256']}`, verdict: {b['rehearsal']['verdict']}.", "",
              BEFORE_M_BEGIN, json.dumps(b, indent=1, sort_keys=True), BEFORE_M_END, ""]
     return "\n".join(lines)
 
 
+def limits_record(cost):
+    """The time limits as the code uses them (PREDICTION.md, 10.4), at need 4 and need 7."""
+    out = {}
+    for tag, needs in (("need4_s", (4, 4, 4, 4)), ("need7_s", (7, 7, 7, 7))):
+        r = dict(calibration_deck=c4.limit(cost["calibration_deck_s"]))
+        for key, sc in (("quiet_with_skew", "quiet"), ("noisy", "n1"), ("untrained", "untrained")):
+            r[key] = with_limits(network_run(c4.FIRST_SEED, "a", needs, sc, "injected"), cost, "injected")["timeout_s"]
+        out[tag] = r
+    return dict(rule="a run's time limit is 10 x ceil(2 x expected / 10), its expected cost computed on its own calendar (PREDICTION.md, 10.4)", **out)
+
+
 def before_m(decisions):
-    """BEFORE_M.md from the decisions file of the noise study's outcome: the model applied and its sources, the
-    constants, the costs, the reuse of the trip value; then I, the expected compute, the stage caps and counts."""
+    """BEFORE_M.md (PREDICTION.md, 10.8) from the decisions file, which names the rehearsal's record (path, commit,
+    SHA-256, verdict); the noise model is the injected one, fixed by PREDICTION.md."""
     d = decisions
-    model = d["noise_model"]
-    assert model in ("device", "injected"), "a corrected model needs its own file and code"
-    const = {k: max(c4.DECISION5[k], d.get("validated_constants", {}).get(k, 0.0)) for k in c4.DECISION5} if model == "device" else dict(c4.DECISION5)
+    assert d.get("noise_model", "injected") == "injected", "the injected model only (PREDICTION.md, section 6)"
     cost = costs(dict(costs=d.get("costs", {})))
-    reuse = bool(d.get("reuse_trip", False)) if model == "device" else False
-    I, rows = size(cost, model, reuse)
-    row = next(r for r in rows if r["I"] == I)
+    I, rows = size(cost)
+    st = stages(I, "injected", False, cost)
     m = round(c4.MEASURED_FRACTION * I)
-    return dict(what="the record before stage M of campaign 4 (PREDICTION.md, The record before stage M), written by plan.py",
-                noise_model=model, noise_model_source=d["noise_model_source"], constants=const, constants_source=d.get("constants_source"),
-                costs=cost, costs_source=d.get("costs_source"), reuse_trip=reuse, reuse_trip_source=d.get("reuse_trip_source"),
-                I=I, seeds=c4.seeds(I), expected_compute_h=row["expected_h"], stage_caps_s=row["caps"],
-                expected=dict(measured=m, eligible=round(0.6 * I, 1), noisy_runs=c4.R * m))
+    ex = expected_compute(st)
+    meas = {n: dict(cap_s=stage_cap(r), runs=len(r), limits_s=sorted({x["timeout_s"] for x in r})) for n, r in st if n[0] == "M"}
+    net = {n: stage_cap(r) for n, r in st if n[0] != "M"}
+    return dict(what="the record before stage M of campaign 5 (PREDICTION.md, 10.8), written by plan.py",
+                noise_model="injected", noise_model_source="PREDICTION.md, section 6 (decision D5-3): the injected model only",
+                constants=dict(c4.DECISION5), constants_source="decision 5, PREDICTION.md 4.2 (D5-3)",
+                costs=cost, costs_source="PREDICTION.md, 10.3", I=I, seeds=c4.seeds(I), expected_compute_s=ex, expected_compute_h=ex / 3600,
+                expected=dict(measured=m, noisy_runs=c4.R * m), limits=limits_record(cost), measure_stages=meas,
+                network_stage_caps_need4_s=net, rehearsal=d["rehearsal"])
 
 
 # ---------------------------------------------------------------------------------------------- the manifests
@@ -301,37 +324,38 @@ def entry(r, I, scenario, stage=None):
 
 
 def stage_runs(name, here=HERE):
-    """The runs of one stage, all from frozen files: M from BEFORE_M.md; E from MEASURED.json; Q, N1, N2, N3 from
-    PREDICTED.json. Returns the runs (with their limits), the protocol file and I."""
+    """The runs of one stage, all from frozen files: M (M1, M2) from BEFORE_M.md; Q, N1, N2, N3 and their parts (Q.1,
+    N1.1, ...) from PREDICTED.json, cut by the rule of split (PREDICTION.md, 10.5). Returns the runs (with their
+    limits), the protocol file and I."""
+    import re
     b = read_before_m(here / "BEFORE_M.md")
     cost, model, I = costs(b), b["noise_model"], b["I"]
-    reh = json.loads((here / "REHEARSAL.json").read_text())["limits_basis"] if (here / "REHEARSAL.json").exists() else None
-    if name[0] == "M":
-        st = dict(x for x in stages(I, model, b["reuse_trip"], cost, rehearsal=reh) if x[0][0] == "M")
+    assert model == "injected", "the injected model only (PREDICTION.md, section 6)"
+    if re.fullmatch(r"M[12]?", name):
+        st = dict(x for x in stages(I, model, False, cost) if x[0][0] == "M")
         return st[name], "PREDICTION.md", I
-    if name[0] == "E":
-        meas = json.loads((here / "MEASURED.json").read_text())
-        assert meas["before_m_sha256"] == b["sha256"]
-        ms = [x["seed"] for x in meas["instances"] if x["measured"]]
-        s = c4.seeds(I)
-        lim = lambda r: with_limits(r, cost, model, reh)
-        E = split(lambda seed: [lim(r) for r in extract_runs(seed, c4.machine_of(seed, I), b["reuse_trip"])],
-                  [x for x in s["a"] if x in ms], [x for x in s["b"] if x in ms])
-        return E[int(name[1:]) - 1], "PREDICTION.md", I
+    m = re.fullmatch(r"(Q|N[123])(?:\.(\d+))?", name)
+    assert m, f"refused: {name} is not a stage of the campaign"
     p = json.loads((here / "PREDICTED.json").read_text())
-    want = dict(Q=lambda r: r["noise"] == "none", N1=lambda r: r["round"] == 1, N2=lambda r: r["round"] == 2, N3=lambda r: r["round"] == 3)[name]
-    return [r for r in p["network_runs"] if want(r)], "PREDICTED.json", I
+    base, part = m.group(1), m.group(2)
+    want = (lambda r: r["noise"] == "none") if base == "Q" else (lambda r, k=int(base[1]): r["round"] == k)
+    runs = [r for r in p["network_runs"] if want(r)]
+    s = c4.seeds(I)
+    seeds = {mach: [x for x in s[mach] if any(r["seed"] == x for r in runs)] for mach in ("a", "b")}
+    pieces = split(lambda seed: [r for r in runs if r["seed"] == seed], seeds["a"], seeds["b"])
+    named = dict(parts(base, pieces))
+    assert name in named, f"refused: {name} is not one of the parts {sorted(named)} of stage {base}"
+    return named[name], "PREDICTED.json", I
 
 
-# ------------------------------------------------------------------------- the stages' protocols (amendment 5)
+# ------------------------------------------------------------------------- the stages' protocols (PREDICTION.md, 10.6)
 
-GOVERNING = dict(M="PREDICTION.md", E="PREDICTION.md", Q="PREDICTED.json", N="PREDICTED.json")
 STAGE_BEGIN = "```json stage"
-# Safeguard (ii): besides the frozen files, unchanged, a stage's source commit may differ from the frozen commit only in
-# these files of the campaign's folder (fnmatch patterns, relative to it).
-ALLOWED_AFTER_FREEZE = ("STAGE_*.md", "STAGE_*_RUNS.json", "BEFORE_M.md", "MEASURED.json", "PREDICTED.json", "extractions/*",
-                        "Gate4.lean", "REHEARSAL.json", "INVENTORY_a.json", "INVENTORY_b.json", "CAMPAIGN_*.json", "RUN_ATTEMPT_*.json",
-                        "evidence/*", "AMENDMENT_*.md")     # a later amendment only: amendments 1 to 5 are frozen files (amendment 6)
+# Safeguard (ii) (PREDICTION.md, 10.6): besides the frozen files, unchanged, a stage's source commit may differ from the
+# frozen commit only in these files of the campaign's folder (fnmatch patterns, relative to it): the closed list.
+ALLOWED_AFTER_FREEZE = ("STAGE_*.md", "STAGE_*_RUNS.json", "BEFORE_M.md", "PREDICTED.json", "Gate4.lean", "REHEARSAL.json",
+                        "INVENTORY_a.json", "INVENTORY_b.json", "CAMPAIGN_*.json", "RUN_ATTEMPT_*.json", "evidence/*",
+                        "AMENDMENT_*.md", "REPORT.md")
 
 
 def stage_path(name):
@@ -339,17 +363,23 @@ def stage_path(name):
 
 
 def governing_of(name):
-    """The governing protocol of a stage: PREDICTION.md for M, E (and the rehearsal's measure stages), PREDICTED.json for
-    Q, N1 to N3 (and the rehearsal's network stages)."""
-    key = dict(X="M", GUARD="M", MEMD="N", MEMI="N").get(name, name[0])
-    return f"{BASE}/{GOVERNING[key]}"
+    """The governing protocol of a stage, from the closed list of stage names of PREDICTION.md (10.6): PREDICTION.md for
+    M, M1, M2 and the rehearsal's RC and RM; PREDICTED.json for Q, N1, N2, N3 and their parts, and the rehearsal's RQ,
+    RN and RMEM (in the rehearsal's own clone, the development instances' PREDICTED.json). Any other name is refused;
+    nothing is inferred from a first letter."""
+    import re
+    if re.fullmatch(r"M[12]?|RC|RM", name):
+        return f"{BASE}/PREDICTION.md"
+    if re.fullmatch(r"(Q|N[123])(\.\d+)?|RQ|RN|RMEM", name):
+        return f"{BASE}/PREDICTED.json"
+    raise SystemExit(f"refused: {name} is not a stage name of PREDICTION.md (10.6)")
 
 
 def stage_file_text(name, governing, commit, digest):
     block = dict(stage=name, governing_protocol=dict(path=governing, commit=commit, sha256=digest))
-    return "\n".join([f"# Campaign 4: the protocol of stage {name}", "",
-                      "Written by `plan.py stage-file` (the frozen code) and pushed alone before the stage's launch (amendment 5,",
-                      f"section 1). Its governing protocol is `{governing}` at commit `{commit}`, SHA-256 `{digest}`;",
+    return "\n".join([f"# Campaign 5: the protocol of stage {name}", "",
+                      "Written by `plan.py stage-file` (the frozen code) and pushed alone before the stage's launch (PREDICTION.md,",
+                      f"10.6). Its governing protocol is `{governing}` at commit `{commit}`, SHA-256 `{digest}`;",
                       "`run4.py` refuses every run of the stage if that file has another SHA-256 in the repository.", "",
                       STAGE_BEGIN, json.dumps(block, indent=1, sort_keys=True), "```", ""])
 
@@ -361,7 +391,7 @@ def read_stage(path):
 
 
 def check_after_freeze(frozen_commit, source_commit, root=ROOT):
-    """Safeguard (ii) (amendment 5, section 1, item 3): no frozen file differs, and every other changed file is in the
+    """Safeguard (ii) (PREDICTION.md, 10.6): no frozen file differs, and every other changed file is in the
     closed list. Returns the changed files; raises otherwise."""
     import fnmatch
     changed = subprocess.run(["git", "-C", str(root), "diff", "--name-only", frozen_commit, source_commit], check=True,
@@ -380,7 +410,7 @@ def manifest(name, runs, I, protocol_commit, protocol, source_commit, root=ROOT,
         check_after_freeze(frozen_commit, source_commit, root)
     stage = name if protocol.startswith("STAGE_") else None
     entries = [entry(r, I, "stage", stage) for r in runs]
-    return dict(kind="registered", campaign_id=f"learned-dnf-circuit-4-{name.lower()}", attempt=1, executor=c4.EXECUTOR,
+    return dict(kind="registered", campaign_id=f"learned-dnf-circuit-5-{name.lower()}", attempt=1, executor=c4.EXECUTOR,
                 protocol_commit=protocol_commit, protocol_path=f"{BASE}/{protocol}",
                 protocol_sha256=hashlib.sha256(blob(protocol_commit, f"{BASE}/{protocol}")).hexdigest(),
                 source_commit=source_commit, launcher_path=f"{CLOSURE}/launchkit/launch.py", marker_path=f"{BASE}/RUN_ATTEMPT_{name}.json",
@@ -392,21 +422,14 @@ def manifest(name, runs, I, protocol_commit, protocol, source_commit, root=ROOT,
 def main():
     if sys.argv[1] == "size":
         cost = costs(json.loads(Path(sys.argv[2]).read_text()) if len(sys.argv) > 2 else None)
-        for model in ("device", "injected"):
-            I, rows = size(cost, model)
-            print(model, "I =", I)
-            for r in rows:
-                print(" ", r["I"], round(r["expected_h"], 2), r["caps"])
+        I, rows = size(cost)
+        st = stages(I, "injected", False, cost)
+        print(json.dumps(dict(I=I, expected_compute_s=expected_compute(st))))
+        for r in rows:
+            print(" ", r["I"], round(r["expected_h"], 4), r["caps"])
     elif sys.argv[1] == "before-m":
         print(c4.require_pinned())
         Path(sys.argv[3]).write_text(before_m_text(before_m(json.loads(Path(sys.argv[2]).read_text()))))
-    elif sys.argv[1] == "measured":
-        print(c4.require_pinned())
-        import predicted
-        b = read_before_m(HERE / "BEFORE_M.md")
-        res = dict(what="the measured instances after stage M, written by plan.py measured", I=b["I"], before_m_sha256=b["sha256"],
-                   instances=[{k: v for k, v in x.items() if k != "calibration"} for x in predicted.measures(b, sys.argv[2:-1])])
-        Path(sys.argv[-1]).write_text(json.dumps(res, indent=1) + "\n")
     elif sys.argv[1] == "stage-file":
         print(c4.require_pinned())
         name = sys.argv[2]
