@@ -5,14 +5,15 @@ CI runner without AVX-512, where OpenBLAS cannot run the SkylakeX kernel the com
 
 Every integer, string, Boolean and null must be exactly equal (rationals are strings), every list and object have the
 same length and keys in the same order, and each number of the same type; only floats, the reported values
-(np.polyfit's fits), may differ, by at most a relative 1e-12. Exit 1 otherwise. On an AVX-512 machine check.sh
-compares these files byte for byte instead.
+(np.polyfit's fits), may differ: math.isclose with rel_tol=1e-9 and abs_tol=1e-15, set after the test under the
+Haswell kernel (largest relative difference 2.68e-12, in validation_residual_M5.c). Exit 1 otherwise. On an AVX-512
+machine check.sh compares these files byte for byte instead.
 """
 import json
 import math
 import sys
 
-REL = 1e-12
+REL, ABS = 1e-9, 1e-15
 
 
 def walk(a, b, path, out):
@@ -36,7 +37,7 @@ def walk(a, b, path, out):
             out["floats_differing"] += 1
             rel = abs(a - b) / max(abs(a), abs(b))
             out["largest_relative"] = max(out["largest_relative"], rel)
-            if not math.isclose(a, b, rel_tol=REL, abs_tol=0.0):
+            if not math.isclose(a, b, rel_tol=REL, abs_tol=ABS):
                 out["mismatch"].append(f"{path}: {a!r} against {b!r} (relative {rel:.3g})")
     elif a != b:
         out["mismatch"].append(f"{path}: {a!r} against {b!r}")
@@ -49,7 +50,7 @@ def main():
     out = dict(exact=0, floats=0, floats_differing=0, largest_relative=0.0, mismatch=[])
     walk(json.load(open(generated)), json.load(open(committed)), "$", out)
     print(f"structural comparison of {committed}: {out['exact']} exact values equal, {out['floats']} floats, "
-          f"{out['floats_differing']} differing, largest relative difference {out['largest_relative']:.3g} (tolerance {REL})")
+          f"{out['floats_differing']} differing, largest relative difference {out['largest_relative']:.3g} (tolerance rel {REL}, abs {ABS})")
     if out["mismatch"]:
         print("\n".join(out["mismatch"][:20]), file=sys.stderr)
         sys.exit(1)

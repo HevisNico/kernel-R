@@ -34,6 +34,7 @@ import rehearsal as R                                   # noqa: E402
 BASE = c4.BASE
 RUNS_COMMIT = "3156ee40ab35dea396b6fa8785177b84b7667c76"   # the frozen commit attempt 2 ran on
 STAGES = ("M", "X", "E", "N", "MEMD", "MEMI", "GUARD")      # attempt 2's stages, in order
+GOVERNED_AS = dict(MEMD2="MEMD", MEMI2="MEMI")             # plan.governing_of maps MEMD, MEMI to PREDICTED.json; not new names
 
 
 def git_of(repo):
@@ -161,9 +162,10 @@ def main():
         return dict(r, estimate_s=plan.ceil10(e), timeout_s=plan.ceil10(3 * e), expected_s=e)
 
     def stage(name, runs, memory=False):
-        """rehearsal.py's stage (a closure of its main, copied without change but for its names): its stage file, its run
-        list, its manifest; one launch of the kit on each machine, one after the other; the collected folders."""
-        gov = plan.governing_of(name)
+        """rehearsal.py's stage (a closure of its main), copied without change but for its names and its governing
+        protocol (GOVERNED_AS): its stage file, its run list, its manifest; one launch of the kit on each machine, one
+        after the other; the collected folders."""
+        gov = plan.governing_of(GOVERNED_AS.get(name, name))   # MEMD2, MEMI2: the governing protocol of MEMD, MEMI
         gcommit = git("log", "-1", "--format=%H", "--", gov)
         (repo / plan.stage_path(name)).write_text(plan.stage_file_text(name, gov, gcommit, hashlib.sha256((repo / gov).read_bytes()).hexdigest()))
         git("add", plan.stage_path(name))

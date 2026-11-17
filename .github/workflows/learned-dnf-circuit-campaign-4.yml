@@ -77,5 +77,19 @@ jobs:
         run: |
           PYTHON="$RUNNER_TEMP/python/bin/python" bash research/learned-dnf-circuit-campaign-4/check.sh \
             "$RUNNER_TEMP/M8_eligible.lean" "$PWD/research/learned-dnf-circuit-campaign-4/rehearsal/run-2/analysis/M8.lean"
+      - name: The structural comparison (amendment 8), exercised on every runner, a file of the Haswell kernel accepted and a changed integer refused
+        run: |
+          set -euo pipefail
+          cd research/learned-dnf-circuit-campaign-4
+          py="$RUNNER_TEMP/python/bin/python"
+          OPENBLAS_CORETYPE=Haswell "$py" -B cases.py "$RUNNER_TEMP/CASES_haswell.json" "$RUNNER_TEMP/Targets_haswell.lean" Gate4Cases > /dev/null
+          "$py" -B structural_compare.py "$RUNNER_TEMP/CASES_haswell.json" rehearsal/gate-cases-4/CASES.json
+          "$py" -B -c 'import json, sys; d = json.load(open(sys.argv[1])); d["cases"][0]["Q1"] += 1; json.dump(d, open(sys.argv[2], "w"), indent=1)' \
+            "$RUNNER_TEMP/CASES_haswell.json" "$RUNNER_TEMP/CASES_changed.json"
+          if "$py" -B structural_compare.py "$RUNNER_TEMP/CASES_changed.json" rehearsal/gate-cases-4/CASES.json; then
+            echo "structural comparison: a changed integer was accepted" >&2
+            exit 1
+          fi
+          echo "structural comparison: the file of the Haswell kernel accepted, the changed integer (Q1 + 1) refused"
       - name: The negative cases of the audit (amendment 8), each refused on the check of the axioms
         run: PYTHON="$RUNNER_TEMP/python/bin/python" bash research/learned-dnf-circuit-campaign-4/audit_cases.sh
