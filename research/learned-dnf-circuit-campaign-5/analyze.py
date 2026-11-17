@@ -63,14 +63,19 @@ def g_check(rows, noisy):
 
 
 def h_check(rows, result):
-    """H, observed and reported, never refuting: separation, late FIRE, routing, c's decoder, delivery."""
+    """H, observed and reported, never refuting: separation, late FIRE, routing, c's decoder, delivery. Campaign 5: the
+    arithmetic on the instrument's dates is exact (each date at its exact binary value, the unit 1/50000 s), with
+    campaign 4's tolerances kept as exact constants (1e-12 s for matching dates, 1e-9 unit for the bounds)."""
+    F, ex = P.F, P.exact
+    tol = F(1, 10 ** 9)
+    key = lambda s: round(ex(s), 12)
     out = dict(min_separation_units={}, late_fires=0, arrivals_not_routed=0, skews_above_bound=0, c_fire_outside=0,
                undelivered=sum(1 for o in result["occurrences"] if not o["delivered"]), queued=len(result["still_queued_at_the_horizon"]))
     for c in c4.CELLS:
-        d = sorted({round(o["date_s"], 12) for o in result["occurrences"] if o["delivered"] and o["cell"] == c})
-        gaps = [(b - a) / reads4.TU for a, b in zip(d, d[1:]) if (b - a) / reads4.TU > 3]
-        out["min_separation_units"][c] = min(gaps) if gaps else None
-    fires = {(f["cell"], round(f["date_s"], 12)) for f in result["fires"]}
+        d = sorted({key(o["date_s"]) for o in result["occurrences"] if o["delivered"] and o["cell"] == c})
+        gaps = [(b - a) / TU_S for a, b in zip(d, d[1:]) if (b - a) / TU_S > 3]
+        out["min_separation_units"][c] = float(min(gaps)) if gaps else None
+    fires = {(f["cell"], key(f["date_s"])) for f in result["fires"]}
     for x in rows:
         for c, r in x["reads"].items():
             out["late_fires"] += r["late_fires"]
@@ -78,10 +83,10 @@ def h_check(rows, result):
         if r:
             for a in r["arrivals"]:
                 src = "a" if a["port"] == 1 else "b"
-                ok = a["fire_date_s"] is not None and (src, round(a["fire_date_s"], 12)) in fires and \
-                    abs((a["date_s"] - a["fire_date_s"]) / reads4.TU - c4.WIRE) <= c4.SNAP + 1e-9
+                ok = a["fire_date_s"] is not None and (src, key(a["fire_date_s"])) in fires and \
+                    abs((ex(a["date_s"]) - ex(a["fire_date_s"])) / TU_S - F(3, 2)) <= F(1, 50) + tol
                 out["arrivals_not_routed"] += not ok
-            out["skews_above_bound"] += r["skew_units"] > c4.SKEW_C + 1e-9
+            out["skews_above_bound"] += ex(r["skew_units"]) > F(11, 10) + tol
             if r["fire"] and r["fire_date_s"] < max(a["date_s"] for a in r["arrivals"]):
                 out["c_fire_outside"] += 1
     return out
