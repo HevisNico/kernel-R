@@ -1,8 +1,9 @@
 # Campaign 5: the smoke run of M8's eligible path
 
 One run without noise on the nominal cell (model section `tt`, no seed), need 4 with the skew slots, made on
-2026-11-17 from 19:01:56 UTC by `run4.py` at commit `8b6be778e36a3193e76eb3fae4b6c83a9035aa87` of
-`research/learned-dnf-circuit-campaign-5-wip`. It ran outside the kit and before the freeze, under the pinned toolchain,
+2026-11-17 from 19:01:56 UTC by `run4.py` at commit `b8af1750105c4afdbd384c3c191ce85f16fdc65e` of
+`research/learned-dnf-circuit-campaign-5-wip` (the files it uses, run4.py, c4.py, plans4.py, session4.py, noisemodel.py,
+reads4.py and research/network-circuit and research/circuit, are unchanged since). It ran outside the kit and before the freeze, under the pinned toolchain,
 for one purpose: CI's case of M8's eligible path (`m8_case.py`), which needs a waveform. It is not a run of the
 rehearsal or of the campaign, and enters no check and no claim.
 
