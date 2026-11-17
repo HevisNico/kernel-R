@@ -398,9 +398,14 @@ def M8(inst, quiet, predicted):
     return out, lean + "end LearnedCoincidence.MonotoneDNF.PremiseCheck.Campaign4\n"
 
 
+T0_S, TU_S = P.F(1, 10000), P.F(1, 50000)     # the calendar's origin (100 us) and the time unit (20 us), exactly
+
+
 def units(date_s):
-    """A date of the run in time units from the start of the calendar, as a rational rounded to 0.0001 unit."""
-    return P.q(P.exact(date_s - 100e-6) / P.exact(reads4.TU))
+    """A date of the run in time units from the start of the calendar, as a rational rounded to 0.0001 unit, ties to
+    even. Campaign 5: the date is taken at its exact binary value and the arithmetic is exact (campaign 4 subtracted
+    100e-6 and divided by the float 20e-6 in binary floats)."""
+    return P.q((P.exact(date_s) - T0_S) / TU_S)
 
 
 def run_observation(rows, x, folder):
@@ -434,9 +439,9 @@ def run_observation(rows, x, folder):
         r = x_["reads"].get("c")
         lo, hi = reads4.c4_at(x_["date"]) - 1e-9, reads4.c4_at(x_["date"] + dnf.SLOT) - 1e-9
         if r is None:
-            start = net.snap(reads4.c4_at(x_["date"])) + 1.5 * reads4.TU      # no arrival: the slot's date plus 3/2 (amendment 1, point 6)
+            start = net.snap(reads4.c4_at(x_["date"])) + 1.5 * reads4.TU      # no arrival: the slot's date plus 3/2, for the probe window
             fires = tr.crossings("v(xc.p)", lo, hi)
-            return dict(start=str(units(start)), arrivals=[None, None], emissions=[str(units(f)) for f in fires],
+            return dict(start=str(units(net.snap(reads4.c4_at(x_["date"]))) + P.F(3, 2)), arrivals=[None, None], emissions=[str(units(f)) for f in fires],
                         value=P.zint(reads4.q_peak(tr, "c", start, start + 3 * reads4.TU)))
         arr = {a["port"]: units(a["date_s"]) for a in r["arrivals"]}
         return dict(start=str(units(r["start_s"])), arrivals=[str(arr[p]) if p in arr else None for p in (1, 2)],

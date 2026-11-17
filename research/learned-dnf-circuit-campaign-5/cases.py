@@ -1,39 +1,39 @@
-"""Campaign 4: the cases P0 to P6 and P4′ of the kernel gate (PREDICTION.md, The gate on "no" cases; amendment 1;
-amendment 2), built from phase 0's CALIBRATION.json only (#172, commit 49684af), with no campaign data.
+"""Campaign 5: the cases of the kernel gate (PREDICTION.md, 7.4), built from phase 0's CALIBRATION.json only (#172,
+commit 49684af), with no campaign data.
 
-  cases.py OUT.json OUT_TARGETS.lean     writes the cases and the targets file; prints every failing condition
+  cases.py OUT.json OUT_TARGETS.lean [GATE_MODULE]   writes the cases and the targets file; prints every failing condition
 
-P0's table (amendment 1, section 8, item 5): a and b are the nominal cell at amplitude 0.49, c at amplitude 1; Z the
-file's four decimals in integer units; the latency the file's; c's 0.3-late pair equal to its aligned pair; the dose
-of a port at stage k the difference of the stored voltages of stages k and k + 1 (stage 7: that of stage 6), as the
-file gives them for port 1, for both ports. The noisy budget uses the constants of decision 5 (the rehearsal has no
-validated value). Every number is read exactly (decimals as Decimal, amendment 3). Each case is P0 with the single
-change of the table of PREDICTION.md, P4 and P4′ by amendment 2:
+Campaign 4's cases.py (093995b), with the cases of campaign 5 built in (the pre-run's cases5.py, drafts/prerun/,
+commit 39747d7, unchanged in its construction):
 
-  P1  the pair read of a at stage 3, Z set to theta - 1                       a measure; everything recomputed
-  P2  the pair read of a at stage 4, Z set to theta                           a measure; everything recomputed
-  P3  c's aligned pair at stage min(n1, n2), Z set to c's line a alone at n1, minus 1
-                                                                              a measure; everything recomputed
-  P4  b's guard-on latency of its pair read at its need + 1/10 unit           a measure; everything recomputed
-      then the emission of c's test read on ABCD at the midpoint of its two arrivals (1/20 after the first)
-  P4′ (tag P4p) the latency change of P4 alone                                a measure; everything recomputed
-  P5  the arrival of line a on c, in the first test slot where a fires, moved 1/10 later  the observation
-  P6  the start of a's firstTest read in the first test slot, moved 1/100 earlier         the observation
+  P0   the nominal table with b's guard-on latency + 1/10 unit on every read that has a latency (every stage and
+       mask), so that a and b are not the same cell; everything recomputed by the frozen prediction code
+  P1   the pair read of a at stage 3, Z set to theta - 1
+  P1p  the same read at s1*, the largest integer in [Z, theta - 1] for which the frozen code gives the instance
+       eligible (every integer of the interval tried)
+  P2   the pair read of a at stage 4, Z set to theta
+  P2p  the same read at s2*, the least integer in [theta, Z] for which the frozen code gives the instance eligible
+  P3   c's aligned pair at stage min(n1, n2) set to line a alone at n1, minus 1
+  P3p  c's aligned and 0.3-late pairs at stage min(n1, n2) both set to max(Z_1, Z_2) + c's testingError under beta_0
+  P4   the emission of c's test read on ABCD placed at the midpoint of its two arrivals
+  P4p  the same emission placed at its last arrival
+  P5   the arrival of line a on c, in the first test slot where a fires, moved 1/10 later
+  P5p  in the same slot, a's firstTest emission and the arrival of line a on c moved together, 1/10 later
+  P6   the start of a's firstTest read in the first test slot moved 1/100 earlier
+  P6p  the start of a's firstTest read in the second test slot moved 1/100 earlier
 
-Choices the table leaves open, fixed before any verdict was computed (commit 3812038): P3 changes the aligned pair
-(the 0.3-late copy is taken from P0's table; the test pair's score is the lower of the two, so it is the changed
-value either way). P5 and P6 use the first test slot of the calendar (dnf.patterns order) that fits. P6's 1/100 is
-below the layer-1 skew bound 1/50, so the arrivals stay within the skew and only the separation from the previous
-slot (the last lesson) changes; TrainingSeparation does not order test slots among themselves (amendment 2,
-section 5).
+P0's table: a and b are the nominal cell at amplitude 0.49, c at amplitude 1; Z the file's four decimals in integer
+units; the latency the file's; c's 0.3-late pair equal to its aligned pair; the dose of a port at stage k the
+difference of the stored voltages of stages k and k + 1 (stage 7: that of stage 6), as the file gives them for port
+1, for both ports. The noisy budget uses the constants of decision 5. Every number is read exactly (decimals as
+Decimal).
 
-The targets (amendment 2, section 3). `conditions` is a Python mirror of the three Lean checkers
-(`checkCascadeValid`, `checkTrainingSeparation`, `checkCascadeCalibrationOneSided`, MonotonePremiseTargets.lean,
-MonotoneTarget.lean, Target.lean): it lists every condition they hold, read by read, each with its checker, its kind
-and its truth, in exact arithmetic on the case's own numbers. `lean_targets` writes a second Lean file, importing the
-gate file of gate4.py, that decides the three checkers separately on every case and budget (asserting the mirror's
-verdict per checker, so that it compiles only if Lean agrees), and, for P4, the three propositions of amendment 2 on
-c's test read on ABCD.
+The targets. `conditions` is a Python mirror of the three Lean checkers (`checkCascadeValid`,
+`checkTrainingSeparation`, `checkCascadeCalibrationOneSided`): it lists every condition they hold, read by read, each
+with its checker, its kind and its truth, in exact arithmetic on the case's own numbers. `lean_targets` writes a
+second Lean file, importing the gate file of gate4.py, that decides the three checkers separately on every case and
+budget (asserting the mirror's verdict per checker, so that it compiles only if Lean agrees), and, for P4, the three
+propositions on c's test read on ABCD.
 """
 from decimal import Decimal
 from fractions import Fraction as F
@@ -90,54 +90,129 @@ def first_slot(o, test):
     return next(k for k in (("".join(sorted(x)) or "-") for x in dnf.patterns()) if test(k))
 
 
-def build():
-    t0, dose = nominal()
+SHIFT_B = F(1, 10)
+
+
+def base():
+    t, dose = nominal()
+    for key, v in t.items():
+        if key[0] == "b" and v["latency"] is not None:
+            v["latency"] = P.exact(v["latency"]) + SHIFT_B
+    return t, dose
+
+
+def eligible(t, dose):
+    try:
+        x = P.instance(None, t, dose, [], c4.DECISION5)
+    except (AssertionError, ValueError):
+        return None
+    return x if x.get("eligible") else None
+
+
+def scan(t0, dose, key, lo, hi):
+    ok = []
+    for s in range(lo, hi + 1):
+        t = copy.deepcopy(t0)
+        t[key]["Z"] = s
+        fire_bits(t, key)
+        if eligible(t, dose):
+            ok.append(s)
+    return ok
+
+
+def runs(xs):
+    out = []
+    for s in xs:
+        if out and s == out[-1][1] + 1:
+            out[-1][1] = s
+        else:
+            out.append([s, s])
+    return out
+
+
+def with_score(t0, dose, key, s):
+    t = copy.deepcopy(t0)
+    t[key]["Z"] = s
+    fire_bits(t, key)
+    return predict(t, dose)
+
+
+def build_with_notes():
+    """The cases and the notes of the searches of P1p and P2p."""
+    t0, dose = base()
     p0 = predict(t0, dose)
     n = p0["needs"]
-    cases = [dict(p0, tag="P0", change="none")]
+    out = [dict(p0, tag="P0", change="nominal table, b's guard-on latency + 1/10 on every read")]
+    notes = {}
 
-    t = copy.deepcopy(t0)
-    t[("a", 3, "both")]["Z"] = P.THETA - 1
-    fire_bits(t, ("a", 3, "both"))
-    cases.append(dict(predict(t, dose), tag="P1", change="pair of a at stage 3: Z = theta - 1"))
+    k1 = ("a", 3, "both")
+    out.append(dict(with_score(t0, dose, k1, P.THETA - 1), tag="P1", change="pair of a at stage 3: Z = theta - 1"))
+    z = t0[k1]["Z"]
+    ok = scan(t0, dose, k1, z, P.THETA - 1)
+    notes["P1p"] = dict(interval=[z, P.THETA - 1], eligible_runs=runs(ok))
+    s1 = max(ok) if ok else z
+    out.append(dict(with_score(t0, dose, k1, s1), tag="P1p", change=f"pair of a at stage 3: Z = s1* = {s1} (P0: {z})"))
 
-    t = copy.deepcopy(t0)
-    t[("a", 4, "both")]["Z"] = P.THETA
-    fire_bits(t, ("a", 4, "both"))
-    cases.append(dict(predict(t, dose), tag="P2", change="pair of a at stage 4: Z = theta"))
+    k2 = ("a", 4, "both")
+    out.append(dict(with_score(t0, dose, k2, P.THETA), tag="P2", change="pair of a at stage 4: Z = theta"))
+    z = t0[k2]["Z"]
+    ok = scan(t0, dose, k2, P.THETA, z)
+    notes["P2p"] = dict(interval=[P.THETA, z], eligible_runs=runs(ok))
+    s2 = min(ok) if ok else z
+    out.append(dict(with_score(t0, dose, k2, s2), tag="P2p", change=f"pair of a at stage 4: Z = s2* = {s2} (P0: {z})"))
 
-    t = copy.deepcopy(t0)
     lo = min(n["c1"], n["c2"])
+    t = copy.deepcopy(t0)
     t[("c", lo, "both")]["Z"] = t0[("c", n["c1"], "port 1")]["Z"] - 1
     fire_bits(t, ("c", lo, "both"))
-    cases.append(dict(predict(t, dose), tag="P3", change=f"aligned pair of c at stage {lo}: Z = line a alone at stage {n['c1']} minus 1"))
+    out.append(dict(predict(t, dose), tag="P3", change=f"aligned pair of c at stage {lo}: Z = line a alone at stage {n['c1']} minus 1"))
 
+    zmax = max(t0[("c", n["c1"], "port 1")]["Z"], t0[("c", n["c2"], "port 2")]["Z"])
+    v = zmax + p0["budgets"]["K0"]["c"]["testing"]
     t = copy.deepcopy(t0)
-    key = ("b", n["b"], "both")
-    t[key]["latency"] = P.exact(t0[key]["latency"]) + F(1, 10)
-    p4p = predict(t, dose)
-    x = copy.deepcopy(p4p)
+    for r in ("both", P.SKEWED):
+        t[("c", lo, r)]["Z"] = v
+        fire_bits(t, ("c", lo, r))
+    out.append(dict(predict(t, dose), tag="P3p", change=f"aligned and 0.3-late pairs of c at stage {lo}: Z = max(Z_1, Z_2) + testingError = {v}"))
+
+    x = copy.deepcopy(p0)
     d = x["observation"]["secondTest"]["ABCD"]
-    a1, a2 = (F(v) for v in d["arrivals"])
-    assert a2 - a1 == F(1, 10), (a1, a2)
+    a1, a2 = sorted(F(v) for v in d["arrivals"])
+    notes["P4"] = dict(arrivals=[str(a1), str(a2)], emission_P0=d["emissions"])
+    assert a2 - a1 == SHIFT_B, (a1, a2)
     d["emissions"] = [str((a1 + a2) / 2)]
-    cases.append(dict(x, tag="P4", change=f"b's latency at stage {n['b']} + 1/10; then the emission of c's test read on ABCD at the midpoint {(a1 + a2) / 2} of its arrivals {a1} and {a2}"))
-    cases.append(dict(p4p, tag="P4p", change=f"b's latency at stage {n['b']} + 1/10 only"))
+    out.append(dict(x, tag="P4", change=f"emission of c's test read on ABCD at the midpoint {(a1 + a2) / 2} of its arrivals {a1} and {a2}"))
+    x = copy.deepcopy(p0)
+    x["observation"]["secondTest"]["ABCD"]["emissions"] = [str(a2)]
+    out.append(dict(x, tag="P4p", change=f"emission of c's test read on ABCD at its last arrival {a2}"))
 
     x = copy.deepcopy(p0)
     o = x["observation"]
     k = first_slot(o, lambda k: o["firstTest"][k][0]["emissions"])
-    d = o["secondTest"][k]
-    d["arrivals"][0] = str(F(d["arrivals"][0]) + F(1, 10))
-    cases.append(dict(x, tag="P5", change=f"arrival of line a on c in test slot {k} moved 1/10 later"))
-
+    o["secondTest"][k]["arrivals"][0] = str(F(o["secondTest"][k]["arrivals"][0]) + F(1, 10))
+    out.append(dict(x, tag="P5", change=f"arrival of line a on c in test slot {k} moved 1/10 later"))
     x = copy.deepcopy(p0)
     o = x["observation"]
-    k = first_slot(o, lambda k: True)
-    d = o["firstTest"][k][0]
+    o["firstTest"][k][0]["emissions"] = [str(F(e) + F(1, 10)) for e in o["firstTest"][k][0]["emissions"]]
+    o["secondTest"][k]["arrivals"][0] = str(F(o["secondTest"][k]["arrivals"][0]) + F(1, 10))
+    out.append(dict(x, tag="P5p", change=f"emission of a and arrival of line a on c in test slot {k} moved together 1/10 later"))
+
+    order = [("".join(sorted(p)) or "-") for p in dnf.patterns()]
+    x = copy.deepcopy(p0)
+    d = x["observation"]["firstTest"][order[0]][0]
     d["start"] = str(F(d["start"]) - F(1, 100))
-    cases.append(dict(x, tag="P6", change=f"start of a's firstTest read in test slot {k} (the first) moved 1/100 earlier"))
-    return cases
+    out.append(dict(x, tag="P6", change=f"start of a's firstTest read in test slot {order[0]} (the first) moved 1/100 earlier"))
+    x = copy.deepcopy(p0)
+    d = x["observation"]["firstTest"][order[1]][0]
+    d["start"] = str(F(d["start"]) - F(1, 100))
+    out.append(dict(x, tag="P6p", change=f"start of a's firstTest read in test slot {order[1]} (the second) moved 1/100 earlier"))
+    return out, notes
+
+
+
+def build():
+    """The cases, in the order of the table of PREDICTION.md (7.4)."""
+    return build_with_notes()[0]
 
 
 # ----------------------------------------------------------------------- the Python mirror of the three checkers
@@ -411,8 +486,9 @@ def lean_targets(cases, verdicts, gate_module):
 
 def main():
     print(c4.require_pinned())
-    cases = build()
-    Path(sys.argv[1]).write_text(json.dumps(dict(source="CALIBRATION.json, #172, 49684af", cases=cases), indent=1, default=str))
+    cases, notes = build_with_notes()
+    Path(sys.argv[1]).write_text(json.dumps(dict(source="CALIBRATION.json, #172, 49684af", notes=notes, cases=cases), indent=1, default=str))
+    print("notes: " + json.dumps(notes, default=str))
     verdicts = {}
     for x in cases:
         g = gate4.verdicts(x)
@@ -421,11 +497,12 @@ def main():
             v = per_checker(conds)
             verdicts[(x["tag"], K)] = v
             fails = [c for c in conds if not c[3]]
-            print(f"{x['tag']} K{K}: gate {'yes' if g[f'K{K}'] else 'no'}; mirror " + ", ".join(f"{c}={'T' if v[c] else 'F'}" for c in CHECKERS)
+            print(f"{x['tag']} K{K}: eligible {x.get('eligible')}; gate {'yes' if g[f'K{K}'] else 'no'}; mirror "
+                  + ", ".join(f"{c}={'T' if v[c] else 'F'}" for c in CHECKERS)
                   + f"; {len(conds)} conditions, {len(fails)} failing" + (f" | {x['change']}" if K == 0 else ""))
             for ch, kind, where, _ in fails:
                 print(f"    FAIL {ch}: {kind}: {where}")
-    Path(sys.argv[2]).write_text(lean_targets(cases, verdicts, Path(sys.argv[3] if len(sys.argv) > 3 else "Gate4Cases").stem))
+    Path(sys.argv[2]).write_text(lean_targets(cases, verdicts, Path(sys.argv[3] if len(sys.argv) > 3 else "Gate5Cases").stem))
 
 
 if __name__ == "__main__":

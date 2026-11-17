@@ -1,20 +1,23 @@
-"""Campaign 4: PREDICTED.json from the measures, by the rules of PREDICTION.md. No simulation is run.
+"""Campaign 5: PREDICTED.json from the measures, by the rules of PREDICTION.md. No simulation is run.
 
   predicted.py instance ON_DIR OFF_DIR [SEED|none]        prints the prediction of one instance, for reading
-  (the campaign's command, from the collected evidence of stages M and E, is in plan.py)
+  predicted.py predictions OUT_DIR MEASURES_DIR... [--rehearsal]   PREDICTED.json from the collected evidence of the
+                                                          measures (--rehearsal: the development instances, the
+                                                          rehearsal's limits, PREDICTION.md 11.2)
+
+Campaign 4's predicted.py (093995b), adapted to campaign 5's PREDICTION.md: the guarded fit in exact rationals, as
+4.2 requires and campaign 4's code did not (integer rows, both factors of every product converted, a float in a row
+or in the right-hand side refused, a solution that is not all Fraction refused; the patch of drafts/prerun/
+predicted5.patch); the control instance when none is eligible (4.2); the rehearsal's limits. Campaign 4's
+functions of the device model (extraction_of, extraction_check) are kept unchanged and unused.
 
 Everything is computed on the numbers written in PREDICTED.json: scores as integers in units of 1e-5 of the FIRE level
 (theta = 100 000), dates as rationals in time units, rounded to 0.0001 unit (fractions.Fraction), never on floats
-after rounding. The Lean file of the kernel gate (gate4.py) is written from the same numbers.
-
-Amendment 3 (commit 41cf88b): every number that becomes an integer is computed in exact rationals. A measure is taken
-at its exact value (`exact`: a float at its binary value, a Decimal read from a file at its decimal value); the
-guarded tuple is the exact solution of the normal equations; rounding to the nearest is ties to even (`round` on a
-Fraction); the noise terms are rounded up exactly (`ceil_sum_sqrt`). Floats remain in the geometric fit and M5 only.
-
-Open points of the implementation, named here so that an amendment can change them in one place (reported to the
-owner before any freeze): DURATION_C (c's read duration in the kernel's SlotTiming), RAIL, the per-cell budgets
-(the largest per-read budget over a cell's training or test reads), EMPTY_IN_EPSILON.
+after rounding. The Lean file of the kernel gate (gate4.py) is written from the same numbers. Every number that
+becomes an integer is computed in exact rationals: a measure is taken at its exact value (`exact`: a float at its
+binary value, a Decimal read from a file at its decimal value); the guarded tuple is the exact solution of the
+normal equations; rounding to the nearest is ties to even (`round` on a Fraction); the noise terms are rounded up
+exactly (`ceil_sum_sqrt`). Floats remain in the geometric fit and M5 only.
 """
 from fractions import Fraction as F
 import json
@@ -67,9 +70,14 @@ def zint(qpeak):
 
 
 def solve(rows, rhs):
-    """The exact rational least-squares solution: the normal equations A^T A x = A^T b, by Gauss-Jordan elimination."""
+    """The exact rational least-squares solution: the normal equations A^T A x = A^T b, by Gauss-Jordan elimination.
+    Campaign 5: every entry of the rows and of the right-hand side must be an int or a Fraction (a float is refused),
+    both factors of every product are converted, and every entry of the solution must be a Fraction."""
+    for r in rows:
+        assert all(type(v) in (int, F) for v in r), f"refused: a float in a row of the guarded fit: {r}"
+    assert all(type(y) in (int, F) for y in rhs), "refused: a float in the right-hand side of the guarded fit"
     n = len(rows[0])
-    a = [[sum(F(r[i]) * r[j] for r in rows) for j in range(n)] + [sum(F(r[i]) * y for r, y in zip(rows, rhs))] for i in range(n)]
+    a = [[sum(F(r[i]) * F(r[j]) for r in rows) for j in range(n)] + [sum(F(r[i]) * F(y) for r, y in zip(rows, rhs))] for i in range(n)]
     for c in range(n):
         piv = next(i for i in range(c, n) if a[i][c] != 0)
         a[c], a[piv] = a[piv], a[c]
@@ -78,7 +86,9 @@ def solve(rows, rhs):
             if i != c and a[i][c] != 0:
                 f = a[i][c]
                 a[i] = [v - f * w for v, w in zip(a[i], a[c])]
-    return [a[i][n] for i in range(n)]
+    x = [a[i][n] for i in range(n)]
+    assert all(type(v) is F for v in x), "refused: the solution of the guarded fit is not exact"
+    return x
 
 
 def ceil_sum_sqrt(squares):
@@ -182,7 +192,7 @@ def guarded(t, cells, Q, reads):
     for c in cells:
         for k in range(Q + 1):
             for r in reads:
-                row = [0.0] * len(names)
+                row = [0] * len(names)
                 row[names.index(f"h_{c}")] = 1
                 for p in ports(r):
                     row[names.index(f"g_{c}{p}")] = 1
@@ -529,15 +539,17 @@ def extraction_check(ex):
 
 def control_instance(instances):
     """Among the eligible instances, the one whose layer-1 pair at stage 0 scores highest (the higher of a and b),
-    the lowest seed on a tie."""
+    the lowest seed on a tie. If no instance is eligible, the lowest measured seed (PREDICTION.md, 4.2); if none is
+    measured, none."""
     el = [x for x in instances if x.get("eligible")]
     if not el:
-        return None
+        measured = [x["seed"] for x in instances if x.get("measured")]
+        return min(measured, key=lambda s: -1 if s is None else s) if measured else None
     best = lambda x: max(int(x["observation"]["firstTrain"][0][i]["value"]) for i in (0, 1))
     return min(el, key=lambda x: (-best(x), x["seed"]))["seed"]
 
 
-def predictions(before, measure_dirs, extraction_dirs=(), rehearsal=None, extraction_path=lambda seed: f"{c4.BASE}/extractions/EXTRACTION_{seed}.json"):
+def predictions(before, measure_dirs, extraction_dirs=(), rehearsal=False, extraction_path=lambda seed: f"{c4.BASE}/extractions/EXTRACTION_{seed}.json"):
     """PREDICTED.json (as a dict) and the merged extractions to commit beside it (path -> dict)."""
     import plan
     const = {k: before["constants"][k] for k in c4.DECISION5}
@@ -583,21 +595,18 @@ def predictions(before, measure_dirs, extraction_dirs=(), rehearsal=None, extrac
             runs.append(dict(plan.with_limits(r, cost, model, rehearsal), noise_seed=c4.noise_seed(x["seed"], k), position=c4.POSITIONS[f"n{k}"]))
     for r in runs:
         r.setdefault("position", c4.POSITIONS[r["scenario"]])
-    return dict(what="the predictions of campaign 4 (PREDICTION.md, amendments 1 to 3), written by predicted.py; no network run exists when "
-                     "this file is written", I=before["I"], noise_model=model, constants=const, before_m_sha256=before["sha256"],
+    return dict(what="the predictions of campaign 5 (PREDICTION.md), written by predicted.py; no network run exists when this file is written", I=before["I"], noise_model=model, constants=const, before_m_sha256=before["sha256"],
                 instances=instances, extractions=extractions, control_instance=control, network_runs=runs,
                 missing_noisy_runs=[f"{x['machine']}-{x['seed']}-n{k}" for x in instances if x["measured"] and model == "device"
                                     and not extractions.get(str(x["seed"]), {}).get("passed") for k in (1, 2, 3)]), files
 
 
 def main():
-    if sys.argv[1] == "predictions":       # predicted.py predictions OUT_DIR MEASURES_DIR... [--extractions DIR...] [--rehearsal REHEARSAL.json]
+    if sys.argv[1] == "predictions":       # predicted.py predictions OUT_DIR MEASURES_DIR... [--extractions DIR...] [--rehearsal]
         args = sys.argv[3:]
-        reh = None
-        if "--rehearsal" in args:
-            i = args.index("--rehearsal")
-            reh = json.loads(Path(args[i + 1]).read_text())["limits_basis"]
-            args = args[:i] + args[i + 2:]
+        reh = "--rehearsal" in args          # the rehearsal's development instances: the rehearsal's limits (11.2)
+        if reh:
+            args.remove("--rehearsal")
         ext = []
         if "--extractions" in args:
             i = args.index("--extractions")

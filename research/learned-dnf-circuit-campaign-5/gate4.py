@@ -1,4 +1,4 @@
-"""Campaign 4: the kernel gate. Writes the Lean file that checks, for each measured instance and each of the two
+"""Campaign 5 (campaign 4's gate4.py at 093995b, unchanged but for this docstring): the kernel gate. Writes the Lean file that checks, for each measured instance and each of the two
 budgets, `checkCascadeValid`, `checkTrainingSeparation` and `checkCascadeCalibrationOneSided` (the Boolean
 checkers of research/learned-coincidence, proved sound and complete at 2e586aa, merged by #178) on the predicted
 observation of predicted.py, and asserts the verdict the Python gives: `= true` where it says eligible (K0) or that
@@ -7,7 +7,7 @@ every instance and budget. For each instance that passes under K0, the file also
 `two_layer_monotone_recognition_one_sided` that the predicted outputs of the second layer are the cascade's outputs.
 
   gate4.py lean PREDICTED.json OUT.lean          the gate of the campaign
-  gate4.py cases CASES.json OUT.lean             the gate on the cases P0 to P6 (rehearsal)
+  gate4.py cases CASES.json OUT.lean             the gate on the cases of PREDICTION.md 7.4 (check.sh, the rehearsal)
 
 Python's own verdict on the timing of an observation (`timing_ok`) mirrors the decoder, the route and the separation
 of the kernel's checkers; the scores' part of the verdict is predicted.py's room.

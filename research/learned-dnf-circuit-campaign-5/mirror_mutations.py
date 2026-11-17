@@ -1,5 +1,8 @@
-"""Campaign 4: mutation test of the Python mirror of the three kernel checkers (cases.py), asked by the independent
-review after amendment 2. Each mutation is P0 of cases.py (CALIBRATION.json of #172 only, no campaign data) with one
+"""Campaign 5 (campaign 4's mirror_mutations.py at 093995b, unchanged but for this note): mutation test of the Python
+mirror of the three kernel checkers (cases.py), asked by campaign 4's independent review after its amendment 2. In
+campaign 5, P0 is the asymmetric P0 of PREDICTION.md 7.4 (b's guard-on latencies + 1/10); the figures below are
+campaign 4's, for its symmetric P0 (the last silence's room, +4 there); the test itself checks that each mutation
+fails exactly its kind on the P0 it is given. Each mutation is P0 of cases.py (CALIBRATION.json of #172 only, no campaign data) with one
 hand-made change of its serialized numbers (nothing recomputed), meant to make exactly one kind of condition false.
 The test passes when, under beta_0, the mirror's failing conditions are all of that kind (at least one), and Lean,
 deciding the three checkers separately, gives the mirror's verdict per checker (the Lean file asserts it, so it
