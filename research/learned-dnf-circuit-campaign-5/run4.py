@@ -17,8 +17,9 @@ Seed guard (PREDICTION.md, 10.6): a campaign seed is accepted only if it is one 
 --instances, which the manifests take from BEFORE_M.md) and the run is inside a launch of the kit (its folder holds
 the record the kit wrote for it, status `started`, in the STATE.json of the folder above). A development seed (7691 to
 7693) is accepted only inside a launch of the kit for a rehearsal stage (--stage naming RC, RM, RQ, RN or RMEM). The
-nominal cell (no seed) is for the rehearsal and CI. Every other seed, 7501 to 7512 included, is refused before any
-deck is written.
+nominal cell (no seed) is for the rehearsal and CI only: refused in a campaign stage. Every other seed, 7501 to 7512
+included, is refused before any deck is written. Every guard is an assert, so the runner refuses to run at all under
+python -O or PYTHONOPTIMIZE.
 
 Noise-model guard (PREDICTION.md, 10.6 and section 6): a run that asks for any noise model but none or the injected
 one, and any extraction run, is refused before any simulation.
@@ -60,6 +61,8 @@ REHEARSAL_STAGES = ("RC", "RM", "RQ", "RN", "RMEM")
 
 def guard(seed, instances, out, stage_name=None):
     if seed is None:
+        assert stage_name is None or stage_name in REHEARSAL_STAGES, \
+            f"refused: the nominal cell runs only in the rehearsal and CI, not in stage {stage_name} (PREDICTION.md, 10.6)"
         return
     if seed in c4.DEV_SEEDS:
         assert stage_name in REHEARSAL_STAGES, f"refused: development seed {seed} runs only in a rehearsal stage, not {stage_name}"
@@ -106,7 +109,15 @@ def stage_check(stage):
     return dict(stage=st["stage"], governing_protocol=st["governing_protocol"], stage_file_sha256=sha(stage))
 
 
+def require_debug():
+    """Every guard of this runner is an assert: under python -O or PYTHONOPTIMIZE they would vanish, so the runner
+    refuses to run at all (the coordinator's review of the freeze, F2)."""
+    if not __debug__:
+        raise SystemExit("refused: run4.py does not run with optimisation (python -O or PYTHONOPTIMIZE): its guards are asserts")
+
+
 def run(a):
+    require_debug()
     began = time.time()
     out = Path(a.out)
     noise_guard(a.kind, a.noise)
@@ -193,6 +204,7 @@ def run(a):
 
 
 def main():
+    require_debug()
     p = argparse.ArgumentParser(description=__doc__)
     for name in ("out", "ngspice", "pdk"):
         p.add_argument("--" + name, type=Path, required=True)

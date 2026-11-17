@@ -38,12 +38,22 @@ import plan                                             # noqa: E402
 BASE = c4.BASE
 PY = sys.executable
 # the checks of 11.5, and whether each is required ("reported" ones are not)
-CHECKS = dict(limits="required", reproducibility="required", noise_differs="required", operating_point="required",
+CHECKS = dict(rc_wall_times="reported", limits="required", reproducibility="required", noise_differs="required", operating_point="required",
               cross_machine="reported", memory="required", cases="required", gate_dev="required", mutations="required",
               guard="required", collection="required", analysis="required", no_campaign_seed="required", chain="required")
 # what two runs of one deck, instance seed and noise seed may differ in (PREDICTION.md, section 6)
 ALLOWED_RECORD_DIFFERENCES = ("id", "wall_s", "peak_rss_MB")
 FILES_COMPARED_APART = ("trace.raw", "result.json", "session.log")
+
+
+NOTES = dict(
+    instrument="A measure is what the frozen instrument gives: research/network-circuit/measure.py and reads4.py, the code that turns a "
+               "run's waveform into reads, wherever it runs (in the runner, the prediction or the analysis). Its outputs are taken at their "
+               "exact binary value (PREDICTION.md 4.2); the evidence it reads is fixed by its bytes; everything after it is exact (the "
+               "guarded fit, the dates in units, H's arithmetic). Confirmed by the coordinator's review of the freeze at 6832af3.",
+    limits="The 0.75 rule judges RM, RQ, RN and RMEM against the campaign's limits; RC's wall times are reported and enter no rule (11.3).",
+    fill="RQ, RN and RMEM: the measured development instances in seed order, repeated cyclically if fewer than three are measured, each "
+         "repeat on the next noise round, then a repeat of round 1; each run list states the instances measured and the fill used.")
 
 
 def append(checks, kind, ok, **details):
@@ -80,7 +90,14 @@ def before(kind):
 
 def runs_file(name, dev_path=None):
     dev = json.loads(Path(dev_path).read_text()) if dev_path else None
-    return dict(stage=name, I=0, rehearsal=True, runs=plan.rehearsal_runs(name, dev))
+    out = dict(stage=name, I=0, rehearsal=True, runs=plan.rehearsal_runs(name, dev))
+    if name in ("RQ", "RN", "RMEM"):
+        slots, control, fallback = plan.dev_slots(dev)
+        out.update(measured_development_instances=[] if fallback else [s for s, _ in slots],
+                   fill="every development seed at need 4 (none measured, PREDICTION.md 11.2)" if fallback else
+                   "the measured instances in seed order, repeated if fewer than three, each repeat on the next noise round "
+                   "(10 S + 1 to 10 S + 3), then a repeat of round 1 (the coordinator's confirmation of the cyclic fill)")
+    return out
 
 
 def predict(before_dir, out_dir, measure_dirs):
@@ -127,8 +144,10 @@ def memory(out, evidence):
 # ------------------------------------------------------------------------------------------------- RG (11.2)
 
 def guard(checks):
-    """RG: the seed guard's refusals, the noise-model guard's refusal, safeguards (i) and (ii), by direct calls."""
-    import run4
+    """RG: the seed guard's refusals, the nominal cell in a campaign stage, the noise-model guard, the refusal of an
+    optimised interpreter, and safeguards (i) and (ii). Every runner refusal is made by run4.py itself, started as the
+    kit starts it (this interpreter, run4.py by its path, no -O), and must leave no evidence folder: the run is refused
+    before any deck is written."""
     out = {}
 
     def refused(f, *a):
@@ -138,25 +157,39 @@ def guard(checks):
             return str(e)
         return None
     with tempfile.TemporaryDirectory() as d:
-        o = Path(d) / "run"
-        out["campaign seed 7601 outside the kit"] = refused(run4.guard, 7601, 12, o, None)
-        out["seed 7501"] = refused(run4.guard, 7501, 12, o, None)
-        out["development seed 7691 in campaign stage Q"] = refused(run4.guard, 7691, 12, o, "Q")
-        out["development seed 7691 outside the kit, rehearsal stage RM"] = refused(run4.guard, 7691, 12, o, "RM")
-        out["campaign seed 7601 in rehearsal stage RM"] = refused(run4.guard, 7601, 12, o, "RM")
-        out["noise model device"] = refused(run4.noise_guard, "network", "device")
-        out["an extraction run"] = refused(run4.noise_guard, "extract", "none")
-        # the noise model refused before any simulation, by the runner itself: no deck is written
-        p = subprocess.run([PY, "-B", str(HERE / "run4.py"), "--out", str(Path(d) / "dev"), "--ngspice", "/bin/false", "--pdk", d,
-                            "--id", "x", "--kind", "network", "--seed", "none", "--needs", "4,4,4,4", "--noise", "device", "--round", "1"],
-                           capture_output=True, text=True)
-        out["run4.py --noise device"] = (p.stderr.strip().splitlines() or ["?"])[-1] if p.returncode != 0 and not (Path(d) / "dev").exists() else None
+        d = Path(d)
+        gov = f"{BASE}/c4.py"            # a governing file whose SHA-256 the stage files record correctly
+        stages = {}
+        for name in ("RM", "M1", "Q"):
+            stages[name] = d / f"STAGE_{name}.md"
+            stages[name].write_text(plan.stage_file_text(name, gov, "0" * 40, sha(ROOT / gov)))
+
+        def runner(tag, seed, stage=None, noise="none", kind="cal", env=None):
+            o = d / tag
+            argv = [PY, str(HERE / "run4.py"), "--out", str(o), "--ngspice", "/bin/false", "--pdk", str(d), "--id", tag, "--seed", seed,
+                    "--instances", "12"]
+            argv += ["--kind", "cal", "--guard", "on"] if kind == "cal" else ["--kind", "network", "--needs", "4,4,4,4", "--noise", noise, "--round", "1"]
+            if stage:
+                argv += ["--stage", str(stages[stage])]
+            p = subprocess.run(argv, capture_output=True, text=True, env=dict(os.environ, **(env or {})))
+            last = (p.stderr.strip().splitlines() or ["(no message)"])[-1]
+            return last if p.returncode != 0 and "refused" in last and not (o / "evidence").exists() else None
+        out["campaign seed 7601 outside the kit"] = runner("c7601", "7601")
+        out["seed 7501"] = runner("c7501", "7501")
+        out["seed 7613 (I = 12)"] = runner("c7613", "7613")
+        out["development seed 7691 in campaign stage Q"] = runner("d7691q", "7691", "Q")
+        out["development seed 7691 outside the kit, rehearsal stage RM"] = runner("d7691rm", "7691", "RM")
+        out["campaign seed 7601 in rehearsal stage RM"] = runner("c7601rm", "7601", "RM")
+        out["the nominal cell in campaign stage M1"] = runner("nm1", "none", "M1")
+        out["noise model device"] = runner("dev", "none", noise="device", kind="network")
+        out["an optimised interpreter (PYTHONOPTIMIZE=1)"] = runner("opt", "none", env=dict(PYTHONOPTIMIZE="1"))
         # safeguard (i): a stage file whose governing protocol has another SHA-256
-        sf = Path(d) / "STAGE_RM.md"
-        sf.write_text(plan.stage_file_text("RM", f"{BASE}/c4.py", "0" * 40, "0" * 64))     # a governing file whose SHA-256 is not that one
+        sf = d / "STAGE_RN.md"
+        sf.write_text(plan.stage_file_text("RN", gov, "0" * 40, "0" * 64))
+        import run4
         out["safeguard (i)"] = refused(run4.stage_check, str(sf))
         # safeguard (ii): a copy of the repository with a frozen file changed, and one with an allowed file only
-        repo = Path(d) / "repo"
+        repo = d / "repo"
         subprocess.run(["git", "clone", "-q", "--shared", str(ROOT), str(repo)], check=True)
         g = lambda *a: subprocess.run(["git", "-C", str(repo), *a], check=True, capture_output=True, text=True).stdout.strip()
         g("config", "user.name", "rehearsal")
@@ -220,8 +253,12 @@ def initial_point(folder):
 
 
 def check(checks, kind, args):
-    if kind == "limits":                 # limits STAGE_RUNS.json COLLECTED_DIR...: the 0.75 rule (11.4)
+    if kind == "limits":                 # limits STAGE_RUNS.json COLLECTED_DIR...: the 0.75 rule (11.4), RM to RMEM only
         lst = json.loads(Path(args[0]).read_text())
+        if lst["stage"] == "RC":             # RC's wall times are reported and enter no rule (11.3)
+            st = [json.loads((Path(d) / "STATE.json").read_text()) for d in args[1:]]
+            return append(checks, "rc_wall_times", True, runs={r["id"]: dict(status=r["status"], wall_s=r.get("wall_s")) for s in st for r in s["records"]},
+                          note="RC's wall times are reported and enter no rule (PREDICTION.md, 11.3)")
         runs = {r["id"]: r for r in lst["runs"]}
         seen, bad = {}, []
         for d in args[1:]:
@@ -314,6 +351,7 @@ def record(checks, out):
     present = {l["check"] for l in lines}
     absent = sorted(k for k, v in CHECKS.items() if v == "required" and k not in present)
     rec = dict(what="the record of campaign 5's rehearsal (PREDICTION.md, 11), written by rehearsal.py record", interpreter=c4.interpreter(),
+               notes=NOTES,
                checks_file_sha256=sha(checks), checks=lines, required_failed=[l["check"] for l in required_failed], required_absent=absent,
                all_required_passed=not required_failed and not absent)
     Path(out).write_text(json.dumps(rec, indent=1, sort_keys=True, default=str) + "\n")

@@ -12,7 +12,7 @@ protocol commit, as the kit requires.
 |---|---|---|
 | `c4.py` | folder; seeds 7601 up; development seeds 7691–7693; nominal noise seed 90 961, round 1 only; `limit` = 10 ceil(2 e / 10) and `rehearsal_limit` = min(10 ceil(3 e / 10), 3 580), both on exact Fractions; `NOISE_MODELS` | 4, 6, 10.4, 11.2 |
 | `plan.py` | limits without any rehearsal ratio; Q and N split by the rule of M (Q.1, N1.1, …); the closed map of stage names; the closed list of safeguard (ii) (no `MEASURED.json`, no extractions; `REPORT.md`); BEFORE_M.md of 10.8; the rehearsal's run lists (`rehearsal_runs`); campaign ids without dots, rehearsal ids apart; the frozen list | 10.4–10.8, 11.2 |
-| `run4.py` | the seed guard of 10.6 and the noise-model guard | 6, 10.6 |
+| `run4.py` | the seed guard of 10.6 (the nominal cell refused in a campaign stage), the noise-model guard, the refusal of an optimised interpreter (every guard is an assert) | 6, 10.6 |
 | `predicted.py` | the exact guarded fit (`drafts/prerun/predicted5.patch`); the control instance when none is eligible; the rehearsal's limits as a flag | 4.2, B3 |
 | `cases.py` | the cases of 7.4 (asymmetric P0, the controls), from the pre-run's `cases5.py`; `build()` still returns the list | 7.4 |
 | `analyze.py` | dates of the run and H's arithmetic exact; no limits basis; a rehearsal flag | 4.2 (rule 1), 9 |
@@ -36,7 +36,9 @@ and every file that imports them.
 
 A measure is what the frozen instrument gives. The instrument is `research/network-circuit/measure.py` and `reads4.py`:
 the code that turns a run's waveform into reads, run deterministically on the evidence (`trace.raw`, `result.json`),
-whenever it runs. Everything computed from the instrument's values is exact.
+wherever it runs (the runner writes the waveform, not the reads: the reads are made by the prediction and the analysis).
+Everything computed from the instrument's values is exact. This line was confirmed by the coordinator's review of the
+freeze at `6832af3`, and is written into the rehearsal's record (`rehearsal.NOTES`).
 
 | Value | Where | Side |
 |---|---|---|
@@ -64,8 +66,15 @@ closed list. `PY` = `/home/user/owner-prep/venv312/bin/python`, `KIT` = the laun
 3. Each machine, at once: `rehearsal.py memory` detached, then `launch.py run-machine` detached (`setsid nohup`), the
    uptime recorder; the session waits in the foreground (loops of at most 10 minutes) until the shard ends.
 4. Each machine: `collect.py` once into a new folder, pushed (waveforms of 10 MB and more to an evidence branch).
-5. Machine a: the checks of 11.5 for that stage (`rehearsal.py check`), appended at once; for RM, `rehearsal.py predict`
-   (the development instances' `PREDICTED.json` and its gate, pushed alone before RQ's manifest).
-6. RG: `rehearsal.py guard`, on each machine. At the end: `rehearsal.py record`.
+5. Machine a: the checks of 11.5 for that stage (`rehearsal.py check`), appended at once. The 0.75 rule (`check limits`)
+   judges RM, RQ, RN and RMEM; for RC the same command records the wall times only (`rc_wall_times`, reported, 11.3).
+   After RM, `rehearsal.py predict` (the development instances' `PREDICTED.json` and its gate, pushed alone before RQ's
+   manifest).
+6. RG: `rehearsal.py guard`, on each machine: every runner refusal made by run4.py started as the kit starts it. At the
+   end: `rehearsal.py record`.
+
+Each live CI gate costs about 45 minutes, so several stages' manifests share one source commit where the text allows,
+each stage file still pushed alone before its manifest: RC with RM; then RQ, RN and RMEM after the development
+`PREDICTED.json`; then M1 with M2; then every manifest of Q and N together before Q (12.6).
 
 No kit launch before 2026-11-18 03:00 UTC.

@@ -80,6 +80,24 @@ class Guards(unittest.TestCase):
             with self.assertRaises(AssertionError, msg=(seed, stage)):
                 run4.guard(seed, 12, out, stage)
 
+    def test_nominal_cell_only_in_the_rehearsal_and_ci(self):
+        out = Path(tempfile.mkdtemp()) / "run"
+        for stage in (None, "RC", "RM"):
+            run4.guard(None, 12, out, stage)
+        for stage in ("M1", "M2", "Q", "Q.1", "N1", "N3.2"):
+            with self.assertRaises(AssertionError, msg=stage):
+                run4.guard(None, 12, out, stage)
+
+    def test_an_optimised_interpreter_is_refused(self):
+        import os
+        import subprocess
+        p = subprocess.run([sys.executable, str(HERE / "run4.py"), "--help"], capture_output=True, text=True,
+                           env=dict(os.environ, PYTHONOPTIMIZE="1"))
+        self.assertNotEqual(p.returncode, 0)
+        self.assertIn("does not run with optimisation", p.stderr)
+        p = subprocess.run([sys.executable, "-O", str(HERE / "run4.py"), "--help"], capture_output=True, text=True)
+        self.assertNotEqual(p.returncode, 0)
+
     def test_noise_model_guard(self):
         run4.noise_guard("network", "injected")
         run4.noise_guard("cal", "none")
