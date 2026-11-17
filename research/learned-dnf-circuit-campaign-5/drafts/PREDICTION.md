@@ -1,6 +1,7 @@
 # A circuit network that learns (A and B) or (C and D), campaign 5: predictions
 
-**Draft for review**, on the work branch `research/learned-dnf-circuit-campaign-5-wip`. Once the review gives a go,
+**Draft for review, second version** (after the coordinator's review 1 of the draft at `eefeb2b`), on the work
+branch `research/learned-dnf-circuit-campaign-5-wip`. Once the review gives a go,
 this text, byte for byte, becomes `research/learned-dnf-circuit-campaign-5/PREDICTION.md` and is pushed alone on
 `research/learned-dnf-circuit-campaign-5`, before any implementation of campaign 5. Nothing in it may be changed
 afterwards. A wrong rule is corrected by an amendment file, pushed alone before the run or the computation it
@@ -92,6 +93,33 @@ claims under noise hold for the injected noise model only (section 6). [D5-3]
   statuses and wall times in its report and its amendment 11 are cited. [C4 report; C4-A11]
 - **No seed of 7601 and above has ever been simulated.** The repository was searched for mismatch seeds 7601 to 7699
   (section 14, item 5). Seeds 7501 to 7512 are spent and are never used again.
+- **The pre-run of the gate cases and of the sizing** (2026-11-17), asked for by the coordinator's review of this
+  file's first draft and run before this file was pushed. It used no campaign data and simulated nothing.
+  - **What ran.** Campaign 4's frozen `c4.py`, `predicted.py`, `gate4.py`, `plan.py` and `cases.py` (copied unchanged
+    from `093995b`), with two new scripts. `cases5.py` builds the cases of section 7.4. `size5.py` runs campaign 4's
+    sizing with the limits of section 10.4 and the seeds from 7601. `prerun.sh` drives both. All of it sits in
+    `drafts/prerun/` of `research/learned-dnf-circuit-campaign-5-wip`, committed at
+    `39747d70c4d2c07d5980de375b6f5ca234cba4cc` before it ran. SHA-256:
+    `cases5.py` `62ad77f2f9f8e13180800486e93828619040907cb8aae6436ba3e556729f6815`,
+    `size5.py` `e8f85666380933589ac6dcdb996ad83232de6dca35539cdb1f75b40bad640b51`,
+    `prerun.sh` `7f7ab504bb7d5b1a8ca3660402ba52daa9054d8594bbef48abc88bfdb23ed7f5`.
+  - **Input and toolchain.** The only input was `CALIBRATION.json` of #172 (commit `49684af`). The toolchain was the
+    pinned one of section 10.2: the kit's `identity` passing on all seven pins, Lean 4.35.0, and OpenBLAS's SkylakeX
+    kernel on an AVX-512 Xeon.
+  - **Outputs.** In `drafts/prerun/out/`, committed at `bf8be75766ba5bd71cef91880afd74af5ef63cdc`, with their
+    SHA-256 in its `SHA256SUMS`:
+    `CASES.json` `ef0f4c9f0ba5b82441a2939e316736d653c616f78c89290803d9b2e51b08947c`,
+    `Gate5Cases.lean` `141f2070e94ac1a0635bf8dc170c8e64c85dcdfa3be1ffa1f99b97d9f98bbb4c`,
+    `Gate5CasesTargets.lean` `e099f107a163a9b545e256f6e5a9626816a5393784c5f3b6661ff1a493ffe83d`,
+    `python.log` `21e44f1b4301dfbfdfb1190fad7dbf27fb6065e4cac75b9cb78bc787bcf344cf`,
+    `SIZE.json` `2bfac65c22d1df8fe6c00d2a772047ca5d8c82b14a9f28d6f408fce87c0e70a8`.
+  - **What was seen.** Every case gave the verdict of section 7.4, failing on exactly the conditions written there.
+    The two Lean files compiled, and each of their 33 and 85 theorems depends on a subset of `propext`,
+    `Classical.choice` and `Quot.sound`. P1′'s interval had the eligible scores 98 550 to 98 601. P2′'s interval
+    had the eligible scores 102 339 and 102 341 to 102 410: the set is not contiguous, and 102 340 is not eligible.
+    Under `beta_3`, every case was "no". The sizing gave `I = 12` and 28 788.89 s (section 10.5). Section 7.4 was
+    written from the first draft's rules, and only the failing conditions and the values of P1′ and P2′ were filled
+    in from what the pre-run printed. No rule was changed after it.
 
 ## 4. Definitions
 
@@ -138,7 +166,8 @@ the whole physical slot of 22 units. [C4 §Measures; C4-A1 §1]
 An instance is **measured** when three conditions hold: both decks count (section 9), the guard-on FIRE bit of every
 read equals `Z >= 1` of the guard-off read of the same stage and mask, and every stage has its reads. Otherwise it is
 **not measured**: it has no prediction, gets no network run and enters no claim. A deck that reaches its time limit
-does not count. [C4 §Measures; C4-A11 §3]
+does not count. [C4 §Measures; C4-A11 §3] **If no instance is measured**, there is no `PREDICTED.json`, no kernel
+gate on a prediction and no stage Q, N1, N2 or N3, and every claim is "not established". [C4-A11 §3]
 
 ### 4.2 Needs, the gain path and the budgets
 
@@ -256,27 +285,30 @@ the injected model only]
 ## 6. Noise: the injected model only
 
 **The model.** Every noisy run is under the **injected model** of [`research/circuit/noise.py`](https://github.com/HevisNico/kernel-R/blob/8bcd3d744f101378c308a0af9da80631dded715f/research/circuit/noise.py),
-used in campaigns 1 to 3: `trnoise` sources at the input of each block. It is the simulator's built-in noise. ngspice
-42 adds no device noise to a transient. This model is above the device model's reference at every frequency
-([`REPORT_A2.md`][noise-report], commit `fd25955`, sections 4 and 6), so the claims under noise are tested under the
-stronger noise. There is no noise-model extraction, no E stage, no `filesource` source, no samples file, and no
-`xtrtol` setting. The rules of V2, V2b and the isolation check do not apply. [D5-3; C4 §Noise model; C4-A7 §2–3]
+used in campaigns 1 to 3. It consists of `trnoise` sources that the deck adds at the input of each block. It is not
+the device noise of the transistor models: ngspice 42 adds no device noise to a transient. There is no noise-model
+extraction, no E stage, no `filesource` source, no samples file, and no `xtrtol` setting. The rules of V2, V2b and
+the isolation check do not apply. The claims under noise hold for this model only. [D5-3; C4 §Noise model; C4-A7 §2]
 
 **The implementation keeps one noise model.** The frozen code accepts only the injected model. The runner refuses a
-run that asks for any other model, before any simulation. Campaign 4's device-model code (`noise/`, the extraction
-runs, the samples generator) is not part of the frozen implementation of campaign 5, and no check of the rehearsal
-concerns it. [D5-8; L: every check of the rehearsal tied to the model it concerns, C4-A9]
+run that asks for any other model, before any simulation, which RG tests (section 11.2). Campaign 4's
+device-model code (`noise/`, the extraction runs, the samples generator) is removed from the frozen implementation
+only where it is a whole file, together with its call sites. Where removing it would touch a function that other
+code uses, the code is kept and the runner's refusal is the barrier. Every file removed or changed against
+`093995b` is listed at the freeze. No check of the rehearsal concerns the device model. [D5-8; L: every check of
+the rehearsal tied to the model it concerns, C4-A9; coordinator's review 1, choice 7]
 
 **Noise seed.** The noisy run of round `n` (1, 2, 3) of the instance of seed `S` has the noise seed **`10 x S + n`**,
 written into `PREDICTED.json` by the frozen code: 76011 to 76013 for seed 7601, up to `10 x (7600 + I) + 3`. The
 development seeds have 76911 to 76933 (rehearsal only). The noise seed is applied as the **imposed process number**
 of the simulator process (`noise_id` of `net.Session`, the `fakepid` shim of `research/circuit/repetition`), set by
-the frozen runner on its simulator process only. The launcher's own environment is unchanged. [C4 §Noise seed]
+the frozen runner on its simulator process only. The launcher's own environment is unchanged. [C4 §Noise seed] The
+one noisy run of the chain test, on the nominal cell (section 11.3), has the noise seed **90 961**. [new]
 These numbers were never used to fix the noise of any run. The numbers fixed elsewhere lie in 1 to 707, 201 to 9 920,
 706 002 to 706 082, 900 000 to 900 002, 75 011 to 75 123 (campaign 4, never run: no noisy run took place) and 90 951
-to 90 953 (campaign 4's rehearsal, nominal cell). A process number chosen by the system in an earlier run may have
-taken any value; such a draw was not fixed and is not a use of the number. [C4 §Noise seed; new: the ranges of
-campaign 4 added]
+to 90 953 (campaign 4's rehearsal, nominal cell). Campaign 5 fixes 76 011 to 76 123 (at `I = 12`), 76 911 to 76 933
+and 90 961. A process number chosen by the system in an earlier run may have taken any value; such a draw was not
+fixed and is not a use of the number. [C4 §Noise seed; new: the ranges of campaigns 4 and 5 added]
 
 **Every noisy run is reproducible from its seed.** The same deck, instance seed and noise seed give the same run.
 Between the records of two such runs, only these fields may differ: `id`; `wall_s`; `peak_rss_MB`; `files.trace.raw`,
@@ -285,7 +317,7 @@ whose `Date:` line is the start time; `files.result.json`, which holds `wall_s`;
 compared apart: `trace.raw` byte for byte without its `Date:` line, `result.json` equal as data without `wall_s`, and
 `session.log` line for line without the ` Reference value : ` lines. [C4 §Noise seed; C4-A6 §2–3; L: what two runs of
 one seed may differ in] The same list applies to two runs of one calibration deck or one run without noise.
-**Across two machines** the same comparison is made in the rehearsal and is reported, not required (section 11.4):
+**Across two machines** the same comparison is made in the rehearsal and is reported, not required (section 11.5):
 the two machines may differ in CPU. [new]
 
 ## 7. The kernel gate
@@ -416,21 +448,24 @@ target condition, and must give "yes". [L: each "no" case with its exact target 
 | Case | Change from P0 | `beta_0`: Lean false | `beta_0`: Lean true | The Python's failing conditions, and no other |
 |---|---|---|---|---|
 | P0 | none | none | all three | none |
-| P1 | the score of a's pair read at stage 3 (its last silence) raised to `theta − 1` | `checkCascadeValid` | the other two | guarded margins of a's reads, and of b's through the joint fit of layer 1; no timing condition |
-| P1′ | the same score raised to `s1*`, the largest integer in `[Z, theta − 1]` for which the frozen code gives the instance eligible | none | all three | none |
-| P2 | the score of a's pair read at stage 4 (its first FIRE) lowered to `theta` | `checkCascadeValid` | the other two | guarded margins of a's reads, and of b's through the joint fit; no timing condition |
-| P2′ | the same score lowered to `s2*`, the least integer in `[theta, Z]` for which the frozen code gives the instance eligible | none | all three | none |
-| P3 | the score of c's test pair read set to the score of line a alone minus 1 | `checkCascadeCalibrationOneSided` | the other two | c's submask comparison on its test read of both lines |
-| P3′ | the score of c's test pair read set to `max(Z_1, Z_2)` plus c's `testingError` under `beta_0` | none | all three | none |
-| P4 | the emission of c's test read on ABCD placed at the midpoint of its two arrivals | `checkCascadeCalibrationOneSided` | the other two | `v ≤ t` on c's test read on ABCD |
-| P4′ | the same emission placed at its last arrival | none | all three | none |
-| P5 | the arrival of line a on c in test slot AB moved 1/10 unit from the emission of a plus 3/2 | `checkCascadeCalibrationOneSided` | the other two | the route of line a in test slot AB |
+| P1 | the score of a's pair read at stage 3 (its last silence) raised to `theta − 1` | `checkCascadeValid` | the other two | the guarded margin of a's early silence at stage 3, and nothing else |
+| P1′ | the same score set to `s1*` = **98 601**, the largest integer in `[Z, theta − 1]` for which the frozen code gives the instance eligible | none | all three | none |
+| P2 | the score of a's pair read at stage 4 (its first FIRE) lowered to `theta` | `checkCascadeValid` | the other two | four guarded margins, through the joint fit of layer 1: the early silences of a and of b at stage 3, a's stop (training) and a's positive test read at stage 4; no timing condition |
+| P2′ | the same score set to `s2*` = **102 339**, the least integer in `[theta, Z]` for which the frozen code gives the instance eligible | none | all three | none |
+| P3 | c's aligned pair at stage `min(n_1, n_2)` set to the score of line a alone minus 1 (the test pair's score is the lower of the aligned and 0.3-late pairs) | `checkCascadeCalibrationOneSided` | the other two | c's two submask comparisons (submasks a and b) on its test read ABCD |
+| P3′ | c's aligned and 0.3-late pairs at stage `min(n_1, n_2)` both set to `max(Z_1, Z_2)` plus c's `testingError` under `beta_0` (102 017) | none | all three | none |
+| P4 | the emission of c's test read on ABCD placed at the midpoint of its two arrivals (39 719/50 and 19 862/25) | `checkCascadeCalibrationOneSided` | the other two | `v ≤ t` for line b's arrival on c's test read on ABCD |
+| P4′ | the same emission placed at its last arrival (19 862/25) | none | all three | none |
+| P5 | the arrival of line a on c in test slot AB (the first slot where a fires) moved 1/10 unit later | `checkCascadeCalibrationOneSided` | the other two | the route of line a in test slot AB |
 | P5′ | the emission of a in test slot AB and the arrival of line a on c moved together, 1/10 unit later | none | all three | none |
-| P6 | the start of a's `firstTest` read in the first test slot moved 1/100 unit earlier | `checkTrainingSeparation` | the other two | the separation of the first test slot from the last lesson |
-| P6′ | the start of a's `firstTest` read in the second test slot moved 1/100 unit earlier | none | all three | none |
+| P6 | the start of a's `firstTest` read in the first test slot (pattern `-`, the empty one) moved 1/100 unit earlier | `checkTrainingSeparation` | the other two | the separation of that read from the last lesson (lesson 13), from a's and from b's `teach` read |
+| P6′ | the start of a's `firstTest` read in the second test slot (pattern A) moved 1/100 unit earlier | none | all three | none |
 
-`Z` in P1′ and P2′ is that read's score in P0. P1′ and P2′ are found by the case builder, by search over the
-integers of their interval, before any verdict is computed; they are the boundaries of P1 and P2. For P4, the Lean
+`Z` in P1′ and P2′ is that read's score in P0 (98 550 and 102 410). The case builder finds P1′ and P2′ by trying
+every integer of their interval. The values in the table are those the pre-run found (section 3), and the frozen
+code must reproduce them. The eligible scores of P2′'s interval are not contiguous: 102 340 is not eligible. P2′ is
+the least eligible score, as defined, not the start of a run of eligible scores. Nothing in a verdict depends on that
+gap. For P4, the Lean
 file also decides, as propositions on c's test read on ABCD (start `s`, emission `t`): `∀ j v, arrival j = some v → v
 ≤ t` is **false**; `s ≤ t ∧ t ≤ s + deadline` is **true**; and every arrival lies in `[s, s + skew]` is **true**. Only
 the first test slot can break the separation: `TrainingSeparation` orders every test read after every training slot
@@ -439,7 +474,8 @@ and lesson, but does not order the test slots among themselves. That is why P6 a
 P3′, P5′, P6′; P4′ redefined]
 
 Under `beta_3`, on every case, the Python and Lean must give the same verdict per checker, with no fixed expected
-value. **In the rehearsal and in CI**, every case must give its expected verdict under `beta_0`, fail for its target
+value. In the pre-run every case was "no" under `beta_3`, as P0 is: no output of the nominal cell has room at
+`K = 3`. **In the rehearsal and in CI**, every case must give its expected verdict under `beta_0`, fail for its target
 only in both, and agree under `beta_3`. Otherwise nothing is launched. [C4-A2 §3]
 
 **The mirror mutations** of campaign 4 (`mirror_mutations.py`) are kept: each mutation of the Python mirror of a
@@ -557,8 +593,11 @@ of `PREDICTED.json`. Failures are reported as they are. [C4 §Rules of the analy
   reported, with the machine's inventory checked again before the next launch. [L: infrastructure; C4-A11 §1]
 - **The inventory of each machine is written just before each stage's manifest, and the launch follows at once.** If
   anything but the boot time differs from the inventory of the previous stage (CPU model, processors, memory, kernel,
-  system, the pinned environment), nothing is launched on that machine until an amendment. [L: infrastructure;
-  C4-A11 §1]
+  system, the pinned environment), nothing is launched on that machine until an amendment. **M1's reference
+  inventory on each machine is the one written for that machine's last rehearsal stage**, since the rehearsal's wall
+  times hold only for that CPU. So if a container is replaced between the rehearsal and M1 by one with another CPU
+  model or another processor count, nothing is launched on it until an amendment. [L: infrastructure; C4-A11 §1;
+  coordinator's review 1, R7]
 - **Packages are installed with `venv/bin/python -m pip`**, never by a script whose shebang would enter numpy's
   `RECORD` hash. [L: infrastructure; C4 report, machine `b`'s numpy]
 - The remote of every clone is `https://github.com/HevisNico/kernel-R`, checked before every launch. [C4-A11 §1]
@@ -589,7 +628,7 @@ owner's cost-model decision, [`COST_MODEL_DECISION.md`][costdec], commit `2ffe04
 | Run | Expected cost | Measured where, and under which conditions |
 |---|---|---|
 | calibration deck | **925 s** | 125.1 s for phase 0's one-cell deck, nominal cell, scaled to the three-cell deck by `dnf.cost` ([`COST_MEASURES.json`][costmeas], commit `3144c57`) |
-| run without noise | **814 s** at need 4; 845 s with the skew slots | nominal cell, need-4 calendar ([`COST_C4_need4.json`][cost4], commit `4d3b5a1`) |
+| run without noise | **814 s** at need 4; **845.3149 s** with the skew slots (814 × 1.0384703, the ratio of `dnf.cost` for `dnf.calendar(4, 4, 4, 4, "skew")` to `dnf.cost` for `dnf.calendar(4, 4, 4, 4)`, `dnf.py` at main `8bcd3d7`) | nominal cell, need-4 calendar ([`COST_C4_need4.json`][cost4], commit `4d3b5a1`) |
 | noisy run, injected model | **1 316 s** at need 4 | nominal cell, need-4 calendar, injected model (`COST_C4_need4.json`, commit `4d3b5a1`) |
 | untrained control run | **369.2 s** | `COST_MEASURES.json`, commit `3144c57` |
 
@@ -612,7 +651,7 @@ the skew slots 1 700 s, noisy run 2 640 s, untrained control run 740 s. At need 
   time) took 588 s guard on and 449 s guard off [C4-A5 §7]. At stage M of campaign 4 (mismatched cells, through the
   kit, four at a time), guard-on decks ran past 660 s, by an amount not recorded, and guard-off decks took 551 to
   595 s in 11 of 12 cases, one reaching 660 s [C4-A11 §1]. So the guard-on cost under the campaign's real conditions
-  is **not known**: it is above 660 s. The limit is 2.8 times 660 s. The rehearsal's 0.75 rule (section 11.3)
+  is **not known**: it is above 660 s. The limit is 2.8 times 660 s. The rehearsal's 0.75 rule (section 11.4)
   measures it before any launch.
 - **Run without noise and untrained run.** Campaign 4's smoke runs, nominal cell: 672 s (need 4, with skew) and 142 s
   [C4-A5 §7], against limits of 1 700 s and 740 s. No mismatched run was ever made.
@@ -629,10 +668,10 @@ the skew slots 1 700 s, noisy run 2 640 s, untrained control run 740 s. At need 
 by the sum over both machines of `sum(caps) / 4 + max(caps)`, each cap being a run's time limit plus 10 s, at 14 400 s.
 A stage that does not fit is split by seed (below).
 
-**The result, computed with campaign 4's `plan.py` (`093995b`) with these limits and seeds, under the container's
-default Python while this draft was written** (to be recomputed by the frozen code, and recorded in `BEFORE_M.md`):
-**`I = 12`**, seeds 7601 to 7612 (7601 to 7606 on `a`, 7607 to 7612 on `b`), 11 expected measured, **7.997 h** of
-expected compute (13 instances would need 8.458 h), in six stages:
+**The result**, computed by the pre-run (section 3) with campaign 4's `plan.py` (`093995b`), these limits and seeds,
+under the pinned interpreter: **`I = 12`**, seeds 7601 to 7612 (7601 to 7606 on `a`, 7607 to 7612 on `b`), 11
+expected measured. The expected compute is **28 788.89 s = 7.9969 h** (13 instances would need 8.458 h), in six
+stages:
 
 | Stage | Runs | Limits | Cap (kit bound) | Expected per machine (a, b) |
 |---|---|---|---|---|
@@ -641,8 +680,10 @@ expected compute (13 instances would need 8.458 h), in six stages:
 | Q | the runs without noise (with skew) of the measured instances, and the untrained control run | 1 700 s, 740 s at need 4 | 8 310 s at need 4 | 1 994 s, 1 691 s |
 | N1, N2, N3 | the noisy run of round 1, 2, 3 of every measured instance | 2 640 s at need 4 | 12 588 s at need 4 | 2 961 s, 2 632 s |
 
-The 2× limits split stage M in two, so 12 instances fit within 0.003 h of the budget. The frozen code computes the
-figure from the same rule. If its figure is above 8 h, `I` is 11. [new: the margin stated]
+The 2× limits split stage M in two, so 12 instances fit within 11.1 s of the budget. That margin is far above the
+precision of the arithmetic. **The frozen code must reproduce `I = 12` and 28 788.89 s** (to 0.01 s). This is checked
+at the freeze and by CI on every push. A mismatch is a defect of the code, fixed before the freeze. It never changes
+`I`. [coordinator's review 1, R2]
 
 **Splitting a stage, a fixed rule.** Each machine's runs of a stage, in seed order, are cut into the fewest
 consecutive parts such that every part, the `j`-th parts of both machines together, fits the kit's bound. This applies
@@ -664,9 +705,11 @@ launched, or whose launch on a machine reaches its cap, is missing on that machi
 - **One protocol file per stage**, `research/learned-dnf-circuit-campaign-5/STAGE_<name>.md`, written by the frozen
   code and pushed alone before the stage's launch, since the kit claims a machine once per protocol file. It names
   the stage and its **governing protocol**, with that file's commit and SHA-256: `PREDICTION.md` for M1 and M2;
-  `PREDICTED.json` for Q, N1, N2, N3 and their parts. The frozen code maps **every stage name explicitly** to its
-  governing protocol (the rehearsal's stage names included) and refuses an unknown name. It never infers the mapping
-  from a first letter. [C4-A5 §1; C4-A8 §1; L: one protocol file per stage]
+  `PREDICTED.json` for Q, N1, N2, N3 and their parts. The rehearsal's stages (section 11.2) are governed as follows:
+  RC-a, RM-a, RM-b, RG-a and RG-b by `PREDICTION.md`; RQ-a, RQ-b, RN-a, RN-b, RMEM-a and RMEM-b by the rehearsal's
+  own `PREDICTED.json` of the development instances. The frozen code maps **every stage name explicitly** to its
+  governing protocol, from this closed list of names, and refuses an unknown name. It never infers the mapping from a
+  first letter. [C4-A5 §1; C4-A8 §1; L: one protocol file per stage]
 - **Safeguard (i).** At launch, the frozen runner checks that the governing protocol in the repository still has the
   SHA-256 written in its stage file, and refuses the run otherwise, before any simulation. [C4-A5 §1]
 - **Safeguard (ii).** Each stage's source commit differs from the frozen implementation commit in no frozen file, byte
@@ -682,6 +725,8 @@ launched, or whose launch on a machine reaches its cap, is missing on that machi
   stage name in the rehearsal's closed list), and the nominal cell (no seed) only for the rehearsal and CI. It refuses
   every other seed, 7501 to 7512 included, before any deck is written. [C4 §Noise-model extraction; C4-A5 §7; new:
   the development seeds]
+- **The noise-model guard.** The frozen runner refuses a run that asks for any noise model but the injected one (or
+  none), before any simulation. [D5-3; coordinator's review 1, R5]
 
 ### 10.7 Evidence
 
@@ -695,7 +740,7 @@ L: tooling]
 collector, built from campaign 4's `collect_with_links.py`. It copies every regular file byte for byte with its
 SHA-256, records each link as text (its path and target) without following it, writes `COLLECTED.json`, and checks
 that the evidence folder is unchanged before and after. It is part of the frozen implementation and is tested in the
-rehearsal on a run stopped by a deliberately short limit (section 11.2). [C4-A11 §2; L: collection built in]
+rehearsal on a run stopped by a deliberately short limit (section 11.3). [C4-A11 §2; L: collection built in]
 
 ### 10.8 The record before stage M
 
@@ -711,13 +756,14 @@ M1, records **what the code really uses**: [C4 §The record before stage M; C4-A
    to N3 at need 4, marked as the figures the frozen code recomputes from `PREDICTED.json`;
 6. the rehearsal's record (`REHEARSAL.json`), by its commit and SHA-256, and its verdict.
 
-Nothing in it is chosen by hand. The rehearsal changes no rule. It can only stop the launch (section 11.3).
+Nothing in it is chosen by hand. The rehearsal changes no rule. It can only stop the launch (sections 11.4 and 11.5).
 
 ## 11. The rehearsal
 
 The frozen implementation is rehearsed **in the real conditions of the campaign** before any launch. [D5-6] It runs
-through the launch kit, with the campaign's limits, on the campaign's two machines, four runs at a time, after the
-freeze and with CI green on the frozen commit.
+through the launch kit, on the campaign's two machines, four runs at a time, after the freeze and with CI green on
+the frozen commit. Its own limits are three times the expected cost (section 11.2). The campaign's limits judge it
+(section 11.4).
 
 ### 11.1 What it is made of
 
@@ -726,56 +772,74 @@ freeze and with CI green on the frozen commit.
 - **The nominal cell** (section `tt`, no seed): the gate cases, the mutations, and the chain test. [C4 §The kernel
   gate]
 
-### 11.2 First, the chain test on a short run
+### 11.2 The rehearsal's limits and stages
 
-Before the long stages, **the end of the chain is tried once** on the nominal cell, on machine `a`, through the kit: a
-stage `RC` with the two calibration decks, a run without noise at need 4 with the skew slots, the untrained control
-run, one noisy run, and **one calibration deck given a deliberate 120 s limit**, so that it stops at its limit. Then,
-in order: the collection (with the links of the stopped run), the prediction (`PREDICTED.json`), the kernel gate and
-`check.sh`, the generation of the manifests of Q and N (dry, not launched), the analysis (M8 on whichever path the
-nominal cell takes), `check.sh` on M8, and the writer of the record. The chain test checks only that each step runs
-and writes its output. Its wall times enter no rule. A defect found here is fixed and the implementation refrozen,
-which is declared, before the rehearsal starts. [L: the end of the chain tried on a short run; C4-A8 §4; C4-A11 §2]
+**The rehearsal's own limits are three times the expected cost**, rounded up the same way:
+`limit = 10 x ceil(3 x expected / 10)`. A slow run is then measured rather than cut. The kit's cap of a run is its
+limit plus 10 s. [C4-A5 §5; coordinator's review 1, R1] The rehearsal limits are: calibration deck 2 780 s; run without
+noise (with skew) 2 540 s at need 4 and 3 200 s at need 7; untrained control run 1 110 s; noisy run 3 950 s at need 4
+and 5 010 s at need 7.
 
-### 11.3 The rehearsal stages, and the 0.75 rule
+**Each rehearsal stage is one stage per machine**, with its own protocol file, run list and manifest (`RM-a`,
+`RM-b`, …). Both machines run the same runs, four at a time, which is the campaign's load. A stage is never cut into
+parts with fewer than four runs. [coordinator's review 1, R1]
 
-Each rehearsal stage is launched once on **each** machine. Both machines run the same runs, so that each machine's
-wall times are measured under four-at-a-time load:
+| Stage | Runs (per machine) | Of the kind of | Cap (kit bound, one machine) |
+|---|---|---|---|
+| RC-a (machine `a` only) | the chain test, section 11.3: on the nominal cell, the two calibration decks, a third calibration deck limited to 120 s, the run without noise at need 4 with skew, the untrained control run, and one noisy run at need 4 (noise seed 90 961) | every kind, and a stopped run | 7 295 s |
+| RM-a, RM-b | the 6 calibration decks of 7691 to 7693 | M1, M2 | 6 975 s |
+| RQ-a, RQ-b | the run without noise (with skew) of each development instance at its own needs (need 7 if it has none); **one run without noise of 7691 on `dnf.calendar(7, 7, 7, 7, "skew")`**; the untrained control run on the development control instance | Q, at both ends of its calendar | 6 205 s at need 4, 6 700 s at need 7 |
+| RN-a, RN-b | round 1 of each development instance; a second run of round 1 of 7691 (same noise seed); round 2 of 7691 | N1 to N3 | 8 910 s at need 4, 11 295 s at need 7 |
+| RMEM-a, RMEM-b | four noisy runs on `dnf.calendar(7, 7, 7, 7)`: round 1 of 7691, 7692, 7693, and round 2 of 7691 | the longest N run | 10 040 s |
+| RG-a, RG-b | no simulation: the seed guard's refusals (a campaign seed outside the kit; seed 7501; a development seed in a campaign stage); the noise-model guard's refusal of a run that asks for another model; safeguards (i) and (ii) on deliberately altered copies | — | — |
 
-| Stage | Runs per machine | Of the kind of campaign stage |
-|---|---|---|
-| RM | the 6 calibration decks of 7691 to 7693 | M1, M2 |
-| RQ | the run without noise (with skew) of each development instance at its own needs (need 7 if it has none), and the untrained control run on the development control instance | Q |
-| RN | round 1 of each development instance; a second run of round 1 of 7691 (same noise seed); round 2 of 7691 | N1 to N3 |
-| RMEM | four noisy runs at the need-7 calendar `dnf.calendar(7, 7, 7, 7)`: round 1 of 7691, 7692, 7693, and round 2 of 7691 | the longest N run |
-| RG | no simulation: the seed guard's refusals (a campaign seed outside the kit; seed 7501; a development seed in a campaign stage) and safeguards (i) and (ii) on deliberately altered copies | — |
+Every cap is within the kit's 14 400 s. RQ and RN use the development instances' own `PREDICTED.json`, computed on
+machine `a` from RM-a's evidence, with the kernel gate run on it. RM-b's evidence is compared with RM-a's (section
+11.5) and does not enter that prediction. If a development instance is not measured, the next one replaces it in RQ,
+RN and RMEM, in seed order. If none is measured, RQ and RN run on the development decks with the need-4 calendar,
+which is declared in the record. RQ's run at need 7 makes the 0.75 rule try every limit formula at both ends of its
+calendar. Every noisy limit is tried at need 7 by RMEM. [new; coordinator's review 1, R4]
 
-RQ and RN use the development instances' own `PREDICTED.json`, computed on machine `a` from RM's evidence, with the
-kernel gate run on it. If a development instance is not measured, it is replaced in RQ, RN and RMEM by the next one,
-in seed order. If none is measured, the runs of RQ and RN use the nominal cell's calendar at need 4 on the
-development decks, which is declared in the record. [new]
+**Expected rehearsal compute** under the cost model: about 2.6 h per machine (RM 2 081 s, RQ about 1 790 s at need 4,
+RN 2 632 s, RMEM 2 922 s), both machines in parallel. The chain test adds about 0.6 h on `a`. All of it is outside the
+8 h budget of the campaign. [new]
 
-**The rehearsal's own limits are three times the expected cost**, so that a slow run is measured rather than cut.
-[C4-A5 §5; new: why]
+### 11.3 First, the chain test on a short run
 
-**The 0.75 rule.** For every run of RM, RQ, RN and RMEM on either machine, its wall time recorded by the kit is
-compared with **the campaign's time limit for a run of its kind and calendar** (section 10.4). **If any run uses more
-than 0.75 of that limit, or does not complete, nothing is launched until an amendment.** [D5-6]
+Before the long stages, **the end of the chain is tried once**, in stage RC-a (section 11.2). The deck limited to
+120 s stops at its limit and leaves the links a stopped run leaves. Then, in order:
 
-### 11.4 The checks, each tied to what it concerns
+1. the collection, with the links of the stopped run;
+2. the prediction (`PREDICTED.json`);
+3. the kernel gate and `check.sh`;
+4. the generation of the manifests of Q and N, dry and not launched;
+5. the analysis, with M8 on whichever path the nominal cell takes, and `check.sh` on M8;
+6. the writer of the record.
+
+The chain test checks only that each step runs and writes its output. Its wall times are reported and enter no rule.
+Its stopped deck is outside the 0.75 rule. A defect found here is fixed and the implementation refrozen, which is
+declared, before RM starts. [L: the end of the chain tried on a short run; C4-A8 §4; C4-A11 §2]
+
+### 11.4 The 0.75 rule
+
+For every run of RM, RQ, RN and RMEM on either machine, its wall time recorded by the kit is compared with **the
+campaign's time limit for a run of its kind and calendar** (section 10.4, the 2× limit, not the rehearsal's 3×).
+**If any run uses more than 0.75 of that limit, or does not complete, nothing is launched until an amendment.** [D5-6]
+
+### 11.5 The checks, each tied to what it concerns
 
 [L: every check of the rehearsal tied to the model it concerns; C4-A9]
 
 | Check | Concerns | Passes when |
 |---|---|---|
-| limits (the 0.75 rule) | every run kind, both machines | every run within 0.75 of its campaign limit |
-| reproducibility | the injected model | the two runs of round 1 of 7691 equal on each machine, as section 6 allows; round 1 and round 2 of 7691 give different noise; all start from the same operating point |
+| limits (the 0.75 rule) | every run kind, both machines, both ends of the calendars | every run within 0.75 of its campaign limit |
+| reproducibility | the injected model | on each machine, the two runs of round 1 of 7691 are equal as section 6 allows; round 1 and round 2 of 7691 give different noise; all start from the same operating point |
 | determinism of measures | calibration and runs without noise | (reported, not required) the same deck on machines `a` and `b`, compared as in section 6 |
 | memory | the injected model, need 7 | the machine's peak resident memory over RMEM, sampled by the frozen code every second, at most 80 % of the machine's memory in its inventory |
 | the gate on the cases | the kernel gate | P0 to P6 and their controls as in section 7.4, under `beta_0` and `beta_3` |
 | the gate on the development instances | the kernel gate on mismatched cells | Lean and the Python agree per checker on every development instance with all its needs |
 | the mirror mutations | the Python mirror | every mutation detected |
-| the seed guard and safeguards (i), (ii) | the runner and the manifests | every refusal of RG |
+| the seed guard, the noise-model guard, safeguards (i) and (ii) | the runner and the manifests | every refusal of RG |
 | the collection | runs stopped at their limit | `COLLECTED.json` of every rehearsal stage written, and the folder unchanged |
 | the analysis | the end of the chain | `PREDICTED.json` reproduced byte for byte from the evidence; every record equal to its files; `check.sh` passes on the gate and on M8 |
 | no campaign seed | the seed guard | no deck of the rehearsal sets a seed other than 7691 to 7693 or none |
@@ -783,7 +847,7 @@ than 0.75 of that limit, or does not complete, nothing is launched until an amen
 If any check but the one marked "reported" fails, nothing is launched until an amendment. The memory figure expected
 from campaign 4's rehearsal is 17.7 % to 21.5 % of the machine [C4-A9 §1], measured on the nominal cell.
 
-### 11.5 Resumable, written as it goes
+### 11.6 Resumable, written as it goes
 
 The rehearsal **writes each check to its record as soon as the check is done**, and each machine's samples of memory
 as they are taken. A rehearsal that stops resumes from its last written check, on the same frozen commit, without
@@ -791,17 +855,13 @@ rerunning a completed stage. A stage stopped mid-way is missing and is run again
 declared. The record (`REHEARSAL.json`) states the frozen commit, the CPU model and the OpenBLAS core of each machine,
 every wall time, and the verdict of every check. [L: resumable; C4-A8 §1, §4]
 
-**Expected rehearsal compute** under the cost model: about 2.5 h per machine (RM 2 081 s, RQ about 1 360 s, RN
-2 632 s, RMEM 2 921 s), both machines in parallel, plus about 1 h for the chain test on `a`. It is outside the 8 h
-budget of the campaign. [new]
-
 ## 12. Order of the campaign
 
 1. This file, pushed alone. [method]
 2. The implementation: campaign 4's frozen code at `093995b`, adapted as D5-8 says and as this file requires, then
    frozen. The list of frozen files is sent at the freeze. Independent review by the coordinator, and CI green on the
    frozen commit. [D5-8; method]
-3. The chain test (11.2), then the rehearsal (11.3–11.5), and `REHEARSAL.json` pushed.
+3. The chain test (11.3), then the rehearsal (11.2, 11.4 to 11.6), and `REHEARSAL.json` pushed.
 4. `BEFORE_M.md`, pushed alone. [10.8]
 5. **Measures**: stages M1 and M2. [C4 §Order]
 6. **Predictions**: `PREDICTED.json` and the Lean file of the kernel gate, computed on machine `a`, committed and
@@ -832,15 +892,18 @@ that the network does what its cells, measured alone, say it will. [C4 §What th
 | A5 (stage protocols, safeguards, limits, extraction costs, M8 and M7 as observed) | 10.6, 10.4 (replaced by D5-4), 8 (M7, M8); extraction not needed |
 | A6 (what two runs of one seed may differ in; later amendments in safeguard (ii)) | 6, 10.6 |
 | A7 (the injected model) | 6 |
-| A8 (audit subset rule and negative cases, OpenBLAS pin, completion, memory record) | 7.3, 10.2, 11.5 |
-| A9 (the zero-amplitude check concerns the device model only) | 6, 11.4 (no device-model check) |
+| A8 (audit subset rule and negative cases, OpenBLAS pin, completion, memory record) | 7.3, 10.2, 11.6 |
+| A9 (the zero-amplitude check concerns the device model only) | 6, 11.5 (no device-model check) |
 | A10 (`BEFORE_M.md`'s caps upper bounds) | 10.8 (the exact M caps recorded) |
 | A11 (collection with links; a run at its limit is missing) | 9, 10.7 |
 
-Item 5 of section 3: the search for seeds 7601 to 7699 covered `main` at `8bcd3d7` only (every file except waveforms
-and CSV tables, for a seed passed to `setseed` or named as a seed). It found 7601 to 7620 only as `noise_id` values of
-`research/circuit/repetition/manifest.json`, which are noise numbers and not mismatch seeds. The noise seeds of
-campaign 5 (76 011 and above) lie outside that range of noise numbers (201 to 9 920).
+Item 5 of section 3: the search for seeds 7601 to 7699 covered every file except waveforms and CSV tables, looking
+for a seed passed to `setseed` or named as a seed. It ran on `main` at `8bcd3d7` and on the heads of the 31
+`research/*` branches on 2026-11-17, each fetched by name with depth 1 (blobs above 5 MB were not fetched and may not have been searched), never an
+`evidence/*` branch. On `main` it found 7601 to 7620 only as `noise_id` values of
+`research/circuit/repetition/manifest.json`, which are noise numbers and not mismatch seeds. On the 31 heads it found
+nothing outside this campaign's own folder. The noise seeds of campaign 5 (76 011 and above) lie outside that range of
+noise numbers (201 to 9 920).
 
 [c4p]: https://github.com/HevisNico/kernel-R/blob/6232e16859b09b58dffd25bafac114e05ed905cb/research/learned-dnf-circuit-campaign-4/PREDICTION.md
 [c4dir]: https://github.com/HevisNico/kernel-R/tree/6232e16859b09b58dffd25bafac114e05ed905cb/research/learned-dnf-circuit-campaign-4
