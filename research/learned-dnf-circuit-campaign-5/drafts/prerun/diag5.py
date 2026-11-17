@@ -75,8 +75,8 @@ def main():
     Path(sys.argv[2]).write_text(gate4.lean_file(cases, "diagnostic of P2's interval, campaign 5"))
     full = C4.lean_targets(cases + [dict(cases[0], tag="P4")], verdicts | {("P4", 0): verdicts[(cases[0]["tag"], 0)], ("P4", 3): verdicts[(cases[0]["tag"], 3)]},
                            Path(sys.argv[2]).stem)
-    keep = full.split("/-! P4 (amendment 2")[0]
-    keep = "\n".join(l for l in keep.split("\n") if "_P4_" not in l) + "\nend LearnedCoincidence.MonotoneDNF.PremiseCheck.Campaign4\n"
+    keep = full.split("set_option maxRecDepth 100000 in\nset_option maxHeartbeats 0 in\ntheorem valid_P4_K0")[0]
+    keep += "end LearnedCoincidence.MonotoneDNF.PremiseCheck.Campaign4\n"
     Path(sys.argv[3]).write_text(keep)
 
 
