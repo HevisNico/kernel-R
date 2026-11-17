@@ -56,5 +56,22 @@ jobs:
           tar --no-same-owner --strip-components=1 --zstd -xf "$archive" -C "$install_dir"
           rm -f "$archive"
           printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
-      - name: The kernel gate on P0 to P6 and P4', its targets and the mirror mutations, regenerated and audited
-        run: PYTHON="$RUNNER_TEMP/python/bin/python" bash research/learned-dnf-circuit-campaign-4/check.sh
+      - name: The waveform of the rehearsal's run without noise (attempt 2), from its evidence branch, for M8's eligible path
+        run: |
+          set -euo pipefail
+          run=research/learned-dnf-circuit-campaign-4/rehearsal/run-2/collected-N-a/a-None-quiet
+          git init -q "$RUNNER_TEMP/evidence"
+          git -C "$RUNNER_TEMP/evidence" fetch -q --depth 1 --filter=blob:none "https://github.com/$GITHUB_REPOSITORY" \
+            evidence/learned-dnf-circuit-campaign-4-rehearsal-run-2
+          git -C "$RUNNER_TEMP/evidence" checkout -q FETCH_HEAD -- "$run/evidence/trace.raw"
+          cp "$RUNNER_TEMP/evidence/$run/evidence/trace.raw" "$run/evidence/trace.raw"
+      - name: M8's eligible path (amendment 8), code path only, P0's prediction with that run
+        run: |
+          cd research/learned-dnf-circuit-campaign-4
+          "$RUNNER_TEMP/python/bin/python" -B m8_case.py rehearsal/run-2/collected-N-a/a-None-quiet "$RUNNER_TEMP/M8_eligible.lean"
+      - name: The kernel gate on P0 to P6 and P4', its targets and the mirror mutations, regenerated and audited; M8 eligible, and M8 with no eligible instance (a theorem on no axiom)
+        run: |
+          PYTHON="$RUNNER_TEMP/python/bin/python" bash research/learned-dnf-circuit-campaign-4/check.sh \
+            "$RUNNER_TEMP/M8_eligible.lean" "$PWD/research/learned-dnf-circuit-campaign-4/rehearsal/run-2/analysis/M8.lean"
+      - name: The negative cases of the audit (amendment 8), each refused on the check of the axioms
+        run: PYTHON="$RUNNER_TEMP/python/bin/python" bash research/learned-dnf-circuit-campaign-4/audit_cases.sh

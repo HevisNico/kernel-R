@@ -7,12 +7,13 @@
 #    byte, the files committed under rehearsal/ (gate-cases-4, mirror-mutations-3: the runs under the pinned
 #    interpreter and the exact arithmetic of amendment 3).
 # 3. Compiles each generated file with warnings as errors, refuses sorry, admit, native_decide, axiom, unsafe,
-#    implemented_by and extern, and requires `#print axioms` of every theorem to be exactly
-#    [propext, Classical.choice, Quot.sound].
+#    implemented_by and extern, and requires `#print axioms` of every theorem to be a subset of
+#    [propext, Classical.choice, Quot.sound] (amendment 8: a theorem on no axiom passes, such as M8's
+#    `no_eligible_instance`; a theorem on any other axiom, sorryAx or Lean.ofReduceBool among them, fails).
 #
 #   check.sh                 the steps above
-#   check.sh FILE.lean       also checks FILE.lean (the gate of the campaign, written from PREDICTED.json), the
-#                            same way, after the steps above
+#   check.sh FILE.lean ...   also checks each FILE.lean (the gate of the campaign, written from PREDICTED.json; the
+#                            analysis's M8.lean), the same way, after the steps above
 #
 # PYTHON names the interpreter; it must be the pinned one (amendment 3, section 3: Python 3.12.3, numpy 2.3.5, and in
 # the pinned venv the SHA-256 of both), which is recorded and checked first. Default: the pinned venv.
@@ -56,11 +57,14 @@ assert names, "no theorem"
 open(audit, "w").write(f"import {module}\nopen {ns}\n" + "".join(f"#print axioms {n}\n" for n in names))
 out = subprocess.run(["lean", audit], capture_output=True, text=True, cwd=src.rsplit("/", 1)[0])
 assert out.returncode == 0, out.stdout + out.stderr
-found = re.findall(r"'([^']+)' depends on axioms: \[([^\]]*)\]", " ".join(out.stdout.split()))
+flat = " ".join(out.stdout.split())
+found = [(n, {a.strip() for a in ax.split(",")}) for n, ax in re.findall(r"'([^']+)' depends on axioms: \[([^\]]*)\]", flat)]
+found += [(n, set()) for n in re.findall(r"'([^']+)' does not depend on any axioms", flat)]
 assert len(found) == len(names), (len(found), len(names), out.stdout[-2000:])
 for name, axioms in found:
-    assert sorted(a.strip() for a in axioms.split(",")) == ["Classical.choice", "Quot.sound", "propext"], (name, axioms)
-print(f"{module}: {len(names)} theorems, each on exactly [propext, Classical.choice, Quot.sound]")
+    assert axioms <= {"propext", "Classical.choice", "Quot.sound"}, (name, sorted(axioms))
+on_three = sum(axioms == {"propext", "Classical.choice", "Quot.sound"} for _, axioms in found)
+print(f"{module}: {len(names)} theorems, each on a subset of [propext, Classical.choice, Quot.sound] ({on_three} on all three)")
 PY
 }
 
@@ -79,7 +83,7 @@ audit "$build/Gate4Cases.lean"
 audit "$build/Gate4CasesTargets.lean"
 audit "$build/MirrorMutations.lean"
 
-if [[ $# -ge 1 ]]; then
-  audit "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
-fi
+for file in "$@"; do
+  audit "$(cd "$(dirname "$file")" && pwd)/$(basename "$file")"
+done
 echo "check.sh: passed"
