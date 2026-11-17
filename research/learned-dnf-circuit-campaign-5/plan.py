@@ -348,6 +348,83 @@ def stage_runs(name, here=HERE):
     return named[name], "PREDICTED.json", I
 
 
+# ----------------------------------------------------------------------------- the rehearsal (PREDICTION.md, 11)
+
+REHEARSAL_STAGES = ("RC", "RM", "RQ", "RN", "RMEM")
+STOPPED_LIMIT_S = 120                                   # RC's deck limited to 120 s, so that it stops at its limit (11.2)
+
+
+def both(runs):
+    """The same runs on machines a and b (PREDICTION.md, 11.2): each run's id carries its machine."""
+    return [dict(r, id=f"{m}-{r['id']}", machine=m) for m in ("a", "b") for r in runs]
+
+
+def dev_slots(dev):
+    """The development instances that RQ, RN and RMEM use: those measured, in seed order, with their needs (a missing
+    need counts as 7); if none is measured, every development seed at need 4 (PREDICTION.md, 11.2)."""
+    if dev is None:
+        return [(s, (4, 4, 4, 4)) for s in c4.DEV_SEEDS], None, True
+    xs = [x for x in dev["instances"] if x.get("measured")]
+    if not xs:
+        return [(s, (4, 4, 4, 4)) for s in c4.DEV_SEEDS], None, True
+    nd = lambda x: calendar_needs((x["needs"]["a"], x["needs"]["b"], x["needs"]["c1"], x["needs"]["c2"]))
+    return [(x["seed"], nd(x)) for x in sorted(xs, key=lambda x: x["seed"])], dev.get("control_instance"), False
+
+
+def rehearsal_runs(name, dev=None, cost=None):
+    """The runs of a rehearsal stage, the same on both machines, with the rehearsal's limits (11.2). dev: the
+    development instances' PREDICTED.json (RQ, RN, RMEM). Slots: the measured development instances in seed order,
+    repeated if fewer than three are measured (a not-measured instance is replaced by the next one, 11.2). RQ: three
+    runs without noise, one at need 7 of the first, the untrained control run. RN: round 1 of each slot (round 2, 3 for
+    a repeated instance), then a second run of round 1 of the first. RMEM: the same at need 7, then round 2 of the
+    first (with three measured: round 1 of 7691, 7692, 7693 and round 2 of 7691)."""
+    cost = cost or costs()
+    lim = lambda r: with_limits(r, cost, "injected", rehearsal=True)
+    plain = lambda r: {k: v for k, v in r.items() if k != "machine"}
+    if name == "RC":
+        runs = [lim(dict(id=f"None-cal-{g}", machine="a", seed=None, kind="cal", guard=g)) for g in ("on", "off")]
+        stopped = lim(dict(id="None-cal-stopped", machine="a", seed=None, kind="cal", guard="on"))
+        runs.append(dict(stopped, timeout_s=STOPPED_LIMIT_S, estimate_s=STOPPED_LIMIT_S, stopped_on_purpose=True))
+        for sc in ("quiet", "untrained", "n1"):
+            r = lim(network_run(None, "a", (4, 4, 4, 4), sc, "injected"))
+            runs.append(dict(r, id=f"None-{sc}", noise_seed=c4.noise_seed(None, 1) if sc == "n1" else None))
+        return both([plain(r) for r in runs])
+    if name == "RM":
+        return both([plain(lim(r)) for s in c4.DEV_SEEDS for r in cal_runs(s, "a") for r in [dict(r, id=r["id"][2:])]])
+    slots, control, fallback = dev_slots(dev)
+    first = slots[0]
+    cycle = lambda n: [slots[j % len(slots)] for j in range(n)]
+
+    def net(s, nd, sc, tag):
+        r = lim(network_run(s, "a", nd, sc, "injected"))
+        return plain(dict(r, id=f"{s}-{tag}", noise_seed=c4.noise_seed(s, r["round"]) if r["round"] else None))
+
+    def noisy(seq, nd_of, suffix=""):
+        """Round 1 for a seed's first slot, 2 and 3 for its next ones, then round 1 again as a repeat."""
+        out, seen = [], {}
+        for s, nd in seq:
+            j = seen[s] = seen.get(s, 0) + 1
+            rnd = j if j <= 3 else 1
+            out.append(net(s, nd_of(nd), f"n{rnd}", f"n{rnd}{suffix}" + ("" if j <= 3 else f"-repeat{j - 3}")))
+        return out
+    if name == "RQ":
+        runs, seen = [], {}
+        for s, nd in cycle(3):
+            j = seen[s] = seen.get(s, 0) + 1
+            runs.append(net(s, nd, "quiet", "quiet" if j == 1 else f"quiet-{j}"))
+        runs.append(net(first[0], (7, 7, 7, 7), "quiet", "quiet-need7"))
+        ctl = control if control is not None else first[0]
+        runs.append(net(ctl, dict(slots)[ctl], "untrained", "untrained"))
+        return both(runs)
+    if name == "RN":
+        runs = noisy(cycle(3), lambda nd: nd)
+        runs.append(net(first[0], first[1], "n1", "n1-repeat"))
+        return both(runs)
+    if name == "RMEM":
+        return both(noisy(cycle(3) + [first], lambda nd: (7, 7, 7, 7), "-need7"))
+    raise SystemExit(f"refused: {name} is not a rehearsal stage (PREDICTION.md, 11.2)")
+
+
 # ------------------------------------------------------------------------- the stages' protocols (PREDICTION.md, 10.6)
 
 STAGE_BEGIN = "```json stage"
@@ -403,19 +480,22 @@ def check_after_freeze(frozen_commit, source_commit, root=ROOT):
     return changed
 
 
-def manifest(name, runs, I, protocol_commit, protocol, source_commit, root=ROOT, frozen_commit=None):
+def manifest(name, runs, I, protocol_commit, protocol, source_commit, root=ROOT, frozen_commit=None, extra=None):
     def blob(commit, path):
         return subprocess.run(["git", "-C", str(root), "show", f"{commit}:{path}"], check=True, capture_output=True).stdout
     if frozen_commit is not None:
         check_after_freeze(frozen_commit, source_commit, root)
     stage = name if protocol.startswith("STAGE_") else None
     entries = [entry(r, I, "stage", stage) for r in runs]
-    return dict(kind="registered", campaign_id=f"learned-dnf-circuit-5-{name.lower()}", attempt=1, executor=c4.EXECUTOR,
+    rehearsal = name in REHEARSAL_STAGES
+    cid = ("learned-dnf-circuit-5-rehearsal-" if rehearsal else "learned-dnf-circuit-5-") + name.lower().replace(".", "-")
+    bound = [f"{BASE}/BEFORE_M.md"] if not rehearsal else []
+    return dict(kind="registered", campaign_id=cid, attempt=1, executor=c4.EXECUTOR,
                 protocol_commit=protocol_commit, protocol_path=f"{BASE}/{protocol}",
                 protocol_sha256=hashlib.sha256(blob(protocol_commit, f"{BASE}/{protocol}")).hexdigest(),
                 source_commit=source_commit, launcher_path=f"{CLOSURE}/launchkit/launch.py", marker_path=f"{BASE}/RUN_ATTEMPT_{name}.json",
                 spinit_path=f"{CLOSURE}/runtime/spinit", inventory_a_path=f"{BASE}/INVENTORY_a.json", inventory_b_path=f"{BASE}/INVENTORY_b.json",
-                source_sha256={n: hashlib.sha256(blob(source_commit, n)).hexdigest() for n in FROZEN + [f"{BASE}/BEFORE_M.md"] + extra_frozen(runs)},
+                source_sha256={n: hashlib.sha256(blob(source_commit, n)).hexdigest() for n in FROZEN + bound + list(extra or []) + extra_frozen(runs)},
                 expected_workflows=WORKFLOWS, jobs=c4.JOBS, scenario_order=["stage"], budget_s=math.ceil(stage_cap(runs)), runs=entries)
 
 

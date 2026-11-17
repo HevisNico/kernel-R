@@ -1,4 +1,5 @@
-"""Campaign 4: the one analysis, after the last stage has ended on both machines. Run once.
+"""Campaign 5 (campaign 4's analyze.py at 093995b, adapted: the dates of the run in exact arithmetic, the rehearsal's
+limits passed as a flag, no limits basis): the one analysis, after the last stage has ended on both machines. Run once.
 
   analyze.py OUT_DIR MEASURES_DIR_A MEASURES_DIR_B RUNS_DIR_A RUNS_DIR_B [EXTRACTIONS_DIR...]
 
@@ -110,7 +111,7 @@ def n_own(word, need):
     return w[:need] == "s" * need and set(w[need:]) <= {"F"}
 
 
-def main(argv=None, here=HERE, predicted_path=None):
+def main(argv=None, here=HERE, predicted_path=None, rehearsal=False):
     argv = sys.argv[1:] if argv is None else argv
     print(c4.require_pinned())
     outdir, mA, mB, rA, rB = map(Path, argv[:5])
@@ -118,11 +119,10 @@ def main(argv=None, here=HERE, predicted_path=None):
     raw = Path(predicted_path or here / "PREDICTED.json").read_text()
     predicted = json.loads(raw)
     before = plan.read_before_m(here / "BEFORE_M.md")
-    res = dict(what="the one analysis of campaign 4; see analyze.py", interpreter=c4.interpreter(), missing=[], claims={}, comparisons={})
+    res = dict(what="the one analysis of campaign 5; see analyze.py", interpreter=c4.interpreter(), missing=[], claims={}, comparisons={})
     recs = state_records(mA, mB, rA, rB)
     # (1) PREDICTED.json must be what the frozen prediction script gives from the evidence of the measures
-    again, files = P.predictions(before, [mA, mB], extraction_dirs,
-                                 json.loads((here / "REHEARSAL.json").read_text())["limits_basis"] if (here / "REHEARSAL.json").exists() else None)
+    again, files = P.predictions(before, [mA, mB], extraction_dirs, rehearsal)
     same = json.dumps(again, indent=1, default=str) + "\n" == raw
     for path, text in files.items():
         same = same and (here.parent.parent / path).exists() and (here.parent.parent / path).read_text() == text
