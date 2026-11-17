@@ -1,31 +1,41 @@
-"""Campaign 4: checks of the implementation against PREDICTION.md, without simulation.
+"""Campaign 5: checks of the implementation against PREDICTION.md (commit a2d8bad), without simulation.
 
-  python -m unittest research/learned-dnf-circuit-campaign-4/test_campaign.py
+  python -m unittest test_campaign        (from this folder)
+
+Campaign 4's test_campaign.py (093995b), rewritten for campaign 5's rules: the protocol file, the seeds, the limits,
+the sizing and its exact figure (10.5: the frozen code must reproduce I = 12 and 28 788.89 s), the split of a stage,
+the closed map of stage names, the guards, the exact guarded fit (a float in a row refused), the rehearsal's stages
+against the kit's own bound.
 """
 from fractions import Fraction as F
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
-import subprocess
 import sys
+import tempfile
 import unittest
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import c4                                               # noqa: E402
-import gate4                                            # noqa: E402
 import plan                                             # noqa: E402
 import plans4                                           # noqa: E402
 import predicted as P                                   # noqa: E402
+import run4                                             # noqa: E402
 from c4 import dnf                                      # noqa: E402
 
 TEXT = (HERE / "PREDICTION.md").read_text()
 FLAT = " ".join(TEXT.split())
-PREDICTION_SHA256 = "714cb6b7a37ecca45260a582262750a8705907f889d6fa9fabd4a1cb7ee69c34"
-ORIGINALS = {"devnoise.py": "016234f5fa43e2b83e09f0438a0482ae4ddd0d4152aab1ccbdb12ade676dd5a2",
-             "model.py": "38630ca29a81619b0793d918ea9b026da0ade18858a48fd544f1d08484917cce",
-             "pilot.py": "40ea3b678c61ae2a135bc01447dfd0b6a769ecb9cc1b846a9dc14abe4ca5c0c6",
-             "noisegen.py": "2415336b5f31de902ae47d573f76081dd855c6f20355df82d73374ddd2085b45"}
+PREDICTION_SHA256 = "36249501a232fb3a9f7e092ac6dee1927767cde852b9519ced7f9c671c110b10"
+NOISEGEN_SHA256 = "2415336b5f31de902ae47d573f76081dd855c6f20355df82d73374ddd2085b45"
+
+
+def kit():
+    spec = importlib.util.spec_from_file_location("launch", HERE.parent / "sky130-supervisor-closure" / "launchkit" / "launch.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
 
 
 class Protocol(unittest.TestCase):
@@ -34,27 +44,48 @@ class Protocol(unittest.TestCase):
 
     def test_constants_are_those_of_the_text(self):
         for s in ("Layer-1 pulse amplitude **0.49**", "layer 2 at amplitude 1", "`k = 0, ..., 7`", "**22 units**", "**1.5 units after the FIRE**",
-                  "skew bound **1.1 units**", "deadline **2.2 units**", "**0.111 mV between runs, 0.094 mV within a run, 0.009 mV per dose**",
-                  "**`R = 3` noisy runs**", "**up to 8 h of expected compute**", "0.01 mV", "at least 1 us", "**`10 x S + n`**",
-                  "calibration guard on (`k = 0`), calibration guard off (1), run without noise (2), N1 (3), N2 (4), N3 (5), and the untrained control run last (6)"):
+                  "skew bound is **1.1 units**", "deadline is **2.2 units**", "`theta = 100 000`", "**1 000 000**",
+                  "`b = 0.111` mV between runs, `w = 0.094` mV within a run, `d = 0.009` mV per dose", "`R = 3`", "**`10 x S + n`**",
+                  "**90 961**", "**7691, 7692, 7693**", "**Four runs at a time on each machine.**",
+                  "calibration guard on (0), calibration guard off (1), run without noise (2), N1 (3), N2 (4), N3 (5), the untrained control run (6)"):
             self.assertIn(s, FLAT)
-        self.assertEqual((c4.AMP_AND, c4.AMP_OR, c4.SLOT, c4.WIRE, c4.SKEW_C, c4.DEADLINE_C, c4.STAGES, c4.R), (0.49, 1.0, 22, 1.5, 1.1, 2.2, 8, 3))
+        self.assertEqual((c4.AMP_AND, c4.AMP_OR, c4.SLOT, c4.WIRE, c4.SKEW_C, c4.DEADLINE_C, c4.STAGES, c4.R, c4.JOBS), (0.49, 1.0, 22, 1.5, 1.1, 2.2, 8, 3, 4))
         self.assertEqual(c4.DECISION5, dict(between_mV=0.111, within_mV=0.094, per_dose_mV=0.009))
         self.assertEqual(c4.POSITIONS, dict(cal_on=0, cal_off=1, quiet=2, n1=3, n2=4, n3=5, untrained=6))
+        self.assertEqual((P.THETA, P.RAIL), (100000, 1000000))
 
     def test_seeds_machines_and_noise_seeds(self):
-        self.assertEqual(c4.seeds(9), dict(a=[7501, 7502, 7503, 7504, 7505], b=[7506, 7507, 7508, 7509]))
-        self.assertEqual([c4.noise_seed(7501, n) for n in (1, 2, 3)], [75011, 75012, 75013])
-        self.assertTrue(all(c4.noise_seed(None, n) > 90950 for n in (1, 2, 3)))
-
-    def test_copied_noise_code(self):
-        self.assertIn("commit `74e93b4`", (HERE / "noise" / "README.md").read_text())
-        self.assertEqual(hashlib.sha256((HERE / "noise" / "noisegen.py").read_bytes()).hexdigest(), ORIGINALS["noisegen.py"])
-        sys.path.insert(0, str(HERE / "noise"))
-        import pilot
-        self.assertEqual(pilot.ALLOWED_SEEDS, ())
+        self.assertEqual(c4.seeds(12), dict(a=list(range(7601, 7607)), b=list(range(7607, 7613))))
+        self.assertEqual([c4.noise_seed(7601, n) for n in (1, 2, 3)], [76011, 76012, 76013])
+        self.assertEqual(c4.noise_seed(7612, 3), 76123)
+        self.assertEqual(c4.DEV_SEEDS, (7691, 7692, 7693))
+        self.assertEqual([c4.noise_seed(s, n) for s in (7691, 7693) for n in (1, 3)], [76911, 76913, 76931, 76933])
+        self.assertEqual(c4.noise_seed(None, 1), 90961)
         with self.assertRaises(AssertionError):
-            pilot.seeded(7501)
+            c4.noise_seed(None, 2)
+
+    def test_copied_noise_code_is_unchanged_and_unused(self):
+        self.assertEqual(hashlib.sha256((HERE / "noise" / "noisegen.py").read_bytes()).hexdigest(), NOISEGEN_SHA256)
+        self.assertEqual(c4.NOISE_MODELS, ("none", "injected"))
+
+
+class Guards(unittest.TestCase):
+    """PREDICTION.md, 10.6: the seed guard and the noise-model guard (outside the kit, every mismatch seed is refused)."""
+
+    def test_seed_guard(self):
+        out = Path(tempfile.mkdtemp()) / "run"
+        run4.guard(None, 12, out, None)
+        for seed, stage in ((7601, None), (7612, None), (7613, None), (7501, None), (7512, None), (7691, "RM"), (7691, "Q"), (7691, None),
+                            (7601, "RM"), (7690, "RM")):
+            with self.assertRaises(AssertionError, msg=(seed, stage)):
+                run4.guard(seed, 12, out, stage)
+
+    def test_noise_model_guard(self):
+        run4.noise_guard("network", "injected")
+        run4.noise_guard("cal", "none")
+        for kind, noise in (("network", "device"), ("extract", "none"), ("network", "corrected")):
+            with self.assertRaises(AssertionError):
+                run4.noise_guard(kind, noise)
 
 
 class Calendar(unittest.TestCase):
@@ -82,38 +113,141 @@ class Calendar(unittest.TestCase):
                 self.assertGreaterEqual(min(dnf.separation(slots).values()), 16)
 
 
+class Limits(unittest.TestCase):
+    """PREDICTION.md, 10.4 and 11.2."""
+
+    def test_campaign_limits(self):
+        cost = plan.costs()
+        lim = lambda needs, sc: plan.with_limits(plan.network_run(7601, "a", needs, sc, "injected"), cost, "injected")["timeout_s"]
+        self.assertEqual(c4.limit(cost["calibration_deck_s"]), 1850)
+        self.assertEqual([lim((4, 4, 4, 4), s) for s in ("quiet", "n1", "untrained")], [1700, 2640, 740])
+        self.assertEqual([lim((7, 7, 7, 7), s) for s in ("quiet", "n1")], [2130, 3340])
+        for s in ("**calibration deck 1 850 s**", "with the skew slots 1 700 s", "noisy run 2 640 s", "untrained control run 740 s", "2 130 s and 3 340 s",
+                  "`limit = 10 x ceil(2 x expected / 10)`"):
+            self.assertIn(s, FLAT)
+
+    def test_rehearsal_limits(self):
+        cost = plan.costs()
+        self.assertEqual(c4.rehearsal_limit(cost["calibration_deck_s"]), 2780)
+        lim = lambda needs, sc: plan.with_limits(plan.network_run(7691, "a", needs, sc, "injected"), cost, "injected", rehearsal=True)
+        self.assertEqual([lim((4, 4, 4, 4), s)["timeout_s"] for s in ("quiet", "untrained", "n1")], [2540, 1110, 3580])
+        self.assertEqual([lim((7, 7, 7, 7), s)["timeout_s"] for s in ("quiet", "n1")], [3200, 3580])
+        self.assertEqual(lim((7, 7, 7, 7), "n1")["campaign_limit_s"], 3340)
+        self.assertIn("`min(10 x ceil(3 x expected / 10), 3 580 s)`", FLAT)
+
+    def test_ceil10_is_exact(self):
+        self.assertEqual([c4.ceil10(x) for x in (1850, 1850.0, F(18501, 10), 0.1, 2632)], [1850, 1850, 1860, 10, 2640])
+
+
 class Sizing(unittest.TestCase):
-    def test_provisional_size_is_that_of_the_text(self):
-        I, rows = plan.size(plan.costs(), "device")
-        self.assertEqual(I, 9)
-        row = next(r for r in rows if r["I"] == 9)
-        self.assertAlmostEqual(row["expected_h"], 7.55, places=2)
-        self.assertIn("`I = 9`", FLAT)
-        self.assertIn("**7.55 h**", FLAT)
+    """PREDICTION.md, 10.5: the frozen code must reproduce I = 12 and 28 788.89 s (to 0.01 s)."""
 
-    def test_every_stage_within_the_cap(self):
-        for model in ("device", "injected"):
-            I, rows = plan.size(plan.costs(), model)
-            row = next(r for r in rows if r["I"] == I)
-            self.assertTrue(all(v <= 14400 for v in row["caps"].values()))
-            self.assertLessEqual(row["expected_h"], 8.0)
+    def test_size_and_expected_compute(self):
+        cost = plan.costs()
+        I, rows = plan.size(cost)
+        self.assertEqual(I, 12)
+        st = plan.stages(I, "injected", False, cost)
+        self.assertAlmostEqual(plan.expected_compute(st), 28788.89, delta=0.01)
+        self.assertGreater(next(r for r in rows if r["I"] == 13)["expected_h"], 8.0)
+        self.assertEqual([n for n, _ in st], ["M1", "M2", "Q", "N1", "N2", "N3"])
+        caps = {n: plan.stage_cap(r) for n, r in st}
+        self.assertEqual(caps, dict(M1=9300.0, M2=9300.0, Q=8310.0, N1=12587.5, N2=12587.5, N3=12587.5))
+        quiet = plan.expected(plan.network_run(7601, "a", (4, 4, 4, 4), "quiet", "injected"), cost, "injected")
+        self.assertAlmostEqual(quiet, 845.3149, delta=0.0001)
+        for s in ("**`I = 12`**", "28 788.89 s", "**845.3149 s**"):
+            self.assertIn(s, FLAT)
+        self.assertEqual({r["seed"] for r in dict(st)["M1"]}, {7601, 7602, 7603, 7607, 7608, 7609})
 
-    def test_extraction_runs(self):
-        runs = plan.extract_runs(7501, "a", True)
-        self.assertEqual(len(runs), 21)
-        self.assertEqual(sum(r["isolation"] for r in runs), 3)
-        self.assertEqual(len({r["id"] for r in runs}), 21)
-        self.assertTrue(all(r["id"] == r["id"].lower() for r in runs))
+    def test_every_stage_within_the_kit(self):
+        K = kit()
+        for n, runs in plan.stages(12, "injected", False, plan.costs()):
+            K.check_budget(runs, K.MAX_BUDGET_S, c4.JOBS)
 
 
-class Timing(unittest.TestCase):
-    def test_slot_timing_valid(self):
-        for skew, deadline, duration in ((P.SKEW_A, P.DEADLINE_A, P.DURATION_A), (P.SKEW_C, P.DEADLINE_C, P.DURATION_C)):
-            self.assertTrue(0 <= skew <= deadline < duration)
+class Stages(unittest.TestCase):
+    """BEFORE_M.md, the runs of each stage, the split of Q and N, the closed map of stage names."""
+
+    def setUp(self):
+        self.dir = Path(tempfile.mkdtemp())
+        d = dict(rehearsal=dict(path="REHEARSAL.json", commit="0" * 40, sha256="0" * 64, verdict="test"))
+        (self.dir / "BEFORE_M.md").write_text(plan.before_m_text(plan.before_m(d)))
+        self.b = plan.read_before_m(self.dir / "BEFORE_M.md")
+
+    def test_before_m(self):
+        self.assertEqual((self.b["I"], self.b["noise_model"]), (12, "injected"))
+        self.assertAlmostEqual(self.b["expected_compute_s"], 28788.89, delta=0.01)
+        self.assertEqual(self.b["measure_stages"]["M1"]["limits_s"], [1850])
+        self.assertEqual(self.b["limits"]["need7_s"]["noisy"], 3340)
+
+    def test_stage_m(self):
+        for name in ("M1", "M2"):
+            M, protocol, I = plan.stage_runs(name, here=self.dir)
+            self.assertEqual((len(M), protocol, I), (12, "PREDICTION.md", 12))
+            self.assertTrue(all(7601 <= r["seed"] <= 7612 and r["timeout_s"] == 1850 for r in M))
+
+    def test_split_at_need_7(self):
+        cost = plan.costs()
+        runs = [plan.with_limits(plan.network_run(s, c4.machine_of(s, 12), (7, 7, 7, 7), f"n{k}", "injected"), cost, "injected")
+                for k in (1, 2, 3) for s in range(7601, 7613)]
+        (self.dir / "PREDICTED.json").write_text(json.dumps(dict(network_runs=runs)))
+        with self.assertRaises(AssertionError):
+            plan.stage_runs("N1", here=self.dir)        # at need 7, N1 does not fit: only its parts exist
+        p1, protocol, _ = plan.stage_runs("N1.1", here=self.dir)
+        p2, _, _ = plan.stage_runs("N1.2", here=self.dir)
+        self.assertEqual(protocol, "PREDICTED.json")
+        self.assertEqual(sorted(r["seed"] for r in p1 + p2), list(range(7601, 7613)))
+        K = kit()
+        for p in (p1, p2):
+            K.check_budget(p, K.MAX_BUDGET_S, c4.JOBS)
+
+    def test_governing_map_is_closed(self):
+        for n in ("M", "M1", "M2", "RC", "RM"):
+            self.assertTrue(plan.governing_of(n).endswith("/PREDICTION.md"))
+        for n in ("Q", "Q.1", "N1", "N3.2", "RQ", "RN", "RMEM"):
+            self.assertTrue(plan.governing_of(n).endswith("/PREDICTED.json"))
+        for n in ("E1", "MEMD", "Mx", "X", "GUARD", "RG", "N4", "Q1"):
+            with self.assertRaises(SystemExit):
+                plan.governing_of(n)
+
+    def test_campaign_ids_are_valid_and_distinct(self):
+        import re
+        ids = ["learned-dnf-circuit-5-" + n.lower().replace(".", "-") for n in ("M1", "M2", "Q", "Q.1", "N1.2")]
+        ids += ["learned-dnf-circuit-5-rehearsal-" + n.lower() for n in plan.REHEARSAL_STAGES]
+        self.assertEqual(len(set(ids)), len(ids))
+        self.assertTrue(all(re.fullmatch(r"[a-z0-9][a-z0-9-]{2,63}", i) for i in ids))
+
+
+class Rehearsal(unittest.TestCase):
+    """PREDICTION.md, 11.2: every rehearsal stage one manifest over both machines, within the kit's bound."""
+
+    def test_rehearsal_stages_fit_the_kit(self):
+        K = kit()
+        dev = dict(instances=[dict(seed=s, measured=True, needs=dict(a=7, b=7, c1=7, c2=7)) for s in c4.DEV_SEEDS], control_instance=7691)
+        want = dict(RC=13665.0, RM=13950.0, RQ=13400.0, RN=14360.0, RMEM=14360.0)
+        for n in plan.REHEARSAL_STAGES:
+            runs = plan.rehearsal_runs(n, dev)
+            self.assertEqual({r["machine"] for r in runs}, {"a", "b"})
+            a = [r for r in runs if r["machine"] == "a"]
+            self.assertEqual([r["id"][2:] for r in a], [r["id"][2:] for r in runs if r["machine"] == "b"])
+            self.assertGreaterEqual(len(a), 4)
+            self.assertEqual(K.check_budget(runs, K.MAX_BUDGET_S, c4.JOBS)["aggregate_cap_s"], want[n])
+
+    def test_rehearsal_seeds_and_noise(self):
+        rc = plan.rehearsal_runs("RC")
+        self.assertTrue(all(r["seed"] is None for r in rc))
+        self.assertEqual([r["timeout_s"] for r in rc if r.get("stopped_on_purpose")], [120, 120])
+        self.assertEqual({r.get("noise_seed") for r in rc if r["kind"] == "network" and r["noise"] != "none"}, {90961})
+        rm = plan.rehearsal_runs("RM")
+        self.assertEqual(sorted({r["seed"] for r in rm}), list(c4.DEV_SEEDS))
+        rn = [r for r in plan.rehearsal_runs("RN", None) if r["machine"] == "a"]
+        self.assertEqual([r["noise_seed"] for r in rn], [76911, 76921, 76931, 76911])
+        rmem = [r for r in plan.rehearsal_runs("RMEM", None) if r["machine"] == "a"]
+        self.assertEqual([r["noise_seed"] for r in rmem], [76911, 76921, 76931, 76912])
+        self.assertTrue(all(tuple(r["needs"]) == (7, 7, 7, 7) for r in rmem))
 
 
 class ExactArithmetic(unittest.TestCase):
-    """Amendment 3, section 2: rounding ties to even, exact rounding-up of one or two square roots, exact solve."""
+    """PREDICTION.md, 4.2: ties to even, exact rounding-up of one or two square roots, the exact guarded fit."""
 
     def test_ties_to_even(self):
         self.assertEqual([round(F(20735, 2)), round(F(20737, 2)), P.zint(F(1, 200000)), P.zint(F(3, 200000))], [10368, 10368, 0, 2])
@@ -135,52 +269,26 @@ class ExactArithmetic(unittest.TestCase):
         self.assertEqual(P.ceil_sum_sqrt([F(0)]), 0)
 
     def test_solve_is_exact(self):
-        rows = [[1, 0], [1, 1], [1, 2]]
-        self.assertEqual(P.solve(rows, [1, 2, 4]), [F(5, 6), F(3, 2)])
+        x = P.solve([[1, 0], [1, 1], [1, 2]], [1, 2, 4])
+        self.assertEqual(x, [F(5, 6), F(3, 2)])
+        self.assertTrue(all(type(v) is F for v in x))
+
+    def test_a_float_in_the_fit_is_refused(self):
+        with self.assertRaises(AssertionError):
+            P.solve([[1, 0.0], [1, 1]], [1, 2])
+        with self.assertRaises(AssertionError):
+            P.solve([[1, 0], [1, 1]], [1, 2.0])
+
+    def test_the_guarded_fit_is_built_of_integers(self):
+        t = {(c, k, r): dict(Z=100000 + 1000 * k + 7 * len(P.ports(r))) for c in ("a", "b") for k in range(8) for r in P.GUARDED_READS_1}
+        tup = P.guarded(t, P.LAYER1, 6, P.GUARDED_READS_1)
+        self.assertTrue(all(type(v) is int for v in list(tup["help"].values()) + list(tup["gain"].values()) + [tup["dose"]]))
 
 
-class Stages(unittest.TestCase):
-    """plan.py's record before stage M and the runs of each stage, without simulation."""
-
-    def setUp(self):
-        import tempfile
-        self.dir = Path(tempfile.mkdtemp())
-        d = dict(noise_model="device", noise_model_source="test", constants_source="test", costs_source="test", reuse_trip=True,
-                 reuse_trip_source="test")
-        (self.dir / "BEFORE_M.md").write_text(plan.before_m_text(plan.before_m(d)))
-        self.b = plan.read_before_m(self.dir / "BEFORE_M.md")
-
-    def test_before_m_round_trip(self):
-        self.assertEqual((self.b["I"], self.b["noise_model"], self.b["reuse_trip"]), (9, "device", True))
-        self.assertEqual(self.b["seeds"], dict(a=[7501, 7502, 7503, 7504, 7505], b=[7506, 7507, 7508, 7509]))
-        self.assertEqual(len(self.b["sha256"]), 64)
-
-    def test_stage_m_and_e(self):
-        M, protocol, I = plan.stage_runs("M", here=self.dir)
-        self.assertEqual((len(M), protocol, I), (18, "PREDICTION.md", 9))
-        self.assertTrue(all(c4.FIRST_SEED <= r["seed"] <= 7509 and r["machine"] == c4.machine_of(r["seed"], 9) for r in M))
-        self.assertLessEqual(plan.stage_cap(M), c4.MAX_BUDGET_S)
-        (self.dir / "MEASURED.json").write_text(json.dumps(dict(before_m_sha256=self.b["sha256"], instances=[
-            dict(seed=s, measured=s != 7503) for s in range(7501, 7510)])))
-        E, protocol, _ = plan.stage_runs("E1", here=self.dir)
-        self.assertEqual({r["seed"] for r in E}, set(range(7501, 7510)) - {7503})
-        self.assertEqual(len(E), 8 * 21)
-        self.assertTrue(all(r["reuse_trip"] for r in E))
-        self.assertLessEqual(plan.stage_cap(E), c4.MAX_BUDGET_S)
-        a = plan.argv(E[0], 9)
-        self.assertEqual(a[a.index("--instances") + 1], "9")
-
-    def test_limits_follow_the_rehearsal(self):
-        cost = plan.costs(self.b)
-        run = plan.network_run(7501, "a", (4, 4, 4, 4), "n1", "device", dict(path="x", sha256="0" * 64))
-        free = plan.with_limits(run, cost, "device")
-        self.assertEqual(free["timeout_s"], min(plan.ceil10(1.3 * free["expected_s"]), 1.3 * free["expected_s"]))
-        fast = plan.with_limits(run, cost, "device", {"noisy_device": 0.5})
-        self.assertEqual(fast["timeout_s"], min(plan.ceil10(1.3 * 0.5 * fast["expected_s"]), 1.3 * fast["expected_s"]))
-        self.assertLessEqual(free["timeout_s"], 1.3 * free["expected_s"])
-        slow = plan.with_limits(run, cost, "device", {"noisy_device": 2.0})
-        self.assertEqual(slow["timeout_s"], free["timeout_s"])          # never above 1.3 times the cost model
-        self.assertLessEqual(slow["estimate_s"], slow["timeout_s"])
+class Timing(unittest.TestCase):
+    def test_slot_timing_valid(self):
+        for skew, deadline, duration in ((P.SKEW_A, P.DEADLINE_A, P.DURATION_A), (P.SKEW_C, P.DEADLINE_C, P.DURATION_C)):
+            self.assertTrue(0 <= skew <= deadline < duration)
 
 
 if __name__ == "__main__":
