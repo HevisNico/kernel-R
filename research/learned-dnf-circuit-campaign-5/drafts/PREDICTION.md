@@ -1,7 +1,7 @@
 # A circuit network that learns (A and B) or (C and D), campaign 5: predictions
 
-**Draft for review, third version** (after the coordinator's reviews of the drafts at `eefeb2b` and `f89c23c`), on
-the work branch `research/learned-dnf-circuit-campaign-5-wip`. Once the review gives a go,
+**Draft for review, fourth version** (after the coordinator's reviews of the drafts at `eefeb2b`, `f89c23c` and
+`edb7438`), on the work branch `research/learned-dnf-circuit-campaign-5-wip`. Once the review gives a go,
 this text, byte for byte, becomes `research/learned-dnf-circuit-campaign-5/PREDICTION.md` and is pushed alone on
 `research/learned-dnf-circuit-campaign-5`, before any implementation of campaign 5. Nothing in it may be changed
 afterwards. A wrong rule is corrected by an amendment file, pushed alone before the run or the computation it
@@ -142,6 +142,42 @@ claims under noise hold for the injected noise model only (section 6). [D5-3]
     Both Lean files compiled. Every rehearsal stage of section 11.2 was accepted by `check_budget`, with the bounds
     given there. These results filled in section 7.4's sentence on the gap and section 11.2's figures. No rule was
     changed after them.
+- **A defect of campaign 4's frozen code, and the third pre-run** (2026-11-17).
+  - **The defect**, found by the coordinator's review of the third draft from `DIAG.json`. In `predicted.py` at
+    `093995b`, `guarded()` built its rows as `[0.0] * len(names)`, and `solve()` multiplied `F(r[i]) * r[j]`. In
+    Python a `Fraction` times a float is a float, so the normal equations, and the guarded tuple, were computed in
+    binary floats. C4-A3 §2 required exact rationals. Campaign 4 never computed a prediction, so no campaign-4
+    result depends on this.
+  - **The audit** of `predicted.py`, `cases.py`, `gate4.py` and `cases5.py`, looking for every float that reaches an
+    integer, found no other:
+    - the scores (`zint`), the dates and latencies (`q`) and the doses (`exact`, from `Decimal`) are Fractions;
+    - the timing constants are Fractions, and the slot length is an int;
+    - the budgets use `math.ceil` of a Fraction, which is exact, and `ceil_sum_sqrt`'s float is only a starting
+      point that an exact predicate corrects;
+    - the cases and the mirror read every number through `Fraction` or `Decimal`;
+    - the floats left are the geometric fit and M5, which decide nothing.
+  - **The fix**, as adaptation under D5-8, in `drafts/prerun/predicted5.py` (SHA-256
+    `b0e2ae8ca6b5aa5e73512028b2b8a23f0a563c0664771fc59382abe9f698967a`), with its patch against `093995b`'s
+    `predicted.py` (`predicted5.patch`, `d4e706975c29c65b4679edcca5ba6eef4f2d6e8ed319c85f790cbf41c3b28a54`):
+    - the rows are integer;
+    - both factors of every product are converted;
+    - a float in a row or in the right-hand side is refused;
+    - a solution that is not all `Fraction` is refused.
+    It is the rule of section 4.2.
+  - **What ran.** `prerun3.sh` (`01deb30b7a4a3e60928f4bb06eed6b046c10babc01167aa5316e39b510600122`) runs everything
+    of the first two pre-runs again, with `predicted5.py` in place of `predicted.py`, and checks that a float in a row
+    is refused. `diag5.py`'s rows were made integer too
+    (`908b9ce21dd08029806c082253da009da09857ad4f1dc7da6b7f0ae248686b57`). All of it was committed before it ran, at
+    `67acd3c859784440d0ea9ffa7f999fb355c64efb`. The outputs are in `drafts/prerun/out3/`, committed at
+    `80d292454e1a23c23bb46942eff70ec5ffed926b`.
+  - **What was seen.** A row holding a float was refused.
+    - **Nothing changed.** `CASES.json`, `python.log`, `Gate5Cases.lean`, `Gate5CasesTargets.lean`, `SIZE.json` and
+      `BUDGET.json` are byte-identical to the first two pre-runs. So are the Lean files of the diagnostic and every
+      verdict, budget and failing condition of `DIAG.json`, whose fit values are now printed as fractions. This
+      covers every verdict, failing condition, Lean result, `s1*` = 98 601, `s2*` = 102 339, the gap at 102 340, `I`
+      and the stage bounds.
+    - **The tie at 102 340 is exact.** a's port-1 gain there is 77 315/2. The neighbours are not ties: 1 082 407/28
+      at 102 338, 2 164 817/56 at 102 339, 2 164 823/56 at 102 341 and 1 082 413/28 at 102 342.
 
 ## 4. Definitions
 
@@ -213,7 +249,11 @@ For `c` only the single lines are fitted. Its pairs enter the one-sided premise,
 integer units, with the threshold `theta`. It is fitted by least squares on stages 0 to `Q` on **exactly the reads its
 residual bound covers**: for `a` and `b`, the empty read, the singles and the aligned pairs; for `c`, the empty read
 and the single lines. It is computed as **the exact rational solution of the normal equations** on the integer
-scores, then rounded to the nearest unit, ties to even. [C4 §Needs; C4-A1 §7; C4-A3 §2]
+scores, then rounded to the nearest unit, ties to even. [C4 §Needs; C4-A1 §7; C4-A3 §2] **The frozen code enforces
+it.** Every entry of the fit's rows and right-hand side must be an `int` or a `Fraction`, and a float is refused.
+Both factors of every product are converted to `Fraction`. Every entry of the solution must be a `Fraction` before
+rounding. CI checks on every push that a row holding a float is refused. Campaign 4's frozen code did not meet this
+rule (section 3, the third pre-run). [new; coordinator's review 3, B3]
 
 **Residual bound** `epsilon` of a cell: the largest `|Z - G|` over the reads its fit covers (with the empty read of
 each cell), stages 0 to `Q`. `G` is the score of the guarded tuple. [C4 §Needs; C4-A1 §4]
@@ -487,12 +527,13 @@ target condition, and must give "yes". [L: each "no" case with its exact target 
 `Z` in P1′ and P2′ is that read's score in P0 (98 550 and 102 410). The case builder finds P1′ and P2′ by trying
 every integer of their interval. The values in the table are those the pre-run found (section 3), and the frozen
 code must reproduce them. The eligible scores of P2′'s interval are not contiguous: 102 340 is not eligible. At
-102 340 the exact least-squares gain of a's port 1 is 38 657.5, a tie. Ties to even round it to 38 658, which raises
+102 340 the exact least-squares gain of a's port 1 is 77 315/2 = 38 657.5, an exact tie. Ties to even round it to 38 658, which raises
 a's guarded pair score at stage 3 from 99 207 to 99 208. The training budget stays 792, so the room of that early
 silence, `theta − (G + beta_0)`, is 0, and the strict `G + beta_0 < theta` fails. The mirror's only failing condition
 is a's guarded margin (early silence) at stage 3. Lean gives `checkCascadeValid` false and the other two checkers
 true. At 102 339 and at 102 341 the room is 1. This follows from the rules of section 4.2 (exact fit, ties to even, a
-strict inequality) and is not a defect (second pre-run, section 3). P2′ is the least eligible score, as defined.
+strict inequality) and is not a defect (second and third pre-runs, section 3). P2′ is the least eligible score, as
+defined.
 For P4, the Lean
 file also decides, as propositions on c's test read on ABCD (start `s`, emission `t`): `∀ j v, arrival j = some v → v
 ≤ t` is **false**; `s ≤ t ∧ t ≤ s + deadline` is **true**; and every arrival lies in `[s, s + skew]` is **true**. Only
@@ -948,7 +989,7 @@ that the network does what its cells, measured alone, say it will. [C4 §What th
 | `PREDICTION.md` | sections 1 to 13 |
 | A1 (the kernel's fields, budgets per cell, rail, timing of `c`, instances without a need) | 4.2, 5, 7.1, 7.2 |
 | A2 (P4, its control, targets per case, latency of `c`'s pair, P6) | 7.1, 7.4 (P0 now asymmetric; controls for every "no" case) |
-| A3 (exact arithmetic, ties to even, the interpreter) | 4.2, 7.1, 10.2 |
+| A3 (exact arithmetic, ties to even, the interpreter) | 4.2 (now enforced by the frozen code: campaign 4's guarded fit ran in floats, section 3), 7.1, 10.2 |
 | A4 (which validation verdict decides) | not needed: no device model (6) |
 | A5 (stage protocols, safeguards, limits, extraction costs, M8 and M7 as observed) | 10.6, 10.4 (replaced by D5-4), 8 (M7, M8); extraction not needed |
 | A6 (what two runs of one seed may differ in; later amendments in safeguard (ii)) | 6, 10.6 |
