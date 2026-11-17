@@ -59,10 +59,11 @@ under `evidence/`; the waveforms of 10 MB and more are on an evidence branch.
 
 ## 3. The consequence
 
-By `PREDICTION.md` (Calibration), an instance is measured only when both its calibration runs count; otherwise it is
-not measured, has no prediction, gets no network run and enters no claim. Every `cal-on` deck is missing, so **no
-instance of campaign 4 is measured**. There is therefore no `PREDICTED.json`, no kernel gate on a prediction, and no
-stage Q, N1, N2 or N3. Nothing is relaunched; seeds 7501 to 7512 are spent. This file interprets no cause.
+By `PREDICTION.md` (Definitions, Measures, each cell alone in its slot), an instance is measured only when both its
+calibration runs count; otherwise it is not measured, has no prediction, gets no network run and enters no claim.
+Every `cal-on` deck is missing, so **no instance of campaign 4 is measured**. There is therefore no `PREDICTED.json`,
+no kernel gate on a prediction, and no stage Q, N1, N2 or N3. Nothing is relaunched; seeds 7501 to 7512 are spent.
+This file interprets no cause.
 
 ## 4. What was known when this was decided
 
