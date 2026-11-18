@@ -22,8 +22,8 @@ deck); the cell is brought to it within 2 uV per port (`move`).
   scan6.py OUT SEED|none c bothfire D1_V D2_V NGSPICE PDK            c's both lines (the second 0.3 late) read once at
                                                                      the preset, s = 0: the one-sided FIRE check (v9)
   scan6.py OUT none CELL reach S D1_V D2_V NGSPICE PDK              the nominal cell brought to the path at s = S, both
-                                                                     ports, without a read: it decides nothing (the
-                                                                     reach-only read of MAPPING_U.md 5)
+                                                                     ports, then one read of port 1 alone there; it
+                                                                     decides nothing (the reach-only read of MAPPING_U.md 5)
   scan6.py OUT SEED|none CELL onesided S1 S2 D1_V D2_V NGSPICE PDK    a or b: port 1 alone read at s = S1, port 2 at S2
 
 The run's record (`record.json`): what was asked, every read (its s, the ports' u, FIRE and its date), and the
@@ -260,7 +260,9 @@ def main(argv=None):
         target = drv.target(s_target)
         res = dict(kind="reach", s=str(s_target), reached=ok, target_V={str(p): target[p] for p in (1, 2)},
                    u_V={str(p): drv.u[p] for p in (1, 2)}, decides="nothing (MAPPING_U.md 5)")
-        if not ok:
+        if ok:                                   # one read of port 1 alone there, recorded, as a one-sided set reads
+            res["port1_alone_fired"] = bool(drv.slot("read", READS["port1"], s_target=str(s_target), label="reach: port 1 alone"))
+        else:
             res["why"] = res_why
     elif kind == "bothfire":
         assert cell == "c", "the both-lines FIRE check is for c"
