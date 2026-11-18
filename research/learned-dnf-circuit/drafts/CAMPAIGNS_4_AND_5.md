@@ -14,9 +14,9 @@ down before any data (a preregistration), measured the cells (stage M), and woul
 ## Campaign 4: stopped by a time limit
 
 Every "guard on" calibration run of stage M reached its time limit of 660 s, so no instance could be measured and
-nothing was predicted or tested. The limit had been set at 1.3 times a single run on the nominal cell, under a lighter
-load than the campaign's. Campaign 5's rehearsal later measured these runs at 705 to 734 s on mismatched cells, under
-the campaign's load: every one of them would have been cut.
+nothing was predicted or tested. The limit had been set at 1.3 times one run on the nominal cell. Campaign 5 later
+measured these runs at 485 to 514 s on the nominal cell and 705 to 734 s on mismatched cells, under the same load.
+Mismatched cells take longer to simulate, and every one of them would have been cut.
 
 ## Campaign 5: closed before its campaign stages
 
@@ -34,7 +34,7 @@ The campaign would most likely have ended "not established". It was closed befor
 ## What comes next
 
 A sixth campaign, if any, starts from a short design note in plain language, reviewed before any rule is written. It
-will reuse what worked: campaign 3's threshold scan, which handled mismatch, the launch kit and the Lean gate.
+is to start from what worked: campaign 3's threshold scan, which handled mismatch, the launch kit and the Lean gate.
 
 ## The records
 
