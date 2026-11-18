@@ -581,12 +581,14 @@ def predictions(before, measure_dirs, extraction_dirs=(), rehearsal=False, extra
             continue
         nd = plan.calendar_needs((x["needs"]["a"], x["needs"]["b"], x["needs"]["c1"], x["needs"]["c2"]))
         runs.append(plan.with_limits(plan.network_run(x["seed"], x["machine"], nd, "quiet", model), cost, model, rehearsal))
-        if control is not None and x["seed"] == control:
+        if x["seed"] == control:         # the nominal cell (seed None) can be the control (control_instance)
             runs.append(plan.with_limits(plan.network_run(x["seed"], x["machine"], nd, "untrained", model), cost, model, rehearsal))
     for k in (1, 2, 3):
         for x in instances:
             if not x["measured"]:
                 continue
+            if x["seed"] is None and k > 1:
+                continue                 # the nominal cell: round 1 only, the chain test (PREDICTION.md, 6 and 11.3)
             ex = extractions.get(str(x["seed"]))
             if model == "device" and not (ex and ex["passed"]):
                 continue                 # no noisy runs: missing (PREDICTION.md, Noise-model extraction)

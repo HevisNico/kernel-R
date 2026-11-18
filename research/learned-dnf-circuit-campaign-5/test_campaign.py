@@ -264,6 +264,29 @@ class Rehearsal(unittest.TestCase):
         self.assertTrue(all(tuple(r["needs"]) == (7, 7, 7, 7) for r in rmem))
 
 
+class NominalCell(unittest.TestCase):
+    def test_nominal_cell_predictions(self):
+        """The chain test (PREDICTION.md, 6 and 11.3): the nominal cell (seed None), measured on machine a and not
+        eligible, is its own control (the lowest measured seed); its PREDICTED.json has its run without noise, its
+        untrained control run and one noisy run, round 1, noise seed 90 961."""
+        from unittest import mock
+        import rehearsal
+        b = dict(rehearsal.before("rc"), sha256="0" * 64)
+        m = dict(seed=None, machine="a", measured=True, calibration=dict(on=None, off=None))
+        x = dict(seed=None, measured=True, eligible=False, needs=dict(a=4, b=4, c1=4, c2=4))
+        with mock.patch.object(P, "state_records", return_value={}), mock.patch.object(P, "measures", return_value=[m]), \
+                mock.patch.object(P, "load", return_value=(None, None)), mock.patch.object(P, "table", return_value=(None, None, [])), \
+                mock.patch.object(P, "instance", return_value=dict(x)):
+            res, files = P.predictions(b, [], (), True)
+        self.assertEqual(files, {})
+        self.assertIsNone(res["control_instance"])
+        runs = res["network_runs"]
+        self.assertEqual(sorted(r["scenario"] for r in runs), ["n1", "quiet", "untrained"])
+        self.assertEqual([r["noise_seed"] for r in runs if r["scenario"].startswith("n")], [90961])
+        rc = {r["scenario"]: r["timeout_s"] for r in plan.rehearsal_runs("RC", None) if r["machine"] == "a" and r["kind"] == "network"}
+        self.assertEqual({r["scenario"]: r["timeout_s"] for r in runs}, rc)
+
+
 class ExactArithmetic(unittest.TestCase):
     """PREDICTION.md, 4.2: ties to even, exact rounding-up of one or two square roots, the exact guarded fit."""
 
