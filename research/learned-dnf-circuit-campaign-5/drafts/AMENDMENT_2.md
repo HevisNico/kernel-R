@@ -9,8 +9,11 @@ ends campaign 5. It is the last file of campaign 5.
 
 - **Campaign 5 is closed. No claim was tested.** No campaign stage (M1, M2, Q, N1, N2, N3) was launched, `BEFORE_M.md`
   was never written, and no prediction, kernel gate or network run on a campaign instance exists.
-- **Seeds 7601 to 7612 were never simulated and are never to be used**, nor are their noise seeds 76 011 to 76 123.
-- **The rehearsal stopped after its stage RQ, by the owner's decision.** RN and RMEM were never launched. Their stage
+- **Seeds 7601 to 7612 were never simulated and are never to be used**, nor are their noise seeds `10 x S + n` for
+  `S` = 7601 to 7612 and `n` = 1 to 3.
+- **The rehearsal stopped after its stage RQ, by the owner's decision.** RQ had been launched on both machines at
+  10:26 UTC, before the owner's decision to stop reached the campaign director. The owner then chose to let it finish,
+  deciding nothing on its results. RN and RMEM were never launched. Their stage
   files and run lists are on the rehearsal branch, but no manifest, marker or claim was ever made for them.
   `REHEARSAL.json` was never written. The rehearsal's record is kept as it is (section 2). Nothing is decided on RQ's
   results.
