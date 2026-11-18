@@ -1,4 +1,4 @@
-# Campaign 6: the mapping on the stored-voltage axis (design addendum, one page, for review)
+# Campaign 6: the mapping on the stored-voltage axis (design addendum, one page, for review, second version)
 
 The owner allows one bounded redesign of BATCH_SPEC.md section 4 (v9, `2b6cf6b`). Only the scores given to the frozen
 gate change. **[C]** marks a choice.
@@ -17,31 +17,46 @@ the scan measures at 0.36 stage. The training itself is linear on the stored-vol
   of its own mean dose. It is the instrument's output, and is exact after it.
 - **Scores.** A read of mask `M` gets `Z = help + sum over p in M of (g_p + d w_p(k))`. This is additive in the ports,
   with one dose `d` per layer, and nothing else enters.
+- **The principle** (the reviewers' revision): no free unit, and no model margin beyond an observation. The model
+  must agree with every deck read and with the one-sided bound.
 - **Anchors** (θ at `u*`, the scanned threshold).
-  - Layer 1: `g_1 + g_2 + 2 d s*_pair = THETA`, with `help = 0` and `g_1 = g_2 = (THETA - 2 d s*_pair) / 2`
-    **[C: the symmetric split]**.
-  - `c`: `g_p + d s*_line p = THETA`, with `help = 0`.
-  - `d = 1 000` per write and per port, for both layers **[C: a unit]**.
-  - Scores are rounded to integers, ties to even, so each carries an error of at most 1/4 000 stage. The verdicts do
-    not depend on `d` beyond that rounding.
+  - Layer 1: `K = max over a, b of max(8 - s*_x, s*_x)`, `d = THETA / (2K)`, `help_x = 0`,
+    `g_x1 = g_x2 = d (K - s*_x) >= 0`.
+    - Each pair crosses at its own `s*_x`, since `2 g_x + 2 d s*_x = THETA`.
+    - Each alone kind's model threshold is `W_x = s*_x + K`. This is `>= 8` and `>= 2 s*_x`, so every deck alone read
+      (`w <= 7`) is predicted silent.
+  - `c`: `help = 0`, `d_c = THETA / (s*_1 + s*_2)`, `g_p = THETA - d_c s*_p >= 0`.
+    - Each line crosses at its `s*_p`.
+    - The both-lines model score at `s = 0` is exactly THETA, matching the observed both-lines FIRE there. The stage-0
+      both-lines reads fall in the `H` band and are observed to fire.
+  - Integers. `d` and `d_c` are rounded to integers, and then the scores, ties to even. This moves a crossing by at
+    most `1 / (2d)` stage, about 0.00005 on the nominal cell.
+  - Signs and rail. The kernel's fields are natural numbers: `g >= 0` because `K >= s*_x` and `s*_p <= s*_1 + s*_2`.
+    Every gain is below THETA, far under the rail `10 THETA`.
+- **How these rules were set.** They were set by evaluating the earlier proposals at the nominal smoke's `s*` (about
+  3.36 and 3.58), before the acceptance test. A free unit with a symmetric split put the alone thresholds near 53
+  stages. `g = 0` would have predicted the stage-7 alone reads to fire. The rules are general in `s*` and not tuned to
+  the nominal values. The acceptance test is unchanged.
 - **Unchanged.** Campaign 5's `P.instance` runs unchanged on this table: the guarded fit, `epsilon`, the sensitivities
   (`d / D_p`, so the 0.030 mV allowance is 0.030 mV in stages), the budgets, `room` and the observation.
 - **What `epsilon` becomes.** Only the dose-move variation `|w_p(k) - k|`, about 0.01 stage, instead of the curvature
   of `q_peak`.
 - **The other error terms.**
-  - `H_x` is the half bracket times `2d` for a pair and `d` for a line.
+  - `H_x` is the half bracket times `2d` for a pair and `d_c` for a line.
   - `S_x = 0`, by construction, since every kind is anchored at its own `u*`.
   - The levels `L` and the per-cell rescaling of v9 are no longer used.
 
 **2. The alone reads of layer 1, under C.**
 
-- No scan per alone kind is needed. The split puts each alone threshold at `s*_p = THETA / (2d) + s*_pair`, about 53.
-- The one-sided set becomes a fixed read of each port alone at `s = 8` **[C]**. The smoke's bounds were already 8, so
-  its cost is unchanged.
-- The model's scores of the alone reads are a construction. Their observed content is that each port alone stays
-  silent up to `s = 8`, which the set and the decoder (point 3) check.
-- `c`'s both lines (`2 THETA - d (s*_1 + s*_2) + d(w_1 + w_2)`, about `1.93 THETA`) are predicted to fire at every
-  stage. The both-lines check at `s = 0` and v9's deck rule check that.
+- No scan per alone kind is needed.
+- The one-sided set reads each port alone at `W_x` plus `H_x` in stages, one read per port. The model's alone
+  threshold then equals exactly the observed bound.
+- `W_x` is 8 when `s*_x <= 4`, and up to about 10 if some `s*` is near 5. So the scan deck must bring the cell to
+  `s` of about 10: about 13.5 mV of doses, against 10.8 mV in the deck's own eight stages. This is not yet run; the
+  smoke reached `s = 8`.
+- The set now depends on both pair scans, through `K`. Its cost is one read per port, about the smoke's 137 s.
+- `c`'s both lines (`THETA + d_c (w_1 + w_2)`) are predicted to fire at every stage, at THETA exactly at the preset.
+  The both-lines check at `s = 0` and v9's deck rule check that.
 
 **3. The FIRE decoder stays observational.**
 
