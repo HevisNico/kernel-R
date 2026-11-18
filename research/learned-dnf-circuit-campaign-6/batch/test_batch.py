@@ -43,6 +43,7 @@ def ones_for(t, scans, silent=True):
         b = predict6.one_sided_bounds(t2, c, H)
         out[c] = dict(all_silent=silent, silent={"1": silent, "2": silent}, bounds={str(p): str(v) for p, v in b.items()})
     return out
+BOTH_OK = dict(kind="bothfire", fired=True)
 STATUSES = {f"7701-{x}": "complete" for x in ("cal-on", "cal-off")}
 
 
@@ -72,26 +73,26 @@ class Wrapper(unittest.TestCase):
         self.assertEqual(kept, ["missing read ('c', 2, 'empty')"])
 
     def test_own_level_test(self):
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(), ones_for(self.t, nominal_scans()))
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(), ones_for(self.t, nominal_scans()), bothfire=BOTH_OK)
         self.assertEqual(why, [])
         # a level of a's pair read above every firing pair read of the deck: the deck's FIRE bits now disagree with it
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans({("a", "pair"): 100000, ("c", "both"): 200000}), ones_for(self.t, nominal_scans()))
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans({("a", "pair"): 100000, ("c", "line2"): 200000}), ones_for(self.t, nominal_scans()), bothfire=BOTH_OK)
         self.assertTrue(any("disagree with the cell's own level" in w and "'c'" in w for w in why), why)
 
     def test_question_1_in_measured(self):
-        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(s_star="9/2"), ones_for(self.t, nominal_scans(s_star="9/2")))
+        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(s_star="9/2"), ones_for(self.t, nominal_scans(s_star="9/2")), bothfire=BOTH_OK)
         self.assertTrue(any(w.startswith("question 1: need a:") for w in why))
         self.assertEqual(data["question_1"]["a"], dict(predicted=5, observed=4, agree=False))
 
     def test_causes(self):
         sc = nominal_scans()
         sc[("c", "line2")] = dict(crossing=False, why="no crossing below 8")
-        why, _ = predict6.measure_instance(7701, dict(STATUSES, **{"7701-scan-a-pair": "missing (limit)"}), self.t, self.dose, [], sc, ones_for(self.t, nominal_scans()))
+        why, _ = predict6.measure_instance(7701, dict(STATUSES, **{"7701-scan-a-pair": "missing (limit)"}), self.t, self.dose, [], sc, ones_for(self.t, nominal_scans()), bothfire=BOTH_OK)
         self.assertIn("run 7701-scan-a-pair did not complete: missing (limit)", why)
         self.assertIn("scan ('c', 'line2'): no crossing below 8", why)
         ones = ones_for(self.t, nominal_scans())
         ones["b"] = dict(ones["b"], all_silent=False)
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(), ones)
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(), ones, bothfire=BOTH_OK)
         self.assertTrue(any(w.startswith("one-sided set of b") for w in why))
 
     def test_rescaling(self):
@@ -99,14 +100,14 @@ class Wrapper(unittest.TestCase):
         self.assertEqual(predict6.scale(99000, 99000), 100000)
         self.assertEqual(predict6.scale(1, 200000), 0)                  # 0.5, to the even
         self.assertEqual(predict6.scale(3, 200000), 2)                  # 1.5, to the even
-        _, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans({("a", "pair"): 99000}), ones_for(self.t, nominal_scans({("a", "pair"): 99000})))
+        _, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans({("a", "pair"): 99000}), ones_for(self.t, nominal_scans({("a", "pair"): 99000})), bothfire=BOTH_OK)
         self.assertEqual(data["theta"]["a"], 99000)
         self.assertEqual(data["t2"][("a", 4, "both")]["Z"], round(F(self.t[("a", 4, "both")]["Z"]) * 100000 / 99000))
         self.assertEqual(data["t2"][("b", 4, "both")]["Z"], self.t[("b", 4, "both")]["Z"])
 
     def test_errors_and_room(self):
-        L = {("c", "line1"): 100000, ("c", "line2"): 100040, ("c", "both"): 100020}
-        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(L), ones_for(self.t, nominal_scans(L)))
+        L = {("c", "line1"): 100000, ("c", "line2"): 100040}
+        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(L), ones_for(self.t, nominal_scans(L)), bothfire=BOTH_OK)
         self.assertEqual(why, [])
         self.assertEqual(data["S"], dict(a=0, b=0, c=40))
         for c in c4.CELLS:
@@ -147,17 +148,20 @@ class Scan(unittest.TestCase):
 
 class Choice(unittest.TestCase):
     def costs(self, b, c):
-        return {"1/4": dict(pair=b, line=b, both=b, onesided=F(250) / F(151, 100)), "1/2": dict(pair=c, line=c, both=c, onesided=F(250) / F(151, 100))}
+        return {"1/4": dict(pair=b, line=b, bothfire=F(36), onesided=F(250) / F(151, 100)), "1/2": dict(pair=c, line=c, bothfire=F(36), onesided=F(250) / F(151, 100))}
 
     def test_rule(self):
-        tie = report6.choose(self.costs(F(785) / F(151, 100), F(785) / F(151, 100)))
-        self.assertEqual((tie["B"]["least_k"], tie["C"]["least_k"], tie["choice"], tie["delta"]), (4, 4, "B", "1/4"))
-        c = report6.choose(self.costs(F(785) / F(151, 100), F(685) / F(151, 100)))
-        self.assertEqual((c["B"]["least_k"], c["C"]["least_k"], c["choice"], c["delta"]), (4, 3, "C", "1/2"))
+        k = F(151, 100)
+        tie = report6.choose(self.costs(F(785) / k, F(785) / k))
+        self.assertEqual((tie["B"]["least_k"], tie["C"]["least_k"], tie["choice"], tie["delta"]), (3, 3, "B", "1/4"))
+        c = report6.choose(self.costs(F(1000) / k, F(785) / k))
+        self.assertEqual((c["B"]["least_k"], c["C"]["least_k"], c["choice"], c["delta"]), (5, 3, "C", "1/2"))
+        b = report6.choose(self.costs(F(785) / k, F(1000) / k))
+        self.assertEqual((b["B"]["least_k"], b["C"]["least_k"], b["choice"]), (3, 5, "B"))
 
 
 class StoppingRule(unittest.TestCase):
-    MEANS = dict(report6.RM_CAL, pair=F(785), line=F(785), both=F(785), onesided=F(250))
+    MEANS = dict(report6.RM_CAL, pair=F(785), line=F(785), bothfire=F(785), onesided=F(250))
 
     def test_table(self):
         d3, d4 = report6.decision(3, self.MEANS), report6.decision(4, self.MEANS)
@@ -274,10 +278,10 @@ class Marker(unittest.TestCase):
 
 class SmokeCosts(unittest.TestCase):
     def test_costs_table(self):
-        runs = [dict(cost_kind=f"{k}@{s}", status="complete", wall_s=w) for k in ("pair", "line", "both") for s, w in (("1/4", 500.0), ("1/2", 450.0))]
-        runs.append(dict(cost_kind="onesided", status="complete", wall_s=150.0))
+        runs = [dict(cost_kind=f"{k}@{s}", status="complete", wall_s=w) for k in ("pair", "line") for s, w in (("1/4", 500.0), ("1/2", 450.0))]
+        runs += [dict(cost_kind="onesided", status="complete", wall_s=150.0), dict(cost_kind="bothfire", status="complete", wall_s=36.0)]
         c = report6.smoke_costs(runs)
-        self.assertEqual(c["1/2"], dict(pair=F(450), line=F(450), both=F(450), onesided=F(150)))
+        self.assertEqual(c["1/2"], dict(pair=F(450), line=F(450), bothfire=F(36), onesided=F(150)))
         runs += [dict(cost_kind="pair@1/4", status="complete", wall_s=700.0), dict(cost_kind="onesided", status="complete", wall_s=250.0)]
         c = report6.smoke_costs(runs)
         self.assertEqual((c["1/4"]["pair"], c["1/4"]["onesided"], c["1/2"]["onesided"]), (F(600), F(200), F(200)))   # means, not the last
@@ -291,10 +295,10 @@ class ReviewDefects(unittest.TestCase):
     def test_one_sided_bounds_rechecked(self):
         sc = nominal_scans()
         ones = ones_for(self.t, sc)
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones)
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, bothfire=BOTH_OK)
         self.assertEqual(why, [])
         ones["a"] = dict(ones["a"], bounds=dict(ones["a"]["bounds"], **{"1": str(F(ones["a"]["bounds"]["1"]) + F(1, 1000))}))
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones)
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, bothfire=BOTH_OK)
         self.assertTrue(any(w.startswith("one-sided set of a: its bounds") for w in why), why)
 
     def test_runs_at_their_limit_in_the_means(self):
@@ -335,11 +339,43 @@ class ReviewDefects(unittest.TestCase):
         ones = ones_for(self.t, sc)
         for v in ones.values():
             v["u0_V"] = {"1": "0.3895", "2": "0.3895"}
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, deck)
+        both = dict(BOTH_OK, u0_V={"1": "0.3895", "2": "0.3895"})
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, deck, bothfire=both)
         self.assertEqual(why, [])
-        sc[("c", "both")]["u0_V"] = {"1": "0.3895", "2": "0.389521"}     # 21 uV
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, deck)
-        self.assertTrue(any("('c', 'both'): u(0) of port 2 differs" in w for w in why), why)
+        sc[("c", "line2")]["u0_V"] = {"1": "0.3895", "2": "0.389521"}    # 21 uV
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, deck, bothfire=both)
+        self.assertTrue(any("('c', 'line2'): u(0) of port 2 differs" in w for w in why), why)
+
+
+class BothLines(unittest.TestCase):
+    """v9: c's both lines are predicted to FIRE only; their FIRE check at s = 0, and the deck's monotonicity."""
+
+    def setUp(self):
+        self.t, self.dose = cases.nominal()
+
+    def test_check_and_deck(self):
+        sc = nominal_scans()
+        self.assertEqual(sorted(sc), [("a", "pair"), ("b", "pair"), ("c", "line1"), ("c", "line2")])
+        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones_for(self.t, sc), bothfire=BOTH_OK)
+        self.assertEqual(why, [])
+        self.assertEqual(data["S"]["c"], 0)
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones_for(self.t, sc), bothfire=dict(fired=False))
+        self.assertIn("the both-lines FIRE check of c: both lines did not fire at the preset (s = 0)", why)
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones_for(self.t, sc))
+        self.assertIn("the both-lines FIRE check of c: missing", why)
+        t = copy.deepcopy(self.t)
+        t[("c", 5, "both")]["Z"] = t[("c", 0, "both")]["Z"] - 1                     # below stage 0: not monotone
+        t[("c", 6, P.SKEWED)]["fire"] = False                                        # a both-lines read silent
+        why, _ = predict6.measure_instance(7701, STATUSES, t, self.dose, [], sc, ones_for(t, sc), bothfire=BOTH_OK)
+        self.assertTrue(any("('c', 5, 'both')" in w and "monotonicity" in w for w in why), why)
+        self.assertTrue(any("('c', 6, 'both, second 0.3 late')" in w and "did not fire" in w for w in why), why)
+
+    def test_runs_per_instance(self):
+        import schedule6
+        jobs = schedule6.instance_jobs(7701, F(1, 4))
+        self.assertEqual(len(jobs), 9)
+        self.assertEqual(sorted(j["cost_kind"] for j in jobs), sorted(["cal-on", "cal-off", "pair", "pair", "line", "line", "bothfire", "onesided", "onesided"]))
+        self.assertEqual(sum(n for _, n in report6.KINDS), 9)
 
 
 if __name__ == "__main__":

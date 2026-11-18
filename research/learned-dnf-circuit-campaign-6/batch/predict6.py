@@ -6,7 +6,8 @@ For one instance, from its two calibration decks and its scans and one-sided set
 1. the table: `P.load` and `P.table`, unchanged. In `table`'s `bad` list the entries that begin "FIRE bit" (campaign 5's
    test against the nominal theta) are replaced by the entries of section 3, point 6; every other entry is kept;
 2. measured (section 3): the runs complete, the brackets consistent, the crossings below 8, every D_p > 0, question 1
-   (ceil(s*) = the first firing stage of the guard-on deck, a need above 7 failing it), the one-sided sets run at
+   (ceil(s*) = the first firing stage of the guard-on deck, a need above 7 failing it), c's both-lines FIRE check
+   fired at s = 0, the deck's both-lines reads all fire with Z(k) >= Z(0) (v9), the one-sided sets run at
    the recomputed bounds (exactly, as Fractions) and silent, every scan's u(0) within 20 uV of its own guard-on
    deck's, and every deck read against the cell's own trip levels;
 3. per-cell units (section 4.1): theta_x = min L; every Z and L of cell x times 100 000 / theta_x, to the nearest
@@ -32,11 +33,11 @@ import c4                                               # noqa: E402
 import predicted as P                                   # noqa: E402
 
 THETA = P.THETA
-CROSSINGS = (("a", "pair"), ("b", "pair"), ("c", "line1"), ("c", "line2"), ("c", "both"))
+CROSSINGS = (("a", "pair"), ("b", "pair"), ("c", "line1"), ("c", "line2"))   # v9: c's both lines are no crossing read
 NEEDS = dict(a=("a", "pair"), b=("b", "pair"), c1=("c", "line1"), c2=("c", "line2"))
-DECK_READ = dict(pair="both", line1="port 1", line2="port 2", both=P.SKEWED)     # the deck read of each scan kind
-LEVEL_OF = {("a", "both"): "pair", ("b", "both"): "pair", ("c", "port 1"): "line1", ("c", "port 2"): "line2",
-            ("c", "both"): "both", ("c", P.SKEWED): "both"}
+DECK_READ = dict(pair="both", line1="port 1", line2="port 2")                   # the deck read of each scan kind
+LEVEL_OF = {("a", "both"): "pair", ("b", "both"): "pair", ("c", "port 1"): "line1", ("c", "port 2"): "line2"}
+BOTH = {("c", "both"), ("c", P.SKEWED)}                                          # predicted FIRE only (v9)
 ALONE = {("a", "port 1"), ("a", "port 2"), ("b", "port 1"), ("b", "port 2")}
 
 
@@ -73,7 +74,7 @@ def deck_u0(on_dir):
 
 def steps(t2, c):
     """step_r: (Z_r(7) - Z_r(0)) / 7 in the rescaled guard-off deck, per deck read."""
-    reads = ("port 1", "port 2", "both", P.SKEWED) if c == "c" else ("port 1", "port 2", "both")
+    reads = ("port 1", "port 2") if c == "c" else ("port 1", "port 2", "both")
     return {r: F(t2[(c, 7, r)]["Z"] - t2[(c, 0, r)]["Z"], 7) for r in reads}
 
 
@@ -111,7 +112,7 @@ def u0_check(runs, deck_u):
     return why
 
 
-def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None):
+def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None, bothfire=None):
     """statuses: {run id: status}; scans: {(cell, kind): the scan's `result`}; onesided: {cell: result}.
     Returns (why_not_measured, per-cell data). The rescaled table is in data['t2']."""
     why = list(bad)
@@ -127,7 +128,10 @@ def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None)
         elif not r.get("consistent"):
             why.append(f"scan {key}: bracket not consistent ({r.get('why', 'after the majority')})")
     if deck_u is not None:
-        why += u0_check({**{k: v for k, v in scans.items()}, **{(c, "onesided"): v for c, v in onesided.items()}}, deck_u)
+        runs = {**{k: v for k, v in scans.items()}, **{(c, "onesided"): v for c, v in onesided.items()}}
+        if bothfire is not None:
+            runs[("c", "bothfire")] = bothfire
+        why += u0_check(runs, deck_u)
     data = dict(D_mV={f"{c}{p}": str(v) for (c, p), v in D.items()})
     if why or any(k not in scans for k in CROSSINGS):
         why += [f"scan {k}: missing" for k in CROSSINGS if k not in scans]
@@ -152,6 +156,10 @@ def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None)
         H[c] = max(math.ceil(h[k] * st[DECK_READ[k[1]]]) for k in CROSSINGS if k[0] == c)
         Sx[c] = max(L2[k] for k in CROSSINGS if k[0] == c) - min(L2[k] for k in CROSSINGS if k[0] == c)
     bounds = {c: one_sided_bounds(t2, c, H[c]) for c in ("a", "b")}
+    if bothfire is None:
+        why.append("the both-lines FIRE check of c: missing")
+    elif not bothfire.get("fired"):
+        why.append("the both-lines FIRE check of c: both lines did not fire at the preset (s = 0)")
     for c in ("a", "b"):
         o = onesided.get(c)
         if o is None:
@@ -164,6 +172,12 @@ def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None)
         if r == "empty":
             if v["fire"]:
                 why.append(f"deck read {(c, k, r)}: an empty read fired")
+            continue
+        if (c, r) in BOTH:
+            if not v["fire"]:
+                why.append(f"deck read {(c, k, r)}: both lines did not fire (they are predicted to fire at every stage)")
+            if v["Z"] < t2[(c, 0, r)]["Z"]:
+                why.append(f"deck read {(c, k, r)}: Z = {v['Z']} below its stage-0 value {t2[(c, 0, r)]['Z']} (monotonicity)")
             continue
         if (c, r) in ALONE:
             if v["fire"] and v["Z"] < THETA + H[c]:
@@ -208,9 +222,9 @@ def augmented(x, H, S, t2):
     return x
 
 
-def predict_instance(seed, machine, statuses, on_dir, off_dir, scans, onesided):
+def predict_instance(seed, machine, statuses, on_dir, off_dir, scans, onesided, bothfire=None):
     t, dose, bad = table(on_dir, off_dir)
-    why, data = measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u0(on_dir))
+    why, data = measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u0(on_dir), bothfire)
     if why:
         return dict(seed=seed, machine=machine, measured=False, why_not_measured=why, eligible=False,
                     **{k: v for k, v in data.items() if k != "t2"})
@@ -300,7 +314,11 @@ def predict_batch(batch_dir, out_dir, check=True):
             if mine.get(i) == "complete":
                 rec = collected(bd / m / i)
                 ones[c] = dict(rec["result"], u0_V=rec["u0_V"])
-        x = predict_instance(seed, m, mine, on, off, scans, ones)
+        bf = None
+        if mine.get(f"{seed}-bothfire-c") == "complete":
+            rec = collected(bd / m / f"{seed}-bothfire-c")
+            bf = dict(rec["result"], u0_V=rec["u0_V"])
+        x = predict_instance(seed, m, mine, on, off, scans, ones, bf)
         t, dose, _ = table(on, off)
         x.update(questions(scans, dose, P.needs(t)))
         xs.append(x)
@@ -344,7 +362,11 @@ def predict_smoke(smoke_dir, on, off, out_dir, check=True):
         if status.get(f"none-onesided-{c}") == "complete":
             rec = collected(sd / f"none-onesided-{c}")
             ones[c] = dict(rec["result"], u0_V=rec["u0_V"])
-    x = predict_instance(None, "a", status, on, off, scans, ones)
+    bf = None
+    if status.get("none-bothfire-c") == "complete":
+        rec = collected(sd / "none-bothfire-c")
+        bf = dict(rec["result"], u0_V=rec["u0_V"])
+    x = predict_instance(None, "a", status, on, off, scans, ones, bf)
     t, dose, _ = table(on, off)
     x.update(questions(scans, dose, P.needs(t)))
     gate_each([x], od, check)

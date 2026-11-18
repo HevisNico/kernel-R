@@ -5,12 +5,13 @@ New code. Started detached (`setsid nohup ... &`) by the machine's session, whic
                                                               refused unless the pushed marker names this very code
   schedule6.py merge BATCH_DIR                                 BATCH_DIR/RUNS.json from a/RUNS.json and b/RUNS.json
   schedule6.py smoke OUT RC_CAL_ON RC_CAL_OFF NGSPICE PDK       the declared nominal smokes (section 1), before the marker:
-                                                              the whole nominal instance at 1/4, and its a pair, c line 1
-                                                              and c both lines at 1/2
+                                                              the whole nominal instance at 1/4, and its a pair and c
+                                                              line 1 at 1/2
 
 Per instance, three waves, each run started as soon as its inputs exist:
 1. the two calibration decks (batch6.py cal);
-2. the five crossing scans (scan6.py), with D_p from the guard-on deck;
+2. the four crossing scans (scan6.py) and c's both-lines FIRE check at s = 0 (scan6.py bothfire), with D_p from the
+   guard-on deck;
 3. the two one-sided sets (scan6.py onesided), with their bounds from the rescaled deck, the pair scan's theta_x and
    H_x (predict6.one_sided_bounds).
 A run whose inputs failed is not started ("not started: <why>"). A run at its limit is killed and recorded "missing
@@ -45,6 +46,7 @@ def instance_jobs(seed, delta):
     jobs = [dict(id=f"{s}-cal-{g}", limit="cal", cost_kind=f"cal-{g}", wave=1, guard=g, seed=seed) for g in ("on", "off")]
     for c, kind in predict6.CROSSINGS:
         jobs.append(dict(id=f"{s}-scan-{c}-{kind}", limit="scan", cost_kind=cost_kind(kind), wave=2, cell=c, kind=kind, seed=seed, delta=str(delta)))
+    jobs.append(dict(id=f"{s}-bothfire-c", limit="onesided", cost_kind="bothfire", wave=2, cell="c", kind="bothfire", seed=seed))
     for c in ("a", "b"):
         jobs.append(dict(id=f"{s}-onesided-{c}", limit="onesided", cost_kind="onesided", wave=3, cell=c, kind="onesided", seed=seed))
     return jobs
@@ -62,6 +64,8 @@ def command(job, folder, cal_dirs, ngspice, pdk):
     D = predict6.doses_V(dose)
     c = job["cell"]
     dv = [repr(float(D[(c, p)]) / 1000) for p in (1, 2)]
+    if job["kind"] == "bothfire":
+        return [PY, "-B", str(HERE / "scan6.py"), out, s, "c", "bothfire", *dv, str(ngspice), str(pdk)], None
     if job["wave"] == 2:
         return [PY, "-B", str(HERE / "scan6.py"), out, s, c, job["kind"], job["delta"], *dv, str(ngspice), str(pdk)], None
     pair = folder / f"{s}-scan-{c}-pair" / "record.json"
@@ -218,10 +222,11 @@ def main(argv=None):
         jobs = []
         for delta in batch6.DELTAS:
             tag = "q" if delta == F(1, 4) else "h"
-            kinds = predict6.CROSSINGS if delta == F(1, 4) else (("a", "pair"), ("c", "line1"), ("c", "both"))
+            kinds = predict6.CROSSINGS if delta == F(1, 4) else (("a", "pair"), ("c", "line1"))
             for c, kind in kinds:
                 jobs.append(dict(id=f"none-{tag}-scan-{c}-{kind}", limit="scan", cost_kind=f"{cost_kind(kind)}@{delta}", wave=2, cell=c, kind=kind,
                                  seed=None, delta=str(delta), machine="a"))
+        jobs.append(dict(id="none-bothfire-c", limit="onesided", cost_kind="bothfire", wave=2, cell="c", kind="bothfire", seed=None, machine="a"))
         for c in ("a", "b"):
             jobs.append(dict(id=f"none-onesided-{c}", limit="onesided", cost_kind="onesided", wave=3, cell=c, kind="onesided", seed=None, machine="a"))
         folder.mkdir(parents=True, exist_ok=True)

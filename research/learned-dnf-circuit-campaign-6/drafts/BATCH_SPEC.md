@@ -1,4 +1,4 @@
-# Campaign 6: what the development batch's code computes (draft for review, eighth version)
+# Campaign 6: what the development batch's code computes (draft for review, ninth version)
 
 It implements the design note (`659d3a2`) under the stopping rule (`2e26910`). **[C]** marks a choice made here. The
 batch decides only `k`. Its definition of eligible is, unchanged, the one campaign 6 would preregister.
@@ -17,7 +17,8 @@ excluded):
 - campaign 5's two calibration decks, guard on and guard off. Declared deviation: `run4.py`'s own guard refuses these
   seeds. So `batch6.py cal` calls its cal branch's frozen functions and writes the same deck and the same record, plus
   one key; `test_batch.Equivalence` shows this without a simulator;
-- then five robust scans and two one-sided sets (section 2 and section 5).
+- then four robust scans and three one-sided checks: the two alone sets of layer 1 and `c`'s both-lines FIRE check
+  (sections 2, 3 and 5, v9).
 
 **Running them.**
 - Four runs at a time per machine, detached (`setsid nohup`), while the session stays active in waits of at most
@@ -38,8 +39,8 @@ A run that does not complete, at its limit or otherwise, makes its instance not 
 **Smoke**, declared, before the marker, on the nominal cell with the nominal calibration decks of campaign 5's RC.
 It is pushed on `evidence/learned-dnf-circuit-campaign-6-smoke`.
 
-- The whole instance at 1/4: the five scans and the two one-sided sets.
-- The `a` pair, `c` line 1 and `c` both-lines scans at 1/2.
+- The whole instance at 1/4: the four scans and the three one-sided checks.
+- The `a` pair and `c` line 1 scans at 1/2.
 - Then the whole chain on its outputs: `predict6` (the wrapper, the instance's own Lean file, `check.sh`) and `report6`
   (k, I, E, and the B/C rule). So every path that computes `k` runs once before the marker.
 
@@ -55,11 +56,26 @@ running code's commit and each file's SHA-256, with its `delta`.
 
 Its wall times serve only the choice of section 5. No number of the report comes from it.
 
+**v9: the change found by the smoke.**
+
+- **What was found.** The declared nominal smoke at `5745fc2`, run before any batch seed, found a design error of this
+  spec. `c`'s both-lines read fires at the preset and never crosses along the training path. Campaign 5's nominal table
+  gives `Z` = 159 890 at stage 0, rising to 180 870 at stage 7, with FIRE at every stage. The read is only ever
+  predicted to fire.
+- **The change.**
+  - The both-lines scan is replaced by a one-sided FIRE check: one read of both lines at `s = 0`, the lowest score
+    along the path. If it fires, its own trip level lies below its score there, which is what the gate's fire-side
+    check needs. The monotonicity assumption is then checked on the deck itself (section 3, point 6).
+  - `c`'s threshold and spread come from its two line scans.
+  - An instance is four crossing scans plus three one-sided checks.
+- **What does not change.** The stopping rule. The B/C choice is recomputed by the owner's mechanical rule on the
+  smoke's measured costs after this fix.
+
 ## 2. The scans
 
 **Reads.**
 - For `a` and for `b`: the pair read, port 1 alone, and port 2 alone.
-- For `c`: line 1 alone, line 2 alone, and both lines with the second 0.3 unit late (accepted).
+- For `c`: line 1 alone and line 2 alone. Both lines (the second 0.3 unit late) are no crossing read; see v9 below.
 
 Pulses are campaign 5's: 0.49 on layer 1 and 1 on `c`. A direct pulse stands for the routed one, and question 5
 reports any difference. Each read is gated read-only. FIRE is campaign 5's: the latch rises through 0.9 V within
@@ -75,8 +91,7 @@ reports any difference. Each read is gated read-only. FIRE is campaign 5's: the 
 Which ports move:
 
 - Layer 1: both ports move together, for every read of the cell (port alone means "at the trained state").
-- `c`: a line alone moves alone, the other line staying at `u(0)`; both lines move together for the both-lines scan
-  **[C]**.
+- `c`: a line alone moves alone, the other line staying at `u(0)` **[C]**.
 
 The cell is brought to `u(s)` by joint clock-only doses and per-port imposed leaks, each port within 2 uV, as
 campaign 3's `move` does.
@@ -105,10 +120,10 @@ counted silent.
 
 An instance is measured if all of these hold, otherwise it is not:
 
-1. All 9 runs complete, and both one-sided sets stay silent up to their bound.
+1. All 9 runs complete, both one-sided sets stay silent up to their bound, and `c`'s both lines fire at `s = 0`
+   (the both-lines FIRE check, v9).
 2. Every bracket is consistent.
-3. The five crossing scans (pair of `a`, pair of `b`, both lines of `c`, line 1 of `c`, line 2 of `c`) each cross
-   below 8.
+3. The four crossing scans (pair of `a`, pair of `b`, line 1 of `c`, line 2 of `c`) each cross below 8.
 4. Every `D_p > 0`.
 5. **Question 1:** for each of the four needs (pair of `a`, pair of `b`, line 1 of `c`, line 2 of `c`), `ceil(s*)`
    equals the first stage at which the matching read fires in the guard-on deck. A need above 7 cannot be checked
@@ -121,7 +136,9 @@ An instance is measured if all of these hold, otherwise it is not:
    - The kinds are matched as follows:
      - `a` and `b`: `both` uses the pair scan; `port 1` and `port 2` must be silent wherever `Z < THETA + H_x`,
        the one-sided bound;
-     - `c`: `port 1` and `port 2` use the line scans, and `both` and the 0.3-late `both` use the both-lines scan;
+     - `c`: `port 1` and `port 2` use the line scans. Every `both` and 0.3-late `both` read must FIRE in the guard-on
+       deck, and its `Z` (guard-off deck, rescaled) must satisfy `Z(k) >= Z(0)` at every stage: the monotonicity, observed
+       (v9);
      - an `empty` read must be silent.
    - A disagreement outside the exempt band makes the instance not measured.
 
@@ -140,7 +157,8 @@ the table (section 4) and passes it to `P.instance`.
 **Mapping onto the gate's fields** (campaign 5's `predicted.py` and `gate4.py`, imported and never edited).
 
 1. Threshold.
-   - Each cell's threshold is `theta_x = min L` over its scans (layer 1: the pair scan alone; `c`: 3).
+   - Each cell's threshold is `theta_x = min L` over its scans (layer 1: the pair scan alone; `c`: its two line
+     scans, v9).
    - Every score of cell `x`, the deck's `Z` and the scans' `L`, is multiplied by `100 000 / theta_x` and rounded to
      the nearest integer, ties to even.
    - So in the gate's units every cell's threshold is the gate's fixed `THETA = 100 000`, and the theory is
@@ -177,6 +195,9 @@ both sides of every crossing: training silent before the need and FIRE at it, an
 
 ## 5. Affordability, and the choice of scan set (the owner's rule)
 
+The table below was computed before v9 (five scans at an assumed 785 s). It illustrates only; the choice is made by
+the owner's rule below, on the smokes' measured costs.
+
 The table gives `E` by the stopping rule, computed with campaign 5's frozen `plan.split` and `plan.machine_expected`:
 
 - `I = ceil(30 / k)`;
@@ -203,7 +224,7 @@ The table gives `E` by the stopping rule, computed with campaign 5's frozen `pla
 The three options:
 
 - **(A) The 9 full scans** (sections 2 to 4 as written): 8 373 s of measures per instance. Go needs `k >= 5`.
-- **(B) The 5 crossing scans only.** These are the pairs of `a` and `b` and `c`'s line 1, line 2 and both lines.
+- **(B) The crossing scans only.** In v9 these are four: the pairs of `a` and `b`, and `c`'s line 1 and line 2.
   - Each port-alone kind of `a` and `b` is checked instead by a one-sided set: one run per cell. The two ports are
     moved along the training path up to the state where each port's rescaled score reaches `THETA + H_x`, the
     measure's own error, and not the full budget **[C: the previous coordinator's refinement]**. Each port is read

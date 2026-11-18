@@ -7,7 +7,7 @@ frozen `plan.py` and `c4.py` (plan.split, plan.machine_expected, c4.limit), and 
   report6.py smoke SMOKE_DIR PRED_DIR OUT   the smoke's B/C choice and the whole chain run once on its nominal instance
 
 The measures of one instance are nine runs of six kinds: cal-on, cal-off, pair (a and b), line (c's line 1 and line 2),
-both (c's both lines) and onesided (a and b). E counts each at the batch's mean wall time of its kind (the stopping
+bothfire (c's both lines read once at the preset, v9) and onesided (a and b). E counts each at the batch's mean wall time of its kind (the stopping
 rule), and the network at its fixed 718, 132 and 1 400 s.
 """
 from fractions import Fraction as F
@@ -24,7 +24,7 @@ import plan                                             # noqa: E402
 
 import batch6                                           # noqa: E402
 
-KINDS = (("cal-on", 1), ("cal-off", 1), ("pair", 2), ("line", 2), ("both", 1), ("onesided", 2))
+KINDS = (("cal-on", 1), ("cal-off", 1), ("pair", 2), ("line", 2), ("bothfire", 1), ("onesided", 2))
 NET = dict(quiet=F(718), untrained=F(132), noisy=F(1400))
 RM_CAL = {"cal-on": sum(map(F, ("725.0", "733.7", "707.1", "722.0", "733.4", "705.0"))) / 6,
           "cal-off": sum(map(F, ("580.9", "597.5", "580.0", "582.7", "603.2", "579.0"))) / 6}
@@ -76,11 +76,11 @@ def least_k(means):
 
 
 def choose(smoke):
-    """The owner's rule (section 5): smoke = {"1/4": {kind: wall_s}, "1/2": {...}} for pair, line, both, onesided.
+    """The owner's rule (section 5): smoke = {"1/4": {kind: wall_s}, "1/2": {...}} for pair, line, bothfire, onesided.
     Each cost times 1.51; the decks at RM's means; the least k for B (1/4) and C (1/2); B unless C's is strictly lower."""
     out = {}
     for name, step in (("B", "1/4"), ("C", "1/2")):
-        means = dict(RM_CAL, **{kind: F(smoke[step][kind]) * batch6.MISMATCH for kind in ("pair", "line", "both", "onesided")})
+        means = dict(RM_CAL, **{kind: F(smoke[step][kind]) * batch6.MISMATCH for kind in ("pair", "line", "bothfire", "onesided")})
         out[name] = dict(step=step, means={k: str(v) for k, v in means.items()}, least_k=least_k(means))
     b, c = out["B"]["least_k"], out["C"]["least_k"]
     strictly = c is not None and (b is None or c < b)
@@ -89,7 +89,7 @@ def choose(smoke):
     return out
 
 
-LIMIT_KIND = {"cal-on": "cal", "cal-off": "cal", "pair": "scan", "line": "scan", "both": "scan", "onesided": "onesided"}
+LIMIT_KIND = {"cal-on": "cal", "cal-off": "cal", "pair": "scan", "line": "scan", "bothfire": "onesided", "onesided": "onesided"}
 
 
 def mean_walls(records):
@@ -147,8 +147,8 @@ def main(argv=None):
 
 def smoke_costs(runs):
     """The smokes' wall times: {"1/4": {pair, line, both, onesided}, "1/2": {...}}, each the mean over the smoke runs of
-    that kind and step (at 1/4: pair = a and b, line = line 1 and line 2; onesided = a and b); the one-sided set, which
-    has no ascent, counts at both steps. Every kind must have completed at both steps."""
+    that kind and step (at 1/4: pair = a and b, line = line 1 and line 2; onesided = a and b); the one-sided sets and
+    the both-lines FIRE check, which have no ascent, count at both steps. Every kind must have completed at both steps."""
     each = {}
     for r in runs:
         if r["status"] == "complete":
@@ -156,7 +156,7 @@ def smoke_costs(runs):
     by = {k: sum(v) / len(v) for k, v in each.items()}             # the mean over the smoke runs of each kind
     out = {}
     for step in ("1/4", "1/2"):
-        out[step] = dict(pair=by[f"pair@{step}"], line=by[f"line@{step}"], both=by[f"both@{step}"], onesided=by["onesided"])
+        out[step] = dict(pair=by[f"pair@{step}"], line=by[f"line@{step}"], bothfire=by["bothfire"], onesided=by["onesided"])
     return out
 
 

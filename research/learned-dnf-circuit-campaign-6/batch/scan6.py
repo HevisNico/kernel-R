@@ -18,7 +18,9 @@ The stored voltage of a port is `u = mean(vmem) - mean(sum)` over [t + 400 us, t
 reads measure a move. The training path is `u_p(s) = u_p(0) - s D_p` (D_p in volts, from the guard-on calibration
 deck); the cell is brought to it within 2 uV per port (`move`).
 
-  scan6.py OUT SEED|none CELL KIND DELTA D1_V D2_V NGSPICE PDK       KIND: pair (a, b), line1, line2, both (c)
+  scan6.py OUT SEED|none CELL KIND DELTA D1_V D2_V NGSPICE PDK       KIND: pair (a, b), line1, line2 (c)
+  scan6.py OUT SEED|none c bothfire D1_V D2_V NGSPICE PDK            c's both lines (the second 0.3 late) read once at
+                                                                     the preset, s = 0: the one-sided FIRE check (v9)
   scan6.py OUT SEED|none CELL onesided S1 S2 D1_V D2_V NGSPICE PDK    a or b: port 1 alone read at s = S1, port 2 at S2
 
 The run's record (`record.json`): what was asked, every read (its s, the ports' u, FIRE and its date), and the
@@ -52,7 +54,7 @@ S_MAX = 8
 ORIGIN = 100e-6
 READS = dict(pair=((1, 0.0), (2, 0.0)), line1=((1, 0.0),), line2=((2, 0.0),), both=((1, 0.0), (2, c4.SKEW_PAIR)),
              port1=((1, 0.0),), port2=((2, 0.0),))
-MOVING = dict(pair=(1, 2), line1=(1,), line2=(2,), both=(1, 2), onesided=(1, 2))
+MOVING = dict(pair=(1, 2), line1=(1,), line2=(2,), both=(1, 2), onesided=(1, 2), bothfire=(1, 2))
 
 
 def amp(cell):
@@ -60,7 +62,7 @@ def amp(cell):
 
 
 def kinds_of(cell):
-    return ("line1", "line2", "both") if cell == "c" else ("pair",)
+    return ("line1", "line2") if cell == "c" else ("pair",)
 
 
 class Driver:
@@ -241,7 +243,14 @@ def main(argv=None):
     print(c4.require_pinned())
     assert cell in c4.CELLS, cell
     ev = out / "evidence"
-    if kind == "onesided":
+    if kind == "bothfire":
+        assert cell == "c", "the both-lines FIRE check is for c"
+        d1, d2, ngspice, pdk = a[4:8]
+        D = {"1": d1, "2": d2}
+        drv = Driver(ev, seed, cell, MOVING["bothfire"], {1: d1, 2: d2}, Path(ngspice), Path(pdk))
+        fired = bool(drv.read_at(0, READS["both"], "both lines at the preset"))
+        res = dict(kind="bothfire", fired=fired)
+    elif kind == "onesided":
         assert cell in ("a", "b"), "a one-sided set is for the ports alone of layer 1"
         s1, s2, d1, d2, ngspice, pdk = a[4:10]
         D = {"1": d1, "2": d2}
