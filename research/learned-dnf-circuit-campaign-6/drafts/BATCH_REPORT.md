@@ -1,8 +1,17 @@
-# Campaign 6: the development batch's report (draft, for review)
+# Campaign 6: the development batch's report
 
-This report is a draft. It decides nothing beyond the stopping rule (`STOPPING_RULE.md`, `2e26910`, with amendment 1,
-`566f237`). Every number in it comes from the pushed evidence below. Nothing in it enters the campaign branch before
-both coordinators have reviewed it and the owner has given his go.
+This text will be pushed alone, after the owner's go, as research/learned-dnf-circuit-campaign-6/BATCH_REPORT.md. It
+decides nothing beyond the stopping rule (`STOPPING_RULE.md`, `2e26910`, with amendment 1, `566f237`). Every number in
+it comes from the pushed evidence in §7.
+
+**In plain words.**
+- The batch tested whether ten simulated instances of a small learned circuit can be predicted well enough for a
+  campaign. Each instance has three mismatched cells that learn by repeated doses.
+- It scanned each cell's firing threshold along its own training path, as campaign 3 did. It then checked that this
+  threshold predicts when the simulated training actually fires.
+- 6 of the 10 instances came out eligible: measured, predicted and proved by the frozen Lean gate.
+- By the stopping rule, this gives a go for a campaign 6 of 5 instances, within its compute bound.
+- One caveat: cell c has no room at K = 3 on any instance, so the campaign's noise claims on c will likely be thin.
 
 ## 1. The result, by the stopping rule
 
@@ -111,7 +120,8 @@ while the noise-free primary claim has wide room. This changes no rule.
    vfire = 0: gmin and source stepping failed, then "Too many iterations without convergence". `net.run` does not
    detect a failed tran, so the failure surfaced as a ValueError in `net.last`. Nothing was rerun. 7707 is not
    measured, and no later view of it changes k.
-2. **The prediction code failed on 7709.** This is a design defect of MAPPING_U.md (mine). When a pair's s* is close
+2. **The prediction code failed on 7709.** This is a design defect of MAPPING_U.md, the campaign
+   director's. When a pair's s* is close
    to K, the alone score g = d(K − s*) is close to 0. On 7709, g_b / θ = 0.029, below the frozen geometric fit's
    floor h ≥ 0.05 θ, so `predicted.geometric` found no fit and `predict6` stopped before any gate.
    - The owner ruled **amendment 1**: an instance on which the batch's prediction code raises an error is not
@@ -123,10 +133,10 @@ while the noise-free primary claim has wide room. This changes no rule.
    none (7707's). The owner ruled a fix of that one line. `report6_guard.py` (`7fd74ca`) is report6.report copied
    verbatim, with only the completed runs in question 4, and was reviewed by both coordinators. The failed step is
    kept as it was in RUN_LOG.txt.
-4. **My look before the ruling (16:19 UTC).** While diagnosing the crash, before the owner's ruling, I computed in
-   memory each seed's Python-side eligibility, without gates, and the decision at k = 6 and k = 7. I sent both to the
-   coordinator. I wrote nothing, and none of it was a k. It should not have been done; I should have stopped at
-   locating the crash.
+4. **The campaign director's look before the ruling (16:19 UTC).** While diagnosing the crash, before the owner's
+   ruling, the campaign director computed in memory each seed's Python-side eligibility, without gates, and the
+   decision at k = 6 and k = 7, and sent both to the coordinator. Nothing was written, and none of it was a k. It
+   should not have been done: the diagnosis should have stopped at locating the crash.
    - The coordinator read it after the owner's ruling, and the owner had not seen it.
    - The ruling (amendment 1) can only lower k, and with 7709 eligible k would be 7, also a go.
    - The previous coordinator saw no eligibility before advising.
@@ -151,8 +161,8 @@ while the noise-free primary claim has wide room. This changes no rule.
     - the block did not set the commit identity;
     - ignored files would have been left out silently;
     - the job-log patterns missed three kinds of log.
-    The first three were found by the coordinator's review and fixed before any launch. The fourth was missed by my
-    block and the review, and caught by the guard.
+    The first three were found by the coordinator's review and fixed before any launch. The fourth was missed by the
+    campaign director's block and by the review, and caught by the guard.
 
     Both coordinators reviewed MAPPING_U.md, predict6 and report6, and also missed:
     - (a) the geometric-fit edge, when K − s* is below about half a stage;
@@ -165,7 +175,17 @@ while the noise-free primary claim has wide room. This changes no rule.
 11. **Stale docstrings.** predict6.py's module docstring still describes v9's per-cell rescaling. The code follows
     MAPPING_U. This is noted, not changed.
 
-## 6. Evidence
+## 6. What follows
+
+- By the stopping rule, campaign 6 may be preregistered, with I = 5 and seeds from 7801.
+- Its PREDICTION.md would be written later, reviewed by both coordinators, and pushed alone only with the owner's go.
+- It would:
+  - use the design that produced k: MAPPING_U.md v3, delta 1/2 and BATCH_SPEC v10;
+  - state amendment 1's rule from the start;
+  - run the network on eligible instances only;
+  - keep the stated scope of the noise claims.
+
+## 7. Evidence
 
 | What | Branch | Head |
 |---|---|---|
@@ -188,6 +208,8 @@ The analysis branch holds:
 
 Each run log starts with its provenance: HEAD, a clean status, and the 72 marker files at their hashes.
 
-**Independent check.** The coordinator ran predict6_guard at `026919a` independently, and its seven Gate6 files are
-byte-identical to these. The coordinator also recomputed k = 6, I = 5, E = 17 112.13 s and go with report6.mean_walls
-and decision on this PREDICTIONS.json and RUNS.json.
+**Independent checks.**
+- **The coordinator** ran predict6_guard separately at `026919a`. It gave a PREDICTIONS.json byte-identical to this
+  one (`e2e9e572…cc89`), the same seven Gate6 files, and seven "check.sh: passed".
+- **The previous coordinator** recomputed k, I, E and the decision from the pushed PREDICTIONS.json and RUNS.json,
+  with identical results, and saw no eligibility before advising on amendment 1.
