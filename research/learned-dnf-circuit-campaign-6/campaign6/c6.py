@@ -7,8 +7,18 @@ call the module functions under this guard, which runs before any deck is writte
 patches batch6.SEEDS. Accepted:
   - a campaign seed (7801 to 7805) only in a campaign stage (M1, M2, M3, Q, N1, N2, N3, N) and inside a launch of the kit;
   - a rehearsal seed (7701, 7706) only in the network rehearsal stage RN, inside a launch of the kit;
-  - the nominal cell (none) only in the measure rehearsal stages RM1, RM2, RM3, or with no stage (the tests).
+  - the nominal cell (none) only in the measure rehearsal stages RM1, RM2, RM3, or with no stage (the tests). The
+    nominal cell is not required to run inside the kit: it carries no claim, and the tests run it without one.
 Every other seed, every other stage, and every other combination is refused.
+
+Instances are named by their seed alone: "7801" to "7805", and "none-a", "none-b" for the two nominal instances of the
+measure rehearsal (two distinct instances, measured first on machine a and on machine b). Since amendment 1, an M2 or
+M3 run may execute on the other machine than its instance's: the machine that ran it is read from the kit's state file
+and recorded as `machine`, the instance's assigned machine as `instance_machine`.
+
+Safeguard (i), as campaign 5's run4.stage_check: every runner takes its stage file (STAGE_<name>.md, written by
+stages6 and pushed before the stage's manifest) and refuses the run, before any deck is written, unless that file names
+the governing protocol PREDICTION.md with the SHA-256 PROTOCOL_SHA256, and the file in the repository has that SHA-256.
 """
 from fractions import Fraction as F
 import json
@@ -69,6 +79,44 @@ def inside_kit(out):
     return s.get("status") == "running" and any(r.get("id") == Path(out).name and r.get("status") == "started" for r in s.get("records", []))
 
 
+NOMINAL_INSTANCES = {"none-a": "a", "none-b": "b"}
+
+
+def instance_machine(instance):
+    """The machine an instance is assigned to: MACHINE_OF for the campaign, the rehearsal's own for the rest."""
+    if instance in NOMINAL_INSTANCES:
+        return NOMINAL_INSTANCES[instance]
+    seed = int(instance)
+    return MACHINE_OF.get(seed, REHEARSAL_SEEDS.get(seed))
+
+
+def seed_text(instance):
+    """An instance's seed as the batch's code reads it: "none" for the nominal instances."""
+    return "none" if instance in NOMINAL_INSTANCES else instance
+
+
+def running_machine(out):
+    """The machine the kit runs this run on, from its state file; None outside the kit (the tests)."""
+    state = Path(out).parent / "STATE.json" if out is not None else None
+    if state is None or not state.exists():
+        return None
+    return json.loads(state.read_text()).get("machine")
+
+
+def stage_check(stage_file):
+    """Safeguard (i): the stage file's governing protocol is PREDICTION.md with PROTOCOL_SHA256, and the repository's
+    file has it. Returns the record's `stage` (as run4.stage_check), refuses otherwise."""
+    import hashlib
+    import plan
+    st = plan.read_stage(stage_file)
+    assert st.get("stage") in STAGES, f"refused: {st.get('stage')} is not a stage of campaign 6"
+    gov = st["governing_protocol"]
+    assert gov["path"] == PROTOCOL and gov["sha256"] == PROTOCOL_SHA256, f"refused (safeguard i): stage {st['stage']} does not name PREDICTION.md as pushed"
+    got = hashlib.sha256((HERE.parent.parent.parent / PROTOCOL).read_bytes()).hexdigest()
+    assert got == PROTOCOL_SHA256, f"refused (safeguard i): PREDICTION.md has SHA-256 {got} in the repository, not {PROTOCOL_SHA256}"
+    return dict(stage=st["stage"], governing_protocol=gov, stage_file_sha256=hashlib.sha256(Path(stage_file).read_bytes()).hexdigest())
+
+
 def guard_seed(text, stage=None, out=None):
     """The seed of a run, or a refusal (AssertionError) before anything is written. `text` is "none" or a seed."""
     assert stage is None or stage in STAGES, f"refused: {stage} is not a stage of campaign 6"
@@ -85,9 +133,9 @@ def guard_seed(text, stage=None, out=None):
     return seed
 
 
-def run_header(seed, cell, kind, stage):
-    return dict(campaign="learned-dnf-circuit-campaign-6", protocol=PROTOCOL_COMMIT, seed=seed, cell=cell, kind=kind, stage=stage,
-                machine=MACHINE_OF.get(seed, REHEARSAL_SEEDS.get(seed)), interpreter=c4.interpreter())
+def run_header(instance, cell, kind, stage, out=None):
+    return dict(campaign="learned-dnf-circuit-campaign-6", protocol=PROTOCOL_COMMIT, instance=instance, cell=cell, kind=kind, stage=stage,
+                machine=running_machine(out), instance_machine=instance_machine(instance), interpreter=c4.interpreter())
 
 
 def require_debug():

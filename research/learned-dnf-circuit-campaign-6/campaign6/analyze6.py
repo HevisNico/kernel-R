@@ -5,9 +5,11 @@ unchanged, through an adapter that maps exactly four things. New code.
       MEASURES_*: the collected folders of M1 to M3 of each machine; RUNS_*: those of Q and the N stages
 
 1. The reproduction check. analyze.main recomputes PREDICTED.json with campaign 5's predicted.predictions (the
-   nominal-level prediction). Here it is recomputed with predicted6.predictions from the same measures, byte for byte
-   (each instance's Lean file and check.sh again included). If it differs, analyze.py makes every claim "not
-   established".
+   nominal-level prediction). Here it is recomputed with predicted6.predictions from the same measures (each
+   instance's Lean file and check.sh again included), and the RAW text of the pushed PREDICTED.json is compared with
+   it byte for byte, in the same serialization as analyze.py's (json.dumps(indent=1, default=str) + newline). If it
+   differs, every claim is "not established" (PREDICTION.md 9), whatever analyze.main returns: analyze.main compares
+   only the mapped records, and the mapping overwrites `eligible`.
 2. `eligible`. analyze.py reads an instance's `eligible`; campaign 6's eligibility is measured, eligible and gate_K0
    (PREDICTION.md 3). The record handed to analyze.py carries `eligible` = that, with the original kept as
    `eligible_python`.
@@ -16,9 +18,12 @@ unchanged, through an adapter that maps exactly four things. New code.
 4. The minimum of 2 counted eligible instances (PREDICTION.md 5, the owner's decisions of 2026-11-18). analyze.py's
    verdicts, failures and counts are kept unchanged; the number of distinct eligible instances behind each claim's
    counted runs is added; "held" with fewer than 2 becomes "held on one instance, not established" (1) or "not
-   established" (0); "refuted" is never changed. For N-own, a port-run counts only if campaign 5's n_own does not
-   return None on its word, so the instances behind N-own are found by the same functions analyze.py uses
-   (rows_of, reads4.words, n_own), read-only, on the same runs.
+   established" (0); "refuted" is never changed. The instances are those of exactly the runs and port-runs analyze.py
+   counts, under its own conditions: a noisy run counts when campaign 5's P.counts holds for its kit record (analyze.py's
+   noisy_ok under the injected model); an output-run of N-out when the instance's counts_N_out holds for that output; a
+   port-run of N-word when its learning port has room_up_to; a port-run of N-own when it has own_room and campaign 5's
+   n_own does not return None on its word (rows_of and reads4.words, the same functions, read-only, on the same runs);
+   the primary claim's instances are analyze.py's own list.
 The adapter decides no claim of its own.
 """
 import copy
@@ -58,12 +63,11 @@ def minimum(verdict, n):
 def counted_instances(p, res, recs):
     """The distinct eligible instances behind each claim's counted runs (mapping 4)."""
     inst = {x["seed"]: x for x in p["instances"]}
-    missing = set(res.get("missing", []))
-    noisy = [r for r in p["network_runs"] if r["noise"] != "none" and r["id"] not in missing and r["id"] in recs]
+    noisy = [r for r in p["network_runs"] if r["noise"] == "injected" and analyze.counts(recs.get(r["id"]))]     # analyze.py's noisy_ok
     out = {"primary": set(res["claims"]["primary"]["instances"]) if isinstance(res["claims"].get("primary"), dict) else set()}
     for c in c4.CELLS:
         out[f"N-out:{c}"] = {r["seed"] for r in noisy if inst[r["seed"]]["counts_N_out"][c]}
-    out["N-word"] = {r["seed"] for r in noisy if any(lp["room_up_to"] for lp in inst[r["seed"]]["learning_ports"].values())}
+    out["N-word"] = {r["seed"] for r in noisy for lp in inst[r["seed"]]["learning_ports"].values() if lp["room_up_to"]}
     own = set()
     for r in noisy:
         x = inst[r["seed"]]
@@ -98,11 +102,12 @@ def apply_minimum(res, counted):
     return res
 
 
-def run(outdir, predicted_path, measures_a, measures_b, runs_a, runs_b, check=True):
+def run(outdir, predicted_path, measures_a, measures_b, runs_a, runs_b, check=True, **prediction):
+    """prediction: predicted6.predictions' seeds, machine_of and batch_dir, for the rehearsal's RN (campaign6/README.md)."""
     outdir = Path(outdir)
     pushed = json.loads(Path(predicted_path).read_text())
     work = Path(tempfile.mkdtemp(prefix="c6-analysis-"))
-    again = predicted6.predictions([measures_a, measures_b], work / "gate", check)          # mapping 1
+    again = predicted6.predictions([measures_a, measures_b], work / "gate", check, **prediction)          # mapping 1
     reproduced = predicted6.text(again) == Path(predicted_path).read_text()
     handed = work / "PREDICTED.json"
     handed.write_text(predicted6.text(mapped(pushed)))
@@ -111,7 +116,9 @@ def run(outdir, predicted_path, measures_a, measures_b, runs_a, runs_b, check=Tr
             mock.patch.object(analyze.plan, "read_before_m", lambda path: {}):                 # mapping 3
         res = analyze.main([str(outdir), str(measures_a), str(measures_b), str(runs_a), str(runs_b)], here=work, predicted_path=handed)
     res["predicted6_is_reproduced"] = reproduced
-    if res.get("predicted_is_reproduced"):
+    if not reproduced:                                                       # PREDICTION.md 9, whatever analyze.main returned
+        res["claims"] = {k: "not established" for k in ("primary", "G", "N-out", "N-own", "N-word", "U", "S")}
+    elif res.get("predicted_is_reproduced"):
         recs = analyze.state_records(measures_a, measures_b, runs_a, runs_b)
         res = apply_minimum(res, counted_instances(mapped(pushed), res, recs))
     (outdir / "RESULTS.json").write_text(json.dumps(res, indent=1, default=str) + "\n")

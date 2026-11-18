@@ -4,7 +4,8 @@ evidence of M1 to M3, pushed before any network run. New code.
   predicted6.py OUT_DIR STAGE_DIR...       the campaign's five instances (STAGE_DIR: the collected folders of M1 to M3, both machines)
 
 1. The runs of the measure stages are laid out as the batch's code reads them (BATCH_DIR/<machine>/<seed>-<run>, and
-   BATCH_DIR/RUNS.json with each run's status: "complete" when it counts, else the kit's status).
+   BATCH_DIR/RUNS.json with each run's status: "complete" when it counts, else the kit's status). Every run of an
+   instance is gathered under its instance's assigned machine, wherever it ran (amendment 1).
 2. `predict_batch` is predict6.predict_batch copied verbatim but for two lines: it takes the seeds and their machines
    as arguments instead of reading batch6.SEEDS and batch6.MACHINE_OF, which name only the batch's 7701 to 7710
    (test_campaign6.PredictCopy shows the difference). It runs under predict6_guard's wrapper (amendment 1, stated from
@@ -85,7 +86,7 @@ def layout(bd, stage_dirs, seeds, machine_of):
         (bd / m).mkdir(parents=True, exist_ok=True)
         tails = [f"cal-{g}" for g in ("on", "off")] + [f"scan-{c}-{k}" for c, k in CROSSINGS] + ["bothfire-c", "onesided-a", "onesided-b"]
         for tail in tails:
-            rec = recs.get(f"{m}-{seed}-{tail}")
+            rec = recs.get(f"{seed}-{tail}")                    # run ids by seed (amendment 1: a run may have run on the other machine)
             status = "complete" if inputs6.complete(rec) else (rec.get("status") if rec else "not started")
             if rec is not None:
                 (bd / m / f"{seed}-{tail}").symlink_to(Path(rec["folder"]).resolve())
@@ -111,13 +112,16 @@ def network_runs(instances):
     return runs
 
 
-def predictions(stage_dirs, out_dir, check=True, seeds=c6.SEEDS, machine_of=c6.MACHINE_OF):
-    """PREDICTED.json (as a dict) from the collected stage folders; the Lean files and check logs go to out_dir."""
+def predictions(stage_dirs, out_dir, check=True, seeds=c6.SEEDS, machine_of=c6.MACHINE_OF, batch_dir=None):
+    """PREDICTED.json (as a dict) from the collected stage folders; the Lean files and check logs go to out_dir.
+    batch_dir: a folder already laid out as the batch's code reads it (the rehearsal's RN, on the batch's merged
+    evidence, a d9e431b and b 88a34de, for seeds 7701 and 7706), used instead of laying out stage_dirs."""
     import tempfile
     with tempfile.TemporaryDirectory() as bd:
-        layout(bd, stage_dirs, seeds, machine_of)
+        if batch_dir is None:
+            layout(bd, stage_dirs, seeds, machine_of)
         with mock.patch.object(P, "instance", predict6_guard.guarded_instance):
-            xs = predict_batch(bd, out_dir, seeds, machine_of, check)
+            xs = predict_batch(batch_dir or bd, out_dir, seeds, machine_of, check)
     xs = json.loads(json.dumps(xs, default=str))
     return dict(what="the predictions of campaign 6 (PREDICTION.md), written by predicted6.py; no network run exists when this file is written",
                 protocol=c6.PROTOCOL_COMMIT, constants={k: c4.DECISION5[k] for k in c4.DECISION5}, instances=xs, network_runs=network_runs(xs))

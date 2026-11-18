@@ -34,6 +34,13 @@ def kit_folder(d, rid):
     return d / rid
 
 
+def stage_file(d, stage):
+    """A stage file as stages6 writes it (safeguard i)."""
+    f = Path(d) / f"STAGE_{stage}.md"
+    f.write_text(stages6.stage_file_text(stage))
+    return f
+
+
 def diff(a, b):
     return [x for x in difflib.unified_diff(inspect.getsource(a).splitlines(), inspect.getsource(b).splitlines(), lineterm="", n=0)
             if x[:1] in "+-" and not x.startswith(("+++", "---"))]
@@ -71,15 +78,41 @@ class Guard(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d, mock.patch.object(batch6, "cal", boom), mock.patch.object(meas6, "Driver", boom), \
                 mock.patch.object(net6.session4, "play", boom):
             out = kit_folder(d, "x")
-            for call in (lambda: meas6.cal("M1", out, "7710", "on", "ngspice", "pdk"),
-                         lambda: meas6.main(["scan", "M2", str(out), "a-7710", "a", "pair", "inputs.json", "ngspice", "pdk"]),
-                         lambda: meas6.scan_main([str(out), "7600", "a", "pair", "1/2", "0.001", "0.001", "ngspice", "pdk"], "M2"),
-                         lambda: net6.network("Q", out, "x", "7706", [4, 4, 4, 4], "skew", "none", 0, "ngspice", "pdk"),
-                         lambda: net6.network("RN", out, "x", "7801", [4, 4, 4, 4], "skew", "none", 0, "ngspice", "pdk"),
-                         lambda: net6.network("RN", out, "x", "7701", [4, 4, 4, 4], None, "device", 1, "ngspice", "pdk")):
+            m1, m2, q, rn = (str(stage_file(d, s)) for s in ("M1", "M2", "Q", "RN"))
+            for call in (lambda: meas6.cal(m1, out, "7710", "on", "ngspice", "pdk"),
+                         lambda: meas6.cal(m1, out, "none-a", "on", "ngspice", "pdk"),
+                         lambda: meas6.main(["scan", m2, str(out), "7710", "a", "pair", "inputs.json", "ngspice", "pdk"]),
+                         lambda: meas6.scan_main([str(out), "7600", "a", "pair", "1/2", "0.001", "0.001", "ngspice", "pdk"], dict(stage="M2"), "7600"),
+                         lambda: net6.network(q, out, "x", "7706", [4, 4, 4, 4], "skew", "none", 0, "ngspice", "pdk"),
+                         lambda: net6.network(rn, out, "x", "7801", [4, 4, 4, 4], "skew", "none", 0, "ngspice", "pdk"),
+                         lambda: net6.network(rn, out, "x", "7701", [4, 4, 4, 4], None, "device", 1, "ngspice", "pdk")):
                 with self.assertRaises(AssertionError):
                     call()
         boom.assert_not_called()
+
+    def test_stage_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            st = c6.stage_check(stage_file(d, "M2"))
+            self.assertEqual((st["stage"], st["governing_protocol"]["sha256"]), ("M2", c6.PROTOCOL_SHA256))
+            bad = Path(d) / "STAGE_bad.md"
+            bad.write_text(stages6.stage_file_text("M2").replace(c6.PROTOCOL_SHA256, "0" * 64))
+            with self.assertRaises(AssertionError):
+                c6.stage_check(bad)
+            other = Path(d) / "STAGE_other.md"
+            other.write_text(stages6.stage_file_text("M2").replace('"stage": "M2"', '"stage": "M9"'))
+            with self.assertRaises(AssertionError):
+                c6.stage_check(other)
+            with mock.patch.object(c6, "PROTOCOL_SHA256", "1" * 64):        # the repository's file is not the one named
+                with self.assertRaises(AssertionError):
+                    c6.stage_check(stage_file(d, "M3"))
+
+    def test_header_records_the_running_machine(self):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "STATE.json").write_text(json.dumps(dict(status="running", machine="b", records=[])))
+            h = c6.run_header("7801", "a", "pair", dict(stage="M2"), Path(d) / "7801-scan-a-pair")
+        self.assertEqual((h["machine"], h["instance_machine"], h["instance"]), ("b", "a", "7801"))
+        self.assertEqual((c6.instance_machine("none-b"), c6.seed_text("none-b"), c6.seed_text("7804")), ("b", "none", "7804"))
+        self.assertIsNone(c6.run_header("7801", None, "cal-on", dict(stage="M1"))["machine"])
 
     def test_batch_seeds_untouched(self):
         self.assertEqual(batch6.SEEDS, tuple(range(7701, 7711)))
@@ -90,10 +123,10 @@ class Guard(unittest.TestCase):
 class Copies(unittest.TestCase):
     def test_scan_main_is_scan6_main_but_three_lines(self):
         self.assertEqual(diff(scan6.main, meas6.scan_main), [
-            "-def main(argv=None):", "+def scan_main(argv, stage):",
-            "-    seed = batch6.guard_seed(seed_text)", "+    seed = c6.guard_seed(seed_text, stage, out)",
+            "-def main(argv=None):", "+def scan_main(argv, stage, instance):",
+            "-    seed = batch6.guard_seed(seed_text)", '+    seed = c6.guard_seed(seed_text, stage["stage"], out)',
             '+    (out / "noise.sha256").write_text(run4.trnoise_fingerprint(tr, c4.CELLS) + "\\n")',
-            "-    rec = dict(batch6.run_header(seed, cell, kind), D_V=D,", "+    rec = dict(c6.run_header(seed, cell, kind, stage), D_V=D,"])
+            "-    rec = dict(batch6.run_header(seed, cell, kind), D_V=D,", "+    rec = dict(c6.run_header(instance, cell, kind, stage, out), D_V=D,"])
 
     def test_predict_batch_is_predict6s_but_seeds(self):
         self.assertEqual(diff(predict6.predict_batch, predicted6.predict_batch), [
@@ -138,19 +171,21 @@ class NetCopy(unittest.TestCase):
             texts = []
             with tempfile.TemporaryDirectory() as d, mock.patch.object(run4.session4, "play", self.fake_play(texts)), \
                     mock.patch.object(run4.noisemodel, "shim", self.fake_shim), mock.patch.object(run4, "guard", lambda *a, **k: None), \
-                    mock.patch.object(c6, "guard_seed", lambda *a, **k: 7701):
+                    mock.patch.object(c6, "guard_seed", lambda *a, **k: 7701), \
+                    mock.patch.object(c6, "stage_check", lambda f: dict(stage="RN")):
                 d = Path(d)
                 args = argparse.Namespace(out=d / "run4", ngspice=Path("ngspice"), pdk=Path("pdk"), id="x", kind="network", seed="7701", instances=0,
                                           guard=None, cell=None, state=None, port="none", isolation=0, reuse_trip=0, needs="4,5,4,6", control=control,
                                           noise=noise, round=rnd, extraction=None, extraction_sha256=None, scale="1", stage=None)
                 run4.run(args)
-                net6.network("RN", d / "net6", "x", "7701", [4, 5, 4, 6], None if control == "none" else control, noise, rnd, Path("ngspice"), Path("pdk"))
+                net6.network("STAGE_RN.md", d / "net6", "x", "7701", [4, 5, 4, 6], None if control == "none" else control, noise, rnd, Path("ngspice"), Path("pdk"))
                 r4, r6 = (json.loads((d / k / "record.json").read_text()) for k in ("run4", "net6"))
             self.assertEqual(texts[0], texts[1], control)
             drop = lambda r: {k: v for k, v in r.items() if k not in ("id", "stage", "wall_s", "peak_rss_MB", "campaign6")}
             self.assertEqual(drop(r4), drop(r6), control)
             self.assertEqual(list(r6)[:-1], list(r4), control)
             self.assertEqual(list(r6)[-1], "campaign6")
+            self.assertEqual(r6["stage"], dict(stage="RN"))                 # safeguard (i)'s check, where run4 records its own
 
 
 def instances_for(eligible):
@@ -164,22 +199,34 @@ def instances_for(eligible):
 
 class Stages(unittest.TestCase):
     def test_measure_stages_and_their_cost(self):
-        allow = dict(instances={f"{c6.MACHINE_OF[s]}-{s}": {} for s in c6.SEEDS})
+        allow = dict(instances={str(s): {} for s in c6.SEEDS})
         st = [stages6.measure_runs("M1"), stages6.measure_runs("M2", allow), stages6.measure_runs("M3", allow)]
+        self.assertEqual([(sum(r["machine"] == "a" for r in x), sum(r["machine"] == "b" for r in x)) for x in st], [(6, 4), (13, 12), (5, 5)])
+        self.assertEqual([r["id"] for r in st[1][:6]], ["7801-scan-a-pair", "7801-scan-b-pair", "7801-scan-c-line1", "7801-scan-c-line2",
+                                                        "7801-bothfire-c", "7802-scan-a-pair"])
+        self.assertEqual([r["machine"] for r in st[1][:6]], ["a", "b", "a", "b", "a", "b"])
         self.assertEqual([len(x) for x in st], [10, 25, 10])
         self.assertAlmostEqual(stages6.expected_compute(st), 7084.9, delta=0.05)
         self.assertEqual([round(stages6.stage_cap(x), 1) for x in st], [6902.5, 6987.5, 2025.0])
         for runs in st:
             stages6.kit_checks(dict(runs=[stages6.entry("M2", r, "x.json") for r in runs], scenario_order=["stage"], jobs=4,
                                     budget_s=int(stages6.stage_cap(runs)) + 1))
-        self.assertEqual({r["machine"] for r in st[0] if r["instance"].endswith(("7801", "7802", "7803"))}, {"a"})
+        self.assertEqual({r["machine"] for r in st[0] if r["instance"] in ("7801", "7802", "7803")}, {"a"})
+        self.assertEqual({r["machine"] for r in st[0] if r["instance"] in ("7804", "7805")}, {"b"})
 
-    def test_one_shard_measure_stage_is_refused(self):
-        only_a = dict(instances={f"{c6.MACHINE_OF[s]}-{s}": ({} if c6.MACHINE_OF[s] == "a" else dict(why_not="x")) for s in c6.SEEDS})
-        with self.assertRaises(stages6.MeasureStageOneShard):
-            stages6.measure_runs("M3", only_a)
+    def test_amendment_1_two_shards(self):
+        """Amendment 1: only machine a's instances complete, yet M2 and M3 have runs on both machines; one instance
+        alone gives both machines runs too; a stage with no run is empty; a one-machine stage is an impossible case."""
+        only_a = dict(instances={str(s): ({} if c6.MACHINE_OF[s] == "a" else dict(why_not="x")) for s in c6.SEEDS})
+        for stage in ("M2", "M3"):
+            self.assertEqual({r["machine"] for r in stages6.measure_runs(stage, only_a)}, {"a", "b"})
+        one = dict(instances={str(s): ({} if s == 7804 else dict(why_not="x")) for s in c6.SEEDS})
+        self.assertEqual([r["machine"] for r in stages6.measure_runs("M3", one)], ["a", "b"])
         none = dict(instances={k: dict(why_not="x") for k in only_a["instances"]})
         self.assertEqual(stages6.measure_runs("M3", none), [])
+        with mock.patch.object(stages6, "two_shard", lambda runs: [dict(r, machine="a") for r in runs]):
+            with self.assertRaises(stages6.MeasureStageOneShard):
+                stages6.measure_runs("M3", only_a)
 
     def test_two_shard_rule_every_case(self):
         """PREDICTION.md 4: the stage plan for 0 to 5 eligible instances, through the kit's own checks."""
@@ -218,7 +265,7 @@ class Stages(unittest.TestCase):
         self.assertEqual([c6.limit(x) for x in (c6.QUIET_SKEW_NEED4_S, c6.NOISY_NEED4_S, c6.UNTRAINED_S)], [1440, 2800, 270])
 
     def test_rehearsal(self):
-        allow = dict(instances={"a-none": {}, "b-none": {}})
+        allow = dict(instances={"none-a": {}, "none-b": {}})
         rm = [stages6.measure_runs("RM1"), stages6.measure_runs("RM2", allow), stages6.measure_runs("RM3", allow)]
         self.assertAlmostEqual(stages6.expected_compute(rm), 4200.6, delta=0.05)
         preds = dict(instances=[dict(seed=7701, eligible=True, gate_K0=True, needs=dict(a=4, b=4, c1=4, c2=4)),
@@ -262,6 +309,58 @@ class Adapter(unittest.TestCase):
         self.assertEqual((out["N-own"]["verdict"], out["N-word"]["verdict"]), ("refuted", "held"))
 
 
+class AdapterEnforcement(unittest.TestCase):
+    def test_raw_record_not_reproduced_means_not_established(self):
+        """The pushed record differs from the regenerated one only in `eligible` (a Python-eligible instance whose gate
+        failed), which the mapping overwrites. The mapping keeps the original beside it, so the mapped records still
+        differ; and even if analyze.main reported the record reproduced (mocked here), every claim is not established."""
+        base = dict(what="w", protocol="p", constants={}, network_runs=[], instances=[dict(seed=7801, measured=True, eligible=False, gate_K0=False)])
+        pushed = json.loads(json.dumps(base))
+        pushed["instances"][0]["eligible"] = True                     # a Python-eligible instance whose gate failed
+        self.assertEqual([x["eligible"] for x in analyze6.mapped(pushed)["instances"]], [x["eligible"] for x in analyze6.mapped(base)["instances"]])
+        self.assertNotEqual(analyze6.mapped(pushed), analyze6.mapped(base))           # eligible_python keeps the difference
+        held = dict(predicted_is_reproduced=True, missing=[], claims={k: dict(verdict="held", instances=[7801, 7802]) for k in ("primary", "G", "U", "S")})
+        held["claims"]["N-out"] = {c: dict(verdict="held") for c in c4.CELLS}
+        held["claims"]["N-own"] = held["claims"]["N-word"] = dict(verdict="held")
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(predicted6, "predictions", lambda *a, **k: base), \
+                mock.patch.object(analyze6.analyze, "main", lambda *a, **k: json.loads(json.dumps(held))):
+            f = Path(d) / "PREDICTED.json"
+            f.write_text(predicted6.text(pushed))
+            res = analyze6.run(d, f, d, d, d, d, check=False)
+        self.assertFalse(res["predicted6_is_reproduced"])
+        self.assertEqual(set(res["claims"].values()), {"not established"})
+
+    def test_counted_instances_follow_analyze_counts(self):
+        """A noisy run that analyze.py does not count (its kit record not complete) brings no instance."""
+        xs = instances_for({7801, 7802})
+        for x in xs:
+            x["counts_N_out"] = dict(a=True, b=True, c=False)
+            x["learning_ports"] = {"a1": dict(own_room=False, room_up_to=True)}
+        p = dict(instances=xs, network_runs=predicted6.network_runs(xs))
+        with tempfile.TemporaryDirectory() as d:
+            recs = {}
+            for r in p["network_runs"]:
+                f = Path(d) / r["id"]
+                f.mkdir()
+                (f / "record.json").write_text(json.dumps(dict(reached_its_last_date=True)))
+                recs[r["id"]] = dict(status="complete", folder=str(f))
+            for k in (1, 2, 3):
+                recs[f"7802-n{k}"]["status"] = "missing (limit)"
+            res = dict(claims={"primary": dict(instances=[7801, 7802], verdict="held")})
+            counted = analyze6.counted_instances(p, res, recs)
+        self.assertEqual(counted["N-out:a"], [7801])
+        self.assertEqual(counted["N-out:c"], [])
+        self.assertEqual(counted["N-word"], [7801])
+        self.assertEqual(counted["N-own"], [])
+        self.assertEqual(analyze6.minimum("held", len(counted["N-out:a"])), analyze6.HELD_ON_ONE)
+
+    def test_same_serialization_as_analyze(self):
+        import inspect as ins
+        import analyze
+        self.assertIn('json.dumps(again, indent=1, default=str) + "\\n" == raw', ins.getsource(analyze.main))
+        self.assertEqual(predicted6.text(dict(a=1)), json.dumps(dict(a=1), indent=1, default=str) + "\n")
+
+
 class Inputs(unittest.TestCase):
     def test_complete(self):
         with tempfile.TemporaryDirectory() as d:
@@ -278,7 +377,7 @@ class Inputs(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             d = Path(d)
             recs = []
-            for inst, consistent in (("a-7801", True), ("b-7804", False)):
+            for inst, consistent in (("7801", True), ("7804", False)):
                 for c in ("a", "b"):
                     rid = f"{inst}-scan-{c}-pair"
                     (d / rid).mkdir()
@@ -286,14 +385,16 @@ class Inputs(unittest.TestCase):
                     (d / rid / "record.json").write_text(json.dumps(dict(result=res)))
                     recs.append(dict(id=rid, status="complete"))
             (d / "STATE.json").write_text(json.dumps(dict(records=recs)))
-            m2 = dict(stage="M2", instances={"a-7801": dict(D_V={"a": ["1", "1"], "b": ["1", "1"], "c": ["1", "1"]}),
-                                             "b-7804": dict(D_V={"a": ["1", "1"], "b": ["1", "1"], "c": ["1", "1"]}),
-                                             "a-7802": dict(why_not="a calibration deck did not complete")})
+            m2 = dict(stage="M2", instances={"7801": dict(D_V={"a": ["1", "1"], "b": ["1", "1"], "c": ["1", "1"]}),
+                                             "7804": dict(D_V={"a": ["1", "1"], "b": ["1", "1"], "c": ["1", "1"]}),
+                                             "7802": dict(why_not="a calibration deck did not complete")})
             out = inputs6.m3_inputs("M3", m2, [d])["instances"]
-        self.assertEqual(out["a-7801"]["bounds"], {c: str(predict6.layer1_bounds({"a": F(861, 256), "b": F(861, 256)},
+        self.assertEqual(out["7801"]["bounds"], {c: str(predict6.layer1_bounds({"a": F(861, 256), "b": F(861, 256)},
                                                                                {"a": F(1, 256), "b": F(1, 256)})[c]) for c in ("a", "b")})
-        self.assertEqual(out["b-7804"]["why_not"], "the pair scan of b has no consistent bracket")
-        self.assertEqual(out["a-7802"]["why_not"], "a calibration deck did not complete")
+        self.assertEqual(out["7804"]["why_not"], "the pair scan of b has no consistent bracket")
+        self.assertEqual(out["7802"]["why_not"], "a calibration deck did not complete")
+        self.assertEqual(inputs6.instances("M2"), ["7801", "7802", "7803", "7804", "7805"])
+        self.assertEqual(inputs6.instances("RM3"), ["none-a", "none-b"])
 
 
 class Frozen(unittest.TestCase):

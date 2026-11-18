@@ -1,19 +1,22 @@
 """Campaign 6's stages (PREDICTION.md 4, 6 and 7): the runs of each stage, their machines, expected costs and limits,
 and the launch kit's manifest of each. New code.
 
-  stages6.py manifest STAGE OUT.json SOURCE_COMMIT [INPUTS.json | PREDICTED.json]
+  stages6.py stage-file STAGE OUT.md                                 the stage file (safeguard i), pushed before the manifest
+  stages6.py manifest STAGE OUT.json SOURCE_COMMIT [INPUTS.json | PREDICTED.json | PREDICTIONS_BATCH.json]
 
 Stages, in a fixed sequence (PREDICTION.md 6): M1 (the calibration decks), M2 (the scans and the both-lines checks),
 M3 (the one-sided sets), Q (the runs without noise of the eligible instances and the untrained run), N1, N2, N3 (the
 noisy runs of rounds 1 to 3), or one merged N stage when exactly one instance is eligible. The rehearsal (7): RM1, RM2,
 RM3 on the nominal cell, one instance per machine; RN, the network runs of 7701 (machine a) and 7706 (machine b).
 
-Machines. A measure run keeps its instance's machine (PREDICTION.md 1 and 6: 7801 to 7803 on a, 7804 and 7805 on b).
-A network run follows the two-shard rule (PREDICTION.md 4): within its stage, the runs in a fixed order (the runs
-without noise in seed order, then the untrained run; in an N stage, in seed order) alternate a, b, a, ... from a.
-Every manifest is checked here as the kit checks it: both shards nonempty, the round-robin order, and the budget. A
-measure stage whose runs would all be on one machine is refused (MeasureStageOneShard), since the preregistered rule
-keeps measure runs on their instance's machine: it needs an amendment before its launch, never a silent move.
+Machines. An M1 run keeps its instance's machine (PREDICTION.md 1 and 6: 7801 to 7803 on a, 7804 and 7805 on b; in
+the rehearsal, none-a on a and none-b on b). M2 and M3 (RM2, RM3) follow the two-shard alternation (PREDICTION.md
+amendment 1, a0d4ad3): their runs whose inputs are complete, listed by instance in seed order (none-a before none-b),
+then by run kind (M2: pair a, pair b, line 1, line 2, both-lines; M3: one-sided a, then b), alternate a, b, a, ...
+from a. A network run follows the same alternation (PREDICTION.md 4): the runs without noise in seed order, then the
+untrained run; in an N stage, in seed order. Every manifest is checked here as the kit checks it: both shards nonempty,
+the round-robin order, and the budget. A measure stage with a single run cannot occur (M2 has 5 runs per instance, M3
+has 2); MeasureStageOneShard is kept for it, as an impossible case.
 """
 from fractions import Fraction as F
 import hashlib
@@ -98,8 +101,8 @@ def measure_runs(stage, inputs=None):
     M3: the two one-sided sets of every instance the inputs allow. RM1 to RM3: the same on the nominal cell."""
     base = stage[1:] if stage.startswith("R") else stage
     runs = []
-    for inst in (["a-none", "b-none"] if stage.startswith("RM") else [f"{c6.MACHINE_OF[s]}-{s}" for s in c6.SEEDS]):
-        m = inst.split("-")[0]
+    for inst in (list(c6.NOMINAL_INSTANCES) if stage.startswith("RM") else [str(s) for s in c6.SEEDS]):
+        m = c6.instance_machine(inst)
         if base != "M1" and "why_not" in inputs["instances"][inst]:
             continue
         if base == "M1":
@@ -113,9 +116,10 @@ def measure_runs(stage, inputs=None):
         else:
             for c in ("a", "b"):
                 runs.append(with_cost(dict(id=f"{inst}-onesided-{c}", machine=m, instance=inst, kind="scan", cell=c, scan="onesided"), c6.MEASURE_S["onesided"]))
+    if base != "M1":
+        runs = two_shard(runs)                                  # PREDICTION.md amendment 1
     if runs and {r["machine"] for r in runs} != {"a", "b"}:
-        raise MeasureStageOneShard(f"refused: every run of {stage} is on machine {runs[0]['machine']}; the kit needs both shards, and "
-                                   "the preregistered rule keeps measure runs on their instance's machine (an amendment is needed)")
+        raise MeasureStageOneShard(f"refused: every run of {stage} is on machine {runs[0]['machine']} (an impossible case)")
     return runs
 
 
@@ -164,13 +168,29 @@ def rehearsal_network_runs(predictions):
 
 # ------------------------------------------------------------------------------------------------- the manifest
 
+def stage_path(stage):
+    assert stage in c6.STAGES
+    return f"{c6.BASE}/STAGE_{stage}.md"
+
+
+def stage_file_text(stage):
+    """The stage file (safeguard i): its governing protocol is PREDICTION.md as pushed, with its commit and SHA-256."""
+    block = dict(stage=stage, governing_protocol=dict(path=c6.PROTOCOL, commit=c6.PROTOCOL_COMMIT, sha256=c6.PROTOCOL_SHA256))
+    return "\n".join([f"# Campaign 6: the protocol of stage {stage}", "",
+                      "Written by `stages6.py stage-file` and pushed before the stage's manifest. Its governing protocol is",
+                      f"`{c6.PROTOCOL}` at commit `{c6.PROTOCOL_COMMIT}`, SHA-256 `{c6.PROTOCOL_SHA256}`; every runner of",
+                      "the stage refuses its run if that file has another SHA-256 in the repository (c6.stage_check).", "",
+                      plan.STAGE_BEGIN, json.dumps(block, indent=1, sort_keys=True), "```", ""])
+
+
 def argv(stage, r, inputs_path=None):
+    sf = "{repo}/" + stage_path(stage)
     if r.get("kind") == "cal":
-        return ["{python}", "{repo}/" + f"{CAMPAIGN6}/meas6.py", "cal", stage, "{out}", r["instance"].split("-", 1)[1], r["guard"], "{ngspice}", "{pdk}"]
+        return ["{python}", "{repo}/" + f"{CAMPAIGN6}/meas6.py", "cal", sf, "{out}", r["instance"], r["guard"], "{ngspice}", "{pdk}"]
     if r.get("kind") == "scan":
-        return ["{python}", "{repo}/" + f"{CAMPAIGN6}/meas6.py", "scan", stage, "{out}", r["instance"], r["cell"], r["scan"],
+        return ["{python}", "{repo}/" + f"{CAMPAIGN6}/meas6.py", "scan", sf, "{out}", r["instance"], r["cell"], r["scan"],
                 "{repo}/" + inputs_path, "{ngspice}", "{pdk}"]
-    return ["{python}", "{repo}/" + f"{CAMPAIGN6}/net6.py", stage, "{out}", r["id"], str(r["seed"]), ",".join(map(str, plan.calendar_needs(r["needs"]))),
+    return ["{python}", "{repo}/" + f"{CAMPAIGN6}/net6.py", sf, "{out}", r["id"], str(r["seed"]), ",".join(map(str, plan.calendar_needs(r["needs"]))),
             r["control"] or "none", r["noise"], str(r["round"]), "{ngspice}", "{pdk}"]
 
 
@@ -187,7 +207,7 @@ def manifest(stage, runs, source_commit, inputs_path=None, root=ROOT):
         return subprocess.run(["git", "-C", str(root), "show", f"{commit}:{path}"], check=True, capture_output=True).stdout
     assert stage in c6.STAGES
     rehearsal = stage.startswith("R")
-    extra = [inputs_path] if inputs_path else []
+    extra = [stage_path(stage)] + ([inputs_path] if inputs_path else [])
     if stage == "RN":
         extra.append(REHEARSAL_PREDICTIONS)
     m = dict(kind="registered", campaign_id=("learned-dnf-circuit-6-rehearsal-" if rehearsal else "learned-dnf-circuit-6-") + stage.lower(),
@@ -231,6 +251,9 @@ def stage_runs(stage, path=None):
 def main(argv_=None):
     a = sys.argv[1:] if argv_ is None else argv_
     c6.require_debug()
+    if a[0] == "stage-file":
+        Path(a[2]).write_text(stage_file_text(a[1]))
+        return
     if a[0] != "manifest":
         raise SystemExit(__doc__)
     stage, out, source = a[1], Path(a[2]), a[3]
