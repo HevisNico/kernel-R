@@ -1,4 +1,4 @@
-# Campaign 6: what the development batch's code computes (draft for review, ninth version)
+# Campaign 6: what the development batch's code computes (draft for review, tenth version)
 
 It implements the design note (`659d3a2`) under the stopping rule (`2e26910`). **[C]** marks a choice made here. The
 batch decides only `k`. Its definition of eligible is, unchanged, the one campaign 6 would preregister.
@@ -113,7 +113,8 @@ counted silent.
 
 **Outputs of a scan.**
 - The bracket `[s_lo, s_hi]`, the threshold `s* = (s_lo + s_hi) / 2`, and the half bracket `h = (s_hi - s_lo) / 2`.
-- The trip level `L`: the `Z` of the weakest fired state, campaign 5's `zint` of its `q_peak_before_fire`.
+- The trip level `L`: the `Z` of the weakest fired state, campaign 5's `zint` of its `q_peak_before_fire`. Since v10
+  it is reported only (question 3).
 - Or "no crossing below 8".
 
 ## 3. Measured
@@ -129,69 +130,54 @@ An instance is measured if all of these hold, otherwise it is not:
    equals the first stage at which the matching read fires in the guard-on deck. A need above 7 cannot be checked
    and fails this test.
 
-6. **Every deck read against the cell's own levels.**
-   - For every read of the guard-on deck, of kind `r`, the FIRE bit must equal `Z >= L_r`. Both `Z` and `L_r` are
-     rescaled, and `Z` is taken from the guard-off deck, as campaign 5 does.
-   - A read with `|Z - L_r| <= H_x` is exempt.
-   - The kinds are matched as follows:
-     - `a` and `b`: `both` uses the pair scan; `port 1` and `port 2` must be silent wherever `Z < THETA + H_x`,
-       the one-sided bound;
-     - `c`: `port 1` and `port 2` use the line scans. Every `both` and 0.3-late `both` read must FIRE in the guard-on
-       deck, and its `Z` (guard-off deck, rescaled) must satisfy `Z(k) >= Z(0)` at every stage: the monotonicity, observed
-       (v9);
-     - an `empty` read must be silent.
-   - A disagreement outside the exempt band makes the instance not measured.
-
+6. **The observational FIRE decoder** (v10, MAPPING_U.md 3). For every read of the guard-on deck, of every kind, the
+   FIRE bit must equal `Z >= THETA`, where `Z` is its score on the u axis (section 4). Reads with
+   `|Z - THETA| <= H_x` are exempt. Every both-lines read must also fire, with `Z(k) >= Z(0)` at every stage (v9).
 7. **Each scan's own cell.** Every scan's and one-sided set's `u(0)`, both ports of its cell, must lie within 20 uV of
    the cell's `u` before the first read of its own guard-on deck.
-8. **The one-sided sets' bounds.** The bounds each set recorded must equal the bounds recomputed from the deck and the
-   pair scan (`predict6.one_sided_bounds`), exactly, as Fractions.
+8. **The one-sided sets' bounds.** Each set must have read both ports at its cell's bound `W_x + h_x` (section 4),
+   exactly, as Fractions.
 
-This rescopes campaign 5's FIRE/`Z` test from the nominal theta to the cell's own trip levels. In the code, a declared
-wrapper builds the table with `P.load` and `P.table`. In `table`'s `bad` list it replaces the entries that begin
-"FIRE bit" (that test, on the unscaled `Z`) with this test's entries, and keeps every other entry. It then rescales
-the table (section 4) and passes it to `P.instance`.
+In the code, a declared wrapper builds the table with `P.load` and `P.table`. From `table`'s `bad` list it drops the
+entries that begin "FIRE bit" (campaign 5's test against the nominal theta); point 6 replaces them. It keeps every
+other entry, maps the scores (section 4) and passes the table to `P.instance`.
 
-## 4. Eligible: the frozen gate, on the scans' mapping
+## 4. Eligible: the frozen gate, on the u-axis mapping (v10: MAPPING_U.md at `9c7a96e`, accepted by the owner)
 
-**Mapping onto the gate's fields** (campaign 5's `predicted.py` and `gate4.py`, imported and never edited).
+**The scores** (campaign 5's `predicted.py` and `gate4.py`, imported and never edited).
 
-1. Threshold.
-   - Each cell's threshold is `theta_x = min L` over its scans (layer 1: the pair scan alone; `c`: its two line
-     scans, v9).
-   - Every score of cell `x`, the deck's `Z` and the scans' `L`, is multiplied by `100 000 / theta_x` and rounded to
-     the nearest integer, ties to even.
-   - So in the gate's units every cell's threshold is the gate's fixed `THETA = 100 000`, and the theory is
-     unchanged **[C: per-cell units]**.
-2. Campaign 5's pipeline, called unchanged on the rescaled table (`P.instance`):
-   - the needs (first firing stage in the guard-on deck);
-   - `Q1 = max(n_a, n_b) + 2` and `Q2 = max(n_c1, n_c2) + 2`, both at most 7 (so the needs are at most 5);
-   - the guarded tuple (help, initialGain per port, one dose per layer), fitted on stages `0..Q`;
-   - `epsilon`, the sensitivities, and the predicted observation.
-3. Errors of cell `x`, both trainingError and testingError, at `K = 0`: campaign 5's budget plus two terms.
-   - Campaign 5's budget: `epsilon + ceil(0.030 mV x the sum of the sensitivities)`.
-   - Plus `H_x`, the half bracket: the largest `ceil(h_r x step_r)` over the cell's scans, where `step_r` is
-     `(Z_r(7) - Z_r(0)) / 7` from the rescaled guard-off deck for read `r`.
-   - Plus `S_x`, the spread: `max L - min L` over the cell's scans, rescaled.
-   - The `K = 3` errors add the same `H_x + S_x` to campaign 5's noise budget. They are reported, as in campaign 5.
-   - In the code, the wrapper adds `H_x + S_x` to the budgets that `P.instance` returns. It then recomputes `P.room`,
-     `eligible` and `room_at_K3` from them, as `P.instance` does, before the gate is written.
-4. maxWrites is `Q1` or `Q2`; the rail is `10 x THETA`.
+1. **The axis.** Each port's coordinate at a deck read is `w_p = (u_p(0) - u_p) / D_p`, from the guard-on deck's `u`
+   before the read. A read of mask `M` scores `Z = help + sum over p in M of (g_p + d w_p)`.
+2. **Layer 1.**
+   - `K = max over a, b of max(8 - s*_x, s*_x)`, `d = THETA / 2K`, `help = 0`, `g_x1 = g_x2 = d (K - s*_x)`.
+   - The alone threshold is `W_x = s*_x + K` (`>= 8`, `>= 2 s*_x`).
+3. **`c`.** `help = 0`, `d_c = THETA / (s*_1 + s*_2)`, `g_p = THETA - d_c s*_p`. The both-lines score at the preset is
+   THETA, to the rounding of `d_c` (at most `(s*_1 + s*_2) / 2` units, about 4 on the nominal cell, inside its `H`).
+4. **Integers.** `d`, `d_c` and `g` are rounded to integers, and then each `Z`, ties to even. Every field is a natural
+   number, and every gain is below the rail.
+5. **Campaign 5's pipeline**, unchanged on that table (`P.instance`): the needs, `Q <= 7`, the guarded fit, `epsilon`
+   (now the dose-move variation and the rounding), the sensitivities, the budgets and the observation.
+6. **Errors.** campaign 5's `K = 0` budget plus `H_x`, the pair's half bracket times `2d` (layer 1), or the largest
+   line half bracket times `d_c` (`c`). `S_x = 0`: every kind is anchored at its own `u*`. The scans' `L` is reported
+   only. `K = 3` adds the same `H_x`. The wrapper adds `H_x` to the budgets `P.instance` returns, then recomputes
+   `P.room`, eligible, room_at_K3, counts_N_out and learning_ports.
+
+**The one-sided sets.** Each reads both ports alone at `W_x + h_x`, `h_x` the pair scan's half bracket, in stages.
+Each set waits for both pair scans of its instance, through `K`. It is "not started" if either has no consistent
+bracket.
 
 **Eligible** = measured, and the frozen gate holds under `K = 0`, with Lean and the Python mirror agreeing per checker
 (campaign 5's `gate4.py lean` and `check.sh`, as its rehearsal's `gate_dev`). The check is per instance: each instance
-gets its own Lean file and its own `check.sh` call, and passes only if its own file passes. Campaign 5's `room` is that mirror, with
-both sides of every crossing: training silent before the need and FIRE at it, and the tests at the trained state.
+gets its own Lean file and its own `check.sh` call, and passes only if its own file passes.
 
-**Settled: one threshold and one error per cell (option (a)).** The gate has one threshold and one error per cell.
+**The acceptance test of the redesign** (MAPPING_U.md 5), run once at this code before the marker, on machine a:
 
-- With `theta_x = min L`, the gate's silent checks are stricter than the cell's.
-- A read of kind `r` predicted to fire must clear its own `L_r`. `S_x`, added to testingError, gives that.
-- So the one-threshold default is checked by the gate itself, and eligible is exactly the gate.
-- A per-read correction would need a condition outside the gate, or a threshold per read kind (a theory change).
-  Neither is taken.
-- The theory's single dose per layer (`a` and `b` share it) is kept, as in campaign 5. Its misfit goes into
-  `epsilon`.
+- one one-sided run per layer-1 cell on the nominal cell at `W_x + h_x`;
+- one reach-only read at `s = 10`;
+- the rest from the v9 smoke.
+
+The nominal instance must be measured and eligible, its own Lean file passing `check.sh`. Otherwise the redesign
+stops.
 
 ## 5. Affordability, and the choice of scan set (the owner's rule)
 
@@ -235,6 +221,7 @@ The three options:
   - The alone kinds then have no `L`. `theta_x` and `S_x` come from the pair scan alone. Point 6 checks the alone
     reads of the deck against the bound.
   - 5 733 s per instance. Go needs `k >= 4`.
+  - Since v10 the one-sided bound is `W_x + h_x` on the u axis (section 4). The text above is v6's.
 - **(C) B with the coarse ascent at 1/2 instead of 1/4**: 5 233 s per instance. Go needs `k >= 3`. The saving of
   about 100 s per scan is a guess, since no scan of this deck has been run.
 

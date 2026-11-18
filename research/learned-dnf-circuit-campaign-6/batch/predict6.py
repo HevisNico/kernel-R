@@ -35,15 +35,9 @@ import predicted as P                                   # noqa: E402
 THETA = P.THETA
 CROSSINGS = (("a", "pair"), ("b", "pair"), ("c", "line1"), ("c", "line2"))   # v9: c's both lines are no crossing read
 NEEDS = dict(a=("a", "pair"), b=("b", "pair"), c1=("c", "line1"), c2=("c", "line2"))
-DECK_READ = dict(pair="both", line1="port 1", line2="port 2")                   # the deck read of each scan kind
-LEVEL_OF = {("a", "both"): "pair", ("b", "both"): "pair", ("c", "port 1"): "line1", ("c", "port 2"): "line2"}
 BOTH = {("c", "both"), ("c", P.SKEWED)}                                          # predicted FIRE only (v9)
 ALONE = {("a", "port 1"), ("a", "port 2"), ("b", "port 1"), ("b", "port 2")}
-
-
-def scale(z, theta):
-    """A score of the cell in per-cell units: z x 100 000 / theta_x, to the nearest integer, ties to even."""
-    return round(F(z) * THETA / theta)
+PORTS_OF = {"empty": (), "port 1": (1,), "port 2": (2,), "both": (1, 2), P.SKEWED: (1, 2)}
 
 
 def doses_V(dose):
@@ -72,29 +66,59 @@ def deck_u0(on_dir):
     return {(c, p): F(by[(c, 0, "empty")]["ports"][str(p)]["u_before_mV"]) / 1000 for c in c4.CELLS for p in (1, 2) if (c, 0, "empty") in by}
 
 
-def steps(t2, c):
-    """step_r: (Z_r(7) - Z_r(0)) / 7 in the rescaled guard-off deck, per deck read."""
-    reads = ("port 1", "port 2") if c == "c" else ("port 1", "port 2", "both")
-    return {r: F(t2[(c, 7, r)]["Z"] - t2[(c, 0, r)]["Z"], 7) for r in reads}
+def deck_w(on_dir, D):
+    """w_p of every deck read (MAPPING_U.md 1): (u_p(0) - u_p) / D_p, exactly, with u_p the guard-on deck's u before the
+    read (campaign 5's u_before_mV, the instrument's output) and u_p(0) the one before its first read (stage 0,
+    empty). Returns {(cell, stage, read): {port: w}}."""
+    on_rows, _ = P.load(on_dir, on_dir)
+    by = {(r["cell"], r["stage"], r["read"]): r for r in on_rows if r["read"] != "joint dose"}
+    u = lambda key, p: F(by[key]["ports"][str(p)]["u_before_mV"])
+    return {key: {p: (u((key[0], 0, "empty"), p) - u(key, p)) / D[(key[0], p)] for p in (1, 2)} for key in by}
 
 
-def one_sided_bounds(t2, c, H):
-    """For a or b: per port, the least s in [0, 8] at which the rescaled score of the port alone, linear between the
-    deck's stages (and on from stage 7 with the step from 6 to 7), reaches THETA + H_x; 8 if it never does."""
+def layer1_K(S):
+    """K and W_x of layer 1 (MAPPING_U.md 1): K = max over a, b of max(8 - s*_x, s*_x); W_x = s*_x + K."""
+    K = max(max(8 - S[x], S[x]) for x in ("a", "b"))
+    return K, {x: S[x] + K for x in ("a", "b")}
+
+
+def layer1_bounds(S, h):
+    """S, h: {a, b: the pair scan's s*, half bracket}. The one-sided bound of each layer-1 cell: W_x + h_x, in stages."""
+    _, W = layer1_K(S)
+    return {x: W[x] + h[x] for x in ("a", "b")}
+
+
+def anchors(S):
+    """The anchors of MAPPING_U.md 1 on the scanned thresholds S {(cell, kind): s*} (exact), every field a natural number
+    (integers by round, ties to even). Layer 1: K = max over a, b of max(8 - s*_x, s*_x), d = THETA / 2K, help 0,
+    g_x1 = g_x2 = d (K - s*_x), the alone model threshold W_x = s*_x + K. c: help 0, d_c = THETA / (s*_1 + s*_2),
+    g_p = THETA - d_c s*_p."""
+    s = {x: S[(x, "pair")] for x in ("a", "b")}
+    K, W = layer1_K(s)
+    d = round(F(THETA) / (2 * K))
+    s1, s2 = S[("c", "line1")], S[("c", "line2")]
+    dc = round(F(THETA) / (s1 + s2))
+    a = dict(K=K, d=d, d_c=dc, W=W,
+             gain={(x, p): round(d * (K - s[x])) for x in ("a", "b") for p in (1, 2)})
+    a["gain"].update({("c", 1): round(THETA - dc * s1), ("c", 2): round(THETA - dc * s2)})
+    assert all(g >= 0 for g in a["gain"].values()) and d > 0 and dc > 0, "the kernel's fields are natural numbers"
+    return a
+
+
+def mapped(t, w, an):
+    """The deck's table with every Z replaced by its score on the u axis: Z = help + sum over the read's ports of
+    (g_p + d w_p), help 0, to the nearest integer, ties to even (MAPPING_U.md 1). FIRE bits and latencies are kept."""
     out = {}
-    for p in (1, 2):
-        z = [F(t2[(c, k, f"port {p}")]["Z"]) for k in range(c4.STAGES)] + [None]
-        z[8] = z[7] + (z[7] - z[6])
-        goal, s = THETA + H, F(8)
-        for k in range(8):
-            if z[k] >= goal:
-                s = F(k)
-                break
-            if z[k + 1] >= goal and z[k + 1] > z[k]:
-                s = k + (goal - z[k]) / (z[k + 1] - z[k])
-                break
-        out[p] = s
+    for (c, k, r), v in t.items():
+        dose = an["d_c"] if c == "c" else an["d"]
+        out[(c, k, r)] = dict(v, Z=round(sum(an["gain"][(c, p)] + dose * w[(c, k, r)][p] for p in PORTS_OF[r])))
     return out
+
+
+def one_sided_bounds(an, S, h):
+    """The one-sided bound of each layer-1 cell (MAPPING_U.md 2): W_x plus the pair scan's half bracket, in stages,
+    the same for both ports (layer1_bounds, which schedule6 uses to start the sets)."""
+    return layer1_bounds({x: S[(x, "pair")] for x in ("a", "b")}, {x: h[(x, "pair")] for x in ("a", "b")})
 
 
 def u0_check(runs, deck_u):
@@ -112,9 +136,9 @@ def u0_check(runs, deck_u):
     return why
 
 
-def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None, bothfire=None):
-    """statuses: {run id: status}; scans: {(cell, kind): the scan's `result`}; onesided: {cell: result}.
-    Returns (why_not_measured, per-cell data). The rescaled table is in data['t2']."""
+def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None, bothfire=None, w=None):
+    """statuses: {run id: status}; scans: {(cell, kind): the scan's `result`}; onesided: {cell: result}; w: the deck's
+    w_p per read (deck_w). Returns (why_not_measured, per-cell data). The mapped table is in data['t2']."""
     why = list(bad)
     why += [f"run {i} did not complete: {s}" for i, s in sorted(statuses.items()) if s != "complete"]
     D = doses_V(dose) if not any(b.startswith("missing joint dose") for b in bad) else {}
@@ -138,7 +162,6 @@ def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None,
         return why, data
     S = {k: F(scans[k]["s_star"]) for k in CROSSINGS}
     h = {k: F(scans[k]["half_bracket"]) for k in CROSSINGS}
-    L = {k: int(scans[k]["L"]) for k in CROSSINGS}
     observed = P.needs(t)
     q1 = {}
     for need, key in NEEDS.items():
@@ -147,15 +170,12 @@ def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None,
         if not q1[need]["agree"]:
             why.append(f"question 1: need {need}: ceil(s*) = {pred}, first firing stage of the guard-on deck {obs}")
     data["question_1"] = q1
-    theta = dict(a=L[("a", "pair")], b=L[("b", "pair")], c=min(L[k] for k in CROSSINGS if k[0] == "c"))
-    t2 = {key: dict(v, Z=scale(v["Z"], theta[key[0]])) for key, v in t.items()}
-    L2 = {k: scale(L[k], theta[k[0]]) for k in CROSSINGS}
-    H, Sx = {}, {}
-    for c in c4.CELLS:
-        st = steps(t2, c)
-        H[c] = max(math.ceil(h[k] * st[DECK_READ[k[1]]]) for k in CROSSINGS if k[0] == c)
-        Sx[c] = max(L2[k] for k in CROSSINGS if k[0] == c) - min(L2[k] for k in CROSSINGS if k[0] == c)
-    bounds = {c: one_sided_bounds(t2, c, H[c]) for c in ("a", "b")}
+    an = anchors(S)
+    t2 = mapped(t, w, an)
+    H = dict(a=math.ceil(h[("a", "pair")] * 2 * an["d"]), b=math.ceil(h[("b", "pair")] * 2 * an["d"]),
+             c=max(math.ceil(h[("c", k)] * an["d_c"]) for k in ("line1", "line2")))
+    Sx = {c: 0 for c in c4.CELLS}                                                  # every kind anchored at its own u*
+    bounds = one_sided_bounds(an, S, h)
     if bothfire is None:
         why.append("the both-lines FIRE check of c: missing")
     elif not bothfire.get("fired"):
@@ -164,32 +184,23 @@ def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None,
         o = onesided.get(c)
         if o is None:
             why.append(f"one-sided set of {c}: missing")
-        elif {p: F(o["bounds"][str(p)]) for p in (1, 2)} != bounds[c]:
+        elif {p: F(o["bounds"][str(p)]) for p in (1, 2)} != {1: bounds[c], 2: bounds[c]}:
             why.append(f"one-sided set of {c}: its bounds {o['bounds']} are not the recomputed {bounds[c]}")
         elif not o.get("all_silent"):
             why.append(f"one-sided set of {c}: a port alone fired at or below its bound {o.get('bounds')}")
-    for (c, k, r), v in sorted(t2.items()):
-        if r == "empty":
-            if v["fire"]:
-                why.append(f"deck read {(c, k, r)}: an empty read fired")
-            continue
+    for (c, k, r), v in sorted(t2.items()):                                         # the observational decoder (3)
+        if abs(v["Z"] - THETA) > H[c] and v["fire"] != (v["Z"] >= THETA):
+            why.append(f"deck read {(c, k, r)}: FIRE bit {v['fire']} and Z = {v['Z']} disagree (Z >= THETA)")
         if (c, r) in BOTH:
             if not v["fire"]:
                 why.append(f"deck read {(c, k, r)}: both lines did not fire (they are predicted to fire at every stage)")
             if v["Z"] < t2[(c, 0, r)]["Z"]:
                 why.append(f"deck read {(c, k, r)}: Z = {v['Z']} below its stage-0 value {t2[(c, 0, r)]['Z']} (monotonicity)")
-            continue
-        if (c, r) in ALONE:
-            if v["fire"] and v["Z"] < THETA + H[c]:
-                why.append(f"deck read {(c, k, r)}: a port alone fired with Z = {v['Z']} below the one-sided bound {THETA + H[c]}")
-            continue
-        lev = L2[(c, LEVEL_OF[(c, r)])]
-        if abs(v["Z"] - lev) <= H[c]:
-            continue
-        if v["fire"] != (v["Z"] >= lev):
-            why.append(f"deck read {(c, k, r)}: FIRE bit {v['fire']} and Z = {v['Z']} disagree with the cell's own level L = {lev}")
-    data.update(t2=t2, theta=theta, L={f"{c}-{k}": v for (c, k), v in L.items()}, L_rescaled={f"{c}-{k}": v for (c, k), v in L2.items()}, s_star={f"{c}-{k}": str(v) for (c, k), v in S.items()},
-                half_bracket={f"{c}-{k}": str(v) for (c, k), v in h.items()}, H=H, S=Sx, one_sided_bounds={c: {str(p): str(s) for p, s in b.items()} for c, b in bounds.items()})
+    data.update(t2=t2, L={f"{c}-{k}": int(scans[(c, k)]["L"]) for (c, k) in CROSSINGS if "L" in scans[(c, k)]},
+                s_star={f"{c}-{k}": str(v) for (c, k), v in S.items()}, half_bracket={f"{c}-{k}": str(v) for (c, k), v in h.items()},
+                anchors=dict(K=str(an["K"]), d=an["d"], d_c=an["d_c"], W={x: str(v) for x, v in an["W"].items()},
+                             gain={f"{c}{p}": g for (c, p), g in an["gain"].items()}),
+                H=H, S=Sx, one_sided_bounds={c: str(b) for c, b in bounds.items()})
     return why, data
 
 
@@ -224,7 +235,8 @@ def augmented(x, H, S, t2):
 
 def predict_instance(seed, machine, statuses, on_dir, off_dir, scans, onesided, bothfire=None):
     t, dose, bad = table(on_dir, off_dir)
-    why, data = measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u0(on_dir), bothfire)
+    w = deck_w(on_dir, doses_V(dose)) if not bad else None
+    why, data = measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u0(on_dir), bothfire, w)
     if why:
         return dict(seed=seed, machine=machine, measured=False, why_not_measured=why, eligible=False,
                     **{k: v for k, v in data.items() if k != "t2"})

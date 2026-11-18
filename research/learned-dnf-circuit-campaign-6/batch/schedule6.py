@@ -12,8 +12,8 @@ Per instance, three waves, each run started as soon as its inputs exist:
 1. the two calibration decks (batch6.py cal);
 2. the four crossing scans (scan6.py) and c's both-lines FIRE check at s = 0 (scan6.py bothfire), with D_p from the
    guard-on deck;
-3. the two one-sided sets (scan6.py onesided), with their bounds from the rescaled deck, the pair scan's theta_x and
-   H_x (predict6.one_sided_bounds).
+3. the two one-sided sets (scan6.py onesided), each at W_x + h_x (MAPPING_U.md 2), so each waits for both pair scans of
+   its instance and is "not started" if either has no consistent bracket.
 A run whose inputs failed is not started ("not started: <why>"). A run at its limit is killed and recorded "missing
 (limit)"; a run that fails is "failed"; neither is ever repeated. Every run's state, outer wall time and status go to
 DIR/STATE.json as they change, and to DIR/RUNS.json at the end.
@@ -68,17 +68,17 @@ def command(job, folder, cal_dirs, ngspice, pdk):
         return [PY, "-B", str(HERE / "scan6.py"), out, s, "c", "bothfire", *dv, str(ngspice), str(pdk)], None
     if job["wave"] == 2:
         return [PY, "-B", str(HERE / "scan6.py"), out, s, c, job["kind"], job["delta"], *dv, str(ngspice), str(pdk)], None
-    pair = folder / f"{s}-scan-{c}-pair" / "record.json"
-    if not pair.exists():
-        return None, "its pair scan did not complete"
-    r = json.loads(pair.read_text())["result"]
-    if not r.get("consistent"):
-        return None, "its pair scan has no consistent bracket"
-    theta = int(r["L"])
-    t2 = {key: dict(v, Z=predict6.scale(v["Z"], theta)) for key, v in t.items() if key[0] == c}
-    H = math.ceil(F(r["half_bracket"]) * predict6.steps(t2, c)["both"])
-    b = predict6.one_sided_bounds(t2, c, H)
-    return [PY, "-B", str(HERE / "scan6.py"), out, s, c, "onesided", str(b[1]), str(b[2]), *dv, str(ngspice), str(pdk)], None
+    S, h = {}, {}
+    for x in ("a", "b"):                                    # the bound needs both pair scans, through K (MAPPING_U.md 2)
+        pair = folder / f"{s}-scan-{x}-pair" / "record.json"
+        if not pair.exists():
+            return None, f"the pair scan of {x} did not complete"
+        r = json.loads(pair.read_text())["result"]
+        if not r.get("consistent"):
+            return None, f"the pair scan of {x} has no consistent bracket"
+        S[x], h[x] = F(r["s_star"]), F(r["half_bracket"])
+    b = predict6.layer1_bounds(S, h)[c]
+    return [PY, "-B", str(HERE / "scan6.py"), out, s, c, "onesided", str(b), str(b), *dv, str(ngspice), str(pdk)], None
 
 
 REPO = HERE.parent.parent.parent
@@ -125,6 +125,13 @@ def imported_files():
     return own + c5
 
 
+def wave_deps(j, jobs):
+    """The runs a run waits for: the instance's two decks (waves 2 and 3), and, for a one-sided set (wave 3), both pair
+    scans of its instance (a and b), since its bound needs K over both (MAPPING_U.md 2)."""
+    return [x for x in jobs if x["seed"] == j["seed"] and (x["wave"] == 1 and j["wave"] > 1
+                                                         or j["wave"] == 3 and x["id"].endswith(("-scan-a-pair", "-scan-b-pair")))]
+
+
 def write_state(folder, jobs, status="running"):
     tmp = folder / "STATE.json.tmp"
     tmp.write_text(json.dumps(dict(status=status, jobs=jobs), indent=1, default=str) + "\n")
@@ -141,8 +148,7 @@ def schedule(folder, jobs, cal_of, ngspice, pdk):
         for j in jobs:
             if j["status"] != "waiting" or len(running) >= JOBS:
                 continue
-            deps = [x for x in jobs if x["seed"] == j["seed"] and (x["wave"] == 1 and j["wave"] > 1
-                                                                 or j["wave"] == 3 and x["id"].endswith(f"-scan-{j['cell']}-pair"))]
+            deps = wave_deps(j, jobs)
             if any(x["status"] in ("waiting", "running") for x in deps):
                 continue
             if any(x["status"] != "complete" for x in deps if x["wave"] == 1):

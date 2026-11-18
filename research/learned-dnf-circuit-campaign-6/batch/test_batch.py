@@ -23,27 +23,35 @@ import cases                                            # noqa: E402
 import predicted as P                                   # noqa: E402
 
 
-def nominal_scans(L=None, s_star="7/2", half="1/64"):
-    L = L or {}
-    out = {}
-    for key in predict6.CROSSINGS:
-        out[key] = dict(crossing=True, consistent=True, contradictory=False, s_star=s_star, half_bracket=half,
-                        bracket=[str(F(s_star) - F(half)), str(F(s_star) + F(half))], L=L.get(key, 100000))
-    return out
+S_NOMINAL = {("a", "pair"): "861/256", ("b", "pair"): "859/256", ("c", "line1"): "917/256", ("c", "line2"): "917/256"}
 
 
-def ones_for(t, scans, silent=True):
-    """One-sided sets run at exactly the bounds predict6 recomputes (from the pair scan's theta_x and H_x)."""
-    out = {}
-    for c in ("a", "b"):
-        r = scans[(c, "pair")]
-        theta = int(r["L"])
-        t2 = {k: dict(v, Z=predict6.scale(v["Z"], theta)) for k, v in t.items() if k[0] == c}
-        H = -(-F(r["half_bracket"]) * predict6.steps(t2, c)["both"] // 1)
-        b = predict6.one_sided_bounds(t2, c, H)
-        out[c] = dict(all_silent=silent, silent={"1": silent, "2": silent}, bounds={str(p): str(v) for p, v in b.items()})
-    return out
-BOTH_OK = dict(kind="bothfire", fired=True)
+def nominal_scans(s=None, half="1/256"):
+    """Synthetic scans in the nominal smoke's range (s* between stages 3 and 4, so need 4)."""
+    s = {**S_NOMINAL, **(s or {})}
+    return {key: dict(crossing=True, consistent=True, contradictory=False, s_star=s[key], half_bracket=half,
+                      bracket=[str(F(s[key]) - F(half)), str(F(s[key]) + F(half))], L=100000) for key in predict6.CROSSINGS}
+
+
+def nominal_w(t, wobble=F(0)):
+    """w_p of every deck read: k doses before a read of stage k (the deck's joint doses come at the end of each stage),
+    plus an optional variation per stage."""
+    return {key: {p: key[1] + (wobble if key[1] % 2 else 0) for p in (1, 2)} for key in t}
+
+
+def ones_for(scans, silent=True):
+    """One-sided sets run at exactly the bounds of MAPPING_U.md 2 (W_x + h_x)."""
+    S = {x: F(scans[(x, "pair")]["s_star"]) for x in ("a", "b")}
+    h = {x: F(scans[(x, "pair")]["half_bracket"]) for x in ("a", "b")}
+    b = predict6.layer1_bounds(S, h)
+    return {c: dict(all_silent=silent, silent={"1": silent, "2": silent}, bounds={"1": str(b[c]), "2": str(b[c])}) for c in ("a", "b")}
+
+
+def run(t, dose, scans, ones=None, both=None, w=None, statuses=None, deck_u=None):
+    return predict6.measure_instance(7701, statuses or STATUSES, t, dose, [], scans, ones_for(scans) if ones is None else ones, deck_u,
+                                     dict(kind="bothfire", fired=True) if both is None else both, nominal_w(t) if w is None else w)
+
+
 STATUSES = {f"7701-{x}": "complete" for x in ("cal-on", "cal-off")}
 
 
@@ -72,64 +80,96 @@ class Wrapper(unittest.TestCase):
             _, _, kept = predict6.table("on", "off")
         self.assertEqual(kept, ["missing read ('c', 2, 'empty')"])
 
-    def test_own_level_test(self):
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(), ones_for(self.t, nominal_scans()), bothfire=BOTH_OK)
+    def test_nominal_measured_and_decoded(self):
+        why, data = run(self.t, self.dose, nominal_scans())
         self.assertEqual(why, [])
-        # a level of a's pair read above every firing pair read of the deck: the deck's FIRE bits now disagree with it
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans({("a", "pair"): 100000, ("c", "line2"): 200000}), ones_for(self.t, nominal_scans()), bothfire=BOTH_OK)
-        self.assertTrue(any("disagree with the cell's own level" in w and "'c'" in w for w in why), why)
+        t2 = data["t2"]
+        for k in range(8):                     # the decoder holds on every deck read, by construction of the nominal case
+            self.assertEqual(t2[("a", k, "both")]["Z"] >= 100000, k >= 4)
+            self.assertLess(t2[("a", k, "port 1")]["Z"], 100000)
+            self.assertEqual(t2[("a", k, "empty")]["Z"], 0)
+
+    def test_decoder_disagreement(self):
+        t = copy.deepcopy(self.t)
+        t[("a", 2, "both")]["fire"] = True                           # a FIRE where the u axis says silent
+        why, _ = run(t, self.dose, nominal_scans())
+        self.assertTrue(any("('a', 2, 'both')" in w and "disagree (Z >= THETA)" in w for w in why), why)
+        t = copy.deepcopy(self.t)
+        t[("c", 6, "port 2")]["fire"] = False                        # a silence where it says FIRE
+        why, _ = run(t, self.dose, nominal_scans())
+        self.assertTrue(any("('c', 6, 'port 2')" in w for w in why), why)
 
     def test_question_1_in_measured(self):
-        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(s_star="9/2"), ones_for(self.t, nominal_scans(s_star="9/2")), bothfire=BOTH_OK)
+        why, data = run(self.t, self.dose, nominal_scans({("a", "pair"): "9/2"}))
         self.assertTrue(any(w.startswith("question 1: need a:") for w in why))
         self.assertEqual(data["question_1"]["a"], dict(predicted=5, observed=4, agree=False))
 
     def test_causes(self):
         sc = nominal_scans()
         sc[("c", "line2")] = dict(crossing=False, why="no crossing below 8")
-        why, _ = predict6.measure_instance(7701, dict(STATUSES, **{"7701-scan-a-pair": "missing (limit)"}), self.t, self.dose, [], sc, ones_for(self.t, nominal_scans()), bothfire=BOTH_OK)
+        why, _ = run(self.t, self.dose, sc, ones={}, statuses=dict(STATUSES, **{"7701-scan-a-pair": "missing (limit)"}))
         self.assertIn("run 7701-scan-a-pair did not complete: missing (limit)", why)
         self.assertIn("scan ('c', 'line2'): no crossing below 8", why)
-        ones = ones_for(self.t, nominal_scans())
+        sc = nominal_scans()
+        ones = ones_for(sc)
         ones["b"] = dict(ones["b"], all_silent=False)
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(), ones, bothfire=BOTH_OK)
-        self.assertTrue(any(w.startswith("one-sided set of b") for w in why))
-
-    def test_rescaling(self):
-        self.assertEqual(predict6.scale(100000, 100000), 100000)
-        self.assertEqual(predict6.scale(99000, 99000), 100000)
-        self.assertEqual(predict6.scale(1, 200000), 0)                  # 0.5, to the even
-        self.assertEqual(predict6.scale(3, 200000), 2)                  # 1.5, to the even
-        _, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans({("a", "pair"): 99000}), ones_for(self.t, nominal_scans({("a", "pair"): 99000})), bothfire=BOTH_OK)
-        self.assertEqual(data["theta"]["a"], 99000)
-        self.assertEqual(data["t2"][("a", 4, "both")]["Z"], round(F(self.t[("a", 4, "both")]["Z"]) * 100000 / 99000))
-        self.assertEqual(data["t2"][("b", 4, "both")]["Z"], self.t[("b", 4, "both")]["Z"])
+        why, _ = run(self.t, self.dose, sc, ones)
+        self.assertTrue(any(w.startswith("one-sided set of b: a port alone fired") for w in why))
 
     def test_errors_and_room(self):
-        L = {("c", "line1"): 100000, ("c", "line2"): 100040}
-        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(L), ones_for(self.t, nominal_scans(L)), bothfire=BOTH_OK)
-        self.assertEqual(why, [])
-        self.assertEqual(data["S"], dict(a=0, b=0, c=40))
-        for c in c4.CELLS:
-            st = predict6.steps(data["t2"], c)
-            want = max(-(-F(1, 64) * st[predict6.DECK_READ[k]] // 1) for (cc, k) in predict6.CROSSINGS if cc == c)
-            self.assertEqual(data["H"][c], want)
+        why, data = run(self.t, self.dose, nominal_scans())
+        an = predict6.anchors({k: F(v) for k, v in S_NOMINAL.items()})
+        self.assertEqual(data["H"], dict(a=-(-F(1, 256) * 2 * an["d"] // 1), b=-(-F(1, 256) * 2 * an["d"] // 1), c=-(-F(1, 256) * an["d_c"] // 1)))
+        self.assertEqual(data["S"], dict(a=0, b=0, c=0))
         x0 = P.instance(7701, data["t2"], self.dose, [], c4.DECISION5)
         x = predict6.augmented(x0, data["H"], data["S"], data["t2"])
         for K in ("K0", "K3"):
             for c in c4.CELLS:
                 for side in ("training", "testing"):
-                    self.assertEqual(x["budgets"][K][c][side], x0["budgets"][K][c][side] + data["H"][c] + data["S"][c])
+                    self.assertEqual(x["budgets"][K][c][side], x0["budgets"][K][c][side] + data["H"][c])
+        self.assertTrue(x["eligible"], x.get("why_not_eligible"))   # the u axis on a linear training: the nominal shape passes
+        self.assertLess(max(x0["epsilon"].values()), 10)             # epsilon is only the rounding when w = k exactly
         z = predict6.augmented(x0, {c: 0 for c in c4.CELLS}, {c: 0 for c in c4.CELLS}, data["t2"])
-        self.assertEqual((z["room"], z["eligible"], z["room_at_K3"]), (x0["room"], x0["eligible"], x0["room_at_K3"]))
-        big = predict6.augmented(x0, {c: 10 ** 5 for c in c4.CELLS}, {c: 0 for c in c4.CELLS}, data["t2"])
-        self.assertFalse(big["eligible"])
+        self.assertEqual((z["room"], z["eligible"]), (x0["room"], x0["eligible"]))
 
-    def test_one_sided_bounds(self):
-        t = {("a", k, f"port {p}"): dict(Z=40000 + 10000 * k) for k in range(8) for p in (1, 2)}
-        self.assertEqual(predict6.one_sided_bounds(t, "a", 0), {1: F(6), 2: F(6)})
-        self.assertEqual(predict6.one_sided_bounds(t, "a", 5000), {1: F(13, 2), 2: F(13, 2)})
-        self.assertEqual(predict6.one_sided_bounds(t, "a", 60000), {1: F(8), 2: F(8)})
+
+class Anchors(unittest.TestCase):
+    """MAPPING_U.md 1 and 2: the anchors on given s*, every deck alone read silent, the both lines at THETA, rounding."""
+
+    def check(self, sa, sb, s1, s2):
+        S = {("a", "pair"): F(sa), ("b", "pair"): F(sb), ("c", "line1"): F(s1), ("c", "line2"): F(s2)}
+        an = predict6.anchors(S)
+        K = max(max(8 - F(x), F(x)) for x in (sa, sb))
+        self.assertEqual(an["K"], K)
+        self.assertEqual(an["d"], round(F(100000) / (2 * K)))
+        for x, s in (("a", F(sa)), ("b", F(sb))):
+            g = an["gain"][(x, 1)]
+            self.assertEqual(g, an["gain"][(x, 2)])
+            self.assertGreaterEqual(g, 0)
+            self.assertEqual(an["W"][x], s + K)
+            self.assertGreaterEqual(an["W"][x], 8)
+            self.assertGreaterEqual(an["W"][x], 2 * s)
+            cross = (F(100000) - 2 * g) / (2 * an["d"])                    # rounding: the pair still crosses at s*
+            self.assertLessEqual(abs(cross - s), (K + 1) / (2 * an["d"]))
+            for k in range(8):                                             # every deck alone read predicted silent
+                self.assertLess(g + an["d"] * k, 100000)
+        both0 = an["gain"][("c", 1)] + an["gain"][("c", 2)]                 # c's both lines at the preset: THETA, to the
+        self.assertLessEqual(abs(both0 - 100000), (F(s1) + F(s2)) / 2 + 1)    # rounding of d_c (at most (s*_1 + s*_2) / 2)
+        for p, s in ((1, F(s1)), (2, F(s2))):
+            cross = (F(100000) - an["gain"][("c", p)]) / an["d_c"]
+            self.assertLessEqual(abs(cross - s), F(1, an["d_c"]))
+        self.assertTrue(all(g < 10 * 100000 for g in an["gain"].values()))  # the rail
+        return an
+
+    def test_nominal_range(self):
+        an = self.check("861/256", "859/256", "917/256", "917/256")
+        self.assertEqual(an["K"], 8 - F(859, 256))
+
+    def test_near_five(self):
+        an = self.check("5", "3", "9/2", "4")
+        self.assertEqual((an["K"], an["W"]["a"], an["W"]["b"], an["gain"][("a", 1)]), (5, 10, 8, 0))
+        self.check("1", "1", "1", "2")
+        self.check("19/4", "4", "1/2", "5")
 
 
 class Scan(unittest.TestCase):
@@ -294,11 +334,11 @@ class ReviewDefects(unittest.TestCase):
 
     def test_one_sided_bounds_rechecked(self):
         sc = nominal_scans()
-        ones = ones_for(self.t, sc)
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, bothfire=BOTH_OK)
+        ones = ones_for(sc)
+        why, _ = run(self.t, self.dose, sc, ones)
         self.assertEqual(why, [])
-        ones["a"] = dict(ones["a"], bounds=dict(ones["a"]["bounds"], **{"1": str(F(ones["a"]["bounds"]["1"]) + F(1, 1000))}))
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, bothfire=BOTH_OK)
+        ones["a"] = dict(ones["a"], bounds={"1": str(F(ones["a"]["bounds"]["1"]) - F(1, 1000)), "2": ones["a"]["bounds"]["2"]})
+        why, _ = run(self.t, self.dose, sc, ones)
         self.assertTrue(any(w.startswith("one-sided set of a: its bounds") for w in why), why)
 
     def test_runs_at_their_limit_in_the_means(self):
@@ -336,14 +376,14 @@ class ReviewDefects(unittest.TestCase):
         deck = {(c, p): F(3895, 10000) for c in c4.CELLS for p in (1, 2)}
         for v in sc.values():
             v["u0_V"] = {"1": "0.3895", "2": "0.389519"}                 # 19 uV
-        ones = ones_for(self.t, sc)
+        ones = ones_for(sc)
         for v in ones.values():
             v["u0_V"] = {"1": "0.3895", "2": "0.3895"}
-        both = dict(BOTH_OK, u0_V={"1": "0.3895", "2": "0.3895"})
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, deck, bothfire=both)
+        both = dict(kind="bothfire", fired=True, u0_V={"1": "0.3895", "2": "0.3895"})
+        why, _ = run(self.t, self.dose, sc, ones, both, deck_u=deck)
         self.assertEqual(why, [])
         sc[("c", "line2")]["u0_V"] = {"1": "0.3895", "2": "0.389521"}    # 21 uV
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, deck, bothfire=both)
+        why, _ = run(self.t, self.dose, sc, ones, both, deck_u=deck)
         self.assertTrue(any("('c', 'line2'): u(0) of port 2 differs" in w for w in why), why)
 
 
@@ -356,19 +396,45 @@ class BothLines(unittest.TestCase):
     def test_check_and_deck(self):
         sc = nominal_scans()
         self.assertEqual(sorted(sc), [("a", "pair"), ("b", "pair"), ("c", "line1"), ("c", "line2")])
-        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones_for(self.t, sc), bothfire=BOTH_OK)
+        why, data = run(self.t, self.dose, sc)
         self.assertEqual(why, [])
-        self.assertEqual(data["S"]["c"], 0)
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones_for(self.t, sc), bothfire=dict(fired=False))
+        z0 = data["t2"][("c", 0, "both")]["Z"]                                          # at THETA at s = 0, to the rounding,
+        self.assertLessEqual(abs(z0 - 100000), 5)                                       # inside the H band
+        self.assertLessEqual(abs(z0 - 100000), data["H"]["c"])
+        why, _ = run(self.t, self.dose, sc, both=dict(fired=False))
         self.assertIn("the both-lines FIRE check of c: both lines did not fire at the preset (s = 0)", why)
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones_for(self.t, sc))
-        self.assertIn("the both-lines FIRE check of c: missing", why)
+        w = nominal_w(self.t)
+        w[("c", 5, "both")] = {1: F(-1, 10), 2: F(-1, 10)}                              # below stage 0: not monotone
         t = copy.deepcopy(self.t)
-        t[("c", 5, "both")]["Z"] = t[("c", 0, "both")]["Z"] - 1                     # below stage 0: not monotone
-        t[("c", 6, P.SKEWED)]["fire"] = False                                        # a both-lines read silent
-        why, _ = predict6.measure_instance(7701, STATUSES, t, self.dose, [], sc, ones_for(t, sc), bothfire=BOTH_OK)
-        self.assertTrue(any("('c', 5, 'both')" in w and "monotonicity" in w for w in why), why)
-        self.assertTrue(any("('c', 6, 'both, second 0.3 late')" in w and "did not fire" in w for w in why), why)
+        t[("c", 6, P.SKEWED)]["fire"] = False
+        why, _ = run(t, self.dose, sc, w=w)
+        self.assertTrue(any("('c', 5, 'both')" in x and "monotonicity" in x for x in why), why)
+        self.assertTrue(any("('c', 6, 'both, second 0.3 late')" in x and "did not fire" in x for x in why), why)
+
+    def test_wave_3_waits_for_both_pair_scans(self):
+        import schedule6
+        import tempfile
+        jobs = schedule6.instance_jobs(7701, F(1, 2))
+        j = next(x for x in jobs if x["id"] == "7701-onesided-a")
+        self.assertEqual(sorted(x["id"] for x in schedule6.wave_deps(j, jobs)),
+                         ["7701-cal-off", "7701-cal-on", "7701-scan-a-pair", "7701-scan-b-pair"])
+        sc = nominal_scans()
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(predict6, "table", return_value=(self.t, self.dose, [])):
+            d = Path(d)
+            for x in ("a", "b"):
+                (d / f"7701-scan-{x}-pair").mkdir()
+                (d / f"7701-scan-{x}-pair" / "record.json").write_text(json.dumps(dict(result=sc[(x, "pair")])))
+            cmd, why = schedule6.command(j, d, ("on", "off"), Path("ngspice"), Path("pdk"))
+            b = predict6.layer1_bounds({x: F(sc[(x, "pair")]["s_star"]) for x in "ab"}, {x: F(1, 256) for x in "ab"})["a"]
+            self.assertIsNone(why)
+            self.assertEqual(cmd[cmd.index("onesided") + 1:cmd.index("onesided") + 3], [str(b), str(b)])
+            (d / "7701-scan-b-pair" / "record.json").write_text(json.dumps(dict(result=dict(crossing=True, consistent=False))))
+            cmd, why = schedule6.command(j, d, ("on", "off"), Path("ngspice"), Path("pdk"))
+            self.assertIsNone(cmd)
+            self.assertEqual(why, "the pair scan of b has no consistent bracket")
+            (d / "7701-scan-b-pair" / "record.json").unlink()
+            cmd, why = schedule6.command(j, d, ("on", "off"), Path("ngspice"), Path("pdk"))
+            self.assertEqual(why, "the pair scan of b did not complete")
 
     def test_runs_per_instance(self):
         import schedule6
@@ -384,7 +450,7 @@ class Serialization(unittest.TestCase):
         smoke at 5618699 stopped there on the scans' L, keyed by (cell, kind)."""
         t, dose = cases.nominal()
         sc = nominal_scans()
-        why, data = predict6.measure_instance(7701, STATUSES, t, dose, [], sc, ones_for(t, sc), bothfire=BOTH_OK)
+        why, data = run(t, dose, sc)
         self.assertEqual(why, [])
         x = P.instance(7701, data["t2"], dose, [], c4.DECISION5)
         x = predict6.augmented(x, data["H"], data["S"], data["t2"])
@@ -392,7 +458,6 @@ class Serialization(unittest.TestCase):
         x.update(predict6.questions(sc, dose, P.needs(t)))
         json.dumps(dict(instances=[x]), default=str)
         self.assertEqual(x["L"]["a-pair"], 100000)
-
 
 if __name__ == "__main__":
     unittest.main()
