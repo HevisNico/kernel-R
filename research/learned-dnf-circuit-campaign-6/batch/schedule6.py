@@ -91,7 +91,7 @@ def git(*args):
 def marker_check():
     """No seed of 7701 to 7710 runs before the marker: the marker, pushed on the -wip branch (fetched by name), names
     the code's commit and each file's SHA-256, and every one of those files, here and at that commit, has that hash;
-    it names every file the batch imports; and it records the 7692 check's CHECK_7692.json (its SHA-256, on its
+    it names every file the batch imports (campaign 5's whole frozen list but its workflow); and it records the 7692 check's CHECK_7692.json (its SHA-256, on its
     evidence branch) with all_within true, so that the check's STOP is enforced here."""
     import hashlib
     git("fetch", "-q", "origin", BRANCH)
@@ -112,10 +112,12 @@ def marker_check():
 
 
 def imported_files():
-    """Every file the batch runs: its own (batch/*.py but the tests) and the 38 frozen campaign-5 files it imports."""
+    """Every file the batch runs: its own (batch/*.py but the tests) and every file of campaign 5's plan.FROZEN but its
+    CI workflow (66): campaign 5's own 38, and the 28 outside its folder that define the deck's physics and the gate
+    (research/learned-dnf-circuit, network-circuit, circuit, sky130-supervisor-closure, learned-coincidence)."""
     own = sorted(str(p.relative_to(REPO)) for p in HERE.glob("*.py") if p.name != "test_batch.py")
     import plan
-    c5 = [f for f in plan.FROZEN if f.startswith(plan.BASE + "/")]
+    c5 = [f for f in plan.FROZEN if not f.startswith(".github/")]
     return own + c5
 
 

@@ -248,6 +248,11 @@ class Marker(unittest.TestCase):
         import schedule6
         files = {f: hashlib.sha256((schedule6.REPO / f).read_bytes()).hexdigest() for f in schedule6.imported_files()}
         self.assertEqual(sum(1 for f in files if "campaign-5/" in f), 38)
+        self.assertEqual(sum(1 for f in files if "campaign-6/" not in f), 66)
+        for f in ("research/network-circuit/net.py", "research/circuit/cell.spice", "research/learned-dnf-circuit/dnf.py",
+                  "research/sky130-supervisor-closure/sim.py", "research/learned-coincidence/MonotonePremiseSoundness.lean"):
+            self.assertIn(f, files)
+        self.assertNotIn(".github/workflows/learned-dnf-circuit-campaign-5.yml", files)
         self.assertIn(str((HERE / "check7692.py").relative_to(schedule6.REPO)), files)
         check = json.dumps(dict(all_within=True)).encode()
         good = dict(code_commit="c" * 40, delta="1/4", files=dict(files), check7692=dict(sha256=hashlib.sha256(check).hexdigest(), all_within=True))
@@ -257,9 +262,11 @@ class Marker(unittest.TestCase):
         bad["files"][str((HERE / "batch6.py").relative_to(schedule6.REPO))] = "0" * 64
         missing = copy.deepcopy(good)
         del missing["files"]["research/learned-dnf-circuit-campaign-5/predicted.py"]
+        outside = copy.deepcopy(good)
+        outside["files"]["research/network-circuit/net.py"] = "0" * 64       # a file outside campaign 5's folder changed
         notwithin = copy.deepcopy(good)
         notwithin["check7692"]["all_within"] = False
-        for m, chk in ((bad, check), (missing, check), (notwithin, check), (good, json.dumps(dict(all_within=False)).encode())):
+        for m, chk in ((bad, check), (missing, check), (outside, check), (notwithin, check), (good, json.dumps(dict(all_within=False)).encode())):
             with mock.patch.object(schedule6, "git", side_effect=self.fake(m, chk)):
                 with self.assertRaises(AssertionError):
                     schedule6.marker_check()
