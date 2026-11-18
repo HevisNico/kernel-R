@@ -1,4 +1,4 @@
-# Campaign 6: what the development batch's code computes (draft for review, fifth version)
+# Campaign 6: what the development batch's code computes (draft for review, sixth version)
 
 It implements the design note (`659d3a2`) under the stopping rule (`2e26910`). **[C]** marks a choice made here. The
 batch decides only `k`. Its definition of eligible is, unchanged, the one campaign 6 would preregister.
@@ -11,10 +11,11 @@ on `b`.
 **Toolchain.** Campaign 5's pinned toolchain, checked before every run (`c4.require_pinned`, the kit's `identity`):
 Python 3.12.3, numpy 2.3.5, ngspice 42, the PDK at `1232782c`, OpenBLAS SkylakeX.
 
-**Runs per instance.** Eleven, using campaign 5's deck and mismatch draw, with no noise:
+**Runs per instance.** Nine, using campaign 5's deck and mismatch draw, with no noise (option B or C, section 5; A is
+excluded):
 
 - campaign 5's two calibration decks, guard on and guard off, by `run4.py --kind cal` unchanged;
-- then nine robust scans (section 2).
+- then five robust scans and two one-sided sets (section 2 and section 5).
 
 **Running them.**
 - Four runs at a time per machine, detached (`setsid nohup`), while the session stays active in waits of at most
@@ -32,9 +33,14 @@ Python 3.12.3, numpy 2.3.5, ngspice 42, the PDK at `1232782c`, OpenBLAS SkylakeX
 
 A run that does not complete, at its limit or otherwise, makes its instance not measured and so not eligible.
 
-**Smoke.** A declared nominal-cell smoke of each new scan kind (`a` pair, `a` port 1, `c` line 1, `c` both lines) runs
-before the marker. It uses the nominal calibration decks of campaign 5's RC, and is pushed on
-`evidence/learned-dnf-circuit-campaign-6-smoke`. No number of the report comes from it.
+**Smoke.** A declared nominal-cell smoke runs before the marker:
+
+- each scan kind (`a` pair, `c` line 1, `c` both lines) and the one-sided set (`a`), each at both ascent steps,
+  1/4 and 1/2;
+- on the nominal calibration decks of campaign 5's RC;
+- pushed on `evidence/learned-dnf-circuit-campaign-6-smoke`.
+
+Its wall times serve only the choice of section 5. No number of the report comes from it.
 
 ## 2. The scans
 
@@ -63,7 +69,7 @@ The cell is brought to `u(s)` by joint clock-only doses and per-port imposed lea
 campaign 3's `move` does.
 
 **The search.**
-1. A coarse ascent from `s = 0` in steps of 1/4.
+1. A coarse ascent from `s = 0` in steps of `delta`, a parameter: 1/4 for B, 1/2 for C (section 5).
 2. Then bisection, until the bracket is at most 20 uV on the port of larger `D_p`.
 
 **Disputed states**, as campaign 3. At the end of the search, the bracket is contradictory if some fired isolated
@@ -86,7 +92,7 @@ counted silent.
 
 An instance is measured if all of these hold, otherwise it is not:
 
-1. All 11 runs complete.
+1. All 9 runs complete, and both one-sided sets stay silent up to their bound.
 2. Every bracket is consistent.
 3. The five crossing scans (pair of `a`, pair of `b`, both lines of `c`, line 1 of `c`, line 2 of `c`) each cross
    below 8.
@@ -100,7 +106,8 @@ An instance is measured if all of these hold, otherwise it is not:
      rescaled, and `Z` is taken from the guard-off deck, as campaign 5 does.
    - A read with `|Z - L_r| <= H_x` is exempt.
    - The kinds are matched as follows:
-     - `a` and `b`: `port 1`, `port 2` and `both` use their own scans;
+     - `a` and `b`: `both` uses the pair scan; `port 1` and `port 2` must be silent wherever `Z < THETA + H_x`,
+       the one-sided bound;
      - `c`: `port 1` and `port 2` use the line scans, and `both` and the 0.3-late `both` use the both-lines scan;
      - an `empty` read must be silent.
    - A disagreement outside the exempt band makes the instance not measured.
@@ -115,7 +122,7 @@ the table (section 4) and passes it to `P.instance`.
 **Mapping onto the gate's fields** (campaign 5's `predicted.py` and `gate4.py`, imported and never edited).
 
 1. Threshold.
-   - Each cell's threshold is `theta_x = min L` over its scans (layer 1: 3 scans; `c`: 3).
+   - Each cell's threshold is `theta_x = min L` over its scans (layer 1: the pair scan alone; `c`: 3).
    - Every score of cell `x`, the deck's `Z` and the scans' `L`, is multiplied by `100 000 / theta_x` and rounded to
      the nearest integer, ties to even.
    - So in the gate's units every cell's threshold is the gate's fixed `THETA = 100 000`, and the theory is
@@ -149,7 +156,7 @@ both sides of every crossing: training silent before the need and FIRE at it, an
 - The theory's single dose per layer (`a` and `b` share it) is kept, as in campaign 5. Its misfit goes into
   `epsilon`.
 
-## 5. Affordability, and the choice of scan set (to be made by the owner before any code)
+## 5. Affordability, and the choice of scan set (the owner's rule)
 
 The table gives `E` by the stopping rule, computed with campaign 5's frozen `plan.split` and `plan.machine_expected`:
 
@@ -194,6 +201,27 @@ The three options:
 **The risk of B and C.** Without a full scan of an alone kind, `theta_x <= L_alone` is shown only up to the one-sided
 bound. That is what the gate's silent checks need, but question 3 then reports no spread for layer 1's alone kinds.
 
+**The owner's rule for the scan set** (decided 2026-11-18, before any smoke):
+
+1. A is excluded.
+2. The code takes the ascent step `delta` as a parameter: 1/4 for B, 1/2 for C.
+3. The declared nominal smokes measure, at both steps and before the marker, the wall time of each scan kind and of
+   the one-sided set.
+4. Each smoke cost is multiplied by 1.51 for mismatch, as in the stopping rule. The calibration decks stay at RM's
+   means.
+5. The least `k` giving go is recomputed for B and for C with those costs, by the same frozen `plan.split` and
+   `plan.machine_expected` (`etable.py`).
+6. **B is chosen, unless C's least `k` is strictly lower.** On a tie, B.
+7. The owner confirms the result, and it is frozen in the marker (`delta` and the table) before any seed from 7701
+   runs.
+
+The batch's final `E` is computed from the batch's own measured costs (section 6). So a design chosen at `k >= 3` can
+still stop if the scans cost more than the smokes suggest.
+
+**B's assumption.** The one-sided set reads each port alone only at the bound state. It shows that nothing fires
+below the bound only if firing is monotone in the score along the path. Question 5 reports every contradictory state
+seen in the scans, as evidence on that assumption.
+
 **Sensitivity to the scan cost**, which is the main unknown. The least `k` that gives go:
 
 | Scan cost | A | B |
@@ -211,7 +239,7 @@ bound. That is what the gate's silent checks need, but question 3 then reports n
 **`k` and the decision.** `k` = the eligible count. Then `I = ceil(30 / k)` if `k >= 2`, then `E` by the stopping
 rule:
 
-- measures: 11 runs per instance on `I` instances, each run at the batch's mean wall time for its kind;
+- measures: 9 runs per instance on `I` instances, each run at the batch's mean wall time for its kind;
 - network: on `ceil(k I / 10)` instances, at 718, 132 and 1 400 s;
 - limits `10 ceil(2 e / 10)`, stages split as in campaign 5's section 10.5, and per stage and machine
   `sum / 4 + 3/4 max`.
