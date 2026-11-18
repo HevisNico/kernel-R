@@ -1,11 +1,9 @@
 # A circuit network that learns (A and B) or (C and D), campaign 6: predictions
 
-**Draft for review, first version**, on the work branch `research/learned-dnf-circuit-campaign-6-wip`. Once both
-coordinators have reviewed it and the owner gives his go, this text, byte for byte, becomes
-`research/learned-dnf-circuit-campaign-6/PREDICTION.md`. It is then pushed alone on
-`research/learned-dnf-circuit-campaign-6`, before any implementation of campaign 6 and before any simulation of a seed
-from 7801. Nothing in it may be changed afterwards: a wrong rule is corrected by an amendment file, pushed alone before
-the run or the computation it concerns.
+This file is campaign 6's preregistration: `research/learned-dnf-circuit-campaign-6/PREDICTION.md`. It is pushed
+alone on `research/learned-dnf-circuit-campaign-6`, with the owner's go, before any implementation of campaign 6 and
+before any simulation of a seed from 7801. Nothing in it may be changed afterwards: a wrong rule is corrected by an
+amendment file, pushed alone before the run or the computation it concerns.
 
 **Sources.** Each rule names its source in brackets.
 
@@ -55,7 +53,10 @@ rate of 0.6, the chance of no eligible instance out of 5 is 0.4^5, about 1 %.
   - With 0, it is "not established".
 - One wrong letter or output on a counted instance refutes it.
 - **Claims under noise** are proposed to need the same minimum: 2 eligible instances with a counted run. The owner
-  confirms this with the whole text. Otherwise, or with no counted run, they are "not established".
+  confirms this with the whole text.
+  - With counted runs from exactly 1 instance and no failure, each is "held on one instance, not established".
+  - With no counted run, each is "not established".
+  - A failure in a counted run refutes it.
 
 **Known in advance.** In the batch, cell c (the OR cell) had no room under the noise budget (K = 3) on any instance. So
 the claims under noise that involve c will likely have nothing to count, and come out "not established". This is
@@ -356,7 +357,7 @@ It has two parts, through the launch kit. No campaign seed enters either.
   claim functions are used unchanged: `word_claims`, `g_check`, `h_check`, `n_own`, the N-out, N-word, U and S
   loops, and M1 and M3 to M8. They read only these fields of an instance: `seed`, `eligible`, `measured`,
   `zero_error`, `needs`, `counts_N_out`, `learning_ports`, `observation` and `validation_residual_M5`. All of them are
-  present in `predict6_guard`'s records. A new adapter maps exactly three things:
+  present in `predict6_guard`'s records. A new adapter maps exactly four things:
   1. **The reproduction check.** `analyze.main` recomputes `PREDICTED.json` with campaign 5's
      `predicted.predictions`, the nominal-level prediction. The adapter recomputes it instead with `predict6_guard`
      from the campaign's measures, byte for byte. If it differs, every claim is "not established" (section 9).
