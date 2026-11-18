@@ -1,4 +1,4 @@
-# Campaign 6: what the development batch's code computes (draft for review, fourth version)
+# Campaign 6: what the development batch's code computes (draft for review, fifth version)
 
 It implements the design note (`659d3a2`) under the stopping rule (`2e26910`). **[C]** marks a choice made here. The
 batch decides only `k`. Its definition of eligible is, unchanged, the one campaign 6 would preregister.
@@ -178,11 +178,13 @@ The three options:
 
 - **(A) The 9 full scans** (sections 2 to 4 as written): 8 373 s of measures per instance. Go needs `k >= 5`.
 - **(B) The 5 crossing scans only.** These are the pairs of `a` and `b` and `c`'s line 1, line 2 and both lines.
-  - Each port-alone kind of `a` and `b` is checked instead by a one-sided set: one run per cell, with the two ports
-    moved along the training path up to the state where each port's rescaled score reaches `THETA + testingError`,
-    and each port read alone there.
-  - If neither fires, each alone kind's own trip level is shown to be above that bound, which is all the gate's
-    silent check needs. If one fires, the instance is not measured.
+  - Each port-alone kind of `a` and `b` is checked instead by a one-sided set: one run per cell. The two ports are
+    moved along the training path up to the state where each port's rescaled score reaches `THETA + H_x`, the
+    measure's own error, and not the full budget **[C: the previous coordinator's refinement]**. Each port is read
+    alone there.
+  - The reads are only tests predicted silent, and the gate's silent check needs only `L_alone >= theta_x`.
+  - A FIRE at or below that state makes the instance not measured. If the path never reaches that score by `s = 8`,
+    the set runs to `s = 8` and shows the bound there.
   - The alone kinds then have no `L`. `theta_x` and `S_x` come from the pair scan alone. Point 6 checks the alone
     reads of the deck against the bound.
   - 5 733 s per instance. Go needs `k >= 4`.
