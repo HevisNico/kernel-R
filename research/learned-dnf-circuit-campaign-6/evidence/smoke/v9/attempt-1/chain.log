@@ -1,0 +1,43 @@
+== predict 2026-11-18T12:37:43Z
+interpreter: {"checked": ["numpy_record_sha256", "numpy_version", "python_sha256", "python_version"], "executable": "/home/user/owner-prep/venv312/bin/python", "numpy_record_sha256": "064003bdb6f9f7bb06e46e07cc3398cbfdc3c114dfe55b89d239e564917be2fb", "numpy_version": "2.3.5", "prefix": "/home/user/owner-prep/venv312", "python_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f", "python_version": "3.12.3"}
+Traceback (most recent call last):
+  File "/home/user/c6fix/research/learned-dnf-circuit-campaign-6/batch/predict6.py", line 385, in <module>
+    xs = [predict_smoke(a[1], a[2], a[3], a[4])]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/c6fix/research/learned-dnf-circuit-campaign-6/batch/predict6.py", line 373, in predict_smoke
+    (od / "PREDICTIONS.json").write_text(json.dumps(dict(smoke=True, instances=[x]), indent=1, default=str) + "\n")
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/usr/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/usr/lib/python3.12/json/encoder.py", line 326, in _iterencode_list
+    yield from chunks
+  File "/usr/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/usr/lib/python3.12/json/encoder.py", line 377, in _iterencode_dict
+    raise TypeError(f'keys must be str, int, float, bool or None, '
+TypeError: keys must be str, int, float, bool or None, not tuple
+predict exit 1
+== report 2026-11-18T12:52:13Z
+Traceback (most recent call last):
+  File "/home/user/c6fix/research/learned-dnf-circuit-campaign-6/batch/report6.py", line 175, in <module>
+    main()
+  File "/home/user/c6fix/research/learned-dnf-circuit-campaign-6/batch/report6.py", line 141, in main
+    out = smoke_report(Path(a[1]), Path(a[2]))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/c6fix/research/learned-dnf-circuit-campaign-6/batch/report6.py", line 168, in smoke_report
+    costs = smoke_costs(runs)
+            ^^^^^^^^^^^^^^^^^
+  File "/home/user/c6fix/research/learned-dnf-circuit-campaign-6/batch/report6.py", line 159, in smoke_costs
+    out[step] = dict(pair=by[f"pair@{step}"], line=by[f"line@{step}"], bothfire=by["bothfire"], onesided=by["onesided"])
+                          ~~^^^^^^^^^^^^^^^^
+KeyError: 'pair@1/2'
+report exit 1
+== done 2026-11-18T12:52:13Z
