@@ -1,0 +1,20 @@
+interpreter: {"checked": ["numpy_record_sha256", "numpy_version", "python_sha256", "python_version"], "executable": "/home/user/owner-prep/venv312/bin/python", "numpy_record_sha256": "064003bdb6f9f7bb06e46e07cc3398cbfdc3c114dfe55b89d239e564917be2fb", "numpy_version": "2.3.5", "prefix": "/home/user/owner-prep/venv312", "python_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f", "python_version": "3.12.3"}
+Traceback (most recent call last):
+  File "/home/user/c6b/research/learned-dnf-circuit-campaign-6/batch/batch6.py", line 101, in <module>
+    main()
+  File "/home/user/c6b/research/learned-dnf-circuit-campaign-6/batch/batch6.py", line 96, in main
+    rec = cal(Path(a[1]), seed, a[3], Path(a[4]), Path(a[5]))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/c6b/research/learned-dnf-circuit-campaign-6/batch/batch6.py", line 73, in cal
+    result, tr = session4.play(out / "evidence", plan, text, ngspice, pdk, seed=seed, guard_off=guard == "off")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/c6b/research/learned-dnf-circuit-campaign-5/session4.py", line 60, in play
+    now = s.run(target, watch=[c for c in cells if not protected[c]])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/c6b/research/network-circuit/net.py", line 184, in run
+    self.now = self.last("time")
+               ^^^^^^^^^^^^^^^^^
+  File "/home/user/c6b/research/network-circuit/net.py", line 189, in last
+    return float(out.strip().split("=")[-1])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: could not convert string to float: 'Error: nostrchring on a scalar (time)\n  in term: time[length(time)-1]'
