@@ -301,7 +301,7 @@ are separate**, and none changes another.
 
 ## 7. The rehearsal, before any launch
 
-The design note requires a rehearsal under real conditions before any launch [DN rule 7]. Its proposed minimum
+The design note requires a rehearsal under real conditions before any launch [DN rule 7]. Its minimum
 [new]:
 
 It has two parts, through the launch kit. No campaign seed enters either.
