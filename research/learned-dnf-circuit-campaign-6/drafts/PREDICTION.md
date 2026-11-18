@@ -46,10 +46,16 @@ rate of 0.6, the chance of no eligible instance out of 5 is 0.4^5, about 1 %.
 - **Controls**: an untrained network and a skewed coincidence.
 
 **What counts.**
-- "Established" means the prediction held on every eligible instance, with at least one eligible instance.
-- One wrong letter or output refutes the primary claim.
-- With no eligible instance, the claim is "not established".
-- A claim under noise that has no counted run is "not established".
+- Each claim is judged on the eligible instances whose runs count. A missing run is reported, and never counted as a
+  pass.
+- **The primary claim is "established"** only when it holds on every eligible instance whose run without noise
+  counts, **with at least 2 such instances** (the owner's decision of 2026-11-18, consistent with `k ≥ 2` in the
+  stopping rule).
+  - With exactly 1 counted instance, it is "held on one instance, not established".
+  - With 0, it is "not established".
+- One wrong letter or output on a counted instance refutes it.
+- **Claims under noise** are proposed to need the same minimum: 2 eligible instances with a counted run. The owner
+  confirms this with the whole text. Otherwise, or with no counted run, they are "not established".
 
 **Known in advance.** In the batch, cell c (the OR cell) had no room under the noise budget (K = 3) on any instance. So
 the claims under noise that involve c will likely have nothing to count, and come out "not established". This is
@@ -78,8 +84,9 @@ which are selected by per-cell measures before any network run. They are not abo
 
 ## 2. The measures
 
-Exactly the batch's measures, by the batch's code at the marker `085c6bc`. That code is unchanged, and is called
-through the new seed guard and stage manifests of section 8 [BS; MU; BR §6]. Per instance, nine runs:
+Exactly the batch's measures. The batch's measurement code (`scan6`, `batch6.cal`, `predict6` and `predict6_guard`,
+at `085c6bc` and `026919a`) is unchanged, and is called by new campaign code declared in section 8 [BS; MU;
+BR §6]. Per instance, nine runs:
 
 | Run | What it does |
 |---|---|
@@ -196,9 +203,13 @@ are separate**, and none changes another.
    - **T:** on the 16 test patterns, `a` fires exactly on A and B, `b` exactly on C and D, and `c` exactly on
      `(A and B) or (C and D)`.
 
-   It is refuted by one letter or output that differs, on one eligible instance. It is **established** when it holds
-   on every eligible instance, with at least one. It is **not established** with no eligible instance, or when the
-   run without noise of every eligible instance is missing.
+   It is judged on the eligible instances whose run without noise counts (section 9). A missing run is reported, and
+   never counted as a pass.
+   - It is **refuted** by one letter or output that differs, on one counted instance.
+   - It is **established** when it holds on every counted instance, **with at least 2 counted instances**. This is
+     the owner's decision of 2026-11-18, consistent with `k ≥ 2` in the stopping rule.
+   - With exactly 1 counted instance, on which it holds, it is **"held on one instance, not established"**.
+   - With 0 counted instances, it is **not established**.
 2. **G, read-only**, with its own verdict, as in campaign 5 [C5 §8].
 3. **H, hypotheses**: observed and reported, never refuting [C5 §8].
 4. **N-out, the learned function under noise, per output** [C5 §8].
@@ -211,6 +222,12 @@ are separate**, and none changes another.
      `need` letters `s`, then only `F`.
    - **N-word:** a learning port with room up to it reads exactly its zero-error word.
    - Each is refuted by one port-run that fails it, and is **not established** without a counted port-run.
+
+   **For N-out, N-own and N-word** (a proposal; the owner confirms it with the whole text):
+   - Each is judged on its counted runs only. A missing noisy run is reported, and never counted as a pass.
+   - Each needs the primary claim's minimum: its counted runs must come from **at least 2 eligible instances**.
+   - With counted runs from exactly 1 instance and no failure, it is "held on one instance, not established".
+   - A failure in a counted run refutes it, whatever the number of instances.
 6. **Controls** [C5 §8].
    - **U:** in the untrained run, no output fires on any of the 16 patterns.
    - **S:** in the two skew slots, `a` and `b` stay silent.
@@ -309,6 +326,8 @@ It has two parts, through the launch kit. No campaign seed enters either.
 - **The whole rehearsal:** 7 392.6 s expected.
 - **The 0.75 rule** [C5 §11.4]. If any rehearsal run uses more than 0.75 of its campaign limit, or does not complete,
   nothing is launched until an amendment.
+  - Such an amendment may change **only the limits and the stage split**, never a rule, a claim or an instance.
+  - The 1 400 s cost of a noisy run is an estimate [SR]. R-N makes its first measurement on a mismatched cell.
 - **Also checked:**
   - the seed guard's refusals: a campaign seed outside the kit, and a development seed in a campaign stage;
   - the noise-model guard;
@@ -348,7 +367,13 @@ It has two parts, through the launch kit. No campaign seed enters either.
      noise, noise seed), its `constants` (decision 5's `b`, `w`, `d`, for M7) and campaign 5's `BEFORE_M.md`. The
      adapter supplies this campaign's run list (section 4), its constants and its record before stage M.
   
-  The adapter decides no claim. Its definitions of the claims are campaign 5's text in `analyze.py`, cited here before
+  4. **The minimum of 2 counted instances** (section 5). `analyze.py` gives "held" as soon as one counted run holds,
+     and counts runs, not instances. The adapter keeps its verdict, failures and counts unchanged, and adds the number
+     of distinct eligible instances behind the counted runs of each claim. A "held" with fewer than 2 such instances
+     becomes "held on one instance, not established" (exactly 1) or "not established" (0). "Refuted" is never
+     changed.
+
+  The adapter decides no claim of its own. Its definitions of the claims are campaign 5's text in `analyze.py`, cited here before
   the adapter exists.
 - **The marker.** It names the frozen commit and every imported file's SHA-256, as the batch's marker did. It is pushed
   alone, and every runner checks it before any simulation.
