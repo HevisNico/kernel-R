@@ -1,0 +1,175 @@
+{
+ "all_required_passed": false,
+ "checks": [
+  {
+   "check": "collection",
+   "collections": {
+    "/home/user/c5run/collected/RC_a": {
+     "collector_sha256": "62251b6748ca673c10a8258a0524a4aeea9fb153b7753b4dbc97a13f3a6df432",
+     "files": 56,
+     "links": 1
+    },
+    "/home/user/c5run/collected/RC_b": {
+     "collector_sha256": "62251b6748ca673c10a8258a0524a4aeea9fb153b7753b4dbc97a13f3a6df432",
+     "files": 56,
+     "links": 1
+    }
+   },
+   "ok": true,
+   "required": true,
+   "utc": "2026-11-18T07:23:46Z"
+  },
+  {
+   "check": "rc_wall_times",
+   "note": "RC's wall times are reported and enter no rule (PREDICTION.md, 11.3)",
+   "ok": true,
+   "required": false,
+   "runs": {
+    "a-None-cal-off": {
+     "status": "complete",
+     "wall_s": 394.7744559900002
+    },
+    "a-None-cal-on": {
+     "status": "complete",
+     "wall_s": 513.8263431919995
+    },
+    "a-None-cal-stopped": {
+     "status": "time-limit-never-rerun",
+     "wall_s": 120.01647372099978
+    },
+    "a-None-n1": {
+     "status": "complete",
+     "wall_s": 925.810675922
+    },
+    "a-None-quiet": {
+     "status": "complete",
+     "wall_s": 573.3176876110001
+    },
+    "a-None-untrained": {
+     "status": "complete",
+     "wall_s": 125.60360805999971
+    },
+    "b-None-cal-off": {
+     "status": "complete",
+     "wall_s": 366.1982948669993
+    },
+    "b-None-cal-on": {
+     "status": "complete",
+     "wall_s": 484.83813242199994
+    },
+    "b-None-cal-stopped": {
+     "status": "time-limit-never-rerun",
+     "wall_s": 120.00749191700015
+    },
+    "b-None-n1": {
+     "status": "complete",
+     "wall_s": 922.629416232
+    },
+    "b-None-quiet": {
+     "status": "complete",
+     "wall_s": 555.5018139419999
+    },
+    "b-None-untrained": {
+     "status": "complete",
+     "wall_s": 115.85676271200009
+    }
+   },
+   "utc": "2026-11-18T07:23:46Z"
+  },
+  {
+   "check": "chain",
+   "note": "collect.py once per machine on RC; the links of the stopped runs recorded as text (RC_a, RC_b: 56 files, 1 link each)",
+   "ok": true,
+   "required": true,
+   "step": "collection",
+   "utc": "2026-11-18T07:23:46Z"
+  },
+  {
+   "check": "chain",
+   "note": "PREDICTED.json sha256 b0af314a20742e95f24983f4364bda4f9fe0758895d06a3457da51c1524ce97b; Gate4.lean sha256 6775245d528c9bb41bfead3c07bd85ad6ded0136a1c56e4a700eb67ffa983f41",
+   "ok": true,
+   "required": true,
+   "step": "prediction",
+   "utc": "2026-11-18T07:23:58Z"
+  },
+  {
+   "check": "chain",
+   "note": "plan.py stage-file, runs and manifest of Q, N1, N2, N3 on a local scratch copy of 362755c with the rehearsal's BEFORE_M and PREDICTED.json, not pushed, not launched: each generated, each with 0 runs and budget 0, since the rehearsal's BEFORE_M has I = 0 and the nominal cell is no campaign seed (the kit would refuse such a manifest at preflight: both shards must be nonempty)",
+   "ok": true,
+   "required": true,
+   "step": "dry_manifests",
+   "utc": "2026-11-18T07:25:18Z"
+  },
+  {
+   "check": "chain",
+   "note": "check.sh on the rehearsal's Gate4.lean: Gate4: 2 theorems, each on a subset of [propext, Classical.choice, Quot.sound] (2 on all three)",
+   "ok": true,
+   "required": true,
+   "step": "gate_and_check_sh",
+   "utc": "2026-11-18T07:37:11Z"
+  },
+  {
+   "check": "analysis",
+   "check_sh": [
+    "Gate5Cases: 33 theorems, each on a subset of [propext, Classical.choice, Quot.sound] (33 on all three)",
+    "Gate5CasesTargets: 85 theorems, each on a subset of [propext, Classical.choice, Quot.sound] (85 on all three)",
+    "MirrorMutations: 57 theorems, each on a subset of [propext, Classical.choice, Quot.sound] (57 on all three)",
+    "Gate4: 2 theorems, each on a subset of [propext, Classical.choice, Quot.sound] (2 on all three)",
+    "M8: 1 theorems, each on a subset of [propext, Classical.choice, Quot.sound] (0 on all three)",
+    "check.sh: passed"
+   ],
+   "ok": true,
+   "predicted_is_reproduced": true,
+   "records_equal_files": {
+    "a-None-cal-off": true,
+    "a-None-cal-on": true,
+    "a-None-n1": true,
+    "a-None-quiet": true,
+    "a-None-untrained": true,
+    "b-None-cal-off": true,
+    "b-None-cal-on": true,
+    "b-None-n1": true,
+    "b-None-quiet": true,
+    "b-None-untrained": true
+   },
+   "required": true,
+   "utc": "2026-11-18T07:49:51Z"
+  },
+  {
+   "check": "chain",
+   "note": "analysis RESULTS.json sha256 e6c64960f83ab998fd2f135871dca0e646b179815065f239d4a9aee1de355c08; M8 on the no-eligible path; check.sh on Gate4 and M8",
+   "ok": true,
+   "required": true,
+   "step": "analysis_with_M8",
+   "utc": "2026-11-18T07:49:51Z"
+  }
+ ],
+ "checks_file_sha256": "1f16672810a4c08eb0f1e6ad43da533ff1e86c082b001505367f7f9e2d92ad71",
+ "interpreter": {
+  "executable": "/home/user/owner-prep/venv312/bin/python",
+  "numpy_record_sha256": "064003bdb6f9f7bb06e46e07cc3398cbfdc3c114dfe55b89d239e564917be2fb",
+  "numpy_version": "2.3.5",
+  "prefix": "/home/user/owner-prep/venv312",
+  "python_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+  "python_version": "3.12.3"
+ },
+ "notes": {
+  "fill": "RQ, RN and RMEM: the measured development instances in seed order, repeated cyclically if fewer than three are measured, each repeat on the next noise round, then a repeat of round 1; each run list states the instances measured and the fill used.",
+  "instrument": "A measure is what the frozen instrument gives: research/network-circuit/measure.py and reads4.py, the code that turns a run's waveform into reads, wherever it runs (in the runner, the prediction or the analysis). Its outputs are taken at their exact binary value (PREDICTION.md 4.2); the evidence it reads is fixed by its bytes; everything after it is exact (the guarded fit, the dates in units, H's arithmetic). Confirmed by the coordinator's review of the freeze at 6832af3.",
+  "limits": "The 0.75 rule judges RM, RQ, RN and RMEM against the campaign's limits; RC's wall times are reported and enter no rule (11.3)."
+ },
+ "required_absent": [
+  "cases",
+  "gate_dev",
+  "guard",
+  "limits",
+  "memory",
+  "mutations",
+  "no_campaign_seed",
+  "noise_differs",
+  "operating_point",
+  "reproducibility"
+ ],
+ "required_failed": [],
+ "what": "the record of campaign 5's rehearsal (PREDICTION.md, 11), written by rehearsal.py record"
+}
