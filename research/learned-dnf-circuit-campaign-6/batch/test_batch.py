@@ -378,5 +378,21 @@ class BothLines(unittest.TestCase):
         self.assertEqual(sum(n for _, n in report6.KINDS), 9)
 
 
+class Serialization(unittest.TestCase):
+    def test_instance_data_is_json(self):
+        """Every field predict_instance adds to an instance can be written to PREDICTIONS.json (no tuple key): the
+        smoke at 5618699 stopped there on the scans' L, keyed by (cell, kind)."""
+        t, dose = cases.nominal()
+        sc = nominal_scans()
+        why, data = predict6.measure_instance(7701, STATUSES, t, dose, [], sc, ones_for(t, sc), bothfire=BOTH_OK)
+        self.assertEqual(why, [])
+        x = P.instance(7701, data["t2"], dose, [], c4.DECISION5)
+        x = predict6.augmented(x, data["H"], data["S"], data["t2"])
+        x.update(machine="a", **{k: v for k, v in data.items() if k != "t2"})
+        x.update(predict6.questions(sc, dose, P.needs(t)))
+        json.dumps(dict(instances=[x]), default=str)
+        self.assertEqual(x["L"]["a-pair"], 100000)
+
+
 if __name__ == "__main__":
     unittest.main()

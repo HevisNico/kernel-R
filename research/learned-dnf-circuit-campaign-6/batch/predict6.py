@@ -188,7 +188,7 @@ def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None,
             continue
         if v["fire"] != (v["Z"] >= lev):
             why.append(f"deck read {(c, k, r)}: FIRE bit {v['fire']} and Z = {v['Z']} disagree with the cell's own level L = {lev}")
-    data.update(t2=t2, theta=theta, L=L, L_rescaled={f"{c}-{k}": v for (c, k), v in L2.items()}, s_star={f"{c}-{k}": str(v) for (c, k), v in S.items()},
+    data.update(t2=t2, theta=theta, L={f"{c}-{k}": v for (c, k), v in L.items()}, L_rescaled={f"{c}-{k}": v for (c, k), v in L2.items()}, s_star={f"{c}-{k}": str(v) for (c, k), v in S.items()},
                 half_bracket={f"{c}-{k}": str(v) for (c, k), v in h.items()}, H=H, S=Sx, one_sided_bounds={c: {str(p): str(s) for p, s in b.items()} for c, b in bounds.items()})
     return why, data
 
