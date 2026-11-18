@@ -5,6 +5,8 @@ nominal table (`cases.nominal()`, CALIBRATION.json of #172), with synthetic scan
 """
 from fractions import Fraction as F
 import copy
+import json
+import subprocess
 from pathlib import Path
 import sys
 import unittest
@@ -160,6 +162,91 @@ class StoppingRule(unittest.TestCase):
         self.assertEqual(out["k"], 4)
         self.assertEqual(out["decision"]["go"], "True")
         self.assertEqual(out["decision"]["I"], "8")
+
+
+class Equivalence(unittest.TestCase):
+    """batch6.cal against run4.run's cal branch, for the nominal cell: the same deck text and the same record, key for
+    key, apart from what run4 sets from the kit or measures of itself (id, stage, wall_s, peak_rss_MB) and batch6's
+    one added key (batch). session4.play is replaced by a fake that writes the evidence from the deck text."""
+
+    def fake_play(self, texts):
+        import numpy as np
+        import session4
+        net = session4.net
+
+        def play(out, plan, text, ngspice, pdk, seed=None, guard_off=False, noise_id=None, shim=None):
+            texts.append(text)
+            out = Path(out)
+            out.mkdir(parents=True)
+            (out / "pdk").symlink_to("/nonexistent")
+            for name in ("input.spice", "session.log", "trace.raw"):
+                (out / name).write_text(f"{name}\n{text}\n{seed}\n{guard_off}\n")
+            result = dict(horizon_s=0.01, waveform_ends_s=0.0101, points=1234)
+            (out / "result.json").write_text(json.dumps(result) + "\n")
+            tr = mock.Mock()
+            tr.t = np.linspace(0, 0.0101, 2000)
+            names = [v for c in c4.CELLS for v in [f"v(x{c}.nzm)"] + [f"v(x{c}.x{p}.{n})" for p in net.PORTS for n in ("nzo", "nzc")]]
+            tr.v = {n: np.zeros(2000) for n in names}
+            return result, tr
+        return play
+
+    def test_cal_is_run4s(self):
+        import argparse
+        import tempfile
+        import run4
+        import session4
+        texts = []
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(session4, "play", self.fake_play(texts)):
+            d = Path(d)
+            args = argparse.Namespace(out=d / "run4", ngspice=Path("ngspice"), pdk=Path("pdk"), id="x", kind="cal", seed="none", instances=0,
+                                      guard="on", cell=None, state=None, port="none", isolation=0, reuse_trip=0, needs=None, control="none",
+                                      noise="none", round=0, extraction=None, extraction_sha256=None, scale="1", stage=None)
+            r4 = run4.run(args)
+            r6 = batch6.cal(d / "batch", None, "on", Path("ngspice"), Path("pdk"))
+            on4, on6 = json.loads((d / "run4" / "record.json").read_text()), json.loads((d / "batch" / "record.json").read_text())
+        self.assertEqual(texts[0], texts[1])
+        drop = lambda r: {k: v for k, v in r.items() if k not in ("id", "stage", "wall_s", "peak_rss_MB", "batch")}
+        self.assertEqual(drop(on4), drop(on6))
+        self.assertEqual(list(on6)[:-1], list(on4))            # the same keys in the same order, then `batch`
+        self.assertEqual(list(on6)[-1], "batch")
+        self.assertEqual(drop(r4), drop(r6))
+
+
+class Marker(unittest.TestCase):
+    def test_refused_without_marker(self):
+        import schedule6
+        with mock.patch.object(schedule6, "git", side_effect=subprocess.CalledProcessError(128, "git show")):
+            with self.assertRaises(subprocess.CalledProcessError):
+                schedule6.main(["batch", "a", "/tmp/never", "1/4", "ngspice", "pdk"])
+
+    def test_refused_on_a_changed_file(self):
+        import hashlib
+        import schedule6
+        own = [str((HERE / f).relative_to(schedule6.REPO)) for f in ("schedule6.py", "batch6.py", "scan6.py", "predict6.py", "report6.py")]
+        files = {f: hashlib.sha256((schedule6.REPO / f).read_bytes()).hexdigest() for f in own}
+        files[own[1]] = "0" * 64
+        m = dict(code_commit="c" * 40, delta="1/4", files=files)
+
+        def git(*args):
+            if args[0] == "show" and args[1].startswith("FETCH_HEAD:"):
+                return json.dumps(m).encode()
+            if args[0] == "show":
+                return (schedule6.REPO / args[1].split(":", 1)[1]).read_bytes()
+            return b""
+        with mock.patch.object(schedule6, "git", side_effect=git):
+            with self.assertRaises(AssertionError):
+                schedule6.marker_check()
+            m["files"][own[1]] = hashlib.sha256((schedule6.REPO / own[1]).read_bytes()).hexdigest()
+            self.assertEqual(schedule6.marker_check()["delta"], "1/4")
+
+
+class SmokeCosts(unittest.TestCase):
+    def test_costs_table(self):
+        runs = [dict(cost_kind=f"{k}@{s}", status="complete", wall_s=w) for k in ("pair", "line", "both") for s, w in (("1/4", 500.0), ("1/2", 450.0))]
+        runs.append(dict(cost_kind="onesided", status="complete", wall_s=150.0))
+        c = report6.smoke_costs(runs)
+        self.assertEqual(c["1/2"], dict(pair=F(450), line=F(450), both=F(450), onesided=F(150)))
+        self.assertIn(report6.choose(c)["choice"], ("B", "C"))
 
 
 if __name__ == "__main__":

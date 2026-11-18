@@ -4,6 +4,7 @@ frozen `plan.py` and `c4.py` (plan.split, plan.machine_expected, c4.limit), and 
 
   report6.py choose SMOKE_COSTS.json        B or C from the smokes' wall times (section 5)
   report6.py report BATCH_DIR OUT.json      the batch's report from its collected runs and predictions
+  report6.py smoke SMOKE_DIR PRED_DIR OUT   the smoke's B/C choice and the whole chain run once on its nominal instance
 
 The measures of one instance are nine runs of six kinds: cal-on, cal-off, pair (a and b), line (c's line 1 and line 2),
 both (c's both lines) and onesided (a and b). E counts each at the batch's mean wall time of its kind (the stopping
@@ -126,8 +127,33 @@ def main(argv=None):
         out = report(json.loads((d / "PREDICTIONS.json").read_text())["instances"], json.loads((d / "RUNS.json").read_text()))
         Path(a[2]).write_text(json.dumps(out, indent=1, default=str) + "\n")
         print(json.dumps(dict(k=out["k"], decision=out["decision"])))
+    elif a[0] == "smoke":                               # report6.py smoke SMOKE_DIR PRED_DIR OUT.json
+        out = smoke_report(Path(a[1]), Path(a[2]))
+        Path(a[3]).write_text(json.dumps(out, indent=1, default=str) + "\n")
+        print(json.dumps(dict(choice=out["choice"]["choice"], delta=out["choice"]["delta"], chain_k=out["chain"]["k"])))
     else:
         raise SystemExit(__doc__)
+
+
+def smoke_costs(runs):
+    """The smokes' wall times: {"1/4": {pair, line, both, onesided}, "1/2": {...}}; the one-sided set, which has no
+    ascent, counts at both steps. Every kind must have completed at both steps."""
+    by = {r["cost_kind"]: F(r["wall_s"]) for r in runs if r["status"] == "complete"}
+    out = {}
+    for step in ("1/4", "1/2"):
+        out[step] = dict(pair=by[f"pair@{step}"], line=by[f"line@{step}"], both=by[f"both@{step}"], onesided=by["onesided"])
+    return out
+
+
+def smoke_report(smoke_dir, pred_dir):
+    """The declared smoke's two outputs: the owner's B/C rule on its costs, and the whole chain (report) run once on
+    its nominal instance, so that every path that computes k has run before the marker. No number of it enters the
+    batch's report."""
+    runs = json.loads((smoke_dir / "RUNS.json").read_text())
+    costs = smoke_costs(runs)
+    xs = json.loads((pred_dir / "PREDICTIONS.json").read_text())["instances"]
+    recs = [dict(r, machine="a", cost_kind=r["cost_kind"].split("@")[0]) for r in runs if not r["id"].startswith("none-h-")]
+    return dict(smoke=True, costs={s: {k: str(v) for k, v in c.items()} for s, c in costs.items()}, choice=choose(costs), chain=report(xs, recs))
 
 
 if __name__ == "__main__":

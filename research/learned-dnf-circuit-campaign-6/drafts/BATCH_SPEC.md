@@ -1,4 +1,4 @@
-# Campaign 6: what the development batch's code computes (draft for review, sixth version)
+# Campaign 6: what the development batch's code computes (draft for review, seventh version)
 
 It implements the design note (`659d3a2`) under the stopping rule (`2e26910`). **[C]** marks a choice made here. The
 batch decides only `k`. Its definition of eligible is, unchanged, the one campaign 6 would preregister.
@@ -14,7 +14,9 @@ Python 3.12.3, numpy 2.3.5, ngspice 42, the PDK at `1232782c`, OpenBLAS SkylakeX
 **Runs per instance.** Nine, using campaign 5's deck and mismatch draw, with no noise (option B or C, section 5; A is
 excluded):
 
-- campaign 5's two calibration decks, guard on and guard off, by `run4.py --kind cal` unchanged;
+- campaign 5's two calibration decks, guard on and guard off. Declared deviation: `run4.py`'s own guard refuses these
+  seeds. So `batch6.py cal` calls its cal branch's frozen functions and writes the same deck and the same record, plus
+  one key; `test_batch.Equivalence` shows this without a simulator;
 - then five robust scans and two one-sided sets (section 2 and section 5).
 
 **Running them.**
@@ -33,12 +35,23 @@ excluded):
 
 A run that does not complete, at its limit or otherwise, makes its instance not measured and so not eligible.
 
-**Smoke.** A declared nominal-cell smoke runs before the marker:
+**Smoke**, declared, before the marker, on the nominal cell with the nominal calibration decks of campaign 5's RC.
+It is pushed on `evidence/learned-dnf-circuit-campaign-6-smoke`.
 
-- each scan kind (`a` pair, `c` line 1, `c` both lines) and the one-sided set (`a`), each at both ascent steps,
-  1/4 and 1/2;
-- on the nominal calibration decks of campaign 5's RC;
-- pushed on `evidence/learned-dnf-circuit-campaign-6-smoke`.
+- The whole instance at 1/4: the five scans and the two one-sided sets.
+- The `a` pair, `c` line 1 and `c` both-lines scans at 1/2.
+- Then the whole chain on its outputs: `predict6` (the wrapper, the instance's own Lean file, `check.sh`) and `report6`
+  (k, I, E, and the B/C rule). So every path that computes `k` runs once before the marker.
+
+**The 7692 check.** A declared check runs before the marker, on campaign 5's development seed 7692 (`check7692.py`, a
+separate entry point; `batch6`'s guard is unchanged). It tests whether the leak deck draws the calibration deck's cell:
+
+- `u(0)` and the first two joint-dose moves of each cell, against RM's 7692 guard-on deck;
+- tolerances of 2 uV and 20 uV;
+- beyond them: stop and report.
+
+**The marker gate.** `schedule6.py batch` refuses to run unless the marker is pushed on this branch and names the
+running code's commit and each file's SHA-256, with its `delta`.
 
 Its wall times serve only the choice of section 5. No number of the report comes from it.
 
@@ -143,7 +156,8 @@ the table (section 4) and passes it to `P.instance`.
 4. maxWrites is `Q1` or `Q2`; the rail is `10 x THETA`.
 
 **Eligible** = measured, and the frozen gate holds under `K = 0`, with Lean and the Python mirror agreeing per checker
-(campaign 5's `gate4.py lean` and `check.sh`, as its rehearsal's `gate_dev`). Campaign 5's `room` is that mirror, with
+(campaign 5's `gate4.py lean` and `check.sh`, as its rehearsal's `gate_dev`). The check is per instance: each instance
+gets its own Lean file and its own `check.sh` call, and passes only if its own file passes. Campaign 5's `room` is that mirror, with
 both sides of every crossing: training silent before the need and FIRE at it, and the tests at the trained state.
 
 **Settled: one threshold and one error per cell (option (a)).** The gate has one threshold and one error per cell.

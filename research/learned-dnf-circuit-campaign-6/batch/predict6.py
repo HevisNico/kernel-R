@@ -241,7 +241,8 @@ def collected(d):
 
 def predict_batch(batch_dir, out_dir, check=True):
     """Every instance of the batch from its collected runs (BATCH_DIR/<machine>/<run id>/ and BATCH_DIR/RUNS.json),
-    then the gate and campaign 5's check.sh on it. Writes PREDICTIONS.json, Gate6Batch.lean and the check's output."""
+    then the gate, one Lean file per instance, each checked by its own call of campaign 5's check.sh. Writes
+    PREDICTIONS.json, Gate6_<seed>.lean and check_<seed>.log."""
     import subprocess
     import gate4
     import batch6
@@ -270,28 +271,61 @@ def predict_batch(batch_dir, out_dir, check=True):
         t, dose, _ = table(on, off)
         x.update(questions(scans, dose, P.needs(t)))
         xs.append(x)
-    lean = od / "Gate6Batch.lean"
-    gated = gate_file(xs, lean)
-    ok = None
-    if check:
-        p = subprocess.run(["bash", str(C5 / "check.sh"), str(lean)], capture_output=True, text=True)
-        (od / "check_sh.log").write_text(p.stdout + p.stderr)
-        ok = p.returncode == 0 and "check.sh: passed" in p.stdout
+    gate_each(xs, od, check)
+    (od / "PREDICTIONS.json").write_text(json.dumps(dict(instances=xs), indent=1, default=str) + "\n")
+    return xs
+
+
+def gate_each(xs, od, check=True):
+    """The frozen gate per instance: its own Lean file (gate4.lean_file on that instance alone) and its own check.sh
+    call. An instance passes only if its own file passes, and the Python verdict (gate4.verdicts, K = 0) holds."""
+    import subprocess
+    import gate4
     for x in xs:
-        if x.get("measured") and "observation" in x:
-            x["gate_K0"] = bool(ok) and gate4.verdicts(x)["K0"]
-        else:
-            x["gate_K0"] = False
-    (od / "PREDICTIONS.json").write_text(json.dumps(dict(check_sh_passed=ok, gated=[x["seed"] for x in gated], instances=xs), indent=1, default=str) + "\n")
-    return xs, ok
+        x["gate_K0"] = False
+        if not (x.get("measured") and "observation" in x):
+            continue
+        name = "nominal" if x["seed"] is None else str(x["seed"])
+        lean = od / f"Gate6_{name}.lean"
+        gate_file([x], lean)
+        if check:
+            p = subprocess.run(["bash", str(C5 / "check.sh"), str(lean)], capture_output=True, text=True)
+            (od / f"check_{name}.log").write_text(p.stdout + p.stderr)
+            x["check_sh_passed"] = p.returncode == 0 and "check.sh: passed" in p.stdout
+        x["gate_K0"] = bool(x.get("check_sh_passed")) and gate4.verdicts(x)["K0"]
+
+
+def predict_smoke(smoke_dir, on, off, out_dir, check=True):
+    """The whole chain on the declared nominal smoke (seed None): the 1/4 instance's runs, the wrapper, its Lean
+    file and check.sh. Its numbers enter no report of the batch."""
+    sd, od = Path(smoke_dir), Path(out_dir)
+    od.mkdir(parents=True, exist_ok=True)
+    runs = json.loads((sd / "RUNS.json").read_text())
+    status = {r["id"]: r["status"] for r in runs if not r["id"].startswith("none-h-")}
+    scans, ones = {}, {}
+    for c, kind in CROSSINGS:
+        if status.get(f"none-q-scan-{c}-{kind}") == "complete":
+            scans[(c, kind)] = collected(sd / f"none-q-scan-{c}-{kind}")["result"]
+    for c in ("a", "b"):
+        if status.get(f"none-onesided-{c}") == "complete":
+            ones[c] = collected(sd / f"none-onesided-{c}")["result"]
+    x = predict_instance(None, "a", status, on, off, scans, ones)
+    t, dose, _ = table(on, off)
+    x.update(questions(scans, dose, P.needs(t)))
+    gate_each([x], od, check)
+    (od / "PREDICTIONS.json").write_text(json.dumps(dict(smoke=True, instances=[x]), indent=1, default=str) + "\n")
+    return x
 
 
 if __name__ == "__main__":
     import batch6
     batch6.require_debug()
     a = sys.argv[1:]
-    assert a and a[0] == "predict", "predict6.py predict BATCH_DIR OUT_DIR"
     print(c4.require_pinned())
-    xs, ok = predict_batch(a[1], a[2])
-    print(json.dumps(dict(check_sh_passed=ok, measured=[x["seed"] for x in xs if x.get("measured")],
-                          eligible=[x["seed"] for x in xs if x.get("gate_K0")])))
+    if a and a[0] == "predict":                             # predict6.py predict BATCH_DIR OUT_DIR
+        xs = predict_batch(a[1], a[2])
+    elif a and a[0] == "smoke":                             # predict6.py smoke SMOKE_DIR RC_CAL_ON RC_CAL_OFF OUT_DIR
+        xs = [predict_smoke(a[1], a[2], a[3], a[4])]
+    else:
+        raise SystemExit("predict6.py predict BATCH_DIR OUT_DIR | smoke SMOKE_DIR RC_CAL_ON RC_CAL_OFF OUT_DIR")
+    print(json.dumps(dict(measured=[x["seed"] for x in xs if x.get("measured")], eligible=[x["seed"] for x in xs if x.get("gate_K0")])))

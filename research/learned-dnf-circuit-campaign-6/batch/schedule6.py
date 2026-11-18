@@ -1,8 +1,11 @@
 """Campaign 6's development batch: the runs of one machine, four at a time, each limited (BATCH_SPEC.md section 1).
 New code. Started detached (`setsid nohup ... &`) by the machine's session, which stays active until it ends.
 
-  schedule6.py batch MACHINE BATCH_DIR DELTA NGSPICE PDK      the machine's five instances (7701-7705 on a, 7706-7710 on b)
-  schedule6.py smoke OUT RC_CAL_ON RC_CAL_OFF NGSPICE PDK       the declared nominal smokes (section 1), before the marker
+  schedule6.py batch MACHINE BATCH_DIR DELTA NGSPICE PDK      the machine's five instances (7701-7705 on a, 7706-7710 on b),
+                                                              refused unless the pushed marker names this very code
+  schedule6.py smoke OUT RC_CAL_ON RC_CAL_OFF NGSPICE PDK       the declared nominal smokes (section 1), before the marker:
+                                                              the whole nominal instance at 1/4, and its a pair, c line 1
+                                                              and c both lines at 1/2
 
 Per instance, three waves, each run started as soon as its inputs exist:
 1. the two calibration decks (batch6.py cal);
@@ -73,6 +76,30 @@ def command(job, folder, cal_dirs, ngspice, pdk):
     return [PY, "-B", str(HERE / "scan6.py"), out, s, c, "onesided", str(b[1]), str(b[2]), *dv, str(ngspice), str(pdk)], None
 
 
+REPO = HERE.parent.parent.parent
+BRANCH = "research/learned-dnf-circuit-campaign-6-wip"
+MARKER = "research/learned-dnf-circuit-campaign-6/BATCH_MARKER.json"
+
+
+def git(*args):
+    return subprocess.run(["git", "-C", str(REPO), *args], check=True, capture_output=True).stdout
+
+
+def marker_check():
+    """No seed of 7701 to 7710 runs before the marker: the marker, pushed on the -wip branch (fetched by name), names
+    the code's commit and each file's SHA-256, and every one of those files, here and at that commit, has that hash."""
+    import hashlib
+    git("fetch", "-q", "origin", BRANCH)
+    m = json.loads(git("show", f"FETCH_HEAD:{MARKER}"))
+    git("merge-base", "--is-ancestor", m["code_commit"], "FETCH_HEAD")
+    for path, h in m["files"].items():
+        assert hashlib.sha256((REPO / path).read_bytes()).hexdigest() == h, f"refused: {path} differs from the marker"
+        assert hashlib.sha256(git("show", f"{m['code_commit']}:{path}")).hexdigest() == h, f"refused: {path} at the marker's commit differs"
+    own = [str(Path(__file__).resolve().relative_to(REPO))] + [str((HERE / f).relative_to(REPO)) for f in ("batch6.py", "scan6.py", "predict6.py", "report6.py")]
+    assert all(f in m["files"] for f in own), "refused: the marker does not name the batch's own files"
+    return m
+
+
 def write_state(folder, jobs, status="running"):
     tmp = folder / "STATE.json.tmp"
     tmp.write_text(json.dumps(dict(status=status, jobs=jobs), indent=1, default=str) + "\n")
@@ -138,6 +165,8 @@ def main(argv=None):
     if a[0] == "batch":
         machine, folder, delta, ngspice, pdk = a[1], Path(a[2]), F(a[3]), Path(a[4]), Path(a[5])
         assert machine in ("a", "b") and delta in batch6.DELTAS
+        m = marker_check()
+        assert F(m["delta"]) == delta, f"refused: the marker's ascent step is {m['delta']}, not {delta}"
         seeds = [s for s in batch6.SEEDS if batch6.MACHINE_OF[s] == machine]
         jobs = [dict(j, machine=machine) for s in seeds for j in instance_jobs(s, delta)]
         jobs.sort(key=lambda j: (j["wave"], j["seed"]))
@@ -147,15 +176,17 @@ def main(argv=None):
         jobs = []
         for delta in batch6.DELTAS:
             tag = "q" if delta == F(1, 4) else "h"
-            for c, kind in (("a", "pair"), ("c", "line1"), ("c", "both")):
+            kinds = predict6.CROSSINGS if delta == F(1, 4) else (("a", "pair"), ("c", "line1"), ("c", "both"))
+            for c, kind in kinds:
                 jobs.append(dict(id=f"none-{tag}-scan-{c}-{kind}", limit="scan", cost_kind=f"{cost_kind(kind)}@{delta}", wave=2, cell=c, kind=kind,
                                  seed=None, delta=str(delta), machine="a"))
-        jobs.append(dict(id="none-onesided-a", limit="onesided", cost_kind="onesided", wave=3, cell="a", kind="onesided", seed=None, machine="a"))
+        for c in ("a", "b"):
+            jobs.append(dict(id=f"none-onesided-{c}", limit="onesided", cost_kind="onesided", wave=3, cell=c, kind="onesided", seed=None, machine="a"))
         folder.mkdir(parents=True, exist_ok=True)
-        # the one-sided smoke's bounds come from the 1/4 pair scan
-        link = folder / "none-scan-a-pair"
-        if not link.exists():
-            link.symlink_to("none-q-scan-a-pair")
+        for c, kind in predict6.CROSSINGS:          # the whole chain reads the 1/4 instance under the batch's names
+            link = folder / f"none-scan-{c}-{kind}"
+            if not link.exists():
+                link.symlink_to(f"none-q-scan-{c}-{kind}")
         schedule(folder, jobs, lambda s: (on, off), ngspice, pdk)
     else:
         raise SystemExit(__doc__)
