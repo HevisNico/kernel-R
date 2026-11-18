@@ -36,7 +36,8 @@ fires. The development batch showed that this predicts training on all 9 instanc
 
 **The instances.** Five fresh instances, seeds 7801 to 7805, are never extended and never rerun. An instance whose
 measures complete, and whose prediction passes the frozen Lean gate, is eligible. Only eligible instances get network
-runs. The batch had 6 eligible of 10, so about 3 eligible are expected here.
+runs. The batch had 6 eligible of 10, so about 3 eligible are expected here. For information only: at the batch's
+rate of 0.6, the chance of no eligible instance out of 5 is 0.4^5, about 1 %.
 
 **The claims.**
 - **Primary claim, without noise.** On each eligible instance, the network trains and answers all 16 input patterns
@@ -70,11 +71,15 @@ which are selected by per-cell measures before any network run. They are not abo
   (a network run). A run counts only when the launcher recorded it complete and its own record says it reached its
   last date [C5 §9].
 - **The model section** is the batch's: mismatch on, the deck of the batch's code [BS].
+- **The machines' CPU part** may differ between the two machines and between stages. It is recorded and does not stop
+  a launch. In the batch, both machines had the same CPU part, and machine `b`'s runs were 9 to 17 % slower than
+  machine `a`'s [BR §4]. The limits (twice the batch's means; the slowest batch run at 0.59 of its limit, section 6)
+  already cover that.
 
 ## 2. The measures
 
-Exactly the batch's measures, by the batch's code at the marker `085c6bc`, unchanged [BS; MU; BR §6]. Per instance,
-nine runs:
+Exactly the batch's measures, by the batch's code at the marker `085c6bc`. That code is unchanged, and is called
+through the new seed guard and stage manifests of section 8 [BS; MU; BR §6]. Per instance, nine runs:
 
 | Run | What it does |
 |---|---|
@@ -134,6 +139,34 @@ For each eligible instance, as campaign 5 defines them [C5 §5, §8]:
 
 No network run is made on an instance that is not eligible [DN rule 5]. With no eligible instance, no network run is
 made.
+
+**Which machine runs a network run: the two-shard rule** [new].
+- The launch kit refuses a stage that has no run on one of the two machines (`launch.py`, line 210: "Both machine
+  shards must be nonempty"). With one eligible instance, or with all of them measured on one machine, a network stage
+  could otherwise be one-sided.
+- So network runs are **assigned to machines independently of where their instance was measured**:
+  - within each stage, the stage's runs are listed in a fixed order: the runs without noise in seed order, then the
+    untrained run, or, in an N stage, in seed order;
+  - they then alternate `a`, `b`, `a`, `b`, … starting with `a`.
+- **With exactly one eligible instance**, its three noisy rounds are merged into **one N stage** of three runs (`a`,
+  `b`, `a`), so that no stage holds a single run. With two or more, N1, N2 and N3 each hold one run per eligible
+  instance and stay separate.
+- **What the machine of a network run does not change.** The predictions, needs, calendars, noise seeds and limits are
+  all fixed in the prediction record, which is pushed before any network run. A network run's deck depends on its
+  instance's seed, needs and noise seed, not on the machine. Only its wall time does.
+
+The stage plan in every case, at need 4, with the kit's bound at need 7 (the largest calendar):
+
+| Eligible | Network stages, runs on (a, b) | Network expected compute | Largest kit bound, need 4; need 7 |
+|---|---|---|---|
+| 0 | none | 0 s | none |
+| 1 | Q (1, 1); N (2, 1) | 4 000.0 s | 7 727.5 s; 9 817.5 s |
+| 2 | Q (2, 1); N1, N2, N3 (1, 1) each | 9 869.0 s | 7 025.0 s; 8 925.0 s |
+| 3 | Q (2, 2); N1, N2, N3 (2, 1) each | 11 098.5 s | 7 727.5 s; 9 817.5 s |
+| 4 | Q (3, 2); N1, N2, N3 (2, 2) each | 12 328.0 s | 8 430.0 s; 10 710.0 s |
+| 5 | Q (3, 3); N1, N2, N3 (3, 2) each | 13 557.5 s | 9 132.5 s; 11 602.5 s |
+
+Every stage has runs on both machines and fits the kit's 14 400 s.
 
 **Noise seeds** [C5 §6, the same rule]. The noisy run of round `n` of seed `S` has the noise seed `10 × S + n`: 78 011
 to 78 013 for seed 7801, up to 78 051 to 78 053 for seed 7805. The rehearsal (section 7) uses 77 011 for seed 7701 and
@@ -203,8 +236,9 @@ are separate**, and none changes another.
   - `uptime -s` and the inventory recorded at the start and end of every stage;
   - the pinned environment checked by every script.
   
-  The CPU model and the kernel are recorded and do not stop a launch, as ruled for the batch [BR §4]. The pinned
-  environment, 4 processors, `avx512f` and the SkylakeX OpenBLAS core are checked and do stop it.
+  The CPU model and the kernel may differ between machines and stages. They are recorded and do not stop a launch, as
+  ruled for the batch [BR §4]. The pinned environment, 4 processors, `avx512f` and the SkylakeX OpenBLAS core are
+  checked and do stop it.
 - **The stages, in a fixed sequence**, whatever the results [C5 §10.5]. The measures depend on each other: a scan needs
   the guard-on deck's dose, and a one-sided set needs both pair scans of its instance [BS]. So they are three stages:
 
@@ -214,9 +248,11 @@ are separate**, and none changes another.
   | M2 | the 20 scans and the 5 both-lines checks |
   | M3 | the 10 one-sided sets |
   | Q | the runs without noise of the eligible instances, and the untrained run |
-  | N1, N2, N3 | the noisy runs of rounds 1, 2 and 3 |
+  | N1, N2, N3 | the noisy runs of rounds 1, 2 and 3; one merged N stage when exactly one instance is eligible (section 4) |
 
-  Each stage is split by seed only if it does not fit the kit's bound of 14 400 s [C5 §10.5].
+  M1 to M3 are split by machine as the instances were assigned (section 1). Q and N follow the two-shard rule of
+  section 4. Every stage fits the kit's 14 400 s with runs on both machines. The measure stages' bounds are 6 902.5,
+  6 987.5 and 2 025.0 s.
 - **Measure limits** are twice the batch's means [SR], under `10 × ceil(2e / 10)`:
 
   | Run | Limit |
@@ -235,30 +271,42 @@ are separate**, and none changes another.
   | Case | Expected compute |
   |---|---|
   | The stopping rule's figure: the measures costed as one stage, the network on 3 eligible instances | **17 112.13 s** [BR §1] |
-  | This file's stages (M1 3 018.3 s, M2 3 188.9 s, M3 877.7 s; Q and N on 3 eligible instances) | **18 183.4 s** |
-  | Worst case, all 5 instances eligible | **20 642.4 s** |
-  | Rehearsal (section 7), outside the campaign | 3 192 s |
-  | Worst case plus rehearsal | 23 834 s |
+  | This file's measures (M1 3 018.3 s, M2 3 188.9 s, M3 877.7 s) | 7 084.9 s |
+  | With 1, 2, 3, 4 or 5 eligible instances (section 4) | 11 084.9; 16 953.9; **18 183.4**; 19 412.9; **20 642.4 s** |
+  | Rehearsal (section 7), outside the campaign: measures on the nominal cell 4 200.6 s, network 3 192.0 s | 7 392.6 s |
+  | Worst case plus rehearsal | 28 035.0 s |
 
-  Every figure is below 28 800 s. Each stage fits the kit's bound: the largest is the worst case's N stage, at
-  9 132.5 s.
+  The campaign's figure is below 28 800 s in every case, and so is the worst case with the rehearsal. The largest kit
+  bound of any stage is 11 602.5 s, the worst case's N stage at need 7.
 
 ## 7. The rehearsal, before any launch
 
 The design note requires a rehearsal under real conditions before any launch [DN rule 7]. Its proposed minimum
 [new]:
 
-- **What it exercises.** The network side of the frozen implementation. The batch has already run the measures under
-  the campaign's conditions, with the same code and machines, four at a time [BR §4].
+It has two parts, through the launch kit. No campaign seed enters either.
+
+**R-M, the measures through the kit, on the nominal cell.**
+- The batch ran its measures through `schedule6`, not the kit. So the kit path for measures is new, with its
+  manifests and seed guard, and the batch never ran it.
+- It is rehearsed on the **nominal cell** (no seed, which `batch6` accepts for smokes), outside any claim, through the
+  real M1, M2 and M3 manifests.
+- One nominal instance is measured on each machine, so that each stage has two shards.
+- No development seed is used, since the batch's rule says none of its runs is ever repeated [SR].
+- Expected compute: 4 200.6 s at the batch's means, which is conservative, since the nominal cell is faster than a
+  mismatched one. The kit bounds are 4 705.0, 3 995.0 and 1 350.0 s.
+- The two machines' records are compared, reported and not required, as in campaign 5 [C5 §11.5].
+
+**R-N, the network runs**, in one stage.
 - **The instances.** Two eligible development instances, **7701 on machine `a`** and **7706 on machine `b`**. They use
-  their collected measures and their pushed predictions [`0bd3b60`], and no measure is rerun. No campaign seed enters
-  the rehearsal.
-- **The runs**, through the launch kit:
+  their collected measures and their pushed predictions [`0bd3b60`], and no measure is rerun.
+- **The runs:**
   - on each instance, its run without noise with skew, at its own needs;
   - on each instance, **one noisy run** of round 1, with noise seeds 77 011 and 77 061. This is the first noisy run
     ever made on a mismatched cell;
   - on 7701, the untrained control run.
-- **The cost.** 3 192 s expected over both machines. The limits are those of section 4.
+- **The cost.** 3 192.0 s expected over both machines, with a kit bound of 7 820 s. The limits are those of section 4.
+- **The whole rehearsal:** 7 392.6 s expected.
 - **The 0.75 rule** [C5 §11.4]. If any rehearsal run uses more than 0.75 of its campaign limit, or does not complete,
   nothing is launched until an amendment.
 - **Also checked:**
@@ -280,13 +328,28 @@ The design note requires a rehearsal under real conditions before any launch [DN
 - **New, written only after this file is pushed**, then reviewed by both coordinators:
   - a seed guard for 7801 to 7805 and the rehearsal's seeds. `batch6.SEEDS` accepts only 7701 to 7710, so a campaign
     module must name the campaign's seeds without editing the batch's files;
-  - the stage manifests of M1 to M3, Q and N1 to N3, for the launch kit;
+  - the stage manifests of M1 to M3, Q and N1 to N3, for the launch kit, with the two-shard rule of section 4;
   - a network runner that calls campaign 5's frozen network branches of `run4` (run without noise, noisy, untrained)
     under the new seed guard and noise seeds;
   - the prediction record for the network: `PREDICTED.json` from `predict6_guard`'s instances, with the needs and
     learning ports the network runner and campaign 5's `analyze.py` read.
-- **Not yet checked:** whether campaign 5's `analyze.py` reads `predict6_guard`'s instance records unchanged. If it
-  does not, the adapter is new code and is declared at the freeze.
+- **The analysis: campaign 5's `analyze.py` is not usable unchanged**, as checked read-only on its frozen text. Its
+  claim functions are used unchanged: `word_claims`, `g_check`, `h_check`, `n_own`, the N-out, N-word, U and S
+  loops, and M1 and M3 to M8. They read only these fields of an instance: `seed`, `eligible`, `measured`,
+  `zero_error`, `needs`, `counts_N_out`, `learning_ports`, `observation` and `validation_residual_M5`. All of them are
+  present in `predict6_guard`'s records. A new adapter maps exactly three things:
+  1. **The reproduction check.** `analyze.main` recomputes `PREDICTED.json` with campaign 5's
+     `predicted.predictions`, the nominal-level prediction. The adapter recomputes it instead with `predict6_guard`
+     from the campaign's measures, byte for byte. If it differs, every claim is "not established" (section 9).
+  2. **`eligible`.** `analyze.py` reads a record's `eligible`. Here an instance is eligible only when it is measured,
+     `eligible` and `gate_K0` (section 3). So the record handed to `analyze.py` carries `eligible = eligible and
+     gate_K0`, with the original fields kept beside it.
+  3. **The run list and the constants.** `analyze.py` reads the record's `network_runs` (id, seed, needs, scenario,
+     noise, noise seed), its `constants` (decision 5's `b`, `w`, `d`, for M7) and campaign 5's `BEFORE_M.md`. The
+     adapter supplies this campaign's run list (section 4), its constants and its record before stage M.
+  
+  The adapter decides no claim. Its definitions of the claims are campaign 5's text in `analyze.py`, cited here before
+  the adapter exists.
 - **The marker.** It names the frozen commit and every imported file's SHA-256, as the batch's marker did. It is pushed
   alone, and every runner checks it before any simulation.
 - **CI** on the frozen commit:
