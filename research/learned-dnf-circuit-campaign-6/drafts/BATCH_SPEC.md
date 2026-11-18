@@ -1,4 +1,4 @@
-# Campaign 6: what the development batch's code computes (draft for review, second version)
+# Campaign 6: what the development batch's code computes (draft for review, third version)
 
 It implements the design note (`659d3a2`) under the stopping rule (`2e26910`). **[C]** marks a choice made here. The
 batch decides only `k`. Its definition of eligible is, unchanged, the one campaign 6 would preregister.
@@ -96,7 +96,9 @@ An instance is measured if all of these hold, otherwise it is not:
    and fails this test.
 
 Campaign 5's FIRE/`Z` agreement test is not used, because it compared readings with the nominal theta. Point 5
-replaces it with a test against the cell's own training.
+replaces it with a test against the cell's own training. In the code, a declared wrapper builds the table with
+`P.load` and `P.table`. From `table`'s `bad` list it drops only the entries that begin "FIRE bit" (that test, on the
+unscaled `Z`); every other entry is kept. It then rescales the table (section 4) and passes it to `P.instance`.
 
 ## 4. Eligible: the frozen gate, on the scans' mapping
 
@@ -119,20 +121,21 @@ replaces it with a test against the cell's own training.
      `(Z_r(7) - Z_r(0)) / 7` from the rescaled guard-off deck for read `r`.
    - Plus `S_x`, the spread: `max L - min L` over the cell's scans, rescaled.
    - The `K = 3` errors add the same `H_x + S_x` to campaign 5's noise budget. They are reported, as in campaign 5.
+   - In the code, the wrapper adds `H_x + S_x` to the budgets that `P.instance` returns. It then recomputes `P.room`,
+     `eligible` and `room_at_K3` from them, as `P.instance` does, before the gate is written.
 4. maxWrites is `Q1` or `Q2`; the rail is `10 x THETA`.
 
 **Eligible** = measured, and the frozen gate holds under `K = 0`, with Lean and the Python mirror agreeing per checker
 (campaign 5's `gate4.py lean` and `check.sh`, as its rehearsal's `gate_dev`). Campaign 5's `room` is that mirror, with
 both sides of every crossing: training silent before the need and FIRE at it, and the tests at the trained state.
 
-**Not settled, for the reviewers.** The gate has one threshold and one error per cell. So the coordinator's per-read,
-one-sided correction (`(L_r - min L) / step_r` on the silent side) cannot be expressed in it.
+**Settled: one threshold and one error per cell (option (a)).** The gate has one threshold and one error per cell.
 
-- `S_x` in the per-cell error is the note's default. It is what the gate can check.
-- It is also needed for soundness: with `theta = min L`, a read of kind `r` predicted to fire must clear its own
-  `L_r`. `testingError + S_x` gives that.
-- The per-read correction would need either a condition outside the gate, so that eligible would no longer be
-  exactly the gate, or a threshold per read kind, which is a theory change.
+- With `theta_x = min L`, the gate's silent checks are stricter than the cell's.
+- A read of kind `r` predicted to fire must clear its own `L_r`. `S_x`, added to testingError, gives that.
+- So the one-threshold default is checked by the gate itself, and eligible is exactly the gate.
+- A per-read correction would need a condition outside the gate, or a threshold per read kind (a theory change).
+  Neither is taken.
 - The theory's single dose per layer (`a` and `b` share it) is kept, as in campaign 5. Its misfit goes into
   `epsilon`.
 
