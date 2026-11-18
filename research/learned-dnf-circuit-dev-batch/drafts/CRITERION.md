@@ -27,8 +27,12 @@ result. The decision follows from the batch by the rules below, with nothing cho
   also the 0.3-late pair), with **at least 5 trip reads per cell and read kind**. Their rates of rise `dq/dt` at the
   crossing span **at least from half the smallest to twice the largest** `dq/dt` at the guard-on FIRE crossing among
   the firing reads of campaign 5's development instances (rehearsal stage RM, machine `a`). The batch's code computes
-  that range from that evidence and writes it in its output before any deck of the batch runs. The design of the trip
-  deck is fixed by the batch's code, which is committed and pushed before it runs.
+  that range from that evidence and writes it in its output before any deck of the batch runs.
+- **The trip deck spans the same states as the classified reads.** It follows the calibration decks' dose sequence
+  (dose stages 0 to 7, with the same clock-only dose on both ports of each cell between stages), and its trip reads
+  are spread across those stages. The minimum of 5 trip reads per cell and read kind holds over the whole deck. The
+  leave-one-out residuals (section 4) thus carry any change of trip level across stages into `R` and `e`.
+- The design of the trip deck is fixed by the batch's code, which is committed and pushed before it runs.
 - The pinned toolchain of campaign 5's section 10.2. Every output is pushed as it is. A deck that does not complete
   makes its instance not measured under both definitions.
 
