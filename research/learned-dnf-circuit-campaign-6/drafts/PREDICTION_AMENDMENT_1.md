@@ -1,9 +1,9 @@
 # Campaign 6: amendment 1 to PREDICTION.md
 
-**Draft for review.** With both coordinators' reviews and the owner's go, this file is pushed alone on
-`research/learned-dnf-circuit-campaign-6` as `research/learned-dnf-circuit-campaign-6/PREDICTION_AMENDMENT_1.md`. That
-happens after `PREDICTION.md` (`df1a3cb`, SHA-256 `8e7392c5…2240`) and **before the implementation is frozen**. No seed
-from 7801 has been simulated, and no stage has been launched.
+This file is campaign 6's amendment 1, `research/learned-dnf-circuit-campaign-6/PREDICTION_AMENDMENT_1.md`. It is
+pushed alone on `research/learned-dnf-circuit-campaign-6`, with the owner's go. That happens after `PREDICTION.md`
+(`df1a3cb`, SHA-256 `8e7392c5…2240`) and **before the implementation is frozen**. No seed from 7801 has been simulated,
+and no stage has been launched.
 
 ## What it changes
 
