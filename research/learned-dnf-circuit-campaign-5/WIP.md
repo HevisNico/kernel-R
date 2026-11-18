@@ -13,12 +13,12 @@ protocol commit, as the kit requires.
 | `c4.py` | folder; seeds 7601 up; development seeds 7691–7693; nominal noise seed 90 961, round 1 only; `limit` = 10 ceil(2 e / 10) and `rehearsal_limit` = min(10 ceil(3 e / 10), 3 580), both on exact Fractions; `NOISE_MODELS` | 4, 6, 10.4, 11.2 |
 | `plan.py` | limits without any rehearsal ratio; Q and N split by the rule of M (Q.1, N1.1, …); the closed map of stage names; the closed list of safeguard (ii) (no `MEASURED.json`, no extractions; `REPORT.md`); BEFORE_M.md of 10.8; the rehearsal's run lists (`rehearsal_runs`); campaign ids without dots, rehearsal ids apart; the frozen list | 10.4–10.8, 11.2 |
 | `run4.py` | the seed guard of 10.6 (the nominal cell refused in a campaign stage), the noise-model guard, the refusal of an optimised interpreter (every guard is an assert) | 6, 10.6 |
-| `predicted.py` | the exact guarded fit (`drafts/prerun/predicted5.patch`); the control instance when none is eligible; the rehearsal's limits as a flag | 4.2, B3 |
+| `predicted.py` | the exact guarded fit (`drafts/prerun/predicted5.patch`); the control instance when none is eligible; the rehearsal's limits as a flag; refreeze after the chain test of RC (11.3): the nominal cell has round 1 only and can be its own control | 4.2, B3, 6, 11.3 |
 | `cases.py` | the cases of 7.4 (asymmetric P0, the controls), from the pre-run's `cases5.py`; `build()` still returns the list | 7.4 |
 | `analyze.py` | dates of the run and H's arithmetic exact; no limits basis; a rehearsal flag | 4.2 (rule 1), 9 |
 | `rehearsal.py` | rewritten: the registered kind on two machines, subcommands, every check appended as it is done | 11 |
 | `collect.py` | new: campaign 4's `collect_with_links.py`, unchanged but its docstring | 10.7 |
-| `test_campaign.py` | rewritten for campaign 5's rules (27 tests) | all |
+| `test_campaign.py` | rewritten for campaign 5's rules (30 tests, the nominal cell's predictions among them) | all |
 | `check.sh`, `audit_cases.sh` | campaign 5's cases and reference files (`expected/`), `C5_CI_STRUCTURAL` | 7.3, 10.2 |
 | `gate4.py`, `mirror_mutations.py`, `structural_compare.py` | docstrings only | — |
 | `m8_case.py` | new for campaign 5: M8's eligible path with the nominal smoke run (`smoke/`) | 8 (M8) |
