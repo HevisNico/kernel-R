@@ -34,9 +34,15 @@ Campaign 6 applies the same scan to the reads the AND-OR theorem uses:
   ports dosed together), and each port alone at the trained state;
 - layer 2: each line of `c` alone, and both lines together.
 
-Campaign 3's cells did not learn, but these do. **A need is then predicted from two measures:** the scanned threshold,
-in stored-voltage space, and each dose's measured move of the stored voltage (campaign 5's joint dose). This assumes
-that a state imposed from outside fires where the same state reached by training fires. The batch tests that first.
+Campaign 3's ring cells also learned, dose by dose. Its scan measured each port's threshold (the gap from the preset)
+and its dose, and **the need was the least `n` with `n x dose >= gap`**, with room checked on both sides of the
+crossing. Campaign 6 keeps exactly that method. What is new is not learning but the reads it applies to:
+
+- **two-port reads**, the AND of layer 1, where both ports are dosed together;
+- **two layers**, with `c` trained by the actual FIRE of `a` and `b`;
+- **routed pulses** into `c`.
+
+Campaign 3 is evidence for single ports, not for these. The batch tests them first.
 
 ## What is reused as it is
 
@@ -77,8 +83,9 @@ as the result.
 
 ## Questions the batch must answer before any rule is written
 
-1. **Does the scan predict training?** On each instance, do the scanned threshold and the measured dose moves predict
-   the stage at which the calibration deck's training actually crosses?
+1. **Does campaign 3's method still predict training on the new reads?** On each instance, do the scanned threshold
+   and the measured dose moves predict the stage at which the calibration deck's training actually crosses, for the
+   two-port reads of `a` and `b` and the routed reads of `c`?
 2. **Where do crossings land within a step?** Training advances in steps of about 3.8 % of the score. Scanning removes
    the ±2 % spread between cells, but not where a crossing falls within its step. For each crossing, the batch reports
    the margin on both sides (stage `need - 1` and stage `need`), and which budget term dominates: the half bracket, the
