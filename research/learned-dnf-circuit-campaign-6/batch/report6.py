@@ -89,24 +89,34 @@ def choose(smoke):
     return out
 
 
+LIMIT_KIND = {"cal-on": "cal", "cal-off": "cal", "pair": "scan", "line": "scan", "both": "scan", "onesided": "onesided"}
+
+
 def mean_walls(records):
-    """The batch's mean wall time of each kind, exactly (its records' wall_s, binary values)."""
+    """The batch's mean wall time of each kind, exactly: a complete run at its own wall_s (binary value), and a run
+    stopped at its limit at that limit (batch6.limit_s of its kind), so that a run cut at its limit does not lower
+    the mean. A run that failed otherwise, or never started, has no wall time and is left out (reported)."""
     by = {}
     for r in records:
-        by.setdefault(r["cost_kind"], []).append(F(r["wall_s"]))
+        if r["status"] == "complete":
+            by.setdefault(r["cost_kind"], []).append(F(r["wall_s"]))
+        elif r["status"] == "missing (limit)":
+            by.setdefault(r["cost_kind"], []).append(F(batch6.limit_s(LIMIT_KIND[r["cost_kind"]])))
     return {k: sum(v) / len(v) for k, v in by.items()}
 
 
 def report(instances, records):
     """instances: predict6's dicts; records: every run's {id, machine, cost_kind, status, wall_s}."""
     k = sum(1 for x in instances if x.get("eligible") and x.get("gate_K0"))
-    means = mean_walls([r for r in records if r["status"] == "complete"])
+    means = mean_walls(records)
     d = decision(k, means) if all(kind in means for kind, _ in KINDS) else dict(k=k, go=False, why="a kind has no complete run")
     per_machine = {}
     for r in records:
         per_machine.setdefault(f"{r['cost_kind']}@{r['machine']}", []).append(r["wall_s"])
     q1 = {str(x["seed"]): x.get("question_1") for x in instances}
-    return dict(k=k, eligible=[x["seed"] for x in instances if x.get("eligible") and x.get("gate_K0")], decision={kk: str(v) for kk, v in d.items()},
+    left_out = [r["id"] for r in records if r["status"] not in ("complete", "missing (limit)")]
+    return dict(k=k, means_rule="complete runs at their wall time, runs at their limit at the limit, the others left out",
+                runs_at_their_limit=[r["id"] for r in records if r["status"] == "missing (limit)"], runs_left_out_of_the_means=left_out, eligible=[x["seed"] for x in instances if x.get("eligible") and x.get("gate_K0")], decision={kk: str(v) for kk, v in d.items()},
                 means={kk: str(v) for kk, v in means.items()}, question_1=q1,
                 question_1_failures=sum(1 for v in q1.values() if v for w in v.values() if not w["agree"]),
                 question_2={str(x["seed"]): x.get("question_2") for x in instances},

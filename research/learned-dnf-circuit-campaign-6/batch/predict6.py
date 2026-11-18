@@ -6,8 +6,9 @@ For one instance, from its two calibration decks and its scans and one-sided set
 1. the table: `P.load` and `P.table`, unchanged. In `table`'s `bad` list the entries that begin "FIRE bit" (campaign 5's
    test against the nominal theta) are replaced by the entries of section 3, point 6; every other entry is kept;
 2. measured (section 3): the runs complete, the brackets consistent, the crossings below 8, every D_p > 0, question 1
-   (ceil(s*) = the first firing stage of the guard-on deck, a need above 7 failing it), the one-sided sets silent,
-   and every deck read against the cell's own trip levels;
+   (ceil(s*) = the first firing stage of the guard-on deck, a need above 7 failing it), the one-sided sets run at
+   the recomputed bounds (exactly, as Fractions) and silent, every scan's u(0) within 20 uV of its own guard-on
+   deck's, and every deck read against the cell's own trip levels;
 3. per-cell units (section 4.1): theta_x = min L; every Z and L of cell x times 100 000 / theta_x, to the nearest
    integer, ties to even;
 4. `P.instance` on the rescaled table, unchanged; then H_x + S_x added to every error (K = 0 and K = 3), and `P.room`,
@@ -54,9 +55,20 @@ def doses_V(dose):
     return out
 
 
+U0_TOL_V = F(20, 10 ** 6)                                # a scan's u(0) against its own guard-on deck: 20 uV
+
+
 def table(on_dir, off_dir):
     t, dose, bad = P.table(*P.load(on_dir, off_dir))
     return t, dose, [b for b in bad if not b.startswith("FIRE bit")]
+
+
+def deck_u0(on_dir):
+    """u of every port before the guard-on deck's first read (stage 0, `empty`), in V: the scans' u(0) is checked
+    against it."""
+    on_rows, _ = P.load(on_dir, on_dir)
+    by = {(r["cell"], r["stage"], r["read"]): r for r in on_rows}
+    return {(c, p): F(by[(c, 0, "empty")]["ports"][str(p)]["u_before_mV"]) / 1000 for c in c4.CELLS for p in (1, 2) if (c, 0, "empty") in by}
 
 
 def steps(t2, c):
@@ -84,7 +96,22 @@ def one_sided_bounds(t2, c, H):
     return out
 
 
-def measure_instance(seed, statuses, t, dose, bad, scans, onesided):
+def u0_check(runs, deck_u):
+    """Every scan's and one-sided set's u(0) (its `u0_V`, both ports of its cell) within 20 uV of the guard-on deck's."""
+    why = []
+    for name, r in runs.items():
+        c = name[0]
+        for p in (1, 2):
+            if "u0_V" not in r or (c, p) not in deck_u:
+                why.append(f"{name}: u(0) of port {p} not recorded")
+                continue
+            d = F(r["u0_V"][str(p)]) - deck_u[(c, p)]
+            if abs(d) > U0_TOL_V:
+                why.append(f"{name}: u(0) of port {p} differs from the guard-on deck's by {float(d) * 1e6:.3f} uV (more than 20 uV)")
+    return why
+
+
+def measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u=None):
     """statuses: {run id: status}; scans: {(cell, kind): the scan's `result`}; onesided: {cell: result}.
     Returns (why_not_measured, per-cell data). The rescaled table is in data['t2']."""
     why = list(bad)
@@ -99,6 +126,8 @@ def measure_instance(seed, statuses, t, dose, bad, scans, onesided):
             why.append(f"scan {key}: no crossing below 8")
         elif not r.get("consistent"):
             why.append(f"scan {key}: bracket not consistent ({r.get('why', 'after the majority')})")
+    if deck_u is not None:
+        why += u0_check({**{k: v for k, v in scans.items()}, **{(c, "onesided"): v for c, v in onesided.items()}}, deck_u)
     data = dict(D_mV={f"{c}{p}": str(v) for (c, p), v in D.items()})
     if why or any(k not in scans for k in CROSSINGS):
         why += [f"scan {k}: missing" for k in CROSSINGS if k not in scans]
@@ -127,6 +156,8 @@ def measure_instance(seed, statuses, t, dose, bad, scans, onesided):
         o = onesided.get(c)
         if o is None:
             why.append(f"one-sided set of {c}: missing")
+        elif {p: F(o["bounds"][str(p)]) for p in (1, 2)} != bounds[c]:
+            why.append(f"one-sided set of {c}: its bounds {o['bounds']} are not the recomputed {bounds[c]}")
         elif not o.get("all_silent"):
             why.append(f"one-sided set of {c}: a port alone fired at or below its bound {o.get('bounds')}")
     for (c, k, r), v in sorted(t2.items()):
@@ -179,7 +210,7 @@ def augmented(x, H, S, t2):
 
 def predict_instance(seed, machine, statuses, on_dir, off_dir, scans, onesided):
     t, dose, bad = table(on_dir, off_dir)
-    why, data = measure_instance(seed, statuses, t, dose, bad, scans, onesided)
+    why, data = measure_instance(seed, statuses, t, dose, bad, scans, onesided, deck_u0(on_dir))
     if why:
         return dict(seed=seed, machine=machine, measured=False, why_not_measured=why, eligible=False,
                     **{k: v for k, v in data.items() if k != "t2"})
@@ -262,11 +293,13 @@ def predict_batch(batch_dir, out_dir, check=True):
         for c, kind in CROSSINGS:
             i = f"{seed}-scan-{c}-{kind}"
             if mine.get(i) == "complete":
-                scans[(c, kind)] = collected(bd / m / i)["result"]
+                rec = collected(bd / m / i)
+                scans[(c, kind)] = dict(rec["result"], u0_V=rec["u0_V"])
         for c in ("a", "b"):
             i = f"{seed}-onesided-{c}"
             if mine.get(i) == "complete":
-                ones[c] = collected(bd / m / i)["result"]
+                rec = collected(bd / m / i)
+                ones[c] = dict(rec["result"], u0_V=rec["u0_V"])
         x = predict_instance(seed, m, mine, on, off, scans, ones)
         t, dose, _ = table(on, off)
         x.update(questions(scans, dose, P.needs(t)))
@@ -305,10 +338,12 @@ def predict_smoke(smoke_dir, on, off, out_dir, check=True):
     scans, ones = {}, {}
     for c, kind in CROSSINGS:
         if status.get(f"none-q-scan-{c}-{kind}") == "complete":
-            scans[(c, kind)] = collected(sd / f"none-q-scan-{c}-{kind}")["result"]
+            rec = collected(sd / f"none-q-scan-{c}-{kind}")
+            scans[(c, kind)] = dict(rec["result"], u0_V=rec["u0_V"])
     for c in ("a", "b"):
         if status.get(f"none-onesided-{c}") == "complete":
-            ones[c] = collected(sd / f"none-onesided-{c}")["result"]
+            rec = collected(sd / f"none-onesided-{c}")
+            ones[c] = dict(rec["result"], u0_V=rec["u0_V"])
     x = predict_instance(None, "a", status, on, off, scans, ones)
     t, dose, _ = table(on, off)
     x.update(questions(scans, dose, P.needs(t)))

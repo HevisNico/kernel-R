@@ -1,4 +1,4 @@
-# Campaign 6: what the development batch's code computes (draft for review, seventh version)
+# Campaign 6: what the development batch's code computes (draft for review, eighth version)
 
 It implements the design note (`659d3a2`) under the stopping rule (`2e26910`). **[C]** marks a choice made here. The
 batch decides only `k`. Its definition of eligible is, unchanged, the one campaign 6 would preregister.
@@ -124,6 +124,11 @@ An instance is measured if all of these hold, otherwise it is not:
      - `c`: `port 1` and `port 2` use the line scans, and `both` and the 0.3-late `both` use the both-lines scan;
      - an `empty` read must be silent.
    - A disagreement outside the exempt band makes the instance not measured.
+
+7. **Each scan's own cell.** Every scan's and one-sided set's `u(0)`, both ports of its cell, must lie within 20 uV of
+   the cell's `u` before the first read of its own guard-on deck.
+8. **The one-sided sets' bounds.** The bounds each set recorded must equal the bounds recomputed from the deck and the
+   pair scan (`predict6.one_sided_bounds`), exactly, as Fractions.
 
 This rescopes campaign 5's FIRE/`Z` test from the nominal theta to the cell's own trip levels. In the code, a declared
 wrapper builds the table with `P.load` and `P.table`. In `table`'s `bad` list it replaces the entries that begin
@@ -253,7 +258,12 @@ seen in the scans, as evidence on that assumption.
 **`k` and the decision.** `k` = the eligible count. Then `I = ceil(30 / k)` if `k >= 2`, then `E` by the stopping
 rule:
 
-- measures: 9 runs per instance on `I` instances, each run at the batch's mean wall time for its kind;
+- measures: 9 runs per instance on `I` instances, each run at the batch's mean wall time for its kind:
+  - a complete run counts at its wall time;
+  - a run stopped at its limit counts at that limit, so that a cut run does not lower the mean;
+  - a run that failed otherwise has no wall time, and is left out and listed;
+  - the two machines' `RUNS.json` are merged first (`schedule6.py merge`): no id twice, exactly the 90 runs, every
+    status kept;
 - network: on `ceil(k I / 10)` instances, at 718, 132 and 1 400 s;
 - limits `10 ceil(2 e / 10)`, stages split as in campaign 5's section 10.5, and per stage and machine
   `sum / 4 + 3/4 max`.

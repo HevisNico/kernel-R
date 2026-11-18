@@ -3,6 +3,7 @@ New code. Started detached (`setsid nohup ... &`) by the machine's session, whic
 
   schedule6.py batch MACHINE BATCH_DIR DELTA NGSPICE PDK      the machine's five instances (7701-7705 on a, 7706-7710 on b),
                                                               refused unless the pushed marker names this very code
+  schedule6.py merge BATCH_DIR                                 BATCH_DIR/RUNS.json from a/RUNS.json and b/RUNS.json
   schedule6.py smoke OUT RC_CAL_ON RC_CAL_OFF NGSPICE PDK       the declared nominal smokes (section 1), before the marker:
                                                               the whole nominal instance at 1/4, and its a pair, c line 1
                                                               and c both lines at 1/2
@@ -159,6 +160,25 @@ def schedule(folder, jobs, cal_of, ngspice, pdk):
     return jobs
 
 
+def expected_ids():
+    return {j["id"] for s in batch6.SEEDS for j in instance_jobs(s, F(1, 4))}
+
+
+def merge(batch_dir):
+    """BATCH_DIR/RUNS.json from BATCH_DIR/a/RUNS.json and BATCH_DIR/b/RUNS.json: every run of both machines, each
+    status kept as it is; no id twice, and exactly the batch's 90 runs (10 instances x 9)."""
+    runs = []
+    for m in ("a", "b"):
+        part = json.loads((batch_dir / m / "RUNS.json").read_text())
+        assert all(r["machine"] == m for r in part), f"a run of {m}/RUNS.json is not of machine {m}"
+        runs += part
+    ids = [r["id"] for r in runs]
+    assert len(ids) == len(set(ids)), "an id appears twice"
+    assert set(ids) == expected_ids() and len(ids) == 90, "not the batch's 90 runs"
+    (batch_dir / "RUNS.json").write_text(json.dumps(runs, indent=1) + "\n")
+    return runs
+
+
 def main(argv=None):
     a = sys.argv[1:] if argv is None else argv
     batch6.require_debug()
@@ -171,6 +191,8 @@ def main(argv=None):
         jobs = [dict(j, machine=machine) for s in seeds for j in instance_jobs(s, delta)]
         jobs.sort(key=lambda j: (j["wave"], j["seed"]))
         schedule(folder / machine, jobs, lambda s: (folder / machine / f"{s}-cal-on", folder / machine / f"{s}-cal-off"), ngspice, pdk)
+    elif a[0] == "merge":
+        print(json.dumps(dict(runs=len(merge(Path(a[1]))))))
     elif a[0] == "smoke":
         folder, on, off, ngspice, pdk = Path(a[1]), Path(a[2]), Path(a[3]), Path(a[4]), Path(a[5])
         jobs = []

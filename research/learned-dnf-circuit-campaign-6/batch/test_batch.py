@@ -32,7 +32,17 @@ def nominal_scans(L=None, s_star="7/2", half="1/64"):
     return out
 
 
-ONES = {c: dict(all_silent=True, silent={"1": True, "2": True}) for c in ("a", "b")}
+def ones_for(t, scans, silent=True):
+    """One-sided sets run at exactly the bounds predict6 recomputes (from the pair scan's theta_x and H_x)."""
+    out = {}
+    for c in ("a", "b"):
+        r = scans[(c, "pair")]
+        theta = int(r["L"])
+        t2 = {k: dict(v, Z=predict6.scale(v["Z"], theta)) for k, v in t.items() if k[0] == c}
+        H = -(-F(r["half_bracket"]) * predict6.steps(t2, c)["both"] // 1)
+        b = predict6.one_sided_bounds(t2, c, H)
+        out[c] = dict(all_silent=silent, silent={"1": silent, "2": silent}, bounds={str(p): str(v) for p, v in b.items()})
+    return out
 STATUSES = {f"7701-{x}": "complete" for x in ("cal-on", "cal-off")}
 
 
@@ -62,24 +72,25 @@ class Wrapper(unittest.TestCase):
         self.assertEqual(kept, ["missing read ('c', 2, 'empty')"])
 
     def test_own_level_test(self):
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(), ONES)
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(), ones_for(self.t, nominal_scans()))
         self.assertEqual(why, [])
         # a level of a's pair read above every firing pair read of the deck: the deck's FIRE bits now disagree with it
-        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans({("a", "pair"): 100000, ("c", "both"): 200000}), ONES)
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans({("a", "pair"): 100000, ("c", "both"): 200000}), ones_for(self.t, nominal_scans()))
         self.assertTrue(any("disagree with the cell's own level" in w and "'c'" in w for w in why), why)
 
     def test_question_1_in_measured(self):
-        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(s_star="9/2"), ONES)
+        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(s_star="9/2"), ones_for(self.t, nominal_scans(s_star="9/2")))
         self.assertTrue(any(w.startswith("question 1: need a:") for w in why))
         self.assertEqual(data["question_1"]["a"], dict(predicted=5, observed=4, agree=False))
 
     def test_causes(self):
         sc = nominal_scans()
         sc[("c", "line2")] = dict(crossing=False, why="no crossing below 8")
-        why, _ = predict6.measure_instance(7701, dict(STATUSES, **{"7701-scan-a-pair": "missing (limit)"}), self.t, self.dose, [], sc, ONES)
+        why, _ = predict6.measure_instance(7701, dict(STATUSES, **{"7701-scan-a-pair": "missing (limit)"}), self.t, self.dose, [], sc, ones_for(self.t, nominal_scans()))
         self.assertIn("run 7701-scan-a-pair did not complete: missing (limit)", why)
         self.assertIn("scan ('c', 'line2'): no crossing below 8", why)
-        ones = dict(ONES, b=dict(all_silent=False, bounds={"1": "4", "2": "4"}))
+        ones = ones_for(self.t, nominal_scans())
+        ones["b"] = dict(ones["b"], all_silent=False)
         why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(), ones)
         self.assertTrue(any(w.startswith("one-sided set of b") for w in why))
 
@@ -88,14 +99,14 @@ class Wrapper(unittest.TestCase):
         self.assertEqual(predict6.scale(99000, 99000), 100000)
         self.assertEqual(predict6.scale(1, 200000), 0)                  # 0.5, to the even
         self.assertEqual(predict6.scale(3, 200000), 2)                  # 1.5, to the even
-        _, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans({("a", "pair"): 99000}), ONES)
+        _, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans({("a", "pair"): 99000}), ones_for(self.t, nominal_scans({("a", "pair"): 99000})))
         self.assertEqual(data["theta"]["a"], 99000)
         self.assertEqual(data["t2"][("a", 4, "both")]["Z"], round(F(self.t[("a", 4, "both")]["Z"]) * 100000 / 99000))
         self.assertEqual(data["t2"][("b", 4, "both")]["Z"], self.t[("b", 4, "both")]["Z"])
 
     def test_errors_and_room(self):
         L = {("c", "line1"): 100000, ("c", "line2"): 100040, ("c", "both"): 100020}
-        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(L), ONES)
+        why, data = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], nominal_scans(L), ones_for(self.t, nominal_scans(L)))
         self.assertEqual(why, [])
         self.assertEqual(data["S"], dict(a=0, b=0, c=40))
         for c in c4.CELLS:
@@ -247,6 +258,64 @@ class SmokeCosts(unittest.TestCase):
         c = report6.smoke_costs(runs)
         self.assertEqual(c["1/2"], dict(pair=F(450), line=F(450), both=F(450), onesided=F(150)))
         self.assertIn(report6.choose(c)["choice"], ("B", "C"))
+
+
+class ReviewDefects(unittest.TestCase):
+    def setUp(self):
+        self.t, self.dose = cases.nominal()
+
+    def test_one_sided_bounds_rechecked(self):
+        sc = nominal_scans()
+        ones = ones_for(self.t, sc)
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones)
+        self.assertEqual(why, [])
+        ones["a"] = dict(ones["a"], bounds=dict(ones["a"]["bounds"], **{"1": str(F(ones["a"]["bounds"]["1"]) + F(1, 1000))}))
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones)
+        self.assertTrue(any(w.startswith("one-sided set of a: its bounds") for w in why), why)
+
+    def test_runs_at_their_limit_in_the_means(self):
+        recs = [dict(id="1", cost_kind="pair", status="complete", wall_s=800.0), dict(id="2", cost_kind="pair", status="missing (limit)", wall_s=None),
+                dict(id="3", cost_kind="pair", status="failed (exit 1)", wall_s=None), dict(id="4", cost_kind="onesided", status="missing (limit)", wall_s=None)]
+        m = report6.mean_walls(recs)
+        self.assertEqual(m["pair"], (F(800) + 2360) / 2)
+        self.assertEqual(m["onesided"], F(750))
+
+    def test_merge(self):
+        import schedule6
+        import tempfile
+        ids = sorted(schedule6.expected_ids())
+        self.assertEqual(len(ids), 90)
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            for m in ("a", "b"):
+                (d / m).mkdir()
+                mine = [dict(id=i, machine=m, cost_kind="x", status="complete" if i.endswith("on") else "missing (limit)", wall_s=1.0)
+                        for i in ids if batch6.MACHINE_OF[int(i.split("-")[0])] == m]
+                (d / m / "RUNS.json").write_text(json.dumps(mine))
+            runs = schedule6.merge(d)
+            self.assertEqual(sorted(r["id"] for r in runs), ids)
+            self.assertEqual({r["id"]: r["status"] for r in runs}, {r["id"]: r["status"] for r in json.loads((d / "RUNS.json").read_text())})
+            part = json.loads((d / "b" / "RUNS.json").read_text())
+            (d / "b" / "RUNS.json").write_text(json.dumps(part + part[:1]))
+            with self.assertRaises(AssertionError):
+                schedule6.merge(d)
+            (d / "b" / "RUNS.json").write_text(json.dumps(part[1:]))
+            with self.assertRaises(AssertionError):
+                schedule6.merge(d)
+
+    def test_u0_against_the_own_deck(self):
+        sc = nominal_scans()
+        deck = {(c, p): F(3895, 10000) for c in c4.CELLS for p in (1, 2)}
+        for v in sc.values():
+            v["u0_V"] = {"1": "0.3895", "2": "0.389519"}                 # 19 uV
+        ones = ones_for(self.t, sc)
+        for v in ones.values():
+            v["u0_V"] = {"1": "0.3895", "2": "0.3895"}
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, deck)
+        self.assertEqual(why, [])
+        sc[("c", "both")]["u0_V"] = {"1": "0.3895", "2": "0.389521"}     # 21 uV
+        why, _ = predict6.measure_instance(7701, STATUSES, self.t, self.dose, [], sc, ones, deck)
+        self.assertTrue(any("('c', 'both'): u(0) of port 2 differs" in w for w in why), why)
 
 
 if __name__ == "__main__":
