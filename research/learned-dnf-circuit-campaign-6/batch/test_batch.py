@@ -459,5 +459,11 @@ class Serialization(unittest.TestCase):
         json.dumps(dict(instances=[x]), default=str)
         self.assertEqual(x["L"]["a-pair"], 100000)
 
+class Reach(unittest.TestCase):
+    def test_reach_is_for_the_nominal_cell_only(self):
+        with self.assertRaises(AssertionError):
+            scan6.main(["/tmp/never", "7701", "a", "reach", "10", "0.00135", "0.00135", "ngspice", "pdk"])
+
+
 if __name__ == "__main__":
     unittest.main()

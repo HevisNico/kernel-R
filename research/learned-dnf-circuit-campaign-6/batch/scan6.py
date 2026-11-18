@@ -21,6 +21,9 @@ deck); the cell is brought to it within 2 uV per port (`move`).
   scan6.py OUT SEED|none CELL KIND DELTA D1_V D2_V NGSPICE PDK       KIND: pair (a, b), line1, line2 (c)
   scan6.py OUT SEED|none c bothfire D1_V D2_V NGSPICE PDK            c's both lines (the second 0.3 late) read once at
                                                                      the preset, s = 0: the one-sided FIRE check (v9)
+  scan6.py OUT none CELL reach S D1_V D2_V NGSPICE PDK              the nominal cell brought to the path at s = S, both
+                                                                     ports, without a read: it decides nothing (the
+                                                                     reach-only read of MAPPING_U.md 5)
   scan6.py OUT SEED|none CELL onesided S1 S2 D1_V D2_V NGSPICE PDK    a or b: port 1 alone read at s = S1, port 2 at S2
 
 The run's record (`record.json`): what was asked, every read (its s, the ports' u, FIRE and its date), and the
@@ -54,7 +57,7 @@ S_MAX = 8
 ORIGIN = 100e-6
 READS = dict(pair=((1, 0.0), (2, 0.0)), line1=((1, 0.0),), line2=((2, 0.0),), both=((1, 0.0), (2, c4.SKEW_PAIR)),
              port1=((1, 0.0),), port2=((2, 0.0),))
-MOVING = dict(pair=(1, 2), line1=(1,), line2=(2,), both=(1, 2), onesided=(1, 2), bothfire=(1, 2))
+MOVING = dict(pair=(1, 2), line1=(1,), line2=(2,), both=(1, 2), onesided=(1, 2), bothfire=(1, 2), reach=(1, 2))
 
 
 def amp(cell):
@@ -243,7 +246,23 @@ def main(argv=None):
     print(c4.require_pinned())
     assert cell in c4.CELLS, cell
     ev = out / "evidence"
-    if kind == "bothfire":
+    if kind == "reach":
+        assert seed is None, "the reach-only read is for the nominal cell (MAPPING_U.md 5), never a seed of the batch"
+        s_target, d1, d2, ngspice, pdk = F(a[4]), a[5], a[6], a[7], a[8]
+        D = {"1": d1, "2": d2}
+        drv = Driver(ev, seed, cell, MOVING["reach"], {1: d1, 2: d2}, Path(ngspice), Path(pdk))
+        ok = True
+        try:
+            drv.move(s_target)
+        except RuntimeError as e:
+            ok = False
+            res_why = str(e)
+        target = drv.target(s_target)
+        res = dict(kind="reach", s=str(s_target), reached=ok, target_V={str(p): target[p] for p in (1, 2)},
+                   u_V={str(p): drv.u[p] for p in (1, 2)}, decides="nothing (MAPPING_U.md 5)")
+        if not ok:
+            res["why"] = res_why
+    elif kind == "bothfire":
         assert cell == "c", "the both-lines FIRE check is for c"
         d1, d2, ngspice, pdk = a[4:8]
         D = {"1": d1, "2": d2}
