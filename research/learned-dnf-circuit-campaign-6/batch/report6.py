@@ -146,9 +146,14 @@ def main(argv=None):
 
 
 def smoke_costs(runs):
-    """The smokes' wall times: {"1/4": {pair, line, both, onesided}, "1/2": {...}}; the one-sided set, which has no
-    ascent, counts at both steps. Every kind must have completed at both steps."""
-    by = {r["cost_kind"]: F(r["wall_s"]) for r in runs if r["status"] == "complete"}
+    """The smokes' wall times: {"1/4": {pair, line, both, onesided}, "1/2": {...}}, each the mean over the smoke runs of
+    that kind and step (at 1/4: pair = a and b, line = line 1 and line 2; onesided = a and b); the one-sided set, which
+    has no ascent, counts at both steps. Every kind must have completed at both steps."""
+    each = {}
+    for r in runs:
+        if r["status"] == "complete":
+            each.setdefault(r["cost_kind"], []).append(F(r["wall_s"]))
+    by = {k: sum(v) / len(v) for k, v in each.items()}             # the mean over the smoke runs of each kind
     out = {}
     for step in ("1/4", "1/2"):
         out[step] = dict(pair=by[f"pair@{step}"], line=by[f"line@{step}"], both=by[f"both@{step}"], onesided=by["onesided"])

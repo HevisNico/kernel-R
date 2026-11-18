@@ -80,6 +80,8 @@ def command(job, folder, cal_dirs, ngspice, pdk):
 REPO = HERE.parent.parent.parent
 BRANCH = "research/learned-dnf-circuit-campaign-6-wip"
 MARKER = "research/learned-dnf-circuit-campaign-6/BATCH_MARKER.json"
+CHECK_BRANCH = "evidence/learned-dnf-circuit-campaign-6-check7692"
+CHECK_FILE = "research/learned-dnf-circuit-campaign-6/evidence/check7692/CHECK_7692.json"
 
 
 def git(*args):
@@ -88,7 +90,9 @@ def git(*args):
 
 def marker_check():
     """No seed of 7701 to 7710 runs before the marker: the marker, pushed on the -wip branch (fetched by name), names
-    the code's commit and each file's SHA-256, and every one of those files, here and at that commit, has that hash."""
+    the code's commit and each file's SHA-256, and every one of those files, here and at that commit, has that hash;
+    it names every file the batch imports; and it records the 7692 check's CHECK_7692.json (its SHA-256, on its
+    evidence branch) with all_within true, so that the check's STOP is enforced here."""
     import hashlib
     git("fetch", "-q", "origin", BRANCH)
     m = json.loads(git("show", f"FETCH_HEAD:{MARKER}"))
@@ -96,9 +100,23 @@ def marker_check():
     for path, h in m["files"].items():
         assert hashlib.sha256((REPO / path).read_bytes()).hexdigest() == h, f"refused: {path} differs from the marker"
         assert hashlib.sha256(git("show", f"{m['code_commit']}:{path}")).hexdigest() == h, f"refused: {path} at the marker's commit differs"
-    own = [str(Path(__file__).resolve().relative_to(REPO))] + [str((HERE / f).relative_to(REPO)) for f in ("batch6.py", "scan6.py", "predict6.py", "report6.py")]
-    assert all(f in m["files"] for f in own), "refused: the marker does not name the batch's own files"
+    missing = [f for f in imported_files() if f not in m["files"]]
+    assert not missing, f"refused: the marker does not name every file the batch imports: {missing[:5]}"
+    c = m.get("check7692", {})
+    assert c.get("all_within") is True, "refused: the declared 7692 check is not recorded as within its tolerances"
+    git("fetch", "-q", "origin", CHECK_BRANCH)
+    got = hashlib.sha256(git("show", f"FETCH_HEAD:{CHECK_FILE}")).hexdigest()
+    assert got == c.get("sha256"), "refused: CHECK_7692.json on its evidence branch is not the one the marker records"
+    assert json.loads(git("show", f"FETCH_HEAD:{CHECK_FILE}"))["all_within"] is True, "refused: CHECK_7692.json says not within"
     return m
+
+
+def imported_files():
+    """Every file the batch runs: its own (batch/*.py but the tests) and the 38 frozen campaign-5 files it imports."""
+    own = sorted(str(p.relative_to(REPO)) for p in HERE.glob("*.py") if p.name != "test_batch.py")
+    import plan
+    c5 = [f for f in plan.FROZEN if f.startswith(plan.BASE + "/")]
+    return own + c5
 
 
 def write_state(folder, jobs, status="running"):

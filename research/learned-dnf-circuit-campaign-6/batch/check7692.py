@@ -37,7 +37,7 @@ def main(argv=None):
     by = {(r["cell"], r["stage"], r["read"]): r for r in rows}
     res = {}
     for c in c4.CELLS:
-        drv = scan6.Driver(out / c, SEED, c, (1, 2), {1: 1e-3, 2: 1e-3}, ngspice, pdk)
+        drv = scan6.Driver(out / c / "evidence", SEED, c, (1, 2), {1: 1e-3, 2: 1e-3}, ngspice, pdk)
         u0 = dict(drv.u0)
         moves = []
         for _ in range(2):

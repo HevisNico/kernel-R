@@ -230,25 +230,39 @@ class Marker(unittest.TestCase):
             with self.assertRaises(subprocess.CalledProcessError):
                 schedule6.main(["batch", "a", "/tmp/never", "1/4", "ngspice", "pdk"])
 
-    def test_refused_on_a_changed_file(self):
-        import hashlib
+    def fake(self, m, check):
         import schedule6
-        own = [str((HERE / f).relative_to(schedule6.REPO)) for f in ("schedule6.py", "batch6.py", "scan6.py", "predict6.py", "report6.py")]
-        files = {f: hashlib.sha256((schedule6.REPO / f).read_bytes()).hexdigest() for f in own}
-        files[own[1]] = "0" * 64
-        m = dict(code_commit="c" * 40, delta="1/4", files=files)
 
         def git(*args):
-            if args[0] == "show" and args[1].startswith("FETCH_HEAD:"):
+            if args[0] == "show" and args[1] == f"FETCH_HEAD:{schedule6.MARKER}":
                 return json.dumps(m).encode()
+            if args[0] == "show" and args[1] == f"FETCH_HEAD:{schedule6.CHECK_FILE}":
+                return check
             if args[0] == "show":
                 return (schedule6.REPO / args[1].split(":", 1)[1]).read_bytes()
             return b""
-        with mock.patch.object(schedule6, "git", side_effect=git):
-            with self.assertRaises(AssertionError):
-                schedule6.marker_check()
-            m["files"][own[1]] = hashlib.sha256((schedule6.REPO / own[1]).read_bytes()).hexdigest()
+        return git
+
+    def test_marker_rules(self):
+        import hashlib
+        import schedule6
+        files = {f: hashlib.sha256((schedule6.REPO / f).read_bytes()).hexdigest() for f in schedule6.imported_files()}
+        self.assertEqual(sum(1 for f in files if "campaign-5/" in f), 38)
+        self.assertIn(str((HERE / "check7692.py").relative_to(schedule6.REPO)), files)
+        check = json.dumps(dict(all_within=True)).encode()
+        good = dict(code_commit="c" * 40, delta="1/4", files=dict(files), check7692=dict(sha256=hashlib.sha256(check).hexdigest(), all_within=True))
+        with mock.patch.object(schedule6, "git", side_effect=self.fake(good, check)):
             self.assertEqual(schedule6.marker_check()["delta"], "1/4")
+        bad = copy.deepcopy(good)
+        bad["files"][str((HERE / "batch6.py").relative_to(schedule6.REPO))] = "0" * 64
+        missing = copy.deepcopy(good)
+        del missing["files"]["research/learned-dnf-circuit-campaign-5/predicted.py"]
+        notwithin = copy.deepcopy(good)
+        notwithin["check7692"]["all_within"] = False
+        for m, chk in ((bad, check), (missing, check), (notwithin, check), (good, json.dumps(dict(all_within=False)).encode())):
+            with mock.patch.object(schedule6, "git", side_effect=self.fake(m, chk)):
+                with self.assertRaises(AssertionError):
+                    schedule6.marker_check()
 
 
 class SmokeCosts(unittest.TestCase):
@@ -257,6 +271,9 @@ class SmokeCosts(unittest.TestCase):
         runs.append(dict(cost_kind="onesided", status="complete", wall_s=150.0))
         c = report6.smoke_costs(runs)
         self.assertEqual(c["1/2"], dict(pair=F(450), line=F(450), both=F(450), onesided=F(150)))
+        runs += [dict(cost_kind="pair@1/4", status="complete", wall_s=700.0), dict(cost_kind="onesided", status="complete", wall_s=250.0)]
+        c = report6.smoke_costs(runs)
+        self.assertEqual((c["1/4"]["pair"], c["1/4"]["onesided"], c["1/2"]["onesided"]), (F(600), F(200), F(200)))   # means, not the last
         self.assertIn(report6.choose(c)["choice"], ("B", "C"))
 
 
