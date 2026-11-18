@@ -54,27 +54,44 @@ freeze at `6832af3`, and is written into the rehearsal's record (`rehearsal.NOTE
 | M3, M7, M8's latency comparison (`assumption_on_c`) | `analyze.py` | reported floats, no integer |
 | the geometric fit and M5 | `predicted.py` | floats, decide nothing (4.2) |
 
-## The procedure of a rehearsal stage (PREDICTION.md, 11)
+## The procedure of a stage (PREDICTION.md, 10 and 11), as ruled by the coordinator on 2026-11-18
 
-On the branch `research/learned-dnf-circuit-campaign-5-rehearsal`, built from the frozen commit plus only files of the
-closed list. `PY` = `/home/user/owner-prep/venv312/bin/python`, `KIT` = the launch kit, from a clean clone at that branch.
+On the branch `research/learned-dnf-circuit-campaign-5-rehearsal` (then the campaign branch), built from the frozen
+commit plus only files of the closed list. `PY` = `/home/user/owner-prep/venv312/bin/python`, `KIT` = the launch kit.
 
-1. Each machine: `uptime -s`; its inventory (`launch.py inventory`), committed as `INVENTORY_<m>.json`.
-2. Machine a: `rehearsal.py runs NAME STAGE_NAME_RUNS.json [PREDICTED.json]`; `plan.py stage-file NAME` (pushed alone); then
-   `plan.py manifest NAME STAGE_COMMIT SOURCE_COMMIT FROZEN_COMMIT CAMPAIGN_NAME.json`; `launch.py preflight` and `prepare`
-   (the marker); push. CI must be green on the source commit.
-3. Each machine, at once: `rehearsal.py memory` detached, then `launch.py run-machine` detached (`setsid nohup`), the
-   uptime recorder; the session waits in the foreground (loops of at most 10 minutes) until the shard ends.
-4. Each machine: `collect.py` once into a new folder, pushed (waveforms of 10 MB and more to an evidence branch).
-5. Machine a: the checks of 11.5 for that stage (`rehearsal.py check`), appended at once. The 0.75 rule (`check limits`)
-   judges RM, RQ, RN and RMEM; for RC the same command records the wall times only (`rc_wall_times`, reported, 11.3).
-   After RM, `rehearsal.py predict` (the development instances' `PREDICTED.json` and its gate, pushed alone before RQ's
-   manifest).
-6. RG: `rehearsal.py guard`, on each machine: every runner refusal made by run4.py started as the kit starts it. At the
-   end: `rehearsal.py record`.
+The kit's rule that orders everything: at launch (and at any `resume-machine`), `published_marker` fetches the remote
+branch head and `runtime_unchanged` (launch.py:225) refuses unless that head differs from the manifest's
+`source_commit` only by that manifest, its marker and the two inventories. Hence:
 
-Each live CI gate costs about 45 minutes, so several stages' manifests share one source commit where the text allows,
-each stage file still pushed alone before its manifest: RC with RM; then RQ, RN and RMEM after the development
-`PREDICTED.json`; then M1 with M2; then every manifest of Q and N together before Q (12.6).
+- Two stages never share a source commit. The source commit of a stage is the previous stage's marker commit, or the
+  last commit pushed before its manifest (a stage file, a run list, the development `PREDICTED.json`); CI must be
+  green on that exact commit. A CI run on a marker commit runs while that stage runs.
+- While a stage runs, nothing is pushed to the branch. A stage's manifest and marker are pushed only after the
+  previous stage has ended on both machines.
+- On the branch go only stage files, run lists, manifests, markers, inventories and the development `PREDICTED.json`.
+  Every stage's evidence and the checks file go to `evidence/*` branches, one per stage and machine. The record
+  (`REHEARSAL.json`) and copies of the small evidence come onto the branch only after the last rehearsal stage has
+  ended on both machines. The campaign branch follows the same pattern (M1, M2, Q, N, ...).
+- Each stage's go names its marker commit; each machine checks that its fetched head equals it before preflight.
 
-No kit launch before 2026-11-18 03:00 UTC.
+Per stage S, on each machine m:
+
+1. Once, just before the first manifests: `launch.py identity`; `launch.py inventory --machine m`, committed as
+   `INVENTORY_<m>.json` (one per machine and branch; on the campaign branch, M1's new inventories are compared with the
+   last rehearsal inventory).
+2. Machine a: `rehearsal.py runs` / `plan.py runs` (in the source commit); `plan.py manifest NAME STAGE_COMMIT
+   SOURCE_COMMIT 373cb3d OUT`; `launch.py preflight`, `prepare`; the manifest and marker pushed; the marker commit sent.
+3. On the go: `uptime -s`; fetch by name and check head = marker commit; 4.0: `launch.py inventory` to
+   `INVENTORY_BEFORE_<S>_<m>.json` (not committed), equal field by field to the committed inventory except
+   `boot_utc` and `recorded_utc`, or no launch (10.1); `preflight`; then `rehearsal.py memory`, `launch.py
+   run-machine` and the uptime recorder, each detached (`setsid nohup`); the session waits in the foreground (loops
+   of at most 9 minutes) and stays active through every wait, CI waits included.
+4. `collect.py` once into a new folder; the evidence (with `INVENTORY_BEFORE_<S>_<m>.json`, the memory samples and
+   the uptime log) pushed to `evidence/learned-dnf-circuit-campaign-5-rehearsal-<S>-<m>` (files over 100 MiB in
+   parts with `PARTS.json`).
+5. Machine a: the checks of 11.5 (`rehearsal.py check`), appended at once to the checks file on its evidence branch.
+   The 0.75 rule judges RM, RQ, RN and RMEM; for RC it records the wall times only. After RM, `rehearsal.py predict`
+   (the development `PREDICTED.json`, pushed alone before RQ's manifest).
+6. RG: `rehearsal.py guard` on each machine. At the end: `rehearsal.py record`; the commit that pushes
+   `REHEARSAL.json` names the governing commit fb002cf of STAGE_RC.md and STAGE_RM.md (byte-identical to a2d8bad,
+   accepted by the coordinator), as REPORT.md will.
