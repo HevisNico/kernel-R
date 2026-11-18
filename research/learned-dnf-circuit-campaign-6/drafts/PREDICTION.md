@@ -35,7 +35,9 @@ fires. The development batch showed that this predicts training on all 9 instanc
 **The instances.** Five fresh instances, seeds 7801 to 7805, are never extended and never rerun. An instance whose
 measures complete, and whose prediction passes the frozen Lean gate, is eligible. Only eligible instances get network
 runs. The batch had 6 eligible of 10, so about 3 eligible are expected here. For information only: at the batch's
-rate of 0.6, the chance of no eligible instance out of 5 is 0.4^5, about 1 %.
+rate of 0.6, the chance of no eligible instance out of 5 is 0.4^5, about 1 %. With the minimum of 2 (below), the
+chance of at most 1 eligible instance is 0.4^5 + 5 × 0.6 × 0.4^4, about 8.7 %. That is the chance that the primary
+claim cannot be established for lack of instances.
 
 **The claims.**
 - **Primary claim, without noise.** On each eligible instance, the network trains and answers all 16 input patterns
@@ -52,8 +54,8 @@ rate of 0.6, the chance of no eligible instance out of 5 is 0.4^5, about 1 %.
   - With exactly 1 counted instance, it is "held on one instance, not established".
   - With 0, it is "not established".
 - One wrong letter or output on a counted instance refutes it.
-- **Claims under noise** are proposed to need the same minimum: 2 eligible instances with a counted run. The owner
-  confirms this with the whole text.
+- **Claims under noise** need the same minimum: counted runs from at least 2 eligible instances (the owner's decision
+  of 2026-11-18).
   - With counted runs from exactly 1 instance and no failure, each is "held on one instance, not established".
   - With no counted run, each is "not established".
   - A failure in a counted run refutes it.
@@ -224,7 +226,7 @@ are separate**, and none changes another.
    - **N-word:** a learning port with room up to it reads exactly its zero-error word.
    - Each is refuted by one port-run that fails it, and is **not established** without a counted port-run.
 
-   **For N-out, N-own and N-word** (a proposal; the owner confirms it with the whole text):
+   **For N-out, N-own and N-word** (the owner's decision of 2026-11-18):
    - Each is judged on its counted runs only. A missing noisy run is reported, and never counted as a pass.
    - Each needs the primary claim's minimum: its counted runs must come from **at least 2 eligible instances**.
    - With counted runs from exactly 1 instance and no failure, it is "held on one instance, not established".
@@ -365,8 +367,11 @@ It has two parts, through the launch kit. No campaign seed enters either.
      `eligible` and `gate_K0` (section 3). So the record handed to `analyze.py` carries `eligible = eligible and
      gate_K0`, with the original fields kept beside it.
   3. **The run list and the constants.** `analyze.py` reads the record's `network_runs` (id, seed, needs, scenario,
-     noise, noise seed), its `constants` (decision 5's `b`, `w`, `d`, for M7) and campaign 5's `BEFORE_M.md`. The
-     adapter supplies this campaign's run list (section 4), its constants and its record before stage M.
+     noise, noise seed) and its `constants` (decision 5's `b`, `w`, `d`, for M7). The adapter supplies this
+     campaign's run list (section 4) and constants in the prediction record.
+     - `analyze.py` also reads campaign 5's `BEFORE_M.md` (lines 126 and 130), but only to pass it to
+       `predicted.predictions`, which mapping 1 replaces.
+     - So this campaign needs no record before stage M, and defines none. This is the simpler of the two choices.
   
   4. **The minimum of 2 counted instances** (section 5). `analyze.py` gives "held" as soon as one counted run holds,
      and counts runs, not instances. The adapter keeps its verdict, failures and counts unchanged, and adds the number
