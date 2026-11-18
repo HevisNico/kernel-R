@@ -1,100 +1,163 @@
-# Campaign 6: what the development batch's code computes (draft for review)
+# Campaign 6: what the development batch's code computes (draft for review, second version)
 
-It implements the design note (`659d3a2`) under the stopping rule (`2e26910`). It sets no campaign rule. **[C]** marks
-each choice made here.
+It implements the design note (`659d3a2`) under the stopping rule (`2e26910`). **[C]** marks a choice made here. The
+batch decides only `k`. Its definition of eligible is, unchanged, the one campaign 6 would preregister.
 
-**Seeds and runs.** The batch runs seeds 7701 to 7710 only, 7701–7705 on machine `a` and 7706–7710 on `b`. All of
-them use campaign 5's toolchain, its deck and its mismatch draw, with no noise. Each instance gets 11 runs:
+## 1. Runs, machines, procedure
 
-- campaign 5's two calibration decks, guard on and guard off, unchanged (`run4.py --kind cal`);
-- nine robust scans: for `a` and for `b`, the pair read and each port alone; for `c`, line 1 alone, line 2 alone, and
-  both lines with the second 0.3 unit late **[C: the skewed pair, the less favourable of campaign 5's two]**.
+**Seeds and machines.** Seeds 7701 to 7710 only; any other seed is refused. Seeds 7701–7705 run on `a` and 7706–7710
+on `b`.
 
-The scans run after their instance's calibration decks. Four runs at a time per machine, detached, outside the kit
-**[C: no campaign protocol to bind]**.
+**Toolchain.** Campaign 5's pinned toolchain, checked before every run (`c4.require_pinned`, the kit's `identity`):
+Python 3.12.3, numpy 2.3.5, ngspice 42, the PDK at `1232782c`, OpenBLAS SkylakeX.
 
-**The scan.** Every scan moves along the training path. Port `p` of a cell sits at `u_p(s) = u_p(0) - s D_p`, where:
+**Runs per instance.** Eleven, using campaign 5's deck and mismatch draw, with no noise:
 
-- `u_p(0)` is the preset;
-- `D_p` is the mean of the eight joint-dose moves of `p` in the guard-off deck, the measured dose move;
-- `s` is a real number of stages.
+- campaign 5's two calibration decks, guard on and guard off, by `run4.py --kind cal` unchanged;
+- then nine robust scans (section 2).
 
-Layer 1 thus reads each port alone at the trained state of both ports **[C]**. For `c`, a line alone is moved alone,
-the other line staying at the preset; both lines move together for the both-lines scan **[C]**. The cell is brought
-to `u(s)` by joint clock-only doses (writes enabled) and per-port imposed leaks, each port within 2 uV, as campaign 3's
-`move` does. Each read is gated read-only and uses campaign 5's pulses: 0.49 on `a` and `b`, 1 on `c`, a direct pulse
-standing for the routed one **[C]**. A read fires if it meets campaign 5's FIRE window.
+**Running them.**
+- Four runs at a time per machine, detached (`setsid nohup`), while the session stays active in waits of at most
+  5 min.
+- Outside the kit **[C]**.
+- `uptime -s` and the inventory at the start and end on each machine.
+- Collection by campaign 5's `collect.py`.
+- Every output is pushed as it is, on `evidence/learned-dnf-circuit-campaign-6-batch-<machine>`, with files above
+  100 MiB in parts of 90 000 000 bytes listed in `PARTS.json`.
 
-The search, then the majority, as campaign 3:
+**Limits.** Each run is limited to `min(10 ceil(3 e / 10), 3 580)` s **[C: factor 3, as campaign 5's rehearsal]**:
 
-- a coarse ascent in `s` from 0, in steps of 1/4, up to `s = 8`, then bisection until the bracket is at most 20 uV on
-  the port of larger `D_p`;
-- if contradictory states remain, one round reads each of the two disputed states twice more, and each counts by the
-  majority of its three reads.
+- `e` = 925 s for a calibration deck (campaign 5's cost model), giving 2 780 s;
+- `e` = 785 s for a scan (campaign 3's 520 s times 1.51), giving 2 360 s.
 
-The scan writes:
+A run that does not complete, at its limit or otherwise, makes its instance not measured and so not eligible.
 
-- its bracket `[s_lo, s_hi]`, with threshold `s* = (s_lo + s_hi) / 2` and half bracket `h = (s_hi - s_lo) / 2`;
-- its trip level `L`: the score `Z` (campaign 5's `zint` of `q_peak_before_fire`) of the weakest fired state;
-- or "no crossing below 8".
+**Smoke.** A declared nominal-cell smoke of each new scan kind (`a` pair, `a` port 1, `c` line 1, `c` both lines) runs
+before the marker. It uses the nominal calibration decks of campaign 5's RC, and is pushed on
+`evidence/learned-dnf-circuit-campaign-6-smoke`. No number of the report comes from it.
 
-**Measured.** An instance is measured if all of these hold, otherwise it is not:
+## 2. The scans
 
-- all 11 runs complete;
-- every scan's bracket is consistent after the majority (every fired state lies above every silent state in `s`);
-- every `D_p > 0`.
+**Reads.**
+- For `a` and for `b`: the pair read, port 1 alone, and port 2 alone.
+- For `c`: line 1 alone, line 2 alone, and both lines with the second 0.3 unit late (accepted).
 
-Campaign 5's FIRE/`Z` agreement test is not used: it compared readings with the nominal theta.
+Pulses are campaign 5's: 0.49 on layer 1 and 1 on `c`. A direct pulse stands for the routed one, and question 5
+reports any difference. Each read is gated read-only. FIRE is campaign 5's: the latch rises through 0.9 V within
+1.1 units.
 
-**Needs** (campaign 3's rule, `n x D >= gap` with `gap = s* D`): `n = ceil(s*)` for the pair of `a`, the pair of
-`b`, line 1 of `c` and line 2 of `c`, each required in 1 to 7 **[C: the calibration stages]**.
+**The training path.** Port `p` is held at `u_p(s) = u_p(0) - s D_p`, where:
 
-**Budget of a read `r` of cell `x`, in stages, exact.** `B_r` is the sum of four terms:
+- `u_p(0)` is its preset;
+- `D_p` is the mean of the eight joint-dose moves `m_{p,k}` (`k = 0..7`, `move_mV` of the "joint dose" slots) in the
+  guard-on deck, which is campaign 5's dose;
+- the range is `s` in `[0, 8]`, which in mV is `u_p(0)` down to `u_p(0) - 8 D_p`.
 
-- `h_r`, the measure's own error;
-- the variation of the dose moves: `max_k |sum_{j<k} m_j - k D_p| / D_p` over `k <= 8` and the read's active ports;
-- the noise-free allowance of campaign 5 (`K = 0`): `0.030 mV / D_p`, summed over the read's active ports;
-- the one-threshold default: `(max L - min L)` over the cell's scanned kinds, divided by the read's score step per
-  stage `(Z_r(7) - Z_r(0)) / 7`, taken from the guard-off deck **[C: that conversion]**.
+Which ports move:
 
-The `K = 3` noise term, `3 sqrt(w^2 + b^2 + n d^2) / D_p` per active port, is reported. It does not decide
-eligibility, as in campaign 5.
+- Layer 1: both ports move together, for every read of the cell (port alone means "at the trained state").
+- `c`: a line alone moves alone, the other line staying at `u(0)`; both lines move together for the both-lines scan
+  **[C]**.
 
-**Eligible** (room on both sides of every crossing). An instance is eligible if it is measured, all four needs exist,
-and every inequality below holds (with `s*` of a port alone, or of both lines, taken as `+inf` when it never crosses):
+The cell is brought to `u(s)` by joint clock-only doses and per-port imposed leaks, each port within 2 uV, as
+campaign 3's `move` does.
 
-- for `x` in `a`, `b`, with need `n`:
-  - pair silent at `n - 1`: `s*_pair - (n - 1) >= B`;
-  - pair FIRE at `n`: `n - s*_pair >= B`;
-  - each port alone silent at `n`: `s*_p - n >= B`;
-- for `c`, with needs `n_1`, `n_2`:
-  - line `p` silent at `n_p - 1` and FIRE at `n_p`, in the same way;
-  - both lines FIRE at `min(n_1, n_2)`: `min(n_1, n_2) - s*_both >= B`.
+**The search.**
+1. A coarse ascent from `s = 0` in steps of 1/4.
+2. Then bisection, until the bracket is at most 20 uV on the port of larger `D_p`.
 
-Campaign 5's rail and guarded-fit conditions are dropped **[C: no fit is made]**.
+**Disputed states**, as campaign 3. At the end of the search, the bracket is contradictory if some fired isolated
+state has an `s` that is not larger than that of some silent one. Then:
 
-**Time limits.** Each run is limited to `min(10 ceil(3 E_r / 10), 3 580)` s **[C: factor 3, as campaign 5's
-rehearsal]**. `E_r` is 925 s for a calibration deck (campaign 5's cost model) and 785 s for a scan: campaign 3's 520 s
-times 1.51. A run at its limit is missing, and its instance is not eligible.
+- the fired state of smallest `s` is brought back, from where the cell then is, and read twice more;
+- then the silent state of largest `s` is brought back and read twice more;
+- one round only;
+- each disputed state counts by the majority of its three reads.
 
-**Answers to the note's five questions** (all reported, none deciding):
+The bracket is **consistent** if, after the majority, every state counted fired has a larger `s` than every state
+counted silent.
 
-1. For each of the four needs, `ceil(s*)` against the first firing stage of the matching read in the guard-on deck.
-2. Each margin, in stages and in mV, and which of the four budget terms dominates.
-3. `L` per cell and read kind, and its spread.
-4. Wall time per run kind and machine.
-5. Bracket widths, contradictory states, rounds of repeats, and their outcomes.
+**Outputs of a scan.**
+- The bracket `[s_lo, s_hi]`, the threshold `s* = (s_lo + s_hi) / 2`, and the half bracket `h = (s_hi - s_lo) / 2`.
+- The trip level `L`: the `Z` of the weakest fired state, campaign 5's `zint` of its `q_peak_before_fire`.
+- Or "no crossing below 8".
 
-**The report.** It gives `k`, then `I = ceil(30 / k)` if `k >= 2`, then `E` by the stopping rule:
+## 3. Measured
+
+An instance is measured if all of these hold, otherwise it is not:
+
+1. All 11 runs complete.
+2. Every bracket is consistent.
+3. The five crossing scans (pair of `a`, pair of `b`, both lines of `c`, line 1 of `c`, line 2 of `c`) each cross
+   below 8.
+4. Every `D_p > 0`.
+5. **Question 1:** for each of the four needs (pair of `a`, pair of `b`, line 1 of `c`, line 2 of `c`), `ceil(s*)`
+   equals the first stage at which the matching read fires in the guard-on deck. A need above 7 cannot be checked
+   and fails this test.
+
+Campaign 5's FIRE/`Z` agreement test is not used, because it compared readings with the nominal theta. Point 5
+replaces it with a test against the cell's own training.
+
+## 4. Eligible: the frozen gate, on the scans' mapping
+
+**Mapping onto the gate's fields** (campaign 5's `predicted.py` and `gate4.py`, imported and never edited).
+
+1. Threshold.
+   - Each cell's threshold is `theta_x = min L` over its scans (layer 1: 3 scans; `c`: 3).
+   - Every score of cell `x`, the deck's `Z` and the scans' `L`, is multiplied by `100 000 / theta_x` and rounded to
+     the nearest integer, ties to even.
+   - So in the gate's units every cell's threshold is the gate's fixed `THETA = 100 000`, and the theory is
+     unchanged **[C: per-cell units]**.
+2. Campaign 5's pipeline, called unchanged on the rescaled table (`P.instance`):
+   - the needs (first firing stage in the guard-on deck);
+   - `Q1 = max(n_a, n_b) + 2` and `Q2 = max(n_c1, n_c2) + 2`, both at most 7 (so the needs are at most 5);
+   - the guarded tuple (help, initialGain per port, one dose per layer), fitted on stages `0..Q`;
+   - `epsilon`, the sensitivities, and the predicted observation.
+3. Errors of cell `x`, both trainingError and testingError, at `K = 0`: campaign 5's budget plus two terms.
+   - Campaign 5's budget: `epsilon + ceil(0.030 mV x the sum of the sensitivities)`.
+   - Plus `H_x`, the half bracket: the largest `ceil(h_r x step_r)` over the cell's scans, where `step_r` is
+     `(Z_r(7) - Z_r(0)) / 7` from the rescaled guard-off deck for read `r`.
+   - Plus `S_x`, the spread: `max L - min L` over the cell's scans, rescaled.
+   - The `K = 3` errors add the same `H_x + S_x` to campaign 5's noise budget. They are reported, as in campaign 5.
+4. maxWrites is `Q1` or `Q2`; the rail is `10 x THETA`.
+
+**Eligible** = measured, and the frozen gate holds under `K = 0`, with Lean and the Python mirror agreeing per checker
+(campaign 5's `gate4.py lean` and `check.sh`, as its rehearsal's `gate_dev`). Campaign 5's `room` is that mirror, with
+both sides of every crossing: training silent before the need and FIRE at it, and the tests at the trained state.
+
+**Not settled, for the reviewers.** The gate has one threshold and one error per cell. So the coordinator's per-read,
+one-sided correction (`(L_r - min L) / step_r` on the silent side) cannot be expressed in it.
+
+- `S_x` in the per-cell error is the note's default. It is what the gate can check.
+- It is also needed for soundness: with `theta = min L`, a read of kind `r` predicted to fire must clear its own
+  `L_r`. `testingError + S_x` gives that.
+- The per-read correction would need either a condition outside the gate, so that eligible would no longer be
+  exactly the gate, or a threshold per read kind, which is a theory change.
+- The theory's single dose per layer (`a` and `b` share it) is kept, as in campaign 5. Its misfit goes into
+  `epsilon`.
+
+## 5. The report
+
+**`k` and the decision.** `k` = the eligible count. Then `I = ceil(30 / k)` if `k >= 2`, then `E` by the stopping
+rule:
 
 - measures: 11 runs per instance on `I` instances, each run at the batch's mean wall time for its kind;
-- network: on `ceil(k I / 10)` instances, at the rule's 718, 132 and 1 400 s;
-- limits `10 ceil(2 e / 10)`, stages split as in campaign 5's section 10.5, and the sum of
-  `sum / 4 + 3/4 max` per stage and machine.
+- network: on `ceil(k I / 10)` instances, at 718, 132 and 1 400 s;
+- limits `10 ceil(2 e / 10)`, stages split as in campaign 5's section 10.5, and per stage and machine
+  `sum / 4 + 3/4 max`.
 
-The report also gives the decision of the rule, and every input, in exact arithmetic. The code's commit and file
-hashes are those of the pushed marker.
+The report then gives the decision. It gives every input, in exact arithmetic, and names the marker's commit and file
+hashes.
 
-**Estimate.** About 10 x (1 315 + 9 x 785) = 84 000 s of compute. On 8 slots (two machines, four runs each), the
-calibration wave takes about 40 min and the scans about 2.6 h, so roughly 3.5 h of wall time. The smokes come
-before it: 4 scan kinds on the nominal cell, about 1 h on machine `a`. The scan cost is the largest unknown.
+**The five questions**, reported per instance:
+
+1. `ceil(s*)` against the first firing stage, for each need, and the count of failures. This is the answer to
+   whether campaign 3's method carries over to two-port and routed reads.
+2. For each crossing, the margins `s* - (n - 1)` and `n - s*`, in stages and in mV, and the dominant term among the
+   half bracket, the dose-move variation `max_k |sum_{j<k} m_j - k D_p|`, and the noise constants.
+3. `L` per read kind and its spread.
+4. Wall time per run kind and machine.
+5. Bracket widths, contradictory states and their outcomes.
+
+**Estimate.** About 84 000 s of compute. That is roughly 3.5 h of wall time on 2 x 4 slots, plus about 1 h of
+smokes. The scan cost is the main unknown.
