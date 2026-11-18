@@ -19,6 +19,8 @@ and recorded as `machine`, the instance's assigned machine as `instance_machine`
 Safeguard (i), as campaign 5's run4.stage_check: every runner takes its stage file (STAGE_<name>.md, written by
 stages6 and pushed before the stage's manifest) and refuses the run, before any deck is written, unless that file names
 the governing protocol PREDICTION.md with the SHA-256 PROTOCOL_SHA256, and the file in the repository has that SHA-256.
+For M2, M3, RM2 and RM3, whose machines amendment 1 governs, the stage file also names PREDICTION_AMENDMENT_1.md
+with AMENDMENT_SHA256, checked the same way, both as named and in the repository.
 """
 from fractions import Fraction as F
 import json
@@ -39,6 +41,10 @@ BASE = "research/learned-dnf-circuit-campaign-6"
 PROTOCOL = f"{BASE}/PREDICTION.md"
 PROTOCOL_COMMIT = "df1a3cbcf73ed0ad71e04ded987f756a466e3902"
 PROTOCOL_SHA256 = "8e7392c5654975049de3d25adf8a511105fba425fdb07b4d841a12fdc6342240"
+AMENDMENT = f"{BASE}/PREDICTION_AMENDMENT_1.md"            # governs the machines of M2 and M3 (and RM2, RM3)
+AMENDMENT_COMMIT = "a0d4ad3cfd4ab5b669070c499385c2f5fdd06110"
+AMENDMENT_SHA256 = "14a5379e8ec78fea5d137cecfbb3614b439fa227e5939c7653d6be518ddc9554"
+AMENDED_STAGES = ("M2", "M3", "RM2", "RM3")
 
 SEEDS = (7801, 7802, 7803, 7804, 7805)                  # PREDICTION.md 1: I = 5, never extended
 MACHINE_OF = {s: ("a" if i < math.ceil(len(SEEDS) / 2) else "b") for i, s in enumerate(SEEDS)}
@@ -114,7 +120,16 @@ def stage_check(stage_file):
     assert gov["path"] == PROTOCOL and gov["sha256"] == PROTOCOL_SHA256, f"refused (safeguard i): stage {st['stage']} does not name PREDICTION.md as pushed"
     got = hashlib.sha256((HERE.parent.parent.parent / PROTOCOL).read_bytes()).hexdigest()
     assert got == PROTOCOL_SHA256, f"refused (safeguard i): PREDICTION.md has SHA-256 {got} in the repository, not {PROTOCOL_SHA256}"
-    return dict(stage=st["stage"], governing_protocol=gov, stage_file_sha256=hashlib.sha256(Path(stage_file).read_bytes()).hexdigest())
+    out = dict(stage=st["stage"], governing_protocol=gov)
+    if st["stage"] in AMENDED_STAGES:
+        am = st.get("governing_amendment") or {}
+        assert am.get("path") == AMENDMENT and am.get("sha256") == AMENDMENT_SHA256, \
+            f"refused (safeguard i): stage {st['stage']} does not name PREDICTION_AMENDMENT_1.md as pushed"
+        got = hashlib.sha256((HERE.parent.parent.parent / AMENDMENT).read_bytes()).hexdigest()
+        assert got == AMENDMENT_SHA256, f"refused (safeguard i): PREDICTION_AMENDMENT_1.md has SHA-256 {got} in the repository, not {AMENDMENT_SHA256}"
+        out["governing_amendment"] = am
+    out["stage_file_sha256"] = hashlib.sha256(Path(stage_file).read_bytes()).hexdigest()
+    return out
 
 
 def guard_seed(text, stage=None, out=None):

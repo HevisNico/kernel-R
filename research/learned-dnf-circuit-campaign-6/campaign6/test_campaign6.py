@@ -106,6 +106,25 @@ class Guard(unittest.TestCase):
                 with self.assertRaises(AssertionError):
                     c6.stage_check(stage_file(d, "M3"))
 
+    def test_stage_check_amendment(self):
+        """M2, M3, RM2, RM3 name amendment 1 with its SHA-256 as a second governing document; M1 does not need it."""
+        with tempfile.TemporaryDirectory() as d:
+            for stage in c6.AMENDED_STAGES:
+                st = c6.stage_check(stage_file(d, stage))
+                self.assertEqual(st["governing_amendment"]["sha256"], c6.AMENDMENT_SHA256)
+            self.assertNotIn("governing_amendment", c6.stage_check(stage_file(d, "M1")))
+            wrong = Path(d) / "STAGE_wrong.md"
+            wrong.write_text(stages6.stage_file_text("M2").replace(c6.AMENDMENT_SHA256, "0" * 64))
+            with self.assertRaises(AssertionError):
+                c6.stage_check(wrong)
+            missing = Path(d) / "STAGE_missing.md"
+            missing.write_text(stages6.stage_file_text("M3").replace('"governing_amendment"', '"other"'))
+            with self.assertRaises(AssertionError):
+                c6.stage_check(missing)
+            with mock.patch.object(c6, "AMENDMENT_SHA256", "1" * 64):        # the repository's file is not the one named
+                with self.assertRaises(AssertionError):
+                    c6.stage_check(stage_file(d, "RM2"))
+
     def test_header_records_the_running_machine(self):
         with tempfile.TemporaryDirectory() as d:
             (Path(d) / "STATE.json").write_text(json.dumps(dict(status="running", machine="b", records=[])))
@@ -405,6 +424,8 @@ class Frozen(unittest.TestCase):
                      "research/circuit/cell.spice", ".github/workflows/learned-dnf-circuit-campaign-6.yml"):
             self.assertIn(need, f)
         self.assertNotIn(".github/workflows/learned-dnf-circuit-campaign-5.yml", f)
+        for need in stages6.C5_SMOKE + [c6.AMENDMENT, stages6.REHEARSAL_PREDICTIONS]:
+            self.assertIn(need, f)
         missing = [x for x in f if not (stages6.ROOT / x).exists()]
         self.assertEqual(missing, [])
 

@@ -43,6 +43,11 @@ BATCH_FILES = [f"{c6.BASE}/batch/{n}" for n in ("batch6.py", "scan6.py", "predic
 OWN_FILES = [f"{CAMPAIGN6}/{n}" for n in ("c6.py", "meas6.py", "net6.py", "inputs6.py", "stages6.py", "predicted6.py", "analyze6.py",
                                           "test_campaign6.py")]
 REHEARSAL_PREDICTIONS = f"{c6.BASE}/rehearsal/PREDICTIONS_BATCH.json"      # the batch's PREDICTIONS.json, 0bd3b60
+# campaign 5's smoke run of M8's eligible path (m8_case.py, CI): its files besides the waveform, from f805c20; the waveform
+# itself is fetched by CI from evidence/learned-dnf-circuit-campaign-5-smoke. Bound so that M8's inputs are pinned.
+C5_SMOKE = [f"research/learned-dnf-circuit-campaign-5/smoke/{n}" for n in (
+    "README.md", "nominal-quiet/record.json", "nominal-quiet/noise.sha256", "nominal-quiet/evidence/.spiceinit",
+    "nominal-quiet/evidence/input.spice", "nominal-quiet/evidence/result.json", "nominal-quiet/evidence/session.log")]
 REHEARSAL_PREDICTIONS_SHA256 = "e2e9e572cc80ca20f953f5ed800c306e47d3413ee7efdeceed323ea12ef3cc89"
 
 
@@ -52,9 +57,10 @@ class MeasureStageOneShard(AssertionError):
 
 def frozen():
     """Every file a stage's runs, the predictions and the analysis read: campaign 6's own, the batch's, and campaign 5's
-    frozen list but its workflow (which is not on this branch), and campaign 6's workflow."""
+    frozen list but its workflow (which is not on this branch), campaign 5's smoke files that M8's eligible path reads,
+    amendment 1, the rehearsal's batch predictions, and campaign 6's workflow."""
     c5 = [f for f in plan.FROZEN if not f.startswith(".github/")]
-    return sorted(set(OWN_FILES + BATCH_FILES + c5 + [".github/workflows/learned-dnf-circuit-campaign-6.yml"]))
+    return sorted(set(OWN_FILES + BATCH_FILES + c5 + C5_SMOKE + [c6.AMENDMENT, REHEARSAL_PREDICTIONS, ".github/workflows/learned-dnf-circuit-campaign-6.yml"]))
 
 
 # ------------------------------------------------------------------------------------------------ costs and limits
@@ -176,6 +182,8 @@ def stage_path(stage):
 def stage_file_text(stage):
     """The stage file (safeguard i): its governing protocol is PREDICTION.md as pushed, with its commit and SHA-256."""
     block = dict(stage=stage, governing_protocol=dict(path=c6.PROTOCOL, commit=c6.PROTOCOL_COMMIT, sha256=c6.PROTOCOL_SHA256))
+    if stage in c6.AMENDED_STAGES:                              # amendment 1 governs these stages' machines
+        block["governing_amendment"] = dict(path=c6.AMENDMENT, commit=c6.AMENDMENT_COMMIT, sha256=c6.AMENDMENT_SHA256)
     return "\n".join([f"# Campaign 6: the protocol of stage {stage}", "",
                       "Written by `stages6.py stage-file` and pushed before the stage's manifest. Its governing protocol is",
                       f"`{c6.PROTOCOL}` at commit `{c6.PROTOCOL_COMMIT}`, SHA-256 `{c6.PROTOCOL_SHA256}`; every runner of",

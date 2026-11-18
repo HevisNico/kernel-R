@@ -19,6 +19,19 @@ The code of `PREDICTION.md` section 8 (`df1a3cb`) and its amendment 1 (`a0d4ad3`
   `campaign6.instance_machine` is its instance's assigned machine. Run ids name the instance by its seed alone
   (`7801-scan-a-pair`, or `none-a-...` / `none-b-...` for the two nominal instances of the rehearsal).
 
+- **Amendment 1 in the stage files.** The stage files of M2, M3, RM2 and RM3 name `PREDICTION_AMENDMENT_1.md`
+  (`a0d4ad3`, SHA-256 `14a5379e…9554`) as a second governing document, and every runner of those stages checks it,
+  both as named and in the repository (`c6.stage_check`).
+- **Campaign 5's smoke files.** M8's eligible path (`m8_case.py`, in CI) reads campaign 5's smoke run
+  `smoke/nominal-quiet`. Its files besides the waveform are copied byte-identical from `f805c20`
+  (`research/learned-dnf-circuit-campaign-5-wip`), and the waveform is fetched by CI from
+  `evidence/learned-dnf-circuit-campaign-5-smoke`. The 7 files are in `stages6.frozen()`, so every manifest and the
+  marker bind them.
+- **CI before this commit.** The 3 earlier campaign-6 CI runs on `-wip` (44376104118, 44376622903, 44381740440) failed
+  at M8's step, because these smoke files were missing; every unit test step before it had passed. So `check.sh`, the
+  structural comparison and the audit had never run in campaign 6's CI until the commit that added the files. CI also
+  never ran on `-impl` before `-impl` was added to the workflow's branches in that same commit.
+
 ## The per-stage procedure
 
 For each stage, in the order of `PREDICTION.md` 10:
