@@ -1,4 +1,4 @@
-# Campaign 6: the mapping on the stored-voltage axis (design addendum, one page, for review, second version)
+# Campaign 6: the mapping on the stored-voltage axis (design addendum, one page, for review, third version)
 
 The owner allows one bounded redesign of BATCH_SPEC.md section 4 (v9, `2b6cf6b`). Only the scores given to the frozen
 gate change. **[C]** marks a choice.
@@ -54,7 +54,9 @@ the scan measures at 0.36 stage. The training itself is linear on the stored-vol
 - `W_x` is 8 when `s*_x <= 4`, and up to about 10 if some `s*` is near 5. So the scan deck must bring the cell to
   `s` of about 10: about 13.5 mV of doses, against 10.8 mV in the deck's own eight stages. This is not yet run; the
   smoke reached `s = 8`.
-- The set now depends on both pair scans, through `K`. Its cost is one read per port, about the smoke's 137 s.
+- The set now depends on both pair scans, through `K`. In the code, each one-sided set waits for both pair scans of its
+  instance (`a` and `b`). It is "not started" if either has no consistent bracket. A test covers this. Its cost is one
+  read per port, about the smoke's 137 s.
 - `c`'s both lines (`THETA + d_c (w_1 + w_2)`) are predicted to fire at every stage, at THETA exactly at the preset.
   The both-lines check at `s = 0` and v9's deck rule check that.
 
@@ -76,9 +78,17 @@ the scan measures at 0.36 stage. The training itself is linear on the stored-vol
 fires, and that is campaign 3's method. `q_peak` is not linear in the writes: the nominal smoke's pair steps rise from
 3 432 to 4 453. It stays only in the reports. Only the nominal smoke and the development seeds are cited here.
 
-**5. The acceptance test**, fixed now and run once on the existing nominal smoke data (v9), with no new simulation:
+**5. The acceptance test**, fixed now and run once:
 
-- under this mapping, the nominal instance must be **measured** and **eligible**;
+- **New simulation, in one session on machine a, at the code that implements this page.** One one-sided run per
+  layer-1 cell on the nominal cell, at `W_x + H_x` as the rule computes it. The smoke read the alone ports at exactly
+  `s = 8`, and on the nominal cell the bounds are about 8.012 (`a`) and 8.004 (`b`), so "silent at 8" does not show
+  "silent at `W + H`". The two runs take about 137 s each.
+- **A reach-only read, in the same session**, of the nominal cell at `s = 10`, about 13.5 mV. It decides nothing. It
+  shows whether the scan deck can impose the state the batch may need. If it cannot, that is a defect to fix before
+  the marker.
+- **Everything else** uses the existing v9 smoke data: the scans, the decks, the both-lines check.
+- Under this mapping, the nominal instance must be **measured** and **eligible**;
 - the frozen gate must hold under `K = 0` on its own Lean file, with `check.sh` passing, so that Lean and Python
   agree.
 
