@@ -1,0 +1,104 @@
+name: Learned DNF circuit campaign 6
+
+on:
+  push:
+    branches:
+      - research/learned-dnf-circuit-campaign-6
+      - research/learned-dnf-circuit-campaign-6-wip
+    paths:
+      - research/learned-dnf-circuit-campaign-6/**
+      - research/learned-dnf-circuit-campaign-5/**
+      - research/learned-dnf-circuit/**
+      - research/learned-coincidence/**
+      - .github/workflows/learned-dnf-circuit-campaign-6.yml
+  pull_request:
+    paths:
+      - research/learned-dnf-circuit-campaign-6/**
+      - research/learned-dnf-circuit-campaign-5/**
+      - research/learned-dnf-circuit/**
+      - research/learned-coincidence/**
+      - .github/workflows/learned-dnf-circuit-campaign-6.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  campaign:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      # campaign 5's PREDICTION.md 10.2, as campaign 6's 8 keeps it: on a runner without AVX-512, check.sh compares the generated JSON files structurally; it
+      # states the CPU, the OpenBLAS core and the comparison it made
+      C5_CI_STRUCTURAL: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Python 3.12.3 with numpy 2.3.5 (PREDICTION.md, 10.2)
+        run: |
+          set -euo pipefail
+          /usr/bin/python3.12 -m venv "$RUNNER_TEMP/python"
+          "$RUNNER_TEMP/python/bin/python" -m pip install numpy==2.3.5
+          cd research/learned-dnf-circuit-campaign-5
+          "$RUNNER_TEMP/python/bin/python" -B -c 'import c4; print(c4.require_pinned())'
+      - name: Campaign 6's code against its PREDICTION.md (the guards, the copies, the stages and their costs, the two-shard rule, the adapter), without simulation
+        run: cd research/learned-dnf-circuit-campaign-6/campaign6 && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_campaign6
+      - name: The batch's code (unchanged) and its two guards
+        run: cd research/learned-dnf-circuit-campaign-6/batch && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_batch test_guard test_report_guard
+      - name: Campaign 5's frozen code, which campaign 6 imports, against its own tests
+        run: cd research/learned-dnf-circuit-campaign-5 && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_campaign
+      - name: Install the pinned Lean distribution
+        run: |
+          set -euo pipefail
+          test "$(cat proof/lean/lean-toolchain)" = 'leanprover/lean4:v4.35.0'
+          archive=$(mktemp "$RUNNER_TEMP/lean.XXXXXXXX.tar.zst")
+          install_dir=$(mktemp -d "$RUNNER_TEMP/lean.XXXXXXXX")
+          download_toolchain() {
+            curl --fail --silent --show-error --location \
+              --retry 2 --retry-all-errors --retry-max-time 180 \
+              --connect-timeout 10 --max-time 180 --output "$archive" "$@" &&
+            printf '%s  %s\n' '7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d' "$archive" \
+              | sha256sum --check
+          }
+          download_toolchain -H 'Accept: application/octet-stream' \
+            "https://api.github.com/repos/leanprover/lean4/releases/assets/634574462?download=1&run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" ||
+          download_toolchain \
+            "https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst?run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          tar --no-same-owner --strip-components=1 --zstd -xf "$archive" -C "$install_dir"
+          rm -f "$archive"
+          printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
+      - name: The waveform of the smoke run without noise (smoke/README.md), from its evidence branch, for M8's eligible path
+        run: |
+          set -euo pipefail
+          run=research/learned-dnf-circuit-campaign-5/smoke/nominal-quiet
+          git init -q "$RUNNER_TEMP/evidence"
+          git -C "$RUNNER_TEMP/evidence" fetch -q --depth 1 --filter=blob:none "https://github.com/$GITHUB_REPOSITORY" \
+            evidence/learned-dnf-circuit-campaign-5-smoke
+          git -C "$RUNNER_TEMP/evidence" checkout -q FETCH_HEAD -- "$run/evidence/trace.raw"
+          cp "$RUNNER_TEMP/evidence/$run/evidence/trace.raw" "$run/evidence/trace.raw"
+      - name: M8's two paths (PREDICTION.md, M8), code path only - eligible (P0 with the smoke run), and no eligible instance (a theorem on no axiom)
+        run: |
+          set -euo pipefail
+          cd research/learned-dnf-circuit-campaign-5
+          "$RUNNER_TEMP/python/bin/python" -B m8_case.py smoke/nominal-quiet "$RUNNER_TEMP/M8_eligible.lean"
+          "$RUNNER_TEMP/python/bin/python" -B -c 'import analyze, sys; open(sys.argv[1], "w").write(analyze.M8({}, {}, None)[1])' "$RUNNER_TEMP/M8_none.lean"
+          grep -q "theorem no_eligible_instance" "$RUNNER_TEMP/M8_none.lean"
+      - name: The kernel gate on the cases of PREDICTION.md 7.4, their targets and the mirror mutations, regenerated and audited; both paths of M8
+        run: |
+          PYTHON="$RUNNER_TEMP/python/bin/python" bash research/learned-dnf-circuit-campaign-5/check.sh \
+            "$RUNNER_TEMP/M8_eligible.lean" "$RUNNER_TEMP/M8_none.lean"
+      - name: The structural comparison (PREDICTION.md, 10.2), exercised on every runner, a file of the Haswell kernel accepted and a changed integer refused
+        run: |
+          set -euo pipefail
+          cd research/learned-dnf-circuit-campaign-5
+          py="$RUNNER_TEMP/python/bin/python"
+          OPENBLAS_CORETYPE=Haswell "$py" -B cases.py "$RUNNER_TEMP/CASES_haswell.json" "$RUNNER_TEMP/Targets_haswell.lean" Gate5Cases > /dev/null
+          "$py" -B structural_compare.py "$RUNNER_TEMP/CASES_haswell.json" expected/CASES.json
+          "$py" -B -c 'import json, sys; d = json.load(open(sys.argv[1])); d["cases"][0]["Q1"] += 1; json.dump(d, open(sys.argv[2], "w"), indent=1)' \
+            "$RUNNER_TEMP/CASES_haswell.json" "$RUNNER_TEMP/CASES_changed.json"
+          if "$py" -B structural_compare.py "$RUNNER_TEMP/CASES_changed.json" expected/CASES.json; then
+            echo "structural comparison: a changed integer was accepted" >&2
+            exit 1
+          fi
+          echo "structural comparison: the file of the Haswell kernel accepted, the changed integer (Q1 + 1) refused"
+      - name: The negative cases of the audit (PREDICTION.md, 7.3), each refused on the check of the axioms
+        run: PYTHON="$RUNNER_TEMP/python/bin/python" bash research/learned-dnf-circuit-campaign-5/audit_cases.sh
