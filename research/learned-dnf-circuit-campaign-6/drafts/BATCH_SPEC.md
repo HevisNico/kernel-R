@@ -1,4 +1,4 @@
-# Campaign 6: what the development batch's code computes (draft for review, third version)
+# Campaign 6: what the development batch's code computes (draft for review, fourth version)
 
 It implements the design note (`659d3a2`) under the stopping rule (`2e26910`). **[C]** marks a choice made here. The
 batch decides only `k`. Its definition of eligible is, unchanged, the one campaign 6 would preregister.
@@ -95,10 +95,20 @@ An instance is measured if all of these hold, otherwise it is not:
    equals the first stage at which the matching read fires in the guard-on deck. A need above 7 cannot be checked
    and fails this test.
 
-Campaign 5's FIRE/`Z` agreement test is not used, because it compared readings with the nominal theta. Point 5
-replaces it with a test against the cell's own training. In the code, a declared wrapper builds the table with
-`P.load` and `P.table`. From `table`'s `bad` list it drops only the entries that begin "FIRE bit" (that test, on the
-unscaled `Z`); every other entry is kept. It then rescales the table (section 4) and passes it to `P.instance`.
+6. **Every deck read against the cell's own levels.**
+   - For every read of the guard-on deck, of kind `r`, the FIRE bit must equal `Z >= L_r`. Both `Z` and `L_r` are
+     rescaled, and `Z` is taken from the guard-off deck, as campaign 5 does.
+   - A read with `|Z - L_r| <= H_x` is exempt.
+   - The kinds are matched as follows:
+     - `a` and `b`: `port 1`, `port 2` and `both` use their own scans;
+     - `c`: `port 1` and `port 2` use the line scans, and `both` and the 0.3-late `both` use the both-lines scan;
+     - an `empty` read must be silent.
+   - A disagreement outside the exempt band makes the instance not measured.
+
+This rescopes campaign 5's FIRE/`Z` test from the nominal theta to the cell's own trip levels. In the code, a declared
+wrapper builds the table with `P.load` and `P.table`. In `table`'s `bad` list it replaces the entries that begin
+"FIRE bit" (that test, on the unscaled `Z`) with this test's entries, and keeps every other entry. It then rescales
+the table (section 4) and passes it to `P.instance`.
 
 ## 4. Eligible: the frozen gate, on the scans' mapping
 
@@ -139,7 +149,62 @@ both sides of every crossing: training silent before the need and FIRE at it, an
 - The theory's single dose per layer (`a` and `b` share it) is kept, as in campaign 5. Its misfit goes into
   `epsilon`.
 
-## 5. The report
+## 5. Affordability, and the choice of scan set (to be made by the owner before any code)
+
+The table gives `E` by the stopping rule, computed with campaign 5's frozen `plan.split` and `plan.machine_expected`:
+
+- `I = ceil(30 / k)`;
+- the network on `ceil(k I / 10)` instances, the first of each machine, at 718, 132 and 1 400 s;
+- limits `10 ceil(2 e / 10)`, within the kit's 14 400 s bound;
+- measures at assumed costs, since the batch's own means are unknown before it runs:
+  - calibration decks: RM's means, 721.0 s (guard on) and 587.2 s (guard off);
+  - a scan: 785 s;
+  - a one-sided set: 250 s;
+  - a scan with the coarse ascent at 1/2: 685 s.
+
+| `k` | `I` | E (A) | E (B) | E (C) |
+|---|---|---|---|---|
+| 2 | 15 | 51 329 stop | 40 841 stop | 35 049 stop |
+| 3 | 10 | 37 919 stop | 31 319 stop | 27 426 **go** |
+| 4 | 8 | 33 785 stop | 28 505 **go** | 24 958 **go** |
+| 5 | 6 | 27 191 **go** | 23 231 **go** | 21 112 **go** |
+| 6 | 5 | 24 509 **go** | 20 620 **go** | 19 803 **go** |
+| 7 | 5 | 25 738 **go** | 21 850 **go** | 21 033 **go** |
+| 8 | 4 | 23 056 **go** | 20 416 **go** | 18 643 **go** |
+| 9 | 4 | 23 056 **go** | 20 416 **go** | 18 643 **go** |
+| 10 | 3 | 19 145 **go** | 16 576 **go** | 16 105 **go** |
+
+The three options:
+
+- **(A) The 9 full scans** (sections 2 to 4 as written): 8 373 s of measures per instance. Go needs `k >= 5`.
+- **(B) The 5 crossing scans only.** These are the pairs of `a` and `b` and `c`'s line 1, line 2 and both lines.
+  - Each port-alone kind of `a` and `b` is checked instead by a one-sided set: one run per cell, with the two ports
+    moved along the training path up to the state where each port's rescaled score reaches `THETA + testingError`,
+    and each port read alone there.
+  - If neither fires, each alone kind's own trip level is shown to be above that bound, which is all the gate's
+    silent check needs. If one fires, the instance is not measured.
+  - The alone kinds then have no `L`. `theta_x` and `S_x` come from the pair scan alone. Point 6 checks the alone
+    reads of the deck against the bound.
+  - 5 733 s per instance. Go needs `k >= 4`.
+- **(C) B with the coarse ascent at 1/2 instead of 1/4**: 5 233 s per instance. Go needs `k >= 3`. The saving of
+  about 100 s per scan is a guess, since no scan of this deck has been run.
+
+**The risk of B and C.** Without a full scan of an alone kind, `theta_x <= L_alone` is shown only up to the one-sided
+bound. That is what the gate's silent checks need, but question 3 then reports no spread for layer 1's alone kinds.
+
+**Sensitivity to the scan cost**, which is the main unknown. The least `k` that gives go:
+
+| Scan cost | A | B |
+|---|---|---|
+| 600 s | 5 | 3 |
+| 785 s | 5 | 4 |
+| 1 000 s | 6 | 5 |
+| 1 200 s | none | 5 |
+| 1 500 s | none | none |
+
+"None" means that one instance's measures no longer fit one kit stage under campaign 5's split.
+
+## 6. The report
 
 **`k` and the decision.** `k` = the eligible count. Then `I = ceil(30 / k)` if `k >= 2`, then `E` by the stopping
 rule:
