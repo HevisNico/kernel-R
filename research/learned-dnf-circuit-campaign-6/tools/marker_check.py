@@ -7,15 +7,16 @@ stage's launch; a refusal means no launch for that stage, and its output is comm
 CANDIDATE for the commit after CAMPAIGN_MARKER_3.json (the audit of 2026-11-19): the attempt's layout stages/<ATTEMPT>/;
 the manifest and the report outside REPO (F1); REPO's head within the kit's allowed changes after the source commit
 (F2); the prediction record (PREDICTED.json for Q and the N stages, PREDICTED_RN.json for RN) bound, byte-identical to
-its own earlier commit that adds only it and its gate files, with a gate file per measured instance (findings 10, 11).
+its own earlier commit that adds only it and its gate files, with a gate file exactly for each measured instance
+that has an observation (the frozen predict6.gate_each writes no other), unchanged at the source commit (findings 10,
+11; the coordinator's review M1 and N5).
 
-Since CAMPAIGN_MARKER_2.json (7eda858, frozen commit 6f29fe6), which supersedes CAMPAIGN_MARKER.json (b88144f): each
-stage's kit protocol is its own stage file stages/STAGE_<S>.md, so each stage has its own claim ref (the first
-rehearsal's shared claim key, README incident 2). It passes only if all of these hold:
-1. the marker at MARKER_COMMIT (research/learned-dnf-circuit-campaign-6/CAMPAIGN_MARKER_2.json) has the pinned SHA-256
+Each stage's kit protocol is its own stage file stages/<ATTEMPT>/STAGE_<S>.md, so each stage and attempt has its own
+claim ref (README incidents 2 and 10). It passes only if all of these hold:
+1. the marker at MARKER_COMMIT (MARKER, the campaign marker this script is pinned to) has the pinned SHA-256
    (MARKER_SHA256, the marker approved by both coordinators), MARKER_COMMIT descends from the commit that introduced it
-   (MARKER_INTRODUCED, 7eda858), that commit descends from PREDICTION.md's commit df1a3cb (checked), and REPO's tree
-   holds the same marker (a missing one refuses);
+   (MARKER_INTRODUCED), that commit descends from PREDICTION.md's commit df1a3cb (checked), and REPO's tree holds the
+   same marker (a missing one refuses);
 2. the manifest's source_commit descends from MARKER_COMMIT;
 3. the manifest's source_sha256 holds EXACTLY the marker's frozen paths, each with the marker's SHA-256, plus only the
    stage's declared data files, all under stages/<ATTEMPT>/: STAGE_<S>.md and RUNS_<S>.json; INPUTS_<S>.json for M2, M3,
@@ -33,7 +34,6 @@ rehearsal's shared claim key, README incident 2). It passes only if all of these
 It refuses under python -O (the asserts of c6.stage_check would vanish), and any exception of the stage check is a
 refusal, so a refusal always leaves its MARKER_CHECK file. The report records this script's own SHA-256.
 """
-import fnmatch
 import hashlib
 import json
 from pathlib import Path
@@ -212,7 +212,7 @@ def check(stage, attempt, manifest_path, marker_commit, repo):
             fail(f"protocol_commit {pc} is not the only commit adding the stage file in source_commit's history: {adders}")
         if not is_ancestor(repo, MARKER_INTRODUCED, pc):
             proto_ok = False
-            fail(f"protocol_commit {pc} does not descend from marker 2's commit {MARKER_INTRODUCED}")
+            fail(f"protocol_commit {pc} does not descend from the marker's introducing commit {MARKER_INTRODUCED}")
         if pc == src_commit:
             proto_ok = False
             fail("source_commit must differ from protocol_commit (the stage file is pushed alone before it)")
@@ -221,7 +221,7 @@ def check(stage, attempt, manifest_path, marker_commit, repo):
             fail(f"source_commit {src_commit} does not descend from protocol_commit {pc}")
         if proto_ok:
             lines.append(f"protocol: {stage_file(stage, attempt)} at {pc}, sha256 {m.get('protocol_sha256')}; the only commit adding it; "
-                         f"after marker 2; before source_commit")
+                         f"after the marker; before source_commit")
     # the prediction record: its own earlier commit, adding only it and its gate files (finding 11)
     rec = record_file(stage, attempt)
     if rec is not None and rec in src:
@@ -239,13 +239,25 @@ def check(stage, attempt, manifest_path, marker_commit, repo):
                 fail(f"{rec} differs between its own commit {rc} and the manifest")
             try:
                 record = json.loads(git(repo, "show", f"{rc}:{rec}"))
-                missing = [x["seed"] for x in record["instances"] if x.get("measured") and f"{adir(attempt)}/Gate6_{x['seed']}.lean" not in added]
-                if missing:
-                    fail(f"the record's commit {rc} has no gate file for measured instances {missing}")
+                # the frozen gate_each (batch/predict6.py) writes a gate file exactly for each measured instance with an
+                # observation; a measured instance without one (needs above 7, or a prediction that raised) has none
+                gated = {x["seed"] for x in record["instances"] if x.get("measured") and "observation" in x}
+                have = {int(g) for g in re.findall(rf"^{re.escape(adir(attempt))}/Gate6_(\d+)\.lean$", "\n".join(sorted(added)), re.M)}
+                if gated - have:
+                    fail(f"the record's commit {rc} has no gate file for measured instances with an observation {sorted(gated - have)}")
+                if have - gated:
+                    fail(f"the record's commit {rc} has gate files for instances that have none in the record (not measured, or no observation): {sorted(have - gated)}")
             except (ValueError, KeyError) as e:
                 fail(f"{rec} at {rc} is not a prediction record: {e}")
+            gate_paths = sorted(p for p in added if p != rec)
+            if gate_paths:
+                try:
+                    git(repo, "diff", "--quiet", rc, src_commit, "--", *gate_paths)                       # N5
+                except subprocess.CalledProcessError:
+                    fail(f"the gate files or check logs of the record's commit {rc} differ at the source commit {src_commit}")
             if ok:
-                lines.append(f"record {rec}: commit {rc}, sha256 {at_rc}, with its gate files; byte-identical in the manifest")
+                lines.append(f"record {rec}: commit {rc}, sha256 {at_rc}, with its gate files ({len(gate_paths)} files, unchanged at the "
+                             f"source commit); byte-identical in the manifest")
     if not m.get("campaign_id", "").endswith("-" + stage.lower()):
         fail(f"the manifest's campaign_id {m.get('campaign_id')} does not name stage {stage}")
     # 6. safeguard i

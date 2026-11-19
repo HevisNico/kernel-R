@@ -77,8 +77,11 @@ and are kept unchanged.
    - both sessions are in active loops of at most 5 minutes (`PREDICTION.md` 6);
    - a machine that has restarted (`uptime -s` changed) passes envcheck again first;
    - `tools/diskcheck.py MANIFEST MACHINE OUT_PARENT` passes: free space above the stage's footprint on that machine
-     (its runs' largest measured folder sizes, twice for the collected copy) plus 500 MB; its report, with the df line,
+     (its runs' largest folder sizes per kind, measured for the measure runs and extrapolated for the network runs, twice
+     for the collected copy) plus 500 MB; its report, with the df line,
      the uptime and the free memory, goes with the stage's evidence;
+   - the pushed manifest is the one checked: the SHA-256 of `stages/<attempt>/CAMPAIGN_<S>.json` as pushed equals the
+     `manifest … sha256` line of `MARKER_CHECK_<S>.txt` (the coordinator's review of the audit, M2);
    - while its shard runs, the machine stays quiet: no dry run, no Lean check, no CI simulation, no cleanup.
 5. **The collection**, with campaign 5's `collect.py`, then the evidence branches. Once a machine's evidence branch is
    pushed and verified (every file against `COLLECTED.json`), its run folder is cleared before the next stage; never
@@ -138,6 +141,11 @@ machine during a stage, and its `resume-machine` (each run started before it is 
 limit, and the links `collect.py` records for it. Each is reported with its runs and times; none is a pass condition by
 itself, but a lost run fails condition 1.
 
+**Observed, not fixed** (the coordinator's review of the audit, N1): `stages6.py manifest` (frozen) checks that a data
+path is given exactly when the stage takes one, but not, as `stages6.py runs` does, that it resolves to the stage's
+`stages/<attempt>/` data file. Contained: the run list at the source commit must equal the runs computed from that path,
+and the manifest binds the committed data file by its SHA-256 (`stages6.data_path`), which `marker_check` requires.
+
 **Reported whatever they are:** the wall times of the first noisy runs on a mismatched cell, `7701-n1` (noise seed
 77 011, machine `a`) and `7706-n1` (77 061, `b`). Each is reported against section 4's 1 400 s estimate, scaled to its
 instance's needs. The two machines' measure records (RM1–RM3) are compared and reported, not required to match.
@@ -160,6 +168,7 @@ commits and listed here; `PREDICTION.md` amendments stay reserved for real rule 
 | 8 | While committing `1758644`, the director deleted the working copy of the pushed `CAMPAIGN_RM2.json` with `rm -f`, taking it for an untracked copy | none needed: the deletion was not staged, `1758644` holds only its 3 files, and the copy was restored byte-identical (`187c82fb…`) | None |
 | 9 | Planned, before Q: for Q and the N stages `stages6.manifest` (frozen) binds the prediction record only through the run list, so `marker_check` only allows `stages/PREDICTIONS.json` and the gate files | a pre-Q `marker_check` commit (the previous coordinator's version): require `stages/PREDICTIONS.json` and the per-instance `Gate6_*.lean` at the source commit, byte-identical to the prediction record pushed under `PREDICTION.md` 10 at its own commit (an ancestor of the source commit), with both SHA-256s and that commit recorded in `MARKER_CHECK` | None so far: no Q or N stage has been prepared |
 | 10 | The audit of 2026-11-19 (before freeze 3; a dry run of every stage through the kit with a fake simulator, and a CI simulation): test_c committed a fixture at a real stage path (CI failing after the first stage file); a stage could never be re-attempted, and attempts shared claim refs; a runner could crash on the kit's STATE.json mid-rewrite (a run lost); RN's record could not be produced (predicted6 crashed on rehearsal seeds) nor reproduced; analyze6 had no RN command line and read whatever folders it walked; marker_check named PREDICTIONS.json; Q/N manifests did not bind the prediction record; manifests or reports inside the checkout, and commits between a source commit and its launch, refused late | frozen commit 3 (findings 1 to 12 of the audit report) and the marker_check commit after marker 3 | None on any result: no rehearsal result that counts exists; attempt 1's RM1 counts for nothing |
+| 11 | The coordinator's review of the audit's candidate (2026-11-19): `marker_check` required a gate file for every measured instance, while the frozen `predict6.gate_each` writes one only for a measured instance with an observation (in the batch 7705 and 7709 had none), so Q would have been refused whenever a measured instance has no observation; the dry run's cases had no such instance. Also: gate files not checked unchanged at the source commit; refusal tests dropped in the rewrite; the pushed manifest not checked equal to the checked one | the `marker_check` commit after marker 3 (a gate file exactly for each measured instance with an observation, refusing any other; gate files unchanged at the source commit; the refusal tests restored; README step 4's manifest check) | None: found before marker 3 and before any Q |
 
 ## Rule changes of the audit (2026-11-19)
 

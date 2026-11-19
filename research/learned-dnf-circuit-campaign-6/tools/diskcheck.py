@@ -4,10 +4,11 @@ launch the stage; its report goes with the stage's evidence.
 
   diskcheck.py MANIFEST.json MACHINE OUT_PARENT [MARGIN_MB]     writes DISK_CHECK_<campaign_id>_<MACHINE>.txt next to the manifest
 
-The stage's footprint on MACHINE: for each of its runs, the largest run folder measured for its kind (the batch's
-collected evidence, and campaign 5's smoke run for the network runs, with room for the longest calendars), counted
-twice (the run folder and its collected copy). It passes only if the free space where the runs are written (OUT_PARENT)
-exceeds that footprint plus MARGIN_MB (default 500). The report records the df line, the uptime and the free memory.
+The stage's footprint on MACHINE: for each of its runs, the largest run folder of its kind (measured, for the measure
+kinds, on the batch's collected evidence; EXTRAPOLATED, for the network runs, from campaign 5's smoke run at need 4 to
+the longest calendars), counted twice (the run folder and its collected copy). A run of an unknown kind refuses. It
+passes only if the free space where the runs are written (OUT_PARENT) exceeds that footprint plus MARGIN_MB (default
+500). The report records the df line, the uptime and the free memory.
 """
 import json
 import os
@@ -17,7 +18,7 @@ import subprocess
 import sys
 
 # the largest run folder per kind, in MB (the batch's evidence: cal-on 79.3, cal-off 68.1, pair 76.6, line 81.3,
-# bothfire 3.0, onesided 25.1; the smoke network run's trace 64.3 at need 4, with room for need 7's longer calendar)
+# bothfire 3.0, onesided 25.1; network EXTRAPOLATED: the smoke run's trace is 64.3 at need 4, with room for need 7)
 MB = {"cal-on": 85, "cal-off": 75, "pair": 85, "line": 90, "bothfire": 5, "onesided": 30, "network": 130}
 TWICE = 2                                                # the run folder and its collected copy
 
@@ -28,7 +29,10 @@ def kind(run):
         if a[2] == "cal":                                    # {python} meas6 cal STAGE {out} INSTANCE GUARD ...
             return "cal-on" if a[6] == "on" else "cal-off"
         k = a[7]                                             # {python} meas6 scan STAGE {out} INSTANCE CELL KIND ...
-        return {"bothfire": "bothfire", "onesided": "onesided"}.get(k, "pair" if k == "pair" else "line")
+        kinds = {"pair": "pair", "line1": "line", "line2": "line", "bothfire": "bothfire", "onesided": "onesided"}
+        assert k in kinds, f"refused: unknown scan kind {k!r} in run {run['id']}"
+        return kinds[k]
+    assert a[1].endswith("net6.py"), f"refused: unknown runner {a[1]!r} in run {run['id']}"
     return "network"
 
 

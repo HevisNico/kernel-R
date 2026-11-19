@@ -38,6 +38,31 @@ class DiskCheck(unittest.TestCase):
         self.assertEqual(diskcheck.footprint_mb(m2, "a"), 2 * sum(diskcheck.MB[k] for k in on_a))
         self.assertEqual(diskcheck.footprint_mb(m2, "a"), 1780)
 
+    def test_m3_and_network_kinds(self):
+        """M3's one-sided scans and a network stage (the coordinator's review, N2); an unknown kind refuses."""
+        allow = dict(instances={str(s): {} for s in range(7801, 7806)})
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "INPUTS_M3.json"
+            f.write_text(json.dumps(allow))
+            m3 = manifest("M3", f)
+        self.assertEqual({diskcheck.kind(r) for r in m3["runs"]}, {"onesided"})
+        self.assertEqual(diskcheck.footprint_mb(m3, "a"), 2 * 30 * sum(r["machine"] == "a" for r in m3["runs"]))
+        import predicted6
+        xs = [dict(seed=s, measured=True, eligible=True, gate_K0=True, needs=dict(a=4, b=4, c1=4, c2=4)) for s in (7801, 7804)]
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "PREDICTED.json"
+            f.write_text(json.dumps(dict(instances=xs, network_runs=predicted6.network_runs(xs))))
+            q = manifest("Q", f)
+        self.assertEqual({diskcheck.kind(r) for r in q["runs"]}, {"network"})
+        self.assertEqual(diskcheck.footprint_mb(q, "a"), 2 * 130 * sum(r["machine"] == "a" for r in q["runs"]))
+        bad = json.loads(json.dumps(m3["runs"][0]))
+        bad["argv"][7] = "line3"
+        with self.assertRaises(AssertionError):
+            diskcheck.kind(bad)
+        bad["argv"][1] = "{repo}/other.py"
+        with self.assertRaises(AssertionError):
+            diskcheck.kind(bad)
+
     def test_refuses_below_margin_and_writes_its_report(self):
         m1 = manifest("M1")
         with tempfile.TemporaryDirectory() as d:

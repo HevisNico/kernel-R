@@ -1,8 +1,10 @@
 """Tests of marker_check.py (the candidate for marker 3: attempts, the record binding, F1, F2), on real manifests
 built by stages6 in a throwaway worktree, with local commits never pushed: a stand-in marker 3 (the frozen files'
 SHA-256 at HEAD), then for attempt t1 the stage files of RM1, M2, RN and Q, RN's and Q's records alone with their gate
-files, then the run lists and M2's inputs. The pins are patched to the stand-in, and PREDICTION.md's commit to HEAD's
-(so that the tests run in CI's depth-1 checkout).
+files, then the run lists and M2's inputs. Q's record holds an eligible instance (7801, a gate file), a measured
+instance without an observation (7802: no gate file, as the frozen gate_each writes none), a measured instance with an
+observation whose gate is false (7803: a gate file, not eligible), and two unmeasured ones. The pins are patched to the
+stand-in, and PREDICTION.md's commit to HEAD's (so that the tests run in CI's depth-1 checkout).
 
   python -B -m unittest test_marker_check        (from this folder, with the pinned venv)
 """
@@ -51,19 +53,19 @@ class MarkerCheck(unittest.TestCase):
         a = stages6.attempt_dir(ATT)
         (cls.wt / a).mkdir(parents=True)
         # the records, alone with their gate files: RN's (round 1) and Q's (one eligible campaign instance)
-        xs_rn = [dict(seed=s, measured=True, eligible=True, gate_K0=True, needs=n) for s, n in
+        xs_rn = [dict(seed=s, measured=True, eligible=True, gate_K0=True, needs=n, observation={}) for s, n in
                  ((7701, dict(a=4, b=4, c1=5, c2=4)), (7706, dict(a=4, b=4, c1=4, c2=5)))]
         rn = dict(what="test", instances=xs_rn, network_runs=predicted6.network_runs(xs_rn, rounds=(1,)))
         (cls.wt / f"{a}/PREDICTED_RN.json").write_text(predicted6.text(rn))
         for s in (7701, 7706):
             (cls.wt / f"{a}/Gate6_{s}.lean").write_text(f"-- test gate {s}\n")
         cls.commit("test: RN's record alone", f"{a}/PREDICTED_RN.json", f"{a}/Gate6_7701.lean", f"{a}/Gate6_7706.lean")
-        xs_q = [dict(seed=7801, measured=True, eligible=True, gate_K0=True, needs=dict(a=4, b=4, c1=4, c2=4))] + \
-               [dict(seed=s, measured=False, eligible=False, gate_K0=False) for s in (7802, 7803, 7804, 7805)]
-        q = dict(what="test", instances=xs_q, network_runs=predicted6.network_runs(xs_q))
-        (cls.wt / f"{a}/PREDICTED.json").write_text(predicted6.text(q))
-        (cls.wt / f"{a}/Gate6_7801.lean").write_text("-- test gate 7801\n")
-        cls.commit("test: Q's record alone", f"{a}/PREDICTED.json", f"{a}/Gate6_7801.lean")
+        cls.q = cls.q_record(predicted6)
+        (cls.wt / f"{a}/PREDICTED.json").write_text(predicted6.text(cls.q))
+        for s in (7801, 7803):
+            (cls.wt / f"{a}/Gate6_{s}.lean").write_text(f"-- test gate {s}\n")
+            (cls.wt / f"{a}/check_{s}.log").write_text("check.sh: passed\n")
+        cls.commit("test: Q's record alone", f"{a}/PREDICTED.json", *(f"{a}/{n}_{s}.{e}" for s in (7801, 7803) for n, e in (("Gate6", "lean"), ("check", "log"))))
         for stage in ("RM1", "M2", "RN", "Q"):
             (cls.wt / stages6.stage_path(stage, ATT)).write_text(stages6.stage_file_text(stage, ATT))
         cls.commit("test: stage files", a)
@@ -83,6 +85,16 @@ class MarkerCheck(unittest.TestCase):
             f = cls.tmp / f"CAMPAIGN_{stage}.json"
             f.write_text(json.dumps(m, indent=1) + "\n")
             cls.manifests[stage] = f
+
+    @staticmethod
+    def q_record(predicted6):
+        """7801 eligible; 7802 measured without an observation (needs above 7, no gate file); 7803 measured with an
+        observation, gate false (a gate file, not eligible); 7804 and 7805 not measured (the coordinator's review, M1)."""
+        xs = [dict(seed=7801, measured=True, eligible=True, gate_K0=True, needs=dict(a=4, b=4, c1=4, c2=4), observation={}),
+              dict(seed=7802, measured=True, eligible=False, gate_K0=False, needs=dict(a=4, b=3, c1=8, c2=4)),
+              dict(seed=7803, measured=True, eligible=False, gate_K0=False, needs=dict(a=4, b=3, c1=5, c2=4), observation={})] + \
+             [dict(seed=s, measured=False, eligible=False, gate_K0=False) for s in (7804, 7805)]
+        return dict(what="test", instances=xs, network_runs=predicted6.network_runs(xs))
 
     @classmethod
     def commit(cls, msg, *paths):
@@ -173,25 +185,83 @@ class MarkerCheck(unittest.TestCase):
         git(self.wt, *IDENT, "commit", "-q", "-am", "test: README after the source commit (never pushed)")
         self.refused("RM1", self.manifests["RM1"], "more than the kit allows")
 
-    def test_record_must_be_alone(self):
-        """Finding 11: a record committed with other files, or without the gate of a measured instance, refuses."""
+    def q_history(self, gates, extra=(), change_gate_after=False):
+        """A new history on top of the marker: Q's record with the given gate files (and extra files) in its own
+        commit, then the stage file, then the run list (optionally changing a gate file too); returns the manifest."""
         a = self.stages6.attempt_dir(ATT)
         rec = git(self.wt, "show", f"{self.src}:{a}/PREDICTED.json")
-        git(self.wt, "checkout", "-q", "--detach", self.marker)                    # a new history on top of the marker
+        git(self.wt, "checkout", "-q", "--detach", self.marker)
         (self.wt / a).mkdir(parents=True, exist_ok=True)
         (self.wt / f"{a}/PREDICTED.json").write_text(rec + "\n")
-        (self.wt / f"{a}/NOTES.txt").write_text("not a gate file\n")            # no Gate6_7801.lean, and an extra file
-        self.commit("test: Q's record with another file (never pushed)", a)
+        for s in gates:
+            (self.wt / f"{a}/Gate6_{s}.lean").write_text(f"-- test gate {s}\n")
+        for name in extra:
+            (self.wt / f"{a}/{name}").write_text("not a gate file\n")
+        self.commit("test: Q's record (never pushed)", a)
         (self.wt / self.stages6.stage_path("Q", ATT)).write_text(self.stages6.stage_file_text("Q", ATT))
         self.commit("test: Q's stage file (never pushed)", a)
         runs = self.stages6.stage_runs("Q", self.wt / self.stages6.data_path("Q", ATT))
         (self.wt / self.stages6.runs_path("Q", ATT)).write_text(self.stages6.runs_text("Q", runs))
+        if change_gate_after:
+            (self.wt / f"{a}/Gate6_{gates[0]}.lean").write_text("-- changed after the record\n")
         self.commit("test: Q's run list (never pushed)", a)
         m = self.stages6.manifest("Q", runs, git(self.wt, "rev-parse", "HEAD"), ATT, root=self.wt)
-        f = self.tmp / "bad_Q.json"
+        f = self.tmp / "hist_Q.json"
         f.write_text(json.dumps(m, indent=1) + "\n")
-        lines = self.refused("Q", f, "adds more than the record and its gate files")
-        self.assertTrue(any("no gate file for measured instances [7801]" in x for x in lines), lines)
+        return f
+
+    def test_record_must_be_alone(self):
+        """Finding 11: a record committed with another file refuses."""
+        self.refused("Q", self.q_history((7801, 7803), extra=("NOTES.txt",)), "adds more than the record and its gate files")
+
+    def test_gate_files_exactly_the_observed_measured_instances(self):
+        """M1: a gate file exactly for each measured instance with an observation (7801 eligible, 7803 gate false); none
+        for 7802 (measured, no observation) nor for an unmeasured instance."""
+        ok, lines = self.run_check("Q", self.q_history((7801, 7803)))
+        self.assertTrue(ok, lines)
+        self.refused("Q", self.q_history((7801,)), "no gate file for measured instances with an observation [7803]")
+        self.refused("Q", self.q_history((7801, 7802, 7803)), "gate files for instances that have none in the record")
+        self.refused("Q", self.q_history((7801, 7803, 7804)), "[7804]")
+
+    def test_gate_file_changed_after_its_record_refused(self):
+        """N5: the gate files are unchanged between the record's commit and the source commit."""
+        self.refused("Q", self.q_history((7801, 7803), change_gate_after=True), "differ at the source commit")
+
+    def test_protocol_commit_before_the_marker_refused(self):
+        """A stage file and run list committed on top of the commit before the marker."""
+        git(self.wt, "checkout", "-q", "--detach", self.base)
+        a = self.stages6.attempt_dir(ATT)
+        (self.wt / a).mkdir(parents=True, exist_ok=True)
+        (self.wt / self.stages6.stage_path("RM1", ATT)).write_text(self.stages6.stage_file_text("RM1", ATT))
+        self.commit("test: stage file before the marker (never pushed)", a)
+        (self.wt / self.stages6.runs_path("RM1", ATT)).write_text(self.stages6.runs_text("RM1", self.runs["RM1"]))
+        self.commit("test: run list (never pushed)", a)
+        m = self.stages6.manifest("RM1", self.runs["RM1"], git(self.wt, "rev-parse", "HEAD"), ATT, root=self.wt)
+        f = self.tmp / "early_RM1.json"
+        f.write_text(json.dumps(m, indent=1) + "\n")
+        self.refused("RM1", f, "does not descend from the marker's introducing commit")
+
+    def test_source_not_after_marker_commit_refused(self):
+        self.refused("RM1", self.variant("RM1", lambda m: m.__setitem__("source_commit", self.base)), "does not descend from the marker's commit")
+
+    def test_wrong_stage_refused(self):
+        ok, lines = self.run_check("M2", self.manifests["RM1"])
+        self.assertFalse(ok, lines)
+
+    def test_marker_missing_from_tree_refused(self):
+        (self.wt / marker_check.MARKER).unlink()
+        try:
+            self.refused("RM1", self.manifests["RM1"], "missing from REPO's tree")
+        finally:
+            git(self.wt, "checkout", "-q", "--", marker_check.MARKER)
+
+    def test_tree_differs_from_source_refused(self):
+        """A frozen path changed in REPO's head: the tree check itself refuses (besides F2)."""
+        f = self.wt / "research/learned-dnf-circuit-campaign-5/smoke/README.md"
+        f.write_text(f.read_text() + "changed\n")
+        git(self.wt, *IDENT, "commit", "-q", "-am", "test: change (never pushed)")
+        lines = self.refused("RM1", self.manifests["RM1"], "differs from source_commit")
+        self.assertTrue(any(x.startswith("REPO ") and "HEAD" in x for x in lines), lines)
 
     def test_marker(self):
         self.refused("RM1", self.manifests["RM1"], "does not descend from", marker_commit=self.base)
@@ -205,7 +275,8 @@ class MarkerCheck(unittest.TestCase):
         extra = self.wt / BASE / "untracked.txt"
         extra.write_text("x\n")
         try:
-            self.refused("RM1", self.manifests["RM1"], "not clean")
+            lines = self.refused("RM1", self.manifests["RM1"], "not clean")
+            self.assertTrue(any("stage check is not run" in x for x in lines), lines)
         finally:
             extra.unlink()
         import c6
