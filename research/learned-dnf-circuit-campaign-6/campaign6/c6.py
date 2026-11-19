@@ -179,4 +179,3 @@ def run_header(instance, cell, kind, stage, out=None):
 
 def require_debug():
     batch6.require_debug()
-# -wip CI short-path test 3: a change to a frozen file after the marker (this line exists only on -wip)
