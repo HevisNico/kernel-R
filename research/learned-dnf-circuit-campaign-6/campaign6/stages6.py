@@ -1,8 +1,18 @@
 """Campaign 6's stages (PREDICTION.md 4, 6 and 7): the runs of each stage, their machines, expected costs and limits,
 and the launch kit's manifest of each. New code.
 
-  stages6.py stage-file STAGE OUT.md                                 the stage file (safeguard i), pushed before the manifest
+  stages6.py stage-file STAGE OUT.md                                 the stage file: the kit's protocol of the stage
+  stages6.py runs STAGE OUT.json [INPUTS.json | PREDICTED.json | PREDICTIONS_BATCH.json]      the stage's run list
   stages6.py manifest STAGE OUT.json SOURCE_COMMIT [INPUTS.json | PREDICTED.json | PREDICTIONS_BATCH.json]
+
+The kit's protocol of each stage is its own stage file, stages/STAGE_<S>.md, as in campaign 5 (CAMPAIGN_RC.json named
+STAGE_RC.md): the kit's claim ref is keyed by the protocol's SHA-256 and the machine alone (launch.claim_ref), so each
+stage has its own claim. The stage file names PREDICTION.md (and amendment 1 for M2, M3, RM2, RM3) as its governing
+documents, which every runner checks (c6.stage_check, safeguard i). The manifest's protocol_commit is the one commit
+that adds the stage file; its source_commit is a later, different commit that adds the stage's run list
+(stages/RUNS_<S>.json, which the manifest must equal) and, for M2, M3, RM2, RM3, its inputs file (stages/INPUTS_<S>.json),
+or, for Q and the N stages, PREDICTED.json and the gate's files. (The first rehearsal named PREDICTION.md as every
+stage's kit protocol, so RM1's claims refused every later stage: the defect this layout fixes.)
 
 Stages, in a fixed sequence (PREDICTION.md 6): M1 (the calibration decks), M2 (the scans and the both-lines checks),
 M3 (the one-sided sets), Q (the runs without noise of the eligible instances and the untrained run), N1, N2, N3 (the
@@ -25,6 +35,7 @@ import math
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -34,6 +45,7 @@ import plan                                             # noqa: E402  (campaign 
 from c4 import dnf                                      # noqa: E402
 
 ROOT = HERE.parent.parent.parent
+STAGES_DIR = f"{c6.BASE}/stages"                        # each stage's stage file, run list, inputs, manifest, attempt marker
 CLOSURE = "research/sky130-supervisor-closure"
 CAMPAIGN6 = f"{c6.BASE}/campaign6"
 WORKFLOWS = ["Learned DNF circuit campaign 6"]
@@ -176,7 +188,17 @@ def rehearsal_network_runs(predictions):
 
 def stage_path(stage):
     assert stage in c6.STAGES
-    return f"{c6.BASE}/STAGE_{stage}.md"
+    return f"{STAGES_DIR}/STAGE_{stage}.md"
+
+
+def runs_path(stage):
+    assert stage in c6.STAGES
+    return f"{STAGES_DIR}/RUNS_{stage}.json"
+
+
+def runs_text(stage, runs):
+    """The stage's run list, committed at its source commit (the manifest must equal it)."""
+    return json.dumps(dict(stage=stage, runs=runs), indent=1, sort_keys=True) + "\n"
 
 
 def stage_file_text(stage):
@@ -185,7 +207,9 @@ def stage_file_text(stage):
     if stage in c6.AMENDED_STAGES:                              # amendment 1 governs these stages' machines
         block["governing_amendment"] = dict(path=c6.AMENDMENT, commit=c6.AMENDMENT_COMMIT, sha256=c6.AMENDMENT_SHA256)
     return "\n".join([f"# Campaign 6: the protocol of stage {stage}", "",
-                      "Written by `stages6.py stage-file` and pushed before the stage's manifest. Its governing protocol is",
+                      "Written by `stages6.py stage-file` and pushed alone before the stage's source commit. It is the launch",
+                      "kit's protocol file of this stage (the manifest's `protocol_path`), so each stage has its own claim.",
+                      "Its governing protocol is",
                       f"`{c6.PROTOCOL}` at commit `{c6.PROTOCOL_COMMIT}`, SHA-256 `{c6.PROTOCOL_SHA256}`; every runner of",
                       "the stage refuses its run if that file has another SHA-256 in the repository (c6.stage_check).", "",
                       plan.STAGE_BEGIN, json.dumps(block, indent=1, sort_keys=True), "```", ""])
@@ -210,23 +234,40 @@ def entry(stage, r, inputs_path=None):
                 diagnostic_logs=["evidence/session.log"], noise_fingerprint="noise.sha256")
 
 
+def protocol_commit(stage, source_commit, root=ROOT):
+    """The one commit, in source_commit's history, that adds the stage file; it must precede source_commit."""
+    out = subprocess.run(["git", "-C", str(root), "log", "--diff-filter=A", "--format=%H", source_commit, "--", stage_path(stage)],
+                         check=True, capture_output=True, text=True).stdout.split()
+    assert len(out) == 1, f"refused: {stage_path(stage)} is added by {len(out)} commits in {source_commit}'s history, not one"
+    assert out[0] != source_commit, "refused: the stage file must be pushed alone before the source commit (the kit: protocol must precede implementation)"
+    return out[0]
+
+
 def manifest(stage, runs, source_commit, inputs_path=None, root=ROOT):
     def blob(commit, path):
         return subprocess.run(["git", "-C", str(root), "show", f"{commit}:{path}"], check=True, capture_output=True).stdout
     assert stage in c6.STAGES
     rehearsal = stage.startswith("R")
-    extra = [stage_path(stage)] + ([inputs_path] if inputs_path else [])
+    pc = protocol_commit(stage, source_commit, root)
+    protocol = blob(pc, stage_path(stage))
+    assert blob(source_commit, stage_path(stage)) == protocol, "refused: the stage file differs at the source commit"
+    assert blob(source_commit, runs_path(stage)) == runs_text(stage, runs).encode(), "refused: the run list at the source commit is not this stage's runs"
+    subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor", c6.PROTOCOL_COMMIT, pc], check=True)
+    with tempfile.TemporaryDirectory() as tmp:                 # safeguard i on the protocol's own bytes
+        f = Path(tmp) / "STAGE.md"
+        f.write_bytes(protocol)
+        assert c6.stage_check(f)["stage"] == stage, "refused: the stage file names another stage"
+    extra = [stage_path(stage), runs_path(stage)] + ([inputs_path] if inputs_path else [])
     if stage == "RN":
         extra.append(REHEARSAL_PREDICTIONS)
     m = dict(kind="registered", campaign_id=("learned-dnf-circuit-6-rehearsal-" if rehearsal else "learned-dnf-circuit-6-") + stage.lower(),
-             attempt=1, executor=c4.EXECUTOR, protocol_commit=c6.PROTOCOL_COMMIT, protocol_path=c6.PROTOCOL,
-             protocol_sha256=hashlib.sha256(blob(c6.PROTOCOL_COMMIT, c6.PROTOCOL)).hexdigest(), source_commit=source_commit,
-             launcher_path=f"{CLOSURE}/launchkit/launch.py", marker_path=f"{c6.BASE}/RUN_ATTEMPT_{stage}.json",
+             attempt=1, executor=c4.EXECUTOR, protocol_commit=pc, protocol_path=stage_path(stage),
+             protocol_sha256=hashlib.sha256(protocol).hexdigest(), source_commit=source_commit,
+             launcher_path=f"{CLOSURE}/launchkit/launch.py", marker_path=f"{STAGES_DIR}/RUN_ATTEMPT_{stage}.json",
              spinit_path=f"{CLOSURE}/runtime/spinit", inventory_a_path=f"{c6.BASE}/INVENTORY_a.json", inventory_b_path=f"{c6.BASE}/INVENTORY_b.json",
              source_sha256={n: hashlib.sha256(blob(source_commit, n)).hexdigest() for n in frozen() + extra},
              expected_workflows=WORKFLOWS, jobs=c4.JOBS, scenario_order=["stage"], budget_s=math.ceil(stage_cap(runs)),
              runs=[entry(stage, r, inputs_path) for r in runs])
-    assert m["protocol_sha256"] == c6.PROTOCOL_SHA256, "the protocol is not PREDICTION.md as pushed at df1a3cb"
     kit_checks(m)
     return m
 
@@ -261,6 +302,10 @@ def main(argv_=None):
     c6.require_debug()
     if a[0] == "stage-file":
         Path(a[2]).write_text(stage_file_text(a[1]))
+        return
+    if a[0] == "runs":
+        stage, out = a[1], Path(a[2])
+        out.write_text(runs_text(stage, stage_runs(stage, a[3] if len(a) > 3 else None)))
         return
     if a[0] != "manifest":
         raise SystemExit(__doc__)

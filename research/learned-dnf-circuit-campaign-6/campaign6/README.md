@@ -36,29 +36,37 @@ The code of `PREDICTION.md` section 8 (`df1a3cb`) and its amendment 1 (`a0d4ad3`
 
 For each stage, in the order of `PREDICTION.md` 10:
 
-1. **The source commit.** On `-impl`, a commit on top of the frozen implementation adds only this stage's files:
-   - its stage file `STAGE_<name>.md` (`stages6.py stage-file`), whose governing protocol is `PREDICTION.md` with its
-     SHA-256 (safeguard i);
-   - for M2 and M3 (RM2 and RM3), its inputs file, written by `inputs6.py` from the collected evidence of the stages
-     before it;
-   - for Q and the N stages, `PREDICTED.json` and the Lean files of the gate;
-   - for RN, nothing more: `rehearsal/PREDICTIONS_BATCH.json` is already in the implementation;
-   - not the inventories: `INVENTORY_a.json` and `INVENTORY_b.json` are written once, each after its machine's envcheck,
-     before RM1's manifest, each pushed alone, and reused unchanged by every later stage (the coordinator's ruling of
-     2026-11-19; the kit compares only the published inventory with the local one, and its machine, environment and
-     executor). Each launch's `INVENTORY_AT_LAUNCH.json` (and `INVENTORY_AT_RESUME`) records the machine at that stage,
-     and envcheck runs before every launch.
+Every stage's files are under `research/learned-dnf-circuit-campaign-6/stages/` (`stages6.STAGES_DIR`). The files at
+the folder's top level from the first rehearsal attempt (`STAGE_RM1.md`, `STAGE_RM2.md`, `INPUTS_RM2.json`,
+`CAMPAIGN_RM1/RM2.json`, `RUN_ATTEMPT_RM1/RM2.json`) belong to the superseded manifest code and are kept unchanged.
 
-   **Each inputs file is pushed before its stage's manifest.** The manifest binds it, the stage file and every frozen
-   file by their SHA-256 at that source commit (`stages6.manifest`). Nothing else may differ from the frozen
-   implementation (the kit's `runtime_unchanged`, and the CI gate on that exact commit).
-2. **The manifest**, `stages6.py manifest STAGE OUT SOURCE_COMMIT [input]`, is checked as the kit checks it (both
-   shards, the round-robin order, the budget).
-3. **The marker check**, `tools/marker_check.py STAGE MANIFEST MARKER_COMMIT REPO`, in a clean checkout whose tree equals
-   the source commit on the frozen paths and the stage file, with the manifest kept outside that checkout (an untracked
-   file there makes the tree unclean, and the script writes its report next to the manifest). A refusal means no launch, and its `MARKER_CHECK_<stage>.txt`
-   is committed with the stage's evidence. On a pass, the manifest is pushed with its attempt marker (`launch.py
-   prepare`) and its `MARKER_CHECK_<stage>.txt`. (The script is outside `stages6.frozen()`, so outside the marker.)
+1. **The protocol commit.** On `-impl`, a commit adds only the stage file `stages/STAGE_<S>.md` (`stages6.py
+   stage-file`). It is the launch kit's protocol of the stage (`protocol_path`), so each stage has its own claim ref
+   (`launch.claim_ref` is keyed by the protocol's SHA-256 and the machine alone), as campaign 5 did with `STAGE_RC.md`.
+   It names `PREDICTION.md` (and amendment 1 for M2, M3, RM2, RM3) with their SHA-256, which every runner checks
+   (safeguard i, `c6.stage_check`).
+2. **The source commit**, a later, different commit, adds only:
+   - the stage's run list `stages/RUNS_<S>.json` (`stages6.py runs STAGE OUT [input]`), which the manifest must equal;
+   - for M2 and M3 (RM2 and RM3), its inputs file `stages/INPUTS_<S>.json`, written by `inputs6.py` from the collected
+     evidence of the stages before it (pushed before the manifest);
+   - for Q and the N stages, `PREDICTED.json` and the Lean files of the gate;
+   - for RN and M1, RM1, nothing more than the run list (`rehearsal/PREDICTIONS_BATCH.json` is frozen).
+
+   Not the inventories: `INVENTORY_a.json` and `INVENTORY_b.json` are written once, each after its machine's envcheck,
+   and reused unchanged by every later stage (the coordinator's ruling of 2026-11-19; the kit compares only the
+   published inventory with the local one, and its machine, environment and executor). Each launch's
+   `INVENTORY_AT_LAUNCH.json` (and `INVENTORY_AT_RESUME`) records the machine at that stage, and envcheck runs before
+   every launch. The manifest (`stages6.manifest`) takes `protocol_commit` as the one commit that adds the stage file,
+   and binds the stage file, the run list, the inputs and every frozen file by their SHA-256 at the source commit. After
+   the source commit, only the manifest, its attempt marker and the inventories may change (the kit's
+   `allowed_after_freeze`), and CI must be green on the source commit itself (the kit's live gate).
+3. **The manifest**, `stages6.py manifest STAGE OUT SOURCE_COMMIT [input]`, is checked as the kit checks it (both
+   shards, the round-robin order, the budget), then the marker check (`tools/marker_check.py`, outside the frozen set)
+   runs in a clean checkout of the source commit, with the manifest kept outside that checkout. A refusal means no
+   launch. On a pass, the manifest `stages/CAMPAIGN_<S>.json` and its attempt marker (`launch.py prepare`,
+   `stages/RUN_ATTEMPT_<S>.json`) are pushed together, and nothing else is pushed to `-impl` until both machines have
+   launched. `MARKER_CHECK_<S>.txt` goes onto the stage's evidence branch of machine a (a file pushed after the source
+   commit other than these would make the launch refuse).
 4. **The launch**, one per machine, detached, with the sessions active. A started run is never relaunched.
 5. **The collection**, with campaign 5's `collect.py`, then the evidence branches.
 

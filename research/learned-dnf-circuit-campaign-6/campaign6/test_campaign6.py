@@ -430,5 +430,90 @@ class Frozen(unittest.TestCase):
         self.assertEqual(missing, [])
 
 
+class Claims(unittest.TestCase):
+    """The kit's claim key (launch.claim_ref: the protocol's SHA-256 and the machine) is distinct for every stage. The
+    first rehearsal named PREDICTION.md as every stage's protocol, so RM1's claims refused RM2 (2026-11-19)."""
+    STAGES = ("RM1", "RM2", "RM3", "RN", "M1", "M2", "M3", "Q", "N1", "N2", "N3", "N")
+    # claim refs that exist on the remote for ever: campaign 6's first rehearsal (PREDICTION.md) and campaign 5's four
+    TAKEN = ("8e7392c5654975049de3d25adf8a511105fba425fdb07b4d841a12fdc6342240",
+             "05c8416189d0ef18c83e65e8b77b44c573800470ce1b740c8277b3c3e3bfa7b1",
+             "223f0c6d996fd56854387874ee30299ee717058d08b0d6cd1300678c8a7ab4d8",
+             "27989a36013709de4fe77e1c8baa5fbdf168c4b4662cd38fec3583af9b72cab5",
+             "31bb3782c6f45ce5269c57a6ca5443c1dcf77fa8a4bf712bdce38c0de3559330")
+
+    @staticmethod
+    def launch_module(root):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(f"launch_{abs(hash(str(root)))}", Path(root) / stages6.CLOSURE / "launchkit/launch.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def refs(self):
+        import hashlib
+        launch = self.launch_module(stages6.ROOT)
+        return {(s, x): launch.claim_ref(dict(protocol_sha256=hashlib.sha256(stages6.stage_file_text(s).encode()).hexdigest()), x)
+                for s in self.STAGES for x in "ab"}
+
+    def test_a_claim_refs_distinct(self):
+        refs = self.refs()
+        self.assertEqual(len(set(refs.values())), 2 * len(self.STAGES), refs)
+        for s in self.STAGES:
+            self.assertEqual(stages6.stage_path(s), f"{c6.BASE}/stages/STAGE_{s}.md")
+
+    def test_b_no_taken_claim_ref(self):
+        launch = self.launch_module(stages6.ROOT)
+        taken = {launch.claim_ref(dict(protocol_sha256=h), x) for h in self.TAKEN for x in "ab"}
+        self.assertIn("refs/heads/owner-launch/protocol-" + self.TAKEN[0] + "/a", taken)
+        self.assertEqual(set(self.refs().values()) & taken, set())
+
+    def test_c_manifest_passes_read_manifest(self):
+        """In a throwaway worktree (never pushed): the stage file alone in one commit, the run list in a later one; the
+        manifest passes the kit's read_manifest. The stage file and its run list in one commit is refused, and so is a run
+        list that differs from the stage's runs."""
+        import subprocess
+        def git(repo, *a):
+            return subprocess.run(["git", "-C", str(repo), *a], check=True, capture_output=True, text=True).stdout.strip()
+        ident = ["-c", "user.name=test", "-c", "user.email=test@invalid"]
+        with tempfile.TemporaryDirectory() as tmp:
+            wt = Path(tmp) / "wt"
+            git(stages6.ROOT, "worktree", "add", "-q", "--detach", str(wt), "HEAD")
+            try:
+                runs = stages6.stage_runs("RM1")
+                (wt / stages6.STAGES_DIR).mkdir(parents=True, exist_ok=True)
+                (wt / stages6.stage_path("RM1")).write_text(stages6.stage_file_text("RM1"))
+                git(wt, "add", stages6.STAGES_DIR)
+                git(wt, *ident, "commit", "-q", "-m", "test: stage file (never pushed)")
+                proto = git(wt, "rev-parse", "HEAD")
+                (wt / stages6.runs_path("RM1")).write_text(stages6.runs_text("RM1", runs))
+                git(wt, "add", stages6.STAGES_DIR)
+                git(wt, *ident, "commit", "-q", "-m", "test: run list (never pushed)")
+                src = git(wt, "rev-parse", "HEAD")
+                m = stages6.manifest("RM1", runs, src, root=wt)
+                self.assertEqual((m["protocol_commit"], m["protocol_path"]), (proto, stages6.stage_path("RM1")))
+                self.assertNotEqual(m["protocol_sha256"], c6.PROTOCOL_SHA256)
+                self.assertIn(stages6.runs_path("RM1"), m["source_sha256"])
+                path = wt / stages6.STAGES_DIR / "CAMPAIGN_RM1.json"
+                path.write_text(json.dumps(m, indent=1) + "\n")
+                launch = self.launch_module(wt)
+                got, _, name = launch.read_manifest(wt, path)
+                self.assertEqual(name, f"{stages6.STAGES_DIR}/CAMPAIGN_RM1.json")
+                self.assertEqual(launch.claim_ref(got, "a"), self.refs()[("RM1", "a")])
+                with self.assertRaises(AssertionError):                       # a run list that is not the stage's runs
+                    stages6.manifest("RM1", runs[:2] + runs[3:], src, root=wt)
+                # the stage file and the run list in one commit: refused (protocol must precede the source commit)
+                git(wt, "checkout", "-q", "--detach", proto + "~1")
+                (wt / stages6.STAGES_DIR).mkdir(parents=True, exist_ok=True)
+                (wt / stages6.stage_path("RM1")).write_text(stages6.stage_file_text("RM1"))
+                (wt / stages6.runs_path("RM1")).write_text(stages6.runs_text("RM1", runs))
+                git(wt, "add", stages6.STAGES_DIR)
+                git(wt, *ident, "commit", "-q", "-m", "test: both in one commit (never pushed)")
+                with self.assertRaises(AssertionError):
+                    stages6.manifest("RM1", runs, git(wt, "rev-parse", "HEAD"), root=wt)
+            finally:
+                git(stages6.ROOT, "worktree", "remove", "--force", str(wt))
+                git(stages6.ROOT, "worktree", "prune")
+
+
 if __name__ == "__main__":
     unittest.main()
