@@ -5,7 +5,9 @@ stage's launch; a refusal means no launch for that stage, and its output is comm
   marker_check.py STAGE MANIFEST.json MARKER_COMMIT [REPO]      writes MARKER_CHECK_<STAGE>.txt next to the manifest
 
 It passes only if all of these hold:
-1. the marker at MARKER_COMMIT (research/learned-dnf-circuit-campaign-6/CAMPAIGN_MARKER.json) is the one in the repository;
+1. the marker at MARKER_COMMIT (research/learned-dnf-circuit-campaign-6/CAMPAIGN_MARKER.json) has the pinned SHA-256
+   (MARKER_SHA256, the marker approved by both coordinators), MARKER_COMMIT descends from the commit that introduced it
+   (MARKER_INTRODUCED, b88144f), and REPO's tree holds the same marker (a missing one refuses);
 2. the manifest's source_commit descends from MARKER_COMMIT;
 3. the manifest's source_sha256 holds EXACTLY the marker's frozen paths, each with the marker's SHA-256, plus only the
    stage's declared data files: its stage file (required); for M2, M3, RM2, RM3 its inputs file (required, one); for
@@ -29,6 +31,8 @@ import sys
 HERE = Path(__file__).resolve().parent
 BASE = "research/learned-dnf-circuit-campaign-6"
 MARKER = f"{BASE}/CAMPAIGN_MARKER.json"
+MARKER_SHA256 = "deb8e78c4425e9b97fe559f95f1da6a0b99775f557832cdbaa58003dab472c9f"
+MARKER_INTRODUCED = "b88144f5999bda8fe5672d20af791608fa3d7693"
 INPUT_STAGES = ("M2", "M3", "RM2", "RM3")
 NETWORK_STAGES = ("Q", "N1", "N2", "N3", "N")
 
@@ -62,11 +66,26 @@ def check(stage, manifest_path, marker_commit, repo):
 
     m = json.loads(Path(manifest_path).read_text())
     src_commit = m["source_commit"]
-    mk_text = git(repo, "show", f"{marker_commit}:{MARKER}")
+    try:
+        git(repo, "merge-base", "--is-ancestor", MARKER_INTRODUCED, marker_commit)
+        lines.append(f"MARKER_COMMIT {marker_commit} descends from {MARKER_INTRODUCED}, which introduced the marker")
+    except subprocess.CalledProcessError:
+        fail(f"MARKER_COMMIT {marker_commit} does not descend from {MARKER_INTRODUCED}, which introduced the marker")
+    try:
+        mk_text = git(repo, "show", f"{marker_commit}:{MARKER}")
+    except subprocess.CalledProcessError:
+        fail(f"no marker {MARKER} at MARKER_COMMIT {marker_commit}")
+        return ok, lines
+    mk_sha = hashlib.sha256(mk_text).hexdigest()
+    lines.append(f"marker {MARKER} at {marker_commit}: sha256 {mk_sha}")
+    if mk_sha != MARKER_SHA256:
+        fail(f"the marker at MARKER_COMMIT has sha256 {mk_sha}, not the pinned {MARKER_SHA256}")
+        return ok, lines
     marker = json.loads(mk_text)
-    lines.append(f"marker {MARKER} at {marker_commit}: sha256 {hashlib.sha256(mk_text).hexdigest()}")
-    if (repo / MARKER).exists() and (repo / MARKER).read_bytes() != mk_text:
-        fail("the marker in the repository differs from the marker at MARKER_COMMIT")
+    if not (repo / MARKER).is_file():
+        fail(f"the marker {MARKER} is missing from REPO's tree")
+    elif (repo / MARKER).read_bytes() != mk_text:
+        fail("the marker in REPO's tree differs from the marker at MARKER_COMMIT")
     try:
         git(repo, "merge-base", "--is-ancestor", marker_commit, src_commit)
         lines.append(f"source_commit {src_commit} descends from the marker's commit")

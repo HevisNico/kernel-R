@@ -72,3 +72,35 @@ of `PREDICTION.md` 7 must pass. Its verdicts are discarded.
 - Its prediction record is `predicted6.predictions` for seeds 7701 and 7706 on the batch's merged evidence (`batch_dir`:
   machine a's `d9e431b` and machine b's `88a34de`, merged as the batch merged them), with its own Lean files.
 - `analyze6` then reproduces that record byte for byte.
+
+## REHEARSAL_RULES (fixed before RM1 is launched)
+
+The rehearsal of `PREDICTION.md` 7: RM1, RM2, RM3 on the nominal cell (`none-a` on `a`, `none-b` on `b`), then RN on
+7701 (`a`) and 7706 (`b`). These rules were set on 2026-11-19 at the coordinators' request (the previous coordinator's
+points), before any rehearsal stage was launched.
+
+**It passes only if all of these hold:**
+1. **Every run completes**, in all four stages, with its required outputs collected (campaign 5's `collect.py`).
+2. **The 0.75 rule** (`PREDICTION.md` 7, [C5 §11.4]) holds on every run. No run's wall time exceeds 0.75 of its campaign
+   limit. That limit is the run's `timeout_s` in its stage's manifest, which is section 4's `10 × ceil(2 × expected / 10)`
+   of its expected cost. For example, a noisy run at need 4 is held to 0.75 × 2 800 s = 2 100 s; at other needs its
+   expected cost (1 400 s at need 4) is scaled by campaign 5's `plan.dcost` ratio. Measure runs are held to their own
+   `timeout_s` the same way.
+3. **Section 7's other checks** pass, each recorded with its output:
+   - the seed guard's refusals: a campaign seed outside the kit, and a development seed in a campaign stage;
+   - the noise-model guard;
+   - the collection;
+   - the prediction record reproduced byte for byte from the evidence (condition 5).
+4. **`check-noise`** on RN's evidence from both machines reports every fingerprint distinct.
+5. **RN's end-to-end analysis** (`predicted6` for 7701 and 7706 on the batch's merged evidence, then `analyze6`) shows
+   `predicted6_is_reproduced` true and every check of section 7 passing. Its verdicts are discarded, and none is a
+   claim.
+6. Every stage's `marker_check.py` passes before its launch. A refusal means that stage is not launched, and its
+   `MARKER_CHECK_<stage>.txt` is committed with the evidence.
+
+**If any condition fails:** no campaign stage (M1 onwards) is launched until an amendment. That amendment may change only
+the limits and the stage split, never a rule, a claim or an instance (`PREDICTION.md` 7).
+
+**Reported whatever they are:** the wall times of the first noisy runs on a mismatched cell, `7701-n1` (noise seed
+77 011, machine `a`) and `7706-n1` (77 061, `b`). Each is reported against section 4's 1 400 s estimate, scaled to its
+instance's needs. The two machines' measure records (RM1–RM3) are compared and reported, not required to match.

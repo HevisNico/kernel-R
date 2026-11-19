@@ -1,7 +1,8 @@
 """Tests of marker_check.py on real manifests built by stages6 at a throwaway local commit on top of the marker (never
 pushed): equal accepted; a missing path, an extra path, a wrong hash, a non-descendant commit, a missing inputs file and
 a wrong stage file each refused; python -O refused, and an unexpected error of the stage check refused; a dirty tree
-and a tree that differs from source_commit refused; RN (90 frozen paths and its stage file) accepted, an extra path refused.
+and a tree that differs from source_commit refused; a marker other than the pinned one, a MARKER_COMMIT not descending
+from b88144f, and a marker missing from REPO's tree refused; RN (90 frozen paths and its stage file) accepted, an extra path refused.
 
   python -B -m unittest test_marker_check        (from this folder, with the pinned venv, in a full clone of -impl)
 """
@@ -153,6 +154,34 @@ class MarkerCheck(unittest.TestCase):
         self.assertFalse(ok)
         self.assertTrue(any("differs from source_commit" in x for x in lines), lines)
         self.assertTrue(any(x.startswith("REPO ") and "HEAD" in x for x in lines), lines)
+
+    def test_other_marker_refused(self):
+        """A MARKER_COMMIT whose marker is not the pinned one (a local commit changing it) is refused."""
+        f = self.wt / BASE / "CAMPAIGN_MARKER.json"
+        try:
+            f.write_text(f.read_text() + "\n")
+            git(self.wt, "-c", "user.name=test", "-c", "user.email=test@invalid", "commit", "-q", "-am", "test: other marker (never pushed)")
+            other = git(self.wt, "rev-parse", "HEAD")
+            ok, lines = marker_check.check("RM1", self.manifests["RM1"], other, self.wt)
+        finally:
+            git(self.wt, "checkout", "-q", "--detach", self.src)
+        self.assertFalse(ok)
+        self.assertTrue(any("not the pinned" in x for x in lines), lines)
+
+    def test_marker_commit_before_introduction_refused(self):
+        ok, lines = marker_check.check("RM1", self.manifests["RM1"], FROZEN_COMMIT, self.wt)
+        self.assertFalse(ok)
+        self.assertTrue(any("does not descend from b88144f" in x for x in lines), lines)
+
+    def test_marker_missing_from_tree_refused(self):
+        f = self.wt / BASE / "CAMPAIGN_MARKER.json"
+        try:
+            f.unlink()
+            ok, lines = self.run_check("RM1", self.manifests["RM1"])
+        finally:
+            git(self.wt, "checkout", "-q", "--", f"{BASE}/CAMPAIGN_MARKER.json")
+        self.assertFalse(ok)
+        self.assertTrue(any("missing from REPO's tree" in x for x in lines), lines)
 
     def test_rn_accepted_and_extra_refused(self):
         m = json.loads(self.manifests["RN"].read_text())
