@@ -12,6 +12,8 @@ It passes only if all of these hold:
    Q and the N stages, PREDICTED.json and the gate's Lean files (allowed). Any other path, or a missing one, refuses;
 4. every hash of source_sha256 equals the file at the manifest's source_commit;
 5. the stage file passes c6.stage_check (safeguard i), and names the same stage; the manifest's campaign_id names it.
+It refuses under python -O (the asserts of c6.stage_check would vanish), and any exception of the stage check is a
+refusal, so a refusal always leaves its MARKER_CHECK file.
 The report records this script's own SHA-256.
 """
 import fnmatch
@@ -89,16 +91,19 @@ def check(stage, manifest_path, marker_commit, repo):
             fail(f"hash differs at source_commit: {p}")
     if not m.get("campaign_id", "").endswith("-" + stage.lower()):
         fail(f"the manifest's campaign_id {m.get('campaign_id')} does not name stage {stage}")
-    sys.path.insert(0, str(repo / BASE / "campaign6"))
-    import c6
-    try:
-        st = c6.stage_check(repo / f"{BASE}/STAGE_{stage}.md")
-        if st["stage"] != stage:
-            fail(f"the stage file names stage {st['stage']}, not {stage}")
-        else:
-            lines.append(f"stage file passes c6.stage_check: {json.dumps(st, sort_keys=True)}")
-    except (AssertionError, FileNotFoundError, KeyError, ValueError) as e:
-        fail(f"the stage file does not pass c6.stage_check: {e}")
+    if not __debug__:
+        fail("run under python -O: c6.stage_check's asserts are stripped, so the stage file is not checked")
+    else:
+        try:
+            sys.path.insert(0, str(repo / BASE / "campaign6"))
+            import c6
+            st = c6.stage_check(repo / f"{BASE}/STAGE_{stage}.md")
+            if st["stage"] != stage:
+                fail(f"the stage file names stage {st['stage']}, not {stage}")
+            else:
+                lines.append(f"stage file passes c6.stage_check: {json.dumps(st, sort_keys=True)}")
+        except Exception as e:
+            fail(f"the stage file does not pass c6.stage_check: {type(e).__name__}: {e}")
     lines.append(f"source_sha256: {len(src)} paths ({len(frozen)} frozen, {len(set(src) - set(frozen))} data)")
     return ok, lines
 

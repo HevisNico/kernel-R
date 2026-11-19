@@ -1,6 +1,6 @@
 """Tests of marker_check.py on real manifests built by stages6 at a throwaway local commit on top of the marker (never
 pushed): equal accepted; a missing path, an extra path, a wrong hash, a non-descendant commit, a missing inputs file and
-a wrong stage file each refused.
+a wrong stage file each refused; python -O refused, and an unexpected error of the stage check refused.
 
   python -B -m unittest test_marker_check        (from this folder, with the pinned venv, in a full clone of -impl)
 """
@@ -100,6 +100,39 @@ class MarkerCheck(unittest.TestCase):
         ok, lines = self.run_check("M2", f)
         self.assertFalse(ok)
         self.assertTrue(any("declared data file missing" in x for x in lines), lines)
+
+    def test_optimized_python_refused(self):
+        """Under python -O the script refuses (and writes its file) even when the stage file is broken in the checkout."""
+        stage_file = self.wt / self.stages6.stage_path("RM1")
+        good = stage_file.read_text()
+        out = self.tmp / "opt"
+        out.mkdir(exist_ok=True)
+        f = out / "CAMPAIGN_RM1.json"
+        f.write_text(self.manifests["RM1"].read_text())
+        try:
+            stage_file.write_text("not a stage file\n")
+            r = subprocess.run([sys.executable, "-O", "-B", str(HERE / "marker_check.py"), "RM1", str(f), MARKER_COMMIT, str(self.wt)],
+                               capture_output=True, text=True)
+        finally:
+            stage_file.write_text(good)
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        report = (out / "MARKER_CHECK_RM1.txt").read_text()
+        self.assertIn("python -O", report)
+        self.assertIn("VERDICT: REFUSED", report)
+
+    def test_unexpected_stage_check_error_refused(self):
+        """An exception outside the usual ones (here a directory in place of the stage file) is a refusal, not a crash."""
+        stage_file = self.wt / self.stages6.stage_path("RM1")
+        good = stage_file.read_text()
+        try:
+            stage_file.unlink()
+            stage_file.mkdir()
+            ok, lines = self.run_check("RM1", self.manifests["RM1"])
+        finally:
+            stage_file.rmdir()
+            stage_file.write_text(good)
+        self.assertFalse(ok)
+        self.assertTrue(any("does not pass c6.stage_check" in x for x in lines), lines)
 
     def test_wrong_stage_refused(self):
         ok, lines = self.run_check("M2", self.manifests["RM1"])       # RM1's manifest checked as M2
