@@ -1,0 +1,919 @@
+>>> set numdgt=16
+ERROR: (external)  no graphics interface;
+ please check if X-server is running,
+ or ngspice is compiled properly (see INSTALL)
+
+Note: Compatibility modes selected: hs a
+
+Warning: m=xx on .subckt line will override multiplier m hierarchy!
+
+
+Circuit: * 3 r cells, pulses at any date (phase 0 of the network experiment, exploratory)
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+>>> setseed 7801
+>>> reset
+Reset re-loads circuit * 3 r cells, pulses at any date (phase 0 of the network experiment, exploratory)
+
+Circuit: * 3 r cells, pulses at any date (phase 0 of the network experiment, exploratory)
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+>>> save v(xa.p) v(xa.vq) v(xa.vmem1) v(xa.x1.sum) v(xa.x1.si) v(ksa1) v(ampa1) v(xa.vmem2) v(xa.x2.sum) v(xa.x2.si) v(ksa2) v(ampa2) v(xa.nzm) v(xa.x1.nzo) v(xa.x1.nzc) v(xa.x2.nzo) v(xa.x2.nzc) v(xb.p) v(xb.vq) v(xb.vmem1) v(xb.x1.sum) v(xb.x1.si) v(ksb1) v(ampb1) v(xb.vmem2) v(xb.x2.sum) v(xb.x2.si) v(ksb2) v(ampb2) v(xb.nzm) v(xb.x1.nzo) v(xb.x1.nzc) v(xb.x2.nzo) v(xb.x2.nzc) v(xc.p) v(xc.vq) v(xc.vmem1) v(xc.x1.sum) v(xc.x1.si) v(ksc1) v(ampc1) v(xc.vmem2) v(xc.x2.sum) v(xc.x2.si) v(ksc2) v(ampc2) v(xc.nzm) v(xc.x1.nzo) v(xc.x1.nzc) v(xc.x2.nzo) v(xc.x2.nzc) v(gla1) v(gla2) v(glb1) v(glb2) v(glc1) v(glc2)
+>>> delete all
+>>> stop when time >= 0.0003001
+>>> save v(xa.p) v(xa.vq) v(xa.vmem1) v(xa.x1.sum) v(xa.x1.si) v(ksa1) v(ampa1) v(xa.vmem2) v(xa.x2.sum) v(xa.x2.si) v(ksa2) v(ampa2) v(xa.nzm) v(xa.x1.nzo) v(xa.x1.nzc) v(xa.x2.nzo) v(xa.x2.nzc) v(xb.p) v(xb.vq) v(xb.vmem1) v(xb.x1.sum) v(xb.x1.si) v(ksb1) v(ampb1) v(xb.vmem2) v(xb.x2.sum) v(xb.x2.si) v(ksb2) v(ampb2) v(xb.nzm) v(xb.x1.nzo) v(xb.x1.nzc) v(xb.x2.nzo) v(xb.x2.nzc) v(xc.p) v(xc.vq) v(xc.vmem1) v(xc.x1.sum) v(xc.x1.si) v(ksc1) v(ampc1) v(xc.vmem2) v(xc.x2.sum) v(xc.x2.si) v(ksc2) v(ampc2) v(xc.nzm) v(xc.x1.nzo) v(xc.x1.nzc) v(xc.x2.nzo) v(xc.x2.nzc) v(gla1) v(gla2) v(glb1) v(glb2) v(glc1) v(glc2)
+>>> tran 1u 0.4 0 200n
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        1.8
+vr0                                       1.25
+vfire                                      0.8
+vreopen                                    1.2
+vcm                                        0.4
+vhi                                        0.6
+vlo                                        0.5
+vpre                                       1.3
+vinita1                                 0.3895
+ksa1                                         0
+kra1                                         1
+kpa1                                         0
+tsa1                                         1
+ampa1                                        1
+vinita2                                 0.3895
+ksa2                                         0
+kra2                                         1
+kpa2                                         0
+tsa2                                         1
+ampa2                                        1
+xa.x1.gm                               0.86112
+xa.x1.sen0                                   0
+xa.x1.rst0                                 1.8
+xa.x1.preb0                                  0
+xa.x1.sen                                    0
+xa.x1.rst                                  1.8
+xa.x1.preb                                   0
+xa.x1.ibs                             0.505381
+xa.x1.ibo                             0.507416
+xa.x1.dq                               1.06456
+xa.vmem1                              0.389574
+xa.x1.admb                                 1.8
+xa.pb                                      1.8
+xa.x1.xnad.n1                      8.01035e-11
+xa.x1.adm                          3.85581e-07
+xa.vq                                     1.25
+xa.x1.vs                               1.29987
+xa.x1.vgd                              1.01506
+xa.x1.x                               0.400009
+xa.x1.si                           1.33882e-06
+xa.x1.sum                             0.400742
+xa.x1.sd                                   1.8
+xa.x1.xop.tail                           1.093
+xa.x1.xop.o1m                         0.691341
+xa.x1.xop.o1                          0.698662
+xa.x1.vcmn                                 0.4
+xa.x1.xop.oz                          0.698662
+xa.x1.vcmn0                                0.4
+xa.x1.nzo                                    0
+gla1                                         0
+xa.x1.drv                             0.400742
+xa.x1.rsti0                                1.8
+xa.x1.rsti                                 1.8
+xa.x1.xcmps.tail                       1.52034
+xa.x1.xcmps.o1m                       0.858316
+xa.x1.vrefsn                               0.6
+xa.x1.xcmps.o1                     1.14947e-05
+xa.x1.xcmps.o2                             1.8
+xa.x1.xcmps.o3                     6.71573e-07
+xa.x1.cmps                                 1.8
+xa.x1.vrefsn0                              0.6
+xa.x1.vrefs                                0.6
+xa.x1.nzc                                    0
+xa.x1.adb                                  1.8
+xa.x1.ad                           7.90747e-07
+xa.x1.nzi                                    0
+xa.x1.en                           7.51095e-07
+xa.x1.cmpb                          9.3148e-07
+xa.x1.sba                                  1.8
+xa.x1.xnsa.n1                        0.0631842
+xa.x1.a                            1.24042e-06
+xa.x1.ab                                   1.8
+xa.x1.xla.x1.n1                    6.16452e-07
+xa.x1.xla.x2.n1                        0.05278
+xa.x1.ad1                          1.24042e-06
+xa.x1.sbc0                                 1.8
+xa.x1.xnsc.n1                      1.16295e-10
+xa.x1.c                            1.75094e-06
+xa.x1.cbar                                 1.8
+xa.x1.xlc.x1.n1                    8.67349e-07
+xa.x1.xlc.x2.n1                       0.075544
+xa.x1.cd1                          1.75094e-06
+xa.x1.cd2                                  1.8
+xa.x1.cdel                         3.32617e-07
+xa.x1.sbb                                  1.8
+xa.x1.xnsb.n1                        0.0701959
+xa.x1.b                            1.75308e-06
+xa.x1.bb                                   1.8
+xa.x1.xlb.x1.n1                    8.80143e-07
+xa.x1.xlb.x2.n1                      0.0720017
+xa.x1.sib                                  1.8
+xa.x1.xnsi.n1                      1.75713e-10
+xa.x1.xnsi.n2                      8.86222e-11
+xa.x2.gm                              0.863088
+xa.x2.sen0                                   0
+xa.x2.rst0                                 1.8
+xa.x2.preb0                                  0
+xa.x2.sen                                    0
+xa.x2.rst                                  1.8
+xa.x2.preb                                   0
+xa.x2.ibs                             0.509892
+xa.x2.ibo                             0.508357
+xa.x2.dq                               1.06052
+xa.vmem2                              0.390133
+xa.x2.admb                                 1.8
+xa.x2.xnad.n1                      1.51094e-11
+xa.x2.adm                          1.06762e-06
+xa.x2.vs                               1.29985
+xa.x2.vgd                              1.02105
+xa.x2.x                                0.40001
+xa.x2.si                           3.38611e-07
+xa.x2.sum                              0.40633
+xa.x2.sd                                   1.8
+xa.x2.xop.tail                         1.09951
+xa.x2.xop.o1m                         0.692422
+xa.x2.xop.o1                          0.700409
+xa.x2.vcmn                                 0.4
+xa.x2.xop.oz                          0.700409
+xa.x2.vcmn0                                0.4
+xa.x2.nzo                                    0
+gla2                                         0
+xa.x2.drv                              0.40633
+xa.x2.rsti0                                1.8
+xa.x2.rsti                                 1.8
+xa.x2.xcmps.tail                       1.51532
+xa.x2.xcmps.o1m                       0.857369
+xa.x2.vrefsn                               0.6
+xa.x2.xcmps.o1                       7.038e-06
+xa.x2.xcmps.o2                             1.8
+xa.x2.xcmps.o3                     5.31984e-07
+xa.x2.cmps                                 1.8
+xa.x2.vrefsn0                              0.6
+xa.x2.vrefs                                0.6
+xa.x2.nzc                                    0
+xa.x2.adb                                  1.8
+xa.x2.ad                           5.96717e-07
+xa.x2.nzi                                    0
+xa.x2.en                           6.50565e-07
+xa.x2.cmpb                         5.95046e-07
+xa.x2.sba                                  1.8
+xa.x2.xnsa.n1                        0.0636034
+xa.x2.a                            1.17111e-06
+xa.x2.ab                                   1.8
+xa.x2.xla.x1.n1                    5.83515e-07
+xa.x2.xla.x2.n1                      0.0355852
+xa.x2.ad1                          1.17111e-06
+xa.x2.sbc0                                 1.8
+xa.x2.xnsc.n1                      1.81375e-10
+xa.x2.c                             1.2681e-06
+xa.x2.cbar                                 1.8
+xa.x2.xlc.x1.n1                    6.39419e-07
+xa.x2.xlc.x2.n1                      0.0599817
+xa.x2.cd1                           1.2681e-06
+xa.x2.cd2                                  1.8
+xa.x2.cdel                         5.36917e-07
+xa.x2.sbb                                  1.8
+xa.x2.xnsb.n1                        0.0551414
+xa.x2.b                            7.36415e-07
+xa.x2.bb                                   1.8
+xa.x2.xlb.x1.n1                    3.69085e-07
+xa.x2.xlb.x2.n1                      0.0850416
+xa.x2.sib                                  1.8
+xa.x2.xnsi.n1                      1.02893e-10
+xa.x2.xnsi.n2                      5.10105e-11
+xa.ibm                                0.506405
+xa.nzm                                       0
+xa.vrefmn0                                 0.8
+xa.vrefm                                   0.8
+xa.vrefmn                                  0.8
+xa.xcmpm.tail                          1.78592
+xa.xcmpm.o1m                          0.620085
+xa.xcmpm.o1                            1.77627
+xa.xcmpm.o2                          0.0200099
+xa.xcmpm.o3                                1.8
+xa.cmpm                            1.03437e-06
+xa.cmpmb                                   1.8
+xa.sbp                                     1.8
+xa.pbdel                                   1.8
+xa.xnsp.n1                         1.07878e-10
+xa.rbp                                     1.8
+xa.pdel                            2.79795e-07
+xa.xnrp.n1                             1.53219
+xa.p                               1.15824e-06
+xa.xlp.x1.n1                       5.94277e-07
+xa.xlp.x2.n1                           1.51783
+xa.pd1                             1.15824e-06
+vinitb1                                 0.3895
+ksb1                                         0
+krb1                                         1
+kpb1                                         0
+tsb1                                         1
+ampb1                                        1
+vinitb2                                 0.3895
+ksb2                                         0
+krb2                                         1
+kpb2                                         0
+tsb2                                         1
+ampb2                                        1
+xb.x1.gm                              0.861959
+xb.x1.sen0                                   0
+xb.x1.rst0                                 1.8
+xb.x1.preb0                                  0
+xb.x1.sen                                    0
+xb.x1.rst                                  1.8
+xb.x1.preb                                   0
+xb.x1.ibs                             0.506586
+xb.x1.ibo                             0.507144
+xb.x1.dq                               1.07474
+xb.vmem1                              0.389726
+xb.x1.admb                                 1.8
+xb.pb                                      1.8
+xb.x1.xnad.n1                      6.91579e-11
+xb.x1.adm                          9.69014e-07
+xb.vq                                     1.25
+xb.x1.vs                               1.29985
+xb.x1.vgd                              1.01145
+xb.x1.x                                0.40001
+xb.x1.si                           9.24933e-07
+xb.x1.sum                             0.402257
+xb.x1.sd                                   1.8
+xb.x1.xop.tail                         1.09812
+xb.x1.xop.o1m                          0.69397
+xb.x1.xop.o1                           0.69811
+xb.x1.vcmn                                 0.4
+xb.x1.xop.oz                           0.69811
+xb.x1.vcmn0                                0.4
+xb.x1.nzo                                    0
+glb1                                         0
+xb.x1.drv                             0.402257
+xb.x1.rsti0                                1.8
+xb.x1.rsti                                 1.8
+xb.x1.xcmps.tail                       1.52959
+xb.x1.xcmps.o1m                       0.860157
+xb.x1.vrefsn                               0.6
+xb.x1.xcmps.o1                     1.29779e-05
+xb.x1.xcmps.o2                             1.8
+xb.x1.xcmps.o3                     7.51552e-07
+xb.x1.cmps                                 1.8
+xb.x1.vrefsn0                              0.6
+xb.x1.vrefs                                0.6
+xb.x1.nzc                                    0
+xb.x1.adb                                  1.8
+xb.x1.ad                           1.23601e-06
+xb.x1.nzi                                    0
+xb.x1.en                            6.4501e-07
+xb.x1.cmpb                         4.64817e-07
+xb.x1.sba                                  1.8
+xb.x1.xnsa.n1                         0.082187
+xb.x1.a                            1.88404e-06
+xb.x1.ab                                   1.8
+xb.x1.xla.x1.n1                    9.43507e-07
+xb.x1.xla.x2.n1                      0.0689192
+xb.x1.ad1                          1.88404e-06
+xb.x1.sbc0                                 1.8
+xb.x1.xnsc.n1                      8.20219e-11
+xb.x1.c                            9.87753e-07
+xb.x1.cbar                                 1.8
+xb.x1.xlc.x1.n1                    4.96366e-07
+xb.x1.xlc.x2.n1                      0.0599105
+xb.x1.cd1                          9.87753e-07
+xb.x1.cd2                                  1.8
+xb.x1.cdel                          5.2498e-07
+xb.x1.sbb                                  1.8
+xb.x1.xnsb.n1                        0.0752599
+xb.x1.b                            1.16272e-06
+xb.x1.bb                                   1.8
+xb.x1.xlb.x1.n1                      5.732e-07
+xb.x1.xlb.x2.n1                      0.0919606
+xb.x1.sib                                  1.8
+xb.x1.xnsi.n1                       1.0862e-10
+xb.x1.xnsi.n2                      5.43247e-11
+xb.x2.gm                              0.862739
+xb.x2.sen0                                   0
+xb.x2.rst0                                 1.8
+xb.x2.preb0                                  0
+xb.x2.sen                                    0
+xb.x2.rst                                  1.8
+xb.x2.preb                                   0
+xb.x2.ibs                             0.506317
+xb.x2.ibo                             0.509987
+xb.x2.dq                               1.12417
+xb.vmem2                              0.389844
+xb.x2.admb                                 1.8
+xb.x2.xnad.n1                      5.91936e-11
+xb.x2.adm                           5.8074e-07
+xb.x2.vs                               1.29985
+xb.x2.vgd                              1.01436
+xb.x2.x                                0.40001
+xb.x2.si                           4.95422e-07
+xb.x2.sum                              0.40344
+xb.x2.sd                                   1.8
+xb.x2.xop.tail                         1.09898
+xb.x2.xop.o1m                           0.6947
+xb.x2.xop.o1                          0.697815
+xb.x2.vcmn                                 0.4
+xb.x2.xop.oz                          0.697815
+xb.x2.vcmn0                                0.4
+xb.x2.nzo                                    0
+glb2                                         0
+xb.x2.drv                              0.40344
+xb.x2.rsti0                                1.8
+xb.x2.rsti                                 1.8
+xb.x2.xcmps.tail                        1.5005
+xb.x2.xcmps.o1m                       0.859316
+xb.x2.vrefsn                               0.6
+xb.x2.xcmps.o1                     6.34012e-06
+xb.x2.xcmps.o2                             1.8
+xb.x2.xcmps.o3                     5.33674e-07
+xb.x2.cmps                                 1.8
+xb.x2.vrefsn0                              0.6
+xb.x2.vrefs                                0.6
+xb.x2.nzc                                    0
+xb.x2.adb                                  1.8
+xb.x2.ad                            3.3756e-07
+xb.x2.nzi                                    0
+xb.x2.en                           1.02005e-06
+xb.x2.cmpb                         1.20814e-06
+xb.x2.sba                                  1.8
+xb.x2.xnsa.n1                        0.0847913
+xb.x2.a                            1.12174e-06
+xb.x2.ab                                   1.8
+xb.x2.xla.x1.n1                    5.63175e-07
+xb.x2.xla.x2.n1                       0.055318
+xb.x2.ad1                          1.12174e-06
+xb.x2.sbc0                                 1.8
+xb.x2.xnsc.n1                       1.2377e-10
+xb.x2.c                            8.60898e-07
+xb.x2.cbar                                 1.8
+xb.x2.xlc.x1.n1                    4.35545e-07
+xb.x2.xlc.x2.n1                      0.0711947
+xb.x2.cd1                          8.60898e-07
+xb.x2.cd2                                  1.8
+xb.x2.cdel                         1.53443e-06
+xb.x2.sbb                                  1.8
+xb.x2.xnsb.n1                         0.060808
+xb.x2.b                            1.47819e-06
+xb.x2.bb                                   1.8
+xb.x2.xlb.x1.n1                    7.43831e-07
+xb.x2.xlb.x2.n1                      0.0941655
+xb.x2.sib                                  1.8
+xb.x2.xnsi.n1                      2.53504e-10
+xb.x2.xnsi.n2                      1.26645e-10
+xb.ibm                                0.510236
+xb.nzm                                       0
+xb.vrefmn0                                 0.8
+xb.vrefm                                   0.8
+xb.vrefmn                                  0.8
+xb.xcmpm.tail                          1.78724
+xb.xcmpm.o1m                          0.612862
+xb.xcmpm.o1                            1.77976
+xb.xcmpm.o2                          0.0195509
+xb.xcmpm.o3                                1.8
+xb.cmpm                            3.65869e-07
+xb.cmpmb                                   1.8
+xb.sbp                                     1.8
+xb.pbdel                                   1.8
+xb.xnsp.n1                         7.28789e-11
+xb.rbp                                     1.8
+xb.pdel                            1.00711e-06
+xb.xnrp.n1                              1.5208
+xb.p                               1.31604e-06
+xb.xlp.x1.n1                       6.62811e-07
+xb.xlp.x2.n1                           1.56069
+xb.pd1                             1.31604e-06
+vinitc1                                 0.3895
+ksc1                                         0
+krc1                                         1
+kpc1                                         0
+tsc1                                         1
+ampc1                                        1
+vinitc2                                 0.3895
+ksc2                                         0
+krc2                                         1
+kpc2                                         0
+tsc2                                         1
+ampc2                                        1
+xc.x1.gm                              0.863409
+xc.x1.sen0                                   0
+xc.x1.rst0                                 1.8
+xc.x1.preb0                                  0
+xc.x1.sen                                    0
+xc.x1.rst                                  1.8
+xc.x1.preb                                   0
+xc.x1.ibs                             0.507237
+xc.x1.ibo                             0.508141
+xc.x1.dq                               1.10183
+xc.vmem1                              0.389811
+xc.x1.admb                                 1.8
+xc.pb                                      1.8
+xc.x1.xnad.n1                      7.49507e-11
+xc.x1.adm                          5.64916e-07
+xc.vq                                     1.25
+xc.x1.vs                               1.29988
+xc.x1.vgd                              1.00907
+xc.x1.x                               0.400007
+xc.x1.si                           4.72495e-07
+xc.x1.sum                             0.403113
+xc.x1.sd                                   1.8
+xc.x1.xop.tail                         1.09321
+xc.x1.xop.o1m                         0.692795
+xc.x1.xop.o1                          0.699225
+xc.x1.vcmn                                 0.4
+xc.x1.xop.oz                          0.699225
+xc.x1.vcmn0                                0.4
+xc.x1.nzo                                    0
+glc1                                         0
+xc.x1.drv                             0.403113
+xc.x1.rsti0                                1.8
+xc.x1.rsti                                 1.8
+xc.x1.xcmps.tail                       1.50188
+xc.x1.xcmps.o1m                       0.860803
+xc.x1.vrefsn                               0.6
+xc.x1.xcmps.o1                     6.42419e-06
+xc.x1.xcmps.o2                             1.8
+xc.x1.xcmps.o3                     1.68983e-07
+xc.x1.cmps                                 1.8
+xc.x1.vrefsn0                              0.6
+xc.x1.vrefs                                0.6
+xc.x1.nzc                                    0
+xc.x1.adb                                  1.8
+xc.x1.ad                           4.48934e-07
+xc.x1.nzi                                    0
+xc.x1.en                           3.44888e-07
+xc.x1.cmpb                         5.20204e-07
+xc.x1.sba                                  1.8
+xc.x1.xnsa.n1                         0.073996
+xc.x1.a                            1.44726e-06
+xc.x1.ab                                   1.8
+xc.x1.xla.x1.n1                    7.24051e-07
+xc.x1.xla.x2.n1                      0.0763736
+xc.x1.ad1                          1.44726e-06
+xc.x1.sbc0                                 1.8
+xc.x1.xnsc.n1                       7.3021e-11
+xc.x1.c                            8.42895e-07
+xc.x1.cbar                                 1.8
+xc.x1.xlc.x1.n1                    4.23564e-07
+xc.x1.xlc.x2.n1                      0.0745745
+xc.x1.cd1                          8.42895e-07
+xc.x1.cd2                                  1.8
+xc.x1.cdel                         6.52112e-07
+xc.x1.sbb                                  1.8
+xc.x1.xnsb.n1                        0.0594781
+xc.x1.b                             1.8794e-06
+xc.x1.bb                                   1.8
+xc.x1.xlb.x1.n1                    9.23868e-07
+xc.x1.xlb.x2.n1                      0.0513613
+xc.x1.sib                                  1.8
+xc.x1.xnsi.n1                      2.17243e-10
+xc.x1.xnsi.n2                      1.08232e-10
+xc.x2.gm                               0.86259
+xc.x2.sen0                                   0
+xc.x2.rst0                                 1.8
+xc.x2.preb0                                  0
+xc.x2.sen                                    0
+xc.x2.rst                                  1.8
+xc.x2.preb                                   0
+xc.x2.ibs                             0.510142
+xc.x2.ibo                             0.507688
+xc.x2.dq                               1.10769
+xc.vmem2                              0.389902
+xc.x2.admb                                 1.8
+xc.x2.xnad.n1                      1.00805e-10
+xc.x2.adm                          5.96521e-07
+xc.x2.vs                               1.29987
+xc.x2.vgd                              1.01544
+xc.x2.x                               0.400009
+xc.x2.si                           3.95985e-07
+xc.x2.sum                              0.40402
+xc.x2.sd                                   1.8
+xc.x2.xop.tail                          1.0933
+xc.x2.xop.o1m                         0.692378
+xc.x2.xop.o1                          0.700458
+xc.x2.vcmn                                 0.4
+xc.x2.xop.oz                          0.700458
+xc.x2.vcmn0                                0.4
+xc.x2.nzo                                    0
+glc2                                         0
+xc.x2.drv                              0.40402
+xc.x2.rsti0                                1.8
+xc.x2.rsti                                 1.8
+xc.x2.xcmps.tail                       1.50573
+xc.x2.xcmps.o1m                       0.859586
+xc.x2.vrefsn                               0.6
+xc.x2.xcmps.o1                     7.58375e-06
+xc.x2.xcmps.o2                             1.8
+xc.x2.xcmps.o3                     4.88173e-07
+xc.x2.cmps                                 1.8
+xc.x2.vrefsn0                              0.6
+xc.x2.vrefs                                0.6
+xc.x2.nzc                                    0
+xc.x2.adb                                  1.8
+xc.x2.ad                           5.58292e-07
+xc.x2.nzi                                    0
+xc.x2.en                           6.16101e-07
+xc.x2.cmpb                         8.17311e-07
+xc.x2.sba                                  1.8
+xc.x2.xnsa.n1                        0.0297112
+xc.x2.a                             1.6658e-06
+xc.x2.ab                                   1.8
+xc.x2.xla.x1.n1                    8.41416e-07
+xc.x2.xla.x2.n1                      0.0938554
+xc.x2.ad1                           1.6658e-06
+xc.x2.sbc0                                 1.8
+xc.x2.xnsc.n1                      5.07248e-11
+xc.x2.c                            6.37693e-07
+xc.x2.cbar                                 1.8
+xc.x2.xlc.x1.n1                    3.17501e-07
+xc.x2.xlc.x2.n1                      0.0714958
+xc.x2.cd1                          6.37693e-07
+xc.x2.cd2                                  1.8
+xc.x2.cdel                         6.01617e-07
+xc.x2.sbb                                  1.8
+xc.x2.xnsb.n1                        0.0756935
+xc.x2.b                            1.35286e-06
+xc.x2.bb                                   1.8
+xc.x2.xlb.x1.n1                     6.8949e-07
+xc.x2.xlb.x2.n1                      0.0640377
+xc.x2.sib                                  1.8
+xc.x2.xnsi.n1                       1.2177e-10
+xc.x2.xnsi.n2                      5.98256e-11
+xc.ibm                                0.507594
+xc.nzm                                       0
+xc.vrefmn0                                 0.8
+xc.vrefm                                   0.8
+xc.vrefmn                                  0.8
+xc.xcmpm.tail                           1.7863
+xc.xcmpm.o1m                           0.62127
+xc.xcmpm.o1                            1.77694
+xc.xcmpm.o2                           0.019789
+xc.xcmpm.o3                                1.8
+xc.cmpm                            1.10488e-06
+xc.cmpmb                                   1.8
+xc.sbp                                     1.8
+xc.pbdel                                   1.8
+xc.xnsp.n1                         6.49782e-11
+xc.rbp                                     1.8
+xc.pdel                            9.35741e-07
+xc.xnrp.n1                             1.53302
+xc.p                               1.86839e-06
+xc.xlp.x1.n1                       9.22118e-07
+xc.xlp.x2.n1                           1.51994
+xc.pd1                             1.86839e-06
+b.xc.bvrm#branch                             0
+b.xc.x2.bvrs#branch                          0
+b.xc.x2.bdrv#branch               -1.24678e-15
+b.xc.x2.bvcmn#branch                         0
+b.xc.x2.bpreb#branch                         0
+b.xc.x2.brst#branch                          0
+b.xc.x2.bsen#branch                          0
+b.xc.x1.bvrs#branch                -1.0842e-19
+b.xc.x1.bdrv#branch               -1.24724e-15
+b.xc.x1.bvcmn#branch                         0
+b.xc.x1.bpreb#branch                         0
+b.xc.x1.brst#branch                          0
+b.xc.x1.bsen#branch                          0
+b.xb.bvrm#branch                             0
+b.xb.x2.bvrs#branch                -1.0842e-19
+b.xb.x2.bdrv#branch               -1.24838e-15
+b.xb.x2.bvcmn#branch                         0
+b.xb.x2.bpreb#branch                         0
+b.xb.x2.brst#branch                          0
+b.xb.x2.bsen#branch                          0
+b.xb.x1.bvrs#branch                 1.0842e-19
+b.xb.x1.bdrv#branch               -1.24916e-15
+b.xb.x1.bvcmn#branch                         0
+b.xb.x1.bpreb#branch                         0
+b.xb.x1.brst#branch                          0
+b.xb.x1.bsen#branch                          0
+b.xa.bvrm#branch                             0
+b.xa.x2.bvrs#branch                          0
+b.xa.x2.bdrv#branch               -1.24675e-15
+b.xa.x2.bvcmn#branch                         0
+b.xa.x2.bpreb#branch                         0
+b.xa.x2.brst#branch                          0
+b.xa.x2.bsen#branch                          0
+b.xa.x1.bvrs#branch                 1.0842e-19
+b.xa.x1.bdrv#branch               -1.24743e-15
+b.xa.x1.bvcmn#branch                         0
+b.xa.x1.bpreb#branch                         0
+b.xa.x1.brst#branch                          0
+b.xa.x1.bsen#branch                          0
+vglc2#branch                                 0
+vglc1#branch                                 0
+v.xc.vnzm#branch                             0
+v.xc.x2.vnzi#branch                          0
+v.xc.x2.vnzo#branch                          0
+v.xc.x2.vnzc#branch                          0
+v.xc.x2.vrsti#branch                         0
+v.xc.x1.vnzi#branch                          0
+v.xc.x1.vnzo#branch                          0
+v.xc.x1.vnzc#branch                          0
+v.xc.x1.vrsti#branch                         0
+vampc2#branch                                0
+vtsc2#branch                                 0
+vkpc2#branch                                 0
+vkrc2#branch                                 0
+vksc2#branch                                 0
+vinitc2#branch                               0
+vampc1#branch                                0
+vtsc1#branch                                 0
+vkpc1#branch                                 0
+vkrc1#branch                                 0
+vksc1#branch                                 0
+vinitc1#branch                               0
+vglb2#branch                                 0
+vglb1#branch                                 0
+v.xb.vnzm#branch                             0
+v.xb.x2.vnzi#branch                          0
+v.xb.x2.vnzo#branch                          0
+v.xb.x2.vnzc#branch                          0
+v.xb.x2.vrsti#branch                         0
+v.xb.x1.vnzi#branch                          0
+v.xb.x1.vnzo#branch                          0
+v.xb.x1.vnzc#branch                          0
+v.xb.x1.vrsti#branch                         0
+vampb2#branch                                0
+vtsb2#branch                                 0
+vkpb2#branch                                 0
+vkrb2#branch                                 0
+vksb2#branch                                 0
+vinitb2#branch                               0
+vampb1#branch                                0
+vtsb1#branch                                 0
+vkpb1#branch                                 0
+vkrb1#branch                                 0
+vksb1#branch                                 0
+vinitb1#branch                               0
+vgla2#branch                                 0
+vgla1#branch                                 0
+v.xa.vnzm#branch                             0
+v.xa.x2.vnzi#branch                          0
+v.xa.x2.vnzo#branch                          0
+v.xa.x2.vnzc#branch                          0
+v.xa.x2.vrsti#branch                         0
+v.xa.x1.vnzi#branch                          0
+v.xa.x1.vnzo#branch                          0
+v.xa.x1.vnzc#branch                          0
+v.xa.x1.vrsti#branch                         0
+vampa2#branch                                0
+vtsa2#branch                                 0
+vkpa2#branch                                 0
+vkra2#branch                                 0
+vksa2#branch                                 0
+vinita2#branch                               0
+vampa1#branch                                0
+vtsa1#branch                                 0
+vkpa1#branch                                 0
+vkra1#branch                                 0
+vksa1#branch                                 0
+vinita1#branch                               0
+vpre#branch                       -5.08949e-08
+vlo#branch                         3.34977e-14
+vhi#branch                         1.39656e-14
+vcm#branch                         4.00095e-07
+vreopen#branch                     5.09252e-16
+vfire#branch                       2.37846e-15
+vr0#branch                        -4.34276e-07
+vdd#branch                        -0.000618509
+
+ Reference value :  0.00000e+00
+ Reference value :  9.69971e-06
+ Reference value :  3.16997e-05
+ Reference value :  5.28997e-05
+ Reference value :  7.40997e-05
+ Reference value :  9.58997e-05
+ Reference value :  1.17700e-04
+ Reference value :  1.34100e-04
+ Reference value :  1.54500e-04
+ Reference value :  1.75900e-04
+ Reference value :  1.96900e-04
+ Reference value :  2.18900e-04
+ Reference value :  2.40300e-04
+ Reference value :  2.60100e-04
+ Reference value :  2.81900e-04
+58: condition met: stop  when time >= 0.0003001
+doAnalyses: Too many iterations without convergence
+
+tran simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.0009999999999998e-04
+>>> delete all
+>>> stop when time >= 0.0005371
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.01792e-04
+ Reference value :  3.22792e-04
+ Reference value :  3.43792e-04
+ Reference value :  3.65992e-04
+ Reference value :  3.88192e-04
+ Reference value :  4.08592e-04
+ Reference value :  4.28392e-04
+ Reference value :  4.48592e-04
+ Reference value :  4.65192e-04
+ Reference value :  4.83792e-04
+ Reference value :  5.04792e-04
+ Reference value :  5.25592e-04
+116: condition met: stop  when time >= 0.0005371
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.3719187919259038e-04
+>>> meas tran m14 avg v(xc.vmem1) from=0.0005001 to=0.0005351
+m14                 =  3.898113e-01 from=  5.001000e-04 to=  5.351919e-04
+>>> print m14
+m14 = 3.8981130000000003e-01
+>>> meas tran m17 avg v(xc.x1.sum) from=0.0005001 to=0.0005351
+m17                 =  4.031132e-01 from=  5.001000e-04 to=  5.351919e-04
+>>> print m17
+m17 = 4.0311320000000006e-01
+>>> meas tran m20 avg v(xc.vmem2) from=0.0005001 to=0.0005351
+m20                 =  3.899021e-01 from=  5.001000e-04 to=  5.351919e-04
+>>> print m20
+m20 = 3.8990210000000003e-01
+>>> meas tran m23 avg v(xc.x2.sum) from=0.0005001 to=0.0005351
+m23                 =  4.040204e-01 from=  5.001000e-04 to=  5.351919e-04
+>>> print m23
+m23 = 4.0402040000000006e-01
+>>> delete all
+>>> stop when time >= 0.0004801
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+117: condition met: stop  when time >= 0.0004801
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.3739187919259039e-04
+>>> alter i.xc.x1.idis dc = 0
+>>> alter i.xc.x2.idis dc = 0
+>>> delete all
+>>> stop when time >= 0.0005381
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+118: condition met: stop  when time >= 0.0005381
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.3824446952210707e-04
+>>> print v(xc.p)[length(time)-1]
+v(xc.p)[length(time)-1] = 1.8683898802289838e-06
+>>> alter @vksc1[pulse] = [ 0 1 0.0005401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrc1[pulse] = [ 1 0 0.0005391 1n 1n 0.000121 2 ]
+>>> alter @vkpc1[pulse] = [ 0 1 0.0005401 1n 1n 0.00012 2 ]
+>>> alter vtsc1 dc = 0.0005401
+>>> alter vampc1 dc = 1
+>>> alter @vksc2[pulse] = [ 0 1 0.0005461 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrc2[pulse] = [ 1 0 0.0005451 1n 1n 0.000121 2 ]
+>>> alter @vkpc2[pulse] = [ 0 1 0.0005461 1n 1n 0.00012 2 ]
+>>> alter vtsc2 dc = 0.0005461
+>>> alter vampc2 dc = 1
+>>> delete all
+>>> stop when time >= 0.0005651
+>>> stop when v(xc.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.39108e-04
+ Reference value :  5.40066e-04
+ Reference value :  5.40101e-04
+ Reference value :  5.40106e-04
+ Reference value :  5.45126e-04
+ Reference value :  5.46100e-04
+ Reference value :  5.46101e-04
+ Reference value :  5.49915e-04
+ Reference value :  5.49929e-04
+120: condition met: stop  when v(xc.p) > 0.9
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.4992869592325922e-04
+>>> print v(xc.p)[length(time)-1]
+v(xc.p)[length(time)-1] = 9.2976403177529510e-01
+>>> meas tran f53 when v(xc.p)=0.9 rise=last from=0.0005391
+f53                 =  5.499287e-04
+>>> delete all
+>>> stop when time >= 0.0005651
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.49929e-04
+ Reference value :  5.49929e-04
+ Reference value :  5.49929e-04
+ Reference value :  5.49931e-04
+ Reference value :  5.49932e-04
+ Reference value :  5.50053e-04
+ Reference value :  5.50069e-04
+ Reference value :  5.56547e-04
+ Reference value :  5.65112e-04
+121: condition met: stop  when time >= 0.0005651
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.6511192684227088e-04
+>>> delete all
+>>> stop when time >= 0.0007401
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.73750e-04
+ Reference value :  5.93750e-04
+ Reference value :  6.13950e-04
+ Reference value :  6.35150e-04
+ Reference value :  6.46757e-04
+ Reference value :  6.46762e-04
+ Reference value :  6.46763e-04
+ Reference value :  6.46763e-04
+ Reference value :  6.46900e-04
+ Reference value :  6.46905e-04
+ Reference value :  6.49752e-04
+ Reference value :  6.60102e-04
+ Reference value :  6.66114e-04
+ Reference value :  6.74575e-04
+ Reference value :  6.93975e-04
+ Reference value :  7.13775e-04
+ Reference value :  7.33575e-04
+122: condition met: stop  when time >= 0.0007401
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.4017547507058197e-04
+>>> delete all
+>>> stop when time >= 0.0009771
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  7.52975e-04
+ Reference value :  7.72375e-04
+ Reference value :  7.92775e-04
+ Reference value :  8.12975e-04
+ Reference value :  8.34175e-04
+ Reference value :  8.54375e-04
+ Reference value :  8.75175e-04
+ Reference value :  8.92575e-04
+ Reference value :  9.11575e-04
+ Reference value :  9.31375e-04
+ Reference value :  9.50975e-04
+ Reference value :  9.70775e-04
+123: condition met: stop  when time >= 0.0009771
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.7717547507058730e-04
+>>> meas tran m67 avg v(xc.vmem1) from=0.0009401 to=0.0009751
+m67                 =  3.898114e-01 from=  9.401000e-04 to=  9.751755e-04
+>>> print m67
+m67 = 3.8981140000000003e-01
+>>> meas tran m70 avg v(xc.x1.sum) from=0.0009401 to=0.0009751
+m70                 =  4.031132e-01 from=  9.401000e-04 to=  9.751755e-04
+>>> print m70
+m70 = 4.0311320000000006e-01
+>>> meas tran m73 avg v(xc.vmem2) from=0.0009401 to=0.0009751
+m73                 =  3.899021e-01 from=  9.401000e-04 to=  9.751755e-04
+>>> print m73
+m73 = 3.8990210000000003e-01
+>>> meas tran m76 avg v(xc.x2.sum) from=0.0009401 to=0.0009751
+m76                 =  4.040204e-01 from=  9.401000e-04 to=  9.751755e-04
+>>> print m76
+m76 = 4.0402040000000006e-01
+>>> delete all
+>>> stop when time >= 0.0009801
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+124: condition met: stop  when time >= 0.0009801
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.8017547507058575e-04
+>>> set filetype=binary
+>>> write trace.raw v(xa.p) v(xa.vq) v(xa.vmem1) v(xa.x1.sum) v(xa.x1.si) v(ksa1) v(ampa1) v(xa.vmem2) v(xa.x2.sum) v(xa.x2.si) v(ksa2) v(ampa2) v(xa.nzm) v(xa.x1.nzo) v(xa.x1.nzc) v(xa.x2.nzo) v(xa.x2.nzc) v(xb.p) v(xb.vq) v(xb.vmem1) v(xb.x1.sum) v(xb.x1.si) v(ksb1) v(ampb1) v(xb.vmem2) v(xb.x2.sum) v(xb.x2.si) v(ksb2) v(ampb2) v(xb.nzm) v(xb.x1.nzo) v(xb.x1.nzc) v(xb.x2.nzo) v(xb.x2.nzc) v(xc.p) v(xc.vq) v(xc.vmem1) v(xc.x1.sum) v(xc.x1.si) v(ksc1) v(ampc1) v(xc.vmem2) v(xc.x2.sum) v(xc.x2.si) v(ksc2) v(ampc2) v(xc.nzm) v(xc.x1.nzo) v(xc.x1.nzc) v(xc.x2.nzo) v(xc.x2.nzc) v(gla1) v(gla2) v(glb1) v(glb2) v(glc1) v(glc2)
+binary raw file "trace.raw"
