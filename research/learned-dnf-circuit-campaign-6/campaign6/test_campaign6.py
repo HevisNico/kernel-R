@@ -34,6 +34,16 @@ def kit_folder(d, rid):
     return d / rid
 
 
+ATT = "t1"                                                  # an attempt id of the tests
+
+
+def stage_file(d, stage):
+    """A stage file as stages6 writes it (safeguard i)."""
+    f = Path(d) / f"STAGE_{stage}.md"
+    f.write_text(stages6.stage_file_text(stage, ATT))
+    return f
+
+
 def diff(a, b):
     return [x for x in difflib.unified_diff(inspect.getsource(a).splitlines(), inspect.getsource(b).splitlines(), lineterm="", n=0)
             if x[:1] in "+-" and not x.startswith(("+++", "---"))]
@@ -71,15 +81,60 @@ class Guard(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d, mock.patch.object(batch6, "cal", boom), mock.patch.object(meas6, "Driver", boom), \
                 mock.patch.object(net6.session4, "play", boom):
             out = kit_folder(d, "x")
-            for call in (lambda: meas6.cal("M1", out, "7710", "on", "ngspice", "pdk"),
-                         lambda: meas6.main(["scan", "M2", str(out), "a-7710", "a", "pair", "inputs.json", "ngspice", "pdk"]),
-                         lambda: meas6.scan_main([str(out), "7600", "a", "pair", "1/2", "0.001", "0.001", "ngspice", "pdk"], "M2"),
-                         lambda: net6.network("Q", out, "x", "7706", [4, 4, 4, 4], "skew", "none", 0, "ngspice", "pdk"),
-                         lambda: net6.network("RN", out, "x", "7801", [4, 4, 4, 4], "skew", "none", 0, "ngspice", "pdk"),
-                         lambda: net6.network("RN", out, "x", "7701", [4, 4, 4, 4], None, "device", 1, "ngspice", "pdk")):
+            m1, m2, q, rn = (str(stage_file(d, s)) for s in ("M1", "M2", "Q", "RN"))
+            for call in (lambda: meas6.cal(m1, out, "7710", "on", "ngspice", "pdk"),
+                         lambda: meas6.cal(m1, out, "none-a", "on", "ngspice", "pdk"),
+                         lambda: meas6.main(["scan", m2, str(out), "7710", "a", "pair", "inputs.json", "ngspice", "pdk"]),
+                         lambda: meas6.scan_main([str(out), "7600", "a", "pair", "1/2", "0.001", "0.001", "ngspice", "pdk"], dict(stage="M2"), "7600"),
+                         lambda: net6.network(q, out, "x", "7706", [4, 4, 4, 4], "skew", "none", 0, "ngspice", "pdk"),
+                         lambda: net6.network(rn, out, "x", "7801", [4, 4, 4, 4], "skew", "none", 0, "ngspice", "pdk"),
+                         lambda: net6.network(rn, out, "x", "7701", [4, 4, 4, 4], None, "device", 1, "ngspice", "pdk")):
                 with self.assertRaises(AssertionError):
                     call()
         boom.assert_not_called()
+
+    def test_stage_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            st = c6.stage_check(stage_file(d, "M2"))
+            self.assertEqual((st["stage"], st["governing_protocol"]["sha256"]), ("M2", c6.PROTOCOL_SHA256))
+            bad = Path(d) / "STAGE_bad.md"
+            bad.write_text(stages6.stage_file_text("M2", ATT).replace(c6.PROTOCOL_SHA256, "0" * 64))
+            with self.assertRaises(AssertionError):
+                c6.stage_check(bad)
+            other = Path(d) / "STAGE_other.md"
+            other.write_text(stages6.stage_file_text("M2", ATT).replace('"stage": "M2"', '"stage": "M9"'))
+            with self.assertRaises(AssertionError):
+                c6.stage_check(other)
+            with mock.patch.object(c6, "PROTOCOL_SHA256", "1" * 64):        # the repository's file is not the one named
+                with self.assertRaises(AssertionError):
+                    c6.stage_check(stage_file(d, "M3"))
+
+    def test_stage_check_amendment(self):
+        """M2, M3, RM2, RM3 name amendment 1 with its SHA-256 as a second governing document; M1 does not need it."""
+        with tempfile.TemporaryDirectory() as d:
+            for stage in c6.AMENDED_STAGES:
+                st = c6.stage_check(stage_file(d, stage))
+                self.assertEqual(st["governing_amendment"]["sha256"], c6.AMENDMENT_SHA256)
+            self.assertNotIn("governing_amendment", c6.stage_check(stage_file(d, "M1")))
+            wrong = Path(d) / "STAGE_wrong.md"
+            wrong.write_text(stages6.stage_file_text("M2", ATT).replace(c6.AMENDMENT_SHA256, "0" * 64))
+            with self.assertRaises(AssertionError):
+                c6.stage_check(wrong)
+            missing = Path(d) / "STAGE_missing.md"
+            missing.write_text(stages6.stage_file_text("M3", ATT).replace('"governing_amendment"', '"other"'))
+            with self.assertRaises(AssertionError):
+                c6.stage_check(missing)
+            with mock.patch.object(c6, "AMENDMENT_SHA256", "1" * 64):        # the repository's file is not the one named
+                with self.assertRaises(AssertionError):
+                    c6.stage_check(stage_file(d, "RM2"))
+
+    def test_header_records_the_running_machine(self):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "STATE.json").write_text(json.dumps(dict(status="running", machine="b", records=[])))
+            h = c6.run_header("7801", "a", "pair", dict(stage="M2"), Path(d) / "7801-scan-a-pair")
+        self.assertEqual((h["machine"], h["instance_machine"], h["instance"]), ("b", "a", "7801"))
+        self.assertEqual((c6.instance_machine("none-b"), c6.seed_text("none-b"), c6.seed_text("7804")), ("b", "none", "7804"))
+        self.assertIsNone(c6.run_header("7801", None, "cal-on", dict(stage="M1"))["machine"])
 
     def test_batch_seeds_untouched(self):
         self.assertEqual(batch6.SEEDS, tuple(range(7701, 7711)))
@@ -90,10 +145,10 @@ class Guard(unittest.TestCase):
 class Copies(unittest.TestCase):
     def test_scan_main_is_scan6_main_but_three_lines(self):
         self.assertEqual(diff(scan6.main, meas6.scan_main), [
-            "-def main(argv=None):", "+def scan_main(argv, stage):",
-            "-    seed = batch6.guard_seed(seed_text)", "+    seed = c6.guard_seed(seed_text, stage, out)",
+            "-def main(argv=None):", "+def scan_main(argv, stage, instance):",
+            "-    seed = batch6.guard_seed(seed_text)", '+    seed = c6.guard_seed(seed_text, stage["stage"], out)',
             '+    (out / "noise.sha256").write_text(run4.trnoise_fingerprint(tr, c4.CELLS) + "\\n")',
-            "-    rec = dict(batch6.run_header(seed, cell, kind), D_V=D,", "+    rec = dict(c6.run_header(seed, cell, kind, stage), D_V=D,"])
+            "-    rec = dict(batch6.run_header(seed, cell, kind), D_V=D,", "+    rec = dict(c6.run_header(instance, cell, kind, stage, out), D_V=D,"])
 
     def test_predict_batch_is_predict6s_but_seeds(self):
         self.assertEqual(diff(predict6.predict_batch, predicted6.predict_batch), [
@@ -138,19 +193,21 @@ class NetCopy(unittest.TestCase):
             texts = []
             with tempfile.TemporaryDirectory() as d, mock.patch.object(run4.session4, "play", self.fake_play(texts)), \
                     mock.patch.object(run4.noisemodel, "shim", self.fake_shim), mock.patch.object(run4, "guard", lambda *a, **k: None), \
-                    mock.patch.object(c6, "guard_seed", lambda *a, **k: 7701):
+                    mock.patch.object(c6, "guard_seed", lambda *a, **k: 7701), \
+                    mock.patch.object(c6, "stage_check", lambda f: dict(stage="RN")):
                 d = Path(d)
                 args = argparse.Namespace(out=d / "run4", ngspice=Path("ngspice"), pdk=Path("pdk"), id="x", kind="network", seed="7701", instances=0,
                                           guard=None, cell=None, state=None, port="none", isolation=0, reuse_trip=0, needs="4,5,4,6", control=control,
                                           noise=noise, round=rnd, extraction=None, extraction_sha256=None, scale="1", stage=None)
                 run4.run(args)
-                net6.network("RN", d / "net6", "x", "7701", [4, 5, 4, 6], None if control == "none" else control, noise, rnd, Path("ngspice"), Path("pdk"))
+                net6.network("STAGE_RN.md", d / "net6", "x", "7701", [4, 5, 4, 6], None if control == "none" else control, noise, rnd, Path("ngspice"), Path("pdk"))
                 r4, r6 = (json.loads((d / k / "record.json").read_text()) for k in ("run4", "net6"))
             self.assertEqual(texts[0], texts[1], control)
             drop = lambda r: {k: v for k, v in r.items() if k not in ("id", "stage", "wall_s", "peak_rss_MB", "campaign6")}
             self.assertEqual(drop(r4), drop(r6), control)
             self.assertEqual(list(r6)[:-1], list(r4), control)
             self.assertEqual(list(r6)[-1], "campaign6")
+            self.assertEqual(r6["stage"], dict(stage="RN"))                 # safeguard (i)'s check, where run4 records its own
 
 
 def instances_for(eligible):
@@ -164,22 +221,34 @@ def instances_for(eligible):
 
 class Stages(unittest.TestCase):
     def test_measure_stages_and_their_cost(self):
-        allow = dict(instances={f"{c6.MACHINE_OF[s]}-{s}": {} for s in c6.SEEDS})
+        allow = dict(instances={str(s): {} for s in c6.SEEDS})
         st = [stages6.measure_runs("M1"), stages6.measure_runs("M2", allow), stages6.measure_runs("M3", allow)]
+        self.assertEqual([(sum(r["machine"] == "a" for r in x), sum(r["machine"] == "b" for r in x)) for x in st], [(6, 4), (13, 12), (5, 5)])
+        self.assertEqual([r["id"] for r in st[1][:6]], ["7801-scan-a-pair", "7801-scan-b-pair", "7801-scan-c-line1", "7801-scan-c-line2",
+                                                        "7801-bothfire-c", "7802-scan-a-pair"])
+        self.assertEqual([r["machine"] for r in st[1][:6]], ["a", "b", "a", "b", "a", "b"])
         self.assertEqual([len(x) for x in st], [10, 25, 10])
         self.assertAlmostEqual(stages6.expected_compute(st), 7084.9, delta=0.05)
         self.assertEqual([round(stages6.stage_cap(x), 1) for x in st], [6902.5, 6987.5, 2025.0])
         for runs in st:
-            stages6.kit_checks(dict(runs=[stages6.entry("M2", r, "x.json") for r in runs], scenario_order=["stage"], jobs=4,
+            stages6.kit_checks(dict(runs=[stages6.entry("M2", r, ATT, f"{stages6.attempt_dir(ATT)}/INPUTS_M2.json") for r in runs], scenario_order=["stage"], jobs=4,
                                     budget_s=int(stages6.stage_cap(runs)) + 1))
-        self.assertEqual({r["machine"] for r in st[0] if r["instance"].endswith(("7801", "7802", "7803"))}, {"a"})
+        self.assertEqual({r["machine"] for r in st[0] if r["instance"] in ("7801", "7802", "7803")}, {"a"})
+        self.assertEqual({r["machine"] for r in st[0] if r["instance"] in ("7804", "7805")}, {"b"})
 
-    def test_one_shard_measure_stage_is_refused(self):
-        only_a = dict(instances={f"{c6.MACHINE_OF[s]}-{s}": ({} if c6.MACHINE_OF[s] == "a" else dict(why_not="x")) for s in c6.SEEDS})
-        with self.assertRaises(stages6.MeasureStageOneShard):
-            stages6.measure_runs("M3", only_a)
+    def test_amendment_1_two_shards(self):
+        """Amendment 1: only machine a's instances complete, yet M2 and M3 have runs on both machines; one instance
+        alone gives both machines runs too; a stage with no run is empty; a one-machine stage is an impossible case."""
+        only_a = dict(instances={str(s): ({} if c6.MACHINE_OF[s] == "a" else dict(why_not="x")) for s in c6.SEEDS})
+        for stage in ("M2", "M3"):
+            self.assertEqual({r["machine"] for r in stages6.measure_runs(stage, only_a)}, {"a", "b"})
+        one = dict(instances={str(s): ({} if s == 7804 else dict(why_not="x")) for s in c6.SEEDS})
+        self.assertEqual([r["machine"] for r in stages6.measure_runs("M3", one)], ["a", "b"])
         none = dict(instances={k: dict(why_not="x") for k in only_a["instances"]})
         self.assertEqual(stages6.measure_runs("M3", none), [])
+        with mock.patch.object(stages6, "two_shard", lambda runs: [dict(r, machine="a") for r in runs]):
+            with self.assertRaises(stages6.MeasureStageOneShard):
+                stages6.measure_runs("M3", only_a)
 
     def test_two_shard_rule_every_case(self):
         """PREDICTION.md 4: the stage plan for 0 to 5 eligible instances, through the kit's own checks."""
@@ -199,7 +268,7 @@ class Stages(unittest.TestCase):
             self.assertAlmostEqual(stages6.expected_compute([x for _, x in st]), net_e, places=2)
             self.assertAlmostEqual(measures + stages6.expected_compute([x for _, x in st]), totals[e], places=1)
             for name, x in st:
-                stages6.kit_checks(dict(runs=[stages6.entry(name, r) for r in x], scenario_order=["stage"], jobs=4,
+                stages6.kit_checks(dict(runs=[stages6.entry(name, r, ATT) for r in x], scenario_order=["stage"], jobs=4,
                                         budget_s=int(stages6.stage_cap(x)) + 1))
                 self.assertLessEqual(stages6.stage_cap(x), 14400)
 
@@ -218,12 +287,12 @@ class Stages(unittest.TestCase):
         self.assertEqual([c6.limit(x) for x in (c6.QUIET_SKEW_NEED4_S, c6.NOISY_NEED4_S, c6.UNTRAINED_S)], [1440, 2800, 270])
 
     def test_rehearsal(self):
-        allow = dict(instances={"a-none": {}, "b-none": {}})
+        allow = dict(instances={"none-a": {}, "none-b": {}})
         rm = [stages6.measure_runs("RM1"), stages6.measure_runs("RM2", allow), stages6.measure_runs("RM3", allow)]
         self.assertAlmostEqual(stages6.expected_compute(rm), 4200.6, delta=0.05)
-        preds = dict(instances=[dict(seed=7701, eligible=True, gate_K0=True, needs=dict(a=4, b=4, c1=4, c2=4)),
-                                dict(seed=7706, eligible=True, gate_K0=True, needs=dict(a=4, b=4, c1=4, c2=4))])
-        rn = stages6.rehearsal_network_runs(preds)
+        xs = [dict(seed=s, measured=True, eligible=True, gate_K0=True, needs=dict(a=4, b=4, c1=4, c2=4)) for s in (7701, 7706)]
+        record = dict(instances=xs, network_runs=predicted6.network_runs(xs, rounds=(1,)))
+        rn = stages6.rehearsal_network_runs(record, dict(instances=xs))
         self.assertEqual(sorted((r["id"], r["machine"]) for r in rn),
                          [("7701-n1", "a"), ("7701-quiet", "a"), ("7701-untrained", "a"), ("7706-n1", "b"), ("7706-quiet", "b")])
         self.assertAlmostEqual(stages6.expected_compute([rn]), 3192.0, places=1)
@@ -262,6 +331,58 @@ class Adapter(unittest.TestCase):
         self.assertEqual((out["N-own"]["verdict"], out["N-word"]["verdict"]), ("refuted", "held"))
 
 
+class AdapterEnforcement(unittest.TestCase):
+    def test_raw_record_not_reproduced_means_not_established(self):
+        """The pushed record differs from the regenerated one only in `eligible` (a Python-eligible instance whose gate
+        failed), which the mapping overwrites. The mapping keeps the original beside it, so the mapped records still
+        differ; and even if analyze.main reported the record reproduced (mocked here), every claim is not established."""
+        base = dict(what="w", protocol="p", constants={}, network_runs=[], instances=[dict(seed=7801, measured=True, eligible=False, gate_K0=False)])
+        pushed = json.loads(json.dumps(base))
+        pushed["instances"][0]["eligible"] = True                     # a Python-eligible instance whose gate failed
+        self.assertEqual([x["eligible"] for x in analyze6.mapped(pushed)["instances"]], [x["eligible"] for x in analyze6.mapped(base)["instances"]])
+        self.assertNotEqual(analyze6.mapped(pushed), analyze6.mapped(base))           # eligible_python keeps the difference
+        held = dict(predicted_is_reproduced=True, missing=[], claims={k: dict(verdict="held", instances=[7801, 7802]) for k in ("primary", "G", "U", "S")})
+        held["claims"]["N-out"] = {c: dict(verdict="held") for c in c4.CELLS}
+        held["claims"]["N-own"] = held["claims"]["N-word"] = dict(verdict="held")
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(predicted6, "predictions", lambda *a, **k: base), \
+                mock.patch.object(analyze6.analyze, "main", lambda *a, **k: json.loads(json.dumps(held))):
+            f = Path(d) / "PREDICTED.json"
+            f.write_text(predicted6.text(pushed))
+            res = analyze6.run(d, f, [], [], [], [], check=False)
+        self.assertFalse(res["predicted6_is_reproduced"])
+        self.assertEqual(set(res["claims"].values()), {"not established"})
+
+    def test_counted_instances_follow_analyze_counts(self):
+        """A noisy run that analyze.py does not count (its kit record not complete) brings no instance."""
+        xs = instances_for({7801, 7802})
+        for x in xs:
+            x["counts_N_out"] = dict(a=True, b=True, c=False)
+            x["learning_ports"] = {"a1": dict(own_room=False, room_up_to=True)}
+        p = dict(instances=xs, network_runs=predicted6.network_runs(xs))
+        with tempfile.TemporaryDirectory() as d:
+            recs = {}
+            for r in p["network_runs"]:
+                f = Path(d) / r["id"]
+                f.mkdir()
+                (f / "record.json").write_text(json.dumps(dict(reached_its_last_date=True)))
+                recs[r["id"]] = dict(status="complete", folder=str(f))
+            for k in (1, 2, 3):
+                recs[f"7802-n{k}"]["status"] = "missing (limit)"
+            res = dict(claims={"primary": dict(instances=[7801, 7802], verdict="held")})
+            counted = analyze6.counted_instances(p, res, recs)
+        self.assertEqual(counted["N-out:a"], [7801])
+        self.assertEqual(counted["N-out:c"], [])
+        self.assertEqual(counted["N-word"], [7801])
+        self.assertEqual(counted["N-own"], [])
+        self.assertEqual(analyze6.minimum("held", len(counted["N-out:a"])), analyze6.HELD_ON_ONE)
+
+    def test_same_serialization_as_analyze(self):
+        import inspect as ins
+        import analyze
+        self.assertIn('json.dumps(again, indent=1, default=str) + "\\n" == raw', ins.getsource(analyze.main))
+        self.assertEqual(predicted6.text(dict(a=1)), json.dumps(dict(a=1), indent=1, default=str) + "\n")
+
+
 class Inputs(unittest.TestCase):
     def test_complete(self):
         with tempfile.TemporaryDirectory() as d:
@@ -278,7 +399,7 @@ class Inputs(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             d = Path(d)
             recs = []
-            for inst, consistent in (("a-7801", True), ("b-7804", False)):
+            for inst, consistent in (("7801", True), ("7804", False)):
                 for c in ("a", "b"):
                     rid = f"{inst}-scan-{c}-pair"
                     (d / rid).mkdir()
@@ -286,14 +407,16 @@ class Inputs(unittest.TestCase):
                     (d / rid / "record.json").write_text(json.dumps(dict(result=res)))
                     recs.append(dict(id=rid, status="complete"))
             (d / "STATE.json").write_text(json.dumps(dict(records=recs)))
-            m2 = dict(stage="M2", instances={"a-7801": dict(D_V={"a": ["1", "1"], "b": ["1", "1"], "c": ["1", "1"]}),
-                                             "b-7804": dict(D_V={"a": ["1", "1"], "b": ["1", "1"], "c": ["1", "1"]}),
-                                             "a-7802": dict(why_not="a calibration deck did not complete")})
+            m2 = dict(stage="M2", instances={"7801": dict(D_V={"a": ["1", "1"], "b": ["1", "1"], "c": ["1", "1"]}),
+                                             "7804": dict(D_V={"a": ["1", "1"], "b": ["1", "1"], "c": ["1", "1"]}),
+                                             "7802": dict(why_not="a calibration deck did not complete")})
             out = inputs6.m3_inputs("M3", m2, [d])["instances"]
-        self.assertEqual(out["a-7801"]["bounds"], {c: str(predict6.layer1_bounds({"a": F(861, 256), "b": F(861, 256)},
+        self.assertEqual(out["7801"]["bounds"], {c: str(predict6.layer1_bounds({"a": F(861, 256), "b": F(861, 256)},
                                                                                {"a": F(1, 256), "b": F(1, 256)})[c]) for c in ("a", "b")})
-        self.assertEqual(out["b-7804"]["why_not"], "the pair scan of b has no consistent bracket")
-        self.assertEqual(out["a-7802"]["why_not"], "a calibration deck did not complete")
+        self.assertEqual(out["7804"]["why_not"], "the pair scan of b has no consistent bracket")
+        self.assertEqual(out["7802"]["why_not"], "a calibration deck did not complete")
+        self.assertEqual(inputs6.instances("M2"), ["7801", "7802", "7803", "7804", "7805"])
+        self.assertEqual(inputs6.instances("RM3"), ["none-a", "none-b"])
 
 
 class Frozen(unittest.TestCase):
@@ -304,8 +427,257 @@ class Frozen(unittest.TestCase):
                      "research/circuit/cell.spice", ".github/workflows/learned-dnf-circuit-campaign-6.yml"):
             self.assertIn(need, f)
         self.assertNotIn(".github/workflows/learned-dnf-circuit-campaign-5.yml", f)
+        for need in stages6.C5_SMOKE + [c6.AMENDMENT, stages6.REHEARSAL_PREDICTIONS]:
+            self.assertIn(need, f)
         missing = [x for x in f if not (stages6.ROOT / x).exists()]
         self.assertEqual(missing, [])
+
+
+class Claims(unittest.TestCase):
+    """The kit's claim key (launch.claim_ref: the protocol's SHA-256 and the machine) is distinct for every stage. The
+    first rehearsal named PREDICTION.md as every stage's protocol, so RM1's claims refused RM2 (2026-11-19)."""
+    STAGES = ("RM1", "RM2", "RM3", "RN", "M1", "M2", "M3", "Q", "N1", "N2", "N3", "N")
+    # claim refs that exist on the remote for ever: campaign 6's first rehearsal (PREDICTION.md) and campaign 5's four
+    TAKEN = ("8e7392c5654975049de3d25adf8a511105fba425fdb07b4d841a12fdc6342240",
+             "05c8416189d0ef18c83e65e8b77b44c573800470ce1b740c8277b3c3e3bfa7b1",
+             "223f0c6d996fd56854387874ee30299ee717058d08b0d6cd1300678c8a7ab4d8",
+             "27989a36013709de4fe77e1c8baa5fbdf168c4b4662cd38fec3583af9b72cab5",
+             "31bb3782c6f45ce5269c57a6ca5443c1dcf77fa8a4bf712bdce38c0de3559330")
+
+    @staticmethod
+    def launch_module(root):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(f"launch_{abs(hash(str(root)))}", Path(root) / stages6.CLOSURE / "launchkit/launch.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def refs(self):
+        import hashlib
+        launch = self.launch_module(stages6.ROOT)
+        return {(s, x): launch.claim_ref(dict(protocol_sha256=hashlib.sha256(stages6.stage_file_text(s, ATT).encode()).hexdigest()), x)
+                for s in self.STAGES for x in "ab"}
+
+    def test_a_claim_refs_distinct(self):
+        refs = self.refs()
+        self.assertEqual(len(set(refs.values())), 2 * len(self.STAGES), refs)
+        for s in self.STAGES:
+            self.assertEqual(stages6.stage_path(s, ATT), f"{c6.BASE}/stages/{ATT}/STAGE_{s}.md")
+
+    def test_b_no_taken_claim_ref(self):
+        launch = self.launch_module(stages6.ROOT)
+        taken = {launch.claim_ref(dict(protocol_sha256=h), x) for h in self.TAKEN for x in "ab"}
+        self.assertIn("refs/heads/owner-launch/protocol-" + self.TAKEN[0] + "/a", taken)
+        self.assertEqual(set(self.refs().values()) & taken, set())
+
+    def test_c_manifest_passes_read_manifest(self):
+        """In a throwaway worktree (never pushed): the stage file alone in one commit, the run list in a later one; the
+        manifest passes the kit's read_manifest. The stage file and its run list in one commit is refused, and so is a run
+        list that differs from the stage's runs."""
+        import subprocess
+        def git(repo, *a):
+            return subprocess.run(["git", "-C", str(repo), *a], check=True, capture_output=True, text=True).stdout.strip()
+        ident = ["-c", "user.name=test", "-c", "user.email=test@invalid"]
+        with tempfile.TemporaryDirectory() as tmp:
+            wt = Path(tmp) / "wt"
+            git(stages6.ROOT, "worktree", "add", "-q", "--detach", str(wt), "HEAD")
+            try:
+                # a parentless base with HEAD's tree but stages/ (which holds the real stage files once the rehearsal has
+                # begun), so the test's stage file is added by exactly one commit, in shallow and full clones alike
+                if (wt / stages6.STAGES_ROOT).exists():
+                    git(wt, "rm", "-r", "-q", stages6.STAGES_ROOT)
+                    git(wt, *ident, "commit", "-q", "-m", "test: without stages/ (never pushed)")
+                base = git(wt, *ident, "commit-tree", git(wt, "rev-parse", "HEAD^{tree}"), "-m", "test: base (never pushed)")
+                git(wt, "checkout", "-q", "--detach", base)
+                runs = stages6.stage_runs("RM1")
+                (wt / stages6.attempt_dir(ATT)).mkdir(parents=True, exist_ok=True)
+                (wt / stages6.stage_path("RM1", ATT)).write_text(stages6.stage_file_text("RM1", ATT))
+                git(wt, "add", stages6.STAGES_ROOT)
+                git(wt, *ident, "commit", "-q", "-m", "test: stage file (never pushed)")
+                proto = git(wt, "rev-parse", "HEAD")
+                (wt / stages6.runs_path("RM1", ATT)).write_text(stages6.runs_text("RM1", runs))
+                git(wt, "add", stages6.STAGES_ROOT)
+                git(wt, *ident, "commit", "-q", "-m", "test: run list (never pushed)")
+                src = git(wt, "rev-parse", "HEAD")
+                m = stages6.manifest("RM1", runs, src, ATT, root=wt)
+                self.assertEqual((m["protocol_commit"], m["protocol_path"]), (proto, stages6.stage_path("RM1", ATT)))
+                self.assertNotEqual(m["protocol_sha256"], c6.PROTOCOL_SHA256)
+                self.assertIn(stages6.runs_path("RM1", ATT), m["source_sha256"])
+                path = wt / stages6.attempt_dir(ATT) / "CAMPAIGN_RM1.json"
+                path.write_text(json.dumps(m, indent=1) + "\n")
+                launch = self.launch_module(wt)
+                got, _, name = launch.read_manifest(wt, path)
+                self.assertEqual(name, f"{stages6.attempt_dir(ATT)}/CAMPAIGN_RM1.json")
+                self.assertEqual(launch.claim_ref(got, "a"), self.refs()[("RM1", "a")])
+                with self.assertRaises(AssertionError):                       # a run list that is not the stage's runs
+                    stages6.manifest("RM1", runs[:2] + runs[3:], src, ATT, root=wt)
+                # the stage file and the run list in one commit: refused (protocol must precede the source commit)
+                git(wt, "checkout", "-q", "--detach", proto + "~1")
+                (wt / stages6.attempt_dir(ATT)).mkdir(parents=True, exist_ok=True)
+                (wt / stages6.stage_path("RM1", ATT)).write_text(stages6.stage_file_text("RM1", ATT))
+                (wt / stages6.runs_path("RM1", ATT)).write_text(stages6.runs_text("RM1", runs))
+                git(wt, "add", stages6.STAGES_ROOT)
+                git(wt, *ident, "commit", "-q", "-m", "test: both in one commit (never pushed)")
+                with self.assertRaises(AssertionError):
+                    stages6.manifest("RM1", runs, git(wt, "rev-parse", "HEAD"), ATT, root=wt)
+            finally:
+                git(stages6.ROOT, "worktree", "remove", "--force", str(wt))
+                git(stages6.ROOT, "worktree", "prune")
+
+
+class AuditFixes(unittest.TestCase):
+    """The fixes of the audit of 2026-11-19 (findings 2 to 7 and 11)."""
+
+    def test_state_reader_tolerates_a_rewrite(self):
+        """Finding 3: an empty state file (the kit mid-rewrite) is read again, not taken as a crash; one that stays
+        unreadable refuses."""
+        import threading
+        import time
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "STATE.json"
+            f.write_text("")
+            threading.Timer(0.3, lambda: f.write_text(json.dumps(dict(status="running", machine="b", records=[])))).start()
+            self.assertEqual(c6.read_state(f)["machine"], "b")
+            f.write_text('{"status": "runn')
+            t0 = time.time()
+            with self.assertRaises(AssertionError):
+                c6.read_state(f, tries=3, wait_s=0.05)
+            self.assertLess(time.time() - t0, 2)
+            f.unlink()
+            t0 = time.time()
+            with self.assertRaises(FileNotFoundError):              # a missing file is never retried
+                c6.read_state(f)
+            self.assertLess(time.time() - t0, 0.5)
+            self.assertFalse(c6.inside_kit(Path(d) / "run"))
+            self.assertIsNone(c6.running_machine(Path(d) / "run"))
+
+    def test_rehearsal_rounds(self):
+        """C1: RN's record is built with round 1 only; noise_seed's guard is unchanged (rounds 2 and 3 of a rehearsal
+        seed refuse), and no other set of rounds is accepted."""
+        xs = [dict(seed=s, measured=True, eligible=True, gate_K0=True, needs=dict(a=4, b=4, c1=4, c2=4)) for s in (7701, 7706)]
+        runs = predicted6.network_runs(xs, rounds=(1,))
+        self.assertEqual(sorted(r["id"] for r in runs), ["7701-n1", "7701-quiet", "7701-untrained", "7706-n1", "7706-quiet"])
+        self.assertEqual({r["noise_seed"] for r in runs if r["noise"] == "injected"}, {77011, 77061})
+        with self.assertRaises(AssertionError):
+            predicted6.network_runs(xs)
+        with self.assertRaises(AssertionError):
+            predicted6.network_runs(xs, rounds=(1, 2))
+        camp = [dict(seed=s, measured=True, eligible=True, gate_K0=True, needs=dict(a=4, b=4, c1=4, c2=4)) for s in (7801, 7802)]
+        noisy = [r["id"] for r in predicted6.network_runs(camp) if r["noise"] == "injected"]
+        self.assertEqual(sorted(noisy), sorted(f"{s}-n{k}" for s in (7801, 7802) for k in (1, 2, 3)))   # the campaign: n1 to n3
+        one = stages6.network_stages(predicted6.network_runs(camp[:1]))
+        self.assertEqual([(n, sorted(r["id"] for r in x)) for n, x in one],
+                         [("Q", ["7801-quiet", "7801-untrained"]), ("N", ["7801-n1", "7801-n2", "7801-n3"])])
+
+    def test_rn_runs_from_its_record(self):
+        """C1: RN's run list comes from its record, whose needs must equal the batch's and whose network runs must be
+        exactly RN's."""
+        xs = [dict(seed=s, measured=True, eligible=True, gate_K0=True, needs=dict(a=4, b=4, c1=4, c2=4)) for s in (7701, 7706)]
+        record = dict(instances=xs, network_runs=predicted6.network_runs(xs, rounds=(1,)))
+        other = json.loads(json.dumps(xs))
+        other[1]["needs"]["c2"] = 5
+        with self.assertRaises(AssertionError):
+            stages6.rehearsal_network_runs(record, dict(instances=other))
+        extra = dict(record, network_runs=record["network_runs"] + [dict(id="7706-untrained")])
+        with self.assertRaises(AssertionError):
+            stages6.rehearsal_network_runs(extra, dict(instances=xs))
+
+    def test_layout_label(self):
+        """C3: a run the kit marked complete whose record did not reach its last date is labelled so, never complete."""
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            ev = d / "ev"
+            ev.mkdir()
+            recs = []
+            for tail in ("cal-on", "cal-off"):
+                (ev / f"7801-{tail}").mkdir()
+                (ev / f"7801-{tail}" / "record.json").write_text(json.dumps(dict(reached_its_last_date=tail == "cal-on")))
+                recs.append(dict(id=f"7801-{tail}", status="complete"))
+            (ev / "STATE.json").write_text(json.dumps(dict(records=recs)))
+            runs = {r["id"]: r["status"] for r in predicted6.layout(d / "bd", [ev], (7801,), {7801: "a"})}
+        self.assertEqual(runs["7801-cal-on"], "complete")
+        self.assertEqual(runs["7801-cal-off"], "complete by the kit, but did not reach its last date")
+
+    def test_analysis_reads_only_the_named_folders(self):
+        """C4: duplicate ids, ids outside the record's runs, and folders that are not the kit's refuse."""
+        record = dict(network_runs=[dict(id="7801-quiet")])
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            for name, ids in (("one", ["7801-cal-on"]), ("two", ["7801-cal-on"]), ("odd", ["7701-quiet"])):
+                (d / name).mkdir()
+                (d / name / "STATE.json").write_text(json.dumps(dict(records=[dict(id=i, status="complete") for i in ids])))
+            (d / "batch").mkdir()
+            (d / "batch" / "STATE.json").write_text(json.dumps(dict(status="done")))
+            allowed = analyze6.allowed_ids(record)
+            analyze6.assemble([d / "one"], d / "w1", allowed, {})
+            for folders in ([d / "one", d / "two"], [d / "odd"], [d / "batch"]):
+                with self.assertRaises(AssertionError):
+                    analyze6.assemble(folders, d / f"w-{len(list(d.iterdir()))}", allowed, {})
+
+    def test_attempts_have_their_own_claims(self):
+        """Finding 2: the same stage in two attempts has two stage files, so two claim refs; a stage file without a
+        valid attempt id refuses."""
+        import hashlib
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("launch_attempts", stages6.ROOT / stages6.CLOSURE / "launchkit/launch.py")
+        launch = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(launch)
+        refs = {launch.claim_ref(dict(protocol_sha256=hashlib.sha256(stages6.stage_file_text("RM1", a).encode()).hexdigest()), "a")
+                for a in ("r3", "r4")}
+        self.assertEqual(len(refs), 2)
+        self.assertNotEqual(stages6.stage_path("RM1", "r3"), stages6.stage_path("RM1", "r4"))
+        for bad in ("", "R3", "a/b", "x" * 40):
+            with self.assertRaises(AssertionError):
+                stages6.attempt_dir(bad)
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "STAGE.md"
+            f.write_text(stages6.stage_file_text("RM1", ATT).replace(f'"attempt": "{ATT}"', '"attempt": "A B"'))
+            with self.assertRaises(AssertionError):
+                c6.stage_check(f)
+
+    def test_m8_fields_read_back(self):
+        """Finding 14: M8's assumption on c gets exactly observation.secondTest[AB|CD].start and .emissions read back as
+        rationals; every other field keeps its type, and a value that is not a rational string is left to refuse."""
+        from fractions import Fraction
+        x = dict(seed=7801, needs=dict(c1=5, c2=4), x_other="1/2",
+                 observation=dict(scores={"-": "3/4"}, secondTest=dict(AB=dict(start="5752921/10000", emissions=["5760001/10000"], other="1/3"),
+                                                                       CD=dict(start="7", emissions=[]), EF=dict(start="1/9", emissions=["1/8"]))))
+        y = analyze6.m8_fields(x)
+        self.assertEqual(y["observation"]["secondTest"]["AB"]["start"], Fraction(5752921, 10000))
+        self.assertEqual(y["observation"]["secondTest"]["AB"]["emissions"], [Fraction(5760001, 10000)])
+        self.assertEqual(y["observation"]["secondTest"]["CD"]["start"], Fraction(7))
+        for path in (("x_other",), ("observation", "scores", "-"), ("observation", "secondTest", "AB", "other"),
+                     ("observation", "secondTest", "EF", "start")):
+            v, w = x, y
+            for k in path:
+                v, w = v[k], w[k]
+            self.assertEqual((type(w), w), (str, v))
+        self.assertEqual(x["observation"]["secondTest"]["AB"]["start"], "5752921/10000")          # the record itself untouched
+        self.assertEqual(analyze6.m8_fields(dict(observation=dict(secondTest=dict(AB=dict(start="0.5", emissions=[])))))
+                         ["observation"]["secondTest"]["AB"]["start"], "0.5")                    # not a rational string: left
+        seen = {}
+
+        def main(*a, **k):
+            seen["f"] = analyze6.analyze.assumption_on_c
+            return dict(predicted_is_reproduced=False, missing=[], claims={})
+        base = dict(what="w", protocol="p", constants={}, network_runs=[], instances=[dict(seed=7801, measured=False)])
+        real = analyze6.analyze.assumption_on_c
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(predicted6, "predictions", lambda *a, **k: base), \
+                mock.patch.object(analyze6.analyze, "main", main):
+            f = Path(d) / "PREDICTED.json"
+            f.write_text(predicted6.text(base))
+            analyze6.run(d, f, [], [], [], [], check=False)
+        self.assertIsNot(seen["f"], real)                              # wrapped inside the analysis only
+        self.assertIs(analyze6.analyze.assumption_on_c, real)
+        with self.assertRaises(TypeError):
+            analyze6.analyze.P.exact("7/2")                          # predicted.exact itself unchanged
+
+    def test_data_files_bound(self):
+        """Finding 11: each stage's declared data file, which its manifest binds."""
+        a = stages6.attempt_dir(ATT)
+        self.assertEqual([stages6.data_path(s, ATT) for s in ("RM1", "RM2", "RN", "M1", "M3", "Q", "N2", "N")],
+                         [None, f"{a}/INPUTS_RM2.json", f"{a}/PREDICTED_RN.json", None, f"{a}/INPUTS_M3.json",
+                          f"{a}/PREDICTED.json", f"{a}/PREDICTED.json", f"{a}/PREDICTED.json"])
 
 
 if __name__ == "__main__":

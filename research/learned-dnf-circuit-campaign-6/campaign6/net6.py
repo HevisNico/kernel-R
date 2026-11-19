@@ -1,11 +1,13 @@
 """Campaign 6's network runner (PREDICTION.md 4), as the launch kit starts it. New code: campaign 5's run4.run network
 branch (run without noise, noisy run under the injected model, untrained control run), called through the same frozen
 functions (plans4.network, net.deck, noisemodel.shim, session4.play, run4.trnoise_fingerprint), writing the same deck
-and the same record key for key, plus one key `campaign6`. run4.run itself cannot run campaign 6's seeds: its guard
-accepts only campaign 5's. This runner's guard is c6.guard_seed, before any deck is written (test_campaign6.NetCopy
-shows the equivalence with a fake simulator; the guard's refusals are tested without one).
+and the same record key for key, plus one key `campaign6`. Its `stage` is safeguard (i)'s check of the stage file,
+as run4.stage_check records it (c6.stage_check: the governing protocol PREDICTION.md with its SHA-256). run4.run itself
+cannot run campaign 6's seeds: its guard accepts only campaign 5's. This runner checks the stage file, then the seed
+(c6.guard_seed), before any deck is written (test_campaign6.NetCopy shows the equivalence with a fake simulator; the
+refusals are tested without one).
 
-  net6.py STAGE OUT ID SEED NEEDS CONTROL NOISE ROUND NGSPICE PDK
+  net6.py STAGE_FILE OUT ID SEED NEEDS CONTROL NOISE ROUND NGSPICE PDK
       NEEDS a,b,c1,c2; CONTROL skew | untrained | none; NOISE none | injected; ROUND 0, or 1 to 3 for a noisy run
 """
 import json
@@ -25,17 +27,19 @@ import session4                                         # noqa: E402
 from session4 import net                                # noqa: E402
 
 
-def network(stage, out, rid, seed_text, needs, control, noise, rnd, ngspice, pdk):
+def network(stage_file, out, rid, seed_text, needs, control, noise, rnd, ngspice, pdk):
     c6.require_debug()
     began = time.time()
     out = Path(out)
     assert noise in ("none", "injected"), "refused: the injected model only (PREDICTION.md 4; campaign 5, section 6)"
+    st = c6.stage_check(stage_file)
+    stage = st["stage"]
     seed = c6.guard_seed(seed_text, stage, out)
     assert stage not in c6.MEASURE_REHEARSAL, "refused: the measure rehearsal has no network run"
     assert (noise == "none") == (rnd == 0), "a noisy run has a round from 1 to 3, a run without noise none"
     assert control in (None, "skew", "untrained")
     section = "tt" if seed is None else c4.SECTION
-    rec = dict(id=rid, kind="network", section=section, seed=seed, stage=None)        # run4.run's order
+    rec = dict(id=rid, kind="network", section=section, seed=seed, stage=st)          # run4.run's order
     plan, slots = plans4.network(tuple(needs), control)
     guard_off, noise_id, shim = False, None, None
     if noise == "injected":
@@ -59,7 +63,7 @@ def network(stage, out, rid, seed_text, needs, control, noise, rnd, ngspice, pdk
                points=result["points"], files={x: run4.sha(ev / x) for x in ("input.spice", "session.log", "trace.raw", "result.json")})
     rec.update(noise_fingerprint=mark, wall_s=time.time() - began,
                peak_rss_MB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024)
-    rec["campaign6"] = c6.run_header(seed, None, "network", stage)                  # the only added key
+    rec["campaign6"] = c6.run_header(str(seed), None, "network", st, out)          # the only added key
     (out / "noise.sha256").write_text(mark + "\n")
     (out / "record.json").write_text(json.dumps(rec, indent=1) + "\n")
     assert rec["reached_its_last_date"], "the waveform ends before the last date of the run"
@@ -68,8 +72,8 @@ def network(stage, out, rid, seed_text, needs, control, noise, rnd, ngspice, pdk
 
 def main(argv=None):
     a = sys.argv[1:] if argv is None else argv
-    stage, out, rid, seed_text, needs, control, noise, rnd, ngspice, pdk = a
-    rec = network(stage, out, rid, seed_text, [int(x) for x in needs.split(",")], None if control == "none" else control, noise, int(rnd),
+    stage_file, out, rid, seed_text, needs, control, noise, rnd, ngspice, pdk = a
+    rec = network(stage_file, out, rid, seed_text, [int(x) for x in needs.split(",")], None if control == "none" else control, noise, int(rnd),
                   Path(ngspice), Path(pdk))
     print(json.dumps(dict(id=rec["id"], reached_its_last_date=rec["reached_its_last_date"], wall_s=round(rec["wall_s"]))))
 

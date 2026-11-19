@@ -1,19 +1,23 @@
 """Campaign 6's measure runners (PREDICTION.md 2), as the launch kit starts them. New code; the batch's measurement
 code is unchanged and is called under campaign 6's seed guard (c6.guard_seed), never through its own command lines.
 
-  meas6.py cal  STAGE OUT SEED on|off NGSPICE PDK                 batch6.cal: one of campaign 5's calibration decks
-  meas6.py scan STAGE OUT INSTANCE CELL KIND INPUTS NGSPICE PDK   one scan, both-lines check or one-sided set
+  meas6.py cal  STAGE_FILE OUT INSTANCE on|off NGSPICE PDK                batch6.cal: one of campaign 5's calibration decks
+  meas6.py scan STAGE_FILE OUT INSTANCE CELL KIND INPUTS NGSPICE PDK      one scan, both-lines check or one-sided set
 
-INSTANCE is `<machine>-<seed>` (`a-7801`, or `a-none` for the nominal cell of the measure rehearsal on machine a).
+INSTANCE is the seed ("7801"), or "none-a" / "none-b" for the two nominal instances of the measure rehearsal. Every run
+first checks its stage file (safeguard i, c6.stage_check) and then its seed (c6.guard_seed), before any deck.
 
 `scan` reads its doses (and, for a one-sided set, its bound W + h) from INPUTS, a frozen file the stage's manifest
 binds by its SHA-256 (inputs6.py writes it from the earlier stages' evidence). It then runs `scan_main`, which is
-scan6.main copied verbatim but for three lines (test_campaign6.ScanCopy shows the difference):
-  - the seed guard is c6.guard_seed (with the stage and the run's folder), not batch6.guard_seed;
-  - the record's header is c6.run_header, not batch6.run_header;
+scan6.main copied verbatim but for its first line (its arguments) and three lines (test_campaign6.Copies shows them):
+  - the seed guard is c6.guard_seed (with the checked stage and the run's folder), not batch6.guard_seed;
+  - the record's header is c6.run_header (with the stage check and the machine that ran it), not batch6.run_header;
   - after the simulator closes, the run writes noise.sha256, the fingerprint of the deck's transient-noise sources
     (campaign 5's run4.trnoise_fingerprint), which the kit requires of every registered run. New behaviour, declared.
-`cal` calls batch6.cal after the guard, then adds one key, `campaign6`, to the record (c6.run_header).
+`cal` calls batch6.cal (unchanged) after the stage check and the guard. batch6.cal's record keeps its own `batch` key,
+batch6.run_header's development-batch label (machine None for 7801 to 7805), since that code is unchanged; `cal` then
+sets the record's `stage` to the stage check (batch6.cal writes None there, as run4 does outside a stage) and adds one
+key, `campaign6`, the campaign's header (c6.run_header).
 """
 from fractions import Fraction as F
 import json
@@ -30,11 +34,13 @@ import run4                                             # noqa: E402  (campaign 
 from scan6 import Driver, MOVING, READS, kinds_of, scan, trip_level, sha     # noqa: E402,F401
 
 
-def cal(stage, out, seed_text, guard, ngspice, pdk):
-    seed = c6.guard_seed(seed_text, stage, out)
+def cal(stage_file, out, instance, guard, ngspice, pdk):
+    st = c6.stage_check(stage_file)
+    seed = c6.guard_seed(c6.seed_text(instance), st["stage"], out)
     assert guard in ("on", "off")
     rec = batch6.cal(Path(out), seed, guard, Path(ngspice), Path(pdk))
-    rec["campaign6"] = c6.run_header(seed, None, f"cal-{guard}", stage)
+    rec["stage"] = st
+    rec["campaign6"] = c6.run_header(instance, None, f"cal-{guard}", st, out)
     (Path(out) / "record.json").write_text(json.dumps(rec, indent=1) + "\n")
     return rec
 
@@ -43,7 +49,7 @@ def scan_args(out, instance, cell, kind, inputs, ngspice, pdk):
     """scan_main's arguments from the frozen inputs file: the doses of the instance's cell (V) and, for a one-sided set,
     its bound. Refuses an instance the inputs mark as not to be run (its earlier runs failed)."""
     data = json.loads(Path(inputs).read_text())
-    seed_text = instance.split("-", 1)[1]
+    seed_text = c6.seed_text(instance)
     x = data["instances"][instance]
     assert "why_not" not in x, f"refused: {instance} is not to be run in {data['stage']}: {x.get('why_not')}"
     dv = x["D_V"][cell]
@@ -55,12 +61,12 @@ def scan_args(out, instance, cell, kind, inputs, ngspice, pdk):
     return [out, seed_text, cell, kind, str(c6.DELTA), *dv, ngspice, pdk]
 
 
-def scan_main(argv, stage):
+def scan_main(argv, stage, instance):
     a = sys.argv[1:] if argv is None else argv
     batch6.require_debug()
     began = time.time()
     out, seed_text, cell, kind = Path(a[0]), a[1], a[2], a[3]
-    seed = c6.guard_seed(seed_text, stage, out)
+    seed = c6.guard_seed(seed_text, stage["stage"], out)
     print(c4.require_pinned())
     assert cell in c4.CELLS, cell
     ev = out / "evidence"
@@ -111,7 +117,7 @@ def scan_main(argv, stage):
     if res.get("consistent"):
         res["L"] = trip_level(tr, drv, res)
     (ev / "pdk").unlink()
-    rec = dict(c6.run_header(seed, cell, kind, stage), D_V=D,
+    rec = dict(c6.run_header(instance, cell, kind, stage, out), D_V=D,
                u0_V={str(p): v for p, v in drv.u0.items()}, reads=drv.reads, slots=len(drv.events), result=res,
                files={x: sha(ev / x) for x in ("input.spice", "session.log", "trace.raw")}, wall_s=time.time() - began)
     (ev / "events.json").write_text(json.dumps(drv.events) + "\n")
@@ -121,17 +127,19 @@ def scan_main(argv, stage):
     return rec
 
 
+
 def main(argv=None):
     a = sys.argv[1:] if argv is None else argv
     c6.require_debug()
     if a[0] == "cal":
-        stage, out, seed_text, guard, ngspice, pdk = a[1:7]
-        rec = cal(stage, out, seed_text, guard, ngspice, pdk)
+        stage_file, out, instance, guard, ngspice, pdk = a[1:7]
+        rec = cal(stage_file, out, instance, guard, ngspice, pdk)
         print(json.dumps(dict(id=rec["id"], reached_its_last_date=rec["reached_its_last_date"], wall_s=round(rec["wall_s"]))))
     elif a[0] == "scan":
-        stage, out, instance, cell, kind, inputs, ngspice, pdk = a[1:9]
-        c6.guard_seed(instance.split("-", 1)[1], stage, out)      # before the inputs are read
-        scan_main(scan_args(out, instance, cell, kind, inputs, ngspice, pdk), stage)
+        stage_file, out, instance, cell, kind, inputs, ngspice, pdk = a[1:9]
+        st = c6.stage_check(stage_file)
+        c6.guard_seed(c6.seed_text(instance), st["stage"], out)       # before the inputs are read
+        scan_main(scan_args(out, instance, cell, kind, inputs, ngspice, pdk), st, instance)
     else:
         raise SystemExit(__doc__)
 

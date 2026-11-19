@@ -9,6 +9,7 @@ The rules are the batch's (schedule6.command, BATCH_SPEC.md v10): the doses come
 predict6.doses_V on the two decks, in volts, as `repr(float(mV) / 1000)`; a one-sided set needs both pair scans of its
 instance complete with a consistent bracket, and its bound is predict6.layer1_bounds over them (MAPPING_U.md 2). An
 instance whose inputs fail is written with `why_not`, and its runs of the stage are not in the manifest (stages6).
+Each inputs file is pushed before its stage's manifest, which binds it by its SHA-256 (campaign6/README.md).
 """
 from fractions import Fraction as F
 import json
@@ -41,10 +42,10 @@ def complete(rec):
 
 
 def instances(stage):
-    """The instances of a measure stage, as `<machine>-<seed>`: the campaign's five, or the nominal cell on each machine."""
+    """The instances of a measure stage, named by their seed: the campaign's five, or the two nominal instances."""
     if stage.startswith("RM"):
-        return ["a-none", "b-none"]
-    return [f"{c6.MACHINE_OF[s]}-{s}" for s in c6.SEEDS]
+        return list(c6.NOMINAL_INSTANCES)
+    return [str(s) for s in c6.SEEDS]
 
 
 def m2_inputs(stage, dirs):
