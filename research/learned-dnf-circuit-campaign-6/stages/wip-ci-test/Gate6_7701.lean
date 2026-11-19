@@ -106,6 +106,6 @@ def trace_7701_K3 : TraceTables cascade_7701_K3 where
 
 set_option maxRecDepth 100000 in
 set_option maxHeartbeats 0 in
-theorem checks_7701_K3 : checks cascade_7701_K3 trace_7701_K3 = false := by decide +kernel
+theorem checks_7701_K3 : checks cascade_7701_K3 trace_7701_K3 = true := by decide +kernel
 
 end LearnedCoincidence.MonotoneDNF.PremiseCheck.Campaign4
