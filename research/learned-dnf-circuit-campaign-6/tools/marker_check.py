@@ -12,6 +12,9 @@ It passes only if all of these hold:
    Q and the N stages, PREDICTED.json and the gate's Lean files (allowed). Any other path, or a missing one, refuses;
 4. every hash of source_sha256 equals the file at the manifest's source_commit;
 5. the stage file passes c6.stage_check (safeguard i), and names the same stage; the manifest's campaign_id names it.
+6. REPO's working tree is clean (`git status --porcelain` empty), and every frozen path and the stage file are identical
+   in REPO's tree and at source_commit (`git diff --quiet SOURCE_COMMIT -- PATHS`), so that the c6 import and the stage
+   check read the source commit's files; the report records REPO's HEAD.
 It refuses under python -O (the asserts of c6.stage_check would vanish), and any exception of the stage check is a
 refusal, so a refusal always leaves its MARKER_CHECK file.
 The report records this script's own SHA-256.
@@ -71,6 +74,20 @@ def check(stage, manifest_path, marker_commit, repo):
         fail(f"source_commit {src_commit} does not descend from the marker's commit {marker_commit}")
     src = m["source_sha256"]
     frozen = marker["files"]
+    tree_ok = True
+    head = git(repo, "rev-parse", "HEAD").decode().strip()
+    lines.append(f"REPO {repo} at HEAD {head}")
+    status = git(repo, "status", "--porcelain").decode()
+    if status.strip():
+        tree_ok = False
+        fail("REPO's working tree is not clean (git status --porcelain): " + " | ".join(status.splitlines()[:10]))
+    tree_paths = sorted(set(frozen) | {f"{BASE}/STAGE_{stage}.md"})
+    try:
+        git(repo, "diff", "--quiet", src_commit, "--", *tree_paths)
+        lines.append(f"REPO's tree equals source_commit on the {len(tree_paths)} frozen paths and the stage file")
+    except subprocess.CalledProcessError:
+        tree_ok = False
+        fail(f"REPO's tree differs from source_commit {src_commit} on the frozen paths or the stage file")
     required, allowed = declared_data(stage, src)
     for p, h in sorted(frozen.items()):
         if p not in src:
@@ -93,6 +110,8 @@ def check(stage, manifest_path, marker_commit, repo):
         fail(f"the manifest's campaign_id {m.get('campaign_id')} does not name stage {stage}")
     if not __debug__:
         fail("run under python -O: c6.stage_check's asserts are stripped, so the stage file is not checked")
+    elif not tree_ok:
+        fail("the stage check is not run: REPO's tree is not the source commit's")
     else:
         try:
             sys.path.insert(0, str(repo / BASE / "campaign6"))

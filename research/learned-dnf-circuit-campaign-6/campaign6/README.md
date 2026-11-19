@@ -43,15 +43,24 @@ For each stage, in the order of `PREDICTION.md` 10:
      before it;
    - for Q and the N stages, `PREDICTED.json` and the Lean files of the gate;
    - for RN, nothing more: `rehearsal/PREDICTIONS_BATCH.json` is already in the implementation;
-   - the two machines' inventories.
+   - not the inventories: `INVENTORY_a.json` and `INVENTORY_b.json` are written once, each after its machine's envcheck,
+     before RM1's manifest, each pushed alone, and reused unchanged by every later stage (the coordinator's ruling of
+     2026-11-19; the kit compares only the published inventory with the local one, and its machine, environment and
+     executor). Each launch's `INVENTORY_AT_LAUNCH.json` (and `INVENTORY_AT_RESUME`) records the machine at that stage,
+     and envcheck runs before every launch.
 
    **Each inputs file is pushed before its stage's manifest.** The manifest binds it, the stage file and every frozen
    file by their SHA-256 at that source commit (`stages6.manifest`). Nothing else may differ from the frozen
    implementation (the kit's `runtime_unchanged`, and the CI gate on that exact commit).
 2. **The manifest**, `stages6.py manifest STAGE OUT SOURCE_COMMIT [input]`, is checked as the kit checks it (both
-   shards, the round-robin order, the budget), then pushed with its attempt marker.
-3. **The launch**, one per machine, detached, with the sessions active. A started run is never relaunched.
-4. **The collection**, with campaign 5's `collect.py`, then the evidence branches.
+   shards, the round-robin order, the budget).
+3. **The marker check**, `tools/marker_check.py STAGE MANIFEST MARKER_COMMIT REPO`, in a clean checkout whose tree equals
+   the source commit on the frozen paths and the stage file, with the manifest kept outside that checkout (an untracked
+   file there makes the tree unclean, and the script writes its report next to the manifest). A refusal means no launch, and its `MARKER_CHECK_<stage>.txt`
+   is committed with the stage's evidence. On a pass, the manifest is pushed with its attempt marker (`launch.py
+   prepare`) and its `MARKER_CHECK_<stage>.txt`. (The script is outside `stages6.frozen()`, so outside the marker.)
+4. **The launch**, one per machine, detached, with the sessions active. A started run is never relaunched.
+5. **The collection**, with campaign 5's `collect.py`, then the evidence branches.
 
 **`check-noise`** (`launch.py check-noise`) is applied to the evidence of the **N stages only** (and RN's noisy runs),
 where noise is drawn, and must report every fingerprint distinct. The runs without noise (decks, scans, the runs
