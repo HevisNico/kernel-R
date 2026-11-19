@@ -252,7 +252,8 @@ def manifest(stage, runs, source_commit, inputs_path=None, root=ROOT):
     protocol = blob(pc, stage_path(stage))
     assert blob(source_commit, stage_path(stage)) == protocol, "refused: the stage file differs at the source commit"
     assert blob(source_commit, runs_path(stage)) == runs_text(stage, runs).encode(), "refused: the run list at the source commit is not this stage's runs"
-    subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor", c6.PROTOCOL_COMMIT, pc], check=True)
+    # PREDICTION.md is bound by its SHA-256 through the stage file (safeguard i). Its commit's ancestry is checked by
+    # tools/marker_check.py in a full clone (protocol_commit descends from the marker), not here: CI's checkout is shallow.
     with tempfile.TemporaryDirectory() as tmp:                 # safeguard i on the protocol's own bytes
         f = Path(tmp) / "STAGE.md"
         f.write_bytes(protocol)
