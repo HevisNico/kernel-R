@@ -41,6 +41,27 @@ jobs:
           "$RUNNER_TEMP/python/bin/python" -m pip install numpy==2.3.5
           cd research/learned-dnf-circuit-campaign-5
           "$RUNNER_TEMP/python/bin/python" -B -c 'import c4; print(c4.require_pinned())'
+      - name: The CI path, decided by content (the short path, a separable option of the audit of 2026-11-19)
+        id: decide
+        run: |
+          "$RUNNER_TEMP/python/bin/python" -B - <<'PY'
+          import hashlib, json, os, pathlib
+          m = pathlib.Path("research/learned-dnf-circuit-campaign-6/CAMPAIGN_MARKER_3.json")
+          path, why = "full", "no CAMPAIGN_MARKER_3.json at HEAD"
+          if m.exists():
+              try:
+                  files = json.loads(m.read_text())["files"]
+                  bad = [p for p, h in sorted(files.items()) if not pathlib.Path(p).is_file() or hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() != h]
+                  path, why = ("short", f"all {len(files)} frozen files equal marker 3") if files and not bad else ("full", f"frozen files differ from marker 3: {bad[:5]}")
+              except Exception as e:
+                  path, why = "full", f"marker 3 unreadable: {e!r}"
+          print(f"CI path: {path} ({why})")
+          if path == "short":
+              print("skipped on the short path (each reads only frozen files, all equal to marker 3): the Lean install; the smoke waveform; "
+                    "M8's two paths; the kernel gate on the cases, targets and mirror mutations; the structural comparison; the negative audit cases")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"path={path}\n")
+          PY
       - name: Campaign 6's code against its PREDICTION.md (the guards, the copies, the stages and their costs, the two-shard rule, the adapter), without simulation
         run: cd research/learned-dnf-circuit-campaign-6/campaign6 && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_campaign6
       - name: The marker check (tools/, outside the frozen set) against its tests, on local commits only
@@ -52,6 +73,7 @@ jobs:
       - name: Campaign 5's frozen code, which campaign 6 imports, against its own tests
         run: cd research/learned-dnf-circuit-campaign-5 && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_campaign
       - name: Install the pinned Lean distribution
+        if: steps.decide.outputs.path == 'full'
         run: |
           set -euo pipefail
           test "$(cat proof/lean/lean-toolchain)" = 'leanprover/lean4:v4.35.0'
@@ -72,6 +94,7 @@ jobs:
           rm -f "$archive"
           printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
       - name: The waveform of the smoke run without noise (smoke/README.md), from its evidence branch, for M8's eligible path
+        if: steps.decide.outputs.path == 'full'
         run: |
           set -euo pipefail
           run=research/learned-dnf-circuit-campaign-5/smoke/nominal-quiet
@@ -81,6 +104,7 @@ jobs:
           git -C "$RUNNER_TEMP/evidence" checkout -q FETCH_HEAD -- "$run/evidence/trace.raw"
           cp "$RUNNER_TEMP/evidence/$run/evidence/trace.raw" "$run/evidence/trace.raw"
       - name: M8's two paths (PREDICTION.md, M8), code path only - eligible (P0 with the smoke run), and no eligible instance (a theorem on no axiom)
+        if: steps.decide.outputs.path == 'full'
         run: |
           set -euo pipefail
           cd research/learned-dnf-circuit-campaign-5
@@ -88,10 +112,12 @@ jobs:
           "$RUNNER_TEMP/python/bin/python" -B -c 'import analyze, sys; open(sys.argv[1], "w").write(analyze.M8({}, {}, None)[1])' "$RUNNER_TEMP/M8_none.lean"
           grep -q "theorem no_eligible_instance" "$RUNNER_TEMP/M8_none.lean"
       - name: The kernel gate on the cases of PREDICTION.md 7.4, their targets and the mirror mutations, regenerated and audited; both paths of M8
+        if: steps.decide.outputs.path == 'full'
         run: |
           PYTHON="$RUNNER_TEMP/python/bin/python" bash research/learned-dnf-circuit-campaign-5/check.sh \
             "$RUNNER_TEMP/M8_eligible.lean" "$RUNNER_TEMP/M8_none.lean"
       - name: The structural comparison (PREDICTION.md, 10.2), exercised on every runner, a file of the Haswell kernel accepted and a changed integer refused
+        if: steps.decide.outputs.path == 'full'
         run: |
           set -euo pipefail
           cd research/learned-dnf-circuit-campaign-5
@@ -106,4 +132,7 @@ jobs:
           fi
           echo "structural comparison: the file of the Haswell kernel accepted, the changed integer (Q1 + 1) refused"
       - name: The negative cases of the audit (PREDICTION.md, 7.3), each refused on the check of the axioms
+        if: steps.decide.outputs.path == 'full'
         run: PYTHON="$RUNNER_TEMP/python/bin/python" bash research/learned-dnf-circuit-campaign-5/audit_cases.sh
+      - name: The path taken
+        run: echo "CI path ${{ steps.decide.outputs.path }}; the skipped steps (if short) read only frozen files, which equal marker 3"
