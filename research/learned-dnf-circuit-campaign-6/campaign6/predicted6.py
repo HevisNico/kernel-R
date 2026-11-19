@@ -2,6 +2,8 @@
 evidence of M1 to M3, pushed before any network run. New code.
 
   predicted6.py OUT_DIR STAGE_DIR...       the campaign's five instances (STAGE_DIR: the collected folders of M1 to M3, both machines)
+  predicted6.py --rehearsal OUT_DIR BATCH_DIR    RN's record PREDICTED_RN.json: 7701 and 7706 on the batch's merged
+                                                 evidence, round 1 only (PREDICTION.md 7; the audit of 2026-11-19)
 
 1. The runs of the measure stages are laid out as the batch's code reads them (BATCH_DIR/<machine>/<seed>-<run>, and
    BATCH_DIR/RUNS.json with each run's status: "complete" when it counts, else the kit's status). Every run of an
@@ -87,7 +89,12 @@ def layout(bd, stage_dirs, seeds, machine_of):
         tails = [f"cal-{g}" for g in ("on", "off")] + [f"scan-{c}-{k}" for c, k in CROSSINGS] + ["bothfire-c", "onesided-a", "onesided-b"]
         for tail in tails:
             rec = recs.get(f"{seed}-{tail}")                    # run ids by seed (amendment 1: a run may have run on the other machine)
-            status = "complete" if inputs6.complete(rec) else (rec.get("status") if rec else "not started")
+            if inputs6.complete(rec):
+                status = "complete"
+            elif rec is not None and rec.get("status") == "complete":     # never counted by predict_batch (audit, C3)
+                status = "complete by the kit, but did not reach its last date"
+            else:
+                status = rec.get("status") if rec else "not started"
             if rec is not None:
                 (bd / m / f"{seed}-{tail}").symlink_to(Path(rec["folder"]).resolve())
             runs.append(dict(id=f"{seed}-{tail}", machine=m, status=status))
@@ -95,8 +102,9 @@ def layout(bd, stage_dirs, seeds, machine_of):
     return runs
 
 
-def network_runs(instances):
-    """PREDICTION.md 4: the network runs of the eligible instances (measured, eligible, gate_K0), in seed order."""
+def network_runs(instances, rounds=(1, 2, 3)):
+    """PREDICTION.md 4: the network runs of the eligible instances (measured, eligible, gate_K0), in seed order. rounds:
+    the noisy rounds of the stage set, 1 to 3 for the campaign, round 1 only for the rehearsal's RN (PREDICTION.md 7)."""
     elig = [x for x in sorted(instances, key=lambda x: x["seed"]) if x.get("measured") and x.get("eligible") and x.get("gate_K0")]
     runs = []
     for i, x in enumerate(elig):
@@ -104,7 +112,8 @@ def network_runs(instances):
         runs.append(dict(id=f"{x['seed']}-quiet", seed=x["seed"], needs=n, scenario="quiet", control="skew", noise="none", round=0))
         if i == 0:
             runs.append(dict(id=f"{x['seed']}-untrained", seed=x["seed"], needs=n, scenario="untrained", control="untrained", noise="none", round=0))
-    for k in (1, 2, 3):
+    assert tuple(rounds) in ((1, 2, 3), (1,)), f"refused: rounds {rounds} are neither the campaign's nor the rehearsal's"
+    for k in rounds:
         for x in elig:
             n = list(plan.calendar_needs([x["needs"][j] for j in ("a", "b", "c1", "c2")]))
             runs.append(dict(id=f"{x['seed']}-n{k}", seed=x["seed"], needs=n, scenario=f"n{k}", control=None, noise="injected", round=k,
@@ -112,7 +121,7 @@ def network_runs(instances):
     return runs
 
 
-def predictions(stage_dirs, out_dir, check=True, seeds=c6.SEEDS, machine_of=c6.MACHINE_OF, batch_dir=None):
+def predictions(stage_dirs, out_dir, check=True, seeds=c6.SEEDS, machine_of=c6.MACHINE_OF, batch_dir=None, rounds=(1, 2, 3)):
     """PREDICTED.json (as a dict) from the collected stage folders; the Lean files and check logs go to out_dir.
     batch_dir: a folder already laid out as the batch's code reads it (the rehearsal's RN, on the batch's merged
     evidence, a d9e431b and b 88a34de, for seeds 7701 and 7706), used instead of laying out stage_dirs."""
@@ -124,7 +133,13 @@ def predictions(stage_dirs, out_dir, check=True, seeds=c6.SEEDS, machine_of=c6.M
             xs = predict_batch(batch_dir or bd, out_dir, seeds, machine_of, check)
     xs = json.loads(json.dumps(xs, default=str))
     return dict(what="the predictions of campaign 6 (PREDICTION.md), written by predicted6.py; no network run exists when this file is written",
-                protocol=c6.PROTOCOL_COMMIT, constants={k: c4.DECISION5[k] for k in c4.DECISION5}, instances=xs, network_runs=network_runs(xs))
+                protocol=c6.PROTOCOL_COMMIT, constants={k: c4.DECISION5[k] for k in c4.DECISION5}, instances=xs, network_runs=network_runs(xs, rounds))
+
+
+def rehearsal(out_dir, batch_dir, check=True):
+    """RN's prediction record (the audit of 2026-11-19, C1): 7701 and 7706 on the batch's merged evidence, round 1 only."""
+    return predictions([], out_dir, check, seeds=tuple(c6.REHEARSAL_SEEDS), machine_of=dict(c6.REHEARSAL_SEEDS),
+                       batch_dir=Path(batch_dir), rounds=(1,))
 
 
 def text(p):
@@ -135,6 +150,12 @@ def main(argv=None):
     a = sys.argv[1:] if argv is None else argv
     c6.require_debug()
     print(c4.require_pinned())
+    if a[0] == "--rehearsal":
+        out = Path(a[1])
+        p = rehearsal(out, a[2])
+        (out / "PREDICTED_RN.json").write_text(text(p))
+        print(json.dumps(dict(eligible=[r["seed"] for r in p["network_runs"] if r["scenario"] == "quiet"], network_runs=len(p["network_runs"]))))
+        return
     out = Path(a[0])
     p = predictions(a[1:], out)
     (out / "PREDICTED.json").write_text(text(p))

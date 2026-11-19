@@ -26,7 +26,9 @@ from fractions import Fraction as F
 import json
 import math
 from pathlib import Path
+import re
 import sys
+import time
 
 HERE = Path(__file__).resolve().parent
 BATCH = HERE.parent / "batch"
@@ -55,6 +57,10 @@ CAMPAIGN_STAGES = ("M1", "M2", "M3", "Q", "N1", "N2", "N3", "N")
 MEASURE_REHEARSAL = ("RM1", "RM2", "RM3")
 NETWORK_REHEARSAL = ("RN",)
 STAGES = CAMPAIGN_STAGES + MEASURE_REHEARSAL + NETWORK_REHEARSAL
+# An attempt of the stages (the audit of 2026-11-19, finding 2): its id is written in each stage file, so each attempt's
+# stage files, and so the kit's claim refs (keyed by the protocol's SHA-256), are its own; its files are under
+# stages/<attempt>/.
+ATTEMPT_RE = r"[a-z0-9][a-z0-9-]{0,31}"
 
 # The batch's mean wall time of each measure kind (BATCH_REPORT.md 1; REPORT.json on the analysis branch, 0bd3b60)
 MEASURE_S = {"cal-on": F("33735174979/41943040"), "cal-off": F("12176667341/18874368"), "pair": F("12451002557/25165824"),
@@ -76,12 +82,28 @@ def noise_seed(seed, n):
     return 10 * seed + n
 
 
+def read_state(state, tries=50, wait_s=0.1):
+    """The kit's STATE.json, read tolerantly: the kit rewrites it in place (launch.py Shard.save, write_bytes) at
+    every run's start and end while other runs read it, so a read can see an empty or partial file. Retries only on an
+    empty or unparsable file, for up to tries * wait_s, then refuses; a missing file is not retried (its callers answer
+    False or None at once, outside the kit and in the tests) (the audit of 2026-11-19, finding 3)."""
+    for _ in range(tries):
+        text = Path(state).read_text()                     # FileNotFoundError propagates: never retried
+        try:
+            if text.strip():
+                return json.loads(text)
+        except json.JSONDecodeError:
+            pass
+        time.sleep(wait_s)
+    raise AssertionError(f"refused: the kit's state file {state} stayed unreadable for {tries * wait_s:.0f} s")
+
+
 def inside_kit(out):
     """The run's folder is a run the kit started (the kit's STATE.json of the folder above), as run4.inside_kit."""
     state = Path(out).parent / "STATE.json"
     if not state.exists():
         return False
-    s = json.loads(state.read_text())
+    s = read_state(state)
     return s.get("status") == "running" and any(r.get("id") == Path(out).name and r.get("status") == "started" for r in s.get("records", []))
 
 
@@ -106,7 +128,7 @@ def running_machine(out):
     state = Path(out).parent / "STATE.json" if out is not None else None
     if state is None or not state.exists():
         return None
-    return json.loads(state.read_text()).get("machine")
+    return read_state(state).get("machine")
 
 
 def stage_check(stage_file):
@@ -120,7 +142,9 @@ def stage_check(stage_file):
     assert gov["path"] == PROTOCOL and gov["sha256"] == PROTOCOL_SHA256, f"refused (safeguard i): stage {st['stage']} does not name PREDICTION.md as pushed"
     got = hashlib.sha256((HERE.parent.parent.parent / PROTOCOL).read_bytes()).hexdigest()
     assert got == PROTOCOL_SHA256, f"refused (safeguard i): PREDICTION.md has SHA-256 {got} in the repository, not {PROTOCOL_SHA256}"
-    out = dict(stage=st["stage"], governing_protocol=gov)
+    assert isinstance(st.get("attempt"), str) and re.fullmatch(ATTEMPT_RE, st["attempt"]), \
+        f"refused: stage {st['stage']} has no valid attempt id ({st.get('attempt')!r})"
+    out = dict(stage=st["stage"], attempt=st["attempt"], governing_protocol=gov)
     if st["stage"] in AMENDED_STAGES:
         am = st.get("governing_amendment") or {}
         assert am.get("path") == AMENDMENT and am.get("sha256") == AMENDMENT_SHA256, \

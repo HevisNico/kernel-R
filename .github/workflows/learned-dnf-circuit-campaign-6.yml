@@ -43,6 +43,10 @@ jobs:
           "$RUNNER_TEMP/python/bin/python" -B -c 'import c4; print(c4.require_pinned())'
       - name: Campaign 6's code against its PREDICTION.md (the guards, the copies, the stages and their costs, the two-shard rule, the adapter), without simulation
         run: cd research/learned-dnf-circuit-campaign-6/campaign6 && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_campaign6
+      - name: The marker check (tools/, outside the frozen set) against its tests, on local commits only
+        run: |
+          git config --global user.name ci && git config --global user.email ci@invalid
+          cd research/learned-dnf-circuit-campaign-6/tools && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_marker_check test_diskcheck
       - name: The batch's code (unchanged) and its two guards
         run: cd research/learned-dnf-circuit-campaign-6/batch && "$RUNNER_TEMP/python/bin/python" -B -m unittest -v test_batch test_guard test_report_guard
       - name: Campaign 5's frozen code, which campaign 6 imports, against its own tests
