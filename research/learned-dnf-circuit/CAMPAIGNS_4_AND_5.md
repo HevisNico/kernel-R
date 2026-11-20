@@ -3,6 +3,9 @@
 **Neither campaign tested its claim.** This page says what they tried, why each one stopped, and where their full
 records are. Both are kept on their own branches, as an archive. They are not merged here.
 
+**Since then, campaign 6 tested the claim** (2026-11-20). Its primary claim is established on 4 of 4 eligible
+instances; see "What came next" below and [its report](../learned-dnf-circuit-campaign-6/REPORT.md).
+
 ## What they tried
 
 Three transistor-level cells (SKY130, simulated with ngspice), each with its own random manufacturing mismatch, are
@@ -31,10 +34,20 @@ limit). But the rehearsal showed a deeper problem:
 
 The campaign would most likely have ended "not established". It was closed before any campaign cell was simulated.
 
-## What comes next
+## What came next: campaign 6
 
-A sixth campaign, if any, starts from a short design note in plain language, reviewed before any rule is written. It
-is to start from what worked: campaign 3's threshold scan, which handled mismatch, the launch kit and the Lean gate.
+This page first said that a sixth campaign, if any, would start from a short design note in plain language, reviewed
+before any rule was written, and from what worked: campaign 3's threshold scan, which handled mismatch, the launch kit
+and the Lean gate. Campaign 6 did that.
+
+- Five new instances were measured, and four were eligible.
+- **Without noise**, the primary claim is established on 4 of 4: every training letter and all 16 answers as predicted.
+- **Under noise**, the claims per training port are established. The claims per output are not: two cells held on one
+  instance each, where the rule asks for two, and the output cell had no room on any instance.
+- All 62 runs completed, and none was repeated.
+
+[Report](../learned-dnf-circuit-campaign-6/REPORT.md) ·
+[preregistration](../learned-dnf-circuit-campaign-6/PREDICTION.md)
 
 ## The records
 
