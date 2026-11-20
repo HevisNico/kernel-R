@@ -26,6 +26,14 @@ Each note says what it did not check, and marks what is known, what is inferred 
 | [`dev/test_dosedev.py`](dev/test_dosedev.py) | Its tests. No simulation | `2f051c8b35cda8eed9915d7ce881140bb808ed68cef7e85ba16ec329047d24ff` |
 | [`smokes/none-1x-cal-on/`](smokes/none-1x-cal-on/record.json) | The calibration deck at the unchanged dose: the run's record and its doses | `record.json` `b049cd09…f5ab`, `DOSES.json` `3fb64b46…4eee` |
 | [`smokes/none-2x-cal-on/`](smokes/none-2x-cal-on/record.json) | The same deck at twice the dose (`vhi = 0.7`) | `record.json` `793423f0…b8fb`, `DOSES.json` `ce3d32a5…4d37` |
+| [`DOSE_REPORT.md`](DOSE_REPORT.md) | The dose experiment on the nominal cell, steps A to D of the plan: what was run, the plan's seven tests, the noise at each dose, and five analyses made after the verdict | `6a2468b57ad562f06f3a891d1884fac2ce1cbc0d46f1d3987c4dd720d83923b8` |
+| [`dev/dosedev2.py`](dev/dosedev2.py), [`dev/test_dosedev2.py`](dev/test_dosedev2.py) | The wrapper for scans and network runs at a changed window, and its 13 tests (no simulation) | `b0999ebe…ce58`, `fd39b404…1686` |
+| [`dev/step_b.py`](dev/step_b.py) | The list of step B's runs (the 2x measures) | `0356028c…3be5` |
+| [`dev/NOISE_SEEDS_DEV.txt`](dev/NOISE_SEEDS_DEV.txt) | The 16 development noise seeds, declared before any noisy run | `b33b281d…2967` |
+| [`dev/g4.py`](dev/g4.py), [`dev/g5.py`](dev/g5.py), [`dev/g6.py`](dev/g6.py) | The readers of the plan's tests G4, G5 and G6. `g6.py` was fixed before the noisy runs | `772475d1…6752`, `6d144868…6a74a`, `bd0a38b0…67cb` |
+| [`dev/post_d.py`](dev/post_d.py), [`dev/post_d_a5.py`](dev/post_d_a5.py) | The analyses made after the verdict (sections 5.1 to 5.5 of the report) | `dc38aadf…477a`, `fece0fac…f25f` |
+| [`dev/analysis/`](dev/SHA256SUMS_DOSE) | The readers' outputs: every figure of the report comes from them | listed in `dev/SHA256SUMS_DOSE` |
+| `dev/runs2x/`, `dev/runsC/`, `dev/runsD/` | The record of each of the 31 runs of steps B to D, and the lists of runs as they were started | listed in `dev/SHA256SUMS_DOSE` |
 
 ## The results so far, in a few lines
 
@@ -38,6 +46,12 @@ Each note says what it did not check, and marks what is known, what is inferred 
   rehearsal, string for string. At twice the dose, the dose is 2.0065 times larger and as constant as before, the
   write keeps 0.6 time unit of margin after the latest FIRE, and each need falls from 4 to 2. A calibration deck
   cannot show a read that both fires and writes; that check needs a network run.
+
+- **The dose experiment.** At twice the dose the measures are clean and the network learns, without noise and in 8
+  noisy runs of 8. The plan's test of the noise says "unclear": by campaign 3's definition the scatter within a run
+  is 47 % larger in mV at twice the dose; counted in steps the noise is smaller by every reading. Under campaign 6's
+  frozen budget, cell c has no room on the nominal cell at either dose. The report says what was computed after
+  the verdict, and labels it so.
 
 None of this is established. It says where to look next.
 
@@ -85,10 +99,36 @@ put back, is the local file byte for byte.
   `reads/`, its `analyze` and `constants` steps give `AUDIT.json`, `PER_READ.json`, `CONSTANTS_AS_CAMPAIGN_3.json`
   and the printed output byte for byte.
 
+## The dose experiment's files
+
+`dev/` on this branch is the folder the experiment ran in: the scripts, the lists of runs (`JOBS_*.json`), the
+readers' configurations and outputs (`analysis/`), and one folder per run with its `record.json`.
+
+**Ten of the 95 files differ from the ones the experiment wrote**, in the paths they hold: the four `JOBS` files,
+the four `STATE.json` and the two configurations recorded full paths on the machine that ran them. Here each path is
+written from this folder: `dev/...` for the experiment's folder, `ev_r3/...` for the evidence of campaign 6's
+rehearsal r3 (on its own evidence branches, not here), and `REPO` for the checkout of the frozen code. Nothing
+else differs.
+
+- `dev/SHA256SUMS_DOSE` lists the 95 files as they are on this branch.
+- `dev/SHA256SUMS_DOSE_as_computed` lists them as the experiment wrote them. The report's SHA-256 of
+  `JOBS_D.json` (`96a1fdf6…b8eb9`) is from that list; on this branch the file is `a17c991e…`. The other 85 files
+  have the same SHA-256 in both lists.
+- `dev/runs/none-1x-cal-on` and `dev/runs/none-2x-cal-on`, named in the two configurations, are the two decks
+  published under `smokes/`.
+- The records keep the path of the pinned interpreter and of the device library, as campaign 6's own records do.
+
+To run the tests of the wrapper (no simulation):
+
+```sh
+python -B dev/test_dosedev2.py REPO
+```
+
 ## What is not on this branch
 
 - **The waveforms of the two decks**, about 63 MB each. Their SHA-256 are in each `record.json`. They are meant for
   an evidence branch, `evidence/learned-dnf-circuit-campaign-6-followup`.
 - The evidence of campaign 6 that the audit read: it is on campaign 6's own evidence branches, named in section 2
   and section 5.4 of `NOISE_AUDIT.md`.
-- The rest of the dose experiment of `DOSE_PLAN.md`: its measures and its network runs are not here yet.
+- **The waveforms and logs of the 31 runs of steps B to D**, about 2.4 GB. Their SHA-256 are in each
+  `record.json`. They are meant for the evidence branch.
