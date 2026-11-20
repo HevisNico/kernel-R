@@ -10,7 +10,8 @@ namespace KernelR.Circuit
 open MeasureTheory Set
 
 /-- The response is affine in the pair (initial state, current): the difference of
-two responses with the same leak is the response to the differences. -/
+two responses with the same leak is the response to the differences. It is kept for
+the later composition step; the two theorems of this file do not use it. -/
 theorem leakyResponse_sub {a t initial referenceInitial : ℝ} {current reference : ℝ → ℝ}
     (currentInt : IntervalIntegrable current volume 0 t)
     (referenceInt : IntervalIntegrable reference volume 0 t) :

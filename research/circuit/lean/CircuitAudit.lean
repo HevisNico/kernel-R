@@ -1,6 +1,7 @@
 import CircuitTiming
 import CircuitNeed
 import CircuitInverter
+import CircuitInverterExamples
 import Training.WideDoseRead
 import Lean.Util.CollectAxioms
 
@@ -9,7 +10,7 @@ run_cmd do
   let env ← getEnv
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
   let roots := #[`CircuitBridge, `CircuitRobustness, `CircuitTiming, `CircuitNeed, `CircuitInverter,
-    `Search.VariableNeedTolerance, `Training.WideDoseRead]
+    `CircuitInverterExamples, `Search.VariableNeedTolerance, `Training.WideDoseRead]
   let mut checked : Nat := 0
   let mut theorems : Nat := 0
   let mut modules : Nat := 0
@@ -67,3 +68,5 @@ run_cmd do
 #print axioms KernelR.Circuit.leakyResponse_sub
 #print axioms KernelR.Circuit.inhibited_silence
 #print axioms KernelR.Circuit.uninhibited_first_crossing
+#print axioms KernelR.Circuit.inhibited_silence_witness
+#print axioms KernelR.Circuit.help_alone_exceeds_level

@@ -208,7 +208,19 @@ off-current budget added to the help budget, `current_error_first_crossing`
 gives a first contact between the early date and the deadline. The silence
 theorem does not need the help to be off before `tau` or the inhibitory input
 to be gated; the two margins carry the whole condition. `leakyResponse_sub`
-states the linearity of the response used in the proof.
+states the linearity of the response. It is kept for the later composition
+step; the two theorems here do not use it.
+
+`CircuitInverterExamples.lean` gives a witness with a positive leak and
+nonzero budgets: `a = 1/10`, `D = 5`, help `2`, inhibitory current `20`,
+no wrong-sign current, threshold `3`, `tau = 1`, `Q = 20`, and every budget
+`1/100`. `inhibited_silence_witness` discharges every hypothesis of
+`inhibited_silence`, so the hypotheses are consistent and the theorem is not
+vacuous. `help_alone_exceeds_level` shows that the same help, without
+inhibition, puts the reference above the threshold plus every budget at
+`t = 5`, so the silence is due to the inhibitory charge. These are numbers
+in the scalar model only. They are not circuit values and say nothing about
+whether a netlist meets the hypotheses.
 
 The negative control that removes `exp(-a*D)` from the margin shows that the
 proof fails without the factor. It does not show that the weakened statement
@@ -295,7 +307,8 @@ and accumulation of local errors. `calibrated_gain`, `kernel_dose_projection`,
 or calibration arithmetic, not four additional scientific contributions.
 
 `CircuitAudit.lean` covers the five circuit modules (`CircuitBridge`,
-`CircuitRobustness`, `CircuitTiming`, `CircuitNeed`, `CircuitInverter`) and the two new native
+`CircuitRobustness`, `CircuitTiming`, `CircuitNeed`, `CircuitInverter`), the
+witness module `CircuitInverterExamples`, and the two new native
 modules (`Search.VariableNeedTolerance`, `Training.WideDoseRead`). It checks
 every declaration, including generated auxiliaries, and rejects dependencies
 on axioms other than `propext`, `Classical.choice` and `Quot.sound`. Declaration
