@@ -49,7 +49,7 @@ function; the experiment tests one. There is no chip.
 | A cell trained by identical pulses stops learning by itself, each silent read adding one fixed dose | Lean |
 | In a network where every read has room, every run makes finitely many writes, no memory saturates, the final memory does not depend on the order of the pulses, and it freezes even when pulses never stop | Lean |
 | For three classes of ring networks, for every number of cells N ≥ 2, the native model follows the guarded model exactly and ends in the predicted memory | Lean |
-| A two-layer network of cells trained by its own pulses can express every monotone Boolean function, and only those; for any number of cells and inputs, a run whose records satisfy three checkable premises has trained as predicted and answers every input pattern as predicted; the same holds for layered networks of any depth | Lean |
+| A two-layer network of cells trained by its own pulses can express every monotone Boolean function, and only those; for any number of cells and inputs, a run whose records satisfy three checkable premises has trained as predicted and answers every input pattern as predicted; the same holds for layered networks of any depth; with each input also given as its complement on a second line, every Boolean function | Lean |
 | Final memory of every port computed before the run from per-cell measures: 52 of 52 ports exact without noise, over three campaigns and two kinds of network | simulation, preregistered |
 | Under the simulator's noise, on twelve new instances: 21 of 21 learned states and 11 of 11 exact words | simulation, preregistered |
 | A network of three cells, trained only by its own pulses, learns `(A and B) or (C and D)`: its training and its answers to all 16 input patterns, computed before the run from per-cell measures, held on 4 of 4 eligible instances (campaign 6) | simulation, preregistered |
@@ -113,6 +113,14 @@ input on never turns its answer from true to false.
   [`layered_monotone_recognition_one_sided`](research/learned-coincidence/LayeredMonotoneRecognition.lean) ·
   [`layered_monotone_characterization`](research/learned-coincidence/LayeredMonotoneCharacterization.lean) ·
   [checkers](research/learned-coincidence/LayeredMonotoneCheckerProofs.lean)
+- **Negation by two rails.** These networks have no negation. With each input
+  given on two lines, the input and its complement, every Boolean function is
+  the predicted answer of such a network, with no change to the cell. On two
+  rails, the exclusive OR of two inputs is the function campaign 6's circuit
+  learned, `(A and B) or (C and D)`, read with `A = p`, `B = not q`,
+  `C = not p`, `D = q`; campaign 6 did not test it as an exclusive OR.
+  [`every_function_on_two_rails`](research/learned-coincidence/TwoRails.lean) ·
+  [note](research/learned-coincidence/TWO_RAILS.md)
 
 These theorems are about records that satisfy their premises. They do not
 say that a physical or simulated cell satisfies them; an experiment tests
@@ -213,7 +221,9 @@ the function. Then the network is simulated.
 - **What is learned.** In campaigns 1 to 3, how many doses each port needs
   before it fires. In campaign 6, one Boolean function of four inputs, on
   three cells. The theory covers every monotone function, under its
-  premises; the experiment covers this one function, and no simulation has
+  premises, and every Boolean function when something outside the network
+  supplies each input with its complement; the network makes no complement
+  itself. The experiment covers this one function, and no simulation has
   tested another function or a larger network.
 - **Selected instances.** Every claim is about eligible instances, selected
   by per-cell measures before any network run.

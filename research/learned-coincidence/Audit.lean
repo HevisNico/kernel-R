@@ -1,5 +1,6 @@
 import Recognition
 import MonotoneCharacterization
+import TwoRails
 import MonotonePremiseCompleteness
 import MonotonePremiseExamples
 import LayeredMonotoneCheckerExamples
@@ -10,7 +11,7 @@ run_cmd do
   let env ← getEnv
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
   let modules := #[`Target, `Recognition, `TwoLayerTarget, `MonotoneTarget, `MonotoneSupport,
-    `MonotoneRecognition, `MonotoneCharacterization,
+    `MonotoneRecognition, `MonotoneCharacterization, `TwoRailsTarget, `TwoRails,
     `MonotoneOneSidedTarget, `MonotoneOneSidedRecognition,
     `MonotonePremiseTargets, `MonotonePremiseCompletenessTargets, `MonotonePremiseSoundness,
     `MonotonePremiseCompleteness, `MonotonePremiseExamples,
@@ -26,6 +27,7 @@ run_cmd do
   let required := #[
     (``LearnedCoincidence.learned_coincidence_recognition, ``LearnedCoincidence.LearnedCoincidenceRecognition),
     (``LearnedCoincidence.MonotoneDNF.monotone_characterization, ``LearnedCoincidence.MonotoneDNF.MonotoneCharacterization),
+    (``LearnedCoincidence.MonotoneDNF.every_function_on_two_rails, ``LearnedCoincidence.MonotoneDNF.EveryFunctionOnTwoRails),
     (``LearnedCoincidence.MonotoneDNF.two_layer_monotone_recognition, ``LearnedCoincidence.MonotoneDNF.TwoLayerMonotoneRecognition),
     (``LearnedCoincidence.MonotoneDNF.two_layer_monotone_recognition_one_sided,
       ``LearnedCoincidence.MonotoneDNF.TwoLayerMonotoneRecognitionOneSided),
