@@ -19,7 +19,8 @@ before the network was run; the networks then learned exactly that memory,
 52 ports out of 52. In a further preregistered experiment, a network of
 three such cells learned a Boolean function, `(A and B) or (C and D)`, and
 answered all 16 input patterns as predicted, on 4 of 4 eligible instances.
-There is no chip.
+The Lean theory behind that experiment covers every monotone Boolean
+function; the experiment tests one. There is no chip.
 
 ## Words used here
 
@@ -48,6 +49,7 @@ There is no chip.
 | A cell trained by identical pulses stops learning by itself, each silent read adding one fixed dose | Lean |
 | In a network where every read has room, every run makes finitely many writes, no memory saturates, the final memory does not depend on the order of the pulses, and it freezes even when pulses never stop | Lean |
 | For three classes of ring networks, for every number of cells N ≥ 2, the native model follows the guarded model exactly and ends in the predicted memory | Lean |
+| A two-layer network of cells trained by its own pulses can express every monotone Boolean function, and only those; for any number of cells and inputs, a run whose records satisfy three checkable premises has trained as predicted and answers every input pattern as predicted; the same holds for layered networks of any depth | Lean |
 | Final memory of every port computed before the run from per-cell measures: 52 of 52 ports exact without noise, over three campaigns and two kinds of network | simulation, preregistered |
 | Under the simulator's noise, on twelve new instances: 21 of 21 learned states and 11 of 11 exact words | simulation, preregistered |
 | A network of three cells, trained only by its own pulses, learns `(A and B) or (C and D)`: its training and its answers to all 16 input patterns, computed before the run from per-cell measures, held on 4 of 4 eligible instances (campaign 6) | simulation, preregistered |
@@ -88,6 +90,33 @@ other complete execution ends in the same state.
 | multi-token ring | several pulses in flight, repeated training, pulses admitted while a cell recovers | [`native_multi_token_refinement`](research/native-multitoken/NativeExternalRows.lean) |
 
 Each condition of each class is rejected by a checked counterexample.
+
+**Networks that compute a function** (guarded model, added after v1.0.0).
+A two-layer network is given by its parameters: each first-layer cell learns
+a conjunction of inputs, and each output cell learns a disjunction of
+first-layer lines. A Boolean function is **monotone** when switching an
+input on never turns its answer from true to false.
+
+- For any number of first-layer cells, output cells and inputs, and any
+  parameters that pass a check: if the records of a run also show training
+  slots separated in time and calibrated reads, then every port stopped
+  training as predicted and every output answers every input pattern as the
+  parameters predict.
+  [`two_layer_monotone_recognition_one_sided`](research/learned-coincidence/MonotoneOneSidedRecognition.lean)
+- The functions these networks express are exactly the monotone ones.
+  [`monotone_characterization`](research/learned-coincidence/MonotoneCharacterization.lean)
+- Each of the three premises is decided on finite records by a checker,
+  proved [sound](research/learned-coincidence/MonotonePremiseSoundness.lean)
+  and [complete](research/learned-coincidence/MonotonePremiseCompleteness.lean).
+- Both results hold for layered networks of any depth, built from two-port
+  cells, with four checkers.
+  [`layered_monotone_recognition_one_sided`](research/learned-coincidence/LayeredMonotoneRecognition.lean) ·
+  [`layered_monotone_characterization`](research/learned-coincidence/LayeredMonotoneCharacterization.lean) ·
+  [checkers](research/learned-coincidence/LayeredMonotoneCheckerProofs.lean)
+
+These theorems are about records that satisfy their premises. They do not
+say that a physical or simulated cell satisfies them; an experiment tests
+that, and campaign 6 below is the first, on one function.
 
 ## 3. Predicted before the run (simulation, preregistered)
 
@@ -139,6 +168,9 @@ the function. Then the network is simulated.
 | Runs | 62 of 62 complete; none lost, none repeated |
 
 - [Report](research/learned-dnf-circuit-campaign-6/REPORT.md) · [preregistration](research/learned-dnf-circuit-campaign-6/PREDICTION.md)
+- The Lean proof is not specific to this function. It is the general
+  theorem of section 2, applied at two first-layer cells, one output cell
+  and four inputs.
 - The Lean proof certifies the prediction, and the simulation tests what the
   prediction announces. A descriptive check of the theorem's premises on the
   measured runs is true for two of its three checkers and false for the
@@ -180,7 +212,9 @@ the function. Then the network is simulated.
   its calibration premise as measured.
 - **What is learned.** In campaigns 1 to 3, how many doses each port needs
   before it fires. In campaign 6, one Boolean function of four inputs, on
-  three cells; nothing is claimed for other functions or larger networks.
+  three cells. The theory covers every monotone function, under its
+  premises; the experiment covers this one function, and no simulation has
+  tested another function or a larger network.
 - **Selected instances.** Every claim is about eligible instances, selected
   by per-cell measures before any network run.
 - Two or three cells per simulated network, 27 °C, typical corner, ideal
@@ -202,6 +236,10 @@ bash research/network-stability/check.sh
 bash research/native-multitoken/check.sh
 ```
 
+```sh
+bash research/learned-coincidence/check.sh
+```
+
 Every audit allows only `propext`, `Classical.choice` and `Quot.sound` and
 fails on admitted proofs. Each campaign folder holds its `PREDICTION.md`, its
 frozen code, its evidence, its generated `REPORT.md` and the commands that
@@ -217,7 +255,7 @@ branches its report names.
 | [v0.4.0](docs/RELEASE_V0_4_0.md) | training that stops by itself, networks of trained cells, searches |
 | [v0.5.0](docs/RELEASE_V0_5_0.md) | a simulated circuit certified port by port; a verifiable supervisor |
 | [v1.0.0](https://github.com/HevisNico/kernel-R/releases/tag/v1.0.0) | closed-loop networks proved for every N; their memory predicted before the run in three preregistered campaigns |
-| [v1.1.0](https://github.com/HevisNico/kernel-R/releases/tag/v1.1.0) | a network of three cells that learns a Boolean function, predicted before the run (campaign 6) |
+| [v1.1.0](https://github.com/HevisNico/kernel-R/releases/tag/v1.1.0) | networks that compute any monotone Boolean function, proved under checkable premises; a network of three cells that learns one such function, predicted before the run (campaign 6) |
 
 All versions: [releases](docs/RELEASES.md). Folders: [`research/`](research/README.md),
 [`proof/lean/`](proof/lean/README.md), [`model/`](model/README.md), [`docs/`](docs/RELEASES.md).
