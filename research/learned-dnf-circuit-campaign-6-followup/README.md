@@ -34,6 +34,10 @@ Each note says what it did not check, and marks what is known, what is inferred 
 | [`dev/post_d.py`](dev/post_d.py), [`dev/post_d_a5.py`](dev/post_d_a5.py) | The analyses made after the verdict (sections 5.1 to 5.5 of the report) | `dc38aadf…477a`, `fece0fac…f25f` |
 | [`dev/analysis/`](dev/SHA256SUMS_DOSE) | The readers' outputs: every figure of the report comes from them | listed in `dev/SHA256SUMS_DOSE` |
 | `dev/runs2x/`, `dev/runsC/`, `dev/runsD/` | The record of each of the 31 runs of steps B to D, and the lists of runs as they were started | listed in `dev/SHA256SUMS_DOSE` |
+| [`DOSE_ADDENDUM.md`](DOSE_ADDENDUM.md) | An addendum to the dose report, on three questions it left open: the Lean gate with a one-port testing budget for cell c, the solver's tolerance, and why the scatter grows on the lines of c | `311e2217301ee5a8c563e5bd831a7491320c254f7e3b03375b4c80c72d39bd6f` |
+| [`dev/t1_gate.py`](dev/t1_gate.py), [`dev/gate/`](dev/gate/GATE_INPUT.json) | Writes campaign 6's gate file for the nominal cell with the frozen generator, as frozen and with the one-port budget; the four Lean files, what `check.sh` printed, and a diagnostic of each checker | listed in `dev/SHA256SUMS_ADDENDUM` |
+| [`dev/dosedev_tol.py`](dev/dosedev_tol.py), [`dev/test_dosedev_tol.py`](dev/test_dosedev_tol.py), `dev/runsT2/` | One scan with the solver's relative tolerance rewritten, its 13 tests (no simulation), and the record of the three scans at `reltol = 1e-5` | listed in `dev/SHA256SUMS_ADDENDUM` |
+| [`dev/t3_lines.py`](dev/t3_lines.py), `dev/analysis/T3_LINES.json` | The FIRE reads of the lines of c in the 16 noisy runs, read by read, against the quiet runs | listed in `dev/SHA256SUMS_ADDENDUM` |
 
 ## The results so far, in a few lines
 
@@ -52,6 +56,11 @@ Each note says what it did not check, and marks what is known, what is inferred 
   is 47 % larger in mV at twice the dose; counted in steps the noise is smaller by every reading. Under campaign 6's
   frozen budget, cell c has no room on the nominal cell at either dose. The report says what was computed after
   the verdict, and labels it so.
+
+- **The addendum.** Explored after the report: the Lean gate accepts a one-port testing budget for cell c on the
+  nominal cell, at both doses; the 0.03 mV difference between identical cells at twice the dose was the solver's
+  tolerance; and, read on the stored voltage itself, what a run adds (the run offset) is the same in mV on the
+  lines of c at both doses.
 
 None of this is established. It says where to look next.
 
@@ -124,6 +133,19 @@ To run the tests of the wrapper (no simulation):
 python -B dev/test_dosedev2.py REPO
 ```
 
+## The addendum's files
+
+They are in `dev/` with the others, 34 files listed in `dev/SHA256SUMS_ADDENDUM`.
+
+- **Four of them differ from the ones that were written**, in the paths they hold, by the same replacements as
+  above: `dev/JOBS_T2.json`, `dev/runsT2/STATE.json`, `dev/gate/diag.sh` and `dev/gate/run_checks.sh`.
+  `dev/SHA256SUMS_ADDENDUM_as_computed` lists the files as written; the addendum's SHA-256 of `JOBS_T2.json` and of
+  `diag.sh` are from that list.
+- The two shell scripts of `dev/gate/` name the folder where the pinned Lean was installed on the machine that ran
+  them; they are kept as a record of what was run, not as scripts to run elsewhere unchanged.
+- The gate files were checked with Lean 4.35.0, installed from the archive this repository's CI pins, and campaign
+  5's `check.sh` at the commit named in the dose report.
+
 ## What is not on this branch
 
 - **The waveforms of the two decks**, about 63 MB each. Their SHA-256 are in each `record.json`. They are meant for
@@ -131,4 +153,5 @@ python -B dev/test_dosedev2.py REPO
 - The evidence of campaign 6 that the audit read: it is on campaign 6's own evidence branches, named in section 2
   and section 5.4 of `NOISE_AUDIT.md`.
 - **The waveforms and logs of the 31 runs of steps B to D**, about 2.4 GB. Their SHA-256 are in each
-  `record.json`. They are meant for the evidence branch.
+  `record.json`. They are on the evidence branch, `evidence/learned-dnf-circuit-campaign-6-followup`.
+- The waveforms and logs of the three scans of the addendum, about 0.22 GB.
