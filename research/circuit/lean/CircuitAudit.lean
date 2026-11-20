@@ -1,5 +1,6 @@
 import CircuitTiming
 import CircuitNeed
+import CircuitInverter
 import Training.WideDoseRead
 import Lean.Util.CollectAxioms
 
@@ -7,7 +8,7 @@ open Lean Elab Command in
 run_cmd do
   let env ← getEnv
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
-  let roots := #[`CircuitBridge, `CircuitRobustness, `CircuitTiming, `CircuitNeed,
+  let roots := #[`CircuitBridge, `CircuitRobustness, `CircuitTiming, `CircuitNeed, `CircuitInverter,
     `Search.VariableNeedTolerance, `Training.WideDoseRead]
   let mut checked : Nat := 0
   let mut theorems : Nat := 0
@@ -62,3 +63,7 @@ run_cmd do
 #print axioms RecursiveLearning.Native.stopped_read_skew_two_thirds_wide
 
 #print axioms KernelR.Circuit.needAlong_of_circuit_tolerances
+
+#print axioms KernelR.Circuit.leakyResponse_sub
+#print axioms KernelR.Circuit.inhibited_silence
+#print axioms KernelR.Circuit.uninhibited_first_crossing

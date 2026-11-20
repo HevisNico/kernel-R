@@ -182,6 +182,43 @@ same-leak assumption is explicit; uncertainty in the leak rate needs a
 separate bound. No numerical value of `epsilon`, `delta` or `speed` for
 the transistor circuit is certified here.
 
+## An inverter cell: silence under inhibition
+
+`CircuitInverter.lean` adds a fixed, untrained cell to the scalar response
+model of `CircuitTiming.lean`. A help current drives the state toward
+threshold. An inhibitory current of the opposite sign, admitted from the
+cell's single input, holds it below. Every contract is a hypothesis of the
+theorems:
+
+| Hypothesis | Statement |
+|---|---|
+| Response law | on the slot, `actual = leakyResponse a initial (help - inhibitory + wrongSign)`, and the reference is the help alone with the same leak `a >= 0` |
+| Rest | `abs(initial - referenceInitial) <= eps0` |
+| Help error | `integral_0^t abs(help - nominalHelp) <= etaH` on every prefix |
+| Inhibitory sign | `inhibitory >= 0`; a wrong-sign part `wrongSign >= 0` has total charge at most `etam` |
+| Inhibitory charge | at least `Q` arrives by `tau` |
+| Off-current | with the input absent, `integral abs(inhibitory) <= etaJ` up to the deadline |
+| Threshold | `abs(actualLevel - level) <= delta` |
+
+`inhibited_silence`: if `reference + (eps0 + etaH + etam) + delta < level`
+on `[0, tau]`, and `< level + exp(-a*D) * Q` on `[tau, D]`, the actual state
+stays below the actual threshold throughout `[0, D]`. The factor `exp(-a*D)`
+is the inhibitory charge lost to leak. `uninhibited_first_crossing`: with the
+off-current budget added to the help budget, `current_error_first_crossing`
+gives a first contact between the early date and the deadline. The silence
+theorem does not need the help to be off before `tau` or the inhibitory input
+to be gated; the two margins carry the whole condition. `leakyResponse_sub`
+states the linearity of the response used in the proof.
+
+The negative control that removes `exp(-a*D)` from the margin shows that the
+proof fails without the factor. It does not show that the weakened statement
+is false.
+
+Not proved: that any netlist satisfies these hypotheses (no inverter netlist
+exists and nothing was simulated), the link from the scalar contact to a
+comparator or latch event, a single emission per slot, the latency corollary,
+the abstract inverter, and its composition with the monotone cascades.
+
 ## Hypothesis status before instrumented replay
 
 The status after the replays, with the bound and the source of each
@@ -257,8 +294,8 @@ and accumulation of local errors. `calibrated_gain`, `kernel_dose_projection`,
 `common_offset_cancels` and `design_dose` are algebraic interface identities
 or calibration arithmetic, not four additional scientific contributions.
 
-`CircuitAudit.lean` covers the four circuit modules (`CircuitBridge`,
-`CircuitRobustness`, `CircuitTiming`, `CircuitNeed`) and the two new native
+`CircuitAudit.lean` covers the five circuit modules (`CircuitBridge`,
+`CircuitRobustness`, `CircuitTiming`, `CircuitNeed`, `CircuitInverter`) and the two new native
 modules (`Search.VariableNeedTolerance`, `Training.WideDoseRead`). It checks
 every declaration, including generated auxiliaries, and rejects dependencies
 on axioms other than `propext`, `Classical.choice` and `Quot.sound`. Declaration
@@ -272,8 +309,9 @@ admitted proof, a latency bound with the threshold-error term removed,
 a variable-dose budget without its accumulation factor, a cumulative budget
 without its term `B`, a circuit budget
 without sensor-dose uncertainty, a local calibration error that is not
-proportional to the whole step, and reuse of the
-old pair-window lower date at dose 0.06. They temporarily edit the relevant
+proportional to the whole step, reuse of the
+old pair-window lower date at dose 0.06, and an inhibitory margin without
+its leak factor. They temporarily edit the relevant
 Lean modules, restore them in a `finally` block and rebuild the original sources. Run them without concurrent edits or builds
 in the same checkout. CI runs the build, audit and these controls.
 
