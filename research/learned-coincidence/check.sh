@@ -5,7 +5,7 @@ build=$(mktemp -d)
 trap 'rm -rf "$build"' EXIT
 export LEAN_PATH="$build${LEAN_PATH:+:$LEAN_PATH}"
 for module in Target Recognition TwoLayerTarget MonotoneTarget MonotoneSupport \
-  MonotoneRecognition MonotoneCharacterization MonotoneOneSidedTarget \
+  MonotoneRecognition MonotoneCharacterization TwoRailsTarget TwoRails MonotoneOneSidedTarget \
   MonotoneOneSidedRecognition MonotonePremiseTargets MonotonePremiseCompletenessTargets \
   MonotonePremiseSoundness MonotonePremiseCompleteness MonotonePremiseExamples \
   LayeredMonotoneTarget LayeredMonotoneRecognition LayeredMonotoneCharacterization \
