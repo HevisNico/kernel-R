@@ -1,14 +1,15 @@
 import Inverters
+import InverterWitness
 import Lean.Util.CollectAxioms
 
-/-! Audit of the inverter modules: no project axiom, only `propext`,
+/-! Audit of the inverter modules and the witness: no project axiom, only `propext`,
 `Classical.choice` and `Quot.sound`, and the composition theorem has its exact type. -/
 
 open Lean Elab Command in
 run_cmd do
   let env ← getEnv
   let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
-  let modules := #[`InverterTarget, `Inverters]
+  let modules := #[`InverterTarget, `Inverters, `InverterWitness]
   let mut checked : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -27,4 +28,7 @@ run_cmd do
 #print axioms LearnedCoincidence.MonotoneDNF.front_end_window
 #print axioms LearnedCoincidence.MonotoneDNF.front_end_calibrated
 #print axioms LearnedCoincidence.MonotoneDNF.one_sided_recognition_at
+#print axioms LearnedCoincidence.MonotoneDNF.inverters_compute
 #print axioms LearnedCoincidence.MonotoneDNF.every_function_with_inverters
+#print axioms LearnedCoincidence.MonotoneDNF.InverterWitness.premises_hold
+#print axioms LearnedCoincidence.MonotoneDNF.InverterWitness.answers_not

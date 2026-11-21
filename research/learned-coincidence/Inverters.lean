@@ -153,6 +153,25 @@ theorem one_sided_recognition_at {p : Cascade A B M} (valid : p.Valid)
     rw [ite_eq_left active] at read
     exact firing_mask_fires' secondCheck i active read
 
+/-- For ANY admissible cascade on 2 M lines: read through the inverter front end,
+its decision at the input pattern `y` is its predicted answer on the rails of `y`.
+This is the composition for a given cascade; the existence of a cascade for each
+function comes from `every_function_on_two_rails`. -/
+theorem inverters_compute {p : Cascade A B (M + M)} (valid : p.Valid)
+    {t : InverterTiming} {firstTiming secondTiming : SlotTiming}
+    {o : Observations A B (M + M)} {scores : Pattern (M + M) → Fin B → Pattern A → Int}
+    (windowFits : t.window ≤ firstTiming.skew) (spreadFits : t.emitLate - t.emitEarly ≤ firstTiming.skew)
+    (training : CascadeTrainingCalibration p firstTiming secondTiming o)
+    {y : Pattern M} {start : Rat} {external : Fin M → Option Rat} {inv : Fin M → ReadObservation 1}
+    (realised : ∀ j, (external j).isSome = y j)
+    (front : InverterFrontRead p t firstTiming o y start external inv)
+    (second : ∀ k, SecondTestRead p secondTiming o scores (rails y) k) :
+    ∀ i, (o.secondTest (rails y) i).fired = output p i (rails y) := by
+  have firstReads : ∀ a, CalibratedAdditiveRead p.first a (settledCount p.first o.firstTrain a)
+      (rails y) (p.first.testingError a) firstTiming (o.firstTest (rails y) a) := fun a =>
+    front_end_calibrated realised (front a).1 (front a).2 windowFits spreadFits
+  exact one_sided_recognition_at valid training firstReads second
+
 /-- Inverters in front of an admissible cascade compute every Boolean function. -/
 theorem every_function_with_inverters : EveryFunctionWithInverters := by
   intro M f
@@ -160,9 +179,6 @@ theorem every_function_with_inverters : EveryFunctionWithInverters := by
   refine ⟨A, B, p, i, valid, ?_⟩
   intro t firstTiming secondTiming o scores windowFits spreadFits training y start external inv
     realised front second
-  have firstReads : ∀ a, CalibratedAdditiveRead p.first a (settledCount p.first o.firstTrain a)
-      (rails y) (p.first.testingError a) firstTiming (o.firstTest (rails y) a) := fun a =>
-    front_end_calibrated realised (front a).1 (front a).2 windowFits spreadFits
-  rw [one_sided_recognition_at valid training firstReads second i, same y]
+  rw [inverters_compute valid windowFits spreadFits training realised front second i, same y]
 
 end LearnedCoincidence.MonotoneDNF

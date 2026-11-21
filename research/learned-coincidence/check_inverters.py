@@ -11,8 +11,9 @@ import os, shutil, subprocess, sys, tempfile
 ROOT = Path(__file__).resolve().parent
 BASE = ["Target", "Recognition", "TwoLayerTarget", "MonotoneTarget", "MonotoneSupport",
         "MonotoneRecognition", "MonotoneCharacterization", "TwoRailsTarget", "TwoRails",
-        "MonotoneOneSidedTarget", "MonotoneOneSidedRecognition"]
-NEW = ["InverterTarget", "Inverters"]
+        "MonotoneOneSidedTarget", "MonotoneOneSidedRecognition", "MonotonePremiseTargets",
+        "MonotonePremiseCompletenessTargets", "MonotonePremiseSoundness"]
+NEW = ["InverterTarget", "Inverters", "InverterWitness"]
 
 
 def lean(args, lean_path, cwd):
@@ -76,6 +77,10 @@ def main():
          mutate("InverterTarget", "read.start = start + t.emitEarly ∧", "read.start = start ∧"), "error"),
         ("a cell that fires on its input instead of on its absence", "InverterTarget",
          mutate("InverterTarget", "r.fired = !r.input 0", "r.fired = r.input 0"), "error"),
+        ("witness: an inverter pulse later than emitLate", "InverterWitness",
+         mutate("InverterWitness", "[60 + 5 / 8]", "[60 + 7 / 8]"), "error"),
+        ("witness: a cascade reading the direct rail, which cannot answer NOT", "InverterWitness",
+         mutate("InverterWitness", "target := fun _ => pattern [1]", "target := fun _ => pattern [0]"), "error"),
     ]
     for label, module, text, marker in controls:
         paths, work = sources_with(module, text)
