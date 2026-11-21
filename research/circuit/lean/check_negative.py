@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parent
 TIMING = ROOT / "CircuitTiming.lean"
 NEED = ROOT / "CircuitNeed.lean"
 ROBUST = ROOT / "CircuitRobustness.lean"
+INVERTER = ROOT / "CircuitInverter.lean"
 VARIABLE = ROOT.parents[1] / "recursive-learning/native/Search/VariableNeedTolerance.lean"
 WIDE = ROOT.parents[1] / "recursive-learning/native/Training/WideDoseRead.lean"
 
@@ -34,6 +35,10 @@ def main():
     if original.count(bound) != 2:
         raise RuntimeError("Update the latency mutation for the current theorem statements")
     originals = {p: p.read_text() for p in (TIMING, VARIABLE, WIDE, NEED, ROBUST)}
+    originals[INVERTER] = INVERTER.read_text()
+    inhibitory_margin = "< level + Real.exp (-a * D) * Q"
+    if originals[INVERTER].count(inhibitory_margin) != 1:
+        raise RuntimeError("Update the inhibitory-margin mutation for the current statement")
     local_bound = "≤ ε * |V t - V s| ∧"
     if originals[ROBUST].count(local_bound) != 1:
         raise RuntimeError("Update the local-calibration mutation for the current statement")
@@ -66,6 +71,9 @@ def main():
         ("old pair window with dose 0.06", WIDE,
          originals[WIDE].replace("59 / 250", "239 / 1000").replace("59 / 500", "239 / 2000"),
          "error: Training/WideDoseRead.lean"),
+        ("inhibitory margin without the leak factor", INVERTER,
+         originals[INVERTER].replace(inhibitory_margin, "< level + Q", 1),
+         "error: CircuitInverter.lean"),
     ]
     try:
         for label, path, mutated, marker in controls:
