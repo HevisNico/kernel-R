@@ -282,8 +282,38 @@ network model, or for a preregistered prediction of a network's exact
 memory from per-cell measurements.
 [Comparison and references](docs/RELATED_WORK.md)
 
-This work draws inspiration from Nicolas Breuillaud's
+**Origin: the Reset Operator.** This work started from Nicolas Breuillaud's
+preprint, under review,
 [*The Reset Operator: A Structural Constraint on Recursivity*](https://ssrn.com/abstract=6964960).
+The preprint proposes that a system which crosses a threshold again and
+again, under strong input, needs after each crossing an interval in which
+its coupling to that input is reduced while its own dynamics bring it back
+below the threshold. The cell is built on that rule: at a FIRE, admission
+closes; the main charge returns by itself to a reopen level well below the
+FIRE level; then admission reopens ([cell laws](model/CELL.md); in the
+circuit, an admission switch held by the protection latch,
+[design](research/circuit/DESIGN.md)). A Lean package states the rule on a
+scalar load model in which a fraction of the forcing still passes during
+protection ([reset window](research/reset-window/README.md)). Repetition
+holds with a margin exactly while that fraction of the forcing, plus the
+residue left by each request, stays below the rearming limit, and ends in
+saturation above it (`uniformMargin_iff`, `terminalSaturation_iff`). So a
+reduced coupling, not a zero one, carries a bounded range of forcing; in
+that family, only a zero fraction carries every level of forcing
+(`robustRecursion_iff`).
+The cell was designed with this interval, so its behaviour is not evidence
+for the preprint's claim about natural systems, and nothing about that
+claim has been measured on the circuit yet.
+
+**Next campaign (planned, not run).** A preregistered test on the
+transistor-level cell, with two arms: the cell as designed, and the same
+cell with its admission switch no longer held by the protection latch. Its
+preregistration will fix the range of input and, before any run, the level
+above which the second arm is predicted to stop firing, while the first arm
+is predicted to keep firing over the whole range. It will also measure, at
+the admission switch, how much the admitted current grows with the input
+during protection, compared with the same input without a FIRE.
+
 Nicolas Breuillaud directs the work with assistance from **Claude**
 (Anthropic) and **ChatGPT** (OpenAI) on models, code, proofs and
 documentation. Lean checks the proof terms against their definitions and
