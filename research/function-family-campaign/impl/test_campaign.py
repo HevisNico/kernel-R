@@ -6,6 +6,7 @@ TOPUP_EV (optional): the extracted top-up evidence (M1, M3 folders), for the dup
 """
 from fractions import Fraction as F
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -442,6 +443,12 @@ class Comparisons(unittest.TestCase):
         want = FP.mirror_verdicts(s)
         self.assertEqual({K: v["checks"] for K, v in m8["mirror"].items()}, {K: v["checks"] for K, v in want.items()})
         self.assertTrue(m8["kernel"].startswith("not computed"))
+        if os.environ.get("LEAN"):                                     # (b): once through the Lean kernel
+            with tempfile.TemporaryDirectory() as d:
+                gate = dict(out_dir=d, gen=GEN, lean=os.environ["LEAN"], build=Path(d) / "build")
+                k = A.analysis(self.pred, self.runs, gate)["comparisons"]["M8"]["F4"][rid]
+            self.assertEqual(k["kernel"], {K: v["checks"] for K, v in want.items()})
+            self.assertTrue(k["kernel_agrees_with_mirror"])
 
 
 class NetworkManifests(unittest.TestCase):
@@ -536,6 +543,27 @@ class NetworkManifests(unittest.TestCase):
             with self.assertRaises(AssertionError):                                   # started once only
                 MF.network_stage(self.pred, "M1", "Q", d, limits, Launch(), ended)
             self.assertEqual(json.loads((Path(d) / "JOBS_Q.json").read_text())[0]["limit_s"], 1000)
+
+
+class NoiseSensitivity(unittest.TestCase):
+    """Section 7's declared comparison: the record regenerated with the larger constants, then restored."""
+
+    def test_patched_then_restored(self):
+        import c4
+        rec = dict(instances=[dict(seed=8303, member="F2", room_K3=True), dict(seed=8303, member="X1", room_K3=False)])
+        seen = []
+
+        def regenerate():
+            seen.append(dict(c4.DECISION5))
+            return dict(instances=[dict(seed=8303, member="F2", room_K3=False), dict(seed=8303, member="X1", room_K3=False)])
+        r = CP.noise_sensitivity(rec, regenerate, dict(between_mV=0.2, within_mV=0.05, per_dose_mV=0.009))
+        self.assertEqual(seen, [dict(between_mV=0.2, within_mV=0.094, per_dose_mV=0.009)])
+        self.assertEqual(c4.DECISION5, dict(between_mV=0.111, within_mV=0.094, per_dose_mV=0.009))
+        self.assertFalse(r["per_instance"]["8303-F2"]["keeps_room"])
+        self.assertTrue(r["per_instance"]["8303-X1"]["keeps_room"].startswith("no meaning"))
+        self.assertTrue(r["what"].endswith("counts nothing"))
+        with self.assertRaises(AssertionError):
+            CP.noise_sensitivity(rec, regenerate, dict(b=1))
 
 
 if __name__ == "__main__":

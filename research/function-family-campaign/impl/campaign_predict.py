@@ -99,6 +99,7 @@ def write(out, mode, instances, runs, gen):
 def campaign(repo, gen, runs_parent, out, do_lean=True, lean="lean"):
     import family_predict as FP
     FP.paths(repo, gen)
+    Path(out).mkdir(parents=True, exist_ok=True)              # the gates are written there before the record
     d = CC.draw()
     rows, where = [], {}
     for m, seeds in CC.MACHINES.items():
@@ -134,11 +135,35 @@ def rehearsal_runs(instances):
 def rehearsal(repo, gen, b2_dir, tdirs, out, do_lean=True, lean="lean"):
     import family_predict as FP
     FP.paths(repo, gen)
+    Path(out).mkdir(parents=True, exist_ok=True)              # the gates are written there before the record
     st_b2, st_tu = FP.statuses(b2_dir), FP.statuses(*tdirs)
     rows = [FP.one_seed(s, list(CC.MEMBERS), b2_dir, tdirs, st_b2, st_tu) for s in CC.REHEARSAL_SEEDS]
     FP.gate_all(rows, out, gen, lean, Path(out) / "build", do_lean)
     inst = [record(r, m, None) for r in rows for m in CC.MEMBERS]
     return write(out, "rehearsal", inst, rehearsal_runs(inst), gen)
+
+
+def noise_sensitivity(record, regenerate, measured):
+    """Section 7's declared comparison after M8, counting nothing: per instance, whether it keeps room at K = 3 with
+    the larger of each pair of constants (decision 5's and the rehearsal's measured b, w, d). The frozen
+    family_predict.py reads c4.DECISION5 when it computes the budgets, so `regenerate()` (campaign or rehearsal, the
+    same evidence) is called with that dict patched in place to the larger values, and restored after; nothing frozen
+    is changed. measured: {between_mV, within_mV, per_dose_mV}."""
+    from unittest import mock
+    import c4
+    assert set(measured) == set(c4.DECISION5), f"refused: the measured constants are {sorted(measured)}"
+    larger = {k: max(c4.DECISION5[k], measured[k]) for k in c4.DECISION5}
+    with mock.patch.dict(c4.DECISION5, larger):
+        again = regenerate()
+    assert c4.DECISION5 == dict(between_mV=0.111, within_mV=0.094, per_dose_mV=0.009)
+    new = {(x["seed"], x["member"]): x for x in again["instances"]}
+    per = {}
+    for x in record["instances"]:
+        y = new[(x["seed"], x["member"])]
+        per[f"{x['seed']}-{x['member']}"] = dict(room_K3=x["room_K3"], room_K3_with_larger=y["room_K3"],
+                                                 keeps_room=(y["room_K3"] if x["room_K3"] else "no meaning: no room at K = 3 in the record"))
+    return dict(what="declared comparison (section 7), counts nothing", constants=dict(c4.DECISION5), measured=measured,
+                larger=larger, per_instance=per)
 
 
 if __name__ == "__main__":

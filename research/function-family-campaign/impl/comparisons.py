@@ -323,19 +323,22 @@ def H(every):
         res = w["result"]
         src = {LINE_PORT[c]: c for c in cells(m)}
         h = dict(member=m, min_separation_units={}, late_fires=0, arrivals_not_routed=0, c_fire_outside=0,
-                 undelivered=sum(1 for o in res["occurrences"] if not o["delivered"]), queued=len(res.get("still_queued_at_the_horizon", [])))
+                 undelivered=sum(1 for o in res["occurrences"] if not o["delivered"]), queued=len(res["still_queued_at_the_horizon"]) if "still_queued_at_the_horizon" in res else
+                 "no data: the run's result has no still_queued_at_the_horizon")
         h["skews_above_bound"] = 0 if len(cells(m)) == 2 else f"no meaning for {m}: c has one line"
         for c in cells(m) + ["c"]:
             d = sorted({key(o["date_s"]) for o in res["occurrences"] if o["delivered"] and o["cell"] == c})
             gaps = [(b - a) / TU_S for a, b in zip(d, d[1:]) if (b - a) / TU_S > 3]
             h["min_separation_units"][c] = float(min(gaps)) if gaps else None
-        fires = {(f["cell"], key(f["date_s"])) for f in res["fires"]}
+        fires = {(f["cell"], key(f["date_s"])) for f in res["fires"]} if "fires" in res else None
+        if fires is None:
+            h["arrivals_not_routed"] = "no data: the run's result has no fires"
         for y in w["rows"]:
             for c, rd in y["reads"].items():
                 h["late_fires"] += rd.get("late_fires", 0)
             rd = y["reads"].get("c")
             if rd:
-                for a in rd.get("arrivals", []):
+                for a in (rd.get("arrivals", []) if fires is not None else []):
                     s = src.get(a["port"])
                     ok = s is not None and a["fire_date_s"] is not None and (s, key(a["fire_date_s"])) in fires and \
                         abs((exact(a["date_s"]) - exact(a["fire_date_s"])) / TU_S - Fraction(3, 2)) <= Fraction(1, 50) + tol
