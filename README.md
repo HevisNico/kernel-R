@@ -287,15 +287,20 @@ preprint, under review,
 [*The Reset Operator: A Structural Constraint on Recursivity*](https://ssrn.com/abstract=6964960).
 The preprint proposes that a system which crosses a threshold again and
 again, under strong input, needs after each crossing an interval in which
-its coupling to that input is suspended while its own dynamics bring it back
+its coupling to that input is reduced while its own dynamics bring it back
 below the threshold. The cell is built on that rule: at a FIRE, admission
 closes; the main charge returns by itself to a reopen level well below the
 FIRE level; then admission reopens ([cell laws](model/CELL.md); in the
 circuit, an admission switch held by the protection latch,
 [design](research/circuit/DESIGN.md)). A Lean package states the rule on a
-scalar load model and proves that repetition at every level of constant
-forcing holds exactly when nothing is admitted during protection and the
-window is long enough ([reset window](research/reset-window/README.md)).
+scalar load model in which a fraction of the forcing still passes during
+protection ([reset window](research/reset-window/README.md)). Repetition
+holds with a margin exactly while that fraction of the forcing, plus the
+residue left by each request, stays below the rearming limit, and ends in
+saturation above it (`uniformMargin_iff`, `terminalSaturation_iff`). So a
+reduced coupling, not a zero one, carries a bounded range of forcing; in
+that family, only a zero fraction carries every level of forcing
+(`robustRecursion_iff`).
 The cell was designed with this interval, so its behaviour is not evidence
 for the preprint's claim about natural systems, and nothing about that
 claim has been measured on the circuit yet.
