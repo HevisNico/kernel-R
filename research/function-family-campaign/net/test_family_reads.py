@@ -101,7 +101,7 @@ def expected_words(member, needs, ports):
 SIGNALS = [f"v(x{c}.{s})" for c in "abc" for s in ("vq", "p", "x1.si", "x2.si", "vmem1", "vmem2", "x1.sum", "x2.sum")]
 
 
-def synthesise(folder, member, needs, ports, control, beh=None, reached=True, noise="none", move=None):
+def synthesise(folder, member, needs, ports, control, beh=None, reached=True, noise="none", move=None, seed=8505):
     """A run folder: record.json, evidence/result.json (plan and delivered occurrences) and evidence/trace.raw, from
     the behaviour (or the zero-error one). move: (slot, cell, port, mV) steps the stored voltage during that read."""
     plan, slots, zero = behaviour(member, needs, ports, control)
@@ -154,7 +154,7 @@ def synthesise(folder, member, needs, ports, control, beh=None, reached=True, no
     (ev / "trace.raw").write_bytes(("\n".join(head) + "\nBinary:\n").encode() + data.tobytes())
     result = dict(plan=json.loads(json.dumps(plan)), occurrences=occ, horizon_s=at(plan["horizon"]))
     (ev / "result.json").write_text(json.dumps(result))
-    rec = dict(id="synthetic", kind="network", member=member, unary_ports=ports, needs=list(N.check_needs(member, needs).values()),
+    rec = dict(id="synthetic", kind="network", seed=seed, member=member, unary_ports=ports, needs=list(N.check_needs(member, needs).values()),
                control=control, noise=dict(model=noise), reached_its_last_date=reached)
     (Path(folder) / "record.json").write_text(json.dumps(rec))
     return plan, slots, beh
@@ -342,6 +342,81 @@ class Counts(Base):
         self.assertIn("rows", out["8505-Q"])
         self.assertEqual(set(out["8505-Q"]["rows"][0]["reads"]), {"a", "b"})
         json.dumps(out)
+
+
+CELL_FIELDS = ("fire", "latency", "start_s", "gated", "late_fires", "ports")
+PORT_FIELDS = ("writes", "writes_prime", "u_before_mV", "move_mV", "rises")
+C_FIELDS = ("arrivals", "skew_units", "q_peak", "fire_date_s")
+
+
+class Comparisons(Base):
+    """with_rows: rows, result, words_prime and observation, the fields M1's comparisons read."""
+    TV = HERE.parent.parent / "function-family" / "topup-verdict" / "PREDICTIONS.json"
+
+    def test_four_fields(self):
+        tv = json.loads(self.TV.read_text())
+        obs = next(x for x in tv["instances"] if x["seed"] == 8306)["members"]["F2"]["observation"]
+        pred = self.d / "PREDICTED.json"
+        pred.write_text(json.dumps(dict(instances=[dict(seed=8506, members=dict(F2=dict(member="F2", seed=8506, observation=obs)))])))
+        f = self.d / "f2"
+        synthesise(f, "F2", NEEDS["F2"], {}, "skew", seed=8506)
+        x = R.record_of(f, "complete", with_rows=True, predicted=pred)
+        self.assertEqual(list(x), ["counts", "words", "tests", "skew", "G", "rows", "result", "words_prime", "observation"])
+        self.assertEqual(x["observation"], obs)
+        self.assertEqual(x["result"], json.loads((f / "evidence" / "result.json").read_text()))
+        self.assertEqual(x["words_prime"], expected_words("F2", NEEDS["F2"], {}))            # every synthetic write lasts 3 us: a write'
+        self.assertEqual({r["stage"] for r in x["rows"]}, {"layer 1", "layer 2", "test", "skew control"})
+        n_c = 0
+        for r in x["rows"]:
+            for c, v in r["reads"].items():
+                for k in CELL_FIELDS:
+                    self.assertIn(k, v, (c, k))
+                for p, pv in v["ports"].items():
+                    self.assertIn(p, ("1", "2"))
+                    for k in PORT_FIELDS:
+                        self.assertIn(k, pv)
+                    for rise in pv["rises"]:
+                        self.assertEqual(set(rise), {"rise_s", "width_s"})
+                if c == "c":
+                    n_c += 1
+                    for k in C_FIELDS:
+                        self.assertIn(k, v)
+                    for a in v["arrivals"]:
+                        self.assertLessEqual({"port", "date_s", "fire_date_s"}, set(a))
+        self.assertGreater(n_c, 0)
+        json.dumps(x)
+
+    def test_missing_observation_is_left_out(self):
+        f = self.d / "x1"
+        synthesise(f, "X1", NEEDS["X1"], {"a": 1}, "skew", seed=8501)
+        x = R.record_of(f, "complete", with_rows=True)
+        self.assertNotIn("observation", x)
+        pred = self.d / "P.json"
+        pred.write_text(json.dumps(dict(instances=[dict(seed=8504, members={})])))
+        self.assertNotIn("observation", R.record_of(f, "complete", with_rows=True, predicted=pred))
+        self.assertNotIn("rows", R.record_of(f, "complete"))
+
+    def test_words_prime_differs_on_a_short_write(self):
+        member, ports = "X2", {}
+        plan, slots, beh = behaviour(member, NEEDS[member], ports, "skew")
+        f = self.d / "short"
+        synthesise(f, member, NEEDS[member], ports, "skew", beh)
+        raw = f / "evidence" / "trace.raw"
+        blob = raw.read_bytes()
+        head, _, body = blob.partition(b"Binary:\n")
+        import measure
+        tr = measure.Trace(raw)
+        names = ["time"] + SIGNALS
+        data = np.frombuffer(body, dtype="<f8").reshape(len(tr.t), len(names)).copy()
+        j = names.index("v(xa.x1.si)")
+        start = at(slots[0]["date"])
+        sel = (data[:, 0] > start + 41e-6) & (data[:, 0] < start + 45e-6)
+        data[sel, j] = 0.0                                                                   # the first write of a1 now lasts under 1 us
+        raw.write_bytes(head + b"Binary:\n" + data.astype("<f8").tobytes())
+        x = R.record_of(f, "complete", with_rows=True)
+        self.assertEqual(x["words"]["a1"][0], "s")
+        self.assertEqual(x["words_prime"]["a1"][0], "o")
+        self.assertEqual(x["words_prime"]["a2"], x["words"]["a2"])
 
 
 class SkewKeys(unittest.TestCase):

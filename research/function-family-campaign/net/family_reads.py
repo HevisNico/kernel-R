@@ -3,7 +3,7 @@
 analysis takes (M1's analysis.analysis(predicted, runs)):
 
   {counts: bool, words: {port: str}, tests: {pattern: {cell: bool}}, skew: {pattern: {cell: bool}}, G: [failure dicts]}
-  and, on request, rows: reads4.network_reads' rows.
+  and, with with_rows: rows (reads4.network_reads' rows), result (evidence/result.json), words_prime, observation.
 
 The frozen functions do the reading, unchanged:
   - reads4.network_reads (campaign 5): every read of every slot, from the trace, the delivered occurrences and the slots.
@@ -19,7 +19,7 @@ Ports: a pair cell's two ports; a unary cell's chosen port only; c's lines c1 (l
 Cells of tests: the layer-1 cells, then c. Cells of skew: the layer-1 cells (reads4's a and b for F1). Skew keys: the
 pair term's letters ("AB", "BC"), which is the skew slot's pattern in family_net.calendar.
 
-  family_reads.py read  REPO RUN_FOLDER STATUS [--rows]     prints the record of one run
+  family_reads.py read  REPO RUN_FOLDER STATUS [--rows] [--predicted=PREDICTED.json]   prints the record of one run
   family_reads.py collect REPO RUNS_DIR ID...               the records of the runs ID, with STATUS from RUNS_DIR/*/STATE.json
 
 PYTHONPATH as family_net's.
@@ -93,9 +93,21 @@ def c5_analyze():
     return mod
 
 
-def record_of(folder, status, with_rows=False, prime=False):
+def observation_of(predicted, seed, member):
+    """family_predict.observation's serialized form for (seed, member), from the prediction record, or None."""
+    for x in json.loads(Path(predicted).read_text())["instances"]:
+        if int(x["seed"]) == int(seed):
+            return (x["members"].get(member) or {}).get("observation")
+    return None
+
+
+def record_of(folder, status, with_rows=False, prime=False, predicted=None):
     """The analysis' record of one run. A run that does not count is still read when its files allow it (reported as
-    observed, counting for nothing); a counted run that cannot be read is an error."""
+    observed, counting for nothing); a counted run that cannot be read is an error.
+    with_rows adds what M1's comparisons read: `rows` (reads4.network_reads' rows), `result` (the run's
+    evidence/result.json), `words_prime` (reads4.words with prime=True, on the member's ports) and, with `predicted`
+    (the prediction record), `observation` (family_predict.observation's serialized form for the run's seed and
+    member). A field that cannot be given is left out ("no data" for M1)."""
     import predicted as P
     analyze = c5_analyze()
     folder = Path(folder)
@@ -110,14 +122,17 @@ def record_of(folder, status, with_rows=False, prime=False):
     needs = N.check_needs(member, rec["needs"])
     noisy = rec["noise"]["model"] == "injected"
     try:
-        rows, _ = rows_of(folder, member, needs, ports, rec["control"])
+        rows, result = rows_of(folder, member, needs, ports, rec["control"])
     except (OSError, KeyError, ValueError) as e:            # missing or truncated evidence; a refused plan is an AssertionError
         assert not counts, f"a counted run cannot be read: {e}"
         return dict(counts=False, words=None, tests=None, skew=None, G=None, unread=f"{type(e).__name__}: {e}")
     w = words(member, ports, rows, prime)
     out = dict(counts=counts, words=w["words"], tests=w["tests"], skew=w["skew"], G=analyze.g_check(rows, noisy))
     if with_rows:
-        out["rows"] = rows
+        out.update(rows=rows, result=result, words_prime=words(member, ports, rows, prime=True)["words"])
+        obs = observation_of(predicted, rec["seed"], member) if predicted is not None and rec.get("seed") is not None else None
+        if obs is not None:
+            out["observation"] = obs
     return out
 
 
@@ -131,7 +146,7 @@ def statuses(runs_dir):
     return out
 
 
-def collect(ids, runs_dir, with_rows=False):
+def collect(ids, runs_dir, with_rows=False, predicted=None):
     """{id: record} for the analysis: the run's folder is RUNS_DIR/<id>; a run absent from every STATE.json is missing."""
     st = statuses(runs_dir)
     out = {}
@@ -139,7 +154,7 @@ def collect(ids, runs_dir, with_rows=False):
         if rid not in st or not (Path(runs_dir) / rid).is_dir():
             out[rid] = dict(counts=False, words=None, tests=None, skew=None, G=None, unread="missing")
             continue
-        out[rid] = record_of(Path(runs_dir) / rid, st[rid], with_rows)
+        out[rid] = record_of(Path(runs_dir) / rid, st[rid], with_rows, predicted=predicted)
     return out
 
 
@@ -150,7 +165,8 @@ def main(argv=None):
     if cmd == "read":
         repo, folder, status, *flags = a[1:]
         N.paths(repo)
-        print(json.dumps(record_of(folder, status, with_rows="--rows" in flags), indent=1))
+        pred = next((f.split("=", 1)[1] for f in flags if f.startswith("--predicted=")), None)
+        print(json.dumps(record_of(folder, status, with_rows="--rows" in flags, predicted=pred), indent=1))
     elif cmd == "collect":
         repo, runs_dir, *ids = a[1:]
         N.paths(repo)
