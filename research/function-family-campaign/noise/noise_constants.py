@@ -20,11 +20,20 @@ They are re-expressed on the family's reads (reads4.network_reads' rows) as foll
     slots whose arrival is on that line for a port of c;
   - a pulse's latency is the read's FIRE latency (units); its step is the read's move_mV on that port
     (u before - u after, mV), taken on silent reads only;
-  - `slope` (latency per mV at the trained state) and `dose_mV` (the port's dose without noise) are INPUTS, per port.
-    Campaign 3 took both from the port's isolated scan reads; their family source is a choice made outside this file.
+  - the slope (decided 2026-11-22): campaign 3's `secant` [C3a, reused as written] of the fired reads' (u_before_mV,
+    latency) of the instance's own guard-on calibration deck(s), at the trained level, through the frozen
+    reads4.calibration_reads(tr, result, record["reads"]) (as campaign 5's predicted.py, line 458, calls it):
+      a port of a pair cell   the cell's "both" reads of the plain guard-on deck (cal-on), u of that port;
+      a port of a unary cell  the cell's "port P at 1.0" reads of the guard-on unary deck (cal-on-unary);
+      a line P of c           c's "port P" reads of the plain guard-on deck;
+    the trained level is the port's u_before_mV at its first FIRE in the instance's run without noise;
+  - the dose without noise (decided 2026-11-22): the mean move_mV of the port's silent reads in the instance's run
+    without noise.
 Output: per port, per instance, and pooled over every counted port of every instance.
 
-  noise_constants.py PREDICTED.json SLOPES.json RUNS_DIR QUIET_ID NOISY_ID...   prints the values as JSON
+  noise_constants.py PREDICTED.json RUNS_DIR DECKS_DIR -- INSTANCE QUIET_ID NOISY_ID... [-- ...]
+      DECKS_DIR/<seed>-cal-on and DECKS_DIR/<seed>-cal-on-unary: the instance's guard-on decks (B2 and top-up
+      evidence, fetched by name and checked against their sums before this is run)
 """
 import json
 import math
@@ -35,6 +44,60 @@ import sys
 MIN_FIRES = 3          # [C3a] len(lat) >= 3
 MIN_WITHIN = 8         # [C3a] count >= 8 for a port's within-run value
 MIN_OFFSETS = 8        # [C3a] instance: len(offsets) >= 8 for noise_between_runs
+
+
+def secant(points, u):
+    """[C3a] constants.secant, as written: slope of latency against u at `u`, from the two measured points around it
+    (or the two nearest), the points of one stored state (within 0.02 mV) merged first."""
+    points = sorted(set(points))
+    merged = []
+    for p in points:
+        if merged and p[0] - merged[-1][0][0] < 0.02:
+            merged[-1].append(p)
+        else:
+            merged.append([p])
+    points = [(statistics.mean(x[0] for x in g), statistics.mean(x[1] for x in g)) for g in merged]
+    assert len(points) >= 2
+    i = min(max(sum(1 for p in points if p[0] <= u), 1), len(points) - 1)
+    (u0, l0), (u1, l1) = points[i - 1], points[i]
+    return (l1 - l0) / (u1 - u0)
+
+
+def calibration_points(cal_rows, port, kind):
+    """[decided] The fired calibration reads of a port as (u_before_mV, latency). cal_rows: reads4.calibration_reads of
+    the deck; kind: "pair", "unary" or "line" (the port's cell kind; a port of c is a line)."""
+    cell, p = port[0], port[1]
+    want = {"pair": "both", "unary": f"port {p} at 1.0", "line": f"port {p}"}[kind]
+    return [(r["ports"][p]["u_before_mV"], r["latency"]) for r in cal_rows if r["cell"] == cell and r["read"] == want and r["fire"]]
+
+
+def trained_level(quiet_pulses):
+    """[decided] The port's u before its first FIRE in the run without noise."""
+    return next(x["u_before_mV"] for x in quiet_pulses if x["fire"])
+
+
+def quiet_dose(quiet_pulses):
+    """[decided] The mean step of the port's silent reads in the run without noise."""
+    steps = [x["step_mV"] for x in quiet_pulses if not x["fire"]]
+    assert steps, "the run without noise has no silent read on this port"
+    return statistics.mean(steps)
+
+
+def inputs(member, unary_ports, quiet_rows, cal_on_rows, cal_on_unary_rows=None):
+    """{port: (slope, dose)} of one instance: its learning ports (campaign_predict.ports_of's set)."""
+    import family_predict as FP
+    out = {}
+    for c, k in FP.kinds(member).items():
+        for p in ((1, 2) if k == "pair" else (unary_ports[c],)):
+            out[f"{c}{p}"] = (k, cal_on_rows if k == "pair" else cal_on_unary_rows)
+    for c in FP.kinds(member):
+        out[f"c{FP.LINE_PORT[c]}"] = ("line", cal_on_rows)
+    res = {}
+    for port, (kind, rows) in out.items():
+        assert rows is not None, f"no calibration deck for {port}"
+        q = pulses(quiet_rows, port)
+        res[port] = (secant(calibration_points(rows, port, kind), trained_level(q)), quiet_dose(q))
+    return res
 
 
 def pulses(rows, port):
@@ -51,7 +114,7 @@ def pulses(rows, port):
             pass
         else:
             continue
-        out.append(dict(fire=bool(r["fire"]), latency=r["latency"], step_mV=r["ports"][p]["move_mV"]))
+        out.append(dict(fire=bool(r["fire"]), latency=r["latency"], step_mV=r["ports"][p]["move_mV"], u_before_mV=r["ports"][p].get("u_before_mV")))
     return out
 
 
@@ -124,11 +187,20 @@ def values(per_instance):
                 per_instance=inst, pooled=pooled(inst))
 
 
+def deck_rows(folder):
+    """reads4.calibration_reads of one deck folder (record.json, evidence/result.json, evidence/trace.raw)."""
+    import measure
+    import reads4
+    folder = Path(folder)
+    rec = json.loads((folder / "record.json").read_text())
+    res = json.loads((folder / "evidence" / "result.json").read_text())
+    return reads4.calibration_reads(measure.Trace(folder / "evidence" / "trace.raw"), res, rec["reads"])
+
+
 def main(a):
-    """PREDICTED.json SLOPES.json RUNS_DIR then groups `INSTANCE QUIET_ID NOISY_ID...` separated by '--'.
-    SLOPES.json: {instance: {slopes: {port: s}, doses: {port: mV}}}."""
     import family_reads as R
-    pred, slopes, runs_dir = Path(a[0]), json.loads(Path(a[1]).read_text()), Path(a[2])
+    pred, runs_dir, decks = Path(a[0]), Path(a[1]), Path(a[2])
+    rec = {(x["seed"], x["member"]): x for x in json.loads(pred.read_text())["instances"]}
     st = R.statuses(runs_dir)
     groups, cur = [], []
     for x in a[3:] + ["--"]:
@@ -141,13 +213,21 @@ def main(a):
     per = {}
     for g in groups:
         k, quiet, noisy = g[0], g[1], g[2:]
-        rec = lambda rid: R.record_of(runs_dir / rid, st[rid], with_rows=True, predicted=pred)
-        q = rec(quiet)
+        seed, member = int(k.split("-")[0]), k.split("-")[1]
+        x = rec[(seed, member)]
+        read = lambda rid: R.record_of(runs_dir / rid, st[rid], with_rows=True, predicted=pred)
+        q = read(quiet)
         assert q["counts"], f"refused: the run without noise {quiet} does not count"
-        nz = {r: rec(r) for r in noisy}
+        nz = {r: read(r) for r in noisy}
+        unary = (x.get("unary_ports") or {})
+        un = deck_rows(decks / f"{seed}-cal-on-unary") if unary else None
+        sd = inputs(member, unary, q["rows"], deck_rows(decks / f"{seed}-cal-on"), un)
         per[k] = dict(quiet=q["rows"], noisy={r: v["rows"] for r, v in nz.items() if v["counts"]},
-                      slopes=slopes[k]["slopes"], doses=slopes[k]["doses"])
-    return values(per)
+                      slopes={p: v[0] for p, v in sd.items()}, doses={p: v[1] for p, v in sd.items()},
+                      not_counted=[r for r, v in nz.items() if not v["counts"]])
+    out = values(per)
+    out["not_counted"] = {k: v["not_counted"] for k, v in per.items()}
+    return out
 
 
 if __name__ == "__main__":

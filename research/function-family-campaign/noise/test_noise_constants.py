@@ -15,8 +15,9 @@ L0, SLOPE, DOSE = 0.8, -0.05, 2.0               # latency units, units per mV, m
 PORTS = ("a1", "a2", "b1", "b2", "c1", "c2")
 
 
-def read(fire, latency, step, p):
-    return dict(fire=fire, latency=latency if fire else None, ports={str(q): dict(move_mV=step if q == int(p) else 0.0) for q in (1, 2)})
+def read(fire, latency, step, p, u=-10.0):
+    return dict(fire=fire, latency=latency if fire else None,
+                ports={str(q): dict(move_mV=step if q == int(p) else 0.0, u_before_mV=u) for q in (1, 2)})
 
 
 def rows(need, fires, latency_of, step_of, ports=PORTS):
@@ -130,6 +131,51 @@ class Random(unittest.TestCase):
         P = NC.values(per)["pooled"]
         for got, want in ((P["between_mV"], b), (P["within_mV"], w), (P["per_dose_mV"], d)):
             self.assertLess(abs(got - want) / want, 0.15, (got, want))
+
+
+def cal_row(cell, read_name, u, fire=True, slope=SLOPE, u0=-10.0):
+    """A calibration read with latency linear in u: L0 + slope (u - u0)."""
+    return dict(cell=cell, read=read_name, fire=fire, latency=L0 + slope * (u - u0) if fire else None,
+                ports={"1": dict(u_before_mV=u), "2": dict(u_before_mV=u)})
+
+
+class Mapping(unittest.TestCase):
+    """The slope from the guard-on decks' fired reads at the trained level, the dose from the run without noise."""
+
+    def test_secant_as_campaign_3(self):
+        """[C3a] the reused secant gives campaign 3's value: exact on a line, and the two points around u otherwise."""
+        pts = [(-12.0 + i * 0.5, L0 + SLOPE * i * 0.5) for i in range(6)]
+        self.assertAlmostEqual(NC.secant(pts, -10.7), SLOPE)
+        bent = [(-12.0, 1.0), (-11.0, 0.9), (-10.0, 0.6)]
+        self.assertAlmostEqual(NC.secant(bent, -10.5), -0.3)
+        self.assertAlmostEqual(NC.secant(bent, -11.5), -0.1)
+        self.assertAlmostEqual(NC.secant(bent + [(-10.005, 0.6)], -10.5), -0.3 / 0.9975)   # within 0.02 mV: one state, u averaged
+
+    def test_reads_chosen_by_kind(self):
+        rows = [cal_row("a", "both", -11.0), cal_row("a", "both", -10.0), cal_row("a", "port 1", -11.0, slope=9),
+                cal_row("b", "port 2 at 1.0", -11.0, slope=-0.2), cal_row("b", "port 2 at 1.0", -10.0, slope=-0.2),
+                cal_row("c", "port 1", -11.0, slope=-0.3), cal_row("c", "port 1", -10.0, slope=-0.3), cal_row("c", "both", -11.0, slope=7),
+                cal_row("a", "both", -9.0, fire=False)]
+        self.assertEqual(len(NC.calibration_points(rows, "a1", "pair")), 2)
+        self.assertAlmostEqual(NC.secant(NC.calibration_points(rows, "a2", "pair"), -10.5), SLOPE)
+        self.assertAlmostEqual(NC.secant(NC.calibration_points(rows, "b2", "unary"), -10.5), -0.2)
+        self.assertAlmostEqual(NC.secant(NC.calibration_points(rows, "c1", "line"), -10.5), -0.3)
+
+    def test_inputs_F3(self):
+        """F3: a unary on port 2 (from the unary deck), b a pair (both reads), lines c1 and c2 (port P of c)."""
+        import family_predict  # noqa: F401  (FP.kinds, FP.LINE_PORT)
+        plain = [cal_row(c, r, u) for u in (-11.0, -10.5, -10.0) for c, r in (("b", "both"), ("c", "port 1"), ("c", "port 2"))]
+        unary = [cal_row("a", "port 2 at 1.0", u, slope=-0.2) for u in (-11.0, -10.5, -10.0)]
+        quiet = rows(2, 3, lambda p, j: L0, lambda p, i: DOSE + (0.1 if p == "c2" else 0.0), ports=("a2", "b1", "b2", "c1", "c2"))
+        got = NC.inputs("F3", {"a": 2}, quiet, plain, unary)
+        self.assertEqual(set(got), {"a2", "b1", "b2", "c1", "c2"})
+        self.assertAlmostEqual(got["a2"][0], -0.2)
+        self.assertAlmostEqual(got["b1"][0], SLOPE)
+        self.assertAlmostEqual(got["c2"][0], SLOPE)
+        self.assertAlmostEqual(got["c2"][1], DOSE + 0.1)
+        self.assertAlmostEqual(got["a2"][1], DOSE)
+        with self.assertRaises(AssertionError):
+            NC.inputs("F3", {"a": 2}, quiet, plain, None)                       # a unary cell needs its unary deck
 
 
 if __name__ == "__main__":
