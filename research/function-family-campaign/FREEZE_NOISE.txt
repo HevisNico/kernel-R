@@ -1,0 +1,59 @@
+Function family campaign (a): freeze marker of the noise sensitivity code (amendment 2a C1, amendment 2 section 3)
+
+This file freezes, by SHA-256, the code that computes b, w and d from the rehearsal's noisy F2 runs by campaign 3's
+definitions. It merges nothing. The code is on research/function-family-campaign-noise, and it has read no run.
+
+Branch tip
+  research/function-family-campaign-noise   7bc064e88641ad084532b75f0054a0b8d5ca118c   (noise/ only, on 385c33bf)
+
+Files (sha256, path)
+  a704b8909dfe06560cab53583ae0e58356f7cf59825e5191b9a343cfae45ca9a  research/function-family-campaign/noise/noise_constants.py
+  6c4eabb314a07e35ff0ec79d5e8631624a12273c9efdd9a99a203937ca0e2323  research/function-family-campaign/noise/test_noise_constants.py
+  3e817070aa3ff0c60798a4a638be67d18dab55d5a6dbf857aa6d9d3e441336af  research/function-family-campaign/noise/test_noise_constants_output.txt   (10 tests, OK)
+
+Definitions reused (main at 14cc793a, read by name)
+  research/network-circuit/phase1/constants.py                 a36dc13681f01acb...  (port, instance, secant)
+  research/network-noise-study/validation/vanalyze.py          82627bc3b16caa20...  (constants, the pooled values)
+
+Dependencies (unchanged, frozen elsewhere)
+  the network code's reader  research/function-family-campaign/net/family_reads.py  65e6dc491dfb7217...  (FREEZE.txt, 70d9d795)
+  family_predict.py           00b6a5161eb220e2...  (kinds, LINE_PORT)
+  campaign 5's reads4.calibration_reads and measure.Trace, through REPO ecfcd1c1
+  FUP 56f9e83e, PREP b956efe4; Python 3.12 from venv312-dev; no Lean
+
+1. M3's rerun (amendment 1's rule, no simulation, no run read)
+  O=/home/user/owner-prep; W=$O/wt; K=/home/user/kernel-R; PY=$O/venv312-dev/bin/python
+  git -C $K fetch origin research/function-family-campaign-noise
+  test "$(git -C $K rev-parse origin/research/function-family-campaign-noise)" = 7bc064e88641ad084532b75f0054a0b8d5ca118c
+  git -C $K worktree add --detach $W/ffnoise 7bc064e88641ad084532b75f0054a0b8d5ca118c
+  (cd $W/ffnoise && sha256sum -c <<'SUMS'
+a704b8909dfe06560cab53583ae0e58356f7cf59825e5191b9a343cfae45ca9a  research/function-family-campaign/noise/noise_constants.py
+6c4eabb314a07e35ff0ec79d5e8631624a12273c9efdd9a99a203937ca0e2323  research/function-family-campaign/noise/test_noise_constants.py
+SUMS
+  )
+  export PYTHONPATH=$W/campaign-6-followup/research/learned-dnf-circuit-campaign-6-followup/dev:$W/campaign-7-prep/research/learned-dnf-circuit-campaign-7-prep/dev:$W/ffimpl/research/function-family/dev:$W/ffimpl/research/function-family-campaign/impl:$W/ffnet/research/function-family-campaign/net
+  mkdir -p $O/ci-noise; cd $W/ffnoise/research/function-family-campaign/noise && $PY -B test_noise_constants.py > $O/ci-noise/test_noise_constants_output.txt 2>&1
+  The pass criterion is "Ran 10 tests" and "OK", compared by verdict and count, not by SHA-256 (the output prints
+  its run time). The output and its SHA-256 go in a commit of their own on evidence/function-family-campaign-ci.
+
+2. The values, for amendment 2b (after the freeze, M3's rerun and the run 8306-F2-quiet, never before)
+  Inputs, each fetched by name and checked against its SHA256SUMS:
+    - the rehearsal record: PREDICTED.json c02057d3... (evidence/function-family-campaign-rehearsal);
+    - the runs, in one folder RUNS with each machine's STATE.json under its own subfolder:
+        8303-F2-quiet, from rehearsal-M3;
+        8303-F2-r1, r2 (M1), 8303-F2-r3, r4 (M2), 8306-F2-r1, r2 (M3), 8306-F2-r3, r4 (M4);
+        8306-F2-quiet, from M5's commit for that run;
+    - the guard-on decks, in DECKS: 8303-cal-on and 8306-cal-on, from B2's evidence
+      (evidence/learned-dnf-circuit-campaign-7-prep, batch-8303 and batch-8306, checked against PARTS.json).
+  Command:
+    cd $W/ffnoise/research/function-family-campaign/noise
+    $PY -B noise_constants.py PREDICTED.json RUNS DECKS -- 8303-F2 8303-F2-quiet 8303-F2-r1 8303-F2-r2 8303-F2-r3 8303-F2-r4 \
+        -- 8306-F2 8306-F2-quiet 8306-F2-r1 8306-F2-r2 8306-F2-r3 8306-F2-r4 > NOISE_VALUES.json
+  The pooled between_mV, within_mV and per_dose_mV are amendment 2b's b, w and d. The output is pushed with its
+  SHA-256 before amendment 2b.
+
+Not checked
+  - The code has read no real noisy run (section 9). Its plumbing was run once, on synthetic run folders, with the
+    real 8303 decks.
+  - Whether every port's trained level falls inside its deck's fired range. If not, the secant takes the two
+    nearest points, as campaign 3's does.
