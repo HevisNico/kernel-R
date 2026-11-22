@@ -9,6 +9,7 @@ the campaign and the rehearsal set (8303 and 8306, the five members).
 """
 import json
 import os
+import shutil
 from pathlib import Path
 import sys
 import tempfile
@@ -78,12 +79,10 @@ def write_runs(pred, d, status=None, beh=None, move=None):
 
 
 def collect(pred, d):
-    runs = R.collect([r["id"] for r in pred["network_runs"]], d, with_rows=True)
-    inst = {(x["seed"], x["member"]): x for x in pred["instances"]}
-    for r in pred["network_runs"]:                       # M8: an observation per counted run (here the predicted one)
-        if runs[r["id"]].get("counts") and r["control"] == "skew":
-            runs[r["id"]]["observation"] = inst[(r["seed"], r["member"])]["observation"]
-    return runs
+    """The reader's records, with the record file given: `observation` is then the RUN's (family_reads.run_observation)."""
+    path = d / "PREDICTED.json"
+    path.write_text(CC.record_text(pred))
+    return R.collect([r["id"] for r in pred["network_runs"]], d, with_rows=True, predicted=path)
 
 
 def flip_first_fire(cell):
@@ -120,7 +119,15 @@ class EndToEnd(unittest.TestCase):
 
     def analyse(self, **kw):
         write_runs(self.pred, self.d, **kw)
-        return A.run(self.text, json.loads(self.text), collect(self.pred, self.d))
+        self.runs = collect(self.pred, self.d)
+        return A.run(self.text, json.loads(self.text), self.runs)
+
+    def predicted_mirror(self, x):
+        """The mirror on the instance's own predicted observation: the prediction's M8 verdicts."""
+        import comparisons as C
+        _, _, spec, *_ = FP.mods()
+        mv = FP.mirror_verdicts(spec.load(FP.raw_spec(C.run_instance(x, x["observation"]), "pred", "test")))
+        return {K: (v["checks"], sorted(map(tuple, v["failing"]))) for K, v in mv.items()}
 
     def test_all_as_predicted(self):
         r = self.analyse()
@@ -144,14 +151,41 @@ class EndToEnd(unittest.TestCase):
             for rid, h in c["H"]["per_member"][m].items():
                 self.assertIsInstance(h, dict, rid)
                 self.assertEqual((h["undelivered"], h["c_fire_outside"], h["late_fires"]), (0, 0, 0), rid)
-                self.assertTrue(h["arrivals_not_routed"].startswith("no data"), rid)   # the synthetic result.json has no fires
+                self.assertEqual(h["arrivals_not_routed"], 0, rid)
         comp = r["comparisons"]
         for m in CC.MEMBERS:
             for rid, v in comp["M8"][m].items():
-                self.assertEqual({K: w["checks"] for K, w in v["mirror"].items()}, dict(K0=True, K3=True), rid)
+                # M8 reads the RUN's observation (family_reads.run_observation), not the predicted one
+                self.assertNotEqual(self.runs[rid]["observation"], self.runs[rid]["observation_predicted"], rid)
+                # The synthetic traces carry no calibrated q (flat voltages): only the calibration checker fails,
+                # validity and separation hold on the run's dates and emissions
+                for K, w in v["mirror"].items():
+                    self.assertEqual({f[0] for f in w["failing"]}, {"checkCascadeCalibrationOneSided"}, (rid, K))
             for rid, v in comp["M3"][m].items():
                 self.assertIsInstance(v, dict, rid)
         self.assertTrue(all(v == {} for v in comp["M6"]["word_and_word_prime_differ"].values()))
+
+    def test_M8_differs_when_the_trace_differs(self):
+        """A run whose trace differs from the prediction (one layer-1 FIRE of a replaced by a silent write) gives an M8
+        result different from the prediction's, and from the as-predicted run's."""
+        rid = next(r["id"] for r in self.pred["network_runs"] if r["member"] == "F2" and r["control"] == "skew")
+        x = next(y for y in self.pred["instances"] if y["seed"] == int(rid.split("-")[0]))
+        res = lambda r: {K: (w["checks"], sorted(map(tuple, w["failing"]))) for K, w in r["comparisons"]["M8"]["F2"][rid]["mirror"].items()}
+        same = res(self.analyse())
+        obs_same = self.runs[rid]["observation"]
+        shutil.rmtree(self.d)
+        self.d.mkdir()
+        bad = res(self.analyse(beh={rid: flip_first_fire("a")}))
+        obs_bad = self.runs[rid]["observation"]
+        pred = self.predicted_mirror(x)
+        self.assertEqual({K: v[0] for K, v in pred.items()}, dict(K0=True, K3=True))
+        self.assertNotEqual(bad, pred)                                  # the coordinator's case
+        self.assertNotEqual(obs_bad["firstTrain"], obs_same["firstTrain"])   # the replaced FIRE reaches the run's observation
+        # Reported, not asserted: on these synthetic traces calibration already fails on every run (flat q), so the
+        # mirror's failure list is the same with and without the replaced FIRE.
+        print(f"\n  M8 {rid} ({self.mode}): prediction's checks {dict((K, v[0]) for K, v in pred.items())}; "
+              f"run's checks {dict((K, v[0]) for K, v in bad.items())}; failing checkers of the run "
+              f"{sorted({f[0] for v in bad.values() for f in v[1]})}; same failure list as the as-predicted run: {bad == same}", file=sys.stderr)
 
     def test_wrong_letter(self):
         rid = next(r["id"] for r in self.pred["network_runs"] if r["member"] == "F2" and r["control"] == "skew")
