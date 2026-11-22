@@ -645,6 +645,46 @@ class Stages(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError, "listed twice"):
                 N.read_predicted(p)
 
+    def test_campaign_record_shape(self):
+        """The campaign's PREDICTED.json (campaign_predict.record): one entry per (seed, member), with `member`,
+        `kernel`, `eligible` and `room_K3` at the top."""
+        D = N.draw()
+        flat = []
+        for s, m in sorted(D.items()):
+            r = row(s, m, ports={"a": 2, "b": 1} if m == "F4" else None)
+            k = r.pop("gate")["kernel"]
+            r.pop("gate_K0")
+            e = s not in (8501, 8506)
+            if s == 8501:
+                k = dict(K0=False, K3=True)                    # not eligible, yet K3 holds: the campaign's room_K3 is False
+            if s == 8506:
+                r["measured"], k = False, None
+            r.update(kernel=k, eligible=e, room_K3=bool(e and k and k["K3"] and s != 8504))
+            if s == 8504:
+                r["kernel"] = dict(K0=True, K3=False)
+            flat.append(r)
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "PREDICTED.json"
+            p.write_text(json.dumps(dict(instances=flat, network_runs=[])))
+            pred = N.read_predicted(p)
+            self.assertEqual(sorted(pred), list(range(8501, 8516)))
+            self.no("not eligible", "Q", "quiet", 0, 8501, "X1", pred)
+            self.no("not eligible", "Q", "quiet", 0, 8506, "F2", pred)
+            self.no("no room", "N1", "noisy", 1, 8504, "X1", pred)
+            self.assertEqual(N.admit("N3", "noisy", 3, 8512, "X1", pred)["noise_id"], 85123)
+            self.assertEqual(N.admit("Q", "quiet", 0, 8505, "F4", pred)["unary_ports"], {"a": 2, "b": 1})
+            self.assertEqual(N.admit("Q", "untrained", 0, 8504, "X1", pred)["control"], "untrained")
+            for bad, msg in ((dict(eligible=False), "the row's eligible"), (dict(room_K3=False), "room_K3 disagrees")):
+                rows = [dict(x, **bad) if x["seed"] == 8512 else x for x in flat]
+                p.write_text(json.dumps(dict(instances=rows)))
+                self.no(msg, "N1", "noisy", 1, 8512, "X1", N.read_predicted(p))
+            p.write_text(json.dumps(dict(instances=flat + [flat[0]])))
+            with self.assertRaisesRegex(AssertionError, "listed twice"):
+                N.read_predicted(p)
+            p.write_text(json.dumps(dict(instances=[dict(seed=8501)])))
+            with self.assertRaisesRegex(AssertionError, "neither"):
+                N.read_predicted(p)
+
     def test_network_run_end_to_end_with_the_fake(self):
         with tempfile.TemporaryDirectory() as d:
             with Fake() as f:

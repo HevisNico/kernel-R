@@ -20,6 +20,7 @@ N.paths(REPO)
 import family_reads as R                                   # noqa: E402
 import family_predict as fp                                # noqa: E402
 import c4                                                  # noqa: E402
+import net                                                 # noqa: E402
 import numpy as np                                         # noqa: E402
 import plans4                                              # noqa: E402
 import reads4                                              # noqa: E402
@@ -102,8 +103,12 @@ SIGNALS = [f"v(x{c}.{s})" for c in "abc" for s in ("vq", "p", "x1.si", "x2.si", 
 
 
 def synthesise(folder, member, needs, ports, control, beh=None, reached=True, noise="none", move=None, seed=8505):
-    """A run folder: record.json, evidence/result.json (plan and delivered occurrences) and evidence/trace.raw, from
-    the behaviour (or the zero-error one). move: (slot, cell, port, mV) steps the stored voltage during that read."""
+    """A run folder: record.json, evidence/result.json and evidence/trace.raw, from the behaviour (or the zero-error
+    one). result.json has session4.play's keys (plan, cells, seed, guard_off, origin_s, occurrences, fires, gates,
+    still_queued_at_the_horizon, wall_s, points, waveform_ends_s, horizon_s). Each pulse's 0.9 V crossing falls on
+    its nominal date exactly (see pulse), so that a FIRE 10 us after a read's start is 1/2 unit late.
+    Occurrences are at their snapped dates, as session4 delivers them (net.snap: about 0.1 us late, 0.005 unit).
+    move: (slot, cell, port, mV) steps the stored voltage during that read."""
     plan, slots, zero = behaviour(member, needs, ports, control)
     beh = zero if beh is None else beh
     horizon = at(plan["horizon"]) + 50e-6
@@ -111,22 +116,31 @@ def synthesise(folder, member, needs, ports, control, beh=None, reached=True, no
     v = {n: np.zeros_like(t) for n in SIGNALS}
     for c in "abc":
         v[f"v(x{c}.vq)"][:] = 1.2
-    pulse = lambda name, t0, width: v[name].__setitem__((t >= t0) & (t <= t0 + width), 1.8)
-    occ = []
+    def pulse(name, t0, width):
+        """A pulse whose 0.9 V crossing, by measure.Trace's linear interpolation, falls at t0: its first sample at or
+        after t0 is 0.9 V scaled by the grid step over (t0 - the sample before); the others up to t0 + width 1.8 V."""
+        i = int(np.searchsorted(t, t0 - 1e-12))
+        frac = (t0 - t[i - 1]) / (t[i] - t[i - 1])
+        sel = (t > t[i]) & (t <= t0 + width)
+        v[name][sel] = 1.8
+        v[name][i] = 0.9 / frac
+        return t0
+    occ, fire_events = [], []
     for date, c, p, amp in plan["sources"]:
-        occ.append(dict(id=len(occ), cell=c, port=p, amp=amp, origin="source", calendar_date=date, date_s=at(date), delivered=True))
+        occ.append(dict(kind="pulse", cell=c, port=p, amp=amp, origin="source", calendar_date=date, id=len(occ), date_s=net.snap(at(date)),
+                        protected_when_scheduled=False, delivered=True))
     for i, (s, b) in enumerate(zip(slots, beh)):
         lo = at(s["date"])
         fires = {}
         for c in N.layer1(member):
             if c not in b:
                 continue
-            mine = [at(d) for d, cc, _, _ in plan["sources"] if cc == c and at(s["date"]) - 1e-9 <= at(d) < at(s["date"] + dnf.SLOT) - 1e-9]
+            mine = [o["date_s"] for o in occ if o["origin"] == "source" and o["cell"] == c and at(s["date"]) - 1e-9 <= o["date_s"] < at(s["date"] + dnf.SLOT) - 1e-9]
             start = min(mine)
             f, wr = b[c]
             if f:
-                fires[c] = start + 10e-6
-                pulse(f"v(x{c}.p)", fires[c], 3e-6)
+                fires[c] = pulse(f"v(x{c}.p)", start + 10e-6, 3e-6)
+                fire_events.append(dict(cell=c, date_s=fires[c], calendar_date=(fires[c] - at(0)) / TU, routed=[]))
             for p, n in wr.items():
                 for k in range(n):
                     pulse(f"v(x{c}.x{p}.si)", start + 40e-6 + 10e-6 * k, 3e-6)
@@ -134,12 +148,15 @@ def synthesise(folder, member, needs, ports, control, beh=None, reached=True, no
             arr = []
             for src, fd in fires.items():
                 e = next(e for e in plan["edges"] if e["source"] == src and e["gate"][0] == s["date"] + min(o for n, o in s["inputs"].items() if n in fp.wiring(member, ports)[src]))
-                occ.append(dict(id=len(occ), cell="c", port=e["port"], amp=e["amp"], origin=e["name"], fire_date_s=fd, date_s=fd + c4.WIRE * TU, delivered=True))
+                occ.append(dict(kind="pulse", cell="c", port=e["port"], amp=e["amp"], origin=e["name"], fire_date_s=fd, id=len(occ),
+                                date_s=fd + c4.WIRE * TU, protected_when_scheduled=False, delivered=True))
+                next(x for x in fire_events if x["cell"] == src and x["date_s"] == fd)["routed"].append(e["name"])
                 arr.append(fd + c4.WIRE * TU)
             if arr and "c" in b:
                 f, wr = b["c"]
                 if f:
-                    pulse("v(xc.p)", max(arr) + 10e-6, 3e-6)
+                    fc = pulse("v(xc.p)", max(arr) + 10e-6, 3e-6)
+                    fire_events.append(dict(cell="c", date_s=fc, calendar_date=(fc - at(0)) / TU, routed=[]))
                 for p, n in wr.items():
                     for k in range(n):
                         pulse(f"v(xc.x{p}.si)", min(arr) + 40e-6 + 10e-6 * k, 3e-6)
@@ -152,7 +169,10 @@ def synthesise(folder, member, needs, ports, control, beh=None, reached=True, no
             f"No. Points: {len(t)}", "Variables:", "\t0\ttime\ttime"] + [f"\t{i + 1}\t{n}\tvoltage" for i, n in enumerate(SIGNALS)]
     data = np.column_stack([t] + [v[n] for n in SIGNALS]).astype("<f8")
     (ev / "trace.raw").write_bytes(("\n".join(head) + "\nBinary:\n").encode() + data.tobytes())
-    result = dict(plan=json.loads(json.dumps(plan)), occurrences=occ, horizon_s=at(plan["horizon"]))
+    gates = [dict(date_s=at(d), calendar_date=d, settings=g, protected=dict(a=False, b=False, c=False)) for d, g in plan["gates"]]
+    result = dict(plan=json.loads(json.dumps(plan)), cells=list(c4.CELLS), seed=seed, guard_off=False, origin_s=at(0), occurrences=occ,
+                  fires=sorted(fire_events, key=lambda x: x["date_s"]), gates=gates, still_queued_at_the_horizon=[], wall_s=0.0,
+                  points=int(len(t)), waveform_ends_s=float(t[-1]), horizon_s=at(plan["horizon"]))
     (ev / "result.json").write_text(json.dumps(result))
     rec = dict(id="synthetic", kind="network", seed=seed, member=member, unary_ports=ports, needs=list(N.check_needs(member, needs).values()),
                control=control, noise=dict(model=noise), reached_its_last_date=reached)
@@ -361,8 +381,10 @@ class Comparisons(Base):
         f = self.d / "f2"
         synthesise(f, "F2", NEEDS["F2"], {}, "skew", seed=8506)
         x = R.record_of(f, "complete", with_rows=True, predicted=pred)
-        self.assertEqual(list(x), ["counts", "words", "tests", "skew", "G", "rows", "result", "words_prime", "observation"])
-        self.assertEqual(x["observation"], obs)
+        self.assertEqual(list(x), ["counts", "words", "tests", "skew", "G", "rows", "result", "words_prime", "observation", "observation_predicted"])
+        self.assertEqual(x["observation_predicted"], obs)
+        self.assertNotEqual(x["observation"], obs)                                            # the run's own, not the prediction
+        self.assertEqual(set(x["observation"]), set(obs))
         self.assertEqual(x["result"], json.loads((f / "evidence" / "result.json").read_text()))
         self.assertEqual(x["words_prime"], expected_words("F2", NEEDS["F2"], {}))            # every synthetic write lasts 3 us: a write'
         self.assertEqual({r["stage"] for r in x["rows"]}, {"layer 1", "layer 2", "test", "skew control"})
@@ -409,14 +431,154 @@ class Comparisons(Base):
         names = ["time"] + SIGNALS
         data = np.frombuffer(body, dtype="<f8").reshape(len(tr.t), len(names)).copy()
         j = names.index("v(xa.x1.si)")
-        start = at(slots[0]["date"])
-        sel = (data[:, 0] > start + 41e-6) & (data[:, 0] < start + 45e-6)
-        data[sel, j] = 0.0                                                                   # the first write of a1 now lasts under 1 us
+        first = int(np.searchsorted(data[:, 0], net.snap(at(slots[0]["date"])) + 40e-6 - 1e-12))   # the first write of a1: its 0.9 V sample
+        data[first - 1, j] = 0.0
+        data[first, j] = 1.0                                                                 # one sample at 1.0 V between zeros:
+        data[first + 1:first + 5, j] = 0.0                                                   # above 0.9 V for about 0.2 us
         raw.write_bytes(head + b"Binary:\n" + data.astype("<f8").tobytes())
         x = R.record_of(f, "complete", with_rows=True)
         self.assertEqual(x["words"]["a1"][0], "s")
         self.assertEqual(x["words_prime"]["a1"][0], "o")
         self.assertEqual(x["words_prime"]["a2"], x["words"]["a2"])
+
+
+class FakeT:
+    """A synthetic table for family_predict.observation: every Z 0, every latency 1/2 unit (the synthetic FIREs' delay),
+    no slot latencies."""
+
+    def __getitem__(self, key):
+        return dict(Z=0, latency=0.5, slot_latencies=None)
+
+
+def predicted_observation(member, ports, needs):
+    import predicted as P
+    L1 = N.layer1(member)
+    Q1 = max(needs[c] for c in L1) + 2
+    Q2 = max(needs[f"c{fp.LINE_PORT[c]}"] for c in L1) + 2
+    return fp.observation(member, ports, FakeT(), needs, Q1, Q2, P)
+
+
+REAL_7802 = os.environ.get("REAL_7802")             # a folder holding campaign 6's 7802-quiet run (evidence/...-c1-Q-a), optional
+
+
+class RunObservation(Base):
+    """observation = the RUN's observation, as campaign 5's analyze.run_observation builds it for F1."""
+
+    def test_f1_equals_campaign5_on_synthetic_runs(self):
+        A = R.c5_analyze()
+        for needs, control in ((NEEDS["F1"], "skew"), (dict(a=3, b=1, c1=2, c2=4), None)):
+            f = self.d / f"f1-{control}"
+            synthesise(f, "F1", needs, {}, control)
+            rows, _ = R.rows_of(f, "F1", needs, {}, control)
+            po = predicted_observation("F1", {}, needs)
+            self.assertEqual(R.js(R.run_observation("F1", {}, rows, f, po)), R.js(A.run_observation(rows, dict(observation=po), f)))
+
+    @unittest.skipUnless(REAL_7802, "REAL_7802 not set")
+    def test_f1_equals_campaign5_on_the_real_7802_quiet(self):
+        A = R.c5_analyze()
+        f = Path(REAL_7802)
+        rec = json.loads((f / "record.json").read_text())
+        pred = json.loads((Path(REPO) / "research" / "learned-dnf-circuit-campaign-6" / "stages" / "c1" / "PREDICTED.json").read_text())
+        x = next(i for i in pred["instances"] if i["seed"] == rec["seed"])
+        needs = dict(zip(("a", "b", "c1", "c2"), rec["needs"]))
+        rows, _ = R.rows_of(f, "F1", needs, {}, rec["control"])
+        mine = R.run_observation("F1", {}, rows, f, x["observation"])
+        theirs = A.run_observation(rows, x, f)
+        self.assertEqual(R.js(mine), R.js(theirs))
+        self.assertNotEqual(R.js(mine), R.js(x["observation"]))
+
+    def close(self, a, b, what):
+        from fractions import Fraction as Fr
+        self.assertLessEqual(abs(Fr(a) - Fr(b)), Fr(dnf.SNAP), what)
+
+    def entry(self, r, p, what):
+        """One read: the start, the arrivals (which inputs, at the start) and the emissions agree within SNAP."""
+        self.close(r["start"], p["start"], what + " start")
+        self.assertEqual([a is None for a in r["arrivals"]], [a is None for a in p["arrivals"]], what + " arrivals")
+        for a, b in zip(r["arrivals"], p["arrivals"]):
+            if a is not None:
+                self.close(a, b, what + " arrival")
+        self.assertEqual(len(r["emissions"]), len(p["emissions"]), what + " emissions")
+        for a, b in zip(r["emissions"], p["emissions"]):
+            self.close(a, b, what + " emission")
+
+    def test_zero_error_runs_match_the_prediction(self):
+        """On each member's synthetic zero-error run (every unary-port choice), the run's observation agrees with the
+        prediction's where it should: the same rows and keys, the same inputs arriving, the same FIREs, every date
+        within dnf.SNAP (the runs' pulses are snapped, about 0.005 unit late; the FIREs 1/2 unit after their read,
+        as the synthetic table's latency). The values are not compared: the run's are its q peaks, the prediction's
+        the calibration's. The scores are the prediction's but on the submask the run observed."""
+        n = 0
+        for member in STEP1 + ("F1",):
+            for ports in port_choices(member):
+                needs = NEEDS[member]
+                f = self.d / f"z-{member}-{n}"
+                synthesise(f, member, needs, ports, "skew")
+                rows, _ = R.rows_of(f, member, needs, ports, "skew")
+                po = predicted_observation(member, ports, needs)
+                ro = R.run_observation(member, ports, rows, f, po)
+                self.assertEqual(set(ro), set(po))
+                for part in ("firstTrain", "teach"):
+                    self.assertEqual(len(ro[part]), len(po[part]), (member, part))
+                    for i, (rr, pr) in enumerate(zip(ro[part], po[part])):
+                        self.assertEqual(len(rr), len(pr))
+                        for j, (r, p) in enumerate(zip(rr, pr)):
+                            self.entry(r, p, f"{member} {part}[{i}][{j}]")
+                self.assertEqual(len(ro["secondTrain"]), len(po["secondTrain"]))
+                for i, (r, p) in enumerate(zip(ro["secondTrain"], po["secondTrain"])):
+                    self.entry(r, p, f"{member} secondTrain[{i}]")
+                self.assertEqual(list(ro["firstTest"]), list(po["firstTest"]))
+                for k in po["firstTest"]:
+                    for j, (r, p) in enumerate(zip(ro["firstTest"][k], po["firstTest"][k])):
+                        self.entry(r, p, f"{member} firstTest[{k}][{j}]")
+                    self.entry(ro["secondTest"][k], po["secondTest"][k], f"{member} secondTest[{k}]")
+                    mask = "".join(str(fp.LINE_PORT[c]) for c, a in zip(N.layer1(member), po["secondTest"][k]["arrivals"]) if a is not None) or "-"
+                    self.assertEqual(set(ro["scores"][k]), set(po["scores"][k]))
+                    self.assertEqual({m: v for m, v in ro["scores"][k].items() if m != mask}, {m: v for m, v in po["scores"][k].items() if m != mask})
+                    self.assertEqual(ro["scores"][k][mask], ro["secondTest"][k]["value"])
+                n += 1
+        self.assertEqual(n, 11)
+
+    def test_a_wrong_fire_shows_in_the_observation(self):
+        member, ports = "F3", {"a": 2}
+        needs = NEEDS[member]
+        plan, slots, beh = behaviour(member, needs, ports, "skew")
+        i = next(k for k, s in enumerate(slots) if s["stage"] == "test" and s["pattern"] == "BC")
+        beh[i]["c"] = (False, {})
+        synthesise(self.d / "wf", member, needs, ports, "skew", beh)
+        rows, _ = R.rows_of(self.d / "wf", member, needs, ports, "skew")
+        po = predicted_observation(member, ports, needs)
+        ro = R.run_observation(member, ports, rows, self.d / "wf", po)
+        self.assertEqual(ro["secondTest"]["BC"]["emissions"], [])
+        self.assertTrue(po["secondTest"]["BC"]["emissions"])
+
+
+class PredictedShapes(Base):
+    """The prediction record in family_predict's shape and in the campaign's (campaign_predict.record)."""
+
+    def test_both_shapes(self):
+        obs = predicted_observation("F4", {"a": 2, "b": 1}, NEEDS["F4"])
+        fam = self.d / "fam.json"
+        fam.write_text(json.dumps(dict(instances=[dict(seed=8505, members=dict(F4=dict(member="F4", seed=8505, observation=obs)))])))
+        camp = self.d / "camp.json"
+        camp.write_text(json.dumps(dict(instances=[dict(seed=8503, member="F3", observation=None),
+                                                   dict(seed=8505, member="F4", eligible=False, observation=obs)])))
+        for path in (fam, camp):
+            self.assertEqual(R.observation_of(path, 8505, "F4"), obs)
+            self.assertIsNone(R.observation_of(path, 8505, "X1"))
+            self.assertIsNone(R.observation_of(path, 8599, "F4"))
+            f = self.d / f"run-{path.stem}"
+            synthesise(f, "F4", NEEDS["F4"], {"a": 2, "b": 1}, "skew", seed=8505)
+            x = R.record_of(f, "complete", with_rows=True, predicted=path)
+            self.assertEqual(x["observation_predicted"], obs)
+            self.assertEqual(set(x["observation"]), set(obs))
+        rehearsal = self.d / "rn.json"                     # the campaign's shape lists one entry per (seed, member): several per seed
+        rehearsal.write_text(json.dumps(dict(instances=[dict(seed=8303, member="X1", observation=dict(k=1)), dict(seed=8303, member="F2", observation=dict(k=2))])))
+        self.assertEqual(R.observation_of(rehearsal, 8303, "F2"), dict(k=2))
+        bad = self.d / "bad.json"
+        bad.write_text(json.dumps(dict(instances=[dict(seed=8505, member="F4"), dict(seed=8505, member="F4")])))
+        with self.assertRaisesRegex(AssertionError, "listed twice"):
+            R.observation_of(bad, 8505, "F4")
 
 
 class SkewKeys(unittest.TestCase):

@@ -319,33 +319,52 @@ def run_of(stage, kind, rnd):
 
 
 def read_predicted(path):
-    """PREDICTED.json in family_predict.py's output shape: {"instances": [{"seed", "members": {member: row}}]}.
-    Returns {seed: {member: row}}; a seed listed twice is refused."""
-    out = {}
+    """The prediction record in either of its two shapes. Returns {seed: {member: row}}; a (seed, member) listed twice
+    is refused.
+      - family_predict.py's output (topup-verdict/PREDICTIONS.json): {"instances": [{"seed", "members": {member: row}}]},
+        the row's kernel verdicts under row["gate"]["kernel"];
+      - the campaign's PREDICTED.json (campaign_predict.record): {"instances": [{"seed", "member", ...row}]}, one entry
+        per (seed, member), the kernel verdicts under row["kernel"], with "eligible" and "room_K3" beside them."""
+    out, whole = {}, set()
     for x in json.loads(Path(path).read_text())["instances"]:
         s = int(x["seed"])
-        assert s not in out, f"refused: seed {s} is listed twice in the prediction record"
-        out[s] = x["members"]
+        if "members" in x:
+            assert "member" not in x, f"refused: the entry of {s} has both shapes"
+            assert s not in whole and s not in out, f"refused: seed {s} is listed twice in the prediction record"
+            whole.add(s)
+            rows = x["members"]
+        else:
+            assert "member" in x, f"refused: the entry of {s} has neither `members` nor `member`"
+            assert s not in whole, f"refused: seed {s} is listed in both shapes"
+            rows = {x["member"]: x}
+        for m, row in rows.items():
+            assert m not in out.setdefault(s, {}), f"refused: {m} of {s} is listed twice in the prediction record"
+            out[s][m] = row
     return out
 
 
 def kernel(row):
-    """The kernel's verdicts {K0, K3} of a row, or None; refuses a row whose summary flags disagree with them."""
-    k = (row.get("gate") or {}).get("kernel")
+    """The kernel's verdicts {K0, K3} of a row (row["gate"]["kernel"] or row["kernel"]), or None."""
+    k = (row.get("gate") or {}).get("kernel") if "gate" in row else row.get("kernel")
     if not k:
         return None
     assert isinstance(k.get("K0"), bool) and isinstance(k.get("K3"), bool), f"refused: the kernel's verdicts are not booleans: {k}"
     if "gate_K0" in row:
         assert row["gate_K0"] == k["K0"], "refused: gate_K0 disagrees with the kernel's K0"
-    if "room_K3" in row:
-        assert row["room_K3"] == k["K3"], "refused: room_K3 disagrees with the kernel's K3"
     return k
 
 
 def eligible(row):
-    """PREDICTION.md 3: measured, and the kernel's checks hold at K = 0."""
+    """PREDICTION.md 3: measured, and the kernel's checks hold at K = 0. A row's own `eligible` and `room_K3`, where
+    given, must agree: room_K3 is the kernel's K3 (family_predict's form) or K3 on an eligible row (the campaign's)."""
     k = kernel(row)
-    return row.get("measured") is True and row.get("eligible_needs") is not False and bool(k) and k["K0"]
+    e = row.get("measured") is True and row.get("eligible_needs") is not False and bool(k) and k["K0"]
+    if "eligible" in row:
+        assert row["eligible"] == e, f"refused: the row's eligible ({row['eligible']}) disagrees with measured and the kernel's K0 ({e})"
+    if "room_K3" in row:
+        k3 = bool(k) and k["K3"]
+        assert row["room_K3"] in (k3, e and k3), f"refused: room_K3 disagrees with the kernel's K3"
+    return e
 
 
 def room(row):

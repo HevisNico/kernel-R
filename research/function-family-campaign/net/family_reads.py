@@ -3,7 +3,8 @@
 analysis takes (M1's analysis.analysis(predicted, runs)):
 
   {counts: bool, words: {port: str}, tests: {pattern: {cell: bool}}, skew: {pattern: {cell: bool}}, G: [failure dicts]}
-  and, with with_rows: rows (reads4.network_reads' rows), result (evidence/result.json), words_prime, observation.
+  and, with with_rows: rows (reads4.network_reads' rows), result (evidence/result.json), words_prime, and with the
+  prediction record: observation (the RUN's, as campaign 5's analyze.run_observation builds it) and observation_predicted.
 
 The frozen functions do the reading, unchanged:
   - reads4.network_reads (campaign 5): every read of every slot, from the trace, the delivered occurrences and the slots.
@@ -93,12 +94,85 @@ def c5_analyze():
     return mod
 
 
+def predicted_row(predicted, seed, member):
+    """The prediction record's row of (seed, member), in either shape (family_net.read_predicted), or None."""
+    rows = N.read_predicted(predicted).get(int(seed), {})
+    return rows.get(member)
+
+
 def observation_of(predicted, seed, member):
-    """family_predict.observation's serialized form for (seed, member), from the prediction record, or None."""
-    for x in json.loads(Path(predicted).read_text())["instances"]:
-        if int(x["seed"]) == int(seed):
-            return (x["members"].get(member) or {}).get("observation")
-    return None
+    """The PREDICTED observation (family_predict.observation's serialized form) of (seed, member), or None."""
+    row = predicted_row(predicted, seed, member)
+    return None if row is None else row.get("observation")
+
+
+def run_observation(member, unary_ports, rows, folder, po):
+    """The RUN's observation, in the serialized format of the predicted one: campaign 5's analyze.run_observation
+    generalised by the member's wiring. Its dates, arrivals and emissions are the run's (reads4's rows and the trace);
+    its values are the run's scores (q peaks; THETA at least on a FIRE); its scores are the predicted calibration
+    scores `po` on the submasks the run did not observe, and the run's own on the one it did. For F1 it is
+    analyze.run_observation, line for line (test_family_reads.RunObservation).
+    The layer-1 inputs are the member's inputs in its order; the lines of c are LINE_PORT of its layer-1 cells."""
+    import measure
+    import net
+    import predicted as P
+    import reads4
+    from c4 import dnf
+    A = c5_analyze()
+    units = A.units
+    folder = Path(folder)
+    tr = measure.Trace(folder / "evidence" / "trace.raw")
+    result = json.loads((folder / "evidence" / "result.json").read_text())
+    delivered = [o for o in result["occurrences"] if o["delivered"]]
+    inputs = fp.MEMBERS[member]["inputs"]
+    L1 = N.layer1(member)
+    wire = fp.wiring(member, N.check_ports(member, unary_ports))
+    INPUT_OF = {(c, p): n for c in L1 for n, p in wire[c].items()}
+    lines = [fp.LINE_PORT[c] for c in L1]
+    score = lambda r: P.zint(r["q_peak"]) if not r["fire"] else max(P.zint(r["q_peak_before_fire"]), P.THETA)
+
+    def layer1(x_, c, own_target=False):
+        lo, hi = reads4.c4_at(x_["date"]) - 1e-9, reads4.c4_at(x_["date"] + dnf.SLOT) - 1e-9
+        arr = {INPUT_OF[(o["cell"], o["port"])]: units(o["date_s"]) for o in delivered if lo <= o["date_s"] < hi and o["cell"] in L1
+               and (not own_target or o["cell"] == c)}
+        arrivals = [None if k not in arr else str(arr[k]) for k in inputs]
+        r = x_["reads"].get(c)
+        if r is None:
+            here = [o["date_s"] for o in delivered if lo <= o["date_s"] < hi and o["cell"] in L1]
+            start = min(here) if here else net.snap(reads4.c4_at(x_["date"]))
+            fires = tr.crossings(f"v(x{c}.p)", lo, hi)
+            peak = reads4.q_peak(tr, c, start, start + 3 * reads4.TU)
+            value = P.zint(peak) if not fires else max(P.zint(reads4.q_peak(tr, c, start, fires[0])), P.THETA)
+            return dict(start=str(units(start)), arrivals=arrivals, emissions=[str(units(f)) for f in fires], value=value)
+        return dict(start=str(units(r["start_s"])), arrivals=arrivals, emissions=[str(units(f)) for f in r["slot_fires_s"]], value=score(r))
+
+    def layer2(x_):
+        r = x_["reads"].get("c")
+        lo, hi = reads4.c4_at(x_["date"]) - 1e-9, reads4.c4_at(x_["date"] + dnf.SLOT) - 1e-9
+        if r is None:
+            start = net.snap(reads4.c4_at(x_["date"])) + 1.5 * reads4.TU
+            fires = tr.crossings("v(xc.p)", lo, hi)
+            return dict(start=str(units(net.snap(reads4.c4_at(x_["date"]))) + P.F(3, 2)), arrivals=[None] * len(lines),
+                        emissions=[str(units(f)) for f in fires], value=P.zint(reads4.q_peak(tr, "c", start, start + 3 * reads4.TU)))
+        arr = {a["port"]: units(a["date_s"]) for a in r["arrivals"]}
+        return dict(start=str(units(r["start_s"])), arrivals=[str(arr[p]) if p in arr else None for p in lines],
+                    emissions=[str(units(f)) for f in r["slot_fires_s"]], value=score(r))
+    o = dict(firstTrain=[], teach=[], secondTrain=[], firstTest={}, secondTest={}, scores={})
+    for x_ in rows:
+        if x_["stage"] == "layer 1":
+            o["firstTrain"].append([layer1(x_, c, own_target=True) for c in L1])
+        elif x_["stage"] == "layer 2":
+            o["teach"].append([layer1(x_, c) for c in L1])
+            o["secondTrain"].append(layer2(x_))
+        elif x_["stage"] == "test":
+            k = "".join(sorted(x_["pattern"])) or "-"
+            o["firstTest"][k] = [layer1(x_, c) for c in L1]
+            o["secondTest"][k] = layer2(x_)
+            sc = dict(po["scores"][k])
+            mask = "".join(str(p) for p, v in zip(lines, o["secondTest"][k]["arrivals"]) if v is not None) or "-"
+            sc[mask] = o["secondTest"][k]["value"]
+            o["scores"][k] = sc
+    return o
 
 
 def record_of(folder, status, with_rows=False, prime=False, predicted=None):
@@ -106,8 +180,9 @@ def record_of(folder, status, with_rows=False, prime=False, predicted=None):
     observed, counting for nothing); a counted run that cannot be read is an error.
     with_rows adds what M1's comparisons read: `rows` (reads4.network_reads' rows), `result` (the run's
     evidence/result.json), `words_prime` (reads4.words with prime=True, on the member's ports) and, with `predicted`
-    (the prediction record), `observation` (family_predict.observation's serialized form for the run's seed and
-    member). A field that cannot be given is left out ("no data" for M1)."""
+    (the prediction record, either shape): `observation`, the RUN's observation (run_observation: the run's dates,
+    emissions and q peaks, the predicted calibration scores only on the submasks the run did not observe), and
+    `observation_predicted`, the prediction's own. A field that cannot be given is left out ("no data" for M1)."""
     import predicted as P
     analyze = c5_analyze()
     folder = Path(folder)
@@ -130,9 +205,10 @@ def record_of(folder, status, with_rows=False, prime=False, predicted=None):
     out = dict(counts=counts, words=w["words"], tests=w["tests"], skew=w["skew"], G=analyze.g_check(rows, noisy))
     if with_rows:
         out.update(rows=rows, result=result, words_prime=words(member, ports, rows, prime=True)["words"])
-        obs = observation_of(predicted, rec["seed"], member) if predicted is not None and rec.get("seed") is not None else None
-        if obs is not None:
-            out["observation"] = obs
+        po = observation_of(predicted, rec["seed"], member) if predicted is not None and rec.get("seed") is not None else None
+        if po is not None:
+            out["observation"] = run_observation(member, ports, rows, folder, po)
+            out["observation_predicted"] = po
     return out
 
 
