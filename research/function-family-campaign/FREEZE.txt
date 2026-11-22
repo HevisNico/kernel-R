@@ -1,0 +1,70 @@
+Function family campaign (a): freeze marker of the joint code (PREDICTION.md sections 8 and 10, step 2)
+
+This file freezes, by SHA-256, the network-run code and the campaign implementation. It merges nothing: it sits on
+385c33bf (PREDICTION.md, DRAW.json, FAMILY.json, draw.py) and names the two branch tips that hold the frozen files.
+No campaign run has been made; no campaign data exists.
+
+Branch tips
+  research/function-family-campaign-net    70d9d79514d8acb70c4ab582d7a02ccb7282a55f   (net/)
+  research/function-family-campaign-impl   920413ecfcd95721bd52af88584dbbddbf8ed6c5   (impl/)
+  both on 385c33bf; each touches only its own folder
+
+Files of research/function-family-campaign/net/ at 70d9d795 (sha256, path)
+  5ad3530656977a441a55076f4703601ff740716c4a97fafae29f304256321b82  research/function-family-campaign/net/family_net.py
+  65e6dc491dfb7217867f10e7f43dc7833c01c2fa107edf8de44d1c7fa9c94fcd  research/function-family-campaign/net/family_reads.py
+  40aef81cef4c9696224b035281308dbaa4bde109a91d0072bfcceb5e767d9079  research/function-family-campaign/net/test_family_net.py
+  6a41aa6d710e0b31aebd8a6c35af34ff00bd61344a2463fc5d5cfd1bb35d063c  research/function-family-campaign/net/test_family_net_output.txt
+  7017761766ea44802582c7f20820c755cf4abd546133c0ff625c1cc683de5244  research/function-family-campaign/net/test_family_reads.py
+  e772d9e11c68e709b098194eeacb00a70ac623f82795fd7e8297019102779fb5  research/function-family-campaign/net/test_family_reads_output.txt
+
+Files of research/function-family-campaign/impl/ at 920413ec (sha256, path)
+  1b0a9270867a36d3b8d2054a8fba037d45a5a81850dc1cad43c2337d5df8c404  research/function-family-campaign/impl/analysis.py
+  aa0f6bb346673578acb2481274353caabe3d0c8a99ce8539cfeb22f55a61e13c  research/function-family-campaign/impl/campaign_common.py
+  57f1908079e4f39f7d0435834055abf2a83c0bfed9dcb2cab97413b6d5cc4977  research/function-family-campaign/impl/campaign_measure.py
+  e9928bc806c1499ed586b9636a7693d6878c88062233aecbfe2e2f8c5b47ac94  research/function-family-campaign/impl/campaign_predict.py
+  a9ab763334f5dd674fa4218eb505bc88134deab96eb041b715a2cf32f2d6a1a9  research/function-family-campaign/impl/comparisons.py
+  181d99efa7a89cbe78a8a3fe60c53b555e2c27d02732605e97e51d56af8db769  research/function-family-campaign/impl/dupcheck.py
+  8720e2847e807d5e7a2d13bfd35bfd9174168f06f07932994d6c85f0af3de297  research/function-family-campaign/impl/manifests.py
+  df947fb940db59a4233bc5e267acbf3dbe80650d373e0f5f191e13ec66349599  research/function-family-campaign/impl/test_campaign.py
+  c90802a05ecddeae431c9463cd616f8cb2ccc3703e9e7e30a94d6d3381058778  research/function-family-campaign/impl/test_campaign_output.txt
+  39c929a6890afac739fb4a02b527d99b1936a0c2d9960cf6f3f3f894b654d3a8  research/function-family-campaign/impl/test_integration.py
+  87c74cfe86a92587fc57058cecaf077834fae7b0e1a5b6a8c1d590cda28feb87  research/function-family-campaign/impl/test_integration_output.txt
+
+Dependencies (unchanged, read by the code above)
+  frozen prediction code   research/function-family/dev/family_predict.py 00b6a516..., frozen at f2b3904c (freeze),
+                           top-up verdict 0c003fbf (research/function-family-dev)
+  REPO                     research/learned-dnf-circuit-campaign-6-impl    ecfcd1c1517048b3305fdc5ed2ac9f481242ba67
+  FUP (dev on PYTHONPATH)  research/learned-dnf-circuit-campaign-6-followup 56f9e83e5eb5e2037bcf89ea8d9d33643543d1fc
+  PREP (dev on PYTHONPATH) research/learned-dnf-circuit-campaign-7-prep     b956efe4d311420fb0410f861face9dfe9ae0f4b
+  GEN                      research/learned-dnf-generator                  4fca62563a6d03b4f1e45027cb21e76fbc000df2
+  Lean                     4.35.0, archive lean-4.35.0-linux.tar.zst sha256 7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+                           (bin/lean sha256 bf8d54e4714cc4b03d3f6bb34c83b7202b87e49c8bfcbff6895c085bb90ceb38)
+  Python                   3.12 (the venv of the top-up); numpy for the network tests
+
+Test outputs (committed beside the tests; sha256 of each output file at its tip)
+  6a41aa6d710e0b31aebd8a6c35af34ff00bd61344a2463fc5d5cfd1bb35d063c  research/function-family-campaign/net/test_family_net_output.txt  (33 tests, OK)
+  e772d9e11c68e709b098194eeacb00a70ac623f82795fd7e8297019102779fb5  research/function-family-campaign/net/test_family_reads_output.txt  (23 tests, OK)
+  c90802a05ecddeae431c9463cd616f8cb2ccc3703e9e7e30a94d6d3381058778  research/function-family-campaign/impl/test_campaign_output.txt  (36 tests, OK (with LEAN set: M8 through the kernel))
+  87c74cfe86a92587fc57058cecaf077834fae7b0e1a5b6a8c1d590cda28feb87  research/function-family-campaign/impl/test_integration_output.txt  (16 tests, OK (net's synthetic runs -> family_reads -> analysis))
+
+  How they were run (no simulation in any of them):
+    PYTHONPATH=FUP/dev:PREP/dev:FF/dev:impl:net python -B test_family_net.py REPO
+    PYTHONPATH=... python -B test_family_reads.py REPO          (REAL_7802 set for the test on the real 7802-quiet folder)
+    PYTHONPATH=... LEAN=lean-4.35.0 python -B test_campaign.py REPO GEN TOPUP_EV
+    PYTHONPATH=... python -B test_integration.py REPO GEN net
+
+CI
+  Replaced by amendment 1: research/function-family-campaign/AMENDMENT_1.md (f8a8809d on
+  research/function-family-campaign), SHA-256 eb19e2915987c08a68d2e9232c8e79436f977f9c66d0e7fc1c0f1036fd0ee947.
+  No workflow covers these folders, so section 8's CI line cannot run. In its place, M3 (a clean machine that wrote
+  none of this code) checks every file above against its SHA-256, then reruns, with no simulation, the frozen
+  prediction tests, the four test files above (the real 7802-quiet test included) and gencheck.sh on the synthetic
+  gate of every member, with Lean checked against its archive. The outputs go in a commit of their own on
+  evidence/function-family-campaign-ci, before the rehearsal. Any failure: nothing is launched until it is explained.
+
+Not checked
+  - No network run and no real network trace: every network-side test is on synthetic traces.
+  - M8 through the kernel was run on a synthetic observation only; on M2's synthetic traces the run's observation
+    fails only the calibration checker (flat q), so it shows M8 reads the run, not that a real run passes.
+  - The network limits and the rehearsal's machines are place-holders until the rehearsal's amendment.
+
