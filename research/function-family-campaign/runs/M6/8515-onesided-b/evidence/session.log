@@ -1,0 +1,3208 @@
+>>> set numdgt=16
+ERROR: (external)  no graphics interface;
+ please check if X-server is running,
+ or ngspice is compiled properly (see INSTALL)
+
+Note: Compatibility modes selected: hs a
+
+Warning: m=xx on .subckt line will override multiplier m hierarchy!
+
+
+Circuit: * 3 r cells, pulses at any date (phase 0 of the network experiment, exploratory)
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+>>> setseed 8515
+>>> reset
+Reset re-loads circuit * 3 r cells, pulses at any date (phase 0 of the network experiment, exploratory)
+
+Circuit: * 3 r cells, pulses at any date (phase 0 of the network experiment, exploratory)
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+>>> save v(xa.p) v(xa.vq) v(xa.vmem1) v(xa.x1.sum) v(xa.x1.si) v(ksa1) v(ampa1) v(xa.vmem2) v(xa.x2.sum) v(xa.x2.si) v(ksa2) v(ampa2) v(xa.nzm) v(xa.x1.nzo) v(xa.x1.nzc) v(xa.x2.nzo) v(xa.x2.nzc) v(xb.p) v(xb.vq) v(xb.vmem1) v(xb.x1.sum) v(xb.x1.si) v(ksb1) v(ampb1) v(xb.vmem2) v(xb.x2.sum) v(xb.x2.si) v(ksb2) v(ampb2) v(xb.nzm) v(xb.x1.nzo) v(xb.x1.nzc) v(xb.x2.nzo) v(xb.x2.nzc) v(xc.p) v(xc.vq) v(xc.vmem1) v(xc.x1.sum) v(xc.x1.si) v(ksc1) v(ampc1) v(xc.vmem2) v(xc.x2.sum) v(xc.x2.si) v(ksc2) v(ampc2) v(xc.nzm) v(xc.x1.nzo) v(xc.x1.nzc) v(xc.x2.nzo) v(xc.x2.nzc) v(gla1) v(gla2) v(glb1) v(glb2) v(glc1) v(glc2)
+>>> delete all
+>>> stop when time >= 0.0003001
+>>> save v(xa.p) v(xa.vq) v(xa.vmem1) v(xa.x1.sum) v(xa.x1.si) v(ksa1) v(ampa1) v(xa.vmem2) v(xa.x2.sum) v(xa.x2.si) v(ksa2) v(ampa2) v(xa.nzm) v(xa.x1.nzo) v(xa.x1.nzc) v(xa.x2.nzo) v(xa.x2.nzc) v(xb.p) v(xb.vq) v(xb.vmem1) v(xb.x1.sum) v(xb.x1.si) v(ksb1) v(ampb1) v(xb.vmem2) v(xb.x2.sum) v(xb.x2.si) v(ksb2) v(ampb2) v(xb.nzm) v(xb.x1.nzo) v(xb.x1.nzc) v(xb.x2.nzo) v(xb.x2.nzc) v(xc.p) v(xc.vq) v(xc.vmem1) v(xc.x1.sum) v(xc.x1.si) v(ksc1) v(ampc1) v(xc.vmem2) v(xc.x2.sum) v(xc.x2.si) v(ksc2) v(ampc2) v(xc.nzm) v(xc.x1.nzo) v(xc.x1.nzc) v(xc.x2.nzo) v(xc.x2.nzc) v(gla1) v(gla2) v(glb1) v(glb2) v(glc1) v(glc2)
+>>> tran 1u 0.4 0 200n
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        1.8
+vr0                                       1.25
+vfire                                      0.8
+vreopen                                    1.2
+vcm                                        0.4
+vhi                                        0.7
+vlo                                        0.5
+vpre                                       1.3
+vinita1                                 0.3895
+ksa1                                         0
+kra1                                         1
+kpa1                                         0
+tsa1                                         1
+ampa1                                        1
+vinita2                                 0.3895
+ksa2                                         0
+kra2                                         1
+kpa2                                         0
+tsa2                                         1
+ampa2                                        1
+xa.x1.gm                              0.863262
+xa.x1.sen0                                   0
+xa.x1.rst0                                 1.8
+xa.x1.preb0                                  0
+xa.x1.sen                                    0
+xa.x1.rst                                  1.8
+xa.x1.preb                                   0
+xa.x1.ibs                             0.503506
+xa.x1.ibo                              0.50776
+xa.x1.dq                               1.07407
+xa.vmem1                              0.389276
+xa.x1.admb                                 1.8
+xa.pb                                      1.8
+xa.x1.xnad.n1                      1.91345e-11
+xa.x1.adm                          4.49066e-07
+xa.vq                                     1.25
+xa.x1.vs                               1.29984
+xa.x1.vgd                              1.01717
+xa.x1.x                                0.40001
+xa.x1.si                           7.20369e-07
+xa.x1.sum                             0.397765
+xa.x1.sd                                   1.8
+xa.x1.xop.tail                         1.09263
+xa.x1.xop.o1m                           0.6928
+xa.x1.xop.o1                          0.697238
+xa.x1.vcmn                                 0.4
+xa.x1.xop.oz                          0.697238
+xa.x1.vcmn0                                0.4
+xa.x1.nzo                                    0
+gla1                                         0
+xa.x1.drv                             0.397765
+xa.x1.rsti0                                1.8
+xa.x1.rsti                                 1.8
+xa.x1.xcmps.tail                       1.59864
+xa.x1.xcmps.o1m                       0.858152
+xa.x1.vrefsn                               0.7
+xa.x1.xcmps.o1                     0.000127734
+xa.x1.xcmps.o2                             1.8
+xa.x1.xcmps.o3                     1.09431e-06
+xa.x1.cmps                                 1.8
+xa.x1.vrefsn0                              0.7
+xa.x1.vrefs                                0.7
+xa.x1.nzc                                    0
+xa.x1.adb                                  1.8
+xa.x1.ad                           6.17936e-07
+xa.x1.nzi                                    0
+xa.x1.en                           6.31105e-07
+xa.x1.cmpb                         7.57011e-07
+xa.x1.sba                                  1.8
+xa.x1.xnsa.n1                        0.0845129
+xa.x1.a                            1.33575e-06
+xa.x1.ab                                   1.8
+xa.x1.xla.x1.n1                    6.59639e-07
+xa.x1.xla.x2.n1                      0.0736865
+xa.x1.ad1                          1.33575e-06
+xa.x1.sbc0                                 1.8
+xa.x1.xnsc.n1                      1.16446e-10
+xa.x1.c                            7.31106e-07
+xa.x1.cbar                                 1.8
+xa.x1.xlc.x1.n1                     3.6208e-07
+xa.x1.xlc.x2.n1                      0.0311278
+xa.x1.cd1                          7.31106e-07
+xa.x1.cd2                                  1.8
+xa.x1.cdel                         8.64658e-07
+xa.x1.sbb                                  1.8
+xa.x1.xnsb.n1                        0.0434859
+xa.x1.b                            8.58248e-07
+xa.x1.bb                                   1.8
+xa.x1.xlb.x1.n1                    4.24009e-07
+xa.x1.xlb.x2.n1                      0.0537846
+xa.x1.sib                                  1.8
+xa.x1.xnsi.n1                      1.77839e-10
+xa.x1.xnsi.n2                      8.84329e-11
+xa.x2.gm                              0.861313
+xa.x2.sen0                                   0
+xa.x2.rst0                                 1.8
+xa.x2.preb0                                  0
+xa.x2.sen                                    0
+xa.x2.rst                                  1.8
+xa.x2.preb                                   0
+xa.x2.ibs                             0.507603
+xa.x2.ibo                             0.505343
+xa.x2.dq                               1.05932
+xa.vmem2                              0.389288
+xa.x2.admb                                 1.8
+xa.x2.xnad.n1                      6.32681e-11
+xa.x2.adm                          9.97857e-07
+xa.x2.vs                               1.29985
+xa.x2.vgd                              1.01158
+xa.x2.x                                0.40001
+xa.x2.si                           4.06731e-07
+xa.x2.sum                             0.397881
+xa.x2.sd                                   1.8
+xa.x2.xop.tail                         1.09695
+xa.x2.xop.o1m                         0.694113
+xa.x2.xop.o1                          0.699995
+xa.x2.vcmn                                 0.4
+xa.x2.xop.oz                          0.699995
+xa.x2.vcmn0                                0.4
+xa.x2.nzo                                    0
+gla2                                         0
+xa.x2.drv                             0.397881
+xa.x2.rsti0                                1.8
+xa.x2.rsti                                 1.8
+xa.x2.xcmps.tail                       1.58601
+xa.x2.xcmps.o1m                       0.857634
+xa.x2.vrefsn                               0.7
+xa.x2.xcmps.o1                     8.15793e-05
+xa.x2.xcmps.o2                             1.8
+xa.x2.xcmps.o3                     4.80232e-07
+xa.x2.cmps                                 1.8
+xa.x2.vrefsn0                              0.7
+xa.x2.vrefs                                0.7
+xa.x2.nzc                                    0
+xa.x2.adb                                  1.8
+xa.x2.ad                           1.22512e-06
+xa.x2.nzi                                    0
+xa.x2.en                           4.21003e-07
+xa.x2.cmpb                         3.30896e-07
+xa.x2.sba                                  1.8
+xa.x2.xnsa.n1                        0.0904097
+xa.x2.a                             1.0367e-06
+xa.x2.ab                                   1.8
+xa.x2.xla.x1.n1                    5.23536e-07
+xa.x2.xla.x2.n1                      0.0567207
+xa.x2.ad1                           1.0367e-06
+xa.x2.sbc0                                 1.8
+xa.x2.xnsc.n1                      2.01884e-10
+xa.x2.c                            1.23566e-06
+xa.x2.cbar                                 1.8
+xa.x2.xlc.x1.n1                    6.19718e-07
+xa.x2.xlc.x2.n1                      0.0769645
+xa.x2.cd1                          1.23566e-06
+xa.x2.cd2                                  1.8
+xa.x2.cdel                         6.48772e-07
+xa.x2.sbb                                  1.8
+xa.x2.xnsb.n1                        0.0498178
+xa.x2.b                            6.67204e-07
+xa.x2.bb                                   1.8
+xa.x2.xlb.x1.n1                    3.33105e-07
+xa.x2.xlb.x2.n1                      0.0718713
+xa.x2.sib                                  1.8
+xa.x2.xnsi.n1                      1.56769e-10
+xa.x2.xnsi.n2                      7.81112e-11
+xa.ibm                                0.508085
+xa.nzm                                       0
+xa.vrefmn0                                 0.8
+xa.vrefm                                   0.8
+xa.vrefmn                                  0.8
+xa.xcmpm.tail                          1.78692
+xa.xcmpm.o1m                          0.613363
+xa.xcmpm.o1                             1.7786
+xa.xcmpm.o2                          0.0196539
+xa.xcmpm.o3                                1.8
+xa.cmpm                            5.24238e-07
+xa.cmpmb                                   1.8
+xa.sbp                                     1.8
+xa.pbdel                                   1.8
+xa.xnsp.n1                         9.66487e-11
+xa.rbp                                     1.8
+xa.pdel                            1.04388e-06
+xa.xnrp.n1                             1.54695
+xa.p                               6.98077e-07
+xa.xlp.x1.n1                       3.48784e-07
+xa.xlp.x2.n1                           1.51648
+xa.pd1                             6.98077e-07
+vinitb1                                 0.3895
+ksb1                                         0
+krb1                                         1
+kpb1                                         0
+tsb1                                         1
+ampb1                                        1
+vinitb2                                 0.3895
+ksb2                                         0
+krb2                                         1
+kpb2                                         0
+tsb2                                         1
+ampb2                                        1
+xb.x1.gm                              0.862821
+xb.x1.sen0                                   0
+xb.x1.rst0                                 1.8
+xb.x1.preb0                                  0
+xb.x1.sen                                    0
+xb.x1.rst                                  1.8
+xb.x1.preb                                   0
+xb.x1.ibs                             0.504496
+xb.x1.ibo                             0.508901
+xb.x1.dq                               1.08192
+xb.vmem1                              0.389013
+xb.x1.admb                                 1.8
+xb.pb                                      1.8
+xb.x1.xnad.n1                      3.55491e-11
+xb.x1.adm                           1.0705e-06
+xb.vq                                     1.25
+xb.x1.vs                               1.29985
+xb.x1.vgd                              1.01227
+xb.x1.x                                0.40001
+xb.x1.si                           6.13743e-07
+xb.x1.sum                             0.395132
+xb.x1.sd                                   1.8
+xb.x1.xop.tail                         1.09252
+xb.x1.xop.o1m                         0.693742
+xb.x1.xop.o1                           0.69808
+xb.x1.vcmn                                 0.4
+xb.x1.xop.oz                           0.69808
+xb.x1.vcmn0                                0.4
+xb.x1.nzo                                    0
+glb1                                         0
+xb.x1.drv                             0.395132
+xb.x1.rsti0                                1.8
+xb.x1.rsti                                 1.8
+xb.x1.xcmps.tail                       1.59198
+xb.x1.xcmps.o1m                       0.851133
+xb.x1.vrefsn                               0.7
+xb.x1.xcmps.o1                     9.21207e-05
+xb.x1.xcmps.o2                             1.8
+xb.x1.xcmps.o3                     8.88283e-07
+xb.x1.cmps                                 1.8
+xb.x1.vrefsn0                              0.7
+xb.x1.vrefs                                0.7
+xb.x1.nzc                                    0
+xb.x1.adb                                  1.8
+xb.x1.ad                           3.60363e-07
+xb.x1.nzi                                    0
+xb.x1.en                           1.16876e-06
+xb.x1.cmpb                         5.08497e-07
+xb.x1.sba                                  1.8
+xb.x1.xnsa.n1                        0.0556558
+xb.x1.a                            9.72574e-07
+xb.x1.ab                                   1.8
+xb.x1.xla.x1.n1                    4.90416e-07
+xb.x1.xla.x2.n1                      0.0758734
+xb.x1.ad1                          9.72574e-07
+xb.x1.sbc0                                 1.8
+xb.x1.xnsc.n1                      5.70829e-11
+xb.x1.c                             9.9514e-07
+xb.x1.cbar                                 1.8
+xb.x1.xlc.x1.n1                    4.95013e-07
+xb.x1.xlc.x2.n1                      0.0463774
+xb.x1.cd1                           9.9514e-07
+xb.x1.cd2                                  1.8
+xb.x1.cdel                         5.39389e-07
+xb.x1.sbb                                  1.8
+xb.x1.xnsb.n1                        0.0748593
+xb.x1.b                            9.59695e-07
+xb.x1.bb                                   1.8
+xb.x1.xlb.x1.n1                     4.7191e-07
+xb.x1.xlb.x2.n1                      0.0869729
+xb.x1.sib                                  1.8
+xb.x1.xnsi.n1                      7.25972e-11
+xb.x1.xnsi.n2                      3.60454e-11
+xb.x2.gm                              0.863897
+xb.x2.sen0                                   0
+xb.x2.rst0                                 1.8
+xb.x2.preb0                                  0
+xb.x2.sen                                    0
+xb.x2.rst                                  1.8
+xb.x2.preb                                   0
+xb.x2.ibs                             0.509547
+xb.x2.ibo                             0.507575
+xb.x2.dq                               1.09272
+xb.vmem2                              0.389542
+xb.x2.admb                                 1.8
+xb.x2.xnad.n1                       8.2214e-11
+xb.x2.adm                          4.70263e-07
+xb.x2.vs                               1.29986
+xb.x2.vgd                              1.01704
+xb.x2.x                                0.40001
+xb.x2.si                           7.32679e-07
+xb.x2.sum                             0.400422
+xb.x2.sd                                   1.8
+xb.x2.xop.tail                         1.09399
+xb.x2.xop.o1m                         0.695685
+xb.x2.xop.o1                          0.702259
+xb.x2.vcmn                                 0.4
+xb.x2.xop.oz                          0.702259
+xb.x2.vcmn0                                0.4
+xb.x2.nzo                                    0
+glb2                                         0
+xb.x2.drv                             0.400422
+xb.x2.rsti0                                1.8
+xb.x2.rsti                                 1.8
+xb.x2.xcmps.tail                       1.58944
+xb.x2.xcmps.o1m                       0.852475
+xb.x2.vrefsn                               0.7
+xb.x2.xcmps.o1                     7.92127e-05
+xb.x2.xcmps.o2                             1.8
+xb.x2.xcmps.o3                     5.96087e-07
+xb.x2.cmps                                 1.8
+xb.x2.vrefsn0                              0.7
+xb.x2.vrefs                                0.7
+xb.x2.nzc                                    0
+xb.x2.adb                                  1.8
+xb.x2.ad                           5.85246e-07
+xb.x2.nzi                                    0
+xb.x2.en                           7.81602e-07
+xb.x2.cmpb                         5.07359e-07
+xb.x2.sba                                  1.8
+xb.x2.xnsa.n1                        0.0879984
+xb.x2.a                            1.10007e-06
+xb.x2.ab                                   1.8
+xb.x2.xla.x1.n1                    5.51675e-07
+xb.x2.xla.x2.n1                      0.0424497
+xb.x2.ad1                          1.10007e-06
+xb.x2.sbc0                                 1.8
+xb.x2.xnsc.n1                      8.93102e-11
+xb.x2.c                             2.3264e-06
+xb.x2.cbar                                 1.8
+xb.x2.xlc.x1.n1                      1.164e-06
+xb.x2.xlc.x2.n1                      0.0431513
+xb.x2.cd1                           2.3264e-06
+xb.x2.cd2                                  1.8
+xb.x2.cdel                         1.23342e-06
+xb.x2.sbb                                  1.8
+xb.x2.xnsb.n1                        0.0750748
+xb.x2.b                            7.07187e-07
+xb.x2.bb                                   1.8
+xb.x2.xlb.x1.n1                     3.4981e-07
+xb.x2.xlb.x2.n1                      0.0808016
+xb.x2.sib                                  1.8
+xb.x2.xnsi.n1                      1.50879e-10
+xb.x2.xnsi.n2                      7.43403e-11
+xb.ibm                                0.506812
+xb.nzm                                       0
+xb.vrefmn0                                 0.8
+xb.vrefm                                   0.8
+xb.vrefmn                                  0.8
+xb.xcmpm.tail                          1.78542
+xb.xcmpm.o1m                          0.622272
+xb.xcmpm.o1                            1.77504
+xb.xcmpm.o2                          0.0201825
+xb.xcmpm.o3                                1.8
+xb.cmpm                            6.34959e-07
+xb.cmpmb                                   1.8
+xb.sbp                                     1.8
+xb.pbdel                                   1.8
+xb.xnsp.n1                          2.1006e-10
+xb.rbp                                     1.8
+xb.pdel                            5.20656e-07
+xb.xnrp.n1                              1.4825
+xb.p                               1.29828e-06
+xb.xlp.x1.n1                       6.58521e-07
+xb.xlp.x2.n1                           1.50807
+xb.pd1                             1.29828e-06
+vinitc1                                 0.3895
+ksc1                                         0
+krc1                                         1
+kpc1                                         0
+tsc1                                         1
+ampc1                                        1
+vinitc2                                 0.3895
+ksc2                                         0
+krc2                                         1
+kpc2                                         0
+tsc2                                         1
+ampc2                                        1
+xc.x1.gm                              0.861558
+xc.x1.sen0                                   0
+xc.x1.rst0                                 1.8
+xc.x1.preb0                                  0
+xc.x1.sen                                    0
+xc.x1.rst                                  1.8
+xc.x1.preb                                   0
+xc.x1.ibs                             0.509639
+xc.x1.ibo                             0.508951
+xc.x1.dq                               1.04168
+xc.vmem1                              0.388558
+xc.x1.admb                                 1.8
+xc.pb                                      1.8
+xc.x1.xnad.n1                      5.29142e-11
+xc.x1.adm                          8.84355e-07
+xc.vq                                     1.25
+xc.x1.vs                               1.29985
+xc.x1.vgd                               1.0094
+xc.x1.x                               0.400009
+xc.x1.si                           5.47979e-07
+xc.x1.sum                             0.390575
+xc.x1.sd                                   1.8
+xc.x1.xop.tail                         1.09026
+xc.x1.xop.o1m                         0.694642
+xc.x1.xop.o1                          0.698814
+xc.x1.vcmn                                 0.4
+xc.x1.xop.oz                          0.698814
+xc.x1.vcmn0                                0.4
+xc.x1.nzo                                    0
+glc1                                         0
+xc.x1.drv                             0.390575
+xc.x1.rsti0                                1.8
+xc.x1.rsti                                 1.8
+xc.x1.xcmps.tail                       1.59384
+xc.x1.xcmps.o1m                       0.850316
+xc.x1.vrefsn                               0.7
+xc.x1.xcmps.o1                     8.14904e-05
+xc.x1.xcmps.o2                             1.8
+xc.x1.xcmps.o3                     5.59911e-07
+xc.x1.cmps                                 1.8
+xc.x1.vrefsn0                              0.7
+xc.x1.vrefs                                0.7
+xc.x1.nzc                                    0
+xc.x1.adb                                  1.8
+xc.x1.ad                           7.38782e-07
+xc.x1.nzi                                    0
+xc.x1.en                           4.25821e-07
+xc.x1.cmpb                         1.41944e-07
+xc.x1.sba                                  1.8
+xc.x1.xnsa.n1                        0.0499909
+xc.x1.a                            2.04613e-06
+xc.x1.ab                                   1.8
+xc.x1.xla.x1.n1                    1.02517e-06
+xc.x1.xla.x2.n1                      0.0390164
+xc.x1.ad1                          2.04613e-06
+xc.x1.sbc0                                 1.8
+xc.x1.xnsc.n1                      1.17049e-10
+xc.x1.c                            1.13041e-06
+xc.x1.cbar                                 1.8
+xc.x1.xlc.x1.n1                    5.64499e-07
+xc.x1.xlc.x2.n1                      0.0477963
+xc.x1.cd1                          1.13041e-06
+xc.x1.cd2                                  1.8
+xc.x1.cdel                         5.89429e-07
+xc.x1.sbb                                  1.8
+xc.x1.xnsb.n1                        0.0964027
+xc.x1.b                            9.65781e-07
+xc.x1.bb                                   1.8
+xc.x1.xlb.x1.n1                    4.84918e-07
+xc.x1.xlb.x2.n1                      0.0935633
+xc.x1.sib                                  1.8
+xc.x1.xnsi.n1                      4.24736e-10
+xc.x1.xnsi.n2                      2.09309e-10
+xc.x2.gm                              0.862413
+xc.x2.sen0                                   0
+xc.x2.rst0                                 1.8
+xc.x2.preb0                                  0
+xc.x2.sen                                    0
+xc.x2.rst                                  1.8
+xc.x2.preb                                   0
+xc.x2.ibs                             0.509388
+xc.x2.ibo                             0.508336
+xc.x2.dq                               1.08877
+xc.vmem2                              0.389318
+xc.x2.admb                                 1.8
+xc.x2.xnad.n1                       7.0679e-11
+xc.x2.adm                          7.06422e-07
+xc.x2.vs                               1.29988
+xc.x2.vgd                              1.00847
+xc.x2.x                               0.400008
+xc.x2.si                           5.19638e-07
+xc.x2.sum                             0.398185
+xc.x2.sd                                   1.8
+xc.x2.xop.tail                         1.09526
+xc.x2.xop.o1m                         0.692562
+xc.x2.xop.o1                          0.698813
+xc.x2.vcmn                                 0.4
+xc.x2.xop.oz                          0.698813
+xc.x2.vcmn0                                0.4
+xc.x2.nzo                                    0
+glc2                                         0
+xc.x2.drv                             0.398185
+xc.x2.rsti0                                1.8
+xc.x2.rsti                                 1.8
+xc.x2.xcmps.tail                       1.58031
+xc.x2.xcmps.o1m                       0.855482
+xc.x2.vrefsn                               0.7
+xc.x2.xcmps.o1                     7.25248e-05
+xc.x2.xcmps.o2                             1.8
+xc.x2.xcmps.o3                     7.17897e-07
+xc.x2.cmps                                 1.8
+xc.x2.vrefsn0                              0.7
+xc.x2.vrefs                                0.7
+xc.x2.nzc                                    0
+xc.x2.adb                                  1.8
+xc.x2.ad                           8.39031e-07
+xc.x2.nzi                                    0
+xc.x2.en                           6.86438e-07
+xc.x2.cmpb                         4.08961e-07
+xc.x2.sba                                  1.8
+xc.x2.xnsa.n1                        0.0436188
+xc.x2.a                            7.95658e-07
+xc.x2.ab                                   1.8
+xc.x2.xla.x1.n1                    3.96978e-07
+xc.x2.xla.x2.n1                      0.0792974
+xc.x2.ad1                          7.95658e-07
+xc.x2.sbc0                                 1.8
+xc.x2.xnsc.n1                      4.09451e-11
+xc.x2.c                            6.91895e-07
+xc.x2.cbar                                 1.8
+xc.x2.xlc.x1.n1                    3.45608e-07
+xc.x2.xlc.x2.n1                       0.057833
+xc.x2.cd1                          6.91895e-07
+xc.x2.cd2                                  1.8
+xc.x2.cdel                         4.92894e-07
+xc.x2.sbb                                  1.8
+xc.x2.xnsb.n1                        0.0768355
+xc.x2.b                            6.98647e-07
+xc.x2.bb                                   1.8
+xc.x2.xlb.x1.n1                    3.52379e-07
+xc.x2.xlb.x2.n1                      0.0666844
+xc.x2.sib                                  1.8
+xc.x2.xnsi.n1                      1.20102e-10
+xc.x2.xnsi.n2                      6.08419e-11
+xc.ibm                                0.507425
+xc.nzm                                       0
+xc.vrefmn0                                 0.8
+xc.vrefm                                   0.8
+xc.vrefmn                                  0.8
+xc.xcmpm.tail                          1.78612
+xc.xcmpm.o1m                          0.623154
+xc.xcmpm.o1                            1.77677
+xc.xcmpm.o2                          0.0197061
+xc.xcmpm.o3                                1.8
+xc.cmpm                            5.25241e-07
+xc.cmpmb                                   1.8
+xc.sbp                                     1.8
+xc.pbdel                                   1.8
+xc.xnsp.n1                         9.00136e-11
+xc.rbp                                     1.8
+xc.pdel                            3.77904e-07
+xc.xnrp.n1                             1.49885
+xc.p                               1.31377e-06
+xc.xlp.x1.n1                       6.60141e-07
+xc.xlp.x2.n1                           1.50585
+xc.pd1                             1.31377e-06
+b.xc.bvrm#branch                             0
+b.xc.x2.bvrs#branch                 1.0842e-19
+b.xc.x2.bdrv#branch                -1.2494e-15
+b.xc.x2.bvcmn#branch                         0
+b.xc.x2.bpreb#branch                         0
+b.xc.x2.brst#branch                          0
+b.xc.x2.bsen#branch                          0
+b.xc.x1.bvrs#branch                 1.0842e-19
+b.xc.x1.bdrv#branch               -1.24747e-15
+b.xc.x1.bvcmn#branch                         0
+b.xc.x1.bpreb#branch                         0
+b.xc.x1.brst#branch                          0
+b.xc.x1.bsen#branch                          0
+b.xb.bvrm#branch                             0
+b.xb.x2.bvrs#branch                          0
+b.xb.x2.bdrv#branch               -1.24579e-15
+b.xb.x2.bvcmn#branch                         0
+b.xb.x2.bpreb#branch                         0
+b.xb.x2.brst#branch                          0
+b.xb.x2.bsen#branch                          0
+b.xb.x1.bvrs#branch                          0
+b.xb.x1.bdrv#branch               -1.24586e-15
+b.xb.x1.bvcmn#branch                         0
+b.xb.x1.bpreb#branch                         0
+b.xb.x1.brst#branch                          0
+b.xb.x1.bsen#branch                          0
+b.xa.bvrm#branch                             0
+b.xa.x2.bvrs#branch                 1.0842e-19
+b.xa.x2.bdrv#branch               -1.24639e-15
+b.xa.x2.bvcmn#branch                         0
+b.xa.x2.bpreb#branch                         0
+b.xa.x2.brst#branch                          0
+b.xa.x2.bsen#branch                          0
+b.xa.x1.bvrs#branch                          0
+b.xa.x1.bdrv#branch               -1.24693e-15
+b.xa.x1.bvcmn#branch                         0
+b.xa.x1.bpreb#branch                         0
+b.xa.x1.brst#branch                          0
+b.xa.x1.bsen#branch                          0
+vglc2#branch                                 0
+vglc1#branch                                 0
+v.xc.vnzm#branch                             0
+v.xc.x2.vnzi#branch                          0
+v.xc.x2.vnzo#branch                          0
+v.xc.x2.vnzc#branch                          0
+v.xc.x2.vrsti#branch                         0
+v.xc.x1.vnzi#branch                          0
+v.xc.x1.vnzo#branch                          0
+v.xc.x1.vnzc#branch                          0
+v.xc.x1.vrsti#branch                         0
+vampc2#branch                                0
+vtsc2#branch                                 0
+vkpc2#branch                                 0
+vkrc2#branch                                 0
+vksc2#branch                                 0
+vinitc2#branch                               0
+vampc1#branch                                0
+vtsc1#branch                                 0
+vkpc1#branch                                 0
+vkrc1#branch                                 0
+vksc1#branch                                 0
+vinitc1#branch                               0
+vglb2#branch                                 0
+vglb1#branch                                 0
+v.xb.vnzm#branch                             0
+v.xb.x2.vnzi#branch                          0
+v.xb.x2.vnzo#branch                          0
+v.xb.x2.vnzc#branch                          0
+v.xb.x2.vrsti#branch                         0
+v.xb.x1.vnzi#branch                          0
+v.xb.x1.vnzo#branch                          0
+v.xb.x1.vnzc#branch                          0
+v.xb.x1.vrsti#branch                         0
+vampb2#branch                                0
+vtsb2#branch                                 0
+vkpb2#branch                                 0
+vkrb2#branch                                 0
+vksb2#branch                                 0
+vinitb2#branch                               0
+vampb1#branch                                0
+vtsb1#branch                                 0
+vkpb1#branch                                 0
+vkrb1#branch                                 0
+vksb1#branch                                 0
+vinitb1#branch                               0
+vgla2#branch                                 0
+vgla1#branch                                 0
+v.xa.vnzm#branch                             0
+v.xa.x2.vnzi#branch                          0
+v.xa.x2.vnzo#branch                          0
+v.xa.x2.vnzc#branch                          0
+v.xa.x2.vrsti#branch                         0
+v.xa.x1.vnzi#branch                          0
+v.xa.x1.vnzo#branch                          0
+v.xa.x1.vnzc#branch                          0
+v.xa.x1.vrsti#branch                         0
+vampa2#branch                                0
+vtsa2#branch                                 0
+vkpa2#branch                                 0
+vkra2#branch                                 0
+vksa2#branch                                 0
+vinita2#branch                               0
+vampa1#branch                                0
+vtsa1#branch                                 0
+vkpa1#branch                                 0
+vkra1#branch                                 0
+vksa1#branch                                 0
+vinita1#branch                               0
+vpre#branch                       -5.32409e-08
+vlo#branch                         3.24455e-14
+vhi#branch                         6.72047e-15
+vcm#branch                         4.02441e-07
+vreopen#branch                     5.09259e-16
+vfire#branch                       2.41984e-15
+vr0#branch                        -4.40883e-07
+vdd#branch                        -0.000614086
+
+ Reference value :  0.00000e+00
+ Reference value :  2.10241e-06
+ Reference value :  1.29191e-05
+ Reference value :  2.81191e-05
+ Reference value :  3.99191e-05
+ Reference value :  5.53191e-05
+ Reference value :  7.17191e-05
+ Reference value :  8.67191e-05
+ Reference value :  1.01919e-04
+ Reference value :  1.18319e-04
+ Reference value :  1.34719e-04
+ Reference value :  1.51119e-04
+ Reference value :  1.67519e-04
+ Reference value :  1.83919e-04
+ Reference value :  2.00319e-04
+ Reference value :  2.16719e-04
+ Reference value :  2.33319e-04
+ Reference value :  2.49719e-04
+ Reference value :  2.66319e-04
+ Reference value :  2.82919e-04
+ Reference value :  2.99319e-04
+58: condition met: stop  when time >= 0.0003001
+doAnalyses: Too many iterations without convergence
+
+tran simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.0009999999999998e-04
+>>> delete all
+>>> stop when time >= 0.0005371
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.15400e-04
+ Reference value :  3.32000e-04
+ Reference value :  3.48600e-04
+ Reference value :  3.65200e-04
+ Reference value :  3.81800e-04
+ Reference value :  3.98400e-04
+ Reference value :  4.15000e-04
+ Reference value :  4.31600e-04
+ Reference value :  4.48200e-04
+ Reference value :  4.71600e-04
+ Reference value :  4.96800e-04
+ Reference value :  5.22000e-04
+116: condition met: stop  when time >= 0.0005371
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.3720000000000569e-04
+>>> meas tran m14 avg v(xb.vmem1) from=0.0005001 to=0.0005351
+m14                 =  3.890132e-01 from=  5.001000e-04 to=  5.352000e-04
+>>> print m14
+m14 = 3.8901320000000000e-01
+>>> meas tran m17 avg v(xb.x1.sum) from=0.0005001 to=0.0005351
+m17                 =  3.951318e-01 from=  5.001000e-04 to=  5.352000e-04
+>>> print m17
+m17 = 3.9513180000000003e-01
+>>> meas tran m20 avg v(xb.vmem2) from=0.0005001 to=0.0005351
+m20                 =  3.895422e-01 from=  5.001000e-04 to=  5.352000e-04
+>>> print m20
+m20 = 3.8954220000000001e-01
+>>> meas tran m23 avg v(xb.x2.sum) from=0.0005001 to=0.0005351
+m23                 =  4.004222e-01 from=  5.001000e-04 to=  5.352000e-04
+>>> print m23
+m23 = 4.0042220000000006e-01
+>>> delete all
+>>> stop when time >= 0.0004801
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+117: condition met: stop  when time >= 0.0004801
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.3740000000000569e-04
+>>> alter i.xb.x1.idis dc = 8.2e-09
+>>> alter i.xb.x2.idis dc = 8.2e-09
+>>> delete all
+>>> stop when time >= 0.0005381
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+118: condition met: stop  when time >= 0.0005381
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.3820000000000571e-04
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.2982828721907015e-06
+>>> alter @vksb1[pulse] = [ 0 1 0.0005401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0005391 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0005401 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0005401
+>>> alter vampb1 dc = 0
+>>> alter @vksb2[pulse] = [ 0 1 0.0005401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0005391 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0005401 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0005401
+>>> alter vampb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0007401
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.39101e-04
+ Reference value :  5.39101e-04
+ Reference value :  5.39103e-04
+ Reference value :  5.40099e-04
+ Reference value :  5.40101e-04
+ Reference value :  5.40101e-04
+ Reference value :  5.40101e-04
+ Reference value :  5.40103e-04
+ Reference value :  5.51423e-04
+ Reference value :  5.60100e-04
+ Reference value :  5.60101e-04
+ Reference value :  5.60101e-04
+ Reference value :  5.60101e-04
+ Reference value :  5.60101e-04
+ Reference value :  5.61031e-04
+ Reference value :  5.67560e-04
+ Reference value :  5.67649e-04
+ Reference value :  5.67652e-04
+ Reference value :  5.67653e-04
+ Reference value :  5.67653e-04
+ Reference value :  5.67653e-04
+ Reference value :  5.67653e-04
+ Reference value :  5.67653e-04
+ Reference value :  5.67653e-04
+ Reference value :  5.67653e-04
+ Reference value :  5.67657e-04
+ Reference value :  5.67666e-04
+ Reference value :  5.67668e-04
+ Reference value :  5.67668e-04
+ Reference value :  5.67668e-04
+ Reference value :  5.67668e-04
+ Reference value :  5.67668e-04
+ Reference value :  5.67668e-04
+ Reference value :  5.67668e-04
+ Reference value :  5.67669e-04
+ Reference value :  5.67678e-04
+ Reference value :  5.67682e-04
+ Reference value :  5.67683e-04
+ Reference value :  5.67686e-04
+ Reference value :  5.68255e-04
+ Reference value :  5.68297e-04
+ Reference value :  5.68300e-04
+ Reference value :  5.68300e-04
+ Reference value :  5.68300e-04
+ Reference value :  5.68300e-04
+ Reference value :  5.68300e-04
+ Reference value :  5.68300e-04
+ Reference value :  5.68300e-04
+ Reference value :  5.68300e-04
+ Reference value :  5.68300e-04
+ Reference value :  5.68309e-04
+ Reference value :  5.68314e-04
+ Reference value :  5.68314e-04
+ Reference value :  5.68314e-04
+ Reference value :  5.68314e-04
+ Reference value :  5.68314e-04
+ Reference value :  5.68315e-04
+ Reference value :  5.68315e-04
+ Reference value :  5.68315e-04
+ Reference value :  5.68317e-04
+ Reference value :  5.68329e-04
+ Reference value :  5.68330e-04
+ Reference value :  5.70736e-04
+ Reference value :  5.76010e-04
+ Reference value :  5.76017e-04
+ Reference value :  5.76017e-04
+ Reference value :  5.76017e-04
+ Reference value :  5.76017e-04
+ Reference value :  5.76017e-04
+ Reference value :  5.76017e-04
+ Reference value :  5.76017e-04
+ Reference value :  5.76017e-04
+ Reference value :  5.76019e-04
+ Reference value :  5.76376e-04
+ Reference value :  5.77949e-04
+ Reference value :  5.77959e-04
+ Reference value :  5.77960e-04
+ Reference value :  5.77960e-04
+ Reference value :  5.77960e-04
+ Reference value :  5.77960e-04
+ Reference value :  5.77960e-04
+ Reference value :  5.77960e-04
+ Reference value :  5.77960e-04
+ Reference value :  5.77960e-04
+ Reference value :  5.77960e-04
+ Reference value :  5.77980e-04
+ Reference value :  5.89118e-04
+ Reference value :  6.09918e-04
+ Reference value :  6.30518e-04
+ Reference value :  6.51518e-04
+ Reference value :  6.60101e-04
+ Reference value :  6.60102e-04
+ Reference value :  6.60102e-04
+ Reference value :  6.60102e-04
+ Reference value :  6.60102e-04
+ Reference value :  6.60102e-04
+ Reference value :  6.60102e-04
+ Reference value :  6.60107e-04
+ Reference value :  6.60110e-04
+ Reference value :  6.60110e-04
+ Reference value :  6.60110e-04
+ Reference value :  6.60110e-04
+ Reference value :  6.60110e-04
+ Reference value :  6.60110e-04
+ Reference value :  6.60111e-04
+ Reference value :  6.60111e-04
+ Reference value :  6.60111e-04
+ Reference value :  6.60111e-04
+ Reference value :  6.60114e-04
+ Reference value :  6.60116e-04
+ Reference value :  6.60116e-04
+ Reference value :  6.60117e-04
+ Reference value :  6.60117e-04
+ Reference value :  6.60117e-04
+ Reference value :  6.60121e-04
+ Reference value :  6.60124e-04
+ Reference value :  6.60125e-04
+ Reference value :  6.60126e-04
+ Reference value :  6.60131e-04
+ Reference value :  6.63103e-04
+ Reference value :  6.88103e-04
+ Reference value :  7.11303e-04
+ Reference value :  7.31503e-04
+119: condition met: stop  when time >= 0.0007401
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.4010290482259605e-04
+>>> delete all
+>>> stop when time >= 0.0009771
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  7.50303e-04
+ Reference value :  7.71703e-04
+ Reference value :  7.92703e-04
+ Reference value :  8.13703e-04
+ Reference value :  8.34703e-04
+ Reference value :  8.54303e-04
+ Reference value :  8.77503e-04
+ Reference value :  9.02503e-04
+ Reference value :  9.27503e-04
+ Reference value :  9.51303e-04
+ Reference value :  9.72703e-04
+120: condition met: stop  when time >= 0.0009771
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.7710290482260148e-04
+>>> meas tran m55 avg v(xb.vmem1) from=0.0009401 to=0.0009751
+m55                 =  3.863029e-01 from=  9.401000e-04 to=  9.751029e-04
+>>> print m55
+m55 = 3.8630290000000000e-01
+>>> meas tran m58 avg v(xb.x1.sum) from=0.0009401 to=0.0009751
+m58                 =  3.951328e-01 from=  9.401000e-04 to=  9.751029e-04
+>>> print m58
+m58 = 3.9513280000000006e-01
+>>> meas tran m61 avg v(xb.vmem2) from=0.0009401 to=0.0009751
+m61                 =  3.868352e-01 from=  9.401000e-04 to=  9.751029e-04
+>>> print m61
+m61 = 3.8683519999999999e-01
+>>> meas tran m64 avg v(xb.x2.sum) from=0.0009401 to=0.0009751
+m64                 =  4.004232e-01 from=  9.401000e-04 to=  9.751029e-04
+>>> print m64
+m64 = 4.0042320000000003e-01
+>>> delete all
+>>> stop when time >= 0.0009201
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+121: condition met: stop  when time >= 0.0009201
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.7730290482260138e-04
+>>> alter i.xb.x1.idis dc = 8.2e-09
+>>> alter i.xb.x2.idis dc = 8.2e-09
+>>> delete all
+>>> stop when time >= 0.0009781
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+122: condition met: stop  when time >= 0.0009781
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 9.7810290482260097e-04
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.2877505715697865e-06
+>>> alter @vksb1[pulse] = [ 0 1 0.0009801 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0009791 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0009801 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0009801
+>>> alter vampb1 dc = 0
+>>> alter @vksb2[pulse] = [ 0 1 0.0009801 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0009791 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0009801 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0009801
+>>> alter vampb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0011801
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  9.79100e-04
+ Reference value :  9.79101e-04
+ Reference value :  9.79102e-04
+ Reference value :  9.80100e-04
+ Reference value :  9.80101e-04
+ Reference value :  9.80101e-04
+ Reference value :  9.80170e-04
+ Reference value :  1.00010e-03
+ Reference value :  1.00010e-03
+ Reference value :  1.00010e-03
+ Reference value :  1.00010e-03
+ Reference value :  1.00298e-03
+ Reference value :  1.00765e-03
+ Reference value :  1.00765e-03
+ Reference value :  1.00765e-03
+ Reference value :  1.00765e-03
+ Reference value :  1.00765e-03
+ Reference value :  1.00765e-03
+ Reference value :  1.00765e-03
+ Reference value :  1.00765e-03
+ Reference value :  1.00767e-03
+ Reference value :  1.00767e-03
+ Reference value :  1.00767e-03
+ Reference value :  1.00767e-03
+ Reference value :  1.00767e-03
+ Reference value :  1.00767e-03
+ Reference value :  1.00767e-03
+ Reference value :  1.00767e-03
+ Reference value :  1.00767e-03
+ Reference value :  1.00768e-03
+ Reference value :  1.00768e-03
+ Reference value :  1.00769e-03
+ Reference value :  1.00819e-03
+ Reference value :  1.00830e-03
+ Reference value :  1.00830e-03
+ Reference value :  1.00830e-03
+ Reference value :  1.00830e-03
+ Reference value :  1.00830e-03
+ Reference value :  1.00830e-03
+ Reference value :  1.00830e-03
+ Reference value :  1.00830e-03
+ Reference value :  1.00830e-03
+ Reference value :  1.00831e-03
+ Reference value :  1.00831e-03
+ Reference value :  1.00831e-03
+ Reference value :  1.00831e-03
+ Reference value :  1.00831e-03
+ Reference value :  1.00831e-03
+ Reference value :  1.00831e-03
+ Reference value :  1.00831e-03
+ Reference value :  1.00831e-03
+ Reference value :  1.00831e-03
+ Reference value :  1.00832e-03
+ Reference value :  1.00832e-03
+ Reference value :  1.00833e-03
+ Reference value :  1.00833e-03
+ Reference value :  1.00834e-03
+ Reference value :  1.01595e-03
+ Reference value :  1.01602e-03
+ Reference value :  1.01602e-03
+ Reference value :  1.01602e-03
+ Reference value :  1.01602e-03
+ Reference value :  1.01602e-03
+ Reference value :  1.01602e-03
+ Reference value :  1.01602e-03
+ Reference value :  1.01602e-03
+ Reference value :  1.01602e-03
+ Reference value :  1.01638e-03
+ Reference value :  1.01795e-03
+ Reference value :  1.01796e-03
+ Reference value :  1.01796e-03
+ Reference value :  1.01796e-03
+ Reference value :  1.01796e-03
+ Reference value :  1.01796e-03
+ Reference value :  1.01796e-03
+ Reference value :  1.01796e-03
+ Reference value :  1.01796e-03
+ Reference value :  1.01796e-03
+ Reference value :  1.01796e-03
+ Reference value :  1.01798e-03
+ Reference value :  1.03089e-03
+ Reference value :  1.05109e-03
+ Reference value :  1.07369e-03
+ Reference value :  1.09909e-03
+ Reference value :  1.10010e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10011e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10012e-03
+ Reference value :  1.10027e-03
+ Reference value :  1.11696e-03
+ Reference value :  1.13736e-03
+ Reference value :  1.15816e-03
+ Reference value :  1.17896e-03
+123: condition met: stop  when time >= 0.0011801
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.1801622326653286e-03
+>>> delete all
+>>> stop when time >= 0.0014171
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.19976e-03
+ Reference value :  1.22056e-03
+ Reference value :  1.24136e-03
+ Reference value :  1.26196e-03
+ Reference value :  1.28276e-03
+ Reference value :  1.30356e-03
+ Reference value :  1.32456e-03
+ Reference value :  1.34556e-03
+ Reference value :  1.36636e-03
+ Reference value :  1.38356e-03
+ Reference value :  1.40376e-03
+124: condition met: stop  when time >= 0.0014171
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.4171622326652059e-03
+>>> meas tran m96 avg v(xb.vmem1) from=0.0013801 to=0.0014151
+m96                 =  3.835926e-01 from=  1.380100e-03 to=  1.415162e-03
+>>> print m96
+m96 = 3.8359260000000001e-01
+>>> meas tran m99 avg v(xb.x1.sum) from=0.0013801 to=0.0014151
+m99                 =  3.951339e-01 from=  1.380100e-03 to=  1.415162e-03
+>>> print m99
+m99 = 3.9513390000000004e-01
+>>> meas tran m102 avg v(xb.vmem2) from=0.0013801 to=0.0014151
+m102                =  3.841282e-01 from=  1.380100e-03 to=  1.415162e-03
+>>> print m102
+m102 = 3.8412820000000003e-01
+>>> meas tran m105 avg v(xb.x2.sum) from=0.0013801 to=0.0014151
+m105                =  4.004242e-01 from=  1.380100e-03 to=  1.415162e-03
+>>> print m105
+m105 = 4.0042420000000001e-01
+>>> delete all
+>>> stop when time >= 0.0013601
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+125: condition met: stop  when time >= 0.0013601
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.4173622326652058e-03
+>>> alter i.xb.x1.idis dc = 8.2e-09
+>>> alter i.xb.x2.idis dc = 8.2e-09
+>>> delete all
+>>> stop when time >= 0.0014181
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+126: condition met: stop  when time >= 0.0014181
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.4181622326652054e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.2999355976581403e-06
+>>> alter @vksb1[pulse] = [ 0 1 0.0014201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0014191 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0014201 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0014201
+>>> alter vampb1 dc = 0
+>>> alter @vksb2[pulse] = [ 0 1 0.0014201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0014191 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0014201 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0014201
+>>> alter vampb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0016201
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.41908e-03
+ Reference value :  1.41910e-03
+ Reference value :  1.41910e-03
+ Reference value :  1.41910e-03
+ Reference value :  1.42010e-03
+ Reference value :  1.42010e-03
+ Reference value :  1.42010e-03
+ Reference value :  1.42010e-03
+ Reference value :  1.42705e-03
+ Reference value :  1.44010e-03
+ Reference value :  1.44010e-03
+ Reference value :  1.44010e-03
+ Reference value :  1.44010e-03
+ Reference value :  1.44744e-03
+ Reference value :  1.44765e-03
+ Reference value :  1.44765e-03
+ Reference value :  1.44765e-03
+ Reference value :  1.44765e-03
+ Reference value :  1.44765e-03
+ Reference value :  1.44765e-03
+ Reference value :  1.44765e-03
+ Reference value :  1.44765e-03
+ Reference value :  1.44766e-03
+ Reference value :  1.44767e-03
+ Reference value :  1.44767e-03
+ Reference value :  1.44767e-03
+ Reference value :  1.44767e-03
+ Reference value :  1.44767e-03
+ Reference value :  1.44767e-03
+ Reference value :  1.44767e-03
+ Reference value :  1.44767e-03
+ Reference value :  1.44767e-03
+ Reference value :  1.44768e-03
+ Reference value :  1.44768e-03
+ Reference value :  1.44769e-03
+ Reference value :  1.44829e-03
+ Reference value :  1.44830e-03
+ Reference value :  1.44830e-03
+ Reference value :  1.44830e-03
+ Reference value :  1.44830e-03
+ Reference value :  1.44830e-03
+ Reference value :  1.44830e-03
+ Reference value :  1.44831e-03
+ Reference value :  1.44831e-03
+ Reference value :  1.44831e-03
+ Reference value :  1.44831e-03
+ Reference value :  1.44831e-03
+ Reference value :  1.44831e-03
+ Reference value :  1.44831e-03
+ Reference value :  1.44832e-03
+ Reference value :  1.44833e-03
+ Reference value :  1.44833e-03
+ Reference value :  1.44834e-03
+ Reference value :  1.45598e-03
+ Reference value :  1.45602e-03
+ Reference value :  1.45602e-03
+ Reference value :  1.45602e-03
+ Reference value :  1.45602e-03
+ Reference value :  1.45602e-03
+ Reference value :  1.45602e-03
+ Reference value :  1.45602e-03
+ Reference value :  1.45602e-03
+ Reference value :  1.45785e-03
+ Reference value :  1.45796e-03
+ Reference value :  1.45796e-03
+ Reference value :  1.45796e-03
+ Reference value :  1.45796e-03
+ Reference value :  1.45796e-03
+ Reference value :  1.45796e-03
+ Reference value :  1.45796e-03
+ Reference value :  1.45796e-03
+ Reference value :  1.45799e-03
+ Reference value :  1.46747e-03
+ Reference value :  1.49107e-03
+ Reference value :  1.51607e-03
+ Reference value :  1.53687e-03
+ Reference value :  1.54010e-03
+ Reference value :  1.54010e-03
+ Reference value :  1.54010e-03
+ Reference value :  1.54010e-03
+ Reference value :  1.54010e-03
+ Reference value :  1.54010e-03
+ Reference value :  1.54010e-03
+ Reference value :  1.54010e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54011e-03
+ Reference value :  1.54012e-03
+ Reference value :  1.54012e-03
+ Reference value :  1.54012e-03
+ Reference value :  1.54012e-03
+ Reference value :  1.54012e-03
+ Reference value :  1.54012e-03
+ Reference value :  1.54012e-03
+ Reference value :  1.54012e-03
+ Reference value :  1.54012e-03
+ Reference value :  1.54013e-03
+ Reference value :  1.54013e-03
+ Reference value :  1.54013e-03
+ Reference value :  1.54476e-03
+ Reference value :  1.56496e-03
+ Reference value :  1.58556e-03
+ Reference value :  1.60596e-03
+127: condition met: stop  when time >= 0.0016201
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.6201602398460821e-03
+>>> delete all
+>>> stop when time >= 0.0018571
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.62616e-03
+ Reference value :  1.64576e-03
+ Reference value :  1.66456e-03
+ Reference value :  1.68516e-03
+ Reference value :  1.70576e-03
+ Reference value :  1.72636e-03
+ Reference value :  1.74516e-03
+ Reference value :  1.76396e-03
+ Reference value :  1.78416e-03
+ Reference value :  1.80436e-03
+ Reference value :  1.82436e-03
+ Reference value :  1.84396e-03
+128: condition met: stop  when time >= 0.0018571
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.8571602398459593e-03
+>>> meas tran m137 avg v(xb.vmem1) from=0.0018201 to=0.0018551
+m137                =  3.808824e-01 from=  1.820100e-03 to=  1.855160e-03
+>>> print m137
+m137 = 3.8088240000000001e-01
+>>> meas tran m140 avg v(xb.x1.sum) from=0.0018201 to=0.0018551
+m140                =  3.951350e-01 from=  1.820100e-03 to=  1.855160e-03
+>>> print m140
+m140 = 3.9513500000000001e-01
+>>> meas tran m143 avg v(xb.vmem2) from=0.0018201 to=0.0018551
+m143                =  3.814212e-01 from=  1.820100e-03 to=  1.855160e-03
+>>> print m143
+m143 = 3.8142120000000002e-01
+>>> meas tran m146 avg v(xb.x2.sum) from=0.0018201 to=0.0018551
+m146                =  4.004253e-01 from=  1.820100e-03 to=  1.855160e-03
+>>> print m146
+m146 = 4.0042530000000004e-01
+>>> delete all
+>>> stop when time >= 0.0018001
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+129: condition met: stop  when time >= 0.0018001
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.8573602398459592e-03
+>>> alter i.xb.x1.idis dc = 8.2e-09
+>>> alter i.xb.x2.idis dc = 8.2e-09
+>>> delete all
+>>> stop when time >= 0.0018581
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+130: condition met: stop  when time >= 0.0018581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 1.8581602398459588e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.3001170725575058e-06
+>>> alter @vksb1[pulse] = [ 0 1 0.0018601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0018591 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0018601 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0018601
+>>> alter vampb1 dc = 0
+>>> alter @vksb2[pulse] = [ 0 1 0.0018601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0018591 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0018601 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0018601
+>>> alter vampb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0020601
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  1.85909e-03
+ Reference value :  1.85910e-03
+ Reference value :  1.85910e-03
+ Reference value :  1.85910e-03
+ Reference value :  1.85959e-03
+ Reference value :  1.86010e-03
+ Reference value :  1.86010e-03
+ Reference value :  1.86010e-03
+ Reference value :  1.86010e-03
+ Reference value :  1.86010e-03
+ Reference value :  1.86106e-03
+ Reference value :  1.87766e-03
+ Reference value :  1.88010e-03
+ Reference value :  1.88010e-03
+ Reference value :  1.88010e-03
+ Reference value :  1.88011e-03
+ Reference value :  1.88763e-03
+ Reference value :  1.88765e-03
+ Reference value :  1.88765e-03
+ Reference value :  1.88765e-03
+ Reference value :  1.88765e-03
+ Reference value :  1.88765e-03
+ Reference value :  1.88765e-03
+ Reference value :  1.88766e-03
+ Reference value :  1.88767e-03
+ Reference value :  1.88767e-03
+ Reference value :  1.88767e-03
+ Reference value :  1.88767e-03
+ Reference value :  1.88767e-03
+ Reference value :  1.88767e-03
+ Reference value :  1.88767e-03
+ Reference value :  1.88768e-03
+ Reference value :  1.88768e-03
+ Reference value :  1.88768e-03
+ Reference value :  1.88827e-03
+ Reference value :  1.88830e-03
+ Reference value :  1.88830e-03
+ Reference value :  1.88830e-03
+ Reference value :  1.88830e-03
+ Reference value :  1.88830e-03
+ Reference value :  1.88830e-03
+ Reference value :  1.88830e-03
+ Reference value :  1.88831e-03
+ Reference value :  1.88831e-03
+ Reference value :  1.88831e-03
+ Reference value :  1.88831e-03
+ Reference value :  1.88831e-03
+ Reference value :  1.88831e-03
+ Reference value :  1.88832e-03
+ Reference value :  1.88833e-03
+ Reference value :  1.88833e-03
+ Reference value :  1.88927e-03
+ Reference value :  1.89601e-03
+ Reference value :  1.89602e-03
+ Reference value :  1.89602e-03
+ Reference value :  1.89602e-03
+ Reference value :  1.89602e-03
+ Reference value :  1.89602e-03
+ Reference value :  1.89602e-03
+ Reference value :  1.89602e-03
+ Reference value :  1.89612e-03
+ Reference value :  1.89796e-03
+ Reference value :  1.89796e-03
+ Reference value :  1.89796e-03
+ Reference value :  1.89796e-03
+ Reference value :  1.89796e-03
+ Reference value :  1.89796e-03
+ Reference value :  1.89796e-03
+ Reference value :  1.89796e-03
+ Reference value :  1.89801e-03
+ Reference value :  1.91228e-03
+ Reference value :  1.93728e-03
+ Reference value :  1.96148e-03
+ Reference value :  1.98010e-03
+ Reference value :  1.98010e-03
+ Reference value :  1.98010e-03
+ Reference value :  1.98010e-03
+ Reference value :  1.98010e-03
+ Reference value :  1.98010e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98011e-03
+ Reference value :  1.98012e-03
+ Reference value :  1.98012e-03
+ Reference value :  1.98012e-03
+ Reference value :  1.98012e-03
+ Reference value :  1.98012e-03
+ Reference value :  1.98012e-03
+ Reference value :  1.98012e-03
+ Reference value :  1.98012e-03
+ Reference value :  1.98013e-03
+ Reference value :  1.98013e-03
+ Reference value :  1.98027e-03
+ Reference value :  2.00203e-03
+ Reference value :  2.02383e-03
+ Reference value :  2.04823e-03
+131: condition met: stop  when time >= 0.0020601
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.0602287382692542e-03
+>>> delete all
+>>> stop when time >= 0.0022971
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.07263e-03
+ Reference value :  2.09703e-03
+ Reference value :  2.12183e-03
+ Reference value :  2.14703e-03
+ Reference value :  2.17223e-03
+ Reference value :  2.19763e-03
+ Reference value :  2.22303e-03
+ Reference value :  2.24843e-03
+ Reference value :  2.27003e-03
+ Reference value :  2.29523e-03
+132: condition met: stop  when time >= 0.0022971
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.2972287382693884e-03
+>>> meas tran m178 avg v(xb.vmem1) from=0.0022601 to=0.0022951
+m178                =  3.781723e-01 from=  2.260100e-03 to=  2.295229e-03
+>>> print m178
+m178 = 3.7817230000000002e-01
+>>> meas tran m181 avg v(xb.x1.sum) from=0.0022601 to=0.0022951
+m181                =  3.951361e-01 from=  2.260100e-03 to=  2.295229e-03
+>>> print m181
+m181 = 3.9513609999999999e-01
+>>> meas tran m184 avg v(xb.vmem2) from=0.0022601 to=0.0022951
+m184                =  3.787144e-01 from=  2.260100e-03 to=  2.295229e-03
+>>> print m184
+m184 = 3.7871440000000001e-01
+>>> meas tran m187 avg v(xb.x2.sum) from=0.0022601 to=0.0022951
+m187                =  4.004265e-01 from=  2.260100e-03 to=  2.295229e-03
+>>> print m187
+m187 = 4.0042650000000002e-01
+>>> delete all
+>>> stop when time >= 0.0022401
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+133: condition met: stop  when time >= 0.0022401
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.2974287382693886e-03
+>>> alter i.xb.x1.idis dc = 8.2e-09
+>>> alter i.xb.x2.idis dc = 8.2e-09
+>>> delete all
+>>> stop when time >= 0.0022981
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+134: condition met: stop  when time >= 0.0022981
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.2982287382693890e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.2961229810985104e-06
+>>> alter @vksb1[pulse] = [ 0 1 0.0023001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0022991 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0023001 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0023001
+>>> alter vampb1 dc = 0
+>>> alter @vksb2[pulse] = [ 0 1 0.0023001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0022991 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0023001 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0023001
+>>> alter vampb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0025001
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.29910e-03
+ Reference value :  2.29910e-03
+ Reference value :  2.29911e-03
+ Reference value :  2.30010e-03
+ Reference value :  2.31173e-03
+ Reference value :  2.32010e-03
+ Reference value :  2.32010e-03
+ Reference value :  2.32010e-03
+ Reference value :  2.32010e-03
+ Reference value :  2.32762e-03
+ Reference value :  2.32765e-03
+ Reference value :  2.32765e-03
+ Reference value :  2.32765e-03
+ Reference value :  2.32765e-03
+ Reference value :  2.32765e-03
+ Reference value :  2.32765e-03
+ Reference value :  2.32766e-03
+ Reference value :  2.32767e-03
+ Reference value :  2.32767e-03
+ Reference value :  2.32767e-03
+ Reference value :  2.32767e-03
+ Reference value :  2.32767e-03
+ Reference value :  2.32767e-03
+ Reference value :  2.32767e-03
+ Reference value :  2.32767e-03
+ Reference value :  2.32768e-03
+ Reference value :  2.32768e-03
+ Reference value :  2.32768e-03
+ Reference value :  2.32775e-03
+ Reference value :  2.32830e-03
+ Reference value :  2.32830e-03
+ Reference value :  2.32830e-03
+ Reference value :  2.32830e-03
+ Reference value :  2.32830e-03
+ Reference value :  2.32830e-03
+ Reference value :  2.32830e-03
+ Reference value :  2.32830e-03
+ Reference value :  2.32831e-03
+ Reference value :  2.32832e-03
+ Reference value :  2.32832e-03
+ Reference value :  2.32832e-03
+ Reference value :  2.32832e-03
+ Reference value :  2.32832e-03
+ Reference value :  2.32832e-03
+ Reference value :  2.32832e-03
+ Reference value :  2.32833e-03
+ Reference value :  2.32833e-03
+ Reference value :  2.32835e-03
+ Reference value :  2.33597e-03
+ Reference value :  2.33602e-03
+ Reference value :  2.33602e-03
+ Reference value :  2.33602e-03
+ Reference value :  2.33602e-03
+ Reference value :  2.33602e-03
+ Reference value :  2.33602e-03
+ Reference value :  2.33602e-03
+ Reference value :  2.33602e-03
+ Reference value :  2.33602e-03
+ Reference value :  2.33789e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33796e-03
+ Reference value :  2.33797e-03
+ Reference value :  2.34216e-03
+ Reference value :  2.35776e-03
+ Reference value :  2.37336e-03
+ Reference value :  2.38896e-03
+ Reference value :  2.40336e-03
+ Reference value :  2.41816e-03
+ Reference value :  2.42010e-03
+ Reference value :  2.42010e-03
+ Reference value :  2.42010e-03
+ Reference value :  2.42010e-03
+ Reference value :  2.42010e-03
+ Reference value :  2.42010e-03
+ Reference value :  2.42010e-03
+ Reference value :  2.42010e-03
+ Reference value :  2.42010e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42011e-03
+ Reference value :  2.42012e-03
+ Reference value :  2.42012e-03
+ Reference value :  2.42012e-03
+ Reference value :  2.42012e-03
+ Reference value :  2.42012e-03
+ Reference value :  2.42012e-03
+ Reference value :  2.42012e-03
+ Reference value :  2.42012e-03
+ Reference value :  2.42013e-03
+ Reference value :  2.42013e-03
+ Reference value :  2.42023e-03
+ Reference value :  2.43637e-03
+ Reference value :  2.45737e-03
+ Reference value :  2.47797e-03
+ Reference value :  2.49877e-03
+135: condition met: stop  when time >= 0.0025001
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.5001676156623511e-03
+>>> delete all
+>>> stop when time >= 0.0027371
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.51977e-03
+ Reference value :  2.54077e-03
+ Reference value :  2.56137e-03
+ Reference value :  2.58097e-03
+ Reference value :  2.60137e-03
+ Reference value :  2.61957e-03
+ Reference value :  2.63997e-03
+ Reference value :  2.66097e-03
+ Reference value :  2.68197e-03
+ Reference value :  2.70297e-03
+ Reference value :  2.72397e-03
+136: condition met: stop  when time >= 0.0027371
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.7371676156624854e-03
+>>> meas tran m219 avg v(xb.vmem1) from=0.0027001 to=0.0027351
+m219                =  3.754623e-01 from=  2.700100e-03 to=  2.735168e-03
+>>> print m219
+m219 = 3.7546230000000003e-01
+>>> meas tran m222 avg v(xb.x1.sum) from=0.0027001 to=0.0027351
+m222                =  3.951373e-01 from=  2.700100e-03 to=  2.735168e-03
+>>> print m222
+m222 = 3.9513730000000002e-01
+>>> meas tran m225 avg v(xb.vmem2) from=0.0027001 to=0.0027351
+m225                =  3.760076e-01 from=  2.700100e-03 to=  2.735168e-03
+>>> print m225
+m225 = 3.7600760000000000e-01
+>>> meas tran m228 avg v(xb.x2.sum) from=0.0027001 to=0.0027351
+m228                =  4.004276e-01 from=  2.700100e-03 to=  2.735168e-03
+>>> print m228
+m228 = 4.0042759999999999e-01
+>>> delete all
+>>> stop when time >= 0.0026801
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+137: condition met: stop  when time >= 0.0026801
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.7373676156624855e-03
+>>> alter i.xb.x1.idis dc = 8.2e-09
+>>> alter i.xb.x2.idis dc = 8.2e-09
+>>> delete all
+>>> stop when time >= 0.0027381
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+138: condition met: stop  when time >= 0.0027381
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.7381676156624860e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.2908702976858241e-06
+>>> alter @vksb1[pulse] = [ 0 1 0.0027401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0027391 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0027401 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0027401
+>>> alter vampb1 dc = 0
+>>> alter @vksb2[pulse] = [ 0 1 0.0027401 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0027391 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0027401 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0027401
+>>> alter vampb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0029401
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.73910e-03
+ Reference value :  2.73910e-03
+ Reference value :  2.73910e-03
+ Reference value :  2.73912e-03
+ Reference value :  2.74010e-03
+ Reference value :  2.74010e-03
+ Reference value :  2.74010e-03
+ Reference value :  2.74010e-03
+ Reference value :  2.74307e-03
+ Reference value :  2.76010e-03
+ Reference value :  2.76010e-03
+ Reference value :  2.76010e-03
+ Reference value :  2.76010e-03
+ Reference value :  2.76010e-03
+ Reference value :  2.76732e-03
+ Reference value :  2.76765e-03
+ Reference value :  2.76765e-03
+ Reference value :  2.76765e-03
+ Reference value :  2.76765e-03
+ Reference value :  2.76765e-03
+ Reference value :  2.76765e-03
+ Reference value :  2.76765e-03
+ Reference value :  2.76765e-03
+ Reference value :  2.76766e-03
+ Reference value :  2.76767e-03
+ Reference value :  2.76767e-03
+ Reference value :  2.76767e-03
+ Reference value :  2.76767e-03
+ Reference value :  2.76767e-03
+ Reference value :  2.76767e-03
+ Reference value :  2.76767e-03
+ Reference value :  2.76767e-03
+ Reference value :  2.76768e-03
+ Reference value :  2.76768e-03
+ Reference value :  2.76768e-03
+ Reference value :  2.76816e-03
+ Reference value :  2.76830e-03
+ Reference value :  2.76830e-03
+ Reference value :  2.76830e-03
+ Reference value :  2.76830e-03
+ Reference value :  2.76830e-03
+ Reference value :  2.76830e-03
+ Reference value :  2.76830e-03
+ Reference value :  2.76830e-03
+ Reference value :  2.76831e-03
+ Reference value :  2.76831e-03
+ Reference value :  2.76831e-03
+ Reference value :  2.76831e-03
+ Reference value :  2.76831e-03
+ Reference value :  2.76831e-03
+ Reference value :  2.76831e-03
+ Reference value :  2.76831e-03
+ Reference value :  2.76832e-03
+ Reference value :  2.76832e-03
+ Reference value :  2.76833e-03
+ Reference value :  2.76833e-03
+ Reference value :  2.77373e-03
+ Reference value :  2.77601e-03
+ Reference value :  2.77602e-03
+ Reference value :  2.77602e-03
+ Reference value :  2.77602e-03
+ Reference value :  2.77602e-03
+ Reference value :  2.77602e-03
+ Reference value :  2.77602e-03
+ Reference value :  2.77602e-03
+ Reference value :  2.77618e-03
+ Reference value :  2.77796e-03
+ Reference value :  2.77796e-03
+ Reference value :  2.77796e-03
+ Reference value :  2.77796e-03
+ Reference value :  2.77796e-03
+ Reference value :  2.77796e-03
+ Reference value :  2.77796e-03
+ Reference value :  2.77796e-03
+ Reference value :  2.77805e-03
+ Reference value :  2.79880e-03
+ Reference value :  2.82280e-03
+ Reference value :  2.84380e-03
+ Reference value :  2.86006e-03
+ Reference value :  2.86010e-03
+ Reference value :  2.86010e-03
+ Reference value :  2.86010e-03
+ Reference value :  2.86010e-03
+ Reference value :  2.86010e-03
+ Reference value :  2.86010e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86011e-03
+ Reference value :  2.86012e-03
+ Reference value :  2.86012e-03
+ Reference value :  2.86012e-03
+ Reference value :  2.86012e-03
+ Reference value :  2.86012e-03
+ Reference value :  2.86012e-03
+ Reference value :  2.86012e-03
+ Reference value :  2.86012e-03
+ Reference value :  2.86013e-03
+ Reference value :  2.86017e-03
+ Reference value :  2.86661e-03
+ Reference value :  2.88301e-03
+ Reference value :  2.89981e-03
+ Reference value :  2.91661e-03
+ Reference value :  2.93341e-03
+139: condition met: stop  when time >= 0.0029401
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 2.9402118288772410e-03
+>>> delete all
+>>> stop when time >= 0.0031771
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  2.95021e-03
+ Reference value :  2.96321e-03
+ Reference value :  2.98001e-03
+ Reference value :  2.99681e-03
+ Reference value :  3.01361e-03
+ Reference value :  3.03041e-03
+ Reference value :  3.04721e-03
+ Reference value :  3.06321e-03
+ Reference value :  3.07721e-03
+ Reference value :  3.09401e-03
+ Reference value :  3.11081e-03
+ Reference value :  3.12741e-03
+ Reference value :  3.14421e-03
+ Reference value :  3.16101e-03
+140: condition met: stop  when time >= 0.0031771
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.1772118288773753e-03
+>>> meas tran m260 avg v(xb.vmem1) from=0.0031401 to=0.0031751
+m260                =  3.727524e-01 from=  3.140100e-03 to=  3.175212e-03
+>>> print m260
+m260 = 3.7275239999999998e-01
+>>> meas tran m263 avg v(xb.x1.sum) from=0.0031401 to=0.0031751
+m263                =  3.951386e-01 from=  3.140100e-03 to=  3.175212e-03
+>>> print m263
+m263 = 3.9513860000000001e-01
+>>> meas tran m266 avg v(xb.vmem2) from=0.0031401 to=0.0031751
+m266                =  3.733010e-01 from=  3.140100e-03 to=  3.175212e-03
+>>> print m266
+m266 = 3.7330100000000005e-01
+>>> meas tran m269 avg v(xb.x2.sum) from=0.0031401 to=0.0031751
+m269                =  4.004289e-01 from=  3.140100e-03 to=  3.175212e-03
+>>> print m269
+m269 = 4.0042890000000003e-01
+>>> delete all
+>>> stop when time >= 0.0031201
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.17741e-03
+141: condition met: stop  when time >= 0.0031201
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.1774118288773754e-03
+>>> alter i.xb.x1.idis dc = 8.2e-09
+>>> alter i.xb.x2.idis dc = 8.2e-09
+>>> delete all
+>>> stop when time >= 0.0031781
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+142: condition met: stop  when time >= 0.0031781
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.1782118288773758e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.2974901525400594e-06
+>>> alter @vksb1[pulse] = [ 0 1 0.0031801 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0031791 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0031801 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0031801
+>>> alter vampb1 dc = 0
+>>> alter @vksb2[pulse] = [ 0 1 0.0031801 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0031791 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0031801 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0031801
+>>> alter vampb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0033801
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.17910e-03
+ Reference value :  3.17910e-03
+ Reference value :  3.17910e-03
+ Reference value :  3.18010e-03
+ Reference value :  3.18010e-03
+ Reference value :  3.18010e-03
+ Reference value :  3.18010e-03
+ Reference value :  3.18010e-03
+ Reference value :  3.19036e-03
+ Reference value :  3.20010e-03
+ Reference value :  3.20010e-03
+ Reference value :  3.20010e-03
+ Reference value :  3.20010e-03
+ Reference value :  3.20010e-03
+ Reference value :  3.20082e-03
+ Reference value :  3.20757e-03
+ Reference value :  3.20765e-03
+ Reference value :  3.20765e-03
+ Reference value :  3.20765e-03
+ Reference value :  3.20765e-03
+ Reference value :  3.20765e-03
+ Reference value :  3.20765e-03
+ Reference value :  3.20765e-03
+ Reference value :  3.20765e-03
+ Reference value :  3.20765e-03
+ Reference value :  3.20766e-03
+ Reference value :  3.20767e-03
+ Reference value :  3.20767e-03
+ Reference value :  3.20767e-03
+ Reference value :  3.20767e-03
+ Reference value :  3.20767e-03
+ Reference value :  3.20767e-03
+ Reference value :  3.20767e-03
+ Reference value :  3.20767e-03
+ Reference value :  3.20767e-03
+ Reference value :  3.20768e-03
+ Reference value :  3.20768e-03
+ Reference value :  3.20768e-03
+ Reference value :  3.20769e-03
+ Reference value :  3.20826e-03
+ Reference value :  3.20830e-03
+ Reference value :  3.20830e-03
+ Reference value :  3.20830e-03
+ Reference value :  3.20830e-03
+ Reference value :  3.20830e-03
+ Reference value :  3.20830e-03
+ Reference value :  3.20830e-03
+ Reference value :  3.20830e-03
+ Reference value :  3.20830e-03
+ Reference value :  3.20830e-03
+ Reference value :  3.20831e-03
+ Reference value :  3.20831e-03
+ Reference value :  3.20831e-03
+ Reference value :  3.20831e-03
+ Reference value :  3.20831e-03
+ Reference value :  3.20831e-03
+ Reference value :  3.20831e-03
+ Reference value :  3.20831e-03
+ Reference value :  3.20831e-03
+ Reference value :  3.20831e-03
+ Reference value :  3.20832e-03
+ Reference value :  3.20833e-03
+ Reference value :  3.20833e-03
+ Reference value :  3.20833e-03
+ Reference value :  3.20833e-03
+ Reference value :  3.21427e-03
+ Reference value :  3.21601e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21602e-03
+ Reference value :  3.21611e-03
+ Reference value :  3.21795e-03
+ Reference value :  3.21796e-03
+ Reference value :  3.21796e-03
+ Reference value :  3.21796e-03
+ Reference value :  3.21796e-03
+ Reference value :  3.21796e-03
+ Reference value :  3.21796e-03
+ Reference value :  3.21796e-03
+ Reference value :  3.21796e-03
+ Reference value :  3.21796e-03
+ Reference value :  3.21796e-03
+ Reference value :  3.21797e-03
+ Reference value :  3.22310e-03
+ Reference value :  3.23970e-03
+ Reference value :  3.25810e-03
+ Reference value :  3.27830e-03
+ Reference value :  3.29810e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30011e-03
+ Reference value :  3.30012e-03
+ Reference value :  3.30012e-03
+ Reference value :  3.30012e-03
+ Reference value :  3.30012e-03
+ Reference value :  3.30012e-03
+ Reference value :  3.30012e-03
+ Reference value :  3.30012e-03
+ Reference value :  3.30012e-03
+ Reference value :  3.30017e-03
+ Reference value :  3.31262e-03
+ Reference value :  3.33302e-03
+ Reference value :  3.35322e-03
+ Reference value :  3.37362e-03
+143: condition met: stop  when time >= 0.0033801
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.3802240201397183e-03
+>>> delete all
+>>> stop when time >= 0.0036171
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.39402e-03
+ Reference value :  3.41442e-03
+ Reference value :  3.43342e-03
+ Reference value :  3.45362e-03
+ Reference value :  3.47382e-03
+ Reference value :  3.49402e-03
+ Reference value :  3.51562e-03
+ Reference value :  3.53602e-03
+ Reference value :  3.55982e-03
+ Reference value :  3.58362e-03
+ Reference value :  3.60742e-03
+144: condition met: stop  when time >= 0.0036171
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.6172240201398525e-03
+>>> meas tran m301 avg v(xb.vmem1) from=0.0035801 to=0.0036151
+m301                =  3.700426e-01 from=  3.580100e-03 to=  3.615224e-03
+>>> print m301
+m301 = 3.7004260000000005e-01
+>>> meas tran m304 avg v(xb.x1.sum) from=0.0035801 to=0.0036151
+m304                =  3.951398e-01 from=  3.580100e-03 to=  3.615224e-03
+>>> print m304
+m304 = 3.9513980000000004e-01
+>>> meas tran m307 avg v(xb.vmem2) from=0.0035801 to=0.0036151
+m307                =  3.705944e-01 from=  3.580100e-03 to=  3.615224e-03
+>>> print m307
+m307 = 3.7059440000000005e-01
+>>> meas tran m310 avg v(xb.x2.sum) from=0.0035801 to=0.0036151
+m310                =  4.004301e-01 from=  3.580100e-03 to=  3.615224e-03
+>>> print m310
+m310 = 4.0043010000000001e-01
+>>> delete all
+>>> stop when time >= 0.0035601
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+145: condition met: stop  when time >= 0.0035601
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.6174240201398526e-03
+>>> alter i.xb.x1.idis dc = 8.2e-09
+>>> alter i.xb.x2.idis dc = 8.2e-09
+>>> delete all
+>>> stop when time >= 0.0036181
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+146: condition met: stop  when time >= 0.0036181
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.6182240201398531e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.2916369918465799e-06
+>>> alter @vksb1[pulse] = [ 0 1 0.0036201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0036191 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0036201 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0036201
+>>> alter vampb1 dc = 0
+>>> alter @vksb2[pulse] = [ 0 1 0.0036201 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0036191 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0036201 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0036201
+>>> alter vampb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0038201
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.61910e-03
+ Reference value :  3.61910e-03
+ Reference value :  3.61910e-03
+ Reference value :  3.62010e-03
+ Reference value :  3.62010e-03
+ Reference value :  3.62010e-03
+ Reference value :  3.62010e-03
+ Reference value :  3.62610e-03
+ Reference value :  3.64010e-03
+ Reference value :  3.64010e-03
+ Reference value :  3.64010e-03
+ Reference value :  3.64010e-03
+ Reference value :  3.64753e-03
+ Reference value :  3.64765e-03
+ Reference value :  3.64765e-03
+ Reference value :  3.64765e-03
+ Reference value :  3.64765e-03
+ Reference value :  3.64765e-03
+ Reference value :  3.64765e-03
+ Reference value :  3.64766e-03
+ Reference value :  3.64767e-03
+ Reference value :  3.64767e-03
+ Reference value :  3.64767e-03
+ Reference value :  3.64767e-03
+ Reference value :  3.64767e-03
+ Reference value :  3.64767e-03
+ Reference value :  3.64767e-03
+ Reference value :  3.64767e-03
+ Reference value :  3.64768e-03
+ Reference value :  3.64768e-03
+ Reference value :  3.64768e-03
+ Reference value :  3.64769e-03
+ Reference value :  3.64826e-03
+ Reference value :  3.64830e-03
+ Reference value :  3.64830e-03
+ Reference value :  3.64830e-03
+ Reference value :  3.64830e-03
+ Reference value :  3.64830e-03
+ Reference value :  3.64830e-03
+ Reference value :  3.64830e-03
+ Reference value :  3.64831e-03
+ Reference value :  3.64831e-03
+ Reference value :  3.64831e-03
+ Reference value :  3.64831e-03
+ Reference value :  3.64831e-03
+ Reference value :  3.64831e-03
+ Reference value :  3.64831e-03
+ Reference value :  3.64832e-03
+ Reference value :  3.64833e-03
+ Reference value :  3.64833e-03
+ Reference value :  3.64833e-03
+ Reference value :  3.65532e-03
+ Reference value :  3.65601e-03
+ Reference value :  3.65602e-03
+ Reference value :  3.65602e-03
+ Reference value :  3.65602e-03
+ Reference value :  3.65602e-03
+ Reference value :  3.65602e-03
+ Reference value :  3.65602e-03
+ Reference value :  3.65602e-03
+ Reference value :  3.65602e-03
+ Reference value :  3.65602e-03
+ Reference value :  3.65632e-03
+ Reference value :  3.65795e-03
+ Reference value :  3.65796e-03
+ Reference value :  3.65796e-03
+ Reference value :  3.65796e-03
+ Reference value :  3.65796e-03
+ Reference value :  3.65796e-03
+ Reference value :  3.65796e-03
+ Reference value :  3.65796e-03
+ Reference value :  3.65796e-03
+ Reference value :  3.65796e-03
+ Reference value :  3.66397e-03
+ Reference value :  3.68957e-03
+ Reference value :  3.71517e-03
+ Reference value :  3.73999e-03
+ Reference value :  3.74010e-03
+ Reference value :  3.74010e-03
+ Reference value :  3.74010e-03
+ Reference value :  3.74010e-03
+ Reference value :  3.74010e-03
+ Reference value :  3.74010e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74011e-03
+ Reference value :  3.74012e-03
+ Reference value :  3.74012e-03
+ Reference value :  3.74012e-03
+ Reference value :  3.74012e-03
+ Reference value :  3.74012e-03
+ Reference value :  3.74012e-03
+ Reference value :  3.74012e-03
+ Reference value :  3.74013e-03
+ Reference value :  3.74013e-03
+ Reference value :  3.74353e-03
+ Reference value :  3.76933e-03
+ Reference value :  3.79113e-03
+ Reference value :  3.81573e-03
+147: condition met: stop  when time >= 0.0038201
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 3.8201261177046881e-03
+>>> delete all
+>>> stop when time >= 0.0040571
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  3.84013e-03
+ Reference value :  3.86453e-03
+ Reference value :  3.88533e-03
+ Reference value :  3.90193e-03
+ Reference value :  3.92513e-03
+ Reference value :  3.95053e-03
+ Reference value :  3.97573e-03
+ Reference value :  3.99813e-03
+ Reference value :  4.02193e-03
+ Reference value :  4.04553e-03
+148: condition met: stop  when time >= 0.0040571
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.0571261177044949e-03
+>>> meas tran m342 avg v(xb.vmem1) from=0.0040201 to=0.0040551
+m342                =  3.673328e-01 from=  4.020100e-03 to=  4.055126e-03
+>>> print m342
+m342 = 3.6733280000000001e-01
+>>> meas tran m345 avg v(xb.x1.sum) from=0.0040201 to=0.0040551
+m345                =  3.951412e-01 from=  4.020100e-03 to=  4.055126e-03
+>>> print m345
+m345 = 3.9514120000000003e-01
+>>> meas tran m348 avg v(xb.vmem2) from=0.0040201 to=0.0040551
+m348                =  3.678879e-01 from=  4.020100e-03 to=  4.055126e-03
+>>> print m348
+m348 = 3.6788790000000005e-01
+>>> meas tran m351 avg v(xb.x2.sum) from=0.0040201 to=0.0040551
+m351                =  4.004315e-01 from=  4.020100e-03 to=  4.055126e-03
+>>> print m351
+m351 = 4.0043150000000005e-01
+>>> delete all
+>>> stop when time >= 0.0040001
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+149: condition met: stop  when time >= 0.0040001
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.0573261177044946e-03
+>>> alter i.xb.x1.idis dc = 8.2e-09
+>>> alter i.xb.x2.idis dc = 8.2e-09
+>>> delete all
+>>> stop when time >= 0.0040581
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+150: condition met: stop  when time >= 0.0040581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.0581261177044933e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.3104563454004938e-06
+>>> alter @vksb1[pulse] = [ 0 1 0.0040601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0040591 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0040601 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0040601
+>>> alter vampb1 dc = 0
+>>> alter @vksb2[pulse] = [ 0 1 0.0040601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0040591 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0040601 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0040601
+>>> alter vampb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0042601
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.05910e-03
+ Reference value :  4.05910e-03
+ Reference value :  4.05910e-03
+ Reference value :  4.05911e-03
+ Reference value :  4.06007e-03
+ Reference value :  4.06010e-03
+ Reference value :  4.06010e-03
+ Reference value :  4.06010e-03
+ Reference value :  4.06011e-03
+ Reference value :  4.07651e-03
+ Reference value :  4.08010e-03
+ Reference value :  4.08010e-03
+ Reference value :  4.08010e-03
+ Reference value :  4.08010e-03
+ Reference value :  4.08010e-03
+ Reference value :  4.08595e-03
+ Reference value :  4.08764e-03
+ Reference value :  4.08765e-03
+ Reference value :  4.08765e-03
+ Reference value :  4.08765e-03
+ Reference value :  4.08765e-03
+ Reference value :  4.08765e-03
+ Reference value :  4.08765e-03
+ Reference value :  4.08765e-03
+ Reference value :  4.08765e-03
+ Reference value :  4.08767e-03
+ Reference value :  4.08767e-03
+ Reference value :  4.08767e-03
+ Reference value :  4.08767e-03
+ Reference value :  4.08767e-03
+ Reference value :  4.08767e-03
+ Reference value :  4.08767e-03
+ Reference value :  4.08767e-03
+ Reference value :  4.08767e-03
+ Reference value :  4.08767e-03
+ Reference value :  4.08768e-03
+ Reference value :  4.08768e-03
+ Reference value :  4.08768e-03
+ Reference value :  4.08768e-03
+ Reference value :  4.08821e-03
+ Reference value :  4.08830e-03
+ Reference value :  4.08830e-03
+ Reference value :  4.08830e-03
+ Reference value :  4.08830e-03
+ Reference value :  4.08830e-03
+ Reference value :  4.08830e-03
+ Reference value :  4.08830e-03
+ Reference value :  4.08830e-03
+ Reference value :  4.08830e-03
+ Reference value :  4.08830e-03
+ Reference value :  4.08831e-03
+ Reference value :  4.08831e-03
+ Reference value :  4.08831e-03
+ Reference value :  4.08831e-03
+ Reference value :  4.08831e-03
+ Reference value :  4.08831e-03
+ Reference value :  4.08831e-03
+ Reference value :  4.08831e-03
+ Reference value :  4.08831e-03
+ Reference value :  4.08831e-03
+ Reference value :  4.08832e-03
+ Reference value :  4.08832e-03
+ Reference value :  4.08833e-03
+ Reference value :  4.08833e-03
+ Reference value :  4.08833e-03
+ Reference value :  4.08839e-03
+ Reference value :  4.09591e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09602e-03
+ Reference value :  4.09619e-03
+ Reference value :  4.09795e-03
+ Reference value :  4.09796e-03
+ Reference value :  4.09796e-03
+ Reference value :  4.09796e-03
+ Reference value :  4.09796e-03
+ Reference value :  4.09796e-03
+ Reference value :  4.09796e-03
+ Reference value :  4.09796e-03
+ Reference value :  4.09796e-03
+ Reference value :  4.09796e-03
+ Reference value :  4.09805e-03
+ Reference value :  4.11286e-03
+ Reference value :  4.13086e-03
+ Reference value :  4.14946e-03
+ Reference value :  4.16966e-03
+ Reference value :  4.18010e-03
+ Reference value :  4.18010e-03
+ Reference value :  4.18010e-03
+ Reference value :  4.18010e-03
+ Reference value :  4.18010e-03
+ Reference value :  4.18010e-03
+ Reference value :  4.18010e-03
+ Reference value :  4.18010e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18011e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18012e-03
+ Reference value :  4.18013e-03
+ Reference value :  4.18013e-03
+ Reference value :  4.18013e-03
+ Reference value :  4.18018e-03
+ Reference value :  4.19074e-03
+ Reference value :  4.20734e-03
+ Reference value :  4.22394e-03
+ Reference value :  4.24074e-03
+ Reference value :  4.25734e-03
+151: condition met: stop  when time >= 0.0042601
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.2601396457835746e-03
+>>> delete all
+>>> stop when time >= 0.0044971
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.27394e-03
+ Reference value :  4.29074e-03
+ Reference value :  4.30754e-03
+ Reference value :  4.32434e-03
+ Reference value :  4.34094e-03
+ Reference value :  4.35774e-03
+ Reference value :  4.37454e-03
+ Reference value :  4.39134e-03
+ Reference value :  4.40794e-03
+ Reference value :  4.42474e-03
+ Reference value :  4.44094e-03
+ Reference value :  4.45774e-03
+ Reference value :  4.47434e-03
+ Reference value :  4.49054e-03
+152: condition met: stop  when time >= 0.0044971
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.4971396457831950e-03
+>>> meas tran m383 avg v(xb.vmem1) from=0.0044601 to=0.0044951
+m383                =  3.646232e-01 from=  4.460100e-03 to=  4.495140e-03
+>>> print m383
+m383 = 3.6462320000000004e-01
+>>> meas tran m386 avg v(xb.x1.sum) from=0.0044601 to=0.0044951
+m386                =  3.951426e-01 from=  4.460100e-03 to=  4.495140e-03
+>>> print m386
+m386 = 3.9514260000000001e-01
+>>> meas tran m389 avg v(xb.vmem2) from=0.0044601 to=0.0044951
+m389                =  3.651815e-01 from=  4.460100e-03 to=  4.495140e-03
+>>> print m389
+m389 = 3.6518150000000005e-01
+>>> meas tran m392 avg v(xb.x2.sum) from=0.0044601 to=0.0044951
+m392                =  4.004329e-01 from=  4.460100e-03 to=  4.495140e-03
+>>> print m392
+m392 = 4.0043290000000004e-01
+>>> delete all
+>>> stop when time >= 0.0047001
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.50714e-03
+ Reference value :  4.52394e-03
+ Reference value :  4.54074e-03
+ Reference value :  4.55754e-03
+ Reference value :  4.57434e-03
+ Reference value :  4.59094e-03
+ Reference value :  4.60754e-03
+ Reference value :  4.62434e-03
+ Reference value :  4.64114e-03
+ Reference value :  4.65794e-03
+ Reference value :  4.67454e-03
+ Reference value :  4.69134e-03
+153: condition met: stop  when time >= 0.0047001
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.7001396457828698e-03
+>>> meas tran m399 avg v(xb.vmem1) from=0.0046601 to=0.0046951
+m399                =  3.646234e-01 from=  4.660100e-03 to=  4.695140e-03
+>>> print m399
+m399 = 3.6462339999999999e-01
+>>> meas tran m402 avg v(xb.x1.sum) from=0.0046601 to=0.0046951
+m402                =  3.951426e-01 from=  4.660100e-03 to=  4.695140e-03
+>>> print m402
+m402 = 3.9514260000000001e-01
+>>> meas tran m405 avg v(xb.vmem2) from=0.0046601 to=0.0046951
+m405                =  3.651817e-01 from=  4.660100e-03 to=  4.695140e-03
+>>> print m405
+m405 = 3.6518170000000000e-01
+>>> meas tran m408 avg v(xb.x2.sum) from=0.0046601 to=0.0046951
+m408                =  4.004329e-01 from=  4.660100e-03 to=  4.695140e-03
+>>> print m408
+m408 = 4.0043290000000004e-01
+>>> alter vglb1 dc = 5.304e-10
+>>> alter vglb2 dc = 5.304e-10
+>>> delete all
+>>> stop when time >= 0.0048701
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.70794e-03
+ Reference value :  4.72474e-03
+ Reference value :  4.74134e-03
+ Reference value :  4.75814e-03
+ Reference value :  4.77474e-03
+ Reference value :  4.79134e-03
+ Reference value :  4.80794e-03
+ Reference value :  4.82474e-03
+ Reference value :  4.84114e-03
+ Reference value :  4.85774e-03
+154: condition met: stop  when time >= 0.0048701
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.8701396457825974e-03
+>>> alter vglb1 dc = 0
+>>> alter vglb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0049371
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.87434e-03
+ Reference value :  4.89114e-03
+ Reference value :  4.90794e-03
+ Reference value :  4.92474e-03
+155: condition met: stop  when time >= 0.0049371
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 4.9371396457824901e-03
+>>> meas tran m423 avg v(xb.vmem1) from=0.0049001 to=0.0049351
+m423                =  3.658106e-01 from=  4.900100e-03 to=  4.935140e-03
+>>> print m423
+m423 = 3.6581060000000004e-01
+>>> meas tran m426 avg v(xb.x1.sum) from=0.0049001 to=0.0049351
+m426                =  3.951420e-01 from=  4.900100e-03 to=  4.935140e-03
+>>> print m426
+m426 = 3.9514199999999999e-01
+>>> meas tran m429 avg v(xb.vmem2) from=0.0049001 to=0.0049351
+m429                =  3.663848e-01 from=  4.900100e-03 to=  4.935140e-03
+>>> print m429
+m429 = 3.6638480000000001e-01
+>>> meas tran m432 avg v(xb.x2.sum) from=0.0049001 to=0.0049351
+m432                =  4.004322e-01 from=  4.900100e-03 to=  4.935140e-03
+>>> print m432
+m432 = 4.0043220000000002e-01
+>>> delete all
+>>> stop when time >= 0.0051401
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  4.94114e-03
+ Reference value :  4.95794e-03
+ Reference value :  4.97474e-03
+ Reference value :  4.99094e-03
+ Reference value :  5.00814e-03
+ Reference value :  5.02774e-03
+ Reference value :  5.04814e-03
+ Reference value :  5.06794e-03
+ Reference value :  5.09054e-03
+ Reference value :  5.11414e-03
+ Reference value :  5.13934e-03
+156: condition met: stop  when time >= 0.0051401
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.1401396457821649e-03
+>>> meas tran m439 avg v(xb.vmem1) from=0.0051001 to=0.0051351
+m439                =  3.658107e-01 from=  5.100100e-03 to=  5.135140e-03
+>>> print m439
+m439 = 3.6581070000000004e-01
+>>> meas tran m442 avg v(xb.x1.sum) from=0.0051001 to=0.0051351
+m442                =  3.951420e-01 from=  5.100100e-03 to=  5.135140e-03
+>>> print m442
+m442 = 3.9514199999999999e-01
+>>> meas tran m445 avg v(xb.vmem2) from=0.0051001 to=0.0051351
+m445                =  3.663850e-01 from=  5.100100e-03 to=  5.135140e-03
+>>> print m445
+m445 = 3.6638500000000002e-01
+>>> meas tran m448 avg v(xb.x2.sum) from=0.0051001 to=0.0051351
+m448                =  4.004322e-01 from=  5.100100e-03 to=  5.135140e-03
+>>> print m448
+m448 = 4.0043220000000002e-01
+>>> alter vglb1 dc = 5.35847785822e-10
+>>> alter vglb2 dc = 5.28725701944e-10
+>>> delete all
+>>> stop when time >= 0.0053101
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.16414e-03
+ Reference value :  5.18774e-03
+ Reference value :  5.20994e-03
+ Reference value :  5.23254e-03
+ Reference value :  5.25594e-03
+ Reference value :  5.27994e-03
+ Reference value :  5.30294e-03
+157: condition met: stop  when time >= 0.0053101
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.3101396457818925e-03
+>>> alter vglb1 dc = 0
+>>> alter vglb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0053771
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.32714e-03
+ Reference value :  5.35054e-03
+ Reference value :  5.37394e-03
+158: condition met: stop  when time >= 0.0053771
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.3771396457817852e-03
+>>> meas tran m463 avg v(xb.vmem1) from=0.0053401 to=0.0053751
+m463                =  3.670101e-01 from=  5.340100e-03 to=  5.375140e-03
+>>> print m463
+m463 = 3.6701010000000001e-01
+>>> meas tran m466 avg v(xb.x1.sum) from=0.0053401 to=0.0053751
+m466                =  3.951413e-01 from=  5.340100e-03 to=  5.375140e-03
+>>> print m466
+m466 = 3.9514130000000003e-01
+>>> meas tran m469 avg v(xb.vmem2) from=0.0053401 to=0.0053751
+m469                =  3.675843e-01 from=  5.340100e-03 to=  5.375140e-03
+>>> print m469
+m469 = 3.6758430000000003e-01
+>>> meas tran m472 avg v(xb.x2.sum) from=0.0053401 to=0.0053751
+m472                =  4.004316e-01 from=  5.340100e-03 to=  5.375140e-03
+>>> print m472
+m472 = 4.0043160000000005e-01
+>>> delete all
+>>> stop when time >= 0.0055801
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.39634e-03
+ Reference value :  5.42074e-03
+ Reference value :  5.44534e-03
+ Reference value :  5.46914e-03
+ Reference value :  5.49194e-03
+ Reference value :  5.51514e-03
+ Reference value :  5.53954e-03
+ Reference value :  5.56314e-03
+159: condition met: stop  when time >= 0.0055801
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.5801396457814600e-03
+>>> meas tran m479 avg v(xb.vmem1) from=0.0055401 to=0.0055751
+m479                =  3.670103e-01 from=  5.540100e-03 to=  5.575140e-03
+>>> print m479
+m479 = 3.6701030000000001e-01
+>>> meas tran m482 avg v(xb.x1.sum) from=0.0055401 to=0.0055751
+m482                =  3.951413e-01 from=  5.540100e-03 to=  5.575140e-03
+>>> print m482
+m482 = 3.9514130000000003e-01
+>>> meas tran m485 avg v(xb.vmem2) from=0.0055401 to=0.0055751
+m485                =  3.675844e-01 from=  5.540100e-03 to=  5.575140e-03
+>>> print m485
+m485 = 3.6758440000000003e-01
+>>> meas tran m488 avg v(xb.x2.sum) from=0.0055401 to=0.0055751
+m488                =  4.004316e-01 from=  5.540100e-03 to=  5.575140e-03
+>>> print m488
+m488 = 4.0043160000000005e-01
+>>> alter vglb1 dc = 1.27883932204e-10
+>>> alter vglb2 dc = 1.17759931532e-10
+>>> delete all
+>>> stop when time >= 0.0057501
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.58394e-03
+ Reference value :  5.60414e-03
+ Reference value :  5.62554e-03
+ Reference value :  5.64754e-03
+ Reference value :  5.66914e-03
+ Reference value :  5.69154e-03
+ Reference value :  5.71514e-03
+ Reference value :  5.73834e-03
+160: condition met: stop  when time >= 0.0057501
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.7501396457811877e-03
+>>> alter vglb1 dc = 0
+>>> alter vglb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0058171
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.76094e-03
+ Reference value :  5.77974e-03
+ Reference value :  5.79654e-03
+ Reference value :  5.81294e-03
+161: condition met: stop  when time >= 0.0058171
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 5.8171396457810803e-03
+>>> meas tran m503 avg v(xb.vmem1) from=0.0057801 to=0.0058151
+m503                =  3.672967e-01 from=  5.780100e-03 to=  5.815140e-03
+>>> print m503
+m503 = 3.6729670000000003e-01
+>>> meas tran m506 avg v(xb.x1.sum) from=0.0057801 to=0.0058151
+m506                =  3.951412e-01 from=  5.780100e-03 to=  5.815140e-03
+>>> print m506
+m506 = 3.9514120000000003e-01
+>>> meas tran m509 avg v(xb.vmem2) from=0.0057801 to=0.0058151
+m509                =  3.678517e-01 from=  5.780100e-03 to=  5.815140e-03
+>>> print m509
+m509 = 3.6785170000000000e-01
+>>> meas tran m512 avg v(xb.x2.sum) from=0.0057801 to=0.0058151
+m512                =  4.004315e-01 from=  5.780100e-03 to=  5.815140e-03
+>>> print m512
+m512 = 4.0043150000000005e-01
+>>> delete all
+>>> stop when time >= 0.0060201
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  5.82874e-03
+ Reference value :  5.84234e-03
+ Reference value :  5.85954e-03
+ Reference value :  5.87714e-03
+ Reference value :  5.89854e-03
+ Reference value :  5.91954e-03
+ Reference value :  5.94074e-03
+ Reference value :  5.96194e-03
+ Reference value :  5.98294e-03
+ Reference value :  6.00574e-03
+162: condition met: stop  when time >= 0.0060201
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.0201396457807551e-03
+>>> meas tran m519 avg v(xb.vmem1) from=0.0059801 to=0.0060151
+m519                =  3.672968e-01 from=  5.980100e-03 to=  6.015140e-03
+>>> print m519
+m519 = 3.6729680000000003e-01
+>>> meas tran m522 avg v(xb.x1.sum) from=0.0059801 to=0.0060151
+m522                =  3.951412e-01 from=  5.980100e-03 to=  6.015140e-03
+>>> print m522
+m522 = 3.9514120000000003e-01
+>>> meas tran m525 avg v(xb.vmem2) from=0.0059801 to=0.0060151
+m525                =  3.678519e-01 from=  5.980100e-03 to=  6.015140e-03
+>>> print m525
+m525 = 3.6785190000000001e-01
+>>> meas tran m528 avg v(xb.x2.sum) from=0.0059801 to=0.0060151
+m528                =  4.004315e-01 from=  5.980100e-03 to=  6.015140e-03
+>>> print m528
+m528 = 4.0043150000000005e-01
+>>> alter vglb1 dc = 1.32626599334e-11
+>>> alter vglb2 dc = 1.31000621331e-11
+>>> delete all
+>>> stop when time >= 0.0061901
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.03054e-03
+ Reference value :  6.05454e-03
+ Reference value :  6.07514e-03
+ Reference value :  6.09574e-03
+ Reference value :  6.11614e-03
+ Reference value :  6.13674e-03
+ Reference value :  6.15734e-03
+ Reference value :  6.17794e-03
+163: condition met: stop  when time >= 0.0061901
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.1901396457804828e-03
+>>> alter vglb1 dc = 0
+>>> alter vglb2 dc = 0
+>>> delete all
+>>> stop when time >= 0.0062571
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.19794e-03
+ Reference value :  6.21414e-03
+ Reference value :  6.22854e-03
+ Reference value :  6.24414e-03
+164: condition met: stop  when time >= 0.0062571
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.2571396457803755e-03
+>>> meas tran m543 avg v(xb.vmem1) from=0.0062201 to=0.0062551
+m543                =  3.673267e-01 from=  6.220100e-03 to=  6.255140e-03
+>>> print m543
+m543 = 3.6732670000000001e-01
+>>> meas tran m546 avg v(xb.x1.sum) from=0.0062201 to=0.0062551
+m546                =  3.951412e-01 from=  6.220100e-03 to=  6.255140e-03
+>>> print m546
+m546 = 3.9514120000000003e-01
+>>> meas tran m549 avg v(xb.vmem2) from=0.0062201 to=0.0062551
+m549                =  3.678817e-01 from=  6.220100e-03 to=  6.255140e-03
+>>> print m549
+m549 = 3.6788170000000003e-01
+>>> meas tran m552 avg v(xb.x2.sum) from=0.0062201 to=0.0062551
+m552                =  4.004315e-01 from=  6.220100e-03 to=  6.255140e-03
+>>> print m552
+m552 = 4.0043150000000005e-01
+>>> delete all
+>>> stop when time >= 0.0062001
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+165: condition met: stop  when time >= 0.0062001
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.2573396457803751e-03
+>>> alter i.xb.x1.idis dc = 0
+>>> alter i.xb.x2.idis dc = 0
+>>> delete all
+>>> stop when time >= 0.0062581
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+166: condition met: stop  when time >= 0.0062581
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.2581303442718079e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.2883049852484119e-06
+>>> alter @vksb1[pulse] = [ 0 1 0.0062601 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb1[pulse] = [ 1 0 0.0062591 1n 1n 0.000121 2 ]
+>>> alter @vkpb1[pulse] = [ 0 1 0.0062601 1n 1n 0.00012 2 ]
+>>> alter vtsb1 dc = 0.0062601
+>>> alter vampb1 dc = 0.49
+>>> delete all
+>>> stop when time >= 0.0062851
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.25896e-03
+ Reference value :  6.25910e-03
+ Reference value :  6.25910e-03
+ Reference value :  6.26006e-03
+ Reference value :  6.26010e-03
+ Reference value :  6.26010e-03
+ Reference value :  6.26010e-03
+ Reference value :  6.27542e-03
+ Reference value :  6.28010e-03
+ Reference value :  6.28010e-03
+ Reference value :  6.28010e-03
+ Reference value :  6.28010e-03
+ Reference value :  6.28284e-03
+167: condition met: stop  when time >= 0.0062851
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.2852360262744145e-03
+>>> delete all
+>>> stop when time >= 0.0064601
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.29864e-03
+ Reference value :  6.31524e-03
+ Reference value :  6.33184e-03
+ Reference value :  6.34844e-03
+ Reference value :  6.36504e-03
+ Reference value :  6.38009e-03
+ Reference value :  6.38010e-03
+ Reference value :  6.38010e-03
+ Reference value :  6.38010e-03
+ Reference value :  6.38012e-03
+ Reference value :  6.39499e-03
+ Reference value :  6.41179e-03
+ Reference value :  6.42819e-03
+ Reference value :  6.44499e-03
+169: condition met: stop  when time >= 0.0064601
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.4601887542643588e-03
+>>> delete all
+>>> stop when time >= 0.0066971
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.46179e-03
+ Reference value :  6.47839e-03
+ Reference value :  6.49359e-03
+ Reference value :  6.51139e-03
+ Reference value :  6.53579e-03
+ Reference value :  6.55999e-03
+ Reference value :  6.58459e-03
+ Reference value :  6.60899e-03
+ Reference value :  6.63259e-03
+ Reference value :  6.65659e-03
+ Reference value :  6.67779e-03
+170: condition met: stop  when time >= 0.0066971
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.6971887542639792e-03
+>>> meas tran m584 avg v(xb.vmem1) from=0.0066601 to=0.0066951
+m584                =  3.673270e-01 from=  6.660100e-03 to=  6.695189e-03
+>>> print m584
+m584 = 3.6732700000000001e-01
+>>> meas tran m587 avg v(xb.x1.sum) from=0.0066601 to=0.0066951
+m587                =  3.951412e-01 from=  6.660100e-03 to=  6.695189e-03
+>>> print m587
+m587 = 3.9514120000000003e-01
+>>> meas tran m590 avg v(xb.vmem2) from=0.0066601 to=0.0066951
+m590                =  3.678821e-01 from=  6.660100e-03 to=  6.695189e-03
+>>> print m590
+m590 = 3.6788210000000005e-01
+>>> meas tran m593 avg v(xb.x2.sum) from=0.0066601 to=0.0066951
+m593                =  4.004315e-01 from=  6.660100e-03 to=  6.695189e-03
+>>> print m593
+m593 = 4.0043150000000005e-01
+>>> delete all
+>>> stop when time >= 0.0066401
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+171: condition met: stop  when time >= 0.0066401
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.6973887542639788e-03
+>>> alter i.xb.x1.idis dc = 0
+>>> alter i.xb.x2.idis dc = 0
+>>> delete all
+>>> stop when time >= 0.0066981
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+172: condition met: stop  when time >= 0.0066981
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.6981887542639775e-03
+>>> print v(xb.p)[length(time)-1]
+v(xb.p)[length(time)-1] = 1.2982211268481693e-06
+>>> alter @vksb2[pulse] = [ 0 1 0.0067001 1n 1n 1.9999e-05 2 ]
+>>> alter @vkrb2[pulse] = [ 1 0 0.0066991 1n 1n 0.000121 2 ]
+>>> alter @vkpb2[pulse] = [ 0 1 0.0067001 1n 1n 0.00012 2 ]
+>>> alter vtsb2 dc = 0.0067001
+>>> alter vampb2 dc = 0.49
+>>> delete all
+>>> stop when time >= 0.0067251
+>>> stop when v(xb.p) > 0.9
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.69909e-03
+ Reference value :  6.69910e-03
+ Reference value :  6.69910e-03
+ Reference value :  6.70010e-03
+ Reference value :  6.71058e-03
+ Reference value :  6.72010e-03
+ Reference value :  6.72010e-03
+ Reference value :  6.72010e-03
+ Reference value :  6.72010e-03
+173: condition met: stop  when time >= 0.0067251
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.7252943031911100e-03
+>>> delete all
+>>> stop when time >= 0.0069001
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.73649e-03
+ Reference value :  6.76149e-03
+ Reference value :  6.78669e-03
+ Reference value :  6.80469e-03
+ Reference value :  6.82011e-03
+ Reference value :  6.82385e-03
+ Reference value :  6.84485e-03
+ Reference value :  6.86625e-03
+ Reference value :  6.88745e-03
+175: condition met: stop  when time >= 0.0069001
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 6.9002491110134803e-03
+>>> delete all
+>>> stop when time >= 0.0071371
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  6.90845e-03
+ Reference value :  6.92945e-03
+ Reference value :  6.95025e-03
+ Reference value :  6.97125e-03
+ Reference value :  6.99265e-03
+ Reference value :  7.01425e-03
+ Reference value :  7.03545e-03
+ Reference value :  7.05705e-03
+ Reference value :  7.07845e-03
+ Reference value :  7.10005e-03
+ Reference value :  7.12385e-03
+176: condition met: stop  when time >= 0.0071371
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.1372491110131006e-03
+>>> meas tran m625 avg v(xb.vmem1) from=0.0071001 to=0.0071351
+m625                =  3.673274e-01 from=  7.100100e-03 to=  7.135249e-03
+>>> print m625
+m625 = 3.6732740000000003e-01
+>>> meas tran m628 avg v(xb.x1.sum) from=0.0071001 to=0.0071351
+m628                =  3.951412e-01 from=  7.100100e-03 to=  7.135249e-03
+>>> print m628
+m628 = 3.9514120000000003e-01
+>>> meas tran m631 avg v(xb.vmem2) from=0.0071001 to=0.0071351
+m631                =  3.678824e-01 from=  7.100100e-03 to=  7.135249e-03
+>>> print m631
+m631 = 3.6788240000000005e-01
+>>> meas tran m634 avg v(xb.x2.sum) from=0.0071001 to=0.0071351
+m634                =  4.004315e-01 from=  7.100100e-03 to=  7.135249e-03
+>>> print m634
+m634 = 4.0043150000000005e-01
+>>> delete all
+>>> stop when time >= 0.0071401
+>>> resume
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+177: condition met: stop  when time >= 0.0071401
+doAnalyses: pause requested
+
+simulation interrupted
+>>> print time[length(time)-1]
+time[length(time)-1] = 7.1402491110130958e-03
+>>> set filetype=binary
+>>> write trace.raw v(xa.p) v(xa.vq) v(xa.vmem1) v(xa.x1.sum) v(xa.x1.si) v(ksa1) v(ampa1) v(xa.vmem2) v(xa.x2.sum) v(xa.x2.si) v(ksa2) v(ampa2) v(xa.nzm) v(xa.x1.nzo) v(xa.x1.nzc) v(xa.x2.nzo) v(xa.x2.nzc) v(xb.p) v(xb.vq) v(xb.vmem1) v(xb.x1.sum) v(xb.x1.si) v(ksb1) v(ampb1) v(xb.vmem2) v(xb.x2.sum) v(xb.x2.si) v(ksb2) v(ampb2) v(xb.nzm) v(xb.x1.nzo) v(xb.x1.nzc) v(xb.x2.nzo) v(xb.x2.nzc) v(xc.p) v(xc.vq) v(xc.vmem1) v(xc.x1.sum) v(xc.x1.si) v(ksc1) v(ampc1) v(xc.vmem2) v(xc.x2.sum) v(xc.x2.si) v(ksc2) v(ampc2) v(xc.nzm) v(xc.x1.nzo) v(xc.x1.nzc) v(xc.x2.nzo) v(xc.x2.nzc) v(gla1) v(gla2) v(glb1) v(glb2) v(glc1) v(glc2)
+binary raw file "trace.raw"
