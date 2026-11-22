@@ -16,11 +16,19 @@ sha256 00b6a516..., research/function-family-dev at 0c003fbf) used to date each 
 Slots are dnf.SLOT (22) units apart from 0. Every constant comes from dnf and c4, unchanged. For F1 the calendar is
 dnf.calendar and the plan is plans4.network, key for key (test_family_net.F1Regression).
 
-  family_net.py plan REPO MEMBER NEEDS CONTROL [CELL=PORT ...]     prints the plan's summary; runs nothing
-  family_net.py run  REPO OUT ID SEED MEMBER NEEDS CONTROL NOISE ROUND NGSPICE PDK [CELL=PORT ...]
-        one network run (the runner below). NEEDS: the member's needs in needs_keys order, comma-separated
-        (F1: a,b,c1,c2; X1: a,c1; F4: a,b,c1,c2); CONTROL skew | untrained | none; NOISE none | injected;
-        ROUND 0, or 1 to 3 for a noisy run; CELL=PORT the unary port of each unary cell (a=1, b=2, ...).
+  family_net.py plan  REPO MEMBER NEEDS CONTROL [CELL=PORT ...]     prints the plan's summary; runs nothing
+        NEEDS: the member's needs in needs_keys order, comma-separated (F1: a,b,c1,c2; X1: a,c1); CONTROL skew |
+        untrained | none; CELL=PORT the unary port of each unary cell (a=1, b=2, ...)
+  family_net.py check REPO SEED MEMBER STAGE KIND ROUND PREDICTED    whether the run belongs to its stage; runs nothing
+  family_net.py run   REPO OUT ID SEED MEMBER STAGE KIND ROUND PREDICTED NGSPICE PDK      one network run
+        STAGE Q | N1 | N2 | N3 | rehearsal (PREDICTION.md 7); KIND quiet (no noise, with the skew slots) | untrained |
+        noisy; ROUND 0 without noise, n in stage Nn, the table's n in the rehearsal; PREDICTED the prediction record
+        (PREDICTION.md 3), from which the needs, the unary ports, eligibility and room are read.
+
+The campaign's rules (PREDICTION.md 4, 7 and 8): seeds 8501 to 8515 in stages Q and N1 to N3, each run of the member
+DRAW.json gives its seed; 8303 and 8306 only in the stage "rehearsal"; noise seed 10 S + n (n = 1 to 3), and in the
+rehearsal the table of section 7 exactly. A network run only on an eligible instance; a noisy run only where every cell
+has room at K = 3; the untrained run of a member only on its first eligible instance in seed order.
 
 PYTHONPATH: FUP dev, PREP dev, research/function-family/dev (as topup.py's), then this folder.
 """
@@ -235,20 +243,178 @@ def settled(member, unary_ports, slots):
     return per_slot + 6.5 < dnf.SLOT - dnf.GATE_LEAD, per_slot
 
 
+# ------------------------------------------------------------------------------------------------ the campaign's rules
+
+CAMPAIGN_DIR = Path(__file__).resolve().parent.parent       # research/function-family-campaign
+PROTOCOL = CAMPAIGN_DIR / "PREDICTION.md"
+PROTOCOL_SHA256 = "5f9cdfe652c10535d66507324fd5554319e7d2340d127726ad98fb206253de4a"   # at 385c33bf
+DRAW = CAMPAIGN_DIR / "DRAW.json"
+DRAW_SHA256 = "5c2adb110b0b3fca5f62786a0d03b7a4762211082f1c523c8c07de1181a5df4b"       # at 385c33bf
+CAMPAIGN_SEEDS = tuple(range(8501, 8516))                    # PREDICTION.md 1
+REHEARSAL_SEEDS = (8303, 8306)                               # PREDICTION.md 7, R-N
+STAGES = ("Q", "N1", "N2", "N3", "rehearsal")                # PREDICTION.md 7; "rehearsal" is R-N, the explicit mode
+KINDS = ("quiet", "untrained", "noisy")
+REHEARSAL_NOISE = {                                          # PREDICTION.md 7: (seed, member, n) -> 10 S + n, exactly
+    **{(8303, "F2", n): 83030 + n for n in (1, 2, 3, 4)}, (8303, "X1", 5): 83035, (8303, "X2", 6): 83036,
+    **{(8306, "F2", n): 83060 + n for n in (1, 2, 3, 4)}, (8306, "F4", 5): 83065, (8306, "F3", 6): 83066,
+}
+
+
+def sha256_file(path):
+    import hashlib
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def protocol_check():
+    """The governing protocol is PREDICTION.md at its pushed SHA-256 (campaign 6's safeguard (i), by hash)."""
+    got = sha256_file(PROTOCOL)
+    assert got == PROTOCOL_SHA256, f"refused: PREDICTION.md has SHA-256 {got}, not the pushed {PROTOCOL_SHA256}"
+    return got
+
+
+def draw():
+    """{seed: member} of DRAW.json at its pushed SHA-256."""
+    got = sha256_file(DRAW)
+    assert got == DRAW_SHA256, f"refused: DRAW.json has SHA-256 {got}, not the pushed {DRAW_SHA256}"
+    return {int(s): m for s, m in json.loads(DRAW.read_text())["draw"].items()}
+
+
+def guard_seed(text, stage):
+    """The seed of a run, or a refusal before anything is written: 8501 to 8515 in the stages Q, N1, N2, N3; 8303 and
+    8306 in the stage "rehearsal" only; everything else refused."""
+    assert stage in STAGES, f"refused: stage {stage!r} is not one of {STAGES}"
+    assert str(text) != "none", "refused: the nominal cell has no network run in this campaign"
+    seed = int(text)
+    assert str(seed) == str(text), f"refused: {text!r} is not a seed"
+    if stage == "rehearsal":
+        assert seed in REHEARSAL_SEEDS, f"refused: the rehearsal runs on 8303 and 8306 only, not {seed}"
+    else:
+        assert seed in CAMPAIGN_SEEDS, f"refused: stage {stage} runs on 8501 to 8515 only, not {seed}"
+    return seed
+
+
+def noise_seed(seed, member, rnd, stage):
+    """Campaign: 10 S + n, n = 1 to 3 (PREDICTION.md 4). Rehearsal: the table of PREDICTION.md 7, exactly."""
+    if stage == "rehearsal":
+        key = (seed, member, rnd)
+        assert key in REHEARSAL_NOISE, f"refused: no rehearsal noise seed for {member} round {rnd} on {seed}"
+        return REHEARSAL_NOISE[key]
+    assert seed in CAMPAIGN_SEEDS and rnd in (1, 2, 3), f"refused: a campaign noise seed is 10 S + n with n from 1 to 3, not {rnd}"
+    return 10 * seed + rnd
+
+
+def run_of(stage, kind, rnd):
+    """(control, noise) of a run of `kind` in `stage`, or a refusal: Q holds the runs without noise (with the skew
+    slots) and the untrained runs; N<n> the noisy runs of round n; the rehearsal all three kinds."""
+    assert stage in STAGES, f"refused: stage {stage!r} is not one of {STAGES}"
+    assert kind in KINDS, f"refused: kind {kind!r} is not one of {KINDS}"
+    if kind in ("quiet", "untrained"):
+        assert stage in ("Q", "rehearsal"), f"refused: a {kind} run belongs to stage Q, not {stage}"
+        assert rnd == 0, "refused: a run without noise has round 0"
+        return ("skew" if kind == "quiet" else "untrained"), "none"
+    assert stage != "Q", "refused: a noisy run does not belong to stage Q"
+    if stage != "rehearsal":
+        assert stage == f"N{rnd}", f"refused: round {rnd} does not belong to stage {stage}"
+    return None, "injected"
+
+
+def read_predicted(path):
+    """PREDICTED.json in family_predict.py's output shape: {"instances": [{"seed", "members": {member: row}}]}.
+    Returns {seed: {member: row}}; a seed listed twice is refused."""
+    out = {}
+    for x in json.loads(Path(path).read_text())["instances"]:
+        s = int(x["seed"])
+        assert s not in out, f"refused: seed {s} is listed twice in the prediction record"
+        out[s] = x["members"]
+    return out
+
+
+def kernel(row):
+    """The kernel's verdicts {K0, K3} of a row, or None; refuses a row whose summary flags disagree with them."""
+    k = (row.get("gate") or {}).get("kernel")
+    if not k:
+        return None
+    assert isinstance(k.get("K0"), bool) and isinstance(k.get("K3"), bool), f"refused: the kernel's verdicts are not booleans: {k}"
+    if "gate_K0" in row:
+        assert row["gate_K0"] == k["K0"], "refused: gate_K0 disagrees with the kernel's K0"
+    if "room_K3" in row:
+        assert row["room_K3"] == k["K3"], "refused: room_K3 disagrees with the kernel's K3"
+    return k
+
+
+def eligible(row):
+    """PREDICTION.md 3: measured, and the kernel's checks hold at K = 0."""
+    k = kernel(row)
+    return row.get("measured") is True and row.get("eligible_needs") is not False and bool(k) and k["K0"]
+
+
+def room(row):
+    """PREDICTION.md 3 and 4: every cell has room, the kernel's checks at K = 3 (on an eligible row)."""
+    return eligible(row) and kernel(row)["K3"]
+
+
+def admit(stage, kind, rnd, seed, member, predicted, members_of=None):
+    """Whether the run belongs to its stage, from the prediction record; refuses otherwise. Returns dict(control,
+    noise, round, noise_id, needs, unary_ports, row). members_of: {seed: member} (DRAW.json; campaign stages only)."""
+    check_member(member)
+    control, noise = run_of(stage, kind, rnd)
+    if stage != "rehearsal":
+        members_of = draw() if members_of is None else members_of
+        assert members_of.get(seed) == member, f"refused: {seed} is drawn for {members_of.get(seed)}, not {member}"
+    assert seed in predicted and member in predicted[seed], f"refused: no row for {member} of {seed} in the prediction record"
+    row = predicted[seed][member]
+    assert row.get("member", member) == member and int(row.get("seed", seed)) == seed, "refused: the row names another member or seed"
+    assert eligible(row), f"refused: {member} of {seed} is not eligible (PREDICTION.md 3): no network run"
+    if noise == "injected":
+        assert room(row), f"refused: {member} of {seed} has no room at K = 3 for every cell: no noisy run"
+    if kind == "untrained" and stage != "rehearsal":
+        first = None
+        for s in sorted(x for x, m in members_of.items() if m == member):
+            assert s in predicted and member in predicted[s], f"refused: no row for {member} of {s}: its first eligible instance is undecided"
+            if eligible(predicted[s][member]):
+                first = s
+                break
+        assert first == seed, f"refused: {member}'s untrained run is on its first eligible instance, {first}, not {seed}"
+    ports = check_ports(member, row.get("unary_ports") or {})
+    needs = check_needs(member, row["needs"])
+    L1 = layer1(member)
+    for q, keys in (("Q1", L1), ("Q2", needs_keys(member)[len(L1):])):
+        if q in row:
+            assert row[q] == max(needs[k] for k in keys) + 2, f"refused: the row's {q} is not max(needs) + 2"
+    noise_id = noise_seed(seed, member, rnd, stage) if noise == "injected" else None
+    return dict(control=control, noise=noise, round=rnd if noise == "injected" else None, noise_id=noise_id, needs=needs, unary_ports=ports)
+
+
 # ------------------------------------------------------------------------------------------------ the runner
 
-def network_run(repo, out, rid, seed_text, member, unary_ports, needs, control, noise, rnd, ngspice, pdk):
-    """campaign6/net6.py network() with MEMBER and UNARY_PORTS added, at the 2x design point (dosedev_tol.tolerance and
+def network_run(repo, out, rid, seed_text, member, stage, kind, rnd, predicted, ngspice, pdk, members_of=None):
+    """One network run of the campaign (stages Q, N1 to N3) or of the rehearsal R-N. Every check is made before
+    anything is written: the protocol's SHA-256, the stage, the seed, the draw, the record's eligibility and room,
+    the noise seed. The needs and the unary ports are the prediction record's; nothing else chooses them."""
+    require_debug()
+    paths(repo)
+    import dosedev2
+    out = Path(out)
+    dosedev2.outside(repo, out)
+    proto = protocol_check()
+    seed = guard_seed(seed_text, stage)
+    pred_sha = sha256_file(predicted)
+    a = admit(stage, kind, rnd, seed, member, read_predicted(predicted), members_of)
+    head = dict(stage=dict(name=stage, kind=kind, protocol_sha256=proto, predicted_sha256=pred_sha,
+                           draw_sha256=DRAW_SHA256 if stage != "rehearsal" else None))
+    return play_run(repo, out, rid, seed, member, a["unary_ports"], a["needs"], a["control"], a["noise_id"], rnd, ngspice, pdk, head)
+
+
+def play_run(repo, out, rid, seed, member, unary_ports, needs, control, noise_id, rnd, ngspice, pdk, head):
+    """campaign6/net6.py network()'s body, with MEMBER and UNARY_PORTS, at the 2x design point (dosedev_tol.tolerance and
     dosedev2.window(batch2x.PARAMS), as topup.py applies it). The same frozen functions in the same order (the plan,
-    noisemodel.shim, net.deck, session4.play, run4.trnoise_fingerprint); the same deck; the same record keys as net6,
-    `campaign6` excepted (no family campaign exists), plus `member`, `wiring`, `unary_ports` and `dosedev`.
-    The seed guard is batch2x.guard_seed (B2's instances 8301 to 8310, the family's). No stage file: the family has no
-    campaign protocol yet, so `stage` is None, as dosedev2.network writes it."""
+    noisemodel.shim, net.deck, session4.play, run4.trnoise_fingerprint); the same deck; net6's record keys in its
+    order, its `stage` as head["stage"] and `campaign6` replaced by `family`; then member, wiring, unary_ports and
+    dosedev. Called by network_run after its checks, and by the tests."""
     require_debug()
     paths(repo)
     import batch2x
     import c4
-    import c6
     import dosedev2
     import dosedev_tol
     import noisemodel
@@ -262,19 +428,16 @@ def network_run(repo, out, rid, seed_text, member, unary_ports, needs, control, 
     ports = check_ports(member, unary_ports)
     needs = check_needs(member, needs)
     check_control(control)
-    assert noise in ("none", "injected"), "refused: the injected model only (PREDICTION.md 4; campaign 5, section 6)"
-    assert (noise == "none") == (rnd == 0), "a noisy run has a round from 1 to 3, a run without noise none"
-    seed = batch2x.guard_seed(str(seed_text))
+    assert (noise_id is None) == (rnd == 0), "a noisy run has a round and a noise seed, a run without noise neither"
     print(c4.require_pinned())
     section = c4.SECTION
-    rec = dict(id=rid, kind="network", section=section, seed=seed, stage=None)          # net6's (run4.run's) order
+    rec = dict(id=rid, kind="network", section=section, seed=seed, stage=head["stage"])     # net6's (run4.run's) order
     plan, slots = network(member, needs, ports, control)
-    noise_id, shim, seen = None, None, []
+    shim, seen = None, []
     with dosedev_tol.tolerance(), dosedev2.window(batch2x.PARAMS, seen):
-        if noise == "injected":
+        if noise_id is not None:
             out.mkdir(parents=True, exist_ok=True)
             shim, shim_info = noisemodel.shim(out)
-            noise_id = c6.noise_seed(seed, rnd)
             text = net.deck(cells=c4.CELLS, section=section, noise=True)
             info = dict(model="injected", noise_seed=noise_id, imposed_process_number=noise_id, shim=shim_info)
         else:
@@ -282,7 +445,7 @@ def network_run(repo, out, rid, seed_text, member, unary_ports, needs, control, 
             info = dict(model="none")
         changed = {k: v for k, v in seen[0]["parameters_changed"].items() if v["old"] != v["new"]}
         assert changed == dict(vhi=dict(old="0.6", new="0.7"), reltol=dict(old="1e-4", new="1e-5")), f"refused: not the 2x design point: {changed}"
-        rec.update(needs=list(needs.values()), control=control, round=rnd if noise != "none" else None, slots=len(slots))
+        rec.update(needs=list(needs.values()), control=control, round=rnd if noise_id is not None else None, slots=len(slots))
         result, tr = session4.play(out / "evidence", plan, text, Path(ngspice), Path(pdk), seed=seed, guard_off=False, noise_id=noise_id, shim=shim)
     (out / "evidence" / "pdk").unlink()
     reached = bool(tr.t[-1] >= result["horizon_s"] - 1e-9)
@@ -294,9 +457,10 @@ def network_run(repo, out, rid, seed_text, member, unary_ports, needs, control, 
                points=result["points"], files={x: run4.sha(ev / x) for x in ("input.spice", "session.log", "trace.raw", "result.json")})
     rec.update(noise_fingerprint=mark, wall_s=time.time() - began,
                peak_rss_MB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024)
+    rec["family"] = dict(campaign="function-family-campaign", protocol_sha256=head["stage"].get("protocol_sha256"), instance=seed,
+                         member=member, kind="network", stage=head["stage"].get("name"), interpreter=c4.interpreter())
     rec.update(member=member, wiring=wiring(member, ports), unary_ports=ports,
-               dosedev=dict(what=f"development network run of {member} at the 2x design point, outside any campaign", needs=needs,
-                            decks=seen, interpreter=c4.interpreter()))
+               dosedev=dict(what=f"network run of {member} at the 2x design point", needs=needs, decks=seen))
     (out / "noise.sha256").write_text(mark + "\n")
     (out / "record.json").write_text(json.dumps(rec, indent=1) + "\n")
     assert rec["reached_its_last_date"], "the waveform ends before the last date of the run"
@@ -317,17 +481,23 @@ def parse_ports(items):
 def main(argv=None):
     require_debug()
     a = sys.argv[1:] if argv is None else argv
-    cmd = a[0]
+    cmd = a[0] if a else None
     if cmd == "plan":
         repo, member, needs, control, *ports = a[1:]
         paths(repo)
         plan, slots = network(member, [int(x) for x in needs.split(",")], parse_ports(ports), None if control == "none" else control)
         print(json.dumps(dict(member=member, slots=len(slots), sources=len(plan["sources"]), edges=len(plan["edges"]),
                               horizon=plan["horizon"]), indent=1))
+    elif cmd == "check":
+        repo, seed, member, stage, kind, rnd, predicted = a[1:]
+        paths(repo)
+        protocol_check()
+        s = guard_seed(seed, stage)
+        x = admit(stage, kind, int(rnd), s, member, read_predicted(predicted))
+        print(json.dumps(dict(seed=s, member=member, stage=stage, kind=kind, **x)))
     elif cmd == "run":
-        repo, out, rid, seed, member, needs, control, noise, rnd, ngspice, pdk, *ports = a[1:]
-        rec = network_run(repo, out, rid, seed, member, parse_ports(ports), [int(x) for x in needs.split(",")],
-                          None if control == "none" else control, noise, int(rnd), ngspice, pdk)
+        repo, out, rid, seed, member, stage, kind, rnd, predicted, ngspice, pdk = a[1:]
+        rec = network_run(repo, out, rid, seed, member, stage, kind, int(rnd), predicted, ngspice, pdk)
         print(json.dumps(dict(id=rec["id"], reached_its_last_date=rec["reached_its_last_date"], wall_s=round(rec["wall_s"]))))
     else:
         raise SystemExit(__doc__)

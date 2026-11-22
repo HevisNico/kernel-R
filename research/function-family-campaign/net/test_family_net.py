@@ -307,41 +307,49 @@ class Refusals(unittest.TestCase):
 
 NET6_KEYS = ("id", "kind", "section", "seed", "stage", "needs", "control", "round", "slots", "noise", "reached_its_last_date", "horizon_s",
              "waveform_ends_s", "points", "files", "noise_fingerprint", "wall_s", "peak_rss_MB")     # net6.network's, `campaign6` aside
+HEAD = dict(stage=dict(name="test", protocol_sha256=None))
 
 
-class Runner(unittest.TestCase):
-    """network_run with session4.play replaced by a fake (no ngspice): the plan and the deck it would play, the
-    record's keys, and the refusals before anything is written."""
+class Fake:
+    """session4.play and run4.trnoise_fingerprint replaced for the time of a call (no ngspice). `seen` gets what the
+    runner would have played and fingerprinted."""
 
-    def fake(self, seen):
+    def __init__(self):
+        self.seen = {}
+
+    def __enter__(self):
         import run4
         import session4
+        seen = self.seen
 
         class Tr:
             t = [1.0]
+        self.tr = Tr()
 
         def play(out, plan, text, ngspice, pdk, seed=None, guard_off=False, noise_id=None, shim=None):
-            seen.update(plan=plan, text=text, seed=seed, noise_id=noise_id, guard_off=guard_off)
+            seen.update(plan=plan, text=text, seed=seed, noise_id=noise_id, guard_off=guard_off, shim_name=None if shim is None else Path(shim).name,
+                        shim_exists=None if shim is None else Path(shim).exists())
             out = Path(out)
             out.mkdir(parents=True, exist_ok=True)
             for x in ("input.spice", "session.log", "trace.raw", "result.json"):
                 (out / x).write_text(x)
             (out / "pdk").symlink_to(out)
-            return dict(horizon_s=0.5, waveform_ends_s=1.0, points=3), Tr()
-        return [(session4, "play", play), (run4, "trnoise_fingerprint", lambda tr, cells: "fake")]
+            return dict(horizon_s=0.5, waveform_ends_s=1.0, points=3), self.tr
 
-    def run_fake(self, out, *args):
-        seen = {}
-        saved = []
-        for mod, name, f in self.fake(seen):
-            saved.append((mod, name, getattr(mod, name)))
+        def fingerprint(tr, cells):
+            seen.update(fingerprint_tr_is_play_tr=tr is self.tr, fingerprint_cells=tuple(cells))
+            return "fake"
+        self.saved = [(session4, "play", session4.play), (run4, "trnoise_fingerprint", run4.trnoise_fingerprint)]
+        session4.play, run4.trnoise_fingerprint = play, fingerprint
+        return self
+
+    def __exit__(self, *exc):
+        for mod, name, f in self.saved:
             setattr(mod, name, f)
-        try:
-            rec = N.network_run(REPO, out, *args)
-        finally:
-            for mod, name, f in saved:
-                setattr(mod, name, f)
-        return rec, seen
+
+
+class Runner(unittest.TestCase):
+    """play_run (the runner's body) with the fake: the plan and the deck it would play, the record's keys."""
 
     def test_record_plan_and_2x_deck(self):
         import batch2x
@@ -351,18 +359,17 @@ class Runner(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             for member, ports, needs in (("F3", {"a": 2}, [3, 2, 4, 1]), ("X1", {"a": 1}, [2, 3]), ("F1", {}, [4, 4, 4, 4])):
                 out = Path(d) / member
-                rec, seen = self.run_fake(out, "rid", "8305", member, ports, needs, "skew", "none", 0, "/usr/bin/ngspice", "/nonexistent-pdk")
+                with Fake() as f:
+                    rec = N.play_run(REPO, out, "rid", 8505, member, ports, needs, "skew", None, 0, "/usr/bin/ngspice", "/nonexistent-pdk", HEAD)
+                seen = f.seen
                 self.assertEqual(js(seen["plan"]), js(N.network(member, needs, ports, "skew")[0]))
                 with dosedev_tol.tolerance(), dosedev2.window(batch2x.PARAMS):
                     self.assertEqual(seen["text"], net.deck(cells=c4.CELLS, section=c4.SECTION))
                 self.assertNotEqual(seen["text"], net.deck(cells=c4.CELLS, section=c4.SECTION))
-                self.assertEqual(seen["seed"], 8305)
+                self.assertEqual(seen["seed"], 8505)
                 self.assertEqual(tuple(rec)[:len(NET6_KEYS)], NET6_KEYS)
-                self.assertEqual(tuple(rec)[len(NET6_KEYS):], ("member", "wiring", "unary_ports", "dosedev"))
-                self.assertEqual(rec["member"], member)
-                self.assertEqual(rec["wiring"], fp.wiring(member, ports))
-                self.assertEqual(rec["unary_ports"], ports)
-                self.assertEqual(rec["section"], c4.SECTION)
+                self.assertEqual(tuple(rec)[len(NET6_KEYS):], ("family", "member", "wiring", "unary_ports", "dosedev"))
+                self.assertEqual((rec["member"], rec["wiring"], rec["unary_ports"], rec["section"]), (member, fp.wiring(member, ports), ports, c4.SECTION))
                 self.assertEqual(json.loads((out / "record.json").read_text())["member"], member)
                 self.assertFalse((out / "evidence" / "pdk").exists())
                 if member == "F1":
@@ -371,22 +378,320 @@ class Runner(unittest.TestCase):
     def test_refusals_before_anything_is_written(self):
         with tempfile.TemporaryDirectory() as d:
             out = Path(d) / "r"
-            for seed, member, ports, needs, err in (("7701", "F1", {}, [1, 1, 1, 1], "not one of this batch"),
-                                                    ("none", "F1", {}, [1, 1, 1, 1], "nominal cell"),
-                                                    ("8301", "F7", {}, [1, 1], "not a member"),
-                                                    ("8301", "X1", {"a": 3}, [1, 1], "1 or 2"),
-                                                    ("8301", "F2", {}, [1, 8, 1, 1], "above 7")):
-                with self.assertRaisesRegex(AssertionError, err):
-                    self.run_fake(out, "rid", seed, member, ports, needs, None, "none", 0, "/usr/bin/ngspice", "/x")
+            for member, ports, needs, ctl, nid, rnd, err in (("F7", {}, [1, 1], None, None, 0, "not a member"),
+                                                             ("X1", {"a": 3}, [1, 1], None, None, 0, "1 or 2"),
+                                                             ("F2", {}, [1, 8, 1, 1], None, None, 0, "above 7"),
+                                                             ("F1", {}, [1, 1, 1, 1], None, None, 1, "a noisy run has a round"),
+                                                             ("F1", {}, [1, 1, 1, 1], None, 85011, 0, "a noisy run has a round"),
+                                                             ("F1", {}, [1, 1, 1, 1], "none", None, 0, "control")):
+                with self.assertRaisesRegex(AssertionError, err), Fake():
+                    N.play_run(REPO, out, "rid", 8501, member, ports, needs, ctl, nid, rnd, "/usr/bin/ngspice", "/x", HEAD)
                 self.assertFalse(out.exists())
-            with self.assertRaisesRegex(AssertionError, "a noisy run has a round"):
-                self.run_fake(out, "rid", "8301", "F1", {}, [1, 1, 1, 1], None, "none", 1, "/usr/bin/ngspice", "/x")
-            with self.assertRaisesRegex(AssertionError, "injected model only"):
-                self.run_fake(out, "rid", "8301", "F1", {}, [1, 1, 1, 1], None, "trnoise", 1, "/usr/bin/ngspice", "/x")
-            self.assertFalse(out.exists())
-        with self.assertRaisesRegex(AssertionError, "inside the repository"):
-            self.run_fake(Path(REPO) / "tmp-run", "rid", "8301", "F1", {}, [1, 1, 1, 1], None, "none", 0, "/usr/bin/ngspice", "/x")
+        with self.assertRaisesRegex(AssertionError, "inside the repository"), Fake():
+            N.play_run(REPO, Path(REPO) / "tmp-run", "rid", 8501, "F1", {}, [1, 1, 1, 1], None, None, 0, "/usr/bin/ngspice", "/x", HEAD)
         self.assertFalse((Path(REPO) / "tmp-run").exists())
+
+
+class InjectedNoise(unittest.TestCase):
+    """The injected-noise path, without simulation: on F1, the runner gives session4.play and run4.trnoise_fingerprint
+    exactly what net6.network gives them (plan, deck text, seed, noise seed, shim built by noisemodel.shim), with the
+    same 2x window around both, and writes the same record values. net6's campaign guards (stage file, seed guard,
+    header) are replaced for the time of the call, since its guard knows campaign 6's seeds only."""
+
+    def net6_run(self, out, needs, control, rnd, seed):
+        import batch2x
+        import c6
+        import dosedev2
+        import dosedev_tol
+        import net6
+        saved = (c6.stage_check, c6.guard_seed, c6.run_header)
+        c6.stage_check = lambda f: dict(stage="N1")
+        c6.guard_seed = lambda text, stage=None, out=None: int(text)
+        c6.run_header = lambda *a, **k: {}
+        try:
+            with Fake() as f, dosedev_tol.tolerance(), dosedev2.window(batch2x.PARAMS):
+                rec = net6.network("stage-file", out, "rid", str(seed), list(needs), control, "injected" if rnd else "none", rnd,
+                                   Path("/usr/bin/ngspice"), Path("/x"))
+        finally:
+            c6.stage_check, c6.guard_seed, c6.run_header = saved
+        return rec, f.seen
+
+    def test_f1_equals_net6(self):
+        import c6
+        with tempfile.TemporaryDirectory() as d:
+            for needs, control, rnd in (((3, 4, 2, 5), None, 1), ((4, 4, 4, 4), None, 3), ((2, 2, 2, 2), "skew", 0)):
+                seed = 8501
+                r6, s6 = self.net6_run(Path(d) / f"n6-{rnd}-{control}", needs, control, rnd, seed)
+                nid = N.noise_seed(seed, "F1", rnd, "N1") if rnd else None
+                self.assertEqual(nid, c6.noise_seed(seed, rnd) if rnd else None)
+                with Fake() as f:
+                    rf = N.play_run(REPO, Path(d) / f"fam-{rnd}-{control}", "rid", seed, "F1", {}, needs, control, nid, rnd, "/usr/bin/ngspice", "/x", HEAD)
+                sf = f.seen
+                self.assertEqual(js(sf["plan"]), js(s6["plan"]))
+                self.assertEqual(sf["text"], s6["text"])
+                for k in ("seed", "noise_id", "guard_off", "shim_name", "shim_exists", "fingerprint_tr_is_play_tr", "fingerprint_cells"):
+                    self.assertEqual(sf[k], s6[k], k)
+                self.assertEqual(sf["fingerprint_cells"], tuple(c4.CELLS))
+                if rnd:
+                    self.assertTrue(sf["shim_exists"])
+                for k in NET6_KEYS:
+                    if k not in ("wall_s", "peak_rss_MB", "stage"):
+                        self.assertEqual(js(rf[k]), js(r6[k]), k)
+                self.assertFalse(list((Path(d) / f"fam-{rnd}-{control}").glob("fakepid.so")))
+
+    def test_noisy_deck_differs_from_quiet(self):
+        with tempfile.TemporaryDirectory() as d:
+            with Fake() as q:
+                N.play_run(REPO, Path(d) / "q", "rid", 8501, "F1", {}, (2, 2, 2, 2), None, None, 0, "/usr/bin/ngspice", "/x", HEAD)
+            with Fake() as n:
+                N.play_run(REPO, Path(d) / "n", "rid", 8501, "F1", {}, (2, 2, 2, 2), None, 85011, 1, "/usr/bin/ngspice", "/x", HEAD)
+        self.assertNotEqual(q.seen["text"], n.seen["text"])
+        self.assertEqual(n.seen["noise_id"], 85011)
+        self.assertIsNone(q.seen["noise_id"])
+
+
+class SeedsAndNoise(unittest.TestCase):
+    def test_seed_guard(self):
+        for s in range(8501, 8516):
+            for st in ("Q", "N1", "N2", "N3"):
+                self.assertEqual(N.guard_seed(str(s), st), s)
+            with self.assertRaisesRegex(AssertionError, "8303 and 8306 only"):
+                N.guard_seed(str(s), "rehearsal")
+        for s in (8303, 8306):
+            self.assertEqual(N.guard_seed(str(s), "rehearsal"), s)
+            for st in ("Q", "N1", "N2", "N3"):
+                with self.assertRaisesRegex(AssertionError, "8501 to 8515 only"):
+                    N.guard_seed(str(s), st)
+        for bad in ("8500", "8516", "8301", "8305", "7701", "7601", "08501"):
+            for st in N.STAGES:
+                with self.assertRaises(AssertionError):
+                    N.guard_seed(bad, st)
+        with self.assertRaisesRegex(AssertionError, "nominal cell"):
+            N.guard_seed("none", "Q")
+        with self.assertRaisesRegex(AssertionError, "stage"):
+            N.guard_seed("8501", "N4")
+        with self.assertRaisesRegex(AssertionError, "stage"):
+            N.guard_seed("8501", "D")
+
+    def test_campaign_noise_seeds(self):
+        got = {N.noise_seed(s, "X1", n, f"N{n}") for s in range(8501, 8516) for n in (1, 2, 3)}
+        self.assertEqual(min(got), 85011)
+        self.assertEqual(max(got), 85153)
+        self.assertEqual(len(got), 45)
+        for n in (0, 4, -1):
+            with self.assertRaisesRegex(AssertionError, "n from 1 to 3"):
+                N.noise_seed(8501, "X1", n, "N1")
+
+    def test_rehearsal_table_exactly(self):
+        want = {(8303, "F2", 1): 83031, (8303, "F2", 2): 83032, (8303, "F2", 3): 83033, (8303, "F2", 4): 83034,
+                (8303, "X1", 5): 83035, (8303, "X2", 6): 83036,
+                (8306, "F2", 1): 83061, (8306, "F2", 2): 83062, (8306, "F2", 3): 83063, (8306, "F2", 4): 83064,
+                (8306, "F4", 5): 83065, (8306, "F3", 6): 83066}
+        self.assertEqual(N.REHEARSAL_NOISE, want)
+        for s in (8303, 8306):
+            for m in fp.MEMBERS:
+                for n in range(0, 9):
+                    if (s, m, n) in want:
+                        self.assertEqual(N.noise_seed(s, m, n, "rehearsal"), want[(s, m, n)])
+                    else:
+                        with self.assertRaisesRegex(AssertionError, "no rehearsal noise seed"):
+                            N.noise_seed(s, m, n, "rehearsal")
+
+    def test_stage_and_kind(self):
+        self.assertEqual(N.run_of("Q", "quiet", 0), ("skew", "none"))
+        self.assertEqual(N.run_of("Q", "untrained", 0), ("untrained", "none"))
+        for n in (1, 2, 3):
+            self.assertEqual(N.run_of(f"N{n}", "noisy", n), (None, "injected"))
+            for m in (1, 2, 3):
+                if m != n:
+                    with self.assertRaisesRegex(AssertionError, "does not belong to stage"):
+                        N.run_of(f"N{n}", "noisy", m)
+            for k in ("quiet", "untrained"):
+                with self.assertRaisesRegex(AssertionError, "belongs to stage Q"):
+                    N.run_of(f"N{n}", k, 0)
+        with self.assertRaisesRegex(AssertionError, "does not belong to stage Q"):
+            N.run_of("Q", "noisy", 1)
+        with self.assertRaisesRegex(AssertionError, "round 0"):
+            N.run_of("Q", "quiet", 1)
+        with self.assertRaisesRegex(AssertionError, "kind"):
+            N.run_of("Q", "skew", 0)
+        self.assertEqual(N.run_of("rehearsal", "noisy", 5), (None, "injected"))
+
+    def test_pushed_files(self):
+        self.assertEqual(N.protocol_check(), N.PROTOCOL_SHA256)
+        d = N.draw()
+        self.assertEqual(sorted(d), list(range(8501, 8516)))
+        self.assertEqual({m: sorted(s for s, x in d.items() if x == m) for m in STEP1},
+                         dict(X1=[8501, 8504, 8512], X2=[8502, 8508, 8513], F4=[8505, 8507, 8514], F2=[8506, 8510, 8515], F3=[8503, 8509, 8511]))
+
+
+def row(seed, member, measured=True, K0=True, K3=True, needs=None, ports=None, **extra):
+    """A synthetic row in family_predict.py's output shape (the per-member fields of topup-verdict/PREDICTIONS.json)."""
+    keys = N.needs_keys(member)
+    needs = needs or dict(zip(keys, (2, 3, 1, 2)[:len(keys)] if len(keys) == 4 else (2, 1)))
+    ports = {c: 1 for c in unary_cells(member)} if ports is None else ports
+    L1 = N.layer1(member)
+    x = dict(member=member, seed=seed, measured=measured, needs=needs, unary_ports=ports,
+             Q1=max(needs[c] for c in L1) + 2, Q2=max(needs[k] for k in keys[len(L1):]) + 2, why_not_measured=[] if measured else ["synthetic"])
+    if measured:
+        x.update(gate=dict(kernel=dict(K0=K0, K3=K3), kernel_agrees_with_mirror=True), gate_K0=K0, room_K3=K3)
+    else:
+        x.update(room_K3=False)
+    x.update(extra)
+    return x
+
+
+def record(rows, path):
+    """rows: row dicts, filed under their own seed and member, or (seed, member, row) triples, filed as given."""
+    by = {}
+    for x in rows:
+        s, m, x = x if isinstance(x, tuple) else (x["seed"], x["member"], x)
+        by.setdefault(s, {})[m] = x
+    Path(path).write_text(json.dumps(dict(summary={}, instances=[dict(seed=s, unary=None, members=m) for s, m in sorted(by.items())]), indent=1))
+    return path
+
+
+class Stages(unittest.TestCase):
+    """The stage checks on a synthetic PREDICTED.json: X1 on 8501 not eligible, 8504 eligible without room, 8512
+    eligible with room; F4 on 8505 eligible with room; F2 on 8506 not measured; every other seed eligible with room."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.dir = tempfile.TemporaryDirectory()
+        D = N.draw()
+        rows = []
+        for s, m in sorted(D.items()):
+            if s == 8501:
+                rows.append(row(s, m, K0=False, K3=False))
+            elif s == 8504:
+                rows.append(row(s, m, K3=False))
+            elif s == 8506:
+                rows.append(row(s, m, measured=False))
+            else:
+                rows.append(row(s, m, ports={"a": 2, "b": 1} if m == "F4" else None))
+        cls.path = record(rows, Path(cls.dir.name) / "PREDICTED.json")
+        cls.pred = N.read_predicted(cls.path)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.dir.cleanup()
+
+    def ok(self, stage, kind, rnd, seed, member):
+        return N.admit(stage, kind, rnd, seed, member, self.pred)
+
+    def no(self, msg, stage, kind, rnd, seed, member, pred=None):
+        with self.assertRaisesRegex(AssertionError, msg):
+            N.admit(stage, kind, rnd, seed, member, pred or self.pred)
+
+    def test_eligibility(self):
+        self.no("not eligible", "Q", "quiet", 0, 8501, "X1")
+        self.no("not eligible", "N1", "noisy", 1, 8501, "X1")
+        self.no("not eligible", "Q", "quiet", 0, 8506, "F2")
+        a = self.ok("Q", "quiet", 0, 8504, "X1")
+        self.assertEqual((a["control"], a["noise"], a["noise_id"], a["round"]), ("skew", "none", None, None))
+        self.assertEqual(a["needs"], dict(a=2, c1=1))
+        self.assertEqual(a["unary_ports"], {"a": 1})
+
+    def test_room(self):
+        for n in (1, 2, 3):
+            self.no("no room", f"N{n}", "noisy", n, 8504, "X1")
+            a = self.ok(f"N{n}", "noisy", n, 8512, "X1")
+            self.assertEqual((a["control"], a["noise"], a["noise_id"], a["round"]), (None, "injected", 85120 + n, n))
+        a = self.ok("N2", "noisy", 2, 8505, "F4")
+        self.assertEqual(a["unary_ports"], {"a": 2, "b": 1})
+
+    def test_untrained_on_the_first_eligible_only(self):
+        self.no("first eligible instance, 8504, not 8512", "Q", "untrained", 0, 8512, "X1")    # 8501 not eligible: 8504 is first
+        a = self.ok("Q", "untrained", 0, 8504, "X1")
+        self.assertEqual(a["control"], "untrained")
+        self.ok("Q", "untrained", 0, 8505, "F4")
+        self.no("first eligible instance, 8505, not 8507", "Q", "untrained", 0, 8507, "F4")
+        self.no("first eligible instance, 8510, not 8515", "Q", "untrained", 0, 8515, "F2")    # 8506 not measured
+        self.ok("Q", "untrained", 0, 8510, "F2")
+
+    def test_untrained_needs_every_earlier_row(self):
+        D = N.draw()
+        rows = [row(s, m) for s, m in sorted(D.items()) if s != 8501]
+        with tempfile.TemporaryDirectory() as d:
+            pred = N.read_predicted(record(rows, Path(d) / "P.json"))
+        self.no("first eligible instance is undecided", "Q", "untrained", 0, 8504, "X1", pred)
+        self.no("no row for X1 of 8501", "Q", "quiet", 0, 8501, "X1", pred)
+
+    def test_member_must_be_the_drawn_one(self):
+        self.no("drawn for X1, not F4", "Q", "quiet", 0, 8504, "F4")
+        self.no("drawn for X2, not F1", "Q", "quiet", 0, 8502, "F1")
+
+    def test_stage_mismatch(self):
+        self.no("belongs to stage Q", "N1", "quiet", 0, 8512, "X1")
+        self.no("does not belong to stage Q", "Q", "noisy", 1, 8512, "X1")
+        self.no("round 2 does not belong to stage N1", "N1", "noisy", 2, 8512, "X1")
+
+    def test_bad_rows(self):
+        D = N.draw()
+        for bad, msg in ((dict(room_K3=False), "room_K3 disagrees"), (dict(gate_K0=False), "gate_K0 disagrees"),
+                         (dict(Q1=9), "Q1 is not max"), (dict(needs=dict(a=8, c1=1)), "above 7"), (dict(unary_ports={"a": 3}), "1 or 2"),
+                         (dict(unary_ports={}), "no unary port"), (dict(member="X2"), "names another member")):
+            rows = [(s, m, {**row(s, m), **(bad if s == 8512 else {})}) for s, m in sorted(D.items())]
+            with tempfile.TemporaryDirectory() as d:
+                pred = N.read_predicted(record(rows, Path(d) / "P.json"))
+            self.no(msg, "N1", "noisy", 1, 8512, "X1", pred)
+        rows = [row(8512, "X1", eligible_needs=False)]
+        with tempfile.TemporaryDirectory() as d:
+            pred = N.read_predicted(record(rows, Path(d) / "P.json"))
+        self.no("not eligible", "Q", "quiet", 0, 8512, "X1", pred)
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "P.json"
+            p.write_text(json.dumps(dict(instances=[dict(seed=8512, members={}), dict(seed=8512, members={})])))
+            with self.assertRaisesRegex(AssertionError, "listed twice"):
+                N.read_predicted(p)
+
+    def test_network_run_end_to_end_with_the_fake(self):
+        with tempfile.TemporaryDirectory() as d:
+            with Fake() as f:
+                rec = N.network_run(REPO, Path(d) / "a", "8512-N2", "8512", "X1", "N2", "noisy", 2, self.path, "/usr/bin/ngspice", "/x")
+            self.assertEqual(f.seen["noise_id"], 85122)
+            self.assertEqual(rec["noise"]["noise_seed"], 85122)
+            self.assertEqual(rec["stage"]["name"], "N2")
+            self.assertEqual(rec["stage"]["predicted_sha256"], N.sha256_file(self.path))
+            self.assertEqual(rec["stage"]["protocol_sha256"], N.PROTOCOL_SHA256)
+            self.assertEqual(rec["needs"], [2, 1])
+            self.assertEqual(js(f.seen["plan"]), js(N.network("X1", dict(a=2, c1=1), {"a": 1}, None)[0]))
+            with Fake() as f:
+                rec = N.network_run(REPO, Path(d) / "b", "8505-Q", "8505", "F4", "Q", "quiet", 0, self.path, "/usr/bin/ngspice", "/x")
+            self.assertEqual((rec["control"], rec["noise"], rec["unary_ports"]), ("skew", dict(model="none"), {"a": 2, "b": 1}))
+            for args, msg in ((("8504", "X1", "N1", "noisy", 1), "no room"), (("8501", "X1", "Q", "quiet", 0), "not eligible"),
+                              (("8303", "F2", "Q", "quiet", 0), "8501 to 8515 only"), (("8512", "X1", "rehearsal", "quiet", 0), "8303 and 8306 only"),
+                              (("8512", "X1", "Q", "untrained", 0), "first eligible")):
+                out = Path(d) / "r"
+                with self.assertRaisesRegex(AssertionError, msg), Fake():
+                    N.network_run(REPO, out, "rid", *args, self.path, "/usr/bin/ngspice", "/x")
+                self.assertFalse(out.exists())
+
+
+class Rehearsal(unittest.TestCase):
+    """R-N on 8303 and 8306, against the published top-up verdict (topup-verdict/PREDICTIONS.json, the same shape as
+    PREDICTED.json): every member is eligible with room there [TV], so every run of section 7's list is admitted."""
+    PRED = HERE.parent.parent / "function-family" / "topup-verdict" / "PREDICTIONS.json"
+
+    def test_every_listed_run_is_admitted(self):
+        pred = N.read_predicted(self.PRED)
+        n = 0
+        for s in (8303, 8306):
+            for m in STEP1:
+                for kind in ("quiet", "untrained"):
+                    a = N.admit("rehearsal", kind, 0, s, m, pred)
+                    self.assertEqual(a["needs"], N.check_needs(m, pred[s][m]["needs"]))
+                    self.assertEqual(a["unary_ports"], pred[s][m]["unary_ports"])
+                    n += 1
+        for (s, m, r), nid in N.REHEARSAL_NOISE.items():
+            a = N.admit("rehearsal", "noisy", r, s, m, pred)
+            self.assertEqual((a["noise_id"], a["control"], a["noise"]), (nid, None, "injected"))
+            n += 1
+        self.assertEqual(n, 32)
+        with self.assertRaisesRegex(AssertionError, "no rehearsal noise seed"):
+            N.admit("rehearsal", "noisy", 1, 8303, "X1", pred)
+        with self.assertRaisesRegex(AssertionError, "8303 and 8306 only"):
+            N.guard_seed("8301", "rehearsal")
 
 
 if __name__ == "__main__":
