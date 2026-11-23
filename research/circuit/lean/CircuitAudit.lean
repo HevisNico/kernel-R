@@ -3,6 +3,9 @@ import CircuitNeed
 import CircuitInverter
 import CircuitInverterExamples
 import CircuitInverterLeakAudit
+import CircuitInverterVaryingLeakAudit
+import CircuitInverterBridgeAudit
+import CircuitInverterGateAudit
 import Training.WideDoseRead
 import Lean.Util.CollectAxioms
 
