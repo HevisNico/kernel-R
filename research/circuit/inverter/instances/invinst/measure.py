@@ -134,3 +134,27 @@ def measure(cfg, seed, outdir, section=None, ngspice="ngspice"):
                runs={n: dict(files=rec["files"], finger=rec["finger"], points=rec["points"]) for n, rec in recs.items()})
     (root / "MEASURE.json").write_text(json.dumps(out, indent=1, sort_keys=True))
     return out
+
+
+def state_extent(cfg, root, a_ref):
+    """X candidates for the varying-leak lemma, from the kept traces of one instance (no new simulation).
+
+    Returns, for R2 (input present) on [0, D] and for R1 (input absent) on [0, D] and on [0, h + hl]:
+    max |x| and max |x - r|, with r the box reference leakyResponse a_ref 0 box in closed form."""
+    c = cfg["cell"]
+    h, hl, H0, D = c["h"], c["hl"], c["H0"], c["D"]
+
+    def ref(u):
+        y = np.clip(u - h, 0.0, hl)
+        peak_part = H0 * (1 - np.exp(-a_ref * y)) / a_ref
+        return np.where(u <= h + hl, peak_part, peak_part * np.exp(-a_ref * (u - h - hl)))
+
+    out = {}
+    for name in ("R1_absent", "R2_present"):
+        data = np.loadtxt(Path(root) / name / "trace.txt", skiprows=1)
+        q = _cols(c, dict(t=data[:, 0], vq=data[:, 1], ih=data[:, 2], ij=data[:, 3], p=data[:, 4], cmp=data[:, 5]))
+        for tag, end in (("slot", D), ("deadline", h + hl)):
+            sel = (q["u"] >= 0) & (q["u"] <= end)
+            out[f"{name}_{tag}_abs_x"] = float(np.abs(q["x"][sel]).max())
+            out[f"{name}_{tag}_abs_x_minus_ref"] = float(np.abs(q["x"][sel] - ref(q["u"][sel])).max())
+    return out
