@@ -2,6 +2,7 @@ import CircuitTiming
 import CircuitNeed
 import CircuitInverter
 import CircuitInverterExamples
+import CircuitInverterLeakAudit
 import Training.WideDoseRead
 import Lean.Util.CollectAxioms
 
