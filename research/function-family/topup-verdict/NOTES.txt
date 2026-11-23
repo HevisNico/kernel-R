@@ -1,0 +1,24 @@
+Function family top-up: the room instrument run on the top-up (TOPUP_RULES.md 2 and 3), development work, no claim.
+
+Code: family_predict.py sha256 00b6a5161eb220e2d013c259e64e3157b438a45821c5881419c8c6d29c12fa9c, as frozen and
+published at research/function-family-dev f2b3904c (PREDICT_FREEZE.txt 13ad8abb...), run unchanged from that tree.
+Command: family_predict.py predict REPO GEN B2_DIR M1:M2:M3 OUT, Lean 4.35.0 (archive 7289597a...), venv312-dev.
+
+Inputs:
+- B2: the ten instances' runs from evidence/learned-dnf-circuit-campaign-7-prep at 85199862 (deck waveforms joined and
+  checked against each batch's PARTS.json: 20 of 20).
+- Top-up: evidence/function-family-topup-M1 525bb26a (8301-8304), -M2 9d1c976f (8305-8307), -M3 06dce775 (8308-8310),
+  each fetched by name, parts joined, every file checked against that machine's SHA256SUMS before any read
+  (MACHINE_PLAN 4.3): 274/274, 208/208, 219/219 (EXTRACT_CHECK.json). No file failed; no instance was excluded.
+
+Pooling of the three machines (MACHINE_PLAN 2): the duplicate's criterion as written was NOT met to the letter.
+topup.py compare on M1's 8301-cal-on-unary and M3's DUP copy gives identical: false. input_spice, record, result and
+noise_sha256 are equal; trace_raw differs. The cause was found (by the coordinator, from the GitHub copies): the two
+trace.raw files differ only in ngspice's header line "Date: ..." (09:46:52 on M1, 11:17:25 on M3); with that line
+removed both have sha256 d6195367..., at the same size, 182 933 244 bytes, so the simulation data are bit-identical.
+The criterion should have excluded the timestamp; it is not rewritten after the fact. The machines' runs are pooled
+on that explained difference.
+
+Results: PREDICTIONS.json (summary, then per instance the unary ports and per member the prediction, the mirror's
+conditions and the kernel's verdicts); Family_<member>_<seed>.lean and .log (gencheck.sh, the generator's copy of
+C5/check.sh steps 1 and 3). The kernel's verdict is the last word (TOPUP_RULES.md 3.3).
