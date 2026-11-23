@@ -1,5 +1,5 @@
 {
- "_doc": "The one configuration of the inverter-instance package. Development values, not preregistered. Times in time units (tu), charges and states in units of x = (vr0 - vq) / vunit.",
+ "_doc": "Redesign 1: J0 4.0 (pushed cell 3.0), for silence under help-mirror mismatch. The one configuration of the inverter-instance package. Development values, not preregistered. Times in time units (tu), charges and states in units of x = (vr0 - vq) / vunit.",
  "cell": {
   "tu_s": 2e-05,
   "cq_F": 5e-12,
@@ -13,7 +13,7 @@
   "h": 0.3,
   "hl": 0.3,
   "H0": 4.5,
-  "J0": 3.0,
+  "J0": 4.0,
   "D": 1.0,
   "reset_len": 0.1,
   "edge_s": 1e-09,
@@ -38,7 +38,8 @@
   "rational_denominator": 1000000,
   "early_grid": "1/1000",
   "timing": {"window": "1/4", "emitEarly": "2/5", "emitLate": "13/20"},
-  "K3_sigmas": 3
+  "K3_sigmas": 3,
+  "front_end": {"_doc": "first-layer skew and direct-rail delay tolerance (InverterLag.lean): network quantities, not measured on an instance; null = not checked", "skew": null, "epsilon": null}
  },
  "driver": {"max_jobs": 4, "job_timeout_s": 1800}
 }

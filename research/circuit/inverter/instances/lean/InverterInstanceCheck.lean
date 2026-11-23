@@ -21,6 +21,8 @@ Not proved here, and so not part of what a passing gate establishes (see README)
   reference, its monotonicity, and the two Taylor bounds in `ℝ`);
 * that the actual response follows `leakyResponse a` with one constant `a`: the cell's leak differs on the two
   sides of rest, and the gate only requires both sides to lie in the interval;
+* the front end's `windowFits` and `spreadFits` are stated (`FrontEndFits`) but checked only when the
+  campaign fixes the first layer's skew and the delay tolerance `ε`;
 * the latch: the contact-to-latch delay is a measured constant of the instance, not a proved bound. -/
 
 namespace LearnedCoincidence.MonotoneDNF.InverterInstance
@@ -138,6 +140,14 @@ instance (d : Design) (m : Measures) (t : InverterTiming) : Decidable (Timing d 
 instance (d : Design) (m : Measures) (k : Allowance) (t : InverterTiming) :
     Decidable (Premises d m k t) := by
   unfold Premises; infer_instance
+
+/-- `front_end_lag_window` (InverterLag.lean): `windowFits` and `spreadFits`, for a direct-rail delay
+`lag ∈ [emitEarly, emitEarly + ε]` and the first layer's skew. Checked only when the campaign fixes both. -/
+def FrontEndFits (t : InverterTiming) (ε skew : Rat) : Prop :=
+  0 ≤ ε ∧ t.window + ε ≤ skew ∧ t.emitLate - t.emitEarly ≤ skew
+
+instance (t : InverterTiming) (ε skew : Rat) : Decidable (FrontEndFits t ε skew) := by
+  unfold FrontEndFits; infer_instance
 
 /-- The checker. -/
 def check (d : Design) (m : Measures) (k : Allowance) (t : InverterTiming) : Bool :=

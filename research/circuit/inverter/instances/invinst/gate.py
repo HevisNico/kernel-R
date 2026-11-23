@@ -108,7 +108,7 @@ def q(x):
     return f"({x.numerator} : Rat)" if x.denominator == 1 else f"({x.numerator} / {x.denominator} : Rat)"
 
 
-def lean_file(seed, d, t, ms, ks, verdicts, per):
+def lean_file(seed, d, t, ms, ks, verdicts, per, fe=None):
     L = ["import InverterInstanceCheck", "",
          f"/-! The kernel gate of inverter instance {seed} (SKY130 tt_mm, its seed), written by",
          "research/circuit/inverter/instances/invinst/gate.py from its MEASURE.json. Each theorem asserts a verdict of",
@@ -131,6 +131,9 @@ def lean_file(seed, d, t, ms, ks, verdicts, per):
             L += [f"theorem premises_{seed}_{K} : Premises {args} timing := check_sound check_{seed}_{K}", "",
                   f"theorem inverterRead_{seed}_{K} : InverterRead timing (absentRead m_{seed}_{K}) ∧ InverterRead timing presentRead :=",
                   f"  inverterRead_of_premises premises_{seed}_{K}", ""]
+    if fe is not None:
+        L += [f"theorem FrontEndFits_{seed} : decide (FrontEndFits timing {q(fe['epsilon'])} {q(fe['skew'])}) = "
+              f"{str(fe['verdict']).lower()} := by decide +kernel", ""]
     return "\n".join(L + ["end LearnedCoincidence.MonotoneDNF.InverterInstance.Gate", ""])
 
 
@@ -143,6 +146,12 @@ def gate(cfg, meas, out_dir, build, timeout=1800):
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     res = dict(seed=seed, kernel=None, attempts=[], measured=x["delta"] is not None and x["emit_absent_tu"] is not None)
+    fcfg = cfg["gate"]["front_end"]
+    fe = None
+    if fcfg["skew"] is not None and fcfg["epsilon"] is not None:
+        eps, skew = F(fcfg["epsilon"]), F(fcfg["skew"])
+        fe = dict(epsilon=eps, skew=skew, verdict=0 <= eps and t["window"] + eps <= skew and t["emitLate"] - t["emitEarly"] <= skew)
+    res["front_end_fits"] = "not checked: skew or epsilon not set" if fe is None else fe["verdict"]
     res["observed"] = dict(same_sample=x["same_sample"], silent_present=not x["fired_present"],
                            fired_absent=x["emit_absent_tu"] is not None)
     if res["measured"]:
@@ -160,7 +169,7 @@ def gate(cfg, meas, out_dir, build, timeout=1800):
             vv = {"K0": mirror["K0"] if per else {"Premises": v0}, "K3": mirror["K3"] if per else {"Premises": v3}}
             name = f"Inverter_{seed}" + ("" if n == 0 else f"_try{n}")
             f = out / f"{name}.lean"
-            f.write_text(lean_file(seed, d, t, ms, ks, vv, per))
+            f.write_text(lean_file(seed, d, t, ms, ks, vv, per, fe))
             p = subprocess.run(["bash", str(PKG / "lean" / "check.sh"), str(f)], capture_output=True, text=True,
                                env=env, timeout=timeout)
             (out / f"{name}.log").write_text(p.stdout + p.stderr)
@@ -170,8 +179,9 @@ def gate(cfg, meas, out_dir, build, timeout=1800):
                 res["kernel_agrees_with_mirror"] = n == 0
                 break
     obs = all(res["observed"].values())
-    res["eligible_K0"] = bool(res["kernel"] and res["kernel"]["K0"] and obs)
-    res["room_K3"] = bool(res["kernel"] and res["kernel"]["K3"] and obs)
+    fits = fe is None or fe["verdict"]          # an unset front end is reported, not counted against the instance
+    res["eligible_K0"] = bool(res["kernel"] and res["kernel"]["K0"] and obs and fits)
+    res["room_K3"] = bool(res["kernel"] and res["kernel"]["K3"] and obs and fits)
     res["allowance"] = {K: {n: str(v) for n, v in ks[K].items()} for K in ks}
     res["timing"] = {n: str(v) for n, v in t.items()}
     (out / f"GATE_{seed}.json").write_text(json.dumps(res, indent=1, sort_keys=True))

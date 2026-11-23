@@ -9,9 +9,18 @@ from invinst import cell, driver
 import inverter as pushed
 
 
+REDESIGN = {"J0": 4.0}                  # the package's design changes against the pushed cell
+REDESIGN_UNDONE = {k: pushed.DESIGN[k] for k in REDESIGN}
+
+
 class Cell(unittest.TestCase):
-    def test_identical_to_pushed_cell(self):
+    def test_redesign_is_only_the_listed_changes(self):
         c = driver.load_config()["cell"]
+        for k, v in pushed.DESIGN.items():
+            self.assertEqual(c[k], REDESIGN.get(k, v), k)
+
+    def test_identical_to_pushed_cell(self):
+        c = dict(driver.load_config()["cell"], **REDESIGN_UNDONE)
         for present, help_on, reset in itertools.product((False, True), repeat=3):
             self.assertEqual(cell.netlist(c, present, help_on=help_on, reset=reset),
                              pushed.netlist(present, help_on=help_on, reset=reset))
