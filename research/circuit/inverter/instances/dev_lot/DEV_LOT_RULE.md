@@ -1,7 +1,9 @@
 # Development lot of inverter instances: the rule, written before the data
 
 **Development work, not preregistered.** This rule is committed alone, before any instance of the lot runs. The lot
-runs only after the owner's go. Code: the package of this folder at commit 65f4745 (`config.json` unchanged).
+runs only after the owner's go. Code: the package of this folder at commit 1345f4b, the redesign (`J0` = 4.0),
+with `config.json` unchanged from it. This version replaces the draft of ada8f0e, which was written for the
+unredesigned cell (J0 = 3.0). No lot ran under that draft.
 
 ## Size and seeds
 
@@ -9,10 +11,11 @@ runs only after the owner's go. Code: the package of this folder at commit 65f47
   - The range is outside every campaign range found in the repository (the highest is 8501-8515). It is also outside
     the three cost seeds 9901-9903.
 - **Sized from the measured cost.**
-  - 3 seeds: 0.93-0.96 machine-minutes per instance, and about 1 s of Lean per instance.
+  - 3 seeds: 0.93-0.96 machine-minutes per instance, and about 1 s of Lean per instance. This was measured
+    twice: before the redesign and after it (3 jobs, 2.9 machine-minutes in all).
   - So 60 instances are about 58 machine-minutes, about 15 minutes of wall time on one 4-core machine with 4 jobs.
-  - With N = 60, the 95 % interval on a usable rate near 2/3 is about ±0.12 (Wilson). The width is reported, not used
-    to decide.
+  - After the redesign, the 3 cost seeds gave 3 eligible out of 3, and 3 with room out of 3. With N = 60, the 95 %
+    Wilson interval at a rate near 0.9 is about ±0.08. The width is reported, not used to decide.
 
 ## What "usable" means (two counts, reported separately)
 
