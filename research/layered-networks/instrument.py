@@ -73,14 +73,29 @@ class ScanCell:
         self._next_group()
 
     def _next_group(self):
+        """The bracket is made of this scan's own reads only (rule D3): L = the largest silent state read, U = the
+        smallest firing state read. The training reads only choose the first targets: the stop state first (where the
+        cell already is), then the last silent training state."""
         self.cur = None
         while self.groups:
             g = self.groups.pop(0)
             if g.get("lo") is None or g.get("hi") is None:
                 self.results.append(dict(group=g["group"], ok=False, why="no training bracket (" + g.get("why", "") + ")"))
                 continue
-            self.cur = dict(g, reads=[], slots=0, s=F(g["lo"] + g["hi"]) / 2)
+            self.cur = dict(g, reads=[], slots=0, L=None, U=None, tried_lo=False, s=F(g["hi"]))
             return
+
+    def _next_target(self):
+        c = self.cur
+        L, U = c["L"], c["U"]
+        if U is None:                                   # no FIRE yet: up by half a stage (an ascent above the stop)
+            return min(max(L, F(c["hi"])) + F(1, 2), F(8)) if L is not None else F(c["hi"])
+        if L is None:                                   # no silence yet: the last silent training state, then down
+            if not c["tried_lo"] and F(c["lo"]) < U:
+                c["tried_lo"] = True
+                return F(c["lo"])
+            return max(U - F(1, 2), F(0))
+        return (L + U) / 2
 
     def target(self, s):
         return {p: self.u0[p] - float(s) * self.D[p] for p in self.cur["ports"]}
@@ -121,18 +136,29 @@ class ScanCell:
         s_read = self.measured_s(u)
         c["reads"].append(dict(target=str(c["s"]), s=str(s_read), fired=bool(fired), u={str(p): u[p] for p in c["ports"]}))
         if fired:
-            c["hi"] = min(F(c["hi"]), s_read)
+            c["U"] = s_read if c["U"] is None else min(c["U"], s_read)
         else:
-            c["lo"] = max(F(c["lo"]), s_read)
+            c["L"] = s_read if c["L"] is None else max(c["L"], s_read)
+        L, U = c["L"], c["U"]
         width = max(self.D[p] for p in c["ports"])
-        if (F(c["hi"]) - F(c["lo"])) * F(width) <= F(self.bracket):
-            lo, hi = F(c["lo"]), F(c["hi"])
-            self.results.append(dict(group=c["group"], ok=True, s_star=str((lo + hi) / 2), half_bracket=str((hi - lo) / 2),
-                                     bracket=[str(lo), str(hi)], reads=c["reads"], slots=c["slots"],
-                                     consistent=lo < hi))
+        why = None
+        if L is not None and U is not None and L >= U:
+            why = f"contradictory: silent at {float(L):.4f}, FIRE at {float(U):.4f}"
+        elif U is None and L is not None and L >= 8:
+            why = "no FIRE below s = 8"
+        elif L is None and U is not None and U <= 0:
+            why = "fires at the preset (s = 0)"
+        if why:
+            self.results.append(dict(group=c["group"], ok=False, why=why, reads=c["reads"], slots=c["slots"]))
+            self._next_group()
+            return
+        if L is not None and U is not None and (U - L) * F(width) <= F(self.bracket):
+            self.results.append(dict(group=c["group"], ok=True, s_star=str((L + U) / 2), half_bracket=str((U - L) / 2),
+                                     bracket=[str(L), str(U)], reads=c["reads"], slots=c["slots"], consistent=True,
+                                     native=True))
             self._next_group()
         else:
-            c["s"] = (F(c["lo"]) + F(c["hi"])) / 2
+            c["s"] = self._next_target()
 
 
 # ------------------------------------------------------------------------------------------------ the network
@@ -153,7 +179,7 @@ class CalNetwork(runmod.Network):
         cal = cfg["calendar"]
         self.slot_ns = self.ns(cal["slot_tu"])
         n_part = sum(len(self.partitions(l, g)) for l in range(len(s["layers"])) for g in range(2))
-        n_scan = CAL["scan"]["max_slots"] * sum(specmod.GROUPS[n["gate"]] for nodes in s["layers"] for n in nodes)
+        n_scan = 2 * CAL["scan"]["max_slots"] * sum(specmod.GROUPS[n["gate"]] for nodes in s["layers"] for n in nodes)
         horizon = (cal["first_slot_tu"] + cal["slot_tu"] * (n_part * cal["max_rounds"] + 2 ** s["m"] + 2 + n_scan)) * st["tu_s"]
         self.ses = sess.Session(out, self.text, cfg, seed=seed, stop_s=horizon)
         self.ses.saved = [f"x{c}.p" for c in self.cells + self.invs] + \
@@ -190,6 +216,17 @@ class CalNetwork(runmod.Network):
     def slot(self, kind, lines, top, allowed, ungated, info):
         rec = super().slot(kind, lines, top, allowed, ungated, info)
         rec["u"] = self.last_u
+        # a second rise is measured again from 1 us after the first: run.Network's rise=2 can catch the same edge
+        # crossing 0.9 V twice (records.py, same-edge rule)
+        gap = CAL.get("same_edge_ns", 1000)
+        for r in rec["reads"]:
+            if r.get("second") is not None and r["second"] - r["latch"] < gap:
+                again = self.ses.rise(f"xc{r['layer']}_{r['index']}.p", (r["latch"] + gap) * 1e-9)
+                r["second"] = None if again is None else round(again * 1e9)
+        for j, v in enumerate(rec["inv"]):
+            if v.get("second") is not None and v["second"] - v["latch"] < gap:
+                again = self.ses.rise(f"xn{j}.p", (v["latch"] + gap) * 1e-9)
+                v["second"] = None if again is None else round(again * 1e9)
         return rec
 
     # ---------------------------------------------------------------------------------------- scan slots
@@ -342,7 +379,7 @@ def median(xs):
     return xs[len(xs) // 2] if xs else 0
 
 
-def scan_all(net, rec, log=print):
+def scan_all(net, rec, log=print, solo=False):
     """The scan phase, after the tests, in the same session."""
     s, sc = net.s, CAL["scan"]
     net.ses.run((net.next_T - net.ns(net.cfg["calendar"]["gate_lead_tu"])) * 1e-9)
@@ -350,7 +387,7 @@ def scan_all(net, rec, log=print):
     rec["u_end"] = u_now
     u0, D, groups = training_path(s, rec)
     tu_ns = net.tu_ns
-    cells = {}
+    cells, groups_of = {}, {}
     for c in net.cells:
         gs = []
         for (cc, g), info in sorted(groups.items()):
@@ -361,6 +398,7 @@ def scan_all(net, rec, log=print):
             if info["offsets"]:
                 offs = {p: F(median([o[p] for o in info["offsets"]]), tu_ns) for p in info["ports"]}
             gs.append(dict(group=g, ports=info["ports"], lo=lo, hi=hi, why=why, offsets=offs))
+        groups_of[c] = [dict(x) for x in gs]
         if any((c, p) not in D for g in gs for p in g["ports"]):
             cells[c] = None
             log(f"scan {c}: no dose measured")
@@ -368,8 +406,40 @@ def scan_all(net, rec, log=print):
         cells[c] = ScanCell(c, gs, {p: u0[c][p - 1] for p in (1, 2)}, {p: D.get((c, p), 0.0) for p in (1, 2)},
                             sc["tol_V"], sc["bracket_V"], sc["step_V"], sc["max_slots"])
     net.leak_gain, net.leak_used = {}, {}
-    t0, n = time.time(), 0
     del u_now
+    t0 = time.time()
+    n = run_scans(net, cells)
+    out = {c: (None if sc_ is None else sc_.results) for c, sc_ in cells.items()}
+    for c, res in out.items():
+        for r in res or []:
+            log(f"scan {c} group {r['group']}: " + (f"s* {float(F(r['s_star'])):.5f} +- {float(F(r['half_bracket'])):.5f} in {r['slots']} slots"
+                                                     if r["ok"] else f"failed: {r['why']}"))
+    result = dict(slots=n, wall_s=time.time() - t0, u0={c: v for c, v in u0.items()},
+                  D={f"{c}/{p}": v for (c, p), v in D.items()}, cells=out)
+    if solo:                                            # D4: each cell again, alone, from where the parallel scan left it
+        t1, n_solo, solo_out = time.time(), 0, {}
+        for c in net.cells:
+            if cells.get(c) is None:
+                continue
+            gs = []
+            for r in out[c]:
+                if not r.get("ok"):
+                    continue
+                g = next(x for x in groups_of[c] if x["group"] == r["group"])
+                gs.append(dict(g, lo=F(r["bracket"][0]), hi=F(r["bracket"][1])))
+            one = {c: ScanCell(c, gs, cells[c].u0, cells[c].D, sc["tol_V"], sc["bracket_V"], sc["step_V"], sc["max_slots"])}
+            n_solo += run_scans(net, one)
+            solo_out[c] = one[c].results
+            for r in one[c].results:
+                log(f"solo scan {c} group {r['group']}: " + (f"s* {float(F(r['s_star'])):.5f} +- {float(F(r['half_bracket'])):.5f} in {r['slots']} slots"
+                                                              if r["ok"] else f"failed: {r['why']}"))
+        result["solo"] = dict(slots=n_solo, wall_s=time.time() - t1, cells=solo_out)
+    return result
+
+
+def run_scans(net, cells):
+    """The scan slots of the given ScanCells, in parallel, until every group is done. Returns the slot count."""
+    n = 0
 
     def decide(ub):
         u = {c: {p: ub[c][p - 1] for p in (1, 2)} for c in net.cells}
@@ -382,10 +452,13 @@ def scan_all(net, rec, log=print):
                 continue
             actions[c] = ("read", a[1], {p: sc_.cur["offsets"].get(p, 0) for p in a[1]}) if a[0] == "read" else a
         return actions
+
     def tail(c, fired, ub):
         """The read's result, then the next action if it is a leak (the read moves no stored voltage)."""
         u = {p: ub[c][p - 1] for p in (1, 2)}
         cells[c].result(fired, u)
+        if cells[c].cur is None:
+            return None
         a = cells[c].action(u, count=False)
         if a is not None and a[0] == "leak":
             cells[c].cur["slots"] += 1
@@ -394,22 +467,13 @@ def scan_all(net, rec, log=print):
     while True:
         actions, fired, ub = net.scan_slot(decide, tail)
         if not actions:
-            break
+            return n
         n += 1
-    out = {}
-    for c, sc_ in cells.items():
-        out[c] = None if sc_ is None else sc_.results
-        if sc_ is not None:
-            for r in sc_.results:
-                log(f"scan {c} group {r['group']}: " + (f"s* {r['s_star']} +- {r['half_bracket']} in {r['slots']} slots"
-                                                         if r["ok"] else f"failed: {r['why']}"))
-    return dict(slots=n, wall_s=time.time() - t0, u0={c: v for c, v in u0.items()},
-                D={f"{c}/{p}": v for (c, p), v in D.items()}, cells=out)
 
 
 # ------------------------------------------------------------------------------------------------ one instance
 
-def cal_run(s, cfg, out, seed, log=print):
+def cal_run(s, cfg, out, seed, log=print, solo=False):
     """run.train_and_test's calendar on CalNetwork, then the scans. Writes record.json (with u, u_end, scans)."""
     out = Path(out)
     t_start = time.time()
@@ -454,7 +518,7 @@ def cal_run(s, cfg, out, seed, log=print):
             log(f"test {''.join(str(int(b)) for b in x)}: out {'FIRE' if top['emission'] is not None else 'silent'}")
         t_test, c_test = time.time() - t0 - t_train, runmod.cpu_of(net.ses.p.pid)
         partial = dict(slots=net.slots, lessons=lessons)
-        scans = scan_all(net, partial, log)
+        scans = scan_all(net, partial, log, solo=solo)
         u_end = partial["u_end"]
     except Exception as e:
         status = f"failed: {e}"

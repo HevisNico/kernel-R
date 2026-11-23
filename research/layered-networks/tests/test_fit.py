@@ -59,11 +59,12 @@ def test_cell_valid_both_needs_silent_singles():
 def test_dev_records_reproduce():
     """The committed dev records give the committed verdicts."""
     for name in ("not1", "andor3"):
-        out = HERE / "dev" / f"cal_{name}"
+        out = HERE / "dev" / f"cal4_{name}"     # the M4 records (fixed instrument, with solo scans)
         if not (out / "fit.json").exists():
             continue
         s = specmod.load(HERE / "specs" / f"{name}.json")
-        r = fit.js(fit.instance_fit(s, json.loads((out / "record.json").read_text())))
+        import records
+        r = fit.js(fit.instance_fit(s, records.load(out)))
         assert json.loads(json.dumps(r)) == json.loads((out / "fit.json").read_text())
 
 

@@ -1,6 +1,6 @@
 """Driver of the calibration instrument (M2). Development only.
 
-  lcal.py run    SPEC OUT SEED     train, test every pattern, then the scans, in one session (OUT/record.json),
+  lcal.py run    SPEC OUT SEED [solo=1]  train, test every pattern, then the scans, in one session (OUT/record.json),
                                    then the score readout (OUT/scores.json)
   lcal.py scores SPEC OUT          the score readout of an existing record
   lcal.py test                     the tests (no simulation)
@@ -20,10 +20,12 @@ import spec as specmod  # noqa: E402
 CFG = json.loads((HERE / "config.json").read_text())
 
 
-def cmd_run(spec_path, out, seed):
+def cmd_run(spec_path, out, seed, *flags):
+    """flags: solo=1 runs the D4 comparison (every cell scanned again alone after the parallel scans)."""
     import instrument
     import scores
-    r = instrument.cal_run(specmod.load(spec_path), CFG, out, int(seed))
+    solo = "solo=1" in flags
+    r = instrument.cal_run(specmod.load(spec_path), CFG, out, int(seed), solo=solo)
     print(json.dumps(dict(status=r["status"], cost=r["cost"], words=r["words"]), indent=1))
     scores.main(spec_path, out)
     return r["status"] == "done"

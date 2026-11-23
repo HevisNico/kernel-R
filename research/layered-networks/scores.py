@@ -106,7 +106,8 @@ def readout(s, rec):
 
 def main(spec_path, outdir):
     s = specmod.load(spec_path)
-    rec = json.loads((Path(outdir) / "record.json").read_text())
+    import records
+    rec = records.load(outdir)
     r = readout(s, rec)
     (Path(outdir) / "scores.json").write_text(json.dumps(r, indent=1, default=str) + "\n")
     print(json.dumps(dict(cells=r["cells"], checked=r["checked"], undecided=r["undecided"],

@@ -65,16 +65,26 @@ def run_fake(groups, s_true, start_s, seed):
     return sc.results, slots
 
 
+def check_native(res):
+    """Rule D3: the bracket ends are states read by the scan itself."""
+    reads = res["reads"]
+    lo, hi = (F(x) for x in res["bracket"])
+    assert any(not r["fired"] and F(r["s"]) == lo for r in reads), "the lower end is a silent read of the scan"
+    assert any(r["fired"] and F(r["s"]) == hi for r in reads), "the upper end is a FIRE of the scan"
+
+
 def test_scan_brackets_the_crossing():
-    for seed in range(20):
+    for seed in range(30):
         rng = random.Random(100 + seed)
         n = rng.randint(2, 6)
-        s_true = F(n - 1) + F(rng.randint(1, 999), 1000)
+        # the crossing usually inside the training bracket, sometimes above the stop or below the last silence
+        s_true = F(n - 1) + F(rng.randint(-400, 1400), 1000)
         res, slots = run_fake([dict(group=0, ports=[1, 2], lo=F(n - 1), hi=F(n), offsets={})], s_true, n, seed)
         assert len(res) == 1 and res[0]["ok"], res
         lo, hi = (F(x) for x in res[0]["bracket"])
-        assert lo < s_true <= hi or abs(float(s_true - lo)) < 2e-3 or abs(float(hi - s_true)) < 2e-3, (lo, s_true, hi)
+        assert lo < s_true <= hi, (lo, s_true, hi)
         assert (hi - lo) * F(1.35e-3) <= F(SC["bracket_V"])
+        check_native(res[0])
         assert slots <= SC["max_slots"], slots
 
 

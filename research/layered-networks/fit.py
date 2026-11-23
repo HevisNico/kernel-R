@@ -27,7 +27,9 @@ DEVIATIONS of the M2 scans from campaign 6's scan6, and how each enters the budg
   D3 no ascent from s = 0: the bracket starts from training reads made under network timing. Bound: a bracket must
      have a scan-native FIRE and a scan-native silence (reads of the scan itself). Otherwise the cell is
      NOT MEASURED. No widening, no re-scan.
-  D4 parallel scans: no term. Not bounded by these data (no solo comparison yet). Stated as open.
+  D4 parallel scans: H_D4 = ceil(k d |s*_par - s*_solo|) (k = 2 for a both cell), with the largest difference over
+     the cell's groups from the run's own solo scans (lcal.py run ... solo=1), else the constant d4_stage of
+     calibration.json; with neither, the cell is not measured.
   D5 drift between the u window (35 µs before T − 3 tu) and the read: H_drift = ⌈Σ_p d · max |Δu_p| / D_p⌉, with
      max |Δu_p| the largest change of the port's u over a read-only slot of the run (tests, and scan slots with
      a read and no tail leak). It is the same measure as campaign 5's u_before; it is added here because the scan
@@ -44,6 +46,7 @@ sys.path.insert(0, str(HERE))
 import scores as scoremod  # noqa: E402
 import spec as specmod  # noqa: E402
 
+CAL = json.loads((HERE / "calibration.json").read_text())
 THETA = scoremod.THETA
 RAIL = 10 * THETA
 ALLOWANCE_MV = F("0.030")
@@ -244,6 +247,25 @@ def cell_fit(s, rec, readout, c, layer, idx):
             for q in D:
                 drift[q] = max(drift[q], abs(F(b["u"][c][q - 1]) - F(a["u"][c][q - 1])))
     H_drift = math.ceil(sum(an["d"] * drift[q] / D[q] for q in D))
+    # D4: parallel against solo scans of the same cell. With the run's own solo scans, the largest |s*_par - s*_solo|
+    # over the cell's groups; without them, the constant d4_stage of calibration.json (bounded from the development
+    # comparisons); with neither, the cell is not measured (D4 cannot be bounded).
+    solo = (scans.get("solo") or {}).get("cells", {}).get(c)
+    if solo is not None:
+        par = {r["group"]: F(r["s_star"]) for r in scans["cells"][c] if r.get("ok")}
+        sol = {r["group"]: F(r["s_star"]) for r in solo if r.get("ok")}
+        if set(par) != set(sol):
+            out["measured"] = False
+            out["why_not_measured"].append("D4: a solo scan failed")
+            return out
+        d4_stage, d4_source = max(abs(par[g] - sol[g]) for g in par), "this run's solo scans"
+    elif CAL.get("d4_stage") is not None:
+        d4_stage, d4_source = F(str(CAL["d4_stage"])), "calibration.json d4_stage"
+    else:
+        out["measured"] = False
+        out["why_not_measured"].append("D4: no solo scan and no d4_stage bound")
+        return out
+    H_D4 = math.ceil((2 if gate == "both" else 1) * an["d"] * d4_stage)
     H = an["H"]
     budgets = {}
     for K in (0, 3):
@@ -260,8 +282,9 @@ def cell_fit(s, rec, readout, c, layer, idx):
             tr = max(read_budget(eps, [sens[q]], [k], K) for q, nq in ((1, n1), (2, n2)) for k in range(nq + 1))
             te = max(max(read_budget(eps, [sens[q]], [nq], K) for q, nq in ((1, n1), (2, n2))),
                      read_budget(eps, [sens[1], sens[2]], [n1, n2], K))
-        budgets[f"K{K}"] = dict(train_base=tr, test_base=te, H=H, H_drift=H_drift, D1=0, D2=0, D4=0,
-                                trainError=tr + H + H_drift, testError=te + H + H_drift)
+        budgets[f"K{K}"] = dict(train_base=tr, test_base=te, H=H, H_drift=H_drift, D1=0, D2=0, H_D4=H_D4,
+                                D4_stage=str(d4_stage), D4_source=d4_source,
+                                trainError=tr + H + H_drift + H_D4, testError=te + H + H_drift + H_D4)
     out.update(anchors=dict(d=an["d"], g=an["g"], H=H), D_mV={q: str(D_mV[q]) for q in D},
                need={str(g): v for g, v in need.items()}, maxWrites=maxw, settled_writes=settled,
                guarded=dict(help=p["help"], gain=p["gain"], dose=p["dose"]), epsilon=eps,
@@ -349,7 +372,8 @@ def js(x):
 
 def main(spec_path, outdir):
     s = specmod.load(spec_path)
-    rec = json.loads((Path(outdir) / "record.json").read_text())
+    import records
+    rec = records.load(outdir)
     r = instance_fit(s, rec)
     (Path(outdir) / "fit.json").write_text(json.dumps(js(r), indent=1) + "\n")
     return r
