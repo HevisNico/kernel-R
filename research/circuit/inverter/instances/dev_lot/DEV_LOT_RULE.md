@@ -31,14 +31,14 @@ unredesigned cell (J0 = 3.0). No lot ran under that draft.
 
 ## Stopping rule (decided now, applied by `driver.py --stop rule.json`)
 
-- **Early stop:** after the first 20 finished instances, if fewer than 6 are eligible (K0 below 30 %), no new job is
+- **Early stop:** after the first 20 finished instances, if fewer than 12 are eligible (K0 below 70 %), no new job is
   started. The lot stops and the verdict is "redesign".
 - **Final verdict:** on all instances run:
-  - if fewer than 18 of 60 are eligible (K0 rate below 30 %), the verdict is "redesign";
+  - if fewer than 42 of 60 are eligible (K0 rate below 70 %), the verdict is "redesign";
   - otherwise "continue", and the rate goes to the owner to size the Monte Carlo sample.
-- The 30 % threshold is a placeholder, kept as the coordinator asked. The final number goes to the owner once
-  the redesigned margins are known.
-- The 30 % threshold is a development choice. It is a design-health bound, not a compute bound: at one machine-minute
+- **The threshold is 70 %, the owner's decision** (relayed by the coordinator after the redesigned margins were known;
+  it replaces the 30 % placeholder).
+- The 70 % threshold is a design-health bound. It is a design-health bound, not a compute bound: at one machine-minute
   per instance, even a 30 % rate is cheap to draw around. Below it, the cell's silence margin is too thin for mismatch.
   9903 failed on help-mirror mismatch alone.
 - Nothing is changed during the lot: no config, no code, no seed. An error that stops the lot is reported as it is.
