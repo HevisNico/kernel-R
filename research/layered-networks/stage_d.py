@@ -6,6 +6,7 @@ BEFORE any network run, and the prediction they give. Development only; nothing 
   stage_d.py predict SPEC OUT [inverters=FILE|inverters=assumed]
                      the fit, the verdicts and the prediction from OUT/record.json (no simulation): OUT/fit_d.json,
                      OUT/prediction.json (canonical bytes), OUT/cost_d.json
+  stage_d.py deck    SPEC FILE [overlay=...]   the deck text, for the inverter kit's in-deck gate (invinst.indeck)
   stage_d.py seal    SEALDIR OUT [OUT ...]     the sealed prediction record (seal.py)
   stage_d.py verify  SEALDIR                   its SHA256SUMS checked
 
@@ -34,8 +35,9 @@ lessons are its own and the mask reads are its test reads. Eligible at K0: every
 with a front end, every inverter's K0 gate. Room at K3: the same at K3.
 
 **The inverter gate** comes from the inverter kit (research/inverter-instances), as a JSON file `inverters=FILE`:
-{"inverters": {"n0": {"K0": bool, "K3": bool, ...}, ...}, ...} (interface proposed to the kit's session; to be
-confirmed). Without it, an instance with a front end has no prediction ("inverter gate not measured").
+{"schema": "inverter-indeck/1", "kit_commit", "seed", "deck_sha256", "inverters": {"n0": {"K0": bool, "K3": bool,
+...}, ...}}, written by `python -m invinst.indeck OUTDIR --deck FILE --seed S` on the deck of `stage_d.py deck`: each
+inverter measured inside this deck at this seed (its fingerprint checked against the network's op point). Without it, an instance with a front end has no prediction ("inverter gate not measured").
 `inverters=assumed` is for development validation only: the gate is taken as holding at K0 and K3, and the
 prediction record says so in `inverter_gate.source`.
 
@@ -64,6 +66,7 @@ import spec as specmod  # noqa: E402
 
 CAL = instrument.CAL
 FORMAT = "layered-stage-d-prediction/1"
+INVERTER_SCHEMAS = ("inverter-indeck/1",)     # research/inverter-instances invinst.indeck (d599300, local, not pushed)
 # the package files whose bytes make the prediction (their sha256 goes into the record)
 CODE = ("stage_d.py", "instrument.py", "fit.py", "scores.py", "records.py", "records2.py", "deck.py", "run.py",
         "session.py", "spec.py", "calibration.json", "config.json")
@@ -292,11 +295,15 @@ def inverter_gate(s, arg):
     if arg is None or not Path(arg).exists():
         return dict(source="missing", inverters={}, K0=False, K3=False, why=["inverter gate not measured"])
     g = json.loads(Path(arg).read_text())
+    if g.get("schema") not in INVERTER_SCHEMAS:
+        return dict(source=dict(file=Path(arg).name, sha256=sha256_file(arg)), inverters={}, K0=False, K3=False,
+                    why=[f"inverter gate schema {g.get('schema')!r} not one of {list(INVERTER_SCHEMAS)}"])
     inv = g.get("inverters", {})
     why = [f"{n}: no gate" for n in names if n not in inv]
     why += [f"{n}: K0 fails" for n in names if n in inv and not inv[n].get("K0")]
     whyK3 = [f"{n}: K3 fails" for n in names if n in inv and not inv[n].get("K3")]
-    return dict(source=dict(file=Path(arg).name, sha256=sha256_file(arg), kit_commit=g.get("kit_commit")),
+    return dict(source=dict(file=Path(arg).name, sha256=sha256_file(arg), kit_commit=g.get("kit_commit"),
+                            schema=g["schema"], seed=g.get("seed"), deck_sha256=g.get("deck_sha256")),
                 inverters={n: dict(K0=bool(inv.get(n, {}).get("K0")), K3=bool(inv.get(n, {}).get("K3"))) for n in names},
                 K0=not why, K3=not why and not whyK3, why=why + whyK3)
 
@@ -388,6 +395,15 @@ def cmd_run(spec_path, out, seed, *rest):
     return r["status"] == "done"
 
 
+def cmd_deck(spec_path, path, *rest):
+    """The deck text of stage D and stage N (instrument.deck_text with the overlay), for the kit's in-deck gate:
+    python -m invinst.indeck OUTDIR --deck PATH --seed S."""
+    cfg, _ = config(flags(rest).get("overlay", "config_inverter_c5.json"))
+    b = instrument.deck_text(specmod.load(spec_path), cfg).encode()
+    Path(path).write_bytes(b)
+    print(sha256_bytes(b))
+
+
 def cmd_predict(spec_path, out, *rest):
     p = predict(spec_path, out, flags(rest).get("inverters"))
     print(json.dumps(dict(eligible_K0=p["eligible_K0"], room_K3=p["room_K3"], cells=p["cells"],
@@ -400,6 +416,8 @@ if __name__ == "__main__":
         sys.exit(0 if cmd_run(*a) else 1)
     elif cmd == "predict":
         cmd_predict(*a)
+    elif cmd == "deck":
+        cmd_deck(*a)
     elif cmd in ("seal", "verify"):
         import seal
         sys.exit(0 if getattr(seal, cmd)(*a) else 1)

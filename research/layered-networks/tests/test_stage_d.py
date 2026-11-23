@@ -52,9 +52,11 @@ def test_inverter_gate():
     assert stage_d.inverter_gate(s, "assumed")["K3"] is True
     with tempfile.TemporaryDirectory() as d:
         p = Path(d) / "g.json"
-        p.write_text(json.dumps(dict(kit_commit="x", inverters={"n0": dict(K0=True, K3=False)})))
+        p.write_text(json.dumps(dict(schema="inverter-indeck/1", kit_commit="x", inverters={"n0": dict(K0=True, K3=False)})))
         g = stage_d.inverter_gate(s, str(p))
         assert g["K0"] and not g["K3"]
+        p.write_text(json.dumps(dict(kit_commit="x", inverters={"n0": dict(K0=True, K3=True)})))   # no schema: refused
+        assert stage_d.inverter_gate(s, str(p))["K0"] is False
     a = specmod.load(SPECS / "andor3.json")
     assert stage_d.inverter_gate(a, None)["K0"] is True                         # no front end, nothing to gate
 

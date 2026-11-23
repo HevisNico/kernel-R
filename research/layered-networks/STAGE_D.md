@@ -44,7 +44,20 @@ python3 -B tests/test_stage_d.py
 
 ## The inverter gate: an interface to confirm with the inverter kit
 
-`inverters=FILE`, JSON: `{"kit_commit": "...", "inverters": {"n0": {"K0": bool, "K3": bool, ...}, ...}}`.
+`inverters=FILE`: the kit's `inverter_gate.json`, schema `inverter-indeck/1` (research/inverter-instances
+`invinst.indeck`, d599300, local, not pushed). It measures each inverter **inside this deck at this seed**; the kit
+checks every run's fingerprint against the network deck's op point. The fingerprint check on 9803 showed that the kit's
+standalone draw is not the network's: neither in-deck inverter matches it, the largest difference being 1.5 mV.
+
+```
+python3 -B stage_d.py deck SPEC DECK.spice [overlay=...]     # prints the deck's sha256
+(cd ../circuit/inverter/instances && python -m invinst.indeck OUTDIR --deck DECK.spice --seed S)
+python3 -B stage_d.py predict SPEC OUT inverters=OUTDIR/inverter_gate.json
+```
+
+Fields read: `schema`, `kit_commit`, `seed`, `deck_sha256`, and `inverters.n<j>.K0` / `.K3`. A file with another
+schema is refused. The kit's smoke test on XOR3 9803 gives K0 and K3 on both inverters, at about 6.1 CPU-min per
+inverter. This is the kit's report; it was not run here.
 
 - Without it, an instance with a front end has **no prediction** ("inverter gate not measured").
 - `inverters=assumed` is for development only. It is written into the prediction (`inverter_gate.source`), into the
