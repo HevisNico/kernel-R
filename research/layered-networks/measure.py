@@ -162,7 +162,7 @@ class Measure:
                                     margin_skew=s[k + 1] + tim["skew"][k + 1] - (s[k] + f[k] + tim["delta"])))
         return all(r["start_ok"] and r["skew_ok"] for r in res), res
 
-    def read_checks(self, slot, top, dmin, dmax):
+    def read_checks(self, slot, top, dmin, dmax, only=None):
         """Scheduled, IntrinsicDelays, Latencies (lambda = dmin, skew + dmax), arrival windows, decoder clause
         (one emission, after every arrival, by the deadline), routing (arrival = emission below + delta)."""
         tim, sc = self.tim, self.sched(slot)
@@ -175,6 +175,8 @@ class Measure:
             for k, row in enumerate(rows[:-1], start=1) for r in row)
         for k, row in enumerate(rows, start=1):
             for i, r in enumerate(row):
+                if k == top and only is not None and i != only:
+                    continue                               # a lesson's trace holds only its addressed read at its layer
                 n = self.s["layers"][k - 1][i]
                 ok["scheduled"] &= r["start"] == sc[k]
                 arr = [a for a in r["arrivals"] if a is not None]
@@ -232,7 +234,7 @@ class Measure:
         for (k, i, g, r), slot in sorted(lessons.items()):
             n = s["layers"][k - 1][i]
             x = specmod.input_of_lines(s, specmod.line_pattern(s, n["stimulus"][g]))
-            les.append(dict(layer=k, cell=i, group=g, round=r, **self.read_checks(slot, k, dmin, dmax), **self.front_checks(slot, x)))
+            les.append(dict(layer=k, cell=i, group=g, round=r, **self.read_checks(slot, k, dmin, dmax, only=i), **self.front_checks(slot, x)))
         keys = lambda rows: sorted({k for r in rows for k, v in r.items() if isinstance(v, bool) and k not in ("out", "expected")})
         summary = dict(
             chain=chain_ok,
