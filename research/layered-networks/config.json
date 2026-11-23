@@ -1,0 +1,65 @@
+{
+  "what": "The one configuration of the layered-network deck builder, router, measure and Lean emitter. Development only; nothing here is preregistered. Dates in time units (tu) of 20 us unless the key says otherwise.",
+  "circuit": {
+    "cell_spice": "../circuit/cell.spice",
+    "blocks_spice": "../circuit/blocks.spice",
+    "spiceinit": "../circuit/spiceinit.txt",
+    "pdk": "../circuit/pdk",
+    "pdk_commit": "1232782c1b9fab3aacda74d67ce7c92bf7da8105",
+    "ngspice_sha256": "820658317b0b54035208da41936fd6871ce924036e5ea4113a4168b821b7fc45",
+    "section": "tt_mm",
+    "temperature": 27,
+    "vinit": 0.3895,
+    "idis": 8.2e-9,
+    "max_step": "200n"
+  },
+  "inverter": {
+    "what": "research/circuit/inverter/inverter.py DESIGN (proof/circuit-inverter-composition 062a2862), with the redesign J0 = 4.0",
+    "tau": 0.25, "h": 0.30, "hl": 0.30, "H0": 4.5, "J0": 4.0, "D": 1.0, "reset_len": 0.1,
+    "help_mirror": {"w": 2, "l": 4}, "inhib_mirror": {"w": 4, "l": 4},
+    "switch_n": {"w": 1, "l": 0.15}, "switch_p": {"w": 2, "l": 0.15},
+    "reset_n": {"w": 1, "l": 0.15}, "reset_p": {"w": 2, "l": 0.15}
+  },
+  "stimulus": {
+    "tu_s": 20e-6,
+    "cycle_tu": 6,
+    "lead_s": 1e-6,
+    "noise_step_s": 0.4e-6,
+    "snap_offset_s": 0.1e-6,
+    "amp": {"both": 0.49, "copy": 1.0, "either": 1.0}
+  },
+  "calendar": {
+    "slot_tu": 22,
+    "gate_lead_tu": 3,
+    "first_slot_tu": 4,
+    "watch_tu": 12,
+    "hold": 2,
+    "max_rounds": 10,
+    "share_lessons": true
+  },
+  "timing": {
+    "what": "Design constants, fixed before a run. delta: every wire delay (inputs included). The read start of layer l+1 is s(l) + delta (no latency lower bound is assumed: lambda_min = measured dmin >= 0). skew(1) = w; skew(l+1) = skew(l) + dmax_design; deadline(l) = skew(l) + dmax_design; duration = deadline + 1. The measure checks the measured dmax against these constants through checkChainDates with lambda_max = skew + dmax.",
+    "delta": 0.12,
+    "dmax_design": 1.2,
+    "external_w": 0,
+    "emit_early": 0.44,
+    "emit_late": 0.64,
+    "inverter_window": 0
+  },
+  "lean": {
+    "dir": "../learned-coincidence",
+    "toolchain": "leanprover/lean4:v4.35.0",
+    "modules": ["Target", "Recognition", "TwoLayerTarget", "MonotoneTarget", "MonotoneSupport",
+        "MonotoneRecognition", "MonotoneCharacterization", "TwoRailsTarget", "TwoRails",
+        "MonotoneOneSidedTarget", "MonotoneOneSidedRecognition", "MonotonePremiseTargets",
+        "MonotonePremiseCompletenessTargets", "MonotonePremiseSoundness", "MonotonePremiseCompleteness",
+        "LayeredMonotoneTarget", "LayeredMonotoneRecognition", "LayeredMonotoneCharacterization",
+        "LayeredMonotoneExample", "LayeredMonotoneCheckerTargets", "LayeredMonotoneCheckerProofs",
+        "InverterTarget", "Inverters",
+        "LayeredCompositionTarget", "LayeredRecognitionAt", "LayeredChain",
+        "LayeredTrainingChainTarget", "LayeredTrainingChain", "LayeredChainChecks",
+        "LayeredChainExamples", "LayeredInverterTarget", "LayeredInverters", "LayeredWitnessSupport",
+        "LayeredIntrinsic", "LayeredIntrinsicExample"]
+  },
+  "batch": {"parallel": 4, "timeout_s": 7200}
+}

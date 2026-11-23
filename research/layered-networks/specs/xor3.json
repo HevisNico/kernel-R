@@ -1,0 +1,8 @@
+{"tag": "XOR3", "inputs": ["x0", "x1"], "front": true, "function": "x0 xor x1",
+ "expect": [false, true, true, false],
+ "layers": [
+  {"nodes": [{"name": "andL", "gate": "both", "source": [0, 3], "stimulus": [[0, 3], null]},
+             {"name": "andR", "gate": "both", "source": [2, 1], "stimulus": [[1, 2], null]}]},
+  {"nodes": [{"name": "or", "gate": "either", "source": [0, 1], "stimulus": [[0, 3], [1, 2]]}]},
+  {"nodes": [{"name": "out", "gate": "copy", "source": [0, null], "stimulus": [[0, 3], null]}]}
+ ]}

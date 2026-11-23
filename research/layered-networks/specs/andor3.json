@@ -1,0 +1,8 @@
+{"tag": "ANDOR3", "inputs": ["x0", "x1", "x2"], "front": false, "function": "(x0 and x1) or x2",
+ "expect": [false, false, false, true, true, true, true, true],
+ "layers": [
+  {"nodes": [{"name": "and01", "gate": "both", "source": [0, 1], "stimulus": [[0, 1, 2], null]},
+             {"name": "cp2", "gate": "copy", "source": [2, null], "stimulus": [[0, 1, 2], null]}]},
+  {"nodes": [{"name": "or", "gate": "either", "source": [0, 1], "stimulus": [[0, 1], [2]]}]},
+  {"nodes": [{"name": "out", "gate": "copy", "source": [0, null], "stimulus": [[0, 1], null]}]}
+ ]}
