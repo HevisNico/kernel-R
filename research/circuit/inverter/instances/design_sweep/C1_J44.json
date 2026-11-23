@@ -1,0 +1,120 @@
+{
+ "_doc": "Redesign 1: J0 4.0 (pushed cell 3.0), for silence under help-mirror mismatch. The one configuration of the inverter-instance package. Development values, not preregistered. Times in time units (tu), charges and states in units of x = (vr0 - vq) / vunit.",
+ "cell": {
+  "tu_s": 2e-05,
+  "cq_F": 5e-12,
+  "vunit_V": 0.5,
+  "vr0_V": 1.25,
+  "vdd_V": 1.8,
+  "settle_s": 1e-05,
+  "level_x": 0.9,
+  "temp_C": 27,
+  "tau": 0.25,
+  "h": 0.3,
+  "hl": 0.3,
+  "H0": 4.5,
+  "J0": 4.4,
+  "D": 1.0,
+  "reset_len": 0.1,
+  "edge_s": 1e-09,
+  "help_mirror": {
+   "w": 2,
+   "l": 4
+  },
+  "inhib_mirror": {
+   "w": 4,
+   "l": 4
+  },
+  "switch_n": {
+   "w": 1,
+   "l": 0.15
+  },
+  "switch_p": {
+   "w": 2,
+   "l": 0.15
+  },
+  "reset_n": {
+   "w": 1,
+   "l": 0.15
+  },
+  "reset_p": {
+   "w": 2,
+   "l": 0.15
+  }
+ },
+ "mismatch": {
+  "section": "tt_mm",
+  "nominal_section": "tt"
+ },
+ "runs": {
+  "R1_absent": {
+   "present": false,
+   "help": true,
+   "reset": true,
+   "length_tu": 1.3,
+   "maxstep": "5n"
+  },
+  "R2_present": {
+   "present": true,
+   "help": true,
+   "reset": true,
+   "length_tu": 1.3,
+   "maxstep": "5n"
+  },
+  "R3_leak_above": {
+   "present": false,
+   "help": true,
+   "reset": false,
+   "length_tu": 4.0,
+   "maxstep": "20n",
+   "fit_tu": [
+    1.0,
+    4.0
+   ]
+  },
+  "R4_leak_below": {
+   "present": true,
+   "help": false,
+   "reset": false,
+   "length_tu": 4.0,
+   "maxstep": "20n",
+   "fit_tu": [
+    0.5,
+    4.0
+   ]
+  },
+  "R5_static": {
+   "present": false,
+   "help": false,
+   "reset": false,
+   "length_tu": 2.3,
+   "maxstep": "5n",
+   "ramp": {
+    "v_hi": 0.85,
+    "v_lo": 0.75,
+    "lead_tu": 0.2,
+    "ramp_tu": 2.0
+   }
+  }
+ },
+ "fingerprint_tol_V": 0.0001,
+ "gate": {
+  "rational_denominator": 1000000,
+  "early_grid": "1/1000",
+  "timing": {
+   "window": "1/4",
+   "emitEarly": "2/5",
+   "emitLate": "13/20"
+  },
+  "K3_sigmas": 3,
+  "front_end": {
+   "_doc": "first-layer skew and direct-rail delay tolerance (InverterLag.lean): network quantities, not measured on an instance; null = not checked",
+   "skew": null,
+   "epsilon": null
+  }
+ },
+ "driver": {
+  "max_jobs": 4,
+  "job_timeout_s": 1800
+ }
+}
