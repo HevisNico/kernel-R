@@ -15,12 +15,14 @@ from pathlib import Path
 PKG = Path(__file__).resolve().parents[1]
 NOISE = Path(__file__).resolve().parents[3] / "noise.json"
 OPEN_PREMISES = [
-    "[I] the leak along the trajectory: the varying-leak theorems (proof/inverter-bridge, local 8e1cd192, not read "
-    "here) need |a(t) - a'| <= alpha along the trajectory; the gate checks that both measured side rates lie in "
-    "[a' - alpha, a' + alpha], with the state bound |x| <= H0 hl (StateBound). That the leak is exactly one of the "
-    "two fitted side rates at every time is a modelling step.",
-    "the real bridge (gate_silence, gate_firing on proof/inverter-bridge 8e1cd192) is reported proved by the "
-    "inverter session, locally; not yet read or checked here.",
+    "[I] the leak along the trajectory: gate_silence and gate_firing (research/circuit/lean/CircuitInverterGateProof.lean, "
+    "proof/inverter-bridge 13aba3a, built and audited here) take a time-varying leak with gap |leak u - a'| <= alpha "
+    "and stateBound |actual u| <= X as hypotheses. The gate checks that both measured side rates lie in "
+    "[a' - alpha, a' + alpha] and that the measured max |x| <= H0 hl (StateBound). That the cell's leak at every "
+    "time is one of the two fitted side rates is a modelling step, not a measurement of leak(t).",
+    "the measured real hypotheses of gate_silence and gate_firing (actualLaw, integrability, initialError, helpError "
+    "on every prefix, inhibitorySign and wrongSign split, wrongCharge, charge, offCharge, thresholdError, "
+    "actualCont) are claims of the simulation, supplied as the outward-rounded numbers; they are not derived in Lean.",
     "the latch: the contact-to-latch delay is a measured constant, not a proved bound.",
 ]
 NAMES = ("aLo", "aHi", "aRef", "alpha", "eps0", "etaH", "etaM", "etaJ", "delta", "Q", "latchLo", "latchHi", "emit", "early")

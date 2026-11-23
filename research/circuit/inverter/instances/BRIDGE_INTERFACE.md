@@ -1,6 +1,21 @@
 # The ℝ bridge: what the gate checks, and what it must imply
 
-**Development work. The bridge is not written here; this is its interface.**
+**Development work.** The bridge was written by the inverter session (`proof/inverter-bridge` 13aba3a). It is
+`gate_silence` and `gate_firing` in `research/circuit/lean/CircuitInverterGateProof.lean`, taking the premises below
+plus `StateBound` to the varying-leak theorems.
+
+**Checked here (independently, 2026-11-23):**
+- On a fresh worktree of 13aba3a: `lake exe cache get`, then `lake build` of the varying-leak, box-reference, Taylor
+  and gate-bridge modules, the 9901 gate and its audit (rc 0), then `check_inverter_gate_single.py` (rc 0).
+- The script reports:
+  - the core-only compile is OK;
+  - a Mathlib import into the core module is rejected;
+  - the single-source gate audit passed on 128 declarations, with the axioms `propext`, `Classical.choice` and
+    `Quot.sound` only;
+  - five negative controls are rejected: a project axiom, `sorry`, StateBound weakened, 9901 above the bound, and
+    9901 with δ = 0.1.
+- The seed-9901 values in `CircuitInverterGateInstance9901.lean` equal this package's.
+- The rest of this file is the interface as first written.
 
 ## Sources
 
