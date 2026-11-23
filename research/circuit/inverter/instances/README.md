@@ -52,3 +52,27 @@ An instance whose runs do not share one sample is refused.
   `emitLate − emitEarly ≤ skew`, involve the first layer's skew. They belong to the network stage; this package
   reports the window, the emission spread and the slot duration.
 - **Campaign dates.** `window = 1/4`, `emitEarly = 2/5` and `emitLate = 13/20` are development choices.
+
+## K3 against the family gate's K3: an analogue, not the same definition
+
+- **The family** (`research/function-family/TOPUP_RULES.md` section 3.5.6; `research/function-family/dev/family_predict.py`
+  lines 472-486, `budget_and_tuple`; `FAMILY_DESIGN.md` section 0.8):
+  - a cell's read budget is `P.read_budget(eps, sens, writes, K, c4.DECISION5)`;
+  - that is the fit residual `eps`, plus `K` times the read's noise standard deviation in stages,
+    `K · sqrt(w² + b² + n d²) / D` (`FAMILY_DESIGN.md` 0.8, citing `FUPD/DESIGN_NOTE_WIDEN.md` B.1);
+  - it uses decision 5's constants `b = 0.111`, `w = 0.094`, `d = 0.009` mV;
+  - K = 0 is the residual alone; K = 3 adds three noise sigmas.
+- **Here:**
+  - K0 is the measured, deterministic values (the instance's analogue of the residual);
+  - K3 adds three sigmas of `research/circuit/noise.json`: the FIRE comparator's input noise (335 µV) on δ, and the
+    two mirrors' shot charge over the slot on the charge budgets and against Q.
+- **Same:**
+  - K = 0 / K = 3;
+  - deterministic error plus K sigma of noise, added to the budgets of the premises;
+  - "eligible" at K0 and "room" at K3;
+  - the kernel's verdict is the last word.
+- **Different:**
+  - the noise sources (the inverter's comparator and mirrors, not the learning-port reads);
+  - the constants (`noise.json`, not decision 5's);
+  - no between-run term `b`, because mismatch is the instance itself (one fixed draw per seed);
+  - the sigmas are added linearly to each budget, not combined as a root sum of squares inside one read.
