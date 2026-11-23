@@ -1,15 +1,16 @@
 """The direct comparison of CAMPAIGN_PLAN_DRAFT.md §2: a sealed stage-D prediction against one stage-N network
 record, letter by letter and output by output. Development only.
 
-  compare_d.py SEALDIR SPEC STAGE_N_OUT [noiseless|noisy|auto] [OUT.json]
+  compare_d.py SEALDIR SPEC STAGE_N [noiseless|noisy|auto] [OUT.json]
+  STAGE_N: a record file (record.json, or noise2.py's noisy_record.json), or a folder holding record.json
 
 - The seal is verified first (seal.load); a broken seal refuses the comparison.
 - The stage-N record is OUT/record.json in the format of instrument.cal_run / run.train_and_test: `words`
   {"layer/cell/group": word}, `tests` (slot indices, info.pattern) and the slots' reads. Its tag and seed must be the
   prediction's.
-- The kind of run: `noisy` when the record has a `noise` entry with a non-zero constant, else `noiseless` (`auto`);
-  it can be stated, and a stated kind that contradicts the record is refused. (The noise entry's field names are
-  provisional: b_mV, w_mV, d_mV, to be confirmed with the noise module.)
+- The kind of run (the noise module's fields, noise2.py): `noisy` when `noise_seed` is an integer (10 S + round) and
+  `noise_scale` is not 0; `noiseless` when `noise_seed` is null or absent, or the scale is 0 (the zero-amplitude
+  identity check). It can be stated, and a stated kind that contradicts the record is refused.
 - **A comparison is made only where a prediction exists**: eligible at K0 for a run without noise, room at K3 for a
   noisy run. Then every letter of every predicted word, every predicted cell FIRE bit and every output on every input
   pattern, and every both cell in a shift slot (kind `skew`, if the record has any), is compared; a word of the wrong
@@ -31,10 +32,9 @@ FORMAT = "layered-stage-d-comparison/1"
 
 
 def run_kind(rec):
-    nz = rec.get("noise")
-    if not nz:
+    if rec.get("noise_seed") is None:
         return "noiseless"
-    return "noisy" if any(float(nz.get(k, 0) or 0) != 0 for k in ("b_mV", "w_mV", "d_mV")) else "noiseless"
+    return "noiseless" if float(rec.get("noise_scale", 1.0)) == 0 else "noisy"
 
 
 def observed(s, rec):
@@ -83,14 +83,15 @@ def differences(pred, obs):
 
 def compare(sealdir, spec_path, outdir, kind="auto"):
     s = specmod.load(spec_path)
-    rec = json.loads((Path(outdir) / "record.json").read_text())
+    path = Path(outdir)
+    rec = json.loads((path / "record.json" if path.is_dir() else path).read_text())
     pred = sealmod.load(sealdir, rec["tag"], rec["seed"])
     rk = run_kind(rec)
     if kind != "auto" and kind != rk:
         raise SystemExit(f"refused: the run is stated {kind} but its record reads {rk}")
     obs = observed(s, rec)
     res = dict(format=FORMAT, tag=rec["tag"], seed=rec["seed"], run_kind=rk, stage_n_status=rec.get("status"),
-               observed=obs)
+               noise_seed=rec.get("noise_seed"), noise_round=rec.get("round"), observed=obs)
     if pred is None:
         res.update(verdict="observed only (no prediction)", why="no sealed prediction for this instance")
         return res

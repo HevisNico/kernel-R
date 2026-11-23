@@ -81,7 +81,7 @@ def fake_record(word="ssFF", out0=True, noise=None, seed=9801):
     rec = dict(tag="NOT1", seed=seed, status="done", words={"1/0/0": word}, tests=[0, 1],
                slots=[test(0, out0), test(1, False)])
     if noise:
-        rec["noise"] = noise
+        rec.update(noise)
     return rec
 
 
@@ -129,12 +129,12 @@ def test_compare():
     assert r["verdict"] == "refuted" and {x["what"] for x in r["differences"]} == {"output", "cell"}
     r = compare_with(fake_prediction(eligible=False), fake_record(word="sFFF"))      # no prediction: observed only
     assert r["verdict"].startswith("observed only") and r["why"] == "not eligible at K0" and "differences" not in r
-    noisy = dict(b_mV=0.111, w_mV=0.094, d_mV=0.009)
+    noisy = dict(noise_seed=98011, round=1, noise_scale=1.0)
     r = compare_with(fake_prediction(room=False), fake_record(noise=noisy))
     assert r["run_kind"] == "noisy" and r["verdict"].startswith("observed only") and r["why"] == "no room at K3"
     r = compare_with(fake_prediction(room=True), fake_record(noise=noisy, word="sFFF"))
     assert r["verdict"] == "refuted"
-    r = compare_with(fake_prediction(), fake_record(noise=dict(b_mV=0, w_mV=0, d_mV=0)))
+    r = compare_with(fake_prediction(), fake_record(noise=dict(noise_seed=98011, round=1, noise_scale=0.0)))
     assert r["run_kind"] == "noiseless" and r["verdict"] == "agrees"
     r = compare_with(fake_prediction(), fake_record(seed=9809))
     assert r["verdict"].startswith("observed only") and "no sealed prediction" in r["why"]

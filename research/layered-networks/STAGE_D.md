@@ -73,9 +73,11 @@ python3 -B tests/test_stage_d.py
 ## The comparator (`compare_d.py`)
 
 - The seal is verified first. The stage-N record's tag and seed select the instance.
-- The run's kind is read from the record's `noise` entry: noisy if b, w or d is non-zero. The field names are
-  provisional and still to be confirmed with the noise module. A kind given on the command line that contradicts the
-  record is refused.
+- The stage-N argument is a record file (`record.json`, or `noisy_record.json` from the noise module's `noise2.py`) or
+  a folder holding `record.json`.
+- The run's kind is read from the record, using the noise module's fields: noisy when `noise_seed` is an integer and
+  `noise_scale` is not 0; noiseless when `noise_seed` is null or the scale is 0. A kind given on the command line that
+  contradicts the record is refused.
 - **Compared only where a prediction applies**: eligible at K0 without noise, room at K3 with noise. The comparison
   covers every letter, every cell FIRE bit, every output, and every both cell in a `skew` slot. Any difference gives
   `refuted`, with the differences listed. Otherwise the verdict is `agrees`.
