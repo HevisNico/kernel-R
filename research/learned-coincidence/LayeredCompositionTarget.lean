@@ -11,9 +11,9 @@ import LayeredMonotoneTarget
    - a window for each layer's pulses (`PulseWindows`);
    - date inequalities between layers on the fixed constants alone (`ChainDates`).
    Those inequalities can be checked before a run (`checkChainDates`).
-3. The latency form. Each layer-`ℓ` cell emits no earlier than `λmin ℓ` after the later of
-   its read start and its last arrival, and no later than `λmax ℓ` after its read start
-   (`CellLatency`). The external pulses lie in `[s 0, s 0 + w]`. The pulse windows then
+3. The latency form. Each layer-`ℓ` cell emits between `λmin ℓ` and `λmax ℓ` after its
+   read start (`CellLatency`). The form measured from the last arrival
+   (`CellLatencyFromLastArrival`) implies it. The external pulses lie in `[s 0, s 0 + w]`. The pulse windows then
    follow, with `e = latencyLow λmin` and `f = latencyHigh w λmax`, so the whole schedule
    is predicted from per-cell constants. -/
 
@@ -137,9 +137,15 @@ def LayeredRecognitionChained : Prop :=
           LayerReads c train test → Scheduled s c test → PulseWindows s e f c test →
           ArrivalWindows c test ∧ observed c test = c.predict x
 
-/-- The latency law of one cell read. Every emission is at least `lmin` after the read
-start and after each arrival, and at most `lmax` after the read start. -/
+/-- The latency law of one cell read: every emission lies in
+`[start + lmin, start + lmax]`. This is the premise the chain uses. -/
 def CellLatency (lmin lmax : Rat) (r : ReadObservation 2) : Prop :=
+  ∀ t ∈ r.emissions, r.start + lmin ≤ t ∧ t ≤ r.start + lmax
+
+/-- The per-cell form measured from the last arrival: every emission is at least `lmin`
+after the later of the read start and each arrival, and at most `lmax` after the read
+start. It implies `CellLatency` (`cell_latency_of_last_arrival`). -/
+def CellLatencyFromLastArrival (lmin lmax : Rat) (r : ReadObservation 2) : Prop :=
   ∀ t ∈ r.emissions,
     r.start + lmin ≤ t ∧ (∀ j v, r.arrival j = some v → v + lmin ≤ t) ∧ t ≤ r.start + lmax
 
