@@ -19,7 +19,8 @@ BASE = ["Target", "Recognition", "TwoLayerTarget", "MonotoneTarget", "MonotoneSu
 NEW = ["LayeredCompositionTarget", "LayeredRecognitionAt", "LayeredChain",
        "LayeredTrainingChainTarget", "LayeredTrainingChain", "LayeredChainChecks",
        "LayeredChainExamples", "LayeredInverterTarget", "LayeredInverters", "LayeredWitnessSupport",
-       "LayeredWitnessAndOr", "LayeredWitnessNot", "LayeredWitnessXor"]
+       "LayeredWitnessAndOr", "LayeredWitnessNot", "LayeredWitnessXor", "LayeredIntrinsic",
+       "LayeredIntrinsicExample"]
 AUDIT = "LayeredCompositionAudit"
 
 
@@ -116,6 +117,11 @@ def main():
         ("witness: a cascade reading the direct rail, which cannot answer NOT", "LayeredWitnessNot",
          mutate("LayeredWitnessNot", "fun a => if a = 0 then some 1 else none", "fun a => if a = 0 then some 0 else none"),
          "error"),
+        ("intrinsic chain with λmax below skew + dmax", "LayeredIntrinsic",
+         mutate("LayeredIntrinsic", "(covers : timing.skew + dmax ≤ lmax)", "(covers : dmax ≤ lmax)"), "error"),
+        ("intrinsic example with dmax below the observed delay", "LayeredIntrinsicExample",
+         mutate("LayeredIntrinsicExample", "checkIntrinsicDelays (fun _ => 1) (fun _ => 1)",
+                "checkIntrinsicDelays (fun _ => 1) (fun _ => 1 / 2)"), "error"),
         ("witness: a claimed function other than XOR", "LayeredWitnessXor",
          mutate("LayeredWitnessXor", "(y 0 != y 1)", "(y 0 || y 1)", count=2), "error"),
     ]

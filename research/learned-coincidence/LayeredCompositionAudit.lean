@@ -4,6 +4,7 @@ import LayeredChainExamples
 import LayeredWitnessAndOr
 import LayeredWitnessNot
 import LayeredWitnessXor
+import LayeredIntrinsicExample
 import Lean.Util.CollectAxioms
 
 /-! Audit of the layered-composition modules.
@@ -25,7 +26,7 @@ run_cmd do
   let modules := #[`LayeredCompositionTarget, `LayeredRecognitionAt, `LayeredChain,
     `LayeredTrainingChainTarget, `LayeredTrainingChain, `LayeredChainChecks, `LayeredChainExamples,
     `LayeredInverterTarget, `LayeredInverters, `LayeredWitnessSupport, `LayeredWitnessAndOr,
-    `LayeredWitnessNot, `LayeredWitnessXor]
+    `LayeredWitnessNot, `LayeredWitnessXor, `LayeredIntrinsic, `LayeredIntrinsicExample]
   let mut checked : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
@@ -85,8 +86,18 @@ example : checkChainDates ChainExample.start (latencyLow fun _ => 1) (latencyHig
     Example.circuit = true :=
   ChainExample.latency_accepted
 
+/-! The λmax assumption: an intrinsic delay within `[dmin, dmax]`, inside a read window of
+width `skew`, gives the latency law for every `λmax ≥ skew + dmax`. -/
+
+example {dmin dmax lmax : Rat} {timing : TwoLayer.SlotTiming} {r : TwoLayer.ReadObservation 2}
+    (delay : IntrinsicDelay dmin dmax r) (window : InWindow timing r) (skewNonneg : 0 ≤ timing.skew)
+    (covers : timing.skew + dmax ≤ lmax) : CellLatency dmin lmax r :=
+  latency_of_intrinsic delay window skewNonneg covers
+
 end LearnedCoincidence.Layered
 
+#print axioms LearnedCoincidence.Layered.layered_recognition_from_intrinsic
+#print axioms LearnedCoincidence.Layered.ChainExample.example_from_intrinsic
 #print axioms LearnedCoincidence.Layered.layered_recognition_at
 #print axioms LearnedCoincidence.Layered.layered_recognition_from_latency
 #print axioms LearnedCoincidence.Layered.training_calibration_chained
