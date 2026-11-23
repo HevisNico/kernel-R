@@ -1,0 +1,30 @@
+{
+ "_doc": "The layered network's simulator directives for an inverter (research/layered-networks at a308eec: instrument.deck_text = deck.build at calibration.json design_point: reltol 1e-5 on the .option line, vhi 0.7 on the .param line; junction areas for R cells only, inverter devices at zero area, which is the PDK subcircuits' own default ad = as = pd = ps = 0). Taken verbatim from the deck of specs/not1.json; tests/test_netopts.py checks them against that branch. Used by invinst/netdeck.py and invinst/driver2.py; config.json and cell.py stay as pushed.",
+ "source": {
+  "branch": "research/layered-networks",
+  "commit": "a308eec",
+  "builder": "instrument.deck_text(spec, config.json)",
+  "spec": "specs/not1.json"
+ },
+ "section_line_mismatch": ".lib \"pdk/models/sky130.lib.spice\" tt_mm",
+ "nominal_section": "tt",
+ "params": [
+  ".param vddv=1.8 tu=20u tper=440u t0=4.1u kp=10",
+  ".param cq=5p vunit=0.5 vr0=1.25",
+  ".param vfire={vr0 - 0.9*vunit} vreopen={vr0 - 0.1*vunit}",
+  ".param rleak={2*tu/cq} at={log(4)/tu} ipk={cq*vunit*at} ioff=50n",
+  ".param vcm=0.4 vhi=0.7 vlo=0.5 vpre=1.3 vinit=0.3895",
+  ".param cs0=400f cf0=30p idis=8.2n wg=40 lg=2.5 rlk=1e18"
+ ],
+ "options": [
+  ".option scale=1e-6",
+  ".option reltol=1e-5 abstol=1e-13 vntol=1e-7 chgtol=1e-17",
+  ".option gmin=1e-16",
+  ".option temp=27"
+ ],
+ "inverter_junction_areas": "zero (PDK default)",
+ "transient_max_step": {
+  "_doc": "unchanged from config.json runs (5n / 20n): a measurement resolution for the integrals; the network session runs tran 1u ... 0 200n",
+  "network_value": "200n"
+ }
+}
