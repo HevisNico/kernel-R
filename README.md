@@ -53,6 +53,7 @@ function; the experiment tests one. There is no chip.
 | Final memory of every port computed before the run from per-cell measures: 52 of 52 ports exact without noise, over three campaigns and two kinds of network | simulation, preregistered |
 | Under the simulator's noise, on twelve new instances: 21 of 21 learned states and 11 of 11 exact words | simulation, preregistered |
 | A network of three cells, trained only by its own pulses, learns `(A and B) or (C and D)`: its training and its answers to all 16 input patterns, computed before the run from per-cell measures, held on 4 of 4 eligible instances (campaign 6) | simulation, preregistered |
+| Five functions, one per network of two or three cells: `A`, `A and B`, `A or B`, `A and (B or C)`, `A or (B and C)`. Every answer, predicted before the run, held on 15 of 15 new instances without noise and on all 8 instances with room under noise; nothing refuted (family campaign) | simulation, preregistered |
 
 Simulations use the SkyWater 130 nm process (SKY130) and ngspice, at the
 level of transistors.
@@ -124,7 +125,7 @@ input on never turns its answer from true to false.
 
 These theorems are about records that satisfy their premises. They do not
 say that a physical or simulated cell satisfies them; an experiment tests
-that, and campaign 6 below is the first, on one function.
+that: campaign 6 below on one function, then the family campaign on five.
 
 ## 3. Predicted before the run (simulation, preregistered)
 
@@ -190,6 +191,28 @@ the function. Then the network is simulated.
 - Two earlier attempts at this claim, campaigns 4 and 5, stopped before
   testing it. [What happened](research/learned-dnf-circuit/CAMPAIGNS_4_AND_5.md)
 
+### The family campaign: five functions
+
+The same method as campaign 6, on five functions instead of one: `A`,
+`A and B`, `A or B`, `A and (B or C)` and `A or (B and C)`. Fifteen new
+instances, three per function, were drawn by a published draw and run on six
+machines. For each instance, a Lean proof checked before any network run
+that its prediction implies its function.
+
+| | Result |
+|---|---|
+| Instances | 15 new ones, all eligible; 8 have room under noise |
+| Without noise (the primary claim) | **established for each of the five functions**, 15 of 15 instances, no discrepancy |
+| Under noise | **established, pooled over the five functions**, on the 8 instances with room, 3 rounds each, no failure; per function, established for `A` and `A and B`, held on one instance for the other three, as stated before the data |
+| Controls | the untrained networks fire no output; the skew control stays silent |
+| Reproduction | the prediction record, regenerated from the measures, is byte-identical to the one published before the runs; a repeated deck is identical on two machines, apart from the simulator's date line |
+| Runs | 204 of 204 complete; none lost, none repeated |
+
+- [Report](research/function-family-campaign/REPORT.md) · [preregistration](research/function-family-campaign/PREDICTION.md)
+- As in campaign 6, the descriptive kernel check of the measured runs is
+  false for the calibration checker, for the same reason (comparison M8).
+  No verdict depends on it.
+
 ## 4. Also in this release
 
 - **Certification, port by port**: on 200 simulated ports, every port
@@ -220,11 +243,11 @@ the function. Then the network is simulated.
   its calibration premise as measured.
 - **What is learned.** In campaigns 1 to 3, how many doses each port needs
   before it fires. In campaign 6, one Boolean function of four inputs, on
-  three cells. The theory covers every monotone function, under its
-  premises, and every Boolean function when something outside the network
-  supplies each input with its complement; the network makes no complement
-  itself. The experiment covers this one function, and no simulation has
-  tested another function or a larger network.
+  three cells; in the family campaign, five monotone functions of one to
+  three inputs, on two or three cells. The theory covers every monotone
+  function, under its premises, and every Boolean function when something
+  outside the network supplies each input with its complement; the network
+  makes no complement itself. No simulation has tested a larger network.
 - **Selected instances.** Every claim is about eligible instances, selected
   by per-cell measures before any network run.
 - Two or three cells per simulated network, 27 °C, typical corner, ideal
