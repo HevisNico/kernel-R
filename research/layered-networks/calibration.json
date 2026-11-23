@@ -1,0 +1,34 @@
+{
+  "what": "Constants of the calibration instrument (instrument.py, scores.py). Development only. config.json (pushed) is not changed; these are added.",
+  "first_slot_tu": 8,
+  "u_window_s": 3.5e-05,
+  "theta": 100000,
+  "scan": {
+    "what": "campaign 6 scan6.py values: TOL_V 2 uV, BRACKET_V 20 uV, a leak step of at most 1.2 mV, LEAK_PER_MV 4.42e-10 (first guess, refined on the run). Dose pulse and leak window inside the 22 tu slot, before the next slot's u window. tol_V is 10 uV here (scan6: 2 uV): the bracket is kept at the measured states of the reads. step_V is 1.5 mV (scan6: 1.2 mV), the leak undershoots by 4 % (scan6: 30 uV).",
+    "tol_V": 1e-05,
+    "bracket_V": 2e-05,
+    "step_V": 0.0015,
+    "leak_S_per_mV": 4.42e-10,
+    "dose_tu": 2,
+    "leak_on_tu": 9,
+    "leak_off_tu": 16.5,
+    "watch_tu": 8,
+    "max_slots": 64,
+    "repeats": true,
+    "repeats_what": "Fix (3) of DIAGNOSIS.md: once a group's bracket closes, each end is read once more, approached from the other side (L after a FIRE, U after a silence). The bracket is then L = largest silence, U = smallest FIRE over all reads; a disagreement widens it to the envelope and is recorded.",
+    "max_slots_what": "64 (40 before): at 2x one write moves 2.71 mV, so the repeat of U after the repeat of L costs a dose of a whole stage and about three leak slots back; 9801's first 2x run closed its bracket (10 uV) and agreed on the L repeat, then ran out at 40 slots before the U repeat."
+  },
+  "same_edge_ns": 1000,
+  "d4_stage": 0.005,
+  "d4_note": "D4 bound for runs without their own solo scans, at the family design point (stages of 2.71 mV): 0.005 stage, the largest |s*_par - s*_solo| of the 2x development reruns (0.00405, c3_0 of 9802, over 6 groups: 0.00006, 0.00207, 0.00002, 0.00054, 0.00237, 0.00405) rounded up to the next 0.001. Every |delta| is within the sum of the two half brackets; 9 of 10 both-direction repeats agree and the tenth (c3_0 parallel U, read silent after a silence at the state that had fired) is inside its bracket. At 1x the largest was 0.0138 1x stage (0.0069 in 2x stages). DESIGN_POINT_REPORT.md.",
+  "design_point": {
+    "what": "The family's design point (owner's decision, DIAGNOSIS.md fix 1 and 2): twice the dose and the solver tolerance of research/learned-dnf-circuit-campaign-7-prep (b956efe4) dev/batch2x.py PARAMS = dict(vhi='0.7', reltol='1e-5') and CAMPAIGN7_PROTOCOL_DRAFT.md lines 40-42 (2.708 mV per pulse against 1.349; at 1e-4 two identical cells differed by 32 uV, at 1e-5 they agree); applied as dosedev.rewrite and dosedev_tol.rewrite apply them (one definition each, on its .param / .option line). Junction areas as network-circuit/net.py deck(junction='areas') applies them: sky130-supervisor-closure/junction/netlist.py build with areas.csv for every R-cell device. Inverter devices: zero areas (no layout of the inverter exists; its characterisation had none).",
+    "params": {
+      "vhi": "0.7"
+    },
+    "options": {
+      "reltol": "1e-5"
+    },
+    "junction": "areas"
+  }
+}
