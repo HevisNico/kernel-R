@@ -118,12 +118,12 @@ def q(x):
 
 
 def lean_file(seed, d, t, ms, ks, verdicts, per, fe=None, sb=None):
-    L = ["import InverterInstanceCheck", "",
+    L = ["import InverterInstanceTiming", "",
          f"/-! The kernel gate of inverter instance {seed} (SKY130 tt_mm, its seed), written by",
          "research/circuit/inverter/instances/invinst/gate.py from its MEASURE.json. Each theorem asserts a verdict of",
          "the Python mirror by `decide +kernel`; the file compiles only if the kernel agrees with every one. -/", "",
-         "namespace LearnedCoincidence.MonotoneDNF.InverterInstance.Gate", "",
-         "open LearnedCoincidence.MonotoneDNF.InverterInstance", "",
+         "namespace LearnedCoincidence.MonotoneDNF.InverterInstance.Instances", "",
+         "open KernelR.Circuit.Gate LearnedCoincidence.MonotoneDNF.InverterInstance", "",
          f"def design : Design := ⟨{', '.join(q(d[n]) for n in ('tau', 'h', 'hl', 'H0', 'D', 'level'))}⟩",
          f"def timing : InverterTiming := ⟨{q(t['window'])}, {q(t['emitEarly'])}, {q(t['emitLate'])}⟩", ""]
     for K in ("K0", "K3"):
@@ -146,7 +146,7 @@ def lean_file(seed, d, t, ms, ks, verdicts, per, fe=None, sb=None):
     if fe is not None:
         L += [f"theorem FrontEndFits_{seed} : decide (FrontEndFits timing {q(fe['epsilon'])} {q(fe['skew'])}) = "
               f"{str(fe['verdict']).lower()} := by decide +kernel", ""]
-    return "\n".join(L + ["end LearnedCoincidence.MonotoneDNF.InverterInstance.Gate", ""])
+    return "\n".join(L + ["end LearnedCoincidence.MonotoneDNF.InverterInstance.Instances", ""])
 
 
 def state_bound(cfg, d, x):

@@ -12,7 +12,7 @@ One self-contained package, meant to become the frozen campaign code later. Ever
 | `invinst/measure.py` | five runs per instance and every quantity of the inverter theorems |
 | `invinst/gate.py` | exact Python mirror of the Lean premises, the per-instance Lean file, the kernel's verdict |
 | `invinst/driver.py` | the one driver: a JOBS file (one seed per line), at most `max_jobs` at a time, each under `job_timeout_s`, an optional stopping rule and compute ceiling, `SUMMARY.json` with counts |
-| `lean/InverterInstanceCheck.lean`, `lean/check.sh` | the Mathlib-free premises over `Rat`, the checker and its soundness, `InverterRead` on both observed reads |
+| `lean/InverterInstanceTiming.lean`, `lean/check.sh` | the abstract layer only (`Timing`, `Premises`, the checker and its soundness, `FrontEndFits`, `InverterRead` on both observed reads). The gate's definitions have one source, `research/circuit/lean/CircuitInverterGate.lean` (core Lean; taken byte-identical from proof/inverter-bridge 13aba3a, its sha256 checked by `check.sh`), which the Mathlib bridge also imports |
 
 Read unchanged from `research/circuit`: `blocks.spice`, `spiceinit.txt` (the ngspice setup), `noise.json`, `pdk/`
 (`fetch_pdk.sh`). Lean modules imported from `research/learned-coincidence`: `InverterTarget` and its imports.

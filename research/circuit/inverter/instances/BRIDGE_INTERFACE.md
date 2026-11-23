@@ -4,8 +4,10 @@
 
 ## Sources
 
-- The gate is `lean/InverterInstanceCheck.lean`. It is free of Mathlib and works over `Rat`, in namespace
-  `LearnedCoincidence.MonotoneDNF.InverterInstance`.
+- The gate's definitions now have one source: `research/circuit/lean/CircuitInverterGate.lean` (namespace
+  `KernelR.Circuit.Gate`, core Lean, proof/inverter-bridge 13aba3a). The Mathlib bridge `CircuitInverterGateProof.lean`
+  and this package's gate files both import it. The package's former copy, `InverterInstanceCheck.lean`, is retired.
+  The abstract layer is in `lean/InverterInstanceTiming.lean`.
 - The theorems the gate serves are in `research/circuit/lean/CircuitInverterLeak.lean` (branch
   `proof/inverter-tolerances`, 646f24ec), namespace `KernelR.Circuit`:
   - `inhibited_silence_leaks`;
