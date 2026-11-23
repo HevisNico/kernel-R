@@ -35,7 +35,7 @@ def netlist(c, present, help_on=True, reset=True, inhib_on=True, section="tt", r
     return f"""* inverter cell: help sink, inhibitory PMOS input, reset (development, not preregistered)
 .lib "pdk/models/sky130.lib.spice" {section}
 .param vddv={c['vdd_V']:g} tu={tu * 1e6:g}u cq={c['cq_F'] * 1e12:g}p vunit={c['vunit_V']:g} vr0={c['vr0_V']:g}
-.param vfire={{vr0 - 0.9*vunit}} vreopen={{vr0 - 0.1*vunit}}
+.param vfire={{vr0 - {c['level_x']:g}*vunit}} vreopen={{vr0 - 0.1*vunit}}
 .param rleak={{2*tu/cq}}
 .option scale=1e-6
 .option reltol=1e-4 abstol=1e-13 vntol=1e-7 chgtol=1e-17
