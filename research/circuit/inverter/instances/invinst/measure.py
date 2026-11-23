@@ -128,6 +128,7 @@ def measure(cfg, seed, outdir, section=None, ngspice="ngspice"):
     m["leak_above"] = leak_fit(r3, *cfg["runs"]["R3_leak_above"]["fit_tu"])
     m["leak_below"] = leak_fit(r4, *cfg["runs"]["R4_leak_below"]["fit_tu"])
     m["slot_duration_tu"] = D + c["reset_len"]                        # 15.
+    m["state_extent"] = state_extent(cfg, root, (m["leak_above"]["rate"] + m["leak_below"]["rate"]) / 2)
     m["machine_s"] = {n: rec["wall_s"] for n, rec in recs.items()}
     m["machine_s_total"] = time.time() - t_start
     out = dict(seed=seed, section=sec, drawn=draw is not None, cell=c, measures=m,

@@ -150,6 +150,16 @@ def FrontEndFits (t : InverterTiming) (ε skew : Rat) : Prop :=
 instance (t : InverterTiming) (ε skew : Rat) : Decidable (FrontEndFits t ε skew) := by
   unfold FrontEndFits; infer_instance
 
+/-- The varying-leak theorems' measured state bound (proof/inverter-bridge): the largest `|x|` on the
+slot, input present (`xPresent`, on `[0, D]`) and absent (`xAbsent`, on `[0, h + hl]`), is at most `H0 * hl`.
+The term `α · X · D` of the varying-leak margins is then at most `leakTerm`. Kept apart from `Premises`, whose
+statement the bridge restates verbatim. -/
+def StateBound (d : Design) (xPresent xAbsent : Rat) : Prop :=
+  0 ≤ xPresent ∧ xPresent ≤ d.H0 * d.hl ∧ 0 ≤ xAbsent ∧ xAbsent ≤ d.H0 * d.hl
+
+instance (d : Design) (xPresent xAbsent : Rat) : Decidable (StateBound d xPresent xAbsent) := by
+  unfold StateBound; infer_instance
+
 /-- The checker. -/
 def check (d : Design) (m : Measures) (k : Allowance) (t : InverterTiming) : Bool :=
   decide (Premises d m k t)

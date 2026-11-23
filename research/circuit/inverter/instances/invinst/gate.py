@@ -15,11 +15,12 @@ from pathlib import Path
 PKG = Path(__file__).resolve().parents[1]
 NOISE = Path(__file__).resolve().parents[3] / "noise.json"
 OPEN_PREMISES = [
-    "[I] one constant actual leak: actualLaw of inhibited_silence_leaks / uninhibited_first_crossing_leaks needs "
-    "actual = leakyResponse a ... with ONE a; the cell's leak depends on the side of rest (two measured rates), so "
-    "the theorem's hypothesis is not met. The gate checks both rates lie in [a' - alpha, a' + alpha], which is the "
-    "numeric content of a varying-leak lemma (|a(t) - a'| <= alpha) that is not proved yet.",
-    "the real bridge from these Rat premises to the real hypotheses (BRIDGE_INTERFACE.md): not written yet.",
+    "[I] the leak along the trajectory: the varying-leak theorems (proof/inverter-bridge, local 8e1cd192, not read "
+    "here) need |a(t) - a'| <= alpha along the trajectory; the gate checks that both measured side rates lie in "
+    "[a' - alpha, a' + alpha], with the state bound |x| <= H0 hl (StateBound). That the leak is exactly one of the "
+    "two fitted side rates at every time is a modelling step.",
+    "the real bridge (gate_silence, gate_firing on proof/inverter-bridge 8e1cd192) is reported proved by the "
+    "inverter session, locally; not yet read or checked here.",
     "the latch: the contact-to-latch delay is a measured constant, not a proved bound.",
 ]
 NAMES = ("aLo", "aHi", "aRef", "alpha", "eps0", "etaH", "etaM", "etaJ", "delta", "Q", "latchLo", "latchHi", "emit", "early")
@@ -116,7 +117,7 @@ def q(x):
     return f"({x.numerator} : Rat)" if x.denominator == 1 else f"({x.numerator} / {x.denominator} : Rat)"
 
 
-def lean_file(seed, d, t, ms, ks, verdicts, per, fe=None):
+def lean_file(seed, d, t, ms, ks, verdicts, per, fe=None, sb=None):
     L = ["import InverterInstanceCheck", "",
          f"/-! The kernel gate of inverter instance {seed} (SKY130 tt_mm, its seed), written by",
          "research/circuit/inverter/instances/invinst/gate.py from its MEASURE.json. Each theorem asserts a verdict of",
@@ -139,10 +140,25 @@ def lean_file(seed, d, t, ms, ks, verdicts, per, fe=None):
             L += [f"theorem premises_{seed}_{K} : Premises {args} timing := check_sound check_{seed}_{K}", "",
                   f"theorem inverterRead_{seed}_{K} : InverterRead timing (absentRead m_{seed}_{K}) ∧ InverterRead timing presentRead :=",
                   f"  inverterRead_of_premises premises_{seed}_{K}", ""]
+    if sb is not None:
+        L += [f"theorem StateBound_{seed} : decide (StateBound design {q(sb['xPresent'])} {q(sb['xAbsent'])}) = "
+              f"{str(sb['verdict']).lower()} := by decide +kernel", ""]
     if fe is not None:
         L += [f"theorem FrontEndFits_{seed} : decide (FrontEndFits timing {q(fe['epsilon'])} {q(fe['skew'])}) = "
               f"{str(fe['verdict']).lower()} := by decide +kernel", ""]
     return "\n".join(L + ["end LearnedCoincidence.MonotoneDNF.InverterInstance.Gate", ""])
+
+
+def state_bound(cfg, d, x):
+    """The measured state bound of the varying-leak theorems, rounded up; None if not measured."""
+    e = x.get("state_extent")
+    if e is None:
+        return None
+    r = Rounding(cfg["gate"]["rational_denominator"])
+    xp, xa = r.up(e["R2_present_slot_abs_x"]), r.up(e["R1_absent_deadline_abs_x"])
+    lim = d["H0"] * d["hl"]
+    return dict(xPresent=xp, xAbsent=xa, limit=lim, verdict=0 <= xp <= lim and 0 <= xa <= lim,
+                absent_on_whole_slot=float(e["R1_absent_slot_abs_x"]))
 
 
 def gate(cfg, meas, out_dir, build, timeout=1800):
@@ -160,6 +176,8 @@ def gate(cfg, meas, out_dir, build, timeout=1800):
         eps, skew = F(fcfg["epsilon"]), F(fcfg["skew"])
         fe = dict(epsilon=eps, skew=skew, verdict=0 <= eps and t["window"] + eps <= skew and t["emitLate"] - t["emitEarly"] <= skew)
     res["front_end_fits"] = "not checked: skew or epsilon not set" if fe is None else fe["verdict"]
+    sb = state_bound(cfg, d, x)
+    res["state_bound"] = "not measured" if sb is None else {k: (str(v) if isinstance(v, F) else v) for k, v in sb.items()}
     res["observed"] = dict(same_sample=x["same_sample"], silent_present=not x["fired_present"],
                            fired_absent=x["emit_absent_tu"] is not None)
     if res["measured"]:
@@ -177,7 +195,7 @@ def gate(cfg, meas, out_dir, build, timeout=1800):
             vv = {"K0": mirror["K0"] if per else {"Premises": v0}, "K3": mirror["K3"] if per else {"Premises": v3}}
             name = f"Inverter_{seed}" + ("" if n == 0 else f"_try{n}")
             f = out / f"{name}.lean"
-            f.write_text(lean_file(seed, d, t, ms, ks, vv, per, fe))
+            f.write_text(lean_file(seed, d, t, ms, ks, vv, per, fe, sb))
             p = subprocess.run(["bash", str(PKG / "lean" / "check.sh"), str(f)], capture_output=True, text=True,
                                env=env, timeout=timeout)
             (out / f"{name}.log").write_text(p.stdout + p.stderr)
@@ -188,6 +206,7 @@ def gate(cfg, meas, out_dir, build, timeout=1800):
                 break
     obs = all(res["observed"].values())
     fits = fe is None or fe["verdict"]          # an unset front end is reported, not counted against the instance
+    fits = fits and (sb is None or sb["verdict"])   # an unmeasured state bound is reported in res["state_bound"]
     res["eligible_K0"] = bool(res["kernel"] and res["kernel"]["K0"] and obs and fits)
     res["room_K3"] = bool(res["kernel"] and res["kernel"]["K3"] and obs and fits)
     res["open_premises"] = OPEN_PREMISES

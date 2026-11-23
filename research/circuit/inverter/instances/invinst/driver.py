@@ -27,6 +27,29 @@ def one_job(seed, outdir, cfg, section, build):
     return meas, res
 
 
+def regate(cfg, seeds, runs, out, build):
+    """Gate again the instances of `runs` from their MEASURE.json, adding the state bound from the kept traces."""
+    from . import measure, gate
+    build_library(build)
+    rows = []
+    for seed in seeds:
+        meas = json.loads((runs / str(seed) / "MEASURE.json").read_text())
+        x = meas["measures"]
+        if "state_extent" not in x:
+            x["state_extent"] = measure.state_extent(cfg, runs / str(seed),
+                                                     (x["leak_above"]["rate"] + x["leak_below"]["rate"]) / 2)
+        g = gate.gate(cfg, meas, out / "gates", build)
+        rows.append(dict(seed=seed, eligible_K0=g["eligible_K0"], room_K3=g["room_K3"], kernel=g["kernel"],
+                         kernel_agrees_with_mirror=g.get("kernel_agrees_with_mirror"), state_bound=g["state_bound"],
+                         failing={K: [p for p, v in g.get("mirror", {}).get(K, {}).items() if not v] for K in ("K0", "K3")},
+                         margins=g.get("margins"), state_extent=x["state_extent"]))
+    summary = dict(verdict_status="conditional on open_premises", open_premises=gate.OPEN_PREMISES,
+                   regated_from=str(runs), n=len(rows), k_eligible_K0=sum(r["eligible_K0"] for r in rows),
+                   k_room_K3=sum(r["room_K3"] for r in rows), rows=rows)
+    (out / "REGATE_SUMMARY.json").write_text(json.dumps(summary, indent=1, sort_keys=True))
+    print(json.dumps({k: v for k, v in summary.items() if k != "rows"}, indent=1))
+
+
 def build_library(build):
     Path(build).mkdir(parents=True, exist_ok=True)
     p = subprocess.run(["bash", str(PKG / "lean" / "check.sh")], env=dict(os.environ, GATE_BUILD=str(build)),
@@ -43,6 +66,8 @@ def main():
     ap.add_argument("--section")
     ap.add_argument("--stop")
     ap.add_argument("--job", action="store_true")
+    ap.add_argument("--regate", help="RUNS dir of finished instances: re-gate them from their measures and kept "
+                                     "traces (no simulation); JOBS lists the seeds, OUTDIR receives the new gates")
     a = ap.parse_args()
     cfg = load_config(a.config)
     out = Path(a.outdir)
@@ -51,6 +76,9 @@ def main():
         one_job(int(a.jobs), out, cfg, a.section, build)
         return
     seeds = [int(l.split("#")[0]) for l in Path(a.jobs).read_text().splitlines() if l.split("#")[0].strip()]
+    if a.regate:
+        regate(cfg, seeds, Path(a.regate), out, build)
+        return
     rule = json.loads(Path(a.stop).read_text()) if a.stop else None
     (out / "status").mkdir(parents=True, exist_ok=True)
     build_library(build)
