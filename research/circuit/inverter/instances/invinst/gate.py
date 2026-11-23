@@ -14,6 +14,14 @@ from pathlib import Path
 
 PKG = Path(__file__).resolve().parents[1]
 NOISE = Path(__file__).resolve().parents[3] / "noise.json"
+OPEN_PREMISES = [
+    "[I] one constant actual leak: actualLaw of inhibited_silence_leaks / uninhibited_first_crossing_leaks needs "
+    "actual = leakyResponse a ... with ONE a; the cell's leak depends on the side of rest (two measured rates), so "
+    "the theorem's hypothesis is not met. The gate checks both rates lie in [a' - alpha, a' + alpha], which is the "
+    "numeric content of a varying-leak lemma (|a(t) - a'| <= alpha) that is not proved yet.",
+    "the real bridge from these Rat premises to the real hypotheses (BRIDGE_INTERFACE.md): not written yet.",
+    "the latch: the contact-to-latch delay is a measured constant, not a proved bound.",
+]
 NAMES = ("aLo", "aHi", "aRef", "alpha", "eps0", "etaH", "etaM", "etaJ", "delta", "Q", "latchLo", "latchHi", "emit", "early")
 
 
@@ -182,6 +190,8 @@ def gate(cfg, meas, out_dir, build, timeout=1800):
     fits = fe is None or fe["verdict"]          # an unset front end is reported, not counted against the instance
     res["eligible_K0"] = bool(res["kernel"] and res["kernel"]["K0"] and obs and fits)
     res["room_K3"] = bool(res["kernel"] and res["kernel"]["K3"] and obs and fits)
+    res["open_premises"] = OPEN_PREMISES
+    res["verdict_status"] = "conditional on open_premises: not a proof that the instance meets the theorems"
     res["allowance"] = {K: {n: str(v) for n, v in ks[K].items()} for K in ks}
     res["timing"] = {n: str(v) for n, v in t.items()}
     (out / f"GATE_{seed}.json").write_text(json.dumps(res, indent=1, sort_keys=True))

@@ -45,8 +45,9 @@ An instance whose runs do not share one sample is refused.
 
 - **The ℝ bridge.** The Rat premises imply the real `before`/`after` hypotheses: closed form and monotonicity of the
   box reference, and the two Taylor bounds. These lemmas are not written.
-- **One leak constant.** The theorems take one actual leak `a`. The cell's leak differs on the two sides of rest. The
-  gate only requires both sides to lie in `[a′ − α, a′ + α]`.
+- **[I] One leak constant, the open modelling step.** `actualLaw` takes one constant leak `a`. The cell's leak depends
+  on the side of rest, so that hypothesis is not met. The gate's interval check is the numeric content of a
+  varying-leak lemma that is not proved yet. Every verdict is therefore conditional, and the gate output says so.
 - **The latch delay** is a measured constant of each instance, not a proved bound.
 - **The front end.** The direct-rail delay tolerance (`InverterLag.lean`), and `window + ε ≤ skew` and
   `emitLate − emitEarly ≤ skew`, involve the first layer's skew. They belong to the network stage; this package

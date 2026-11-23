@@ -65,6 +65,32 @@
      is at most `exp (-(a' + α) * D) * Q`.
 5. **`leakBudget`,** from `∫ u in 0..t, abs (box u) ≤ H0 * hl` and `t ≤ D`.
 
+## Each measured value: its source
+
+Rounding rule:
+- up for a budget;
+- down for `Q` and for `aLo`;
+- nearest for `emit`;
+- denominator 10^6.
+
+| `Measures` field | Formula | Source (MEASURE.json `measures.*`, run) |
+|---|---|---|
+| `aLo`, `aHi` | min and max of the two fitted rates (`aLo` down, `aHi` up) | `leak_above.rate` (R3, help only, fit `x_inf + c e^{-kt}` on [1, 4]), `leak_below.rate` (R4, input only, on [0.5, 4]) |
+| `aRef`, `alpha` | `(aLo + aHi)/2`, `(aHi − aLo)/2` | the same |
+| `eps0` | max of `abs x` at the slot start and 0.05 tu after the reset, R1 and R2 | `eps0` |
+| `etaH` | `max over 200 prefixes t of ∫₀ᵗ abs(H − box)`, max of R1 and R2 | `etaH` |
+| `etaM` | `∫₀^D max(−J, 0)`, R2 (input present) | `etaM` |
+| `etaJ` | `∫₀^(h+hl) abs J`, R1 (input absent) | `etaJ` |
+| `delta` | `abs(x_trip − 0.9)`, with `x_trip` the x at the comparator's first flip on an ideal ramp of 0.1 unit/tu | `delta` (R5) |
+| `Q` | `∫₀^τ max(J, 0)`, R2 | `Q` |
+| `latchLo`, `latchHi` | latch rise (p crossing 0.9 V) minus the crossing of `x_trip` by x, R1 | `latch_delay_tu` |
+| `emit` | latch rise date, R1 | `emit_absent_tu` |
+| `early` | a certificate: the largest grid value (1/1000) satisfying `FiringBefore` | computed by `gate.best_early` |
+| `k.delta`, `k.eta` (K3) | `3 · 335.03 µV / vunit`; `3 · sqrt(2) · inmw · sqrt(D · tu · tnz) / (cq · vunit)` | `research/circuit/noise.json` |
+
+Integrals are trapezoidal on the saved points (step ≤ 5 ns in R1, R2 and R5; ≤ 20 ns in R3 and R4). `H` and `J` are
+the currents through the 0 V ammeters `vah` and `vaj`, in units of x per tu.
+
 ## Measured premises (not the bridge's job: the measurement's claims)
 
 These are the hypotheses that the simulation supplies as numbers. They are not derived in Lean:
@@ -80,5 +106,9 @@ These are the hypotheses that the simulation supplies as numbers. They are not d
 - `actualCont`;
 - the latch delay.
 
-The physical open point is `gap`. The cell's leak differs on the two sides of rest. The gate takes `a′` and `α` so
-that both measured sides lie in `[a′ − α, a′ + α]`, but `actualLaw` assumes one constant `a`.
+**[I] Open modelling step.**
+- `actualLaw` with one constant `a` is not met: the cell's leak depends on the side of rest.
+- The gate's interval check, both measured rates in `[a′ − α, a′ + α]`, is the numeric content of a varying-leak
+  lemma, `|a(t) − a′| ≤ α` for the solution of `x′ = −a(t) x + I(t)`.
+- That lemma is not proved (the Lean session is writing it).
+- Until then, every verdict is conditional; `GATE_*.json` says so in `verdict_status` and `open_premises`.

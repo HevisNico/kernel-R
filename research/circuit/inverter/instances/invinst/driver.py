@@ -102,7 +102,8 @@ def main():
                        | dict(leak_above=mm["leak_above"]["rate"], leak_below=mm["leak_below"]["rate"]))
         rows.append(row)
     run = [r for r in rows if r["status"] != "not_started"]
-    summary = dict(n_started=len(run), n_ok=sum(r["status"] == "ok" for r in run),
+    from .gate import OPEN_PREMISES
+    summary = dict(verdict_status="conditional on open_premises", open_premises=OPEN_PREMISES, n_started=len(run), n_ok=sum(r["status"] == "ok" for r in run),
                    k_eligible_K0=sum(bool(r.get("eligible_K0")) for r in run),
                    k_room_K3=sum(bool(r.get("room_K3")) for r in run),
                    stopped_by_rule=state["stopped"], stop_reason=state["why"], rule=rule,

@@ -19,8 +19,9 @@ degree 5 (below) and 6 (above), valid for every argument `x ≥ 0`. The actual l
 Not proved here, and so not part of what a passing gate establishes (see README):
 * that the Rat premises imply the real-valued hypotheses `before` and `after` (the closed form of the
   reference, its monotonicity, and the two Taylor bounds in `ℝ`);
-* that the actual response follows `leakyResponse a` with one constant `a`: the cell's leak differs on the two
-  sides of rest, and the gate only requires both sides to lie in the interval;
+* [I] OPEN: that the actual response follows `leakyResponse a` with one constant `a` (`actualLaw`). The cell's
+  leak differs on the two sides of rest, so that hypothesis is not met. The interval check is the numeric content
+  of a varying-leak lemma (`|a(t) - a'| ≤ alpha`), which is not proved yet;
 * the front end's `windowFits` and `spreadFits` are stated (`FrontEndFits`) but checked only when the
   campaign fixes the first layer's skew and the delay tolerance `ε`;
 * the latch: the contact-to-latch delay is a measured constant of the instance, not a proved bound. -/
