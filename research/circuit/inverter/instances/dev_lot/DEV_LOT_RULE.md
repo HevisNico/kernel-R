@@ -1,8 +1,8 @@
 # Development lot of inverter instances: the rule, written before the data
 
 **Development work, not preregistered.** This rule is committed alone, before any instance of the lot runs. The lot
-runs only after the owner's go. Code: the package of this folder at commit 1345f4b, the redesign (`J0` = 4.0),
-with `config.json` unchanged from it. This version replaces the draft of ada8f0e, which was written for the
+runs only after the owner's go. Code: the package of this folder at commit cd8823e, the redesign (`J0` = 4.0) with
+the open premises marked in the gate output (`config.json` as at 1345f4b). This version replaces the draft of ada8f0e, which was written for the
 unredesigned cell (J0 = 3.0). No lot ran under that draft.
 
 ## Size and seeds
@@ -36,10 +36,15 @@ unredesigned cell (J0 = 3.0). No lot ran under that draft.
 - **Final verdict:** on all instances run:
   - if fewer than 18 of 60 are eligible (K0 rate below 30 %), the verdict is "redesign";
   - otherwise "continue", and the rate goes to the owner to size the Monte Carlo sample.
+- The 30 % threshold is a placeholder, kept as the coordinator asked. The final number goes to the owner once
+  the redesigned margins are known.
 - The 30 % threshold is a development choice. It is a design-health bound, not a compute bound: at one machine-minute
   per instance, even a 30 % rate is cheap to draw around. Below it, the cell's silence margin is too thin for mismatch.
   9903 failed on help-mirror mismatch alone.
 - Nothing is changed during the lot: no config, no code, no seed. An error that stops the lot is reported as it is.
+
+- Every verdict is conditional on the open premises listed in each `GATE_*.json` (one constant leak [I], the
+  real bridge, the latch). Counts are reported with that status.
 
 ## Compute ceiling
 
