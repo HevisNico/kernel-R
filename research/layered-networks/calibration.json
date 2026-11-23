@@ -13,9 +13,21 @@
     "leak_on_tu": 9,
     "leak_off_tu": 16.5,
     "watch_tu": 8,
-    "max_slots": 40
+    "max_slots": 40,
+    "repeats": true,
+    "repeats_what": "Fix (3) of DIAGNOSIS.md: once a group's bracket closes, each end is read once more, approached from the other side (L after a FIRE, U after a silence). The bracket is then L = largest silence, U = smallest FIRE over all reads; a disagreement widens it to the envelope and is recorded."
   },
   "same_edge_ns": 1000,
   "d4_stage": null,
-  "d4_note": "D4 bound for runs without their own solo scans: none fixed yet (owner's choice). The development comparisons (M4_REPORT.md) give a largest |s*_par - s*_solo| of 0.0138 stage over 6 groups."
+  "d4_note": "D4 bound for runs without their own solo scans: none fixed yet (owner's choice). The development comparisons (M4_REPORT.md) give a largest |s*_par - s*_solo| of 0.0138 stage over 6 groups.",
+  "design_point": {
+    "what": "The family's design point (owner's decision, DIAGNOSIS.md fix 1 and 2): twice the dose and the solver tolerance of research/learned-dnf-circuit-campaign-7-prep (b956efe4) dev/batch2x.py PARAMS = dict(vhi='0.7', reltol='1e-5') and CAMPAIGN7_PROTOCOL_DRAFT.md lines 40-42 (2.708 mV per pulse against 1.349; at 1e-4 two identical cells differed by 32 uV, at 1e-5 they agree); applied as dosedev.rewrite and dosedev_tol.rewrite apply them (one definition each, on its .param / .option line). Junction areas as network-circuit/net.py deck(junction='areas') applies them: sky130-supervisor-closure/junction/netlist.py build with areas.csv for every R-cell device. Inverter devices: zero areas (no layout of the inverter exists; its characterisation had none).",
+    "params": {
+      "vhi": "0.7"
+    },
+    "options": {
+      "reltol": "1e-5"
+    },
+    "junction": "areas"
+  }
 }

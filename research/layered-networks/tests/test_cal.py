@@ -18,11 +18,15 @@ THETA = scores.THETA
 
 def test_deck_leaks():
     for name, n_cells in (("not1", 1), ("andor3", 4), ("xor3", 4)):
-        t = instrument.deck_text(specmod.load(HERE / "specs" / f"{name}.json"), CFG)
+        s = specmod.load(HERE / "specs" / f"{name}.json")
+        t = instrument.deck_text_1x(s, CFG)               # the hierarchical deck before the design point and areas
         assert t.count(".subckt rcell vdd vr0 vfire vreopen vcm vhi vlo vpre gl1 gl2 ") == 1
         assert t.count(" gl1 rport") == 1 and t.count(" gl2 rport") == 1
         assert sum(1 for l in t.splitlines() if l.startswith("vglc")) == 2 * n_cells
         assert "vgl gl 0 dc 0" in t                        # the shared node stays, unused by the cells
+        f = instrument.deck_text(s, CFG)                   # the run's deck: flattened, the per-port leaks kept
+        assert sum(1 for l in f.splitlines() if l.startswith("vglc")) == 2 * n_cells
+        assert ".param vhi=0.7" in f.replace(" = ", "=") or "vhi=0.7" in f
 
 
 class FakeCell:
@@ -43,15 +47,19 @@ class FakeCell:
 
     def read(self, ports):
         s = sum((self.u0[p] - self.u[p]) / self.D[p] for p in ports) / len(ports)
-        return s >= self.s_true
+        # a history effect: after a FIRE the crossing moves up by hyst (0 by default)
+        shift = getattr(self, "hyst", 0) if getattr(self, "last", None) else 0
+        self.last = s >= self.s_true + shift
+        return self.last
 
 
-def run_fake(groups, s_true, start_s, seed):
+def run_fake(groups, s_true, start_s, seed, repeats=False, hysteresis=F(0)):
     rng = random.Random(seed)
     D = {1: 1.35e-3, 2: 1.32e-3}
     u0 = {1: 0.3895, 2: 0.3893}
     fake = FakeCell(s_true, D, u0, start_s, rng)
-    sc = instrument.ScanCell("c", groups, u0, D, SC["tol_V"], SC["bracket_V"], SC["step_V"], SC["max_slots"])
+    fake.hyst, fake.last = hysteresis, None
+    sc = instrument.ScanCell("c", groups, u0, D, SC["tol_V"], SC["bracket_V"], SC["step_V"], SC["max_slots"], repeats)
     slots = 0
     while True:
         a = sc.action(dict(fake.u))
@@ -141,3 +149,35 @@ if __name__ == "__main__":
             n += 1
             print("ok", name)
     print(n, "tests passed")
+
+
+def test_repeats_read_each_end_from_the_other_side():
+    for seed in range(20):
+        rng = random.Random(300 + seed)
+        n = rng.randint(2, 6)
+        s_true = F(n - 1) + F(rng.randint(100, 900), 1000)
+        res, _ = run_fake([dict(group=0, ports=[1, 2], lo=F(n - 1), hi=F(n), offsets={})], s_true, n, seed, repeats=True)
+        r = res[0]
+        assert r["ok"] and r["repeats_agree"] and len(r["repeats"]) == 2, r
+        assert {x["end"] for x in r["repeats"]} == {"L", "U"}
+        assert {x["after"] for x in r["repeats"]} == {"after FIRE", "after silence"}
+        lo, hi = (F(x) for x in r["bracket"]); assert lo < s_true <= hi
+
+
+def test_repeats_widen_a_disputed_bracket():
+    # a history shift larger than the bracket: L read after a FIRE stays silent, but U read after a FIRE would not
+    # fire; the repeat of U is after silence so it fires; make the shift negative to dispute L instead
+    seen = 0
+    for seed in range(20):
+        rng = random.Random(500 + seed)
+        n = rng.randint(2, 6)
+        s_true = F(n - 1) + F(rng.randint(100, 900), 1000)
+        res, _ = run_fake([dict(group=0, ports=[1, 2], lo=F(n - 1), hi=F(n), offsets={})], s_true, n, seed,
+                          repeats=True, hysteresis=F(-1, 100))
+        r = res[0]
+        if r["ok"] and not r["repeats_agree"]:
+            seen += 1
+            lo, hi = (F(x) for x in r["bracket"])
+            L0, U0 = (F(x) for x in r["bracket_before_repeats"])
+            assert lo <= L0 and hi >= U0 and F(r["half_bracket"]) == (hi - lo) / 2
+    assert seen > 0

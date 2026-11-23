@@ -19,7 +19,9 @@ never changed). What this adds:
      second port's pulse keeps the median offset of its training reads (the rail offset);
    - one slot carries a read and, in its tail, the leak or the dose toward the next state.
    It stops when (hi - lo) times the larger D_p is at most 20 uV (scan6's BRACKET_V), or after `max_slots`.
-   No repeats, no one-sided set and no both-lines check here (not in M2's scope).
+   Repeats (CAL scan.repeats): once a bracket closes, each end is read once more, approached from the other side
+   (after a FIRE for L, after a silence for U); a disagreeing repeat widens the bracket to the envelope of the
+   disagreeing reads. No one-sided set and no both-lines check here.
 
 The scores (mapping, decoder check, question 1) are computed from the record by scores.py.
 """
@@ -42,8 +44,54 @@ CAL = json.loads((HERE / "calibration.json").read_text())
 
 # ------------------------------------------------------------------------------------------------ the deck
 
+def rewrite(text, params, options):
+    """Each NAME=old replaced by NAME=new on its single .param line (params) or .option line (options), with the rule
+    of dosedev.rewrite / dosedev_tol.rewrite: exactly one definition in the deck, and the name nowhere else."""
+    import re
+    for kind, table in (("param", params), ("option", options)):
+        for name, value in table.items():
+            pattern = re.compile(rf"(?m)^(\.{kind}\b.*?\b{name}=)(\S+)")
+            found = pattern.findall(text)
+            assert len(found) == 1, f"{name}: {len(found)} definitions on .{kind} lines, not 1"
+            assert len(re.findall(rf"\b{name}=", text)) == 1, f"{name}= appears elsewhere in the deck"
+            text = pattern.sub(lambda m: m.group(1) + value, text)
+    return text
+
+
+def with_junction_areas(text, s):
+    """The deck flattened by sky130-supervisor-closure/junction/netlist.py (frozen, imported unchanged), every R-cell
+    transistor with the areas of junction/areas.csv (as network-circuit/net.py does), every inverter transistor with
+    zero areas."""
+    import importlib.util
+    closure = HERE.parent / "sky130-supervisor-closure"
+    spec_ = importlib.util.spec_from_file_location("stage_j_netlist", closure / "junction" / "netlist.py")
+    netlist = importlib.util.module_from_spec(spec_)
+    spec_.loader.exec_module(netlist)
+    blocks = (HERE.parent / "circuit" / "blocks.spice").read_text()
+    one = netlist.read_areas(closure / "junction" / "areas.csv")
+    cells, invs = deckmod.names(s)
+    marker = ".control\n.endc\n"                        # as net.deck: the tool puts capacitors before a control section
+    marked = deckmod.swap(text, "\n.end\n", "\n" + marker + ".end\n")
+    _, devices = netlist.build(marked, blocks, zero=True)
+    areas = {f"x{c}.{path}": v for c in cells for path, v in one.items()}
+    areas.update({d: ("0", "0", "0", "0") for d in devices if any(d.startswith(f"x{x}.") for x in invs)})
+    flat, devices = netlist.build(marked, blocks, areas=areas)
+    assert len(devices) == 232 * len(cells) + sum(1 for d in devices if any(d.startswith(f"x{x}.") for x in invs))
+    return deckmod.swap(flat, marker, "")
+
+
 def deck_text(s, cfg):
-    """deck.build with one leak node per port."""
+    """deck.build with one leak node per port, at the design point of calibration.json (params, options, junction)."""
+    dp = CAL.get("design_point") or {}
+    text = deck_text_1x(s, cfg)
+    text = rewrite(text, dp.get("params", {}), dp.get("options", {}))
+    if dp.get("junction") == "areas":
+        text = with_junction_areas(text, s)
+    return text
+
+
+def deck_text_1x(s, cfg):
+    """deck.build with one leak node per port (the frozen cell's own design point)."""
     text = deckmod.build(s, cfg)
     cells, _ = deckmod.names(s)
     text = deckmod.swap(text, ".subckt rcell vdd vr0 vfire vreopen vcm vhi vlo vpre gl ",
@@ -66,8 +114,8 @@ class ScanCell:
     """The scan state machine of one cell (no simulator): its groups one after another. Each step returns an action
     from the current u; `result` gives a read's FIRE bit. Units: volts and stages."""
 
-    def __init__(self, name, groups, u0, D, tol_V, bracket_V, step_V, max_slots):
-        self.name, self.groups, self.u0, self.D = name, list(groups), u0, D
+    def __init__(self, name, groups, u0, D, tol_V, bracket_V, step_V, max_slots, repeats=False):
+        self.name, self.groups, self.u0, self.D, self.repeats = name, list(groups), u0, D, repeats
         self.tol, self.bracket, self.step, self.max_slots = tol_V, bracket_V, step_V, max_slots
         self.done, self.results, self.cur = [], [], None
         self._next_group()
@@ -135,6 +183,15 @@ class ScanCell:
         c = self.cur
         s_read = self.measured_s(u)
         c["reads"].append(dict(target=str(c["s"]), s=str(s_read), fired=bool(fired), u={str(p): u[p] for p in c["ports"]}))
+        if c.get("repeat") is not None:                 # the both-direction repeats of the closed bracket
+            c["repeat_reads"].append(dict(end=c["repeat"][0][0], s=str(s_read), fired=bool(fired),
+                                          after=c["repeat"][0][1]))
+            c["repeat"].pop(0)
+            if c["repeat"]:
+                c["s"] = c["repeat"][0][2]
+                return
+            self._close(c, max(self.D[p] for p in c["ports"]))
+            return
         if fired:
             c["U"] = s_read if c["U"] is None else min(c["U"], s_read)
         else:
@@ -153,12 +210,37 @@ class ScanCell:
             self._next_group()
             return
         if L is not None and U is not None and (U - L) * F(width) <= F(self.bracket):
-            self.results.append(dict(group=c["group"], ok=True, s_star=str((L + U) / 2), half_bracket=str((U - L) / 2),
-                                     bracket=[str(L), str(U)], reads=c["reads"], slots=c["slots"], consistent=True,
-                                     native=True))
-            self._next_group()
+            if self.repeats:
+                # each end read once more, approached from the other side: the end the last read was not at first
+                # (approached after that read's outcome), then the last read's end (after the opposite outcome)
+                last_fire = bool(fired)
+                first = ("L", "after FIRE", L) if last_fire else ("U", "after silence", U)
+                second = ("U", "after silence", U) if last_fire else ("L", "after FIRE", L)
+                c["bracket0"], c["repeat"], c["repeat_reads"] = (L, U), [first, second], []
+                c["s"] = first[2]
+                return
+            self._close(c, width)
         else:
             c["s"] = self._next_target()
+
+    def _close(self, c, width):
+        """The group's result. Without repeats, or when the repeats agree with the bracket (L silent, U firing), s* and
+        the half bracket are those of the bracket. When a repeat disagrees, the state is disputed: the bracket becomes
+        the envelope from the smallest FIRE to the largest silence (with the bracket before repeats) and the result says
+        so."""
+        L, U = c.get("bracket0") or (c["L"], c["U"])
+        reps = c.get("repeat_reads") or []
+        # a repeat is a read like any other, at its measured state (within tol of its target): the bracket keeps
+        # L = the largest silence and U = the smallest FIRE over all the scan's reads; it agrees when L < U
+        Ls = max([L] + [F(r["s"]) for r in reps if not r["fired"]])
+        Us = min([U] + [F(r["s"]) for r in reps if r["fired"]])
+        agree = Ls < Us
+        lo, hi = (Ls, Us) if agree else (min(L, Us), max(U, Ls))
+        self.results.append(dict(group=c["group"], ok=True, s_star=str((lo + hi) / 2), half_bracket=str((hi - lo) / 2),
+                                 bracket=[str(lo), str(hi)], bracket_before_repeats=[str(L), str(U)],
+                                 repeats=reps, repeats_agree=agree, reads=c["reads"], slots=c["slots"],
+                                 consistent=agree, native=True))
+        self._next_group()
 
 
 # ------------------------------------------------------------------------------------------------ the network
@@ -404,7 +486,7 @@ def scan_all(net, rec, log=print, solo=False):
             log(f"scan {c}: no dose measured")
             continue
         cells[c] = ScanCell(c, gs, {p: u0[c][p - 1] for p in (1, 2)}, {p: D.get((c, p), 0.0) for p in (1, 2)},
-                            sc["tol_V"], sc["bracket_V"], sc["step_V"], sc["max_slots"])
+                            sc["tol_V"], sc["bracket_V"], sc["step_V"], sc["max_slots"], sc.get("repeats", False))
     net.leak_gain, net.leak_used = {}, {}
     del u_now
     t0 = time.time()
@@ -427,7 +509,7 @@ def scan_all(net, rec, log=print, solo=False):
                     continue
                 g = next(x for x in groups_of[c] if x["group"] == r["group"])
                 gs.append(dict(g, lo=F(r["bracket"][0]), hi=F(r["bracket"][1])))
-            one = {c: ScanCell(c, gs, cells[c].u0, cells[c].D, sc["tol_V"], sc["bracket_V"], sc["step_V"], sc["max_slots"])}
+            one = {c: ScanCell(c, gs, cells[c].u0, cells[c].D, sc["tol_V"], sc["bracket_V"], sc["step_V"], sc["max_slots"], sc.get("repeats", False))}
             n_solo += run_scans(net, one)
             solo_out[c] = one[c].results
             for r in one[c].results:
