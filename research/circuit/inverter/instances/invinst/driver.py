@@ -4,8 +4,8 @@
       JOBS: one seed per line (# comments allowed). Each job is `python -m invinst.driver --job SEED OUTDIR`,
       run in its own process under `job_timeout_s`; its status is OUTDIR/status/SEED.{ok,failed,timeout}.
       A failed or timed-out job is kept and counted, never retried here.
-      --stop RULE.json: the stopping rule (DEV_LOT_RULE.md): after `check_after` finished jobs, if the eligible
-      count is below `min_eligible`, no new job is started; nor once the jobs' summed wall time reaches
+      --stop RULE.json: the stopping rule (DEV_LOT_RULE*.md): after `check_after` finished jobs, if the eligible
+      count is below `min_eligible`, or the count with room below `min_room` (each optional), no new job is started; nor once the jobs' summed wall time reaches
       `max_machine_minutes` (a job already running finishes).
   Writes OUTDIR/SUMMARY.json: counts (k eligible out of n, k with room out of n), machine-minutes, per-seed rows.
 """
@@ -83,7 +83,7 @@ def main():
     (out / "status").mkdir(parents=True, exist_ok=True)
     build_library(build)
     dcfg = cfg["driver"]
-    state = dict(done=0, eligible=0, stopped=False, why=None, machine_s=0.0)
+    state = dict(done=0, eligible=0, room=0, stopped=False, why=None, machine_s=0.0)
     t0 = time.time()
 
     def job(seed):
@@ -101,13 +101,17 @@ def main():
             status, log = "timeout", str(e)
         (out / "status" / f"{seed}.{status}").write_text(log[-5000:])
         g = out / "gates" / f"GATE_{seed}.json"
-        ok = status == "ok" and g.exists() and json.loads(g.read_text())["eligible_K0"]
+        gr = json.loads(g.read_text()) if (status == "ok" and g.exists()) else {}
         state["done"] += 1
-        state["eligible"] += int(ok)
+        state["eligible"] += int(bool(gr.get("eligible_K0")))
+        state["room"] += int(bool(gr.get("room_K3")))
         state["machine_s"] += time.time() - s
         if rule and not state["stopped"]:
-            if state["done"] >= rule["check_after"] and state["eligible"] < rule["min_eligible"]:
+            early = state["done"] >= rule["check_after"]
+            if early and state["eligible"] < rule.get("min_eligible", 0):
                 state["stopped"], state["why"] = True, f"{state['eligible']} eligible after {state['done']}"
+            elif early and state["room"] < rule.get("min_room", 0):
+                state["stopped"], state["why"] = True, f"{state['room']} with room after {state['done']}"
             elif state["machine_s"] >= 60 * rule["max_machine_minutes"]:
                 state["stopped"], state["why"] = True, "compute ceiling reached"
         return seed, status, time.time() - s

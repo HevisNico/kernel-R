@@ -9,7 +9,7 @@ from invinst import cell, driver
 import inverter as pushed
 
 
-REDESIGN = {"J0": 4.0}                  # the package's design changes against the pushed cell
+REDESIGN = {"J0": 4.0, "help_mirror": {"w": 2, "l": 16}}                  # the package's design changes against the pushed cell
 REDESIGN_UNDONE = {k: pushed.DESIGN[k] for k in REDESIGN}
 
 
