@@ -10,28 +10,30 @@ Per instance (group, spec, seed), in OUTROOT/<TAG>_<seed>/, each step a subproce
   inverters front-end groups only: the kit's in-deck gate on deck.spice at the seed (inv/inverter_gate.json)
   D         stage_d.py run, with inverters=inv/inverter_gate.json (D/)
   seal      stage_d.py seal of this instance alone (seal/), written before any stage-N step starts
-  N0        stage N without noise: noise2.py run SPEC N0 SEED 0 (N0/noisy_record.json)
-  C0        compare_d.py seal/ against N0 (C0.json)
-  N1..N3    only with room at K3: noise2.py rounds 1-3, noise seed 10 S + n; C1..C3 their comparisons
+  N0        stage N without noise: controls2.py stagen SPEC N0 SEED 0 (training, the 2^m tests, then one skew slot
+            per both cell; N0/noisy_record.json, noise_seed null)
+  C0        compare_d2.py seal/ against N0 (N0/comparison.json): words, cell bits, outputs, skew slots
+  N1..N3    only with room at K3: controls2.py stagen rounds 1-3, noise seed 10 S + n; C1..C3 their comparisons
 A step runs only when every earlier step is done. A failed or timed-out step stops its instance there; it is recorded
 with its reason, never re-run automatically, and the instance is reported under that step (plan §9). `run` on an
 existing OUTROOT resumes: a step marked done is kept when its output files still have their recorded sha256, else the
 run refuses (an output changed after it was recorded).
 
 Controls (plan §6), after the instances:
-  U         per group, on its first eligible instance in seed order: the untrained run (PLAN `controls.U` command);
-            the claim checked: no R-cell output fires on any pattern
-  S         the shift slots are read from each stage-N record by compare_d.py (slots of kind `skew`)
-  duplicate per group, one instance (PLAN `controls.duplicate`): its N0 again in a fresh folder; input.spice
-            byte-identical and the record identical except its cost fields
+  U         per group, on its first eligible instance in seed order: controls2.py untrained (OUT/untrained_record.json);
+            the claim checked here and by controls2.py verdicts: no R-cell output fires on any pattern
+  S         inside every stage-N run (slots of kind `skew`, listed in the record's `skews`), compared by compare_d2.py
+  duplicate per group, one instance (PLAN `controls.duplicate`): its N0 and C0 again in a fresh folder, checked by
+            the controls' tests/check_duplicate.py (input.spice byte-identical; records and comparison.json equal
+            except cost and wall/cpu fields)
 
 PLAN.json:
   {"groups": {"NOT1": {"spec": "specs/not1.json", "seeds": [9801], "timeout_s": {"D": 1800, ...}}, ...},
    "overlay": "config_inverter_c5.json",
-   "noise_tree": "<a checkout of research/layered-networks holding noise2.py, pinned by commit>",
-   "noise_commit": "38a95c8...", "kit_tree": "<a checkout of research/inverter-instances>", "kit_commit": "d599300...",
+   "noise_tree": "<a checkout of research/layered-networks holding noise2.py and controls2.py, pinned by commit>",
+   "noise_commit": "<that commit>", "kit_tree": "<a checkout of research/inverter-instances>", "kit_commit": "d599300...",
    "rounds": 3,
-   "controls": {"U": {"command": [...]} | null, "duplicate": {"NOT1": 9801, ...}}}
+   "controls": {"duplicate": {"NOT1": 9801, ...}}}
 Both trees are checked at their pinned commit before anything runs (git rev-parse HEAD, clean tree).
 """
 import concurrent.futures as cf
@@ -146,10 +148,8 @@ class Instance:
         rounds = [0] + (list(range(1, plan.get("rounds", 3) + 1)) if pred["room_K3"] else [])
         nz = Path(plan["noise_tree"]) / "research" / "layered-networks"
         for n in rounds:
-            ok = self.step(f"N{n}", [PY, "-B", nz / "noise2.py", "run", sp, d / f"N{n}", seed, n, f"overlay={ov}"],
-                           [f"N{n}/noisy_record.json"], "N", cwd=nz)
-            ok = ok and self.step(f"C{n}", [PY, "-B", HERE / "compare_d.py", d / "seal", sp, d / f"N{n}" / "noisy_record.json",
-                                            "noiseless" if n == 0 else "noisy", d / f"C{n}.json"], [f"C{n}.json"], "C")
+            ok = self.step(f"N{n}", stagen_argv(nz, sp, d / f"N{n}", seed, n, ov), [f"N{n}/noisy_record.json"], "N", cwd=nz)
+            ok = ok and self.step(f"C{n}", compare_argv(d / "seal", sp, d / f"N{n}", n), [f"N{n}/comparison.json"], "C")
             if not ok:
                 break
         return self.summary()
@@ -161,8 +161,8 @@ class Instance:
         if (d / "D" / "prediction.json").exists():
             p = json.loads((d / "D" / "prediction.json").read_text())
             out.update(eligible_K0=p["eligible_K0"], room_K3=p["room_K3"], inverter_gate=p["inverter_gate"]["source"])
-        out["verdicts"] = {f"C{n}": json.loads((d / f"C{n}.json").read_text())["verdict"]
-                           for n in range(0, 4) if (d / f"C{n}.json").exists()}
+        out["verdicts"] = {f"C{n}": json.loads((d / f"N{n}" / "comparison.json").read_text())["verdict"]
+                           for n in range(0, 4) if (d / f"N{n}" / "comparison.json").exists()}
         out["cpu_s"] = {k: v.get("cpu_s") for k, v in self.status["steps"].items()}
         out["wall_s"] = {k: v.get("wall_s") for k, v in self.status["steps"].items()}
         files = sorted(p for p in d.rglob("*.json") if p.name != "status.json" and "lean_build" not in p.parts)
@@ -192,55 +192,56 @@ def run_child(argv, cwd, log, timeout, env=None):
     return p.returncode, round(ru.ru_utime + ru.ru_stime, 1), killed.is_set()
 
 
+def stagen_argv(nz, sp, out, seed, n, ov):
+    return [PY, "-B", nz / "controls2.py", "stagen", sp, out, seed, n, f"overlay={ov}"]
+
+
+def compare_argv(seal, sp, out, n):
+    return [PY, "-B", HERE / "compare_d2.py", seal, sp, out / "noisy_record.json", "noiseless" if n == 0 else "noisy",
+            out / "comparison.json"]
+
+
 # ------------------------------------------------------------------------------------------------ controls
 
-def core(rec):
-    rec = {k: v for k, v in rec.items() if k not in COST_FIELDS}
-    return json.dumps(rec, sort_keys=True)
-
-
 def duplicate(root, inst, plan):
-    """The instance's N0 again, in OUTROOT/DUP_<TAG>_<seed>: input.spice byte-identical, the record identical except
-    its cost fields."""
+    """The instance's N0 and C0 again, in OUTROOT/DUP_<TAG>_<seed>/N0, then tests/check_duplicate.py of the controls
+    (exit 0: identical) on the two N0 folders."""
     d = Path(root) / f"DUP_{inst.dir.name}"
     d.mkdir(exist_ok=True)
     res_path = d / "duplicate.json"
     if res_path.exists():
         return json.loads(res_path.read_text())
     nz = Path(plan["noise_tree"]) / "research" / "layered-networks"
+    ov = plan.get("overlay", "config_inverter_c5.json")
+    sp = HERE / inst.spec_path
     t0 = time.time()
-    rc, cpu, to = run_child([PY, "-B", nz / "noise2.py", "run", HERE / inst.spec_path, d / "N0", inst.seed, 0,
-                             f"overlay={plan.get('overlay', 'config_inverter_c5.json')}"], nz, d / "N0.log", DEFAULT_TIMEOUT["dup"])
-    a, b = inst.dir / "N0", d / "N0"
-    res = dict(instance=inst.dir.name, exit=rc, timed_out=to, cpu_s=cpu, wall_s=round(time.time() - t0, 1))
+    rc, cpu, to = run_child(stagen_argv(nz, sp, d / "N0", inst.seed, 0, ov), nz, d / "N0.log", DEFAULT_TIMEOUT["dup"])
+    res = dict(instance=inst.dir.name, exit=rc, timed_out=to, cpu_s=cpu)
     if rc == 0 and not to:
-        ra, rb = (json.loads((x / "noisy_record.json").read_text()) for x in (a, b))
-        res.update(input_spice_identical=(a / "input.spice").read_bytes() == (b / "input.spice").read_bytes(),
-                   record_identical_except_cost=core(ra) == core(rb))
-        res["ok"] = res["input_spice_identical"] and res["record_identical_except_cost"]
+        rc2, _, _ = run_child(compare_argv(inst.dir / "seal", sp, d / "N0", 0), HERE, d / "C0.log", DEFAULT_TIMEOUT["C"])
+        rc3, _, _ = run_child([PY, "-B", nz / "tests" / "check_duplicate.py", inst.dir / "N0", d / "N0"], nz,
+                              d / "check_duplicate.log", DEFAULT_TIMEOUT["C"])
+        res.update(compare_exit=rc2, check_duplicate_exit=rc3, ok=rc2 == 0 and rc3 == 0)
     else:
         res["ok"] = False
+    res["wall_s"] = round(time.time() - t0, 1)
     res_path.write_text(json.dumps(res, indent=1, sort_keys=True) + "\n")
     return res
 
 
 def untrained(root, inst, plan):
-    """Plan §6 U: the PLAN's command (the stage-N side's untrained run), then the check that no R-cell output fires
-    on any of the 2^m patterns. The command template gets {spec}, {out}, {seed}, {overlay}."""
-    cmd = (plan.get("controls") or {}).get("U")
-    if not cmd:
-        return dict(instance=inst.dir.name, ok=None, why="no U command in the plan (stage-N side not built yet)")
+    """Plan §6 U: controls2.py untrained (a fresh session, the 2^m tests from the preset, every R cell gated), then
+    the check that no R-cell output fires on any pattern (inverter emissions reported, expected)."""
     d = Path(root) / f"U_{inst.dir.name}"
     res_path = d / "untrained.json"
     if res_path.exists():
         return json.loads(res_path.read_text())
     d.mkdir(exist_ok=True)
     nz = Path(plan["noise_tree"]) / "research" / "layered-networks"
-    argv = [a.format(spec=HERE / inst.spec_path, out=d / "U", seed=inst.seed,
-                     overlay=plan.get("overlay", "config_inverter_c5.json")) for a in cmd["command"]]
-    rc, cpu, to = run_child(argv, nz, d / "U.log", DEFAULT_TIMEOUT["U"])
+    rc, cpu, to = run_child([PY, "-B", nz / "controls2.py", "untrained", HERE / inst.spec_path, d / "U", inst.seed,
+                             f"overlay={plan.get('overlay', 'config_inverter_c5.json')}"], nz, d / "U.log", DEFAULT_TIMEOUT["U"])
     res = dict(instance=inst.dir.name, exit=rc, timed_out=to, cpu_s=cpu)
-    rec_path = d / "U" / cmd.get("record", "record.json")
+    rec_path = d / "U" / "untrained_record.json"
     if rc == 0 and not to and rec_path.exists():
         rec = json.loads(rec_path.read_text())
         fired = [dict(slot=i, cell=f"c{r['layer']}_{r['index']}") for i in rec["tests"]
