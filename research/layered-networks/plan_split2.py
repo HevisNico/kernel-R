@@ -6,6 +6,11 @@ plan_split.py's split, unchanged, plus per machine:
 - `keep_raw`: the instances of this machine that another machine duplicates (their N0 trace.raw is kept);
 - `disk_guard_gb`: 20, unless the template sets it;
 - `allow_dry_seal`: false, unless the template sets it (campaign: false).
+
+Machines and window (the owner's correction, 2026-11-24): the ceiling is 280 core-h; with m machines (8 ≤ m ≤ 12) the
+sizes stay the same and the window is longer: each machine's expected load must fit in 280 / (4 m) hours on its 4
+cores, and the total in 280 core-h. Fewer than 8 machines: the campaign is postponed (refused here). There is no
+reduced-size fallback and NOT1 is never cut.
 """
 import json
 from pathlib import Path
@@ -17,8 +22,18 @@ import plan_split as PS  # noqa: E402
 import spec as specmod  # noqa: E402
 
 
+CEILING_CORE_H = 280.0
+
+
 def split(draw, template, m=12):
+    if m < 8:
+        raise SystemExit(f"refused: {m} machines; below 8 the campaign is postponed")
     plans, summary = PS.split(draw, template, m)
+    window_h = CEILING_CORE_H / (4 * m)
+    summary.update(ceiling_core_h=CEILING_CORE_H, window_h=round(window_h, 3),
+                   longest_machine_h=round(summary["max_core_h"] / 4, 3))
+    assert summary["total_core_h"] <= CEILING_CORE_H, f"expected {summary['total_core_h']} core-h > {CEILING_CORE_H}"
+    assert summary["max_core_h"] / 4 <= window_h, f"a machine needs {summary['max_core_h'] / 4:.2f} h > the window {window_h:.2f} h"
     tag = {g: specmod.load(HERE / PS.SPECS[g])["tag"] for g in PS.SPECS}
     for p in plans:
         p.setdefault("disk_guard_gb", template.get("disk_guard_gb", 20))

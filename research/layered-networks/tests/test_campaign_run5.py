@@ -67,6 +67,14 @@ def test_split2_keep_raw():
     keep = sorted(x for p in plans for x in p["keep_raw"])
     assert keep == sorted(f"{t}_{dr['groups'][g][0]}" for g, t in (("NOT1", "NOT1"), ("ANDOR3", "ANDOR3"), ("XOR3", "XOR3")))
     assert all(p["disk_guard_gb"] == 20 and p["allow_dry_seal"] is False for p in plans)
+    for m in (8, 12):
+        _, s = PS2.split(dr, dict(seal_push=dict(remote="r")), m)
+        assert s["longest_machine_h"] <= s["window_h"] == round(280 / (4 * m), 3) and s["total_core_h"] <= 280
+    try:
+        PS2.split(dr, dict(seal_push=dict(remote="r")), 7)
+        raise AssertionError("7 machines accepted")
+    except SystemExit as e:
+        assert "postponed" in str(e)
 
 
 if __name__ == "__main__":

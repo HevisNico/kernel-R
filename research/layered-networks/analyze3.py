@@ -221,7 +221,14 @@ def main(outdir, *args):
         vs = [groups[g][level]["verdict"] for g in groups]
         family[level] = "refuted" if "refuted" in vs else "established" if vs and all(v == "established" for v in vs) else "worded per group"
     rows.sort(key=lambda r: (r["group"], r["seed"]))
-    res = dict(format=FORMAT, analyze3_sha256=A.sha(__file__), times_source=times_src, machines=len(roots),
+    if times_src.startswith("lsremote:"):          # deterministic: the log's name and hash, not its path
+        lp = Path(times_src.split(":", 1)[1])
+        src_desc = dict(source="lsremote (coordinator's ls-remote log; first-seen times, upper bounds of the push times)",
+                        log=lp.name, log_sha256=A.sha(lp) if lp.exists() else None)
+    else:
+        src_desc = dict(source={"github": "GitHub repository activity API (push timestamps)",
+                                "bare": "local bare repository post-receive log"}.get(times_src, times_src))
+    res = dict(format=FORMAT, analyze3_sha256=A.sha(__file__), times_source=src_desc, machines=len(roots),
                env={m: dict(static_sha256=e["static_sha256"], env_json_sha256=e["env_json_sha256"]) for m, e in envs.items()},
                groups=groups, family=family, seal_defects=defects, observed_only=observed, run_failed=failed,
                controls=controls, instances=rows, thresholds=A.THRESHOLD)

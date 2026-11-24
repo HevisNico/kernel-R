@@ -26,8 +26,14 @@ def test_size_rule():
     for g in ("ANDOR3", "XOR3"):
         n = r["sizes"][g]["N"]
         assert n * y[g]["room_K3"]["wilson90"][0] >= 5 and n * y[g]["eligible_K0"]["wilson90"][0] >= 20
-    r8 = Y.size(y, 176, 8)
-    assert r8["total_core_h"] <= 176 and r8["sizes"]["NOT1"]["N"] == 40
+    r8 = Y.size(y, 280, 8)                                   # fewer machines: the same sizes, a longer window
+    assert {g: v["N"] for g, v in r8["sizes"].items()} == {g: v["N"] for g, v in r["sizes"].items()}
+    assert r8["window_h"] == 8.75 and r8["sizes"]["NOT1"]["N"] == 60
+    try:
+        Y.size(y, 280, 7)
+        raise AssertionError("7 machines accepted")
+    except SystemExit as e:
+        assert "postponed" in str(e)
     y2 = dict(NOT1=fake(8, 6, 8), ANDOR3=fake(20, 2, 24), XOR3=fake(18, 0, 24))
     r2 = Y.size(y2, 280, 12)
     assert r2["sizes"]["XOR3"]["N"] == r2["requirements"]["XOR3"]["N0"]        # k3 = 0: sized for K0 only

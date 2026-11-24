@@ -2,7 +2,9 @@
 
   yield_lot.py plans TEMPLATE.json OUTDIR [m=12]          OUTDIR/PLAN_K<nn>.json (stage D only), OUTDIR/LOT.json
   yield_lot.py report OUTDIR ROOT [ROOT ...]              OUTDIR/YIELD.json: k/n with 90 % Wilson intervals per group
-  yield_lot.py size YIELD.json OUT.json [ceiling=280] [machines=12]    the campaign sizes by the rule of §4
+  yield_lot.py size YIELD.json OUT.json [ceiling=280] [machines=12]    the campaign sizes by YIELD_LOT_RULE_2.md §4
+                                                     (machines only sets the window, 280 / (4 m) h; the sizes do not
+                                                     depend on it; fewer than 8 machines: postponed)
 """
 import json
 import math
@@ -105,6 +107,8 @@ def expected_cost(g, n, r3):
 
 
 def size(yld, ceiling=280.0, machines=12):
+    if machines < 8:
+        raise SystemExit(f"refused: {machines} machines; below 8 the campaign is postponed")
     y = {g: yld[g] for g in SEEDS}
     req, r3 = {}, {}
     for g in ("ANDOR3", "XOR3"):
@@ -127,8 +131,6 @@ def size(yld, ceiling=280.0, machines=12):
             want = max(req[g]["N0"], req[g]["N3"])
         N[g] = min(int(want) if want != math.inf else CAP, CAP)
     total = lambda: sum(expected_cost(g, N[g], r3[g]) for g in N)
-    if machines == 8 and total() > ceiling:
-        N["NOT1"] = NOT1_FALLBACK
     steps = [("XOR3", req["XOR3"]["N0"]), ("ANDOR3", req["ANDOR3"]["N0"])]
     for g, floor in steps:
         while total() > ceiling and N[g] > floor:
@@ -147,7 +149,8 @@ def size(yld, ceiling=280.0, machines=12):
     exp = {g: dict(N=N[g], expected_K0=round(N[g] * (y[g]["eligible_K0"]["rate"] or 0), 1),
                    expected_K3=round(N[g] * (y[g]["room_K3"]["rate"] or 0), 1), core_h=round(expected_cost(g, N[g], r3[g]), 1))
            for g in N}
-    return dict(format="layered-sizes/1", ceiling_core_h=ceiling, machines=machines, thresholds=THRESHOLD,
+    return dict(format="layered-sizes/2", ceiling_core_h=ceiling, machines=machines, window_h=round(ceiling / (4 * machines), 3),
+                thresholds=THRESHOLD,
                 requirements={g: {k: (None if v == math.inf else v) for k, v in r.items()} for g, r in req.items()},
                 sizes=exp, total_core_h=round(total(), 1), declared_in_advance=sorted(set(declared)))
 

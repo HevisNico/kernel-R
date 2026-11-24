@@ -23,6 +23,8 @@ sets).
 - **SOURCE github**: GitHub's repository activity API, `GET /repos/{owner}/{repo}/activity?ref=refs/heads/BRANCH&
   activity_type=push` (via `gh api`). Each push has `after` (the new commit) and `timestamp`, GitHub's own record of
   the push.
+- **SOURCE lsremote:<LOG>** (fallback when the activity API cannot be reached): the coordinator's timestamped
+  ls-remote log (seal_watch.py). Each commit's first-seen time is an upper bound of its push time.
 - **SOURCE bare** (tests, and the dry run): a local bare repository whose `post-receive` hook (`install_hook`) appends
   `<new sha> <ref> <UTC time>` to push_times.log as the push is received. This is the same notion: the server's clock
   at reception.
@@ -126,6 +128,9 @@ def times(remote, branch, source):
             if ref == f"refs/heads/{branch}":
                 out.setdefault(sha, t[:26] + "Z" if len(t) > 27 else t)
         return out
+    if str(source).startswith("lsremote:"):          # the coordinator's ls-remote log (seal_watch.py): first-seen times
+        import seal_watch
+        return seal_watch.times(str(source).split(":", 1)[1], branch)
     if source == "github":
         owner_repo = str(remote).rstrip("/").removesuffix(".git").split("github.com/")[-1]
         r = subprocess.run(["gh", "api", "-X", "GET", f"repos/{owner_repo}/activity", "-f", f"ref=refs/heads/{branch}",
