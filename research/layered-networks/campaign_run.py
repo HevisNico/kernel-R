@@ -4,6 +4,8 @@ jobs, timeouts, SHA256SUMS and a resumable status. Development only; nothing fro
   campaign_run.py run    PLAN.json OUTROOT [jobs=4]     run (or resume) every instance, then the controls
   campaign_run.py status OUTROOT                        the status of every instance and control
   campaign_run.py verify OUTROOT                        every SHA256SUMS under OUTROOT checked
+  campaign_run.py forget OUTROOT INSTANCE STEP WHY...   operator recovery: a failed step's entry set aside (kept, with
+                                                        the reason) so that `run` runs it again
 
 Per instance (group, spec, seed), in OUTROOT/<TAG>_<seed>/, each step a subprocess with its own timeout:
   deck      stage_d.py deck: the deck text of stage D and stage N (deck.spice, its sha256)
@@ -83,7 +85,7 @@ class Instance:
     def __init__(self, root, group, spec_path, seed, plan):
         self.group, self.spec_path, self.seed, self.plan = group, Path(spec_path), int(seed), plan
         self.s = specmod.load(HERE / spec_path)
-        self.dir = Path(root) / f"{self.s['tag']}_{self.seed}"
+        self.dir = Path(root).resolve() / f"{self.s['tag']}_{self.seed}"
         self.dir.mkdir(parents=True, exist_ok=True)
         self.status_path = self.dir / "status.json"
         self.status = json.loads(self.status_path.read_text()) if self.status_path.exists() else dict(
@@ -132,15 +134,15 @@ class Instance:
         s, d, plan, seed = self.s, self.dir, self.plan, self.seed
         ov = plan.get("overlay", "config_inverter_c5.json")
         sp = HERE / self.spec_path
-        ok = self.step("deck", [PY, "-B", HERE / "stage_d.py", "deck", sp, d / "deck.spice", f"overlay={ov}"], ["deck.spice"], "deck")
+        ok = self.step("deck", [PY, "-B", HERE / "stage_d3.py", "deck", sp, d / "deck.spice", f"overlay={ov}"], ["deck.spice"], "deck")
         if ok and s["front"]:
             kit = Path(plan["kit_tree"]) / "research" / "circuit" / "inverter" / "instances"
             ok = self.step("inverters", [PY, "-m", "invinst.indeck", d / "inv", "--deck", d / "deck.spice", "--seed", seed],
                            ["inv/inverter_gate.json", "inv/SHA256SUMS"], "inverters", cwd=kit)
         inv = [f"inverters={d / 'inv' / 'inverter_gate.json'}"] if s["front"] else []
-        ok = ok and self.step("D", [PY, "-B", HERE / "stage_d.py", "run", sp, d / "D", seed, f"overlay={ov}", *inv],
+        ok = ok and self.step("D", [PY, "-B", HERE / "stage_d3.py", "run", sp, d / "D", seed, f"overlay={ov}", f"rule={plan.get('testError_rule', 'one-port')}", *inv],
                               ["D/record.json", "D/prediction.json"], "D")
-        ok = ok and self.step("seal", [PY, "-B", HERE / "stage_d.py", "seal", d / "seal", d / "D"],
+        ok = ok and self.step("seal", [PY, "-B", HERE / "stage_d3.py", "seal", d / "seal", d / "D"],
                               ["seal/SHA256SUMS", "seal/MANIFEST.json"], "seal")
         if not ok:
             return self.summary()
@@ -148,7 +150,7 @@ class Instance:
         rounds = [0] + (list(range(1, plan.get("rounds", 3) + 1)) if pred["room_K3"] else [])
         nz = Path(plan["noise_tree"]) / "research" / "layered-networks"
         for n in rounds:
-            ok = self.step(f"N{n}", stagen_argv(nz, sp, d / f"N{n}", seed, n, ov), [f"N{n}/noisy_record.json"], "N", cwd=nz)
+            ok = self.step(f"N{n}", stagen_argv(plan, nz, sp, d / f"N{n}", seed, n, ov), [f"N{n}/noisy_record.json"], "N", cwd=nz)
             ok = ok and self.step(f"C{n}", compare_argv(d / "seal", sp, d / f"N{n}", n), [f"N{n}/comparison.json"], "C")
             if not ok:
                 break
@@ -192,8 +194,12 @@ def run_child(argv, cwd, log, timeout, env=None):
     return p.returncode, round(ru.ru_utime + ru.ru_stime, 1), killed.is_set()
 
 
-def stagen_argv(nz, sp, out, seed, n, ov):
-    return [PY, "-B", nz / "controls2.py", "stagen", sp, out, seed, n, f"overlay={ov}"]
+def stagen_argv(plan, nz, sp, out, seed, n, ov):
+    """PLAN `stagen`: "controls2" (controls2.py stagen: training, tests, then the skew slots) or "noise2" (noise2.py
+    run: training and tests, no skew slots; the fallback while controls2.py is not reachable). Same arguments."""
+    tool = plan.get("stagen", "controls2")
+    script, cmd = dict(controls2=("controls2.py", "stagen"), noise2=("noise2.py", "run"))[tool]
+    return [PY, "-B", nz / script, cmd, sp, out, seed, n, f"overlay={ov}"]
 
 
 def compare_argv(seal, sp, out, n):
@@ -202,6 +208,25 @@ def compare_argv(seal, sp, out, n):
 
 
 # ------------------------------------------------------------------------------------------------ controls
+
+def strip(x):
+    """Remove, at any depth, cost, wall_s, cpu_s and keys ending in _wall_s or _cpu_s (the controls' checker's rule)."""
+    if isinstance(x, dict):
+        return {k: strip(v) for k, v in x.items()
+                if k not in ("cost", "wall_s", "cpu_s") and not k.endswith(("_wall_s", "_cpu_s"))}
+    if isinstance(x, list):
+        return [strip(v) for v in x]
+    return x
+
+
+def same_except_cost(a, b):
+    out = dict(input_spice_identical=(a / "input.spice").read_bytes() == (b / "input.spice").read_bytes())
+    for f in ("noisy_record.json", "comparison.json"):
+        if (a / f).exists() or (b / f).exists():
+            out[f"{f}_identical"] = (a / f).exists() and (b / f).exists() and \
+                strip(json.loads((a / f).read_text())) == strip(json.loads((b / f).read_text()))
+    return out
+
 
 def duplicate(root, inst, plan):
     """The instance's N0 and C0 again, in OUTROOT/DUP_<TAG>_<seed>/N0, then tests/check_duplicate.py of the controls
@@ -215,13 +240,20 @@ def duplicate(root, inst, plan):
     ov = plan.get("overlay", "config_inverter_c5.json")
     sp = HERE / inst.spec_path
     t0 = time.time()
-    rc, cpu, to = run_child(stagen_argv(nz, sp, d / "N0", inst.seed, 0, ov), nz, d / "N0.log", DEFAULT_TIMEOUT["dup"])
+    rc, cpu, to = run_child(stagen_argv(plan, nz, sp, d / "N0", inst.seed, 0, ov), nz, d / "N0.log", DEFAULT_TIMEOUT["dup"])
     res = dict(instance=inst.dir.name, exit=rc, timed_out=to, cpu_s=cpu)
     if rc == 0 and not to:
         rc2, _, _ = run_child(compare_argv(inst.dir / "seal", sp, d / "N0", 0), HERE, d / "C0.log", DEFAULT_TIMEOUT["C"])
-        rc3, _, _ = run_child([PY, "-B", nz / "tests" / "check_duplicate.py", inst.dir / "N0", d / "N0"], nz,
-                              d / "check_duplicate.log", DEFAULT_TIMEOUT["C"])
-        res.update(compare_exit=rc2, check_duplicate_exit=rc3, ok=rc2 == 0 and rc3 == 0)
+        checker = nz / "tests" / "check_duplicate.py"
+        if checker.exists():
+            rc3, _, _ = run_child([PY, "-B", checker, inst.dir / "N0", d / "N0"], nz, d / "check_duplicate.log",
+                                  DEFAULT_TIMEOUT["C"])
+            res.update(compare_exit=rc2, checker="controls tests/check_duplicate.py", check_duplicate_exit=rc3,
+                       ok=rc2 == 0 and rc3 == 0)
+        else:
+            same = same_except_cost(inst.dir / "N0", d / "N0")
+            res.update(compare_exit=rc2, checker="campaign_run.same_except_cost (fallback)", **same,
+                       ok=rc2 == 0 and all(same.values()))
     else:
         res["ok"] = False
     res["wall_s"] = round(time.time() - t0, 1)
@@ -232,6 +264,8 @@ def duplicate(root, inst, plan):
 def untrained(root, inst, plan):
     """Plan §6 U: controls2.py untrained (a fresh session, the 2^m tests from the preset, every R cell gated), then
     the check that no R-cell output fires on any pattern (inverter emissions reported, expected)."""
+    if plan.get("stagen", "controls2") != "controls2":
+        return dict(instance=inst.dir.name, ok=None, why="not run: controls2.py (the untrained run) not in the plan")
     d = Path(root) / f"U_{inst.dir.name}"
     res_path = d / "untrained.json"
     if res_path.exists():
@@ -268,7 +302,7 @@ def instances(plan, root):
 def cmd_run(plan_path, root, *rest):
     kw = dict(a.split("=", 1) for a in rest)
     plan = json.loads(Path(plan_path).read_text())
-    root = Path(root)
+    root = Path(root).resolve()                 # steps run in other folders (the kit, the noise tree): absolute paths
     root.mkdir(parents=True, exist_ok=True)
     trees = check_trees(plan)
     plan_bytes = Path(plan_path).read_bytes()
@@ -299,6 +333,19 @@ def cmd_run(plan_path, root, *rest):
     return True
 
 
+def cmd_forget(root, inst, step, *why):
+    """Operator recovery: drop a failed or timed-out step's entry so that `run` runs it again. The dropped entry is kept
+    in status["forgotten"] with the reason given. A done step cannot be forgotten."""
+    p = Path(root) / inst / "status.json"
+    st = json.loads(p.read_text())
+    e = st["steps"].get(step)
+    assert e and e["status"] != "done", f"{inst} {step}: nothing to forget (or done)"
+    st.setdefault("forgotten", []).append(dict(step=step, entry=e, why=" ".join(why) or "unstated",
+                                               at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())))
+    del st["steps"][step]
+    p.write_text(json.dumps(st, indent=1, sort_keys=True) + "\n")
+
+
 def cmd_status(root):
     for p in sorted(Path(root).glob("*/status.json")):
         st = json.loads(p.read_text())
@@ -323,6 +370,8 @@ if __name__ == "__main__":
     c, *a = sys.argv[1:] or ["help"]
     if c == "run":
         sys.exit(0 if cmd_run(*a) else 1)
+    elif c == "forget":
+        cmd_forget(*a)
     elif c == "status":
         cmd_status(*a)
     elif c == "verify":
