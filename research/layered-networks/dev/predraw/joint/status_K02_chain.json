@@ -1,0 +1,117 @@
+{
+ "env_sha256": "3db8b203dee1207b1b5f3902ed62ae43856bb0d18741ef2d654d3508140500a0",
+ "group": "NOT1",
+ "seed": 9804,
+ "steps": {
+  "D": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d5.py",
+    "run",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/envsmoke/NOT1_9804/D",
+    "9804",
+    "overlay=config_inverter_c5.json",
+    "rule=one-port",
+    "inverters=/home/user/kernel-R/research/layered-networks/dev/envsmoke/NOT1_9804/inv/inverter_gate.json"
+   ],
+   "cores": 1,
+   "cpu_s": 217.9,
+   "ended": "2026-11-24T19:12:11Z",
+   "outputs": {
+    "D/prediction.json": "6c36db1244ab8bbd81ad7318798cc13cdf57ed24f7d83b8ff572b7d5ab23f1c1",
+    "D/record.json": "3a76e59f88f6f38b903a9ff1b01c9e5afed133e3e47827dcf3e015e5cba6aa69"
+   },
+   "started": "2026-11-24T19:08:32Z",
+   "status": "done",
+   "wall_s": 219.6
+  },
+  "deck": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d5.py",
+    "deck",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/envsmoke/NOT1_9804/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-24T19:06:05Z",
+   "outputs": {
+    "deck.spice": "519a6ce2db19bb6cf7b454f7b9fc6d86b0bf2ad8a4fdb8c6cfd09587272a4c02"
+   },
+   "started": "2026-11-24T19:06:05Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "inverters": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-m",
+    "invinst.indeck",
+    "/home/user/kernel-R/research/layered-networks/dev/envsmoke/NOT1_9804/inv",
+    "--deck",
+    "/home/user/kernel-R/research/layered-networks/dev/envsmoke/NOT1_9804/deck.spice",
+    "--seed",
+    "9804"
+   ],
+   "cores": 1,
+   "cpu_s": 146.1,
+   "ended": "2026-11-24T19:08:32Z",
+   "outputs": {
+    "inv/SHA256SUMS": "c186bd2f44f0fa1c200eb5542c58303f98d8938dcaf78cd535c3f1fa8a2631ed",
+    "inv/inverter_gate.json": "37991b10c90ed2049bff6c6488c0b374ce66583dfce84a32d36e6de0ed0e7455"
+   },
+   "started": "2026-11-24T19:06:05Z",
+   "status": "done",
+   "wall_s": 146.6
+  },
+  "seal": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d5.py",
+    "seal",
+    "/home/user/kernel-R/research/layered-networks/dev/envsmoke/NOT1_9804/seal",
+    "/home/user/kernel-R/research/layered-networks/dev/envsmoke/NOT1_9804/D"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-24T19:12:11Z",
+   "outputs": {
+    "seal/MANIFEST.json": "f4658f5814011c28144d8789fb6b1e24742a23d6efa1e26627c2117e74739c59",
+    "seal/SHA256SUMS": "121c3744f158d2df1a919efaa6ab3841f85f1afc2c464432879b2355ab17a04d"
+   },
+   "started": "2026-11-24T19:12:11Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "sealpush": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/sealpush.py",
+    "push",
+    "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/joint/log.git",
+    "evidence/combined-seals-K02",
+    "NOT1_9804",
+    "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/joint/K02/NOT1_9804/seal",
+    "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/joint/K02/.seal_log_work",
+    "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/joint/K02/NOT1_9804/seal_push.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-24T20:25:06Z",
+   "outputs": {
+    "seal_push.json": "7a14e86783f75320c97481ffb307bacb7b3cb0ae485d520276d54d740e93c6bd"
+   },
+   "started": "2026-11-24T20:25:06Z",
+   "status": "done",
+   "wall_s": 0.2
+  }
+ },
+ "tag": "NOT1"
+}
