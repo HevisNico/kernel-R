@@ -24,6 +24,11 @@ C. **Stage N refuses to start without the seal-log commit.**
   their session and is not done here.
 - The duplicates (identity reruns, not predicted runs) are exempt.
 
+Found by the integration run (2026-11-24): the drivers recorded a step's `started` to the second (truncated), so a
+seal pushed at 20:51:11.243 read as later than a stage N started at "20:51:11". Here every time is written to the
+microsecond (UTC), and stage N starts at least PLAN `seal_push_delay_s` (default 2 s) after the push succeeded: a margin
+against the difference between the remote's clock and the machine's.
+
   campaign_run5.py launch | run | wait | status ...     as campaign_run4.py
 """
 import json
@@ -39,7 +44,15 @@ import campaign_run2 as C2  # noqa: E402
 import campaign_run3 as C3  # noqa: E402
 import campaign_run4 as C4  # noqa: E402
 
-STATE = dict(keep=set(), guard_gb=20.0, root=None, held=[])
+STATE = dict(keep=set(), guard_gb=20.0, root=None, held=[], delay_s=2.0)
+
+
+def now_us():
+    import datetime
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+C2.now = now_us                                     # every started/ended time to the microsecond
 _drop_raw = CR.drop_raw
 
 
@@ -82,6 +95,13 @@ class Instance(C4.Instance):
                                                   ended=C2.now())
                 self.save()
                 return False
+            import time as _t
+            pushed_at = r.get("pushed_at_machine_utc")
+            if pushed_at:
+                import analyze3
+                wait = STATE["delay_s"] - (analyze3.parse_utc(now_us()) - analyze3.parse_utc(pushed_at)).total_seconds()
+                if wait > 0:
+                    _t.sleep(wait)
             (d / name).mkdir(parents=True, exist_ok=True)
             (d / name / "SEAL_LOG.json").write_text(json.dumps(dict(commit=commit, branch=r.get("branch"),
                                                                     seal_sha256=r.get("seal_sha256"), line=r.get("line"),
@@ -92,7 +112,7 @@ class Instance(C4.Instance):
 def cmd_run(plan_path, root, *rest):
     plan = json.loads(Path(plan_path).read_text())
     STATE.update(keep=set(plan.get("keep_raw", [])), guard_gb=float(plan.get("disk_guard_gb", 20)),
-                 root=Path(root).resolve(), held=[])
+                 root=Path(root).resolve(), held=[], delay_s=float(plan.get("seal_push_delay_s", 2.0)))
     Path(root).mkdir(parents=True, exist_ok=True)
     CR.drop_raw = drop_raw
     C4.Instance = Instance
