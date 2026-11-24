@@ -1,0 +1,43 @@
+name: Layered networks and inverter Lean checks
+
+# Addition E (2026-11-24): the Lean checks the layered campaign relies on, each with its audit and negative controls.
+# Additions only; no other workflow is changed. The three inverter checks live on the inverter branches and on the
+# campaign integration branch; the workflow is meant for that branch.
+
+on:
+  pull_request:
+    paths:
+      - 'research/learned-coincidence/**'
+      - '.github/actions/build-lean/**'
+      - '.github/workflows/layered-checks.yml'
+  push:
+    branches: ['research/layered-campaign-int']
+    paths:
+      - 'research/learned-coincidence/**'
+      - '.github/workflows/layered-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      LEAN_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/build-lean
+        with:
+          package-directory: proof/lean
+      - name: Layered composition
+        run: python3 -B research/learned-coincidence/check_layered_composition.py
+      - name: Inverters
+        run: python3 -B research/learned-coincidence/check_inverters.py
+      - name: Training through the inverters
+        run: python3 -B research/learned-coincidence/check_inverter_training.py
+      - name: Training through the inverters on a schedule
+        run: python3 -B research/learned-coincidence/check_inverter_schedule.py
+      - name: Inverters with a direct-rail delay
+        run: python3 -B research/learned-coincidence/check_inverter_lag.py
