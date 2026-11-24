@@ -1,0 +1,270 @@
+{
+ "carried": "steps done in dev/pipeline_val (plan val, noise2 38a95c8) carried over; they do not depend on the stage-N tool",
+ "forgotten": [
+  {
+   "at": "2026-11-24T08:45:26Z",
+   "entry": {
+    "argv": [
+     "/usr/local/bin/python3",
+     "-m",
+     "invinst.indeck",
+     "dev/pipeline_val/NOT1_9801/inv",
+     "--deck",
+     "dev/pipeline_val/NOT1_9801/deck.spice",
+     "--seed",
+     "9801"
+    ],
+    "cpu_s": 0.5,
+    "started": "2026-11-24T08:34:11Z",
+    "status": "failed",
+    "wall_s": 0.5,
+    "why": "exit 1, missing ['inv/inverter_gate.json', 'inv/SHA256SUMS']"
+   },
+   "step": "inverters",
+   "why": "driver bug: relative OUTROOT passed to a step run in the kit folder (fixed: OUTROOT resolved)"
+  }
+ ],
+ "group": "NOT1",
+ "seed": 9801,
+ "steps": {
+  "C0": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/compare_d2.py",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/seal",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N0/noisy_record.json",
+    "noiseless",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N0/comparison.json"
+   ],
+   "cpu_s": 0.0,
+   "outputs": {
+    "N0/comparison.json": "ebeb57ad32b6f21560e22136f71d84ddac1290228b26a3f09df87094cd1e5d6e"
+   },
+   "started": "2026-11-24T08:55:44Z",
+   "status": "done",
+   "wall_s": 0.0
+  },
+  "C1": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/compare_d2.py",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/seal",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N1/noisy_record.json",
+    "noisy",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N1/comparison.json"
+   ],
+   "cpu_s": 0.0,
+   "outputs": {
+    "N1/comparison.json": "dde6c70cfd1122e4009d9d335930c61ceae99d5df0ec9962a578261a49dc88d6"
+   },
+   "started": "2026-11-24T08:57:43Z",
+   "status": "done",
+   "wall_s": 0.0
+  },
+  "C2": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/compare_d2.py",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/seal",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N2/noisy_record.json",
+    "noisy",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N2/comparison.json"
+   ],
+   "cpu_s": 0.0,
+   "outputs": {
+    "N2/comparison.json": "22a5d3b3b6958c022b79190375c7befd7f1ca95ee51ccefe0abe850ac5199c79"
+   },
+   "started": "2026-11-24T08:59:40Z",
+   "status": "done",
+   "wall_s": 0.0
+  },
+  "C3": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/compare_d2.py",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/seal",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N3/noisy_record.json",
+    "noisy",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N3/comparison.json"
+   ],
+   "cpu_s": 0.0,
+   "outputs": {
+    "N3/comparison.json": "18fd72a977e692272e2f780c4d0d4ff60eb3208b703ff7172a808c74814ad583"
+   },
+   "started": "2026-11-24T09:01:43Z",
+   "status": "done",
+   "wall_s": 0.0
+  },
+  "D": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d3.py",
+    "run",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/D",
+    "9801",
+    "overlay=config_inverter_c5.json",
+    "rule=one-port",
+    "inverters=/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/inv/inverter_gate.json"
+   ],
+   "cpu_s": 221.7,
+   "outputs": {
+    "D/prediction.json": "cf6f56f844ff25ee643ecc9bea8f56dba8b97583c4b1e890c7efbbd9be06e4ad",
+    "D/record.json": "ec7f73e773f15295e7ca89e99892c1eb39bebef74254fed7371488fe2c25c636"
+   },
+   "started": "2026-11-24T08:50:27Z",
+   "status": "done",
+   "wall_s": 225.4
+  },
+  "N0": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/noise/research/layered-networks/controls2.py",
+    "stagen",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N0",
+    "9801",
+    "0",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cpu_s": 89.5,
+   "outputs": {
+    "N0/noisy_record.json": "64abc993b19170c6adb965f73f42a418bad5bb6c254d2f6ebb6a014c5b5cbfe4",
+    "N0/trace.digest.json": "d2fe34eb66364477113822a7e614db82ec8a77bc7eedd5abe68fad5ed88ceba0"
+   },
+   "started": "2026-11-24T08:54:13Z",
+   "status": "done",
+   "wall_s": 90.7
+  },
+  "N1": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/noise/research/layered-networks/controls2.py",
+    "stagen",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N1",
+    "9801",
+    "1",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cpu_s": 116.5,
+   "outputs": {
+    "N1/noisy_record.json": "7253ec3c6d6039c3ca4a7f24b0956a78151fbd71f2c794ab0d95fd2d7dcc4842",
+    "N1/trace.digest.json": "b977074077965bc15ccea40c6ac3c233082e785a94696bbb6cbfcef030e6fa9e"
+   },
+   "started": "2026-11-24T08:55:44Z",
+   "status": "done",
+   "wall_s": 119.3
+  },
+  "N2": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/noise/research/layered-networks/controls2.py",
+    "stagen",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N2",
+    "9801",
+    "2",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cpu_s": 115.7,
+   "outputs": {
+    "N2/noisy_record.json": "4d82766146205ec6d48fbbbdee257a1325b024b599160a3cb13dc75a1f23920d",
+    "N2/trace.digest.json": "b22bdb50611b6dc8404c9480c38b3d0a1a67194c49745a1e59672e3aafaf0570"
+   },
+   "started": "2026-11-24T08:57:43Z",
+   "status": "done",
+   "wall_s": 117.4
+  },
+  "N3": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/noise/research/layered-networks/controls2.py",
+    "stagen",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/N3",
+    "9801",
+    "3",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cpu_s": 120.6,
+   "outputs": {
+    "N3/noisy_record.json": "3d09f420b29b029fbb8246c4d35b564488e6888608aa275b711da4109cbd6aaf",
+    "N3/trace.digest.json": "1df52f37c7521d16e79f1251b6ece44b1a15d569948127728c8706c3c1217ee7"
+   },
+   "started": "2026-11-24T08:59:40Z",
+   "status": "done",
+   "wall_s": 122.2
+  },
+  "deck": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d3.py",
+    "deck",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "dev/pipeline_val/NOT1_9801/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cpu_s": 0.1,
+   "outputs": {
+    "deck.spice": "519a6ce2db19bb6cf7b454f7b9fc6d86b0bf2ad8a4fdb8c6cfd09587272a4c02"
+   },
+   "started": "2026-11-24T08:34:11Z",
+   "status": "done",
+   "wall_s": 0.2
+  },
+  "inverters": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-m",
+    "invinst.indeck",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val/NOT1_9801/inv",
+    "--deck",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val/NOT1_9801/deck.spice",
+    "--seed",
+    "9801"
+   ],
+   "cpu_s": 147.4,
+   "outputs": {
+    "inv/SHA256SUMS": "a9e7268c5ec074bf76176dec90a2cd4cb3b53e3debced55b92f52755305366c5",
+    "inv/inverter_gate.json": "d000ea520d2ff3ee2a9991e6d999b7a24c4dd5bfa8dd93dbf84f521aa2537181"
+   },
+   "started": "2026-11-24T08:45:38Z",
+   "status": "done",
+   "wall_s": 156.0
+  },
+  "seal": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d3.py",
+    "seal",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/seal",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val2/NOT1_9801/D"
+   ],
+   "cpu_s": 0.1,
+   "outputs": {
+    "seal/MANIFEST.json": "8330f937998719d23bcb1a28972afddd505d5b35def2527ee643b5c433a2a686",
+    "seal/SHA256SUMS": "d3957fd5e70a4a4ff1480cafb19c108ce270f048261ccec8e14a42d4281a336c"
+   },
+   "started": "2026-11-24T08:54:13Z",
+   "status": "done",
+   "wall_s": 0.1
+  }
+ },
+ "tag": "NOT1"
+}
