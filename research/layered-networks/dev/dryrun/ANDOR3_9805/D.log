@@ -1,0 +1,51 @@
+stage D lesson c1_0 group 0: ssFF
+stage D lesson c3_0 group 0: ssFF
+stage D lesson c1_1 group 0: sssFF
+stage D lesson c2_0 group 0: sssFF
+stage D lesson c2_0 group 1: ssFF
+stage D mask reads: c1_0[1]=s, c1_1[1]=F, c2_0[1]=F, c3_0[1]=F
+stage D mask reads: c1_0[2]=s, c2_0[2]=F
+stage D mask reads: c1_0[1, 2]=F
+scan c1_0 group 0: s* 1.79469 +- 0.00188 in 42 slots
+scan c1_1 group 0: s* 2.21494 +- 0.00193 in 44 slots
+scan c2_0 group 0: s* 2.02541 +- 0.00217 in 35 slots
+scan c2_0 group 1: s* 1.47271 +- 0.00196 in 43 slots
+scan c3_0 group 0: s* 1.69478 +- 0.00194 in 40 slots
+{
+ "status": "done",
+ "cost": {
+  "wall_setup_s": 18.165502309799194,
+  "wall_train_s": 710.1562502384186,
+  "wall_test_s": 140.9642677307129,
+  "wall_scan_s": 1998.3301961421967,
+  "cpu_setup_s": 14.65,
+  "cpu_train_s": 713.07,
+  "cpu_test_s": 852.13,
+  "cpu_end_s": 2847.03,
+  "simulated_s": 0.03398019507296106,
+  "lesson_slots": 9,
+  "test_slots": 3,
+  "scan_slots": 65,
+  "solo_scan_slots": null
+ },
+ "words": {
+  "1/0/0": "ssFF",
+  "3/0/0": "ssFF",
+  "1/1/0": "sssFF",
+  "2/0/0": "sssFF",
+  "2/0/1": "ssFF"
+ }
+}
+Traceback (most recent call last):
+  File "/home/user/kernel-R/research/layered-networks/stage_d3.py", line 52, in <module>
+    sys.exit(0 if main(sys.argv[1:]) else 1)
+                  ~~~~^^^^^^^^^^^^^^
+  File "/home/user/kernel-R/research/layered-networks/stage_d3.py", line 38, in main
+    ok = stage_d.cmd_run(*a) if cmd == "run" else (stage_d.cmd_predict(*a) or True)
+         ~~~~~~~~~~~~~~~^^^^
+  File "/home/user/kernel-R/research/layered-networks/stage_d.py", line 393, in cmd_run
+    p = predict(spec_path, out, f.get("inverters"))
+  File "/home/user/kernel-R/research/layered-networks/stage_d.py", line 357, in predict
+    assert all(v is not None for v in pouts.values())
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
