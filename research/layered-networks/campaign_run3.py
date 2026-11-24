@@ -10,6 +10,12 @@ step waits until its cores are free. The jobs' threads are no longer the limit (
 budget is. Running the inverters one at a time was the other option; it would make every front-end instance's chain
 longer by about 6 minutes per extra inverter, and the kit's interface runs them together.
 
+ENV.json (coordinator, 2026-11-24): at the start of `run`, envcheck_layered.env(plan) is computed. A new OUTROOT gets
+it as ENV.json; on a resume, a different `static_sha256` is refused (a mixed environment within one OUTROOT), and the
+resume's uptime is appended to ENV_RESUMES.json. Every step runs with LAYERED_ENV_SHA256 = the sha256 of ENV.json
+(stage_d5.py writes it into the sealed prediction), and every instance's status.json records `env_sha256` (an instance
+recorded under another one is refused). Stage D is stage_d5.py unless the plan says otherwise.
+
 Also: PLAN `steps_until` (for example "D"): each instance's chain stops after that step (a stage-D-only run; no seal,
 no stage N, no controls).
 
@@ -17,6 +23,7 @@ no stage N, no controls).
 """
 import concurrent.futures as cf
 import json
+import os
 from pathlib import Path
 import sys
 import threading
@@ -54,6 +61,18 @@ BUDGET = Budget(4)
 
 
 class Instance(C2.Instance):
+    def __init__(self, *a, **k):
+        super().__init__(*a, **k)
+        self.plan = dict(self.plan)
+        self.plan.setdefault("stage_d_script", "stage_d5.py")
+        sha = os.environ.get("LAYERED_ENV_SHA256")
+        if sha:
+            have = self.status.get("env_sha256")
+            if have and have != sha:
+                raise SystemExit(f"refused: {self.dir.name} was run under ENV {have[:12]}, not {sha[:12]}")
+            self.status["env_sha256"] = sha
+            self.save()
+
     def step(self, name, argv, outputs, kind, cwd=HERE, env=None):
         if self.done(name):
             return True
@@ -75,8 +94,32 @@ class Instance(C2.Instance):
         return ok
 
 
+def set_env(plan, root):
+    import envcheck_layered as E
+    root = Path(root)
+    root.mkdir(parents=True, exist_ok=True)
+    e = E.env(plan)
+    f = root / "ENV.json"
+    if f.exists():
+        old = json.loads(f.read_text())
+        if old["static_sha256"] != e["static_sha256"]:
+            raise SystemExit(f"refused: mixed environment in {root}: ENV.json static {old['static_sha256'][:12]}, "
+                             f"this machine now {e['static_sha256'][:12]}")
+        rs = root / "ENV_RESUMES.json"
+        log = json.loads(rs.read_text()) if rs.exists() else []
+        log.append(dict(uptime_s=e["uptime_s"], static_sha256=e["static_sha256"]))
+        rs.write_text(json.dumps(log, indent=1) + "\n")
+    else:
+        f.write_bytes(E.canon(e))
+    os.environ["LAYERED_ENV_SHA256"] = CR.sha(f)
+    return os.environ["LAYERED_ENV_SHA256"]
+
+
 def cmd_run(plan_path, root, *rest):
     kw = dict(a.split("=", 1) for a in rest)
+    plan0 = json.loads(Path(plan_path).read_text())
+    plan0.setdefault("stage_d_script", "stage_d5.py")
+    set_env(plan0, Path(root).resolve())
     BUDGET.cores = int(kw.get("jobs", 4))
     C2.Instance = Instance                     # campaign_run2.cmd_run builds its instances from this name
     orig = cf.ThreadPoolExecutor
