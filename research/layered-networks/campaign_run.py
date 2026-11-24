@@ -150,8 +150,11 @@ class Instance:
         rounds = [0] + (list(range(1, plan.get("rounds", 3) + 1)) if pred["room_K3"] else [])
         nz = Path(plan["noise_tree"]) / "research" / "layered-networks"
         for n in rounds:
-            ok = self.step(f"N{n}", stagen_argv(plan, nz, sp, d / f"N{n}", seed, n, ov), [f"N{n}/noisy_record.json"], "N", cwd=nz)
+            outs = [f"N{n}/noisy_record.json"] + ([f"N{n}/trace.digest.json"] if plan.get("stagen", "controls2") == "controls2" else [])
+            ok = self.step(f"N{n}", stagen_argv(plan, nz, sp, d / f"N{n}", seed, n, ov), outs, "N", cwd=nz)
             ok = ok and self.step(f"C{n}", compare_argv(d / "seal", sp, d / f"N{n}", n), [f"N{n}/comparison.json"], "C")
+            if ok:
+                drop_raw(d / f"N{n}")
             if not ok:
                 break
         return self.summary()
@@ -192,6 +195,14 @@ def run_child(argv, cwd, log, timeout, env=None):
         timer.cancel()
         p.returncode = os.waitstatus_to_exitcode(status)
     return p.returncode, round(ru.ru_utime + ru.ru_stime, 1), killed.is_set()
+
+
+def drop_raw(folder):
+    """controls2.py writes trace.raw (1.7 GB per XOR3 run) and trace.digest.json. Once the digest exists the raw file
+    is deleted (the controls' check_duplicate.py compares digests when a raw file is absent; CONTROLS_REPORT.md)."""
+    raw, dig = Path(folder) / "trace.raw", Path(folder) / "trace.digest.json"
+    if raw.exists() and dig.exists():
+        raw.unlink()
 
 
 def stagen_argv(plan, nz, sp, out, seed, n, ov):
@@ -250,6 +261,7 @@ def duplicate(root, inst, plan):
                                   DEFAULT_TIMEOUT["C"])
             res.update(compare_exit=rc2, checker="controls tests/check_duplicate.py", check_duplicate_exit=rc3,
                        ok=rc2 == 0 and rc3 == 0)
+            drop_raw(d / "N0")
         else:
             same = same_except_cost(inst.dir / "N0", d / "N0")
             res.update(compare_exit=rc2, checker="campaign_run.same_except_cost (fallback)", **same,
@@ -285,6 +297,7 @@ def untrained(root, inst, plan):
         res.update(patterns=len(rec["tests"]), r_cell_fires=fired, inverter_fires_reported=inv, ok=not fired)
     else:
         res["ok"] = False
+    drop_raw(d / "U")
     res_path.write_text(json.dumps(res, indent=1, sort_keys=True) + "\n")
     return res
 
