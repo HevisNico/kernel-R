@@ -1,0 +1,213 @@
+{
+ "cell": {
+  "D": 1.0,
+  "H0": 4.5,
+  "J0": 4.0,
+  "cq_F": 5e-12,
+  "edge_s": 1e-09,
+  "h": 0.3,
+  "help_mirror": {
+   "l": 16,
+   "w": 2
+  },
+  "hl": 0.3,
+  "inhib_mirror": {
+   "l": 4,
+   "w": 4
+  },
+  "level_x": 0.9,
+  "reset_len": 0.1,
+  "reset_n": {
+   "l": 0.15,
+   "w": 1
+  },
+  "reset_p": {
+   "l": 0.15,
+   "w": 2
+  },
+  "settle_s": 1e-05,
+  "switch_n": {
+   "l": 0.15,
+   "w": 1
+  },
+  "switch_p": {
+   "l": 0.15,
+   "w": 2
+  },
+  "tau": 0.25,
+  "temp_C": 27,
+  "tu_s": 2e-05,
+  "vdd_V": 1.8,
+  "vr0_V": 1.25,
+  "vunit_V": 0.5
+ },
+ "drawn": true,
+ "measures": {
+  "Q": 0.9523402166217546,
+  "actual_level_x": 0.8903434879092657,
+  "comparator_delay_tu": 0.0010004375377141717,
+  "contact_tu": 0.5111857179320072,
+  "delta": 0.00965651209073437,
+  "delta_dynamic": -0.005694441677431383,
+  "emit_absent_tu": 0.5121906980718297,
+  "eps0": 0.00014936907403904296,
+  "etaH": 0.04438850279469932,
+  "etaJ": 0.0270796511950453,
+  "etaJ_slot": 0.02709768764410797,
+  "etaM": 0.003814521794905474,
+  "fired_present": false,
+  "help_negative_L1": 0.008556402914071363,
+  "latch_delay_tu": 0.001004980139822531,
+  "leak_above": {
+   "asymptote_x": 0.0035889754811167375,
+   "fit_rms": 0.00019460291188199045,
+   "rate": 0.48055000000000003
+  },
+  "leak_below": {
+   "asymptote_x": -0.0017295215406676575,
+   "fit_rms": 2.2826830502632517e-05,
+   "rate": 0.48874
+  },
+  "machine_s": {
+   "R1_absent": 14.174708366394043,
+   "R2_present": 13.459804058074951,
+   "R3_leak_above": 13.669150352478027,
+   "R4_leak_below": 13.187874555587769,
+   "R5_static": 13.752744674682617
+  },
+  "machine_s_total": 71.38607430458069,
+  "same_sample": true,
+  "slot_duration_tu": 1.1,
+  "state_extent": {
+   "R1_absent_deadline_abs_x": 1.2249345036984,
+   "R1_absent_deadline_abs_x_minus_ref": 0.03151324237804687,
+   "R1_absent_slot_abs_x": 1.2253113037728,
+   "R1_absent_slot_abs_x_minus_ref": 0.03151324237804687,
+   "R2_present_deadline_abs_x": 0.8729286506360001,
+   "R2_present_deadline_abs_x_minus_ref": 0.8729286506360001,
+   "R2_present_slot_abs_x": 0.8729286506360001,
+   "R2_present_slot_abs_x_minus_ref": 0.8729286506360001
+  },
+  "static_ramp_slope": 0.09999999999999998,
+  "vq_max_present": 1.686464325318,
+  "x_after_reset": [
+   -0.00014415843739824867,
+   -0.00014936907403904296
+  ],
+  "x_max_absent": 1.2253113037728,
+  "x_max_present": 0.5028888082173999,
+  "x_slot_start": [
+   3.169405999869923e-06,
+   3.169405999869923e-06
+  ]
+ },
+ "netopts": {
+  "_doc": "The layered network's simulator directives for an inverter (research/layered-networks at a308eec: instrument.deck_text = deck.build at calibration.json design_point: reltol 1e-5 on the .option line, vhi 0.7 on the .param line; junction areas for R cells only, inverter devices at zero area, which is the PDK subcircuits' own default ad = as = pd = ps = 0). Taken verbatim from the deck of specs/not1.json; tests/test_netopts.py checks them against that branch. Used by invinst/netdeck.py and invinst/driver2.py; config.json and cell.py stay as pushed.",
+  "inverter_junction_areas": "zero (PDK default)",
+  "nominal_section": "tt",
+  "options": [
+   ".option scale=1e-6",
+   ".option reltol=1e-5 abstol=1e-13 vntol=1e-7 chgtol=1e-17",
+   ".option gmin=1e-16",
+   ".option temp=27"
+  ],
+  "params": [
+   ".param vddv=1.8 tu=20u tper=440u t0=4.1u kp=10",
+   ".param cq=5p vunit=0.5 vr0=1.25",
+   ".param vfire={vr0 - 0.9*vunit} vreopen={vr0 - 0.1*vunit}",
+   ".param rleak={2*tu/cq} at={log(4)/tu} ipk={cq*vunit*at} ioff=50n",
+   ".param vcm=0.4 vhi=0.7 vlo=0.5 vpre=1.3 vinit=0.3895",
+   ".param cs0=400f cf0=30p idis=8.2n wg=40 lg=2.5 rlk=1e18"
+  ],
+  "section_line_mismatch": ".lib \"pdk/models/sky130.lib.spice\" tt_mm",
+  "source": {
+   "branch": "research/layered-networks",
+   "builder": "instrument.deck_text(spec, config.json)",
+   "commit": "a308eec",
+   "spec": "specs/not1.json"
+  },
+  "transient_max_step": {
+   "_doc": "unchanged from config.json runs (5n / 20n): a measurement resolution for the integrals; the network session runs tran 1u ... 0 200n",
+   "network_value": "200n"
+  }
+ },
+ "runs": {
+  "R1_absent": {
+   "files": {
+    "input.spice": "5d334b811fea964c2996785e039079c636a138fb0a9a46f040e5e0b21b13de56",
+    "ngspice.log": "abab46e60e6f4d2cbe4f4af4962ff23e58d32d0493eb89a9a71ffaa0b85094f2",
+    "trace.txt": "bcfd8025e15491a5b9c0ca409fc0f4cfa16229fd7847c07958b01f1946253f55"
+   },
+   "finger": [
+    0.507466,
+    0.453378,
+    0.453578,
+    0.529875,
+    1.03812
+   ],
+   "points": 9641
+  },
+  "R2_present": {
+   "files": {
+    "input.spice": "50eec4397dcd2022b58467145885b4a8e734b27aa1a63a3cbb8ef0d28566b0ad",
+    "ngspice.log": "3f45e6e1d61eb49e381d2b953297b66b8e8a3ecf212dfba269ce663e1cb534d7",
+    "trace.txt": "0cbdd94d841d12609c73b89ec7c32f10070f17778c33e420514e6874ae826ccd"
+   },
+   "finger": [
+    0.507466,
+    0.453378,
+    0.453578,
+    0.529875,
+    1.03812
+   ],
+   "points": 7607
+  },
+  "R3_leak_above": {
+   "files": {
+    "input.spice": "519d2a6189c8653a73413d2c2d5e10ede498323024f2ab4a1f33b373df9cf3f1",
+    "ngspice.log": "4c2084073e75935da614ef21b09fdd32c70ce2f32c40e487c0d9d87c9713975e",
+    "trace.txt": "866cb726f6b66912cc28b2830a7efdb2c17db4cf62035c060d03f4867a67bd6f"
+   },
+   "finger": [
+    0.507466,
+    0.453378,
+    0.453578,
+    0.529875,
+    1.03812
+   ],
+   "points": 5743
+  },
+  "R4_leak_below": {
+   "files": {
+    "input.spice": "8d8653680e3a9509534e45ff63ffb5aa03fc7ded5f64ebe3e370527efdbcd797",
+    "ngspice.log": "5e5b3fbf8bf880886ec03d39e6f203f04721b24b810eca0b70eac9208368c855",
+    "trace.txt": "01040018f8723b762ab48dea6fb18a5254ee5636605c941cd065aeb5a4dd6a29"
+   },
+   "finger": [
+    0.507466,
+    0.453378,
+    0.453578,
+    0.529875,
+    1.03812
+   ],
+   "points": 4781
+  },
+  "R5_static": {
+   "files": {
+    "input.spice": "a67af0a14b771c6dd2d1edbc6fc6fae5f59be218e6934a96a2d396f33ed5c5cc",
+    "ngspice.log": "33d1cd6889eb4c5c3568846dc0a5b2cde8fdbe037aa04f6ae2f0ee6f5b307598",
+    "trace.txt": "ce4d3767de5faeaea4ea11cd44cdaf5ec226c18ad27b0892019c118b554cc983"
+   },
+   "finger": [
+    0.507466,
+    0.453378,
+    0.453578,
+    0.529875,
+    1.03812
+   ],
+   "points": 12224
+  }
+ },
+ "section": "tt_mm",
+ "seed": 9718
+}
