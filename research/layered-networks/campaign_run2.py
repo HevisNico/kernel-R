@@ -13,7 +13,9 @@ campaign_run.py is pushed and kept as it is; its steps, commands, controls and c
 2. **No relaunch of a step that started.** Before a step runs, status.json records it as `running`. A step found
    `running` at a resume (the machine or the driver stopped during it) is marked `interrupted` and is never run again,
    like a failed one: a counted run is never relaunched (plan §9). Its instance is reported under that step.
-3. **The machine-run discipline.**
+3. **Stage D by `stage_d4.py`** (PLAN `stage_d_script`; default stage_d4.py: every mask read, the either cell's (1, 2)
+   included; stage_d3.py misses it, the defect found by the dry run on ANDOR3 9805).
+4. **The machine-run discipline.**
      campaign_run2.py launch PLAN.json OUTROOT [jobs=4]   checks that no ngspice runs (pgrep) and that OUTROOT does
                                                           not exist; writes OUTROOT/INVENTORY_START (uptime -s, nproc,
                                                           the ngspice sha256, the trees); starts `run` detached
@@ -93,15 +95,15 @@ class Instance(CR.Instance):
         s, d, plan, seed = self.s, self.dir, self.plan, self.seed
         ov = plan.get("overlay", "config_inverter_c5.json")
         sp = HERE / self.spec_path
-        ok = self.step("deck", [CR.PY, "-B", HERE / "stage_d3.py", "deck", sp, d / "deck.spice", f"overlay={ov}"], ["deck.spice"], "deck")
+        ok = self.step("deck", [CR.PY, "-B", HERE / plan.get("stage_d_script", "stage_d4.py"), "deck", sp, d / "deck.spice", f"overlay={ov}"], ["deck.spice"], "deck")
         if ok and s["front"]:
             kit = Path(plan["kit_tree"]) / "research" / "circuit" / "inverter" / "instances"
             ok = self.step("inverters", [CR.PY, "-m", "invinst.indeck", d / "inv", "--deck", d / "deck.spice", "--seed", seed],
                            ["inv/inverter_gate.json", "inv/SHA256SUMS"], "inverters", cwd=kit)
         inv = [f"inverters={d / 'inv' / 'inverter_gate.json'}"] if s["front"] else []
-        ok = ok and self.step("D", [CR.PY, "-B", HERE / "stage_d3.py", "run", sp, d / "D", seed, f"overlay={ov}",
+        ok = ok and self.step("D", [CR.PY, "-B", HERE / plan.get("stage_d_script", "stage_d4.py"), "run", sp, d / "D", seed, f"overlay={ov}",
                                     f"rule={plan.get('testError_rule', 'one-port')}", *inv], ["D/record.json", "D/prediction.json"], "D")
-        ok = ok and self.step("seal", [CR.PY, "-B", HERE / "stage_d3.py", "seal", d / "seal", d / "D"],
+        ok = ok and self.step("seal", [CR.PY, "-B", HERE / plan.get("stage_d_script", "stage_d4.py"), "seal", d / "seal", d / "D"],
                               ["seal/SHA256SUMS", "seal/MANIFEST.json"], "seal")
         ok = ok and self.round(0)
         if not ok:

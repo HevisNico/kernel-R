@@ -39,7 +39,7 @@ def test_launch_refuses_a_used_outroot():
             C2.cmd_launch(str(HERE / "dev" / "pipeline_plan_val2.json"), d)
             raise AssertionError("a non-empty OUTROOT was accepted")
         except SystemExit as e:
-            assert "not empty" in str(e)
+            assert "refused" in str(e)          # a used OUTROOT (or, while a run is live, a running ngspice)
 
 
 if __name__ == "__main__":
