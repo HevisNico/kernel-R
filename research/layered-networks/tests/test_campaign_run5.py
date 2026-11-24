@@ -34,6 +34,19 @@ def test_raw_kept_unless_agrees():
             assert (f / "trace.raw").exists() == kept, (inst, v)
 
 
+def test_u_raw_dropped_only_when_u_holds():
+    with tempfile.TemporaryDirectory() as d:
+        for inst, fired, kept in (("U_NOT1_1", False, False), ("U_NOT1_2", True, True)):
+            f = Path(d) / inst / "U"
+            f.mkdir(parents=True)
+            (f / "trace.raw").write_text("raw")
+            (f / "trace.digest.json").write_text("{}")
+            rec = dict(tests=[0], slots=[dict(reads=[dict(emission=5 if fired else None)])])
+            (f / "untrained_record.json").write_text(json.dumps(rec))
+            C5.drop_raw(f)
+            assert (f / "trace.raw").exists() == kept
+
+
 def test_disk_guard_holds_without_status():
     with tempfile.TemporaryDirectory() as d:
         C5.STATE.update(root=Path(d), guard_gb=1e9, held=[])

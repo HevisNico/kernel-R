@@ -5,6 +5,7 @@ campaign_run4.py and the earlier drivers are kept as they are.
 B. **Raw traces kept where they may be needed, and a disk guard.**
 - A stage-N folder's trace.raw is deleted (once its digest exists) only when its comparison is `agrees`. It is kept
   when the comparison is anything else (refuted, observed only, run failed), or when the comparison is missing.
+- The untrained control's raw (U_*/U) is dropped when U holds, and kept only if U fails.
 - Kept always:
   - the duplicates' raws (DUP_*, DUPX_*);
   - the raws of the instances named in PLAN `keep_raw`: the originals of the cross-machine duplicates, written by
@@ -56,9 +57,22 @@ C2.now = now_us                                     # every started/ended time t
 _drop_raw = CR.drop_raw
 
 
+def u_holds(folder):
+    """The untrained control holds: no R-cell read of any test slot fired (controls2's untrained_record.json)."""
+    f = Path(folder) / "untrained_record.json"
+    if not f.exists():
+        return False
+    rec = json.loads(f.read_text())
+    return all(r["emission"] is None for i in rec.get("tests", []) for r in rec["slots"][i]["reads"])
+
+
 def drop_raw(folder):
     folder = Path(folder)
     inst = folder.parent.name
+    if inst.startswith("U_"):                      # the untrained control: dropped when U holds, kept when it fails
+        if u_holds(folder):
+            _drop_raw(folder)
+        return
     if inst.startswith(("DUP_", "DUPX_")) or inst in STATE["keep"]:
         return
     comp = folder / "comparison.json"
