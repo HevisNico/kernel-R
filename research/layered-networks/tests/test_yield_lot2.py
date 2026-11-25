@@ -61,8 +61,10 @@ def test_pushed_copy_inv_absent():
         add_line(root, inst, "0" * 64 + "  inv/n0/runs/6223/MEASURE.json\n")
         assert not Y2.check_root(root)["ok"]                                   # no VERIFY.txt: missing is a failure
         (root / "VERIFY.txt").write_text("BROKEN: /root/x/out/RESULT.json\n")
+        assert not Y2.check_root(root)["ok"]                                   # not listed as over 50 MB: a failure
+        (root / "NOT_COPIED_OVER_50MB.txt").write_text("73400320\tNOT1_6223/inv/n0/runs/6223/MEASURE.json\n")
         r = Y2.check_root(root)
-        assert r["ok"] and r["absent_from_copy"] == 1
+        assert r["ok"] and r["absent_from_copy"] == ["NOT1_6223/inv/n0/runs/6223/MEASURE.json"]
         add_line(root, inst, "0" * 64 + "  D/missing.json\n")                            # outside inv/: still a failure
         assert not Y2.check_root(root)["ok"]
         (root / "VERIFY.txt").write_text("BROKEN: /root/x/out/RESULT.json, /root/x/out/NOT1_6223/D/record.json\n")

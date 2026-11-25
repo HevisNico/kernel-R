@@ -9,11 +9,11 @@ The check, per ROOT:
   RESULT.json, with exactly those keys removed (core_budget, remote_duplicates, stopped_for_disk) and written as
   campaign_run2 writes it, gives the recorded hash. Anything else is a failure.
 
-- **Pushed copies** (the evidence/yield-lot-K<nn> branches): a branch omits the inverter run outputs, which are
-  inv/... and the per-instance inv/n<i>/runs/<seed>/MEASURE.json. A file missing under inv/ is then counted as
-  `absent_from_copy`, not as a failure, but only when the root's VERIFY.txt (the machine's own `campaign_run.py verify`
-  on the full OUTROOT) is exactly one line, "BROKEN: <path>/RESULT.json". A missing file elsewhere, or any hash
-  difference, is still a failure.
+- **Pushed copies** (the evidence/yield-lot-K<nn> branches): a file listed in a SHA256SUMS but absent from the copy is
+  accepted (as `absent_from_copy`, reported by name) only when two things hold. The root's NOT_COPIED_OVER_50MB.txt
+  must list it, meaning it was over 50 MB and so not pushed (owner's choice, relayed 2026-11-25). And the root's
+  VERIFY.txt, the machine's own `campaign_run.py verify` on the full OUTROOT, must be exactly one line,
+  "BROKEN: <path>/RESULT.json". Every other missing file, and any hash difference, is a failure.
 
   yield_lot2.py report OUTDIR ROOT [ROOT ...]     OUTDIR/INTEGRITY.json, and OUTDIR/YIELD.json only if every ROOT passes
 """
@@ -53,23 +53,31 @@ def machine_verified(root):
     return len(lines) == 1 and lines[0].startswith("BROKEN: ") and lines[0].endswith("/RESULT.json") and "," not in lines[0]
 
 
-def in_inv(sums, n, root):
-    rel = (sums.parent / n).relative_to(root).parts
-    return len(rel) > 1 and rel[1] == "inv"
+def not_copied(root):
+    f = Path(root) / "NOT_COPIED_OVER_50MB.txt"
+    if not f.exists():
+        return set()
+    return {t.strip().lstrip("./") for line in f.read_text().splitlines() for t in line.replace("\t", " ").split(" ") if t.strip()}
+
+
+def listed(sums, n, root, names):
+    rel = str((sums.parent / n).relative_to(root))
+    return rel in names or any(x.endswith("/" + rel) for x in names)
 
 
 def check_root(root):
     root = Path(root)
     copy_ok = machine_verified(root)
+    names = not_copied(root)
     res = dict(root=str(root), per_instance=[], top_level=[], known_defect=None, machine_verify_only_result_json=copy_ok,
-               absent_from_copy=0)
+               absent_from_copy=[])
     for sums in sorted(root.rglob("SHA256SUMS")):
         if sums.parent == root or "lean_build" in sums.parts:
             continue
         bad = check_sums(sums)
         if copy_ok:
-            absent = [b for b in bad if b["why"] == "missing" and in_inv(sums, b["file"], root)]
-            res["absent_from_copy"] += len(absent)
+            absent = [b for b in bad if b["why"] == "missing" and listed(sums, b["file"], root, names)]
+            res["absent_from_copy"] += [str((sums.parent / b["file"]).relative_to(root)) for b in absent]
             bad = [b for b in bad if b not in absent]
         res["per_instance"].append(dict(sums=str(sums.relative_to(root)), lines=len(sums.read_text().splitlines()),
                                         failed=bad))
@@ -107,7 +115,7 @@ if __name__ == "__main__":
     (Path(outdir) / "INTEGRITY.json").write_bytes(YL.canon(dict(ok=ok, roots=checks)))
     print(json.dumps([dict(root=x["root"], ok=x["ok"], per_instance_lines=sum(p["lines"] for p in x["per_instance"]),
                            failed=sum(len(p["failed"]) for p in x["per_instance"]) + len(x["top_level"]),
-                           absent_from_copy=x["absent_from_copy"], known_defect=bool(x["known_defect"])) for x in checks], indent=1))
+                           absent_from_copy=len(x["absent_from_copy"]), known_defect=bool(x["known_defect"])) for x in checks], indent=1))
     if not ok:
         sys.exit("refused: integrity check failed; YIELD.json not written")
     r = YL.report(roots)
