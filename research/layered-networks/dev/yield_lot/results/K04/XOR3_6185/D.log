@@ -1,0 +1,89 @@
+stage D lesson c1_1 group 0: sFF
+stage D lesson c1_0 group 0: ssFF
+stage D lesson c2_0 group 0: ssFF
+stage D lesson c3_0 group 0: ssFF
+stage D lesson c2_0 group 1: ssFF
+stage D mask reads: c1_0[1]=s, c1_1[1]=s, c2_0[1]=F, c3_0[1]=F
+stage D mask reads: c1_0[2]=s, c1_1[2]=s, c2_0[2]=F
+stage D mask reads: c1_0[1, 2]=F, c1_1[1, 2]=F, c2_0[1, 2]=F
+scan c1_0 group 0: s* 1.85191 +- 0.00087 in 41 slots
+scan c1_1 group 0: s* 0.86986 +- 0.00187 in 48 slots
+scan c2_0 group 0: s* 1.31911 +- 0.00187 in 37 slots
+scan c2_0 group 1: s* 1.89502 +- 0.00002 in 42 slots
+scan c3_0 group 0: s* 1.68327 +- 0.00179 in 41 slots
+{
+ "status": "done",
+ "cost": {
+  "wall_setup_s": 14.833786249160767,
+  "wall_train_s": 762.7461497783661,
+  "wall_test_s": 167.09687972068787,
+  "wall_scan_s": 2499.419712781906,
+  "cpu_setup_s": 14.59,
+  "cpu_train_s": 767.58,
+  "cpu_test_s": 932.28,
+  "cpu_end_s": 3448.55,
+  "simulated_s": 0.034420156010648024,
+  "lesson_slots": 8,
+  "test_slots": 3,
+  "scan_slots": 67,
+  "solo_scan_slots": null
+ },
+ "words": {
+  "1/1/0": "sFF",
+  "1/0/0": "ssFF",
+  "2/0/0": "ssFF",
+  "3/0/0": "ssFF",
+  "2/0/1": "ssFF"
+ }
+}
+{
+ "eligible_K0": true,
+ "room_K3": false,
+ "prediction": {
+  "words": {
+   "1/1/0": "sFF",
+   "1/0/0": "ssFF",
+   "2/0/0": "ssFF",
+   "3/0/0": "ssFF",
+   "2/0/1": "ssFF"
+  },
+  "outputs": {
+   "0": false,
+   "1": true,
+   "2": true,
+   "3": false
+  },
+  "cells": {
+   "0": {
+    "c1_0": false,
+    "c1_1": false,
+    "c2_0": false,
+    "c3_0": false
+   },
+   "1": {
+    "c1_0": true,
+    "c1_1": false,
+    "c2_0": true,
+    "c3_0": true
+   },
+   "2": {
+    "c1_0": false,
+    "c1_1": true,
+    "c2_0": true,
+    "c3_0": true
+   },
+   "3": {
+    "c1_0": false,
+    "c1_1": false,
+    "c2_0": false,
+    "c3_0": false
+   }
+  },
+  "skew_silent": [
+   "c1_0",
+   "c1_1"
+  ],
+  "output_equals_function": true
+ }
+}
+{"testError_rule": "one-port", "eligible_K0": true, "room_K3": false}
