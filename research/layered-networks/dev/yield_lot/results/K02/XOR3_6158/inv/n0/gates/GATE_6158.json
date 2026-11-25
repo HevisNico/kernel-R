@@ -1,0 +1,122 @@
+{
+ "allowance": {
+  "K0": {
+   "delta": "0",
+   "eta": "0"
+  },
+  "K3": {
+   "delta": "2011/1000000",
+   "eta": "2353/1000000"
+  }
+ },
+ "attempts": [
+  {
+   "asserted": {
+    "K0": true,
+    "K3": true
+   },
+   "file": "Inverter_6158.lean",
+   "passed": true,
+   "per_premise": true
+  }
+ ],
+ "eligible_K0": true,
+ "front_end_fits": "not checked: skew or epsilon not set",
+ "kernel": {
+  "K0": true,
+  "K3": true
+ },
+ "kernel_agrees_with_mirror": true,
+ "margins": {
+  "K0": {
+   "firing_margin": 0.27924271395449957,
+   "leak_term": 0.00533925,
+   "silence_margin": 0.14963330057465743
+  },
+  "K3": {
+   "firing_margin": 0.27487871395449953,
+   "leak_term": 0.00533925,
+   "silence_margin": 0.1438261014602656
+  }
+ },
+ "measured": true,
+ "measures": {
+  "K0": {
+   "Q": "919677/1000000",
+   "aHi": "611/1250",
+   "aLo": "48089/100000",
+   "aRef": "96969/200000",
+   "alpha": "791/200000",
+   "delta": "101/20000",
+   "early": "191/1000",
+   "emit": "32291/62500",
+   "eps0": "27/200000",
+   "etaH": "41891/1000000",
+   "etaJ": "24753/1000000",
+   "etaM": "5619/1000000",
+   "latchHi": "257/250000",
+   "latchLo": "1027/1000000"
+  },
+  "K3": {
+   "Q": "919677/1000000",
+   "aHi": "611/1250",
+   "aLo": "48089/100000",
+   "aRef": "96969/200000",
+   "alpha": "791/200000",
+   "delta": "101/20000",
+   "early": "19/100",
+   "emit": "32291/62500",
+   "eps0": "27/200000",
+   "etaH": "41891/1000000",
+   "etaJ": "24753/1000000",
+   "etaM": "5619/1000000",
+   "latchHi": "257/250000",
+   "latchLo": "1027/1000000"
+  }
+ },
+ "mirror": {
+  "K0": {
+   "FiringAfter": true,
+   "FiringBefore": true,
+   "Order": true,
+   "Premises": true,
+   "SilenceAfter": true,
+   "SilenceBefore": true,
+   "Timing": true
+  },
+  "K3": {
+   "FiringAfter": true,
+   "FiringBefore": true,
+   "Order": true,
+   "Premises": true,
+   "SilenceAfter": true,
+   "SilenceBefore": true,
+   "Timing": true
+  }
+ },
+ "observed": {
+  "fired_absent": true,
+  "same_sample": true,
+  "silent_present": true
+ },
+ "open_premises": [
+  "[I] the leak along the trajectory: gate_silence and gate_firing (research/circuit/lean/CircuitInverterGateProof.lean, proof/inverter-bridge 13aba3a, built and audited here) take a time-varying leak with gap |leak u - a'| <= alpha and stateBound |actual u| <= X as hypotheses. The gate checks that both measured side rates lie in [a' - alpha, a' + alpha] and that the measured max |x| <= H0 hl (StateBound). That the cell's leak at every time is one of the two fitted side rates is a modelling step, not a measurement of leak(t).",
+  "the measured real hypotheses of gate_silence and gate_firing (actualLaw, integrability, initialError, helpError on every prefix, inhibitorySign and wrongSign split, wrongCharge, charge, offCharge, thresholdError, actualCont) are claims of the simulation, supplied as the outward-rounded numbers; they are not derived in Lean.",
+  "the latch: the contact-to-latch delay is a measured constant, not a proved bound."
+ ],
+ "room_K3": true,
+ "seed": 6158,
+ "state_bound": {
+  "absent_on_whole_slot": 1.222058730404,
+  "limit": "27/20",
+  "verdict": true,
+  "xAbsent": "19089/15625",
+  "xPresent": "421511/500000"
+ },
+ "timing": {
+  "emitEarly": "2/5",
+  "emitLate": "13/20",
+  "window": "1/4"
+ },
+ "verdict_status": "conditional on open_premises: not a proof that the instance meets the theorems"
+}
