@@ -1,0 +1,7 @@
+#!/bin/sh
+# pre-receive: refuse what GitHub's branch protection refuses for the seal log: a deletion or a non-fast-forward update
+z=0000000000000000000000000000000000000000
+while read old new ref; do
+  if [ "$new" = "$z" ]; then echo "refused: deletion of $ref" >&2; exit 1; fi
+  if [ "$old" != "$z" ] && ! git merge-base --is-ancestor "$old" "$new"; then echo "refused: non-fast-forward $ref" >&2; exit 1; fi
+done

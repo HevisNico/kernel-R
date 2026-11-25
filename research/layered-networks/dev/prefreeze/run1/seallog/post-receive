@@ -1,0 +1,5 @@
+#!/bin/sh
+# post-receive: the server's own record of when each push arrived (UTC), for sealpush.times SOURCE bare
+while read old new ref; do
+  echo "$new $ref $(date -u +%Y-%m-%dT%H:%M:%S.%NZ)" >> "$GIT_DIR/push_times.log"
+done
