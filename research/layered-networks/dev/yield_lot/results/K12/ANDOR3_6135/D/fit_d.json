@@ -1,0 +1,630 @@
+{
+ "cells": [
+  {
+   "cell": "c1_0",
+   "gate": "both",
+   "measured": true,
+   "why_not_measured": [],
+   "anchors": {
+    "d": 7076,
+    "g": {
+     "1": 43391,
+     "2": 43391
+    },
+    "H": 52
+   },
+   "D_mV": {
+    "1": "3059520406854125/1125899906842624",
+    "2": "1520921889158375/562949953421312"
+   },
+   "need": {
+    "0": 1
+   },
+   "maxWrites": 2,
+   "settled_writes": {
+    "1": 1,
+    "2": 1
+   },
+   "guarded": {
+    "help": 0,
+    "gain": {
+     "1": 43391,
+     "2": 43391
+    },
+    "dose": 7076
+   },
+   "epsilon": 0,
+   "sensitivity": {
+    "1": "274719577269600256/105500703684625",
+    "2": "3983433870409203712/1520921889158375"
+   },
+   "drift_V": {
+    "1": "1801439851/18014398509481984",
+    "2": "1801439851/18014398509481984"
+   },
+   "budgets": {
+    "K0": {
+     "train_base": 157,
+     "test_base": 157,
+     "H": 52,
+     "H_drift": 1,
+     "D1": 0,
+     "D2": 0,
+     "H_D4": 71,
+     "D4_stage": "1/200",
+     "D4_source": "calibration.json d4_stage",
+     "trainError": 281,
+     "testError": 281
+    },
+    "K3": {
+     "train_base": 2284,
+     "test_base": 2284,
+     "H": 52,
+     "H_drift": 1,
+     "D1": 0,
+     "D2": 0,
+     "H_D4": 71,
+     "D4_stage": "1/200",
+     "D4_source": "calibration.json d4_stage",
+     "trainError": 2408,
+     "testError": 2408
+    }
+   },
+   "verdicts": {
+    "K0": {
+     "valid": true,
+     "trained_word_matches_model": true,
+     "training_calibration": true,
+     "read_calibration": true,
+     "failing": [],
+     "min_slack": {
+      "dose > 0": 7076,
+      "g0: 0 < stop \u2264 maxWrites (stop 1, maxWrites 2)": 1,
+      "g0: early silence k=0": 12937,
+      "g0: stop margin": 654,
+      "rail port 1": 949533,
+      "rail port 2": 949533,
+      "silent mask ()": 99719,
+      "silent mask (1,)": 49252,
+      "silent mask (2,)": 49252,
+      "anchor (1, 2)": 654
+     },
+     "training_residual_min_slack": 281,
+     "decoder_exact_training": true,
+     "test_residual_min_slack": 280,
+     "decoder_exact_reads": true,
+     "anchor_min_slack": 278,
+     "ok": true
+    },
+    "K3": {
+     "valid": false,
+     "trained_word_matches_model": true,
+     "training_calibration": true,
+     "read_calibration": true,
+     "failing": [
+      "g0: stop margin (slack -1473)",
+      "anchor (1, 2) (slack -1473)"
+     ],
+     "min_slack": {
+      "dose > 0": 7076,
+      "g0: 0 < stop \u2264 maxWrites (stop 1, maxWrites 2)": 1,
+      "g0: early silence k=0": 10810,
+      "g0: stop margin": -1473,
+      "rail port 1": 949533,
+      "rail port 2": 949533,
+      "silent mask ()": 97592,
+      "silent mask (1,)": 47125,
+      "silent mask (2,)": 47125,
+      "anchor (1, 2)": -1473
+     },
+     "training_residual_min_slack": 2408,
+     "decoder_exact_training": true,
+     "test_residual_min_slack": 2407,
+     "decoder_exact_reads": true,
+     "anchor_min_slack": 2405,
+     "ok": false
+    }
+   },
+   "lean_cell": {
+    "K0": {
+     "gate": "both",
+     "help": 0,
+     "gain": {
+      "1": 43391,
+      "2": 43391
+     },
+     "dose": 7076,
+     "threshold": 100000,
+     "maxWrites": 2,
+     "rail": 1000000,
+     "trainError": 281,
+     "testError": 281
+    },
+    "K3": {
+     "gate": "both",
+     "help": 0,
+     "gain": {
+      "1": 43391,
+      "2": 43391
+     },
+     "dose": 7076,
+     "threshold": 100000,
+     "maxWrites": 2,
+     "rail": 1000000,
+     "trainError": 2408,
+     "testError": 2408
+    }
+   }
+  },
+  {
+   "cell": "c1_1",
+   "gate": "copy",
+   "measured": true,
+   "why_not_measured": [],
+   "anchors": {
+    "d": 7670,
+    "g": {
+     "1": 88641,
+     "2": 0
+    },
+    "H": 15
+   },
+   "D_mV": {
+    "1": "1528943925994625/562949953421312"
+   },
+   "need": {
+    "0": 2
+   },
+   "maxWrites": 3,
+   "settled_writes": {
+    "1": 2,
+    "2": 0
+   },
+   "guarded": {
+    "help": 0,
+    "gain": {
+     "1": 88641,
+     "2": 0
+    },
+    "dose": 7670
+   },
+   "epsilon": 0,
+   "sensitivity": {
+    "1": "863565228548292608/305788785198925"
+   },
+   "drift_V": {
+    "1": "450359963/4503599627370496"
+   },
+   "budgets": {
+    "K0": {
+     "train_base": 85,
+     "test_base": 85,
+     "H": 15,
+     "H_drift": 1,
+     "D1": 0,
+     "D2": 0,
+     "H_D4": 39,
+     "D4_stage": "1/200",
+     "D4_source": "calibration.json d4_stage",
+     "trainError": 140,
+     "testError": 140
+    },
+    "K3": {
+     "train_base": 1238,
+     "test_base": 1238,
+     "H": 15,
+     "H_drift": 1,
+     "D1": 0,
+     "D2": 0,
+     "H_D4": 39,
+     "D4_stage": "1/200",
+     "D4_source": "calibration.json d4_stage",
+     "trainError": 1293,
+     "testError": 1293
+    }
+   },
+   "verdicts": {
+    "K0": {
+     "valid": true,
+     "trained_word_matches_model": true,
+     "training_calibration": true,
+     "read_calibration": true,
+     "failing": [],
+     "min_slack": {
+      "dose > 0": 7670,
+      "g0: 0 < stop \u2264 maxWrites (stop 2, maxWrites 3)": 1,
+      "g0: early silence k=0": 11219,
+      "g0: early silence k=1": 3549,
+      "g0: stop margin": 3842,
+      "rail port 1": 896019,
+      "rail port 2": 1000000,
+      "silent mask ()": 99860,
+      "silent mask (2,)": 99860,
+      "anchor (1,)": 3842
+     },
+     "training_residual_min_slack": 140,
+     "decoder_exact_training": true,
+     "test_residual_min_slack": null,
+     "decoder_exact_reads": true,
+     "anchor_min_slack": 138,
+     "ok": true
+    },
+    "K3": {
+     "valid": true,
+     "trained_word_matches_model": true,
+     "training_calibration": true,
+     "read_calibration": true,
+     "failing": [],
+     "min_slack": {
+      "dose > 0": 7670,
+      "g0: 0 < stop \u2264 maxWrites (stop 2, maxWrites 3)": 1,
+      "g0: early silence k=0": 10066,
+      "g0: early silence k=1": 2396,
+      "g0: stop margin": 2689,
+      "rail port 1": 896019,
+      "rail port 2": 1000000,
+      "silent mask ()": 98707,
+      "silent mask (2,)": 98707,
+      "anchor (1,)": 2689
+     },
+     "training_residual_min_slack": 1293,
+     "decoder_exact_training": true,
+     "test_residual_min_slack": null,
+     "decoder_exact_reads": true,
+     "anchor_min_slack": 1291,
+     "ok": true
+    }
+   },
+   "lean_cell": {
+    "K0": {
+     "gate": "copy",
+     "help": 0,
+     "gain": {
+      "1": 88641,
+      "2": 0
+     },
+     "dose": 7670,
+     "threshold": 100000,
+     "maxWrites": 3,
+     "rail": 1000000,
+     "trainError": 140,
+     "testError": 140
+    },
+    "K3": {
+     "gate": "copy",
+     "help": 0,
+     "gain": {
+      "1": 88641,
+      "2": 0
+     },
+     "dose": 7670,
+     "threshold": 100000,
+     "maxWrites": 3,
+     "rail": 1000000,
+     "trainError": 1293,
+     "testError": 1293
+    }
+   }
+  },
+  {
+   "cell": "c2_0",
+   "gate": "either",
+   "measured": true,
+   "why_not_measured": [],
+   "anchors": {
+    "d": 21335,
+    "g": {
+     "1": 41082,
+     "2": 58920
+    },
+    "H": 78
+   },
+   "D_mV": {
+    "1": "778606322777829375/288230376151711744",
+    "2": "3040154928456375/1125899906842624"
+   },
+   "need": {
+    "0": 3,
+    "1": 2
+   },
+   "maxWrites": 3,
+   "settled_writes": {
+    "1": 3,
+    "2": 2
+   },
+   "guarded": {
+    "help": 0,
+    "gain": {
+     "1": 41083,
+     "2": 58920
+    },
+    "dose": 21334
+   },
+   "epsilon": 2,
+   "sensitivity": {
+    "1": "6149106844820618346496/778606322777829375",
+    "2": "24019948612580540416/3040154928456375"
+   },
+   "drift_V": {
+    "1": "1801439851/9007199254740992",
+    "2": "1801439851/18014398509481984"
+   },
+   "budgets": {
+    "K0": {
+     "train_base": 240,
+     "test_base": 240,
+     "H": 78,
+     "H_drift": 3,
+     "D1": 0,
+     "D2": 0,
+     "H_D4": 107,
+     "D4_stage": "1/200",
+     "D4_source": "calibration.json d4_stage",
+     "trainError": 428,
+     "testError": 428
+    },
+    "K3": {
+     "train_base": 3468,
+     "test_base": 3468,
+     "H": 78,
+     "H_drift": 3,
+     "D1": 0,
+     "D2": 0,
+     "H_D4": 107,
+     "D4_stage": "1/200",
+     "D4_source": "calibration.json d4_stage",
+     "trainError": 3656,
+     "testError": 3656
+    }
+   },
+   "verdicts": {
+    "K0": {
+     "valid": true,
+     "trained_word_matches_model": true,
+     "training_calibration": true,
+     "read_calibration": true,
+     "failing": [],
+     "min_slack": {
+      "dose > 0": 21334,
+      "g0: 0 < stop \u2264 maxWrites (stop 3, maxWrites 3)": 1,
+      "g0: early silence k=0": 58489,
+      "g0: early silence k=1": 37155,
+      "g0: early silence k=2": 15821,
+      "g0: stop margin": 4658,
+      "g1: 0 < stop \u2264 maxWrites (stop 2, maxWrites 3)": 1,
+      "g1: early silence k=0": 40652,
+      "g1: early silence k=1": 19318,
+      "g1: stop margin": 1161,
+      "rail port 1": 894915,
+      "rail port 2": 898412,
+      "silent mask ()": 99572,
+      "anchor (1,)": 4658,
+      "anchor (2,)": 1161
+     },
+     "training_residual_min_slack": 426,
+     "decoder_exact_training": true,
+     "test_residual_min_slack": null,
+     "decoder_exact_reads": true,
+     "anchor_min_slack": 421,
+     "ok": true
+    },
+    "K3": {
+     "valid": false,
+     "trained_word_matches_model": true,
+     "training_calibration": true,
+     "read_calibration": true,
+     "failing": [
+      "g1: stop margin (slack -2067)",
+      "anchor (2,) (slack -2067)"
+     ],
+     "min_slack": {
+      "dose > 0": 21334,
+      "g0: 0 < stop \u2264 maxWrites (stop 3, maxWrites 3)": 1,
+      "g0: early silence k=0": 55261,
+      "g0: early silence k=1": 33927,
+      "g0: early silence k=2": 12593,
+      "g0: stop margin": 1430,
+      "g1: 0 < stop \u2264 maxWrites (stop 2, maxWrites 3)": 1,
+      "g1: early silence k=0": 37424,
+      "g1: early silence k=1": 16090,
+      "g1: stop margin": -2067,
+      "rail port 1": 894915,
+      "rail port 2": 898412,
+      "silent mask ()": 96344,
+      "anchor (1,)": 1430,
+      "anchor (2,)": -2067
+     },
+     "training_residual_min_slack": 3654,
+     "decoder_exact_training": true,
+     "test_residual_min_slack": null,
+     "decoder_exact_reads": true,
+     "anchor_min_slack": 3649,
+     "ok": false
+    }
+   },
+   "lean_cell": {
+    "K0": {
+     "gate": "either",
+     "help": 0,
+     "gain": {
+      "1": 41083,
+      "2": 58920
+     },
+     "dose": 21334,
+     "threshold": 100000,
+     "maxWrites": 3,
+     "rail": 1000000,
+     "trainError": 428,
+     "testError": 428
+    },
+    "K3": {
+     "gate": "either",
+     "help": 0,
+     "gain": {
+      "1": 41083,
+      "2": 58920
+     },
+     "dose": 21334,
+     "threshold": 100000,
+     "maxWrites": 3,
+     "rail": 1000000,
+     "trainError": 3656,
+     "testError": 3656
+    }
+   },
+   "testError_rule": "one-port"
+  },
+  {
+   "cell": "c3_0",
+   "gate": "copy",
+   "measured": true,
+   "why_not_measured": [],
+   "anchors": {
+    "d": 8842,
+    "g": {
+     "1": 79263,
+     "2": 0
+    },
+    "H": 17
+   },
+   "D_mV": {
+    "1": "778644753494645375/288230376151711744"
+   },
+   "need": {
+    "0": 3
+   },
+   "maxWrites": 4,
+   "settled_writes": {
+    "1": 3,
+    "2": 0
+   },
+   "guarded": {
+    "help": 0,
+    "gain": {
+     "1": 79263,
+     "2": 0
+    },
+    "dose": 8842
+   },
+   "epsilon": 0,
+   "sensitivity": {
+    "1": "2548532985933435240448/778644753494645375"
+   },
+   "drift_V": {
+    "1": "3602879703/18014398509481984"
+   },
+   "budgets": {
+    "K0": {
+     "train_base": 99,
+     "test_base": 99,
+     "H": 17,
+     "H_drift": 1,
+     "D1": 0,
+     "D2": 0,
+     "H_D4": 45,
+     "D4_stage": "1/200",
+     "D4_source": "calibration.json d4_stage",
+     "trainError": 162,
+     "testError": 162
+    },
+    "K3": {
+     "train_base": 1437,
+     "test_base": 1437,
+     "H": 17,
+     "H_drift": 1,
+     "D1": 0,
+     "D2": 0,
+     "H_D4": 45,
+     "D4_stage": "1/200",
+     "D4_source": "calibration.json d4_stage",
+     "trainError": 1500,
+     "testError": 1500
+    }
+   },
+   "verdicts": {
+    "K0": {
+     "valid": true,
+     "trained_word_matches_model": true,
+     "training_calibration": true,
+     "read_calibration": true,
+     "failing": [],
+     "min_slack": {
+      "dose > 0": 8842,
+      "g0: 0 < stop \u2264 maxWrites (stop 3, maxWrites 4)": 1,
+      "g0: early silence k=0": 20575,
+      "g0: early silence k=1": 11733,
+      "g0: early silence k=2": 2891,
+      "g0: stop margin": 5628,
+      "rail port 1": 894211,
+      "rail port 2": 1000000,
+      "silent mask ()": 99838,
+      "silent mask (2,)": 99838,
+      "anchor (1,)": 5628
+     },
+     "training_residual_min_slack": 162,
+     "decoder_exact_training": true,
+     "test_residual_min_slack": null,
+     "decoder_exact_reads": true,
+     "anchor_min_slack": 159,
+     "ok": true
+    },
+    "K3": {
+     "valid": true,
+     "trained_word_matches_model": true,
+     "training_calibration": true,
+     "read_calibration": true,
+     "failing": [],
+     "min_slack": {
+      "dose > 0": 8842,
+      "g0: 0 < stop \u2264 maxWrites (stop 3, maxWrites 4)": 1,
+      "g0: early silence k=0": 19237,
+      "g0: early silence k=1": 10395,
+      "g0: early silence k=2": 1553,
+      "g0: stop margin": 4290,
+      "rail port 1": 894211,
+      "rail port 2": 1000000,
+      "silent mask ()": 98500,
+      "silent mask (2,)": 98500,
+      "anchor (1,)": 4290
+     },
+     "training_residual_min_slack": 1500,
+     "decoder_exact_training": true,
+     "test_residual_min_slack": null,
+     "decoder_exact_reads": true,
+     "anchor_min_slack": 1497,
+     "ok": true
+    }
+   },
+   "lean_cell": {
+    "K0": {
+     "gate": "copy",
+     "help": 0,
+     "gain": {
+      "1": 79263,
+      "2": 0
+     },
+     "dose": 8842,
+     "threshold": 100000,
+     "maxWrites": 4,
+     "rail": 1000000,
+     "trainError": 162,
+     "testError": 162
+    },
+    "K3": {
+     "gate": "copy",
+     "help": 0,
+     "gain": {
+      "1": 79263,
+      "2": 0
+     },
+     "dose": 8842,
+     "threshold": 100000,
+     "maxWrites": 4,
+     "rail": 1000000,
+     "trainError": 1500,
+     "testError": 1500
+    }
+   }
+  }
+ ]
+}
