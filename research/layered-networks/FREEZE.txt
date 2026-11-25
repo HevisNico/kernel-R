@@ -1,0 +1,67 @@
+LAYERED CAMPAIGN FREEZE (prepared 2026-11-25, local; not yet pushed)
+
+Branch tips (on origin when this was written):
+  main                              3f27bb36dadd77a57e27b8fa80f81c3864a02b0e
+  research/layered-networks         458bc7a6d763127ff2fe0214e2cb79a1a6549f9b
+  research/inverter-instances       d599300d51fcf3a1a4c33d103b89827f8ac4da41
+  research/layered-stage-d          f2019b00 (local; on origin 26a2d9f81fa9f2657bec1661ea7e542e4f0c8637)
+  research/layered-campaign-int     this commit's parents (on origin 1fde95257d97862c5c973d956f547370f7dd5277)
+
+Pins:
+  FREEZE_PINS.json                  sha256 eb30b9a2cd2d3a63a66675985ff00c7045bedb941e345cab64c1015e3d1ad8dc  (113 files)
+  EXCLUDED.json                     sha256 e8666970c914e7d7bfee7f80ca1bb5979db78135795c31034f1eb665519a891e
+    seeds_sha256                    78389a193da0fdcac2a97b37068de463276320188559cfed1779df495a23f2e7  (15323 integers, 218 refs)
+  EXCLUDED_PRINT.txt                sha256 edd6fea8c7fe23fcf1e8adfed314ceac00d1d0410c846a3a4bdadad440639b03
+  analyze8.py (the analysis)        sha256 df2ae67cd3ee1bedd2cc998d8fb883d74d2ec1889eefb24b1dd5938740235cde
+  d4_regate.py (its D4 regate)      sha256 3827d1a5b2a1c7a819ef293afbe5b00f822e0a78fb4ce12171ace76a3aa5c59b
+  draw_seeds.py (the draw)          sha256 d793da47f402d296018d62cebeb7ee01cce34c76047d80287c84b30092d20e32
+  beacon_verify.py (the beacon)     sha256 2339e04eceb90533b6afd842cb6184bd4bfbeee288db22725747f345757e9bd8
+  beacon_chain.py (the chain)       sha256 7188dda1e46e01570fd04e71287dbfd6703f8e6561dcd59ee3b3689825b4124c
+  campaign_run12.py (the driver)    sha256 4d3b018bb04de5747e6c9573484fde9fa5a883cad02521d0ce15f2c55b901082
+
+Tools (checked by envcheck_layered4 before every run):
+  Python 3.13.18
+  Lean 4.35.0, the toolchain's bin/lean    sha256 bf8d54e4714cc4b03d3f6bb34c83b7202b87e49c8bfcbff6895c085bb90ceb38
+  numpy 2.3.5, package files               files_sha256 cd6ab151bc776cb27294b0cdf325a96cd493bd3553887c944d610061c779e887
+  ngspice 42                               sha256 820658317b0b54035208da41936fd6871ce924036e5ea4113a4168b821b7fc45
+  SKY130 PDK (efabless sky130_fd_pr)       commit 1232782c1b9fab3aacda74d67ce7c92bf7da8105
+  the beacon check                         py_ecc 8.0.0 and its dependencies (requirements_beacon.txt)
+
+Driver to run: research/layered-networks/campaign_run12.py (launch | wait), with the plans written from the draw.
+Analysis: research/layered-networks/analyze8.py (analyze7, with the proportional D4 rule written in its docstring:
+  per group, D4* = the largest audited |s*_par - s*_solo|; if D4* > 0.005, every unaudited instance is regated from
+  its sealed D/record.json at d4_stage = D4* (d4_regate.py, no simulation) and is premise_flagged_D4 at a level where
+  its gate fails; nothing removes a refutation; the sealed predictions are never modified).
+Read-only answers: D4_AUDIT.md (the D4 audit as coded: no pass criterion), dev/yield_lot/aggregate/RECOUNT_NOISE4.md
+  (the lot's inverter K3 room under noise4: no change).
+
+SEED DRAW
+  draw_seeds.py draw <beacon randomness> <ROUND> EXCLUDED.json DRAW.json NOT1=60 ANDOR3=32 XOR3=37
+
+BEACON: drand quicknet (pinned; beacon_chain.QUICKNET, its /info of 2026-11-25 from api.drand.sh and api2.drand.sh)
+  chain hash   52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971
+               (recomputed offline by beacon_chain.chain_hash: sha256(period u32 BE, genesis i64 BE, public key,
+               groupHash, beacon ID "quicknet"))
+  public key   83cf0f2896adee7eb8b5f01fcad3912212c437e0073e911fb90022d3e760183c8c4b450b6a0a6c3ac6a5776a2d1064510d
+               1fec758c921cc22b0e17e63aaf4bcb5ed66304de9cf809bd274ca73bab4af5a6e9c76a4bc09e76eae8991ef5ece45a
+               (one string, wrapped here)
+  genesis      1692803367
+  period       3 s
+  scheme       bls-unchained-g1-rfc9380
+  groupHash    f477d5c89f21a17c863a7f937c6a6d15859414d2be09cd448d4279af331c5d3e
+  Checked: beacon_verify.py verifies the published rounds 1000000, 20000000 and 34278954 against this key, and fails
+  on one changed byte of a signature, round or key (tests/test_beacon_published.py).
+
+ROUND (the rule; no fixed time)
+  ROUND is the first quicknet round whose time, 1692803367 + (ROUND - 1) * 3, is at least 600 s after t_push.
+  t_push is the GitHub push time of the FIRST commit on branch evidence/combined-draw that adds DRAW_ANNOUNCE.txt.
+  So ROUND = ceil((t_push + 600 - 1692803367) / 3) + 1 (beacon_verify.py round), with t_push in seconds UTC.
+  - The coordinator pushes that commit once, alone, after the rehearsal. Only the first such commit counts; the
+    branch is append-only.
+  - The coordinator draws.
+  - It verifies the round with the frozen beacon_verify.py against the pinned key above: the BLS signature, and
+    randomness = sha256(signature).
+  - It pushes DRAW.json carrying the round, its signature beside its randomness, and the announce commit's push
+    time, so that anyone can recheck the draw offline.
+  - FALLBACK: if both api.drand.sh and api2.drand.sh are down at draw time, the owner fetches the round from any drand
+    relay, and the frozen beacon_verify.py verifies it against the pinned key. The source of the round does not matter.
