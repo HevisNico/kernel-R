@@ -1,0 +1,74 @@
+{
+ "env_sha256": "ed23224143414a05cb654f3db73bc6c8c2cde3e83ba244981d23c26435dbea11",
+ "group": "NOT1",
+ "seed": 6219,
+ "steps": {
+  "D": {
+   "argv": [
+    "/root/yieldK05/venv/bin/python",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d5.py",
+    "run",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/root/yieldK05/out/NOT1_6219/D",
+    "6219",
+    "overlay=config_inverter_c5.json",
+    "rule=one-port",
+    "inverters=/root/yieldK05/out/NOT1_6219/inv/inverter_gate.json"
+   ],
+   "cores": 1,
+   "cpu_s": 211.3,
+   "ended": "2026-11-25T06:27:07Z",
+   "outputs": {
+    "D/prediction.json": "93975e26c9cd0799930df68480a672763ae0124eec20a130c19b904710878b31",
+    "D/record.json": "b1fc9f93057ed8a2d32950cfaae5229167e4fe08e2bb232f2a731ff9636290b7"
+   },
+   "started": "2026-11-25T06:23:34Z",
+   "status": "done",
+   "wall_s": 212.8
+  },
+  "deck": {
+   "argv": [
+    "/root/yieldK05/venv/bin/python",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d5.py",
+    "deck",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "/root/yieldK05/out/NOT1_6219/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-25T06:07:34Z",
+   "outputs": {
+    "deck.spice": "519a6ce2db19bb6cf7b454f7b9fc6d86b0bf2ad8a4fdb8c6cfd09587272a4c02"
+   },
+   "started": "2026-11-25T06:07:34Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "inverters": {
+   "argv": [
+    "/root/yieldK05/venv/bin/python",
+    "-m",
+    "invinst.indeck",
+    "/root/yieldK05/out/NOT1_6219/inv",
+    "--deck",
+    "/root/yieldK05/out/NOT1_6219/deck.spice",
+    "--seed",
+    "6219"
+   ],
+   "cores": 1,
+   "cpu_s": 161.9,
+   "ended": "2026-11-25T06:11:44Z",
+   "outputs": {
+    "inv/SHA256SUMS": "4173750b4ab85dc30d5e115574c1600af6cc33e8689f07ee3c5206ed6b6af175",
+    "inv/inverter_gate.json": "e17eba381f230134a7290bb2b296939ff90558bfc7d46e4c0ca5f43862a6ca2f"
+   },
+   "started": "2026-11-25T06:07:34Z",
+   "status": "done",
+   "wall_s": 250.3
+  }
+ },
+ "tag": "NOT1"
+}
