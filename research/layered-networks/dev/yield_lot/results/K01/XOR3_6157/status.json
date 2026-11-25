@@ -1,0 +1,74 @@
+{
+ "env_sha256": "4a24564c0968c1d26a5046b68dae52401d68789859e78eda827ea3977a113944",
+ "group": "XOR3",
+ "seed": 6157,
+ "steps": {
+  "D": {
+   "argv": [
+    "/root/yieldK01/venv/bin/python",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d5.py",
+    "run",
+    "/home/user/kernel-R/research/layered-networks/specs/xor3.json",
+    "/root/yieldK01/out/XOR3_6157/D",
+    "6157",
+    "overlay=config_inverter_c5.json",
+    "rule=one-port",
+    "inverters=/root/yieldK01/out/XOR3_6157/inv/inverter_gate.json"
+   ],
+   "cores": 1,
+   "cpu_s": 3510.5,
+   "ended": "2026-11-25T07:22:11Z",
+   "outputs": {
+    "D/prediction.json": "5d4396307d57018947ab679116c7a67198a9efe6ae2a5cd688da7749eaf615ea",
+    "D/record.json": "ea448ad84517a6b9161111ba4241ec873c796c3ee89496c681df8902f1dc4dff"
+   },
+   "started": "2026-11-25T06:23:05Z",
+   "status": "done",
+   "wall_s": 3545.5
+  },
+  "deck": {
+   "argv": [
+    "/root/yieldK01/venv/bin/python",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d5.py",
+    "deck",
+    "/home/user/kernel-R/research/layered-networks/specs/xor3.json",
+    "/root/yieldK01/out/XOR3_6157/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-25T06:07:25Z",
+   "outputs": {
+    "deck.spice": "28b8df4502b93e7a73ebd3ba6553f1d60e8fb46669029e0a2db58359a7301c9e"
+   },
+   "started": "2026-11-25T06:07:24Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "inverters": {
+   "argv": [
+    "/root/yieldK01/venv/bin/python",
+    "-m",
+    "invinst.indeck",
+    "/root/yieldK01/out/XOR3_6157/inv",
+    "--deck",
+    "/root/yieldK01/out/XOR3_6157/deck.spice",
+    "--seed",
+    "6157"
+   ],
+   "cores": 2,
+   "cpu_s": 684.1,
+   "ended": "2026-11-25T06:17:13Z",
+   "outputs": {
+    "inv/SHA256SUMS": "6aa521e0c8e1196b32d8f2aff906776b7e920932f64348fe26a9590f1d37f5bf",
+    "inv/inverter_gate.json": "c4bc63068fba6d2f9ddff4c0c651863736808ee04d2596ffb1730c6b9dd4e779"
+   },
+   "started": "2026-11-25T06:11:13Z",
+   "status": "done",
+   "wall_s": 360.1
+  }
+ },
+ "tag": "XOR3"
+}
