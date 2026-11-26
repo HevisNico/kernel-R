@@ -61,5 +61,11 @@ analyze10. Each item says whether it changes a step, a record, or only a driver 
   analysis.py, flags D4 only. The other three are not computed by any analysis: the data for them is in the trace
   extracts (POSTCHECK_DATA.md). **This is a gap between the text and the analysis.** Closing it is new analysis code,
   which the feature freeze forbids without the owner's decision. It is listed here for that decision and not done.
+- **The secondary Lean control (§2, and in §7's list of RESULTS.json contents).** The text says the kernel's
+  recognition theorem (`layered_recognition_at`, and `layered_inverters_chained` for G1 and G3) is applied to the
+  stage-N traces and reported per instance. No driver and no analysis does it: not analyze10, not analysis.py. Only
+  the dev tool leancal2.py touches that theorem. **This is a second gap between the text and the code.** It is
+  listed for the owner's decision and not done: either new analysis code (forbidden by the freeze without that
+  decision), or an amendment that drops the promise.
 - **§7's "One analysis … analyze8.py"** names the analysis of the review candidate; it is analysis.py now. This needs
   an amendment of the text, not of the code.
