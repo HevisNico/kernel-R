@@ -32,7 +32,19 @@ THE LAYERS, in order (each as its file's docstring states):
 9. analyze10: the stage-D script named by the prediction, stage_d6 with its kernel field.
 
 RESULTS.json is analyze10's, with these changes, all listed: the format (layered-campaign-analysis/1), analysis_sha256
-in place of analyze*_sha256, `mode`, `roots_sha256sums` and `root_drivers`.
+in place of analyze*_sha256, `mode`, `roots_sha256sums`, `root_drivers` and `pins`; and these defect fixes (the
+audit's A1–A6):
+- K3: an instance is refuted if ANY completed sealed comparison of a noisy round is "refuted"; held only if every
+  round completed and agrees; not completed when no completed round refutes and a round is missing. The seal-log
+  checks of a counted level read only its completed rounds.
+- Eligibility and room are read from the SEALED prediction (seal/<inst>.json); an instance whose D/prediction.json
+  differs from its seal is a seal defect (not sealed, not counted).
+- The thresholds are read once, before the first layer (there is no constant default).
+- The not_sealed row lists each instance with its comparison verdicts.
+- first_failing uses the one step order (ORDER, sealpush included).
+- Campaign mode: FREEZE_PINS.json checked over this tree (campaign.pins_check) and the tree clean; thresholds = the
+  pinned thresholds.json only; times = github or lsremote:LOG only; controls = the noise tree at the frozen template's
+  noise_commit (found among this repository's clean worktrees). Test mode leaves these free.
 """
 import contextlib
 import datetime
@@ -57,7 +69,6 @@ import sealpush as SP  # noqa: E402
 
 PY = sys.executable
 FORMAT = "layered-campaign-analysis/1"
-THRESHOLD = dict(K0=30, K3=5)
 SCRIPTS = ("stage_d6.py", "stage_d5.py", "stage_d4.py", "stage_d3.py")
 SOLO = "this run's solo scans"
 ASSUMPTION = ("the unaudited instances are taken to be no worse than the worst audited instance of their group "
@@ -140,8 +151,7 @@ class Reader:
 
 
 def first_failing(status):
-    order = ["deck", "inverters", "D", "seal", "N0", "C0", "N1", "C1", "N2", "C2", "N3", "C3"]
-    for k in order:
+    for k in ORDER:
         st = status["steps"].get(k)
         if st and st["status"] != "done":
             return dict(step=k, status=st["status"], why=st.get("why"))
@@ -178,7 +188,8 @@ def analyze_root(root):
         name = st_path.parent.name
         status = R.json(f"{name}/status.json")
         group = status["group"]
-        pred = R.json(f"{name}/D/prediction.json")
+        seal_file = next((p for p in sorted((Path(root) / name / "seal").glob("*.json")) if p.name != "MANIFEST.json"), None)
+        pred = R.json(str(seal_file.relative_to(root))) if seal_file else R.json(f"{name}/D/prediction.json")
         comps = {n: R.json(f"{name}/N{n}/comparison.json") for n in range(rounds + 1)}
         row = dict(instance=name, group=group, seed=status["seed"],
                    steps={k: v["status"] for k, v in sorted(status["steps"].items())})
@@ -218,8 +229,11 @@ def analyze_root(root):
                                       runs=sorted(f"C{n}" for n, c in comps.items() if c is not None)))
         noisy = [comps[n] for n in range(1, rounds + 1)]
         if pred["room_K3"]:
-            if all(c is not None and c["verdict"] in ("agrees", "refuted") for c in noisy):
-                row["K3"] = dict(counted=True, refuted=any(c["verdict"] == "refuted" for c in noisy))
+            done_ = [c for c in noisy if c is not None and c["verdict"] in ("agrees", "refuted")]
+            if any(c["verdict"] == "refuted" for c in done_):      # one completed refuting round refutes
+                row["K3"] = dict(counted=True, refuted=True)
+            elif len(done_) == len(noisy):                          # held only if every round completed and agrees
+                row["K3"] = dict(counted=True, refuted=False)
             else:
                 row["K3"] = dict(counted=False)
                 run_failed.append(dict(instance=name, group=group, level="K3", first_failing=fail))
@@ -375,7 +389,7 @@ def same_n0(a, b):
     return out
 
 
-def layer_seals(roots, times_src, kernel_build):
+def layer_seals(roots, times_src, kernel_build, th):
     rows, observed, failed, controls, envs, defects = [], [], [], dict(U=[], duplicate=[], S=[], cross_machine_duplicates=[]), {}, []
     logs, by_inst, plans = {}, {}, {}
     for k, root in enumerate(roots):
@@ -389,6 +403,10 @@ def layer_seals(roots, times_src, kernel_build):
             status = json.loads((root / r["instance"] / "status.json").read_text())
             if r.get("stage_d") is not None:
                 ok1, why1 = regenerate(root, r["instance"], plan, status, kernel_build)
+                sf = next((p for p in sorted((root / r["instance"] / "seal").glob("*.json")) if p.name != "MANIFEST.json"), None)
+                dp = root / r["instance"] / "D" / "prediction.json"
+                if ok1 and (sf is None or not dp.exists() or dp.read_bytes() != sf.read_bytes()):
+                    ok1, why1 = False, "D/prediction.json differs from its seal (the sealed prediction is the one read)"
                 ok2, det2 = seal_log(root, r["instance"], plan, status, logs, times_src)
                 r["seal"] = dict(regenerated_identical=ok1, regeneration_why=why1, log_ok=ok2, log=det2)
                 if not (ok1 and ok2):
@@ -429,8 +447,8 @@ def layer_seals(roots, times_src, kernel_build):
         for level in ("K0", "K3"):
             counted = [r for r in rs if (r.get(level) or {}).get("counted")]
             ref = sorted(r["instance"] for r in counted if r[level]["refuted"])
-            out[level] = dict(counted=len(counted), refuted_instances=ref, threshold=THRESHOLD[level],
-                              verdict=word(len(counted), bool(ref), THRESHOLD[level]),
+            out[level] = dict(counted=len(counted), refuted_instances=ref, threshold=th[level][g],
+                              verdict=word(len(counted), bool(ref), th[level][g]),
                               not_sealed=sorted(r["instance"] for r in rs if (r.get(level) or {}).get("not_sealed")))
         mr = [r for r in rs if r.get("max_rule_comparison")]
         out["max_rule_comparison_counts_for_nothing"] = dict(
@@ -449,7 +467,7 @@ def layer_seals(roots, times_src, kernel_build):
     return rt(dict(times_source=src_desc, machines=len(roots),
                    env={m: dict(static_sha256=e["static_sha256"], env_json_sha256=e["env_json_sha256"]) for m, e in envs.items()},
                    groups=groups, family=family_of(groups), seal_defects=defects, observed_only=observed, run_failed=failed,
-                   controls=controls, instances=rows, thresholds=THRESHOLD))
+                   controls=controls, instances=rows, thresholds=dict(K0=th["K0"], K3=th["K3"])))
 
 
 # ================================================================================================ 3–6
@@ -466,15 +484,24 @@ def regroup(res, threshold_of):
     res["family"] = family_of(res["groups"])
 
 
-def layer_stage_n_seal_log(res, roots):
+def completed_rounds(r, level):
+    """The rounds of a counted level whose comparison completed: N0 at K0; at K3 the completed noisy rounds (all three
+    for a held instance, at least the refuting one for a refuted instance)."""
+    if level == "K0":
+        return [0]
+    comps = r.get("comparisons") or {}
+    return [n for n in (1, 2, 3) if (comps.get(f"C{n}") or {}).get("verdict") in ("agrees", "refuted")]
+
+
+def layer_stage_n_seal_log(res, roots, th):
     for r in res["instances"]:
         root = roots[int(r["machine"].split("_")[1]) - 1]
         commit = ((r.get("seal") or {}).get("log") or {}).get("commit")
-        for level, ns in (("K0", [0]), ("K3", [1, 2, 3])):
+        for level in ("K0", "K3"):
             if not (r.get(level) or {}).get("counted"):
                 continue
             bad = []
-            for n in ns:
+            for n in completed_rounds(r, level):
                 f = root / r["instance"] / f"N{n}" / "SEAL_LOG.json"
                 got = json.loads(f.read_text()).get("commit") if f.exists() else None
                 if got is None or got != commit:
@@ -482,12 +509,11 @@ def layer_stage_n_seal_log(res, roots):
             if bad:
                 r[level] = dict(counted=False, not_sealed=True)
                 res["seal_defects"].append(dict(machine=r["machine"], instance=r["instance"], stage_n_seal_log=bad))
-    regroup(res, lambda g, level: THRESHOLD[level])
+    regroup(res, lambda g, level: th[level][g])
     return rt(res)
 
 
-def layer_thresholds(res, tf):
-    th = json.loads(Path(tf).read_text())
+def layer_thresholds(res, tf, th):
     for g, v in res["groups"].items():
         for level in ("K0", "K3"):
             t = th[level][g]
@@ -503,11 +529,11 @@ def layer_record_seal_log(res, roots):
         plan = json.loads((root / "PLAN.json").read_text())
         branch = (plan.get("seal_push") or {}).get("branch")
         commit = ((r.get("seal") or {}).get("log") or {}).get("commit")
-        for level, ns in (("K0", [0]), ("K3", [1, 2, 3])):
+        for level in ("K0", "K3"):
             if not (r.get(level) or {}).get("counted"):
                 continue
             bad = []
-            for n in ns:
+            for n in completed_rounds(r, level):
                 f = root / r["instance"] / f"N{n}" / "noisy_record.json"
                 sl = json.loads(f.read_text()).get("seal_log") if f.exists() else None
                 if not sl or sl.get("commit") != commit or sl.get("branch") != branch:
@@ -681,7 +707,8 @@ def layer_counts(res):
                 elif x.get("premise_flagged_D4"):
                     row["premise_flagged_D4"].append(name)
                 elif x.get("not_sealed"):
-                    row["not_sealed"].append(name)
+                    row["not_sealed"].append(dict(instance=name, verdicts={
+                        k: (c or {}).get("verdict") for k, c in sorted((r.get("comparisons") or {}).items())}))
                 elif (r["machine"], name, lv) in failed:
                     ff = failed[(r["machine"], name, lv)] or never_run(r, lv)
                     row["not_completed"].append(dict(instance=name, step=ff.get("step"), status=ff.get("status")))
@@ -735,19 +762,39 @@ def main(mode, outdir, *args):
         if out == r or r in out.parents:
             raise Refused(f"refused: OUTDIR {out} lies inside the root {r}")
     drivers = {f"machine_{k}": root_driver(r) for k, r in enumerate(roots, start=1)}
+    times = kw.get("times", "github")
+    tf = Path(kw.get("thresholds", str(HERE / "thresholds.json"))).resolve()
+    controls = kw.get("controls")
+    pc = CP.pins_check()
     if mode == "campaign":
+        if CP.pins_refusal(pc):
+            raise Refused("refused: campaign mode: " + CP.pins_refusal(pc))
+        pinned = {p: h for fs in json.loads(CP.PINS.read_text())["groups"].values() for p, h in fs.items()}
+        if tf != (HERE / "thresholds.json").resolve() or pinned.get("research/layered-networks/thresholds.json") != sha(tf):
+            raise Refused("refused: campaign mode reads the pinned thresholds.json only")
+        if not (times == "github" or times.startswith("lsremote:")):
+            raise Refused(f"refused: campaign mode: times must be github or lsremote:LOG, not {times!r}")
+        noise_commit = json.loads(CP.FROZEN_TEMPLATE.read_text())["noise_commit"]
+        trees = [p for p, h in CP.worktrees() if h == noise_commit and CP.git_head(p)[1]]
+        if not trees:
+            raise Refused(f"refused: campaign mode: no clean worktree at the template's noise_commit {noise_commit[:12]}")
+        want = (Path(trees[0]) / "research" / "layered-networks").resolve()
+        if controls is not None and Path(controls).resolve() != want:
+            raise Refused(f"refused: campaign mode: controls must be the noise tree at {noise_commit[:12]} ({want})")
+        controls = str(want)
         bad = [m for m, d in drivers.items() if d != dict(driver_sha256=sha(HERE / "campaign.py"),
                                                           template_sha256=CP.FROZEN_TEMPLATE_SHA256, mode="CAMPAIGN")]
         if bad:
             raise Refused(f"refused: roots not run by this campaign.py on the frozen template in campaign mode: {bad}")
+    th = json.loads(tf.read_text())
     before = sums_of(roots)
     out.mkdir(parents=True, exist_ok=True)
     build = kernel_library(out)
-    res = layer_seals(roots, kw.get("times", "github"), build)
-    res = layer_stage_n_seal_log(res, roots)
-    res = layer_thresholds(res, kw.get("thresholds", str(HERE / "thresholds.json")))
+    res = layer_seals(roots, times, build, th)
+    res = layer_stage_n_seal_log(res, roots, th)
+    res = layer_thresholds(res, tf, th)
     res = layer_record_seal_log(res, roots)
-    res = layer_duplicates(res, roots, kw.get("controls"))
+    res = layer_duplicates(res, roots, controls)
     res = layer_d4(res, roots)
     res = layer_counts(res)
     after = sums_of(roots)
@@ -755,7 +802,7 @@ def main(mode, outdir, *args):
         raise Refused(f"refused: a root's SHA256SUMS changed during the analysis: {before} -> {after}")
     res.update(format=FORMAT, analysis_sha256=sha(__file__), mode="CAMPAIGN" if mode == "campaign" else "TEST",
                stage_d_script_rule=RULE10, kernel_sources_sha256=CP.KERNEL_SOURCES, root_drivers=drivers,
-               roots_sha256sums=dict(before=before, after=after))
+               roots_sha256sums=dict(before=before, after=after), pins=pc)
     (out / "RESULTS.json").write_bytes(canon(res))
     (out / "SHA256SUMS").write_text(f"{sha(out / 'RESULTS.json')}  RESULTS.json\n")
     print(json.dumps(dict(results_sha256=sha(out / "RESULTS.json"), mode=res["mode"],

@@ -394,6 +394,198 @@ def case_analysis_refuses_test_root(w, root):
     return ok, dict(campaign_on_test=a.stderr.strip()[-200:], outdir_inside=inside.stderr.strip()[-200:])
 
 
+# ------------------------------------------------------------------------------------- the audit's cases (D1–D3, A1–A5)
+
+def tamper_pins(t):
+    """A test commit regenerating FREEZE_PINS.json over this clone, so that every pin matches and campaign.py,
+    analysis.py and campaign_template.json are pinned (as the next freeze will do)."""
+    import hashlib
+    f = t / "research" / "layered-networks" / "FREEZE_PINS.json"
+    d = json.loads(f.read_text())
+    must = ("research/layered-networks/campaign.py", "research/layered-networks/analysis.py",
+            "research/layered-networks/campaign_template.json")
+    d["groups"]["test: the consolidated driver, analysis and template"] = {
+        m: hashlib.sha256((t / m).read_bytes()).hexdigest() for m in must}
+    f.write_text(json.dumps(d, indent=1, sort_keys=True) + "\n")
+    sh("git", "-C", t, "commit", "-q", "-am", "test: pins regenerated (test)")
+
+
+def case_pins(w):
+    """D1 and A5: campaign mode against FREEZE_PINS.json and a clean tree, through launch and analysis.py."""
+    info = w.tree("pins", tamper_pins)
+    tr = info["tree"]
+    L = tr / "research" / "layered-networks"
+    frozen = L / "campaign_template.json"
+    pl = w.plans("pins", tr, frozen)
+    out = {}
+    r = campaign(tr, "check", "campaign", frozen, pl["K02"])
+    tc = json.loads(r.stdout or "{}")
+    out["clean tree, every pin matching: check"] = dict(rc=r.returncode, ok=tc.get("ok"), pins=tc.get("pins"))
+    pinned = L / "fit3.py"                                 # one pinned file changed by one byte, committed (tree clean)
+    pinned.write_bytes(pinned.read_bytes() + b" ")
+    sh("git", "-C", tr, "commit", "-q", "-am", "test: one byte (test)")
+    r1 = campaign(tr, "launch", "campaign", frozen, pl["K02"], w.wd / "root_pins_byte")
+    out["one pinned byte changed: launch"] = (r1.returncode, (r1.stdout + r1.stderr).strip()[-300:])
+    sh("git", "-C", tr, "reset", "-q", "--hard", "HEAD~1")
+    (L / "stray.py").write_text("# untracked (test)\n")    # an untracked .py in the driver's tree
+    r2 = campaign(tr, "launch", "campaign", frozen, pl["K02"], w.wd / "root_pins_untracked")
+    out["untracked .py in the driver's tree: launch"] = (r2.returncode, (r2.stdout + r2.stderr).strip()[-300:])
+    a2 = sh(PY, "-B", L / "analysis.py", "campaign", w.wd / "an_pins_untracked", w.wd / "root_home")
+    out["untracked .py: analysis.py campaign"] = (a2.returncode, a2.stderr.strip()[-300:])
+    (L / "stray.py").unlink()
+    kit = Path(f"{tr}.wt-{json.loads(frozen.read_text())['kit_commit'][:8]}")
+    (kit / "stray.json").write_text("{}\n")                 # an untracked .json in the kit's tree
+    r3 = campaign(tr, "launch", "campaign", frozen, pl["K02"], w.wd / "root_pins_kit")
+    out["untracked .json in the kit tree: launch"] = (r3.returncode, (r3.stdout + r3.stderr).strip()[-300:])
+    (kit / "stray.json").unlink()
+    an = {}
+    for label, extra in (("times=bare", ["times=bare"]), ("thresholds=another file", [f"thresholds={w.wd / 'DRAW.json'}"]),
+                         ("controls=another tree", [f"controls={L}"]), ("a TEST root", [])):
+        a = sh(PY, "-B", L / "analysis.py", "campaign", w.wd / "an_pins", w.wd / "root_home", *extra)
+        an[label] = (a.returncode, a.stderr.strip()[-200:])
+    out["analysis.py campaign, clean pinned tree"] = an
+    ok = r.returncode == 0 and tc.get("ok") is True and not tc["pins"]["mismatched"] and tc["pins"]["tree_clean"] and \
+        r1.returncode != 0 and "pinned files differ" in r1.stderr and "fit3.py" in r1.stderr and \
+        r2.returncode != 0 and "not clean" in r2.stderr and a2.returncode != 0 and "not clean" in a2.stderr and \
+        r3.returncode != 0 and "no clean worktree at kit_commit" in r3.stderr and \
+        not any((w.wd / x).exists() for x in ("root_pins_byte", "root_pins_untracked", "root_pins_kit")) and \
+        "times must be" in an["times=bare"][1] and "pinned thresholds" in an["thresholds=another file"][1] and \
+        "controls must be" in an["controls=another tree"][1] and "roots not run by this campaign.py" in an["a TEST root"][1]
+    return ok, out
+
+
+def children_of(root):
+    return [int(x) for x in sh("pgrep", "-f", f"stage_d6.py run .*{root}/NOT1_6213/D").stdout.split()]
+
+
+def wait_done(tr, root):
+    for _ in range(40):
+        if campaign(tr, "wait", root, 580).returncode == 0:
+            return True
+    return False
+
+
+def case_sigterm_driver_only(w):
+    """D2: SIGTERM to the driver alone (its child left alone): the driver kills its children's groups, then a
+    detached `resume` finds D running, records it interrupted and starts nothing after it."""
+    tr = w.tree("main")["tree"]
+    tt = w.template("sigterm", w.remote("sigterm"))
+    pl = w.plans("sigterm", tr, tt)
+    root = w.wd / "root_sigterm"
+    p = run_bg(tr, "run", "test", tt, pl["K02"], root)
+    assert wait_for(lambda: status(root, "NOT1_6213").get("D", {}).get("status") == "running", 1800)
+    time.sleep(5)
+    kids = children_of(root)
+    os.kill(p.pid, signal.SIGTERM)                       # the driver only
+    p.wait(timeout=120)
+    gone = wait_for(lambda: not children_of(root), 30, 1)
+    sig = json.loads((root / "SIGNALS.json").read_text()) if (root / "SIGNALS.json").exists() else None
+    r = campaign(tr, "resume", "test", tt, pl["K02"], root)
+    done = wait_done(tr, root)
+    st = status(root, "NOT1_6213")
+    ok = bool(kids) and gone and sig and sig[0]["signal"] == "SIGTERM" and sig[0]["killed_process_groups"] and \
+        r.returncode == 0 and done and st["D"]["status"] == "interrupted" and "seal" not in st and (root / "DONE").exists()
+    return ok, dict(children_before=kids, children_gone=gone, signals=sig, resume=r.stdout.strip()[-100:],
+                    steps={k: v["status"] for k, v in st.items()}, pids=(root / "DRIVER_PIDS.log").read_text()
+                    if (root / "DRIVER_PIDS.log").exists() else None)
+
+
+def case_sigkill_driver_only(w):
+    """D2: SIGKILL to the driver alone: its child survives, and `run` and `resume` refuse while it runs. Once the
+    child is gone, `run` records D interrupted and starts nothing after it."""
+    tr = w.tree("main")["tree"]
+    tt = w.template("sigkill", w.remote("sigkill"))
+    pl = w.plans("sigkill", tr, tt)
+    root = w.wd / "root_sigkill"
+    p = run_bg(tr, "run", "test", tt, pl["K02"], root)
+    assert wait_for(lambda: status(root, "NOT1_6213").get("D", {}).get("status") == "running", 1800)
+    time.sleep(5)
+    os.kill(p.pid, signal.SIGKILL)                       # the driver only; it cannot clean up
+    p.wait(timeout=60)
+    kids = children_of(root)
+    r1 = campaign(tr, "run", "test", tt, pl["K02"], root)
+    r2 = campaign(tr, "resume", "test", tt, pl["K02"], root)
+    kill_group(f"stage_d6.py run .*{root}/NOT1_6213/D")
+    time.sleep(3)
+    r3 = campaign(tr, "run", "test", tt, pl["K02"], root)
+    st = status(root, "NOT1_6213")
+    ok = bool(kids) and r1.returncode != 0 and "refused" in r1.stderr and r2.returncode != 0 and "refused" in r2.stderr \
+        and r3.returncode == 0 and st["D"]["status"] == "interrupted" and "seal" not in st and (root / "DONE").exists()
+    return ok, dict(children_after_kill=kids, run_while_child=r1.stderr.strip()[-200:],
+                    resume_while_child=r2.stderr.strip()[-200:], steps={k: v["status"] for k, v in st.items()})
+
+
+def tamper_k3(t):
+    f = t / "research" / "layered-networks" / "indeck_noise4.py"
+    s = f.read_text()
+    a, b = "ok = r.returncode == 0 and bool(seen) and not bad", "sys.exit(0 if main(*sys.argv[1:]) else 1)"
+    assert a in s and b in s
+    s = s.replace(a, "ok = False   # STUB: K3_BUDGET not ok, exit 0 (test c)").replace(b, "main(*sys.argv[1:])\n    sys.exit(0)")
+    f.write_text(s)
+    sh("git", "-C", t, "commit", "-q", "-am", "stub: K3_BUDGET not ok with exit 0 (test)")
+
+
+def case_k3_budget_stop(w):
+    """D3: inverters done but inv/K3_BUDGET.json not ok (a stub tree): D is recorded refused, with the reason."""
+    tr = w.tree("stubk3", tamper_k3)["tree"]
+    tt = w.template("k3stop", w.remote("k3stop"))
+    pl = w.plans("k3stop", tr, tt)
+    root = w.wd / "root_k3stop"
+    r = campaign(tr, "run", "test", tt, pl["K02"], root)
+    st = status(root, "NOT1_6213")
+    ok = r.returncode == 0 and st.get("inverters", {}).get("status") == "done" and \
+        st.get("D", {}).get("status") == "refused" and "K3_BUDGET" in st["D"].get("why", "") and "seal" not in st
+    return ok, dict(steps={k: v["status"] for k, v in st.items()}, D=st.get("D"))
+
+
+def case_analysis_tampered(w, home):
+    """A1 and A2 on tampered copies of the home root (NOT1_6212, with room):
+    - round 1 refuted, round 2 timed out (its comparison gone) → refuted at K3, not 'not completed';
+    - D/prediction.json changed (room_K3 false) → the sealed prediction is the one read, and the instance is a seal
+      defect, not counted."""
+    out, oks = {}, []
+    for label in ("A1", "A2"):
+        root = w.wd / f"root_tampered_{label}"
+        if root.exists():
+            shutil.rmtree(root)
+        shutil.copytree(home["root"], root, symlinks=True)
+        d = root / "NOT1_6212"
+        if label == "A1":
+            c = json.loads((d / "N1" / "comparison.json").read_text())
+            c["verdict"] = "refuted"
+            c["differences"] = (c.get("differences") or []) + [dict(what="word", note="tampered (test)")]
+            (d / "N1" / "comparison.json").write_text(json.dumps(c, indent=1, sort_keys=True) + "\n")
+            (d / "N2" / "comparison.json").unlink()
+            st = json.loads((d / "status.json").read_text())
+            st["steps"]["N2"].update(status="timeout", why="more than 7200 s (tampered, test)")
+            st["steps"].pop("C2", None)
+            (d / "status.json").write_text(json.dumps(st, indent=1, sort_keys=True) + "\n")
+        else:
+            p = json.loads((d / "D" / "prediction.json").read_text())
+            p["room_K3"] = not p["room_K3"]
+            (d / "D" / "prediction.json").write_text(json.dumps(p, indent=1, sort_keys=True) + "\n")
+        an = w.wd / f"an_tampered_{label}"
+        a = sh(PY, "-B", HERE / "analysis.py", "test", an, root, "times=bare")
+        res = json.loads((an / "RESULTS.json").read_text()) if (an / "RESULTS.json").exists() else {}
+        row = next((r for r in res.get("instances", []) if r["instance"] == "NOT1_6212"), {})
+        cnt = (res.get("counts") or {}).get("NOT1", {})
+        if label == "A1":
+            ok = a.returncode == 0 and row.get("K3") == dict(counted=True, refuted=True) and \
+                cnt["K3"]["refuted"]["list"] == ["NOT1_6212"] and res["groups"]["NOT1"]["K3"]["verdict"] == "refuted"
+            out[label] = dict(rc=a.returncode, K3=row.get("K3"), counts_K3=cnt.get("K3"),
+                              verdict=res.get("groups", {}).get("NOT1", {}).get("K3", {}).get("verdict"))
+        else:
+            ns = cnt.get("K3", {}).get("not_sealed", {}).get("list", [])
+            ok = a.returncode == 0 and (row.get("stage_d") or {}).get("room_K3") is True and \
+                (row.get("seal") or {}).get("regeneration_why", "").startswith("D/prediction.json differs") and \
+                not (row.get("K0") or {}).get("counted") and not (row.get("K3") or {}).get("counted") and \
+                [x["instance"] for x in ns] == ["NOT1_6212"] and "verdicts" in ns[0]
+            out[label] = dict(rc=a.returncode, stage_d_room_K3=(row.get("stage_d") or {}).get("room_K3"),
+                              seal=row.get("seal"), K0=row.get("K0"), K3=row.get("K3"), not_sealed_K3=ns)
+        oks.append(ok)
+    return all(oks), out
+
+
 def main(wd, *only):
     w = Work(wd)
     report = {}
@@ -419,10 +611,15 @@ def main(wd, *only):
     run("kernel_mirror_disagreement", case_kernel)
     run("no_pushed_seal", case_no_pushed_seal)
     run("second_seal", case_second_seal)
+    run("sigterm_driver_only", case_sigterm_driver_only)
+    run("sigkill_driver_only", case_sigkill_driver_only)
+    run("k3_budget_stop", case_k3_budget_stop)
     r = run("home_run", case_home)
     if r and len(r) > 2:
         run("differing_duplicate", case_differing_duplicate, r[2])
         run("analysis_refuses", case_analysis_refuses_test_root, r[2]["root"])
+        run("analysis_tampered", case_analysis_tampered, r[2])
+        run("pins", case_pins)
     run("partial_guard_and_resume", case_partial_guard)
     ok = all(v["ok"] for v in report.values())
     report["all_pass"] = ok
