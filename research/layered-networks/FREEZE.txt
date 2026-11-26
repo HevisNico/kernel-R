@@ -1,0 +1,85 @@
+LAYERED CAMPAIGN FREEZE CANDIDATE (prepared 2026-11-26, local; not pushed)
+
+SUPERSEDES: the review candidate at 54689b62 on research/layered-campaign-int is superseded by this one and is not the freeze.
+
+Branch tips (on origin when this was written):
+  main                              3f27bb36dadd77a57e27b8fa80f81c3864a02b0e
+  research/layered-networks         458bc7a6d763127ff2fe0214e2cb79a1a6549f9b
+  research/inverter-instances       d599300d51fcf3a1a4c33d103b89827f8ac4da41
+  research/layered-campaign-int     54689b62e8348af41b483a5b6879ad2cf95cafd7 (the superseded review candidate)
+  research/layered-campaign-freeze  this commit (local; built on main 3f27bb36, additions only)
+
+Pins:
+  FREEZE_PINS.json                  sha256 94ace83a37a04757f67899d16da28d1efdaf947ea2c73f19aa065a6e9d3bcaaa  (155 files)
+  EXCLUDED.json                     sha256 783da1ff72299e842ea303e7df88420490fc580428c2163028979703c5f01ebf
+    seeds_sha256                    eee874f2a48909db5a1bee09bf4759a4a23290d3edcff65c7a83bcac6b958988  (15561 integers, 219 refs)
+  EXCLUDED_PRINT.txt                sha256 52a206afbf0ef82a5a5584eb9234dff76342acfc99fb18b492f6d3b95975972d
+  TEMPLATE_CAMPAIGN_5.json          sha256 fbf0c7cc020704ff45ed88ebeed322b53990c3abfee7b43b9cf4f0dc0d0f2df2  (the plan template)
+  plan_split3.py (the splitter)     sha256 061f8b375aeef65adade60762866aab0fdc4da4562963b8776f4afe88a3635a9
+  campaign_run17.py (the driver)    sha256 c62a84916f0b133b3e84ae54e47e1395ebb3ef627146ae68e54bb0a36ff6bbe1
+  stage_d6.py (stage D, kernel)     sha256 a4e2d9335c9a068e0a94067ff6dd5f5d0ad8df27eecfccebfd3c1c7f385c8aca
+  leancell.py (the kernel check)    sha256 aca47f5220868f4716bc9ec9a7bdacae60563c7eab28a40248fa731e48c55f2e
+  trace_extract.py (the extract)    sha256 e8b1ef3d7f80eac86867f3bfbcae43ca9d6f2f33aa575bb3ac005d90949a6320
+  analyze10.py (the analysis)       sha256 f7891416608329e76369ccc95af4d038f83e0fcf246731989d1293daabcba95e
+  d4_regate.py (its D4 regate)      sha256 3827d1a5b2a1c7a819ef293afbe5b00f822e0a78fb4ce12171ace76a3aa5c59b
+  draw_seeds.py (the draw)          sha256 d793da47f402d296018d62cebeb7ee01cce34c76047d80287c84b30092d20e32
+  beacon_verify.py (the beacon)     sha256 2339e04eceb90533b6afd842cb6184bd4bfbeee288db22725747f345757e9bd8
+  beacon_chain.py (the chain)       sha256 7188dda1e46e01570fd04e71287dbfd6703f8e6561dcd59ee3b3689825b4124c
+
+Tools (checked by envcheck_layered4 before every run):
+  Python 3.13.18
+  Lean 4.35.0, the toolchain's bin/lean    sha256 bf8d54e4714cc4b03d3f6bb34c83b7202b87e49c8bfcbff6895c085bb90ceb38
+  numpy 2.3.5, package files               files_sha256 cd6ab151bc776cb27294b0cdf325a96cd493bd3553887c944d610061c779e887
+  ngspice 42                               sha256 820658317b0b54035208da41936fd6871ce924036e5ea4113a4168b821b7fc45
+  SKY130 PDK (efabless sky130_fd_pr)       commit 1232782c1b9fab3aacda74d67ce7c92bf7da8105
+  the beacon check                         py_ecc 8.0.0 and its dependencies (requirements_beacon.txt)
+
+Driver to run: research/layered-networks/campaign_run17.py (launch | wait), with the plans written by plan_split3.py
+  from the draw and TEMPLATE_CAMPAIGN_5.json. It refuses a plan that differs from the template (and templates 1-4),
+  a remote duplicate without its home branch, and a launch with less than 40 GB free. Per machine it builds the
+  kernel library from the 12 pinned Lean sources.
+Disk: 40 GB free at launch; the 20 GB guard during the run holds every step, U and the remote duplicates, but not
+  the comparisons C<n>, which run and delete their round's raw (D4_D5_AUDIT.md; D3_DECISION.md: worst per-machine peak 14.7 GB at m = 12, 16.6 GB at m = 8, within 20).
+Stage D: stage_d6.py. The Lean kernel (leancell.py, decide +kernel, clause by clause) is the last word on Cell.Valid
+  of every R cell at K0 and K3; a kernel-mirror disagreement fails step D (the instance is not completed). The
+  calibration clauses, the trained word and the inverter gate's mirror stay on the Python mirror.
+Trace extract: trace_extract.py on every N round of every instance, before the raw is deleted (parts over 50 MB with
+  PARTS.txt). keep_raw keeps the N0 raw only (the originals of the remote duplicates).
+Remote duplicates: each waits (60 s polls, at most 6 h) for its home's SEALS.txt line on the home branch fetched by
+  name, then checks the line and the folder, then runs N0; at the limit it is not completed. No plan is edited.
+Analysis: research/layered-networks/analyze10.py (analyze9; the stage-D script is the latest the prediction names,
+  stage_d6 names itself and must carry the kernel field; the regeneration with stage_d6 on the pinned kernel library
+  must equal the sealed bytes).
+Read-only answers: D4_AUDIT.md, dev/yield_lot/aggregate/RECOUNT_NOISE4.md, POSTCHECK_DATA.md, KERNEL_RCELLS.md,
+  REHEARSAL13.md, DRYRUN_FINAL.md, FIXES_D1_D3.md, D3_DECISION.md, D4_D5_AUDIT.md.
+
+SEED DRAW
+  draw_seeds.py draw <beacon randomness> <ROUND> EXCLUDED.json DRAW.json NOT1=60 ANDOR3=32 XOR3=37
+
+BEACON: drand quicknet (pinned; beacon_chain.QUICKNET, its /info of 2026-11-25 from api.drand.sh and api2.drand.sh)
+  chain hash   52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971
+               (recomputed offline by beacon_chain.chain_hash: sha256(period u32 BE, genesis i64 BE, public key,
+               groupHash, beacon ID "quicknet"))
+  public key   83cf0f2896adee7eb8b5f01fcad3912212c437e0073e911fb90022d3e760183c8c4b450b6a0a6c3ac6a5776a2d1064510d
+               1fec758c921cc22b0e17e63aaf4bcb5ed66304de9cf809bd274ca73bab4af5a6e9c76a4bc09e76eae8991ef5ece45a
+               (one string, wrapped here)
+  genesis      1692803367
+  period       3 s
+  scheme       bls-unchained-g1-rfc9380
+  groupHash    f477d5c89f21a17c863a7f937c6a6d15859414d2be09cd448d4279af331c5d3e
+  Checked: beacon_verify.py verifies the published rounds 1000000, 20000000 and 34278954 against this key, and fails
+  on one changed byte of a signature, round or key (tests/test_beacon_published.py).
+
+ROUND (the rule; no fixed time)
+  ROUND is the first quicknet round whose time, 1692803367 + (ROUND - 1) * 3, is at least 600 s after t_push.
+  t_push is the GitHub push time of the FIRST commit on branch evidence/combined-draw that adds DRAW_ANNOUNCE.txt.
+  So ROUND = ceil((t_push + 600 - 1692803367) / 3) + 1 (beacon_verify.py round), with t_push in seconds UTC.
+  - The coordinator pushes that commit once, alone, after the rehearsal. Only the first such commit counts; the
+    branch is append-only.
+  - The coordinator draws.
+  - It verifies the round with the frozen beacon_verify.py against the pinned key above: the BLS signature, and
+    randomness = sha256(signature).
+  - It pushes DRAW.json carrying the round, its signature beside its randomness, and the announce commit's push
+    time, so that anyone can recheck the draw offline.
+  - FALLBACK: if both api.drand.sh and api2.drand.sh are down at draw time, the owner fetches the round from any drand
+    relay, and the frozen beacon_verify.py verifies it against the pinned key. The source of the round does not matter.
