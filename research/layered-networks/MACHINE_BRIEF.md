@@ -9,6 +9,7 @@ record. analysis.py refuses any root that campaign.py did not write in campaign 
    git worktree add --detach ../kit   d599300d51fcf3a1a4c33d103b89827f8ac4da41
    git worktree add --detach ../noise 458bc7a6d763127ff2fe0214e2cb79a1a6549f9b
    ```
+   Change nothing in the three trees: no edit and no untracked .py or .json file (campaign mode refuses them).
 2. **Environment.** `python -B envcheck_layered4.py check` must pass: Python 3.13.18, numpy 2.3.5, ngspice 42, the
    PDK, Lean 4.35.0 by its real binary. campaign.py checks it again at launch and at every run.
 3. **Disk.** At least 40 GB free at launch (campaign_template.json disk_launch_gb).
@@ -18,17 +19,40 @@ record. analysis.py refuses any root that campaign.py did not write in campaign 
    ```
    python -B campaign.py launch campaign campaign_template.json PLAN_K<nn>.json OUTROOT
    ```
-   It refuses if the template is not the frozen one, a key is missing or extra, a tree is not at its commit, ngspice
-   is already running, OUTROOT is not empty, or less than 40 GB is free.
+   It refuses if:
+   - the template is not the frozen one, or a key is missing or extra;
+   - a file of FREEZE_PINS.json does not match its sha256 (campaign.py, analysis.py and the template are pinned);
+   - a tree is not clean at its commit (a changed tracked file, or an untracked .py or .json);
+   - ngspice is already running;
+   - OUTROOT is not empty;
+   - less than 40 GB is free.
+   The pins' check is recorded in OUTROOT/TEMPLATE_CHECK.json.
 6. **Wait** in the foreground in chunks of at most 590 s:
    ```
    python -B campaign.py wait OUTROOT 580
    ```
-   Exit 0 means the run has ended (DONE written); exit 3 means it is still running.
-7. **Never relaunch anything.** A run that stops (the machine, the driver) is resumed with
-   `python -B campaign.py run campaign campaign_template.json PLAN_K<nn>.json OUTROOT`. Only steps that never started
-   are started then. A step found running is recorded "interrupted" and stays so: its instance is not completed.
-8. **A machine holding remote duplicates** starts at any time: each duplicate waits (up to 6 h) for its home
+   Exit 0 means the run has ended (DONE written, or the driver is gone); exit 3 means it is still running. `wait`
+   follows the pid in OUTROOT/DRIVER_PID. It prints INSTANCES_DONE once the machine's own instances, their rounds and
+   U have ended. RESULT_INSTANCES.json and SHA256SUMS.instances are then written: they never depend on another
+   machine's seal. Only the remote duplicates (item 8) may still be running.
+7. **Never relaunch anything.** A run that stops (the machine, the driver) is resumed, detached, with
+   ```
+   python -B campaign.py resume campaign campaign_template.json PLAN_K<nn>.json OUTROOT
+   ```
+   then waited for as in item 6: `resume` writes the new driver's pid to DRIVER_PID, and appends it to
+   DRIVER_PIDS.log.
+   - Only steps that never started are started then.
+   - A step found running is recorded "interrupted" and stays so: its instance is not completed.
+   - `resume` and `run` refuse while ngspice runs, while the OUTROOT's driver is alive, or while any other process
+     names OUTROOT. Never kill a child to get past this refusal: report it.
+   - A driver stopped by SIGTERM or SIGINT kills its own children first (SIGNALS.json).
+8. **A machine holding remote duplicates** starts at any time. Each duplicate waits (up to 6 h) for its home
    machine's seal on the home's branch, and needs no manual step.
-9. **Record** `uptime -s` at the start and end (INVENTORY_START, INVENTORY_END). Report DONE, RESULT.json's
-   job_errors and stopped_for_disk, and the free disk.
+9. **The window is an expectation, not a limit.** Nothing is killed when it ends: only each step's own time limit
+   (time_limits_s) stops a step. Every instance's chain is submitted at the start, in the plan's order, and each
+   step takes its cores as the four-core budget frees them. No start order is promised, and it is not the draw
+   order.
+10. **U takes no core of the budget** (as in the chain). The core budget (4) covers every other step: the
+    inverters take m cores, and a remote duplicate's N0 takes one.
+11. **Record** `uptime -s` at the start and end (INVENTORY_START, INVENTORY_END). Report DONE, RESULT.json's
+    job_errors and stopped_for_disk, and the free disk.

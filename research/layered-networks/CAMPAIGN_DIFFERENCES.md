@@ -36,6 +36,44 @@ analyze10. Each item says whether it changes a step, a record, or only a driver 
 9. **`steps`, the no-run mode,** is a new command. It runs nothing (the equivalence test (a) needs it).
 10. **Timeout reasons** print the limit with `:g` ("more than 7200 s", as before for integer limits).
 
+**The audit's defect fixes** (on c99c1f70 and 4ec49104; none changes a step's argv, cwd, environment, outputs or
+limit: test (a) is rerun on them, identical):
+
+11. **D1, campaign mode and the pins.**
+    - Campaign mode refuses unless every file of FREEZE_PINS.json matches its sha256 in the driver's own tree, the
+      tree is clean, and campaign.py, analysis.py and campaign_template.json are among the pins.
+    - The check is recorded as `pins` in TEMPLATE_CHECK.json, in both modes.
+    - A tree is clean only with no changed tracked file and no untracked .py or .json. This applies to the kit and
+      noise trees too, in both modes. The chain used --untracked-files=no.
+    - Until the next freeze pins campaign.py and analysis.py, campaign mode refuses on this branch, as it should.
+12. **D2, the children.**
+    - On SIGTERM or SIGINT the driver kills its running children's process groups, logs them in SIGNALS.json and
+      exits. The chain left them running.
+    - `run` and the new `resume` refuse while ngspice runs, while the OUTROOT's driver is alive, or while another
+      process names the OUTROOT.
+13. **D2, a detached resume.** `resume` is `run` started detached, as launch does. It writes DRIVER_PID and
+    DRIVER_PIDS.log, and moves an earlier DONE aside to DONE.before_resume_<k>. This follows the rule of detached jobs
+    and waits of at most 590 s.
+14. **D3, no silent stop.** When inverters is done but inv/K3_BUDGET.json is not ok, D is recorded "refused" with the
+    reason. The chain returned without an entry. With today's indeck_noise4, which exits 1 when not ok, inverters is
+    "failed" first; the refused entry covers a K3_BUDGET that says not ok after an exit 0. Test (c) makes one with a
+    stub tree.
+15. **D4, the instances' result before the duplicates.**
+    - Once every chain, round and U has ended, and before any remote duplicate waits, the driver writes
+      RESULT_INSTANCES.json (RESULT.json's instance part), SHA256SUMS.instances and INSTANCES_DONE. `wait` prints
+      INSTANCES_DONE.
+    - RESULT.json, the top-level SHA256SUMS (which now also lists those two files) and DONE follow the duplicates, as
+      before.
+    - Both cases are covered. While a duplicate waits up to 6 h for another machine's seal, the instance results are
+      already final and hashed. A machine with no duplicate, or whose duplicates are done, writes DONE right after,
+      and RESULT.json repeats the same instance part.
+16. **D7, the kernel build** records the Lean binary resolved by envcheck's resolver (E3.lean_resolution, which
+    envcheck_layered4 uses): its path, its sha256 and how it was resolved. It also compiles with that binary. The
+    chain hashed realpath(which("lean")), which is elan's proxy on most machines.
+17. **D5, D6 (no change of code, stated):** U takes no core of the budget (kept for equivalence). Nothing is killed
+    when the window ends: only time_limits_s stops a step. The start order is the plan's submission order as the
+    cores free, not the draw order.
+
 **Unchanged, and noted because the audit asked:**
 - **On SIGTERM**, neither driver kills its running children: each step runs in its own session. In test (c) the
   interruption therefore kills the child's process group as well, as a machine stop would.
@@ -50,22 +88,33 @@ analyze10. Each item says whether it changes a step, a record, or only a driver 
    - an OUTDIR inside a root is refused;
    - a changed root is refused;
    - a lean binary that is not the pinned one is refused.
-4. **The rest is byte-identical to analyze10.** Equivalence (b) shows it on the final dry run's 8 roots and e2e17's
-   3 roots.
+4. **The audit's defect fixes (A1–A6):**
+   - **A1:** at K3, refuted if ANY completed sealed comparison of a noisy round refutes; held only if all three
+     completed and agree; otherwise not completed. analyze10 counted K3 only when all three rounds had completed, so
+     it would have lost a refutation next to a timed-out round. The seal-log layers check only the completed rounds of
+     a counted level.
+   - **A2:** eligibility and room are read from the sealed prediction (seal/<inst>.json). A D/prediction.json that
+     differs from its seal is a seal defect: the instance is not sealed and not counted.
+   - **A3:** campaign mode reads only the pinned thresholds.json, times github or lsremote:LOG only, and controls only
+     from the clean noise worktree at the frozen template's noise_commit. The THRESHOLD constant is removed; the
+     thresholds are read once, before the first layer.
+   - **A4:** the not_sealed rows list each instance with its comparison verdicts (analyze10: names only).
+   - **A5:** campaign mode checks FREEZE_PINS.json over its own tree and that the tree is clean (campaign.pins_check).
+   - **A6:** first_failing uses the one step order ORDER, with sealpush in it.
+   - A new top-level key, `pins`.
+5. **The rest is byte-identical to analyze10.** Equivalence (b) shows it on the final dry run's 8 roots and e2e17's
+   3 roots, where none of A1, A2 and A4 applies.
 
 ## Where the chain or the analysis and PREDICTION §8 differ (the text wins)
 - **Time limits, the not-completed rule, "interrupted" and no relaunch:** the same in the text and in campaign.py.
-- **"Premise flagged" for the stage-N premises (§8 failure rule).** The text says an instance whose letters, bits and
-  outputs all agree is premise-flagged at that level, not counted towards established, when a premise observed in
-  stage N is false: the leak along the trajectory, the latch delay, the routed walk, D4. analyze10, and so
-  analysis.py, flags D4 only. The other three are not computed by any analysis: the data for them is in the trace
-  extracts (POSTCHECK_DATA.md). **This is a gap between the text and the analysis.** Closing it is new analysis code,
-  which the feature freeze forbids without the owner's decision. It is listed here for that decision and not done.
-- **The secondary Lean control (§2, and in §7's list of RESULTS.json contents).** The text says the kernel's
-  recognition theorem (`layered_recognition_at`, and `layered_inverters_chained` for G1 and G3) is applied to the
-  stage-N traces and reported per instance. No driver and no analysis does it: not analyze10, not analysis.py. Only
-  the dev tool leancal2.py touches that theorem. **This is a second gap between the text and the code.** It is
-  listed for the owner's decision and not done: either new analysis code (forbidden by the freeze without that
-  decision), or an amendment that drops the promise.
+- **"Premise flagged" for the stage-N premises (§8 failure rule). DECIDED by the owner, no code.** The frozen analysis
+  checks only the D4 premise; the leak along the trajectory, the latch delay and the routed walk are assumed. A
+  complementary analysis after the campaign checks them on the trace extracts (POSTCHECK_DATA.md). It can only lower
+  counts, never remove a refutation, and both versions of every count are reported. The coordinator's text now says
+  this.
+- **The secondary Lean control (§2, and §7's list of RESULTS.json contents). DECIDED by the owner, no code.** The
+  Lean recognition control on the stage-N traces (`layered_recognition_at`, `layered_inverters_chained`) is not part
+  of the frozen analysis. It belongs to the complementary analysis after the campaign. The coordinator's text now
+  says this; the review copy 0a025464 is outdated on this point.
 - **§7's "One analysis … analyze8.py"** names the analysis of the review candidate; it is analysis.py now. This needs
   an amendment of the text, not of the code.

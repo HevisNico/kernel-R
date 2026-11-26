@@ -8,8 +8,10 @@ A function is campaign.py's unless it says `analysis.` or names another file. "M
 left alone (stage_d6, fit3, indeck_noise4, controls4, compare_d2, sealpush2, check_duplicate): its own older tests
 are named where they exist.
 
-**Two promises have no code.** They are marked **GAP**, and listed for the owner's decision in CAMPAIGN_DIFFERENCES.md.
-The feature freeze forbids writing that code without that decision.
+**Two promises of the review copy have no code in the frozen analysis, by the owner's decision.** They are marked
+**DECIDED**. The frozen analysis checks only D4. The other stage-N premises and the Lean recognition control on the
+traces belong to the complementary analysis after the campaign, which can only lower counts and reports both
+versions. The coordinator's text now says so (CAMPAIGN_DIFFERENCES.md, last section).
 
 | § | Promise | Code | Test |
 |---|---|---|---|
@@ -28,7 +30,9 @@ The feature freeze forbids writing that code without that decision.
 | 2 | K0: one noiseless run on every eligible instance, compared directly | Instance.round(0) (controls4 stagen 0, compare_d2 noiseless) | (a); (b) comparisons identical |
 | 2 | K3: three noisy rounds on every instance with room, noise seed 10·S + n | Instance.chain returns room_K3; cmd_run starts rounds 1–3 as jobs; steps_round | (a); (b) |
 | 2 | One difference refutes; no prediction, no claim (observed only, never "predicted to fail") | compare_d2 (measuring code); analysis.analyze_root (observed_only), analysis.layer_counts | (b) analysis; test_analyze10 |
-| 2 | Secondary control: layered_recognition_at (layered_inverters_chained for G1, G3) on the stage-N traces, per instance | **GAP: no code.** Neither analyze10 nor analysis.py runs it; leancal2.py is a dev tool, not called by any driver | none |
+| 2 | K3: one completed refuting round refutes, even beside a round that did not complete (audit A1) | analysis.analyze_root (K3), analysis.completed_rounds | (c) analysis_tampered (A1) |
+| 2c | The counted set and the gates are read from the sealed prediction; a D/prediction.json differing from its seal is a defect (audit A2) | analysis.analyze_root (seal/<inst>.json), analysis.layer_seals | (c) analysis_tampered (A2) |
+| 2 | Secondary control: layered_recognition_at (layered_inverters_chained for G1, G3) on the stage-N traces, per instance | **DECIDED: not in the frozen analysis**; the complementary analysis after the campaign | none |
 | 3 | Sizes of the yield-lot rule | not in the driver: plan_split3.py and draw_seeds.py write the plans; check_plan refuses a plan that differs from the template | test_draw_split; (c) refusals |
 | 4 | The verdict words and thresholds count held instances (counted, completed, agreeing, no premise flagged) | analysis.word, analysis.layer_thresholds, analysis.layer_counts | (b) analysis; test_analyze10 |
 | 4 | All three groups together are established only if each group is | analysis.layer_counts (family_of) | (b) analysis |
@@ -41,15 +45,20 @@ The feature freeze forbids writing that code without that decision.
 | 6 | A duplicate failure is an environment defect; no instance is dropped | analysis.layer_duplicates (reported, the instance kept) | (c) differing_duplicate |
 | 7 | One analysis, run once and checked byte-identical on a second run | analysis.main; two runs compared | (b) two analysis runs byte-identical |
 | 7 | RESULTS.json: counted, verdicts, refuting differences, observed-only, failed and not-run, controls U, S, duplicate, max-rule counts, seal regeneration, ENV per machine, costs | analysis.layer_counts, analyze_root, env_section, layer_seals, max_rule | (b) analysis |
-| 7 | RESULTS.json: the secondary Lean control per instance | **GAP**, as in §2 above | none |
+| 7 | RESULTS.json: the secondary Lean control per instance | **DECIDED**, as in §2 above | none |
 | 7 | Frozen tools: Lean 4.35.0 by its real binary, ngspice 42, Python 3.13.18, numpy 2.3.5, SKY130 | set_env (envcheck_layered4 checks at launch and every run); analysis.kernel_library (pinned Lean) | (c) refusals; test_envcheck4 |
-| 7 | Machine discipline: jobs detached, foreground waits of ≤ 590 s, uptime -s at start and end, no counted run relaunched | cmd_launch (detached), cmd_wait (≤ 590 s), inventory (INVENTORY_START/END), Instance.step (interrupted, never relaunched) | (c) interrupt_and_resume, crash |
-| 7 | Any fix after the freeze is a new freeze commit | campaign mode requires FROZEN_TEMPLATE_SHA256; ENV/RESULT record the driver's and template's sha; analysis campaign mode refuses other roots | (c) refusals, analysis_refuses |
+| 7 | Machine discipline: jobs detached, foreground waits of ≤ 590 s, uptime -s at start and end, no counted run relaunched | cmd_launch and cmd_resume (detached), cmd_wait (≤ 590 s), inventory (INVENTORY_START/END), Instance.step (interrupted, never relaunched) | (c) interrupt_and_resume, sigterm_driver_only, crash |
+| 7 | No child outlives its driver unnoticed (audit D2) | on_signal (kills the children's groups), cmd_run and cmd_resume refuse while ngspice or a process on OUTROOT runs (processes_on) | (c) sigterm_driver_only, sigkill_driver_only |
+| 8 | No silent stop: a chain that stops leaves a status entry with its reason (audit D3) | Instance.chain (D refused when K3_BUDGET is not ok), Instance.round (N refused without a seal) | (c) k3_budget_stop, no_pushed_seal |
+| 5 | A machine's instance results never depend on another machine (audit D4) | cmd_run: RESULT_INSTANCES.json, SHA256SUMS.instances, INSTANCES_DONE before remote_duplicate | (c) home_run, differing_duplicate (the files present) |
+| 7 | The kernel build records the real Lean binary (audit D7) | build_kernel (E3.lean_resolution) | (c) every run (kernel_build/KERNEL_BUILD.json) |
+| 7 | Any fix after the freeze is a new freeze commit | campaign mode requires FROZEN_TEMPLATE_SHA256 and every FREEZE_PINS file matching, the tree clean (pins_check, pins_refusal); ENV/RESULT record the driver's and template's sha; analysis campaign mode does the same pins check and refuses other roots | (c) refusals, pins, analysis_refuses |
+| 7 | One analysis with no free argument in campaign mode: the pinned thresholds, times github or lsremote, the frozen noise tree's checker (audit A3) | analysis.main | (c) pins (analysis refusals) |
 | 8 | Not completed: crash, time limit or cut ends the instance's run at that level; never re-run, never replaced | Instance.step (failed, timeout kills the process group, interrupted on resume); cmd_run | (c) crash, timeout, interrupt_and_resume |
 | 8 | Time limits deck 120, inverters 3600, D 7200, seal 120, N 7200, C 300, U 3600, dup 7200 | campaign_template.json time_limits_s, read by load_template; Instance.step | (a) timeouts column; (c) timeout |
 | 8 | The counted set is fixed by stage D, nothing after stage N removes an instance | analysis.analyze_root (eligibility and room from D/prediction.json) | (b) analysis |
 | 8 | Premise flagged for D4: audited instance (every 6th) runs solo scans; D4* > 0.005 regates the unaudited from their sealed records | steps_chain (solo=1 for d4_audit seeds); analysis.layer_d4 (d4_regate) | (a); (b) NOT1 6220 audited; test_d4_regate |
-| 8 | Premise flagged for the leak along the trajectory, the latch delay, the routed walk | **GAP: not computed.** Listed in CAMPAIGN_DIFFERENCES.md | none |
+| 8 | Premise flagged for the leak along the trajectory, the latch delay, the routed walk | **DECIDED: assumed in the frozen analysis**; the complementary analysis checks them on the trace extracts | none |
 | 8 | Counts side by side: counted, held, refuted, premise flagged, not completed | analysis.layer_counts | (b) analysis |
 | 8 | Zero-noise identity (check_noise_identity2) | an environment check, run apart from the driver (tests/check_noise_identity2.py) | its own run before the freeze |
 | — | Disk: refuse a launch below 40 GB; hold a step below the 20 GB guard, except the comparisons | cmd_launch; Machine.guard (C exempt, GUARD_EXEMPT.json; held steps in stopped_for_disk) | (c) guard, partial_guard_and_resume |

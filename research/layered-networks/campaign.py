@@ -117,6 +117,7 @@ MUST_BE_PINNED = ("research/layered-networks/campaign.py", "research/layered-net
                   "research/layered-networks/campaign_template.json")
 PER_MACHINE = ("what", "groups", "U_groups", "remote_duplicates", "controls", "keep_raw")
 BRANCH = re.compile(r"evidence/combined-seals-K\d{2}")
+TEST_BRANCH = re.compile(r"evidence/(combined|devtest)-seals-K\d{2}")   # test mode only: the test-phase seal logs
 KINDS = ("deck", "inverters", "D", "seal", "N", "C", "U", "dup")
 WAIT_MAX_S = 590
 LEAN_DIR = HERE.parent / "learned-coincidence"
@@ -298,9 +299,11 @@ def load_template(mode, path):
                    template_sha256=h, driver_sha256=sha(__file__))
 
 
-def check_plan(plan, t):
-    """The plan against the template: a list of reasons (empty: it agrees)."""
+def check_plan(plan, t, mode):
+    """The plan against the template: a list of reasons (empty: it agrees). Campaign mode accepts only the campaign's
+    seal-log branches, evidence/combined-seals-K<nn>; test mode also evidence/devtest-seals-K<nn>."""
     bad = []
+    branches = BRANCH if mode == "campaign" else TEST_BRANCH
     for k in sorted(t):
         if k == "what":
             continue
@@ -317,8 +320,8 @@ def check_plan(plan, t):
     for k in sorted(set(PER_MACHINE) - {"what"} - set(plan)):
         bad.append(f"missing per-machine key {k}")
     branch = (plan.get("seal_push") or {}).get("branch")
-    if not BRANCH.fullmatch(str(branch)):
-        bad.append(f"seal_push.branch {branch!r} is not evidence/combined-seals-K<nn>")
+    if not branches.fullmatch(str(branch)):
+        bad.append(f"seal_push.branch {branch!r} is not {branches.pattern}")
     if plan.get("controls") != {"duplicate": {}}:
         bad.append("controls must be {\"duplicate\": {}} (no same-machine duplicate)")
     names = set()
@@ -339,7 +342,7 @@ def check_plan(plan, t):
             bad.append(f"remote duplicate {x.get('seed')}: keys {sorted(x)} (seal_log or seal_dir are not allowed)")
             continue
         inst = f"{specmod.load(HERE / x['spec'])['tag']}_{x['seed']}"
-        if not BRANCH.fullmatch(str(x["home_branch"])) or x["home_branch"] == branch or x["home_instance"] != inst:
+        if not branches.fullmatch(str(x["home_branch"])) or x["home_branch"] == branch or x["home_instance"] != inst:
             bad.append(f"remote duplicate {inst}: home_branch or home_instance wrong")
     return bad
 
@@ -376,7 +379,7 @@ def check(mode, template_path, plan_path):
     t, campaign = load_template(mode, template_path)
     b = Path(plan_path).read_bytes()
     plan = json.loads(b)
-    bad = check_plan(plan, t)
+    bad = check_plan(plan, t, mode)
     if bad:
         raise Refused("refused: the plan differs from the template: " + "; ".join(bad))
     pc = pins_check()
