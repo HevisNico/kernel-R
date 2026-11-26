@@ -1,0 +1,69 @@
+{
+ "forgotten": [
+  {
+   "at": "2026-11-24T08:45:26Z",
+   "entry": {
+    "argv": [
+     "/usr/local/bin/python3",
+     "-m",
+     "invinst.indeck",
+     "dev/pipeline_val/NOT1_9801/inv",
+     "--deck",
+     "dev/pipeline_val/NOT1_9801/deck.spice",
+     "--seed",
+     "9801"
+    ],
+    "cpu_s": 0.5,
+    "started": "2026-11-24T08:34:11Z",
+    "status": "failed",
+    "wall_s": 0.5,
+    "why": "exit 1, missing ['inv/inverter_gate.json', 'inv/SHA256SUMS']"
+   },
+   "step": "inverters",
+   "why": "driver bug: relative OUTROOT passed to a step run in the kit folder (fixed: OUTROOT resolved)"
+  }
+ ],
+ "group": "NOT1",
+ "seed": 9801,
+ "steps": {
+  "deck": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d3.py",
+    "deck",
+    "/home/user/kernel-R/research/layered-networks/specs/not1.json",
+    "dev/pipeline_val/NOT1_9801/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cpu_s": 0.1,
+   "outputs": {
+    "deck.spice": "519a6ce2db19bb6cf7b454f7b9fc6d86b0bf2ad8a4fdb8c6cfd09587272a4c02"
+   },
+   "started": "2026-11-24T08:34:11Z",
+   "status": "done",
+   "wall_s": 0.2
+  },
+  "inverters": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-m",
+    "invinst.indeck",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val/NOT1_9801/inv",
+    "--deck",
+    "/home/user/kernel-R/research/layered-networks/dev/pipeline_val/NOT1_9801/deck.spice",
+    "--seed",
+    "9801"
+   ],
+   "cpu_s": 147.4,
+   "outputs": {
+    "inv/SHA256SUMS": "a9e7268c5ec074bf76176dec90a2cd4cb3b53e3debced55b92f52755305366c5",
+    "inv/inverter_gate.json": "d000ea520d2ff3ee2a9991e6d999b7a24c4dd5bfa8dd93dbf84f521aa2537181"
+   },
+   "started": "2026-11-24T08:45:38Z",
+   "status": "done",
+   "wall_s": 156.0
+  }
+ },
+ "tag": "NOT1"
+}

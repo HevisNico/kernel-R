@@ -1,0 +1,131 @@
+{
+ "group": "XOR3",
+ "seed": 9806,
+ "steps": {
+  "C0": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/compare_d2.py",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/seal",
+    "/home/user/kernel-R/research/layered-networks/specs/xor3.json",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/N0/noisy_record.json",
+    "noiseless",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/N0/comparison.json"
+   ],
+   "cpu_s": 0.0,
+   "ended": "2026-11-24T15:53:44Z",
+   "outputs": {
+    "N0/comparison.json": "a7c5e58ee97c558980cb40dc977ae2e04aa5a239fb2204c58841709e490ae88e"
+   },
+   "started": "2026-11-24T15:53:44Z",
+   "status": "done",
+   "wall_s": 0.0
+  },
+  "D": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d3.py",
+    "run",
+    "/home/user/kernel-R/research/layered-networks/specs/xor3.json",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/D",
+    "9806",
+    "overlay=config_inverter_c5.json",
+    "rule=one-port",
+    "inverters=/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/inv/inverter_gate.json"
+   ],
+   "cpu_s": 3352.7,
+   "ended": "2026-11-24T15:12:49Z",
+   "outputs": {
+    "D/prediction.json": "2a7aa550d4a7a7f5f6a84b84b0c8efeedecc7393c370490f9afd69f52ac9c907",
+    "D/record.json": "65466edc9ef64667b59b111ee55ba1adbd81c6d7a50dc892fff63387cebae21e"
+   },
+   "started": "2026-11-24T14:16:13Z",
+   "status": "done",
+   "wall_s": 3396.0
+  },
+  "N0": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/noise/research/layered-networks/controls2.py",
+    "stagen",
+    "/home/user/kernel-R/research/layered-networks/specs/xor3.json",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/N0",
+    "9806",
+    "0",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cpu_s": 2423.8,
+   "ended": "2026-11-24T15:53:44Z",
+   "outputs": {
+    "N0/noisy_record.json": "dd76faed3fff1db8d16d85212b20bf82855c8add183e6ad5e58b1167ae325616",
+    "N0/trace.digest.json": "128c108c5def6d5627ab8fb97ce6b9201bf6cec9afb8438b26d31671a921d8ca"
+   },
+   "started": "2026-11-24T15:12:50Z",
+   "status": "done",
+   "wall_s": 2454.9
+  },
+  "deck": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d3.py",
+    "deck",
+    "/home/user/kernel-R/research/layered-networks/specs/xor3.json",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cpu_s": 0.1,
+   "ended": "2026-11-24T14:08:46Z",
+   "outputs": {
+    "deck.spice": "28b8df4502b93e7a73ebd3ba6553f1d60e8fb46669029e0a2db58359a7301c9e"
+   },
+   "started": "2026-11-24T14:08:46Z",
+   "status": "done",
+   "wall_s": 0.3
+  },
+  "inverters": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-m",
+    "invinst.indeck",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/inv",
+    "--deck",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/deck.spice",
+    "--seed",
+    "9806"
+   ],
+   "cpu_s": 683.1,
+   "ended": "2026-11-24T14:16:13Z",
+   "outputs": {
+    "inv/SHA256SUMS": "8f15684f933cfd08f266111b91cc53ae2bf4d728804cfdee1f51217f0a524190",
+    "inv/inverter_gate.json": "cabaaa42083809bb9dd5dbd9950d046c4b047400d3d48874ffbf002a9d108276"
+   },
+   "started": "2026-11-24T14:08:46Z",
+   "status": "done",
+   "wall_s": 447.3
+  },
+  "seal": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d3.py",
+    "seal",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/seal",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun/XOR3_9806/D"
+   ],
+   "cpu_s": 0.1,
+   "ended": "2026-11-24T15:12:50Z",
+   "outputs": {
+    "seal/MANIFEST.json": "0807ae5a2af2541a0c8fbed1c86d8d57a56a69ffdec2298569af874560390f7f",
+    "seal/SHA256SUMS": "5600f8d4633397692b02d3c7f640ef7a66af7ece26da8c22cf18bb328f1aeb69"
+   },
+   "started": "2026-11-24T15:12:49Z",
+   "status": "done",
+   "wall_s": 0.1
+  }
+ },
+ "tag": "XOR3"
+}

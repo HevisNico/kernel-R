@@ -1,0 +1,73 @@
+{
+ "group": "XOR3",
+ "seed": 9803,
+ "steps": {
+  "D": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d4.py",
+    "run",
+    "/home/user/kernel-R/research/layered-networks/specs/xor3.json",
+    "/home/user/kernel-R/research/layered-networks/dev/recheck_9803/XOR3_9803/D",
+    "9803",
+    "overlay=config_inverter_c5.json",
+    "rule=one-port",
+    "inverters=/home/user/kernel-R/research/layered-networks/dev/recheck_9803/XOR3_9803/inv/inverter_gate.json"
+   ],
+   "cores": 1,
+   "cpu_s": 3459.2,
+   "ended": "2026-11-24T18:44:41Z",
+   "outputs": {
+    "D/prediction.json": "b53ef5c16bbc8e23806403150293201b809e3ae2bb1225b9c5ab51a5cec55219",
+    "D/record.json": "376089fb2aee54e71e83e8b8153ebb064e1b2da415749549d573d91b0d78e435"
+   },
+   "started": "2026-11-24T17:46:26Z",
+   "status": "done",
+   "wall_s": 3494.8
+  },
+  "deck": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d4.py",
+    "deck",
+    "/home/user/kernel-R/research/layered-networks/specs/xor3.json",
+    "/home/user/kernel-R/research/layered-networks/dev/recheck_9803/XOR3_9803/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-24T17:40:18Z",
+   "outputs": {
+    "deck.spice": "28b8df4502b93e7a73ebd3ba6553f1d60e8fb46669029e0a2db58359a7301c9e"
+   },
+   "started": "2026-11-24T17:40:18Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "inverters": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-m",
+    "invinst.indeck",
+    "/home/user/kernel-R/research/layered-networks/dev/recheck_9803/XOR3_9803/inv",
+    "--deck",
+    "/home/user/kernel-R/research/layered-networks/dev/recheck_9803/XOR3_9803/deck.spice",
+    "--seed",
+    "9803"
+   ],
+   "cores": 2,
+   "cpu_s": 692.4,
+   "ended": "2026-11-24T17:46:26Z",
+   "outputs": {
+    "inv/SHA256SUMS": "c51faa5f39a6e1c167b9b1d95ff1b973f3870ea89330cc6f5ed2a36f63f3553a",
+    "inv/inverter_gate.json": "0a6b746f27cf5d353d9917362eeb4c2fb61c1b658324f98e4d217291c28f96b6"
+   },
+   "started": "2026-11-24T17:40:18Z",
+   "status": "done",
+   "wall_s": 368.1
+  }
+ },
+ "tag": "XOR3"
+}
