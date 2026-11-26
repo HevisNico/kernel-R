@@ -214,8 +214,10 @@ def kill_group(pattern):
 
 
 def run_bg(tree, *a):
+    """The driver in the background; its output goes to <OUTROOT>.driver_bg.log beside the root (a refusal is kept)."""
+    log = open(f"{a[-1]}.driver_bg.log", "w")
     return subprocess.Popen([PY, "-B", str(Path(tree) / "research" / "layered-networks" / "campaign.py"), *map(str, a)],
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+                            stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
 
 
 def case_crash(w):
@@ -224,7 +226,8 @@ def case_crash(w):
     pl = w.plans("crash", tr, tt)
     root = w.wd / "root_crash"
     p = run_bg(tr, "run", "test", tt, pl["K02"], root)
-    assert wait_for(lambda: status(root, "NOT1_6213").get("D", {}).get("status") == "running", 1800)
+    assert wait_for(lambda: status(root, "NOT1_6213").get("D", {}).get("status") == "running", 1800), \
+        Path(f"{root}.driver_bg.log").read_text()[-400:]
     time.sleep(5)
     k = kill_group(f"stage_d6.py run .*{root}/NOT1_6213/D")   # the step's whole process group, from outside
     p.wait(timeout=1800)
@@ -240,7 +243,8 @@ def case_interrupt(w):
     pl = w.plans("interrupt", tr, tt)
     root = w.wd / "root_interrupt"
     p = run_bg(tr, "run", "test", tt, pl["K02"], root)
-    assert wait_for(lambda: status(root, "NOT1_6213").get("D", {}).get("status") == "running", 1800)
+    assert wait_for(lambda: status(root, "NOT1_6213").get("D", {}).get("status") == "running", 1800), \
+        Path(f"{root}.driver_bg.log").read_text()[-400:]
     time.sleep(5)
     os.kill(p.pid, signal.SIGTERM)                      # the driver stops
     p.wait(timeout=120)
@@ -473,7 +477,8 @@ def case_sigterm_driver_only(w):
     pl = w.plans("sigterm", tr, tt)
     root = w.wd / "root_sigterm"
     p = run_bg(tr, "run", "test", tt, pl["K02"], root)
-    assert wait_for(lambda: status(root, "NOT1_6213").get("D", {}).get("status") == "running", 1800)
+    assert wait_for(lambda: status(root, "NOT1_6213").get("D", {}).get("status") == "running", 1800), \
+        Path(f"{root}.driver_bg.log").read_text()[-400:]
     time.sleep(5)
     kids = children_of(root)
     os.kill(p.pid, signal.SIGTERM)                       # the driver only
@@ -481,11 +486,11 @@ def case_sigterm_driver_only(w):
     gone = wait_for(lambda: not children_of(root), 30, 1)
     sig = json.loads((root / "SIGNALS.json").read_text()) if (root / "SIGNALS.json").exists() else None
     r = campaign(tr, "resume", "test", tt, pl["K02"], root)
-    done = wait_done(tr, root)
+    done = r.returncode == 0 and wait_done(tr, root)
     st = status(root, "NOT1_6213")
     ok = bool(kids) and gone and sig and sig[0]["signal"] == "SIGTERM" and sig[0]["killed_process_groups"] and \
         r.returncode == 0 and done and st["D"]["status"] == "interrupted" and "seal" not in st and (root / "DONE").exists()
-    return ok, dict(children_before=kids, children_gone=gone, signals=sig, resume=r.stdout.strip()[-100:],
+    return ok, dict(children_before=kids, children_gone=gone, signals=sig, resume=(r.stdout + r.stderr).strip()[-300:],
                     steps={k: v["status"] for k, v in st.items()}, pids=(root / "DRIVER_PIDS.log").read_text()
                     if (root / "DRIVER_PIDS.log").exists() else None)
 
@@ -498,7 +503,8 @@ def case_sigkill_driver_only(w):
     pl = w.plans("sigkill", tr, tt)
     root = w.wd / "root_sigkill"
     p = run_bg(tr, "run", "test", tt, pl["K02"], root)
-    assert wait_for(lambda: status(root, "NOT1_6213").get("D", {}).get("status") == "running", 1800)
+    assert wait_for(lambda: status(root, "NOT1_6213").get("D", {}).get("status") == "running", 1800), \
+        Path(f"{root}.driver_bg.log").read_text()[-400:]
     time.sleep(5)
     os.kill(p.pid, signal.SIGKILL)                       # the driver only; it cannot clean up
     p.wait(timeout=60)

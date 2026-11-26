@@ -242,8 +242,9 @@ def processes_on(root):
 
 
 def ngspice_running():
-    n = subprocess.run(["pgrep", "-c", "ngspice"], capture_output=True, text=True).stdout.strip()
-    return 0 if n in ("", "0") else int(n)
+    """Live ngspice processes. A zombie (state Z: killed, not yet reaped by init) does not count: it runs nothing."""
+    ps = subprocess.run(["ps", "-eo", "stat=,comm="], capture_output=True, text=True).stdout.splitlines()
+    return sum(1 for ln in ps if ln.split()[1:2] == ["ngspice"] and not ln.split()[0].startswith("Z"))
 
 
 def run_child(argv, cwd, log, timeout):

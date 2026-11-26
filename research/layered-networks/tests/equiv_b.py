@@ -170,6 +170,7 @@ ANALYSIS_LISTED = {
     "mode": "new: campaign or test",
     "root_drivers": "new: each root's driver, template and mode, from ENV.json",
     "roots_sha256sums": "new: every root's SHA256SUMS hashed before and after",
+    "pins": "new: the FREEZE_PINS.json check of the analysis tree (audit A5)",
 }
 
 
@@ -181,7 +182,7 @@ def main_analysis(outp, *sets):
         fa, f1, f2 = (Path(d) / "RESULTS.json" for d in (a10, an1, an2))
         a, b = json.loads(fa.read_text()), json.loads(f1.read_text())
         old = {k for k in a if re.fullmatch(r"analyze\d+_sha256", k)}
-        new = {"analysis_sha256", "mode", "root_drivers", "roots_sha256sums"}
+        new = {"analysis_sha256", "mode", "root_drivers", "roots_sha256sums", "pins"}
         bad = sorted((set(a) - old) ^ (set(b) - new)) + sorted(k for k in (set(a) - old) & (set(b) - new)
                                                              if k != "format" and a[k] != b[k])
         same12 = f1.read_bytes() == f2.read_bytes()
