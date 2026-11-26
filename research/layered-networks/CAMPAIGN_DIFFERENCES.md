@@ -51,6 +51,8 @@ limit: test (a) is rerun on them, identical):
       exits. The chain left them running.
     - `run` and the new `resume` refuse while ngspice runs, while the OUTROOT's driver is alive, or while another
       process names the OUTROOT.
+   - A zombie ngspice (state Z: killed, not yet reaped) is not counted as running. Test (c) first failed on it: a
+     killed ngspice stays a zombie for a few seconds, and the refusal counted it (fixed in 3e90a3de; (c) all pass).
 13. **D2, a detached resume.** `resume` is `run` started detached, as launch does. It writes DRIVER_PID and
     DRIVER_PIDS.log, and moves an earlier DONE aside to DONE.before_resume_<k>. This follows the rule of detached jobs
     and waits of at most 590 s.

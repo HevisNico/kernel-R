@@ -2,11 +2,89 @@
  "all_pass": true,
  "analysis_refuses": {
   "detail": {
-   "campaign_on_test": "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['machine_1']",
-   "outdir_inside": "-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc/root_home/analysis lies inside the root /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc/root_home"
+   "campaign_on_test": "refused: campaign mode: not in FREEZE_PINS.json: ['research/layered-networks/analysis.py', 'research/layered-networks/campaign.py', 'research/layered-networks/campaign_template.json']",
+   "outdir_inside": "ser-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/root_home/analysis lies inside the root /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/root_home"
   },
   "ok": true,
   "seconds": 0.4
+ },
+ "analysis_tampered": {
+  "detail": {
+   "A1": {
+    "K3": {
+     "counted": true,
+     "refuted": true
+    },
+    "counts_K3": {
+     "counted": 1,
+     "held": {
+      "list": [],
+      "n": 0
+     },
+     "instances": 1,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [],
+      "n": 0
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [
+       "NOT1_6212"
+      ],
+      "n": 1
+     }
+    },
+    "rc": 0,
+    "verdict": "refuted"
+   },
+   "A2": {
+    "K0": {
+     "counted": false,
+     "not_sealed": true
+    },
+    "K3": {
+     "counted": false,
+     "not_sealed": true
+    },
+    "not_sealed_K3": [
+     {
+      "instance": "NOT1_6212",
+      "verdicts": {
+       "C0": "agrees",
+       "C1": "agrees",
+       "C2": "agrees",
+       "C3": "agrees"
+      }
+     }
+    ],
+    "rc": 0,
+    "seal": {
+     "log": {
+      "commit": "501dcf9b6299c793c70edc7d41ed714784a0739e",
+      "margin_s": 2.017,
+      "pushed_utc": "2026-11-26T20:27:23.222969Z",
+      "stage_n_start": "2026-11-26T20:27:25.239948Z"
+     },
+     "log_ok": true,
+     "regenerated_identical": false,
+     "regeneration_why": "D/prediction.json differs from its seal (the sealed prediction is the one read)"
+    },
+    "stage_d_room_K3": true
+   }
+  },
+  "ok": true,
+  "seconds": 29.5
  },
  "crash": {
   "detail": {
@@ -15,7 +93,7 @@
     "why": "exit -9, missing ['D/record.json', 'D/prediction.json']"
    },
    "killed_pids": [
-    14957
+    10047
    ],
    "steps": {
     "D": "failed",
@@ -24,7 +102,7 @@
    }
   },
   "ok": true,
-  "seconds": 165.2
+  "seconds": 185.2
  },
  "differing_duplicate": {
   "detail": {
@@ -36,7 +114,7 @@
    },
    "duplicate": [
     {
-     "cpu_s": 86.4,
+     "cpu_s": 87.6,
      "exit": 0,
      "group": "NOT1",
      "instance": "NOT1_6212",
@@ -47,27 +125,27 @@
    "identical": false
   },
   "ok": true,
-  "seconds": 123.3
+  "seconds": 123.8
  },
  "guard": {
   "detail": {
    "steps": {},
    "stopped_for_disk": [
     {
-     "free_gb": 50.18,
+     "free_gb": 40.0,
      "instance": "NOT1_6213",
      "step": "deck"
     }
    ]
   },
   "ok": true,
-  "seconds": 12.9
+  "seconds": 14.3
  },
  "home_run": {
   "detail": {
    "U": [
     {
-     "cpu_s": 26.5,
+     "cpu_s": 27.2,
      "exit": 0,
      "instance": "NOT1_6212",
      "inverter_fires_reported": [
@@ -81,11 +159,11 @@
      "r_cell_fires": [],
      "record_seal_log": {
       "branch": "evidence/combined-seals-K01",
-      "commit": "0de43484ba6d4bc1f43c10b6ad4139957038180e"
+      "commit": "501dcf9b6299c793c70edc7d41ed714784a0739e"
      },
      "seal_log": {
       "branch": "evidence/combined-seals-K01",
-      "commit": "0de43484ba6d4bc1f43c10b6ad4139957038180e"
+      "commit": "501dcf9b6299c793c70edc7d41ed714784a0739e"
      },
      "timed_out": false,
      "tool": "controls4.py"
@@ -108,7 +186,7 @@
    }
   },
   "ok": true,
-  "seconds": 587.7
+  "seconds": 590.4
  },
  "interrupt_and_resume": {
   "detail": {
@@ -125,13 +203,29 @@
    },
    "env_resumes": [
     {
-     "static_sha256": "762b8c02b74e5b51c3faf9564f00360a14b575433daa3456713eb6509172b69b",
+     "static_sha256": "2a44f94b4b848a46c36377a255f549b10ca1bb8896524f250c71dc11ed3a72d0",
      "uptime_s": "2026-11-26 16:02:52"
     }
    ]
   },
   "ok": true,
-  "seconds": 168.7
+  "seconds": 183.2
+ },
+ "k3_budget_stop": {
+  "detail": {
+   "D": {
+    "ended": "2026-11-26T20:21:03.863566Z",
+    "status": "refused",
+    "why": "inv/K3_BUDGET.json is not ok (the inverters' K3 budget)"
+   },
+   "steps": {
+    "D": "refused",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 169.2
  },
  "kernel_mirror_disagreement": {
   "detail": {
@@ -160,25 +254,25 @@
    ]
   },
   "ok": true,
-  "seconds": 354.9
+  "seconds": 378.7
  },
  "no_pushed_seal": {
   "detail": {
    "seal_push": {
     "branch": "evidence/combined-seals-K02",
-    "commit": "70469abdbef75eb57c4a48061868839df3167ad7",
+    "commit": "ec2b84bb89a4c277a0516bc353a731e3fa2da687",
     "instance": "NOT1_6213",
-    "line": "NOT1_6213 3ecb351e5e872855779de73da55fc32adcaaa4542ed5d8b1321468a5728e3194 2026-11-26T16:43:28.850922Z",
+    "line": "NOT1_6213 215c936dda36bffb9daf64e18e34a8dba7c9e2887347897620d6869b18d4ebdb 2026-11-26T19:57:01.891100Z",
     "previous": null,
     "pushed": false,
-    "remote": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc/log_nopush.git",
+    "remote": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/log_nopush.git",
     "seal_folder": {
      "bytes": 5790,
      "files": 3,
      "path": "seals/NOT1_6213"
     },
-    "seal_sha256": "3ecb351e5e872855779de73da55fc32adcaaa4542ed5d8b1321468a5728e3194",
-    "why": "push rejected: ser-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc/log_nopush.git\n ! [remote rejected] HEAD -> evidence/combined-seals-K02 (pre-receive hook declined)\nerror: failed to push some refs to '/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc/log_nopush.git'",
+    "seal_sha256": "215c936dda36bffb9daf64e18e34a8dba7c9e2887347897620d6869b18d4ebdb",
+    "why": "push rejected: r-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/log_nopush.git\n ! [remote rejected] HEAD -> evidence/combined-seals-K02 (pre-receive hook declined)\nerror: failed to push some refs to '/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/log_nopush.git'",
     "with_seal_folder": true
    },
    "steps": {
@@ -190,13 +284,13 @@
    }
   },
   "ok": true,
-  "seconds": 353.5
+  "seconds": 371.4
  },
  "partial_guard_and_resume": {
   "detail": {
    "U_after": [
     {
-     "cpu_s": 27.5,
+     "cpu_s": 28.7,
      "exit": 0,
      "instance": "NOT1_6212",
      "inverter_fires_reported": [
@@ -210,11 +304,11 @@
      "r_cell_fires": [],
      "record_seal_log": {
       "branch": "evidence/combined-seals-K01",
-      "commit": "dd25f781713003dea3c36f00e79debfa419766c1"
+      "commit": "56e3585dd2dbbb5f16f51d343d600412ac679d86"
      },
      "seal_log": {
       "branch": "evidence/combined-seals-K01",
-      "commit": "dd25f781713003dea3c36f00e79debfa419766c1"
+      "commit": "56e3585dd2dbbb5f16f51d343d600412ac679d86"
      },
      "timed_out": false,
      "tool": "controls4.py"
@@ -222,14 +316,18 @@
    ],
    "exempt": [
     {
-     "free_gb": 40.58,
-     "guard_gb": 41.6,
+     "free_gb": 30.88,
+     "guard_gb": 31.9,
      "instance": "NOT1_6212",
      "step": "C0"
     }
    ],
-   "guard_gb": 41.6,
+   "guard_gb": 31.9,
    "held_first": [
+    [
+     "NOT1_6212",
+     "N2"
+    ],
     [
      "U_NOT1_6212",
      "U"
@@ -241,10 +339,6 @@
     [
      "NOT1_6212",
      "N1"
-    ],
-    [
-     "NOT1_6212",
-     "N2"
     ]
    ],
    "rc_resume": 0,
@@ -273,16 +367,68 @@
     "sealpush": "done"
    }
   },
-  "note": "passed at the second attempt; the first attempt (kept in the log) filled the disk after N0 had ended, when C0 and the rounds had already started: a fault of the test's timing, fixed in the test, not in campaign.py",
   "ok": true,
-  "seconds": 632.8
+  "seconds": 611.2
+ },
+ "pins": {
+  "detail": {
+   "analysis.py campaign, clean pinned tree": {
+    "a TEST root": [
+     1,
+     "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['machine_1']"
+    ],
+    "controls=another tree": [
+     1,
+     ": campaign mode: controls must be the noise tree at 458bc7a6d763 (/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/tree_pins.wt-458bc7a6/research/layered-networks)"
+    ],
+    "thresholds=another file": [
+     1,
+     "refused: campaign mode reads the pinned thresholds.json only"
+    ],
+    "times=bare": [
+     1,
+     "refused: campaign mode: times must be github or lsremote:LOG, not 'bare'"
+    ]
+   },
+   "clean tree, every pin matching: check": {
+    "ok": true,
+    "pins": {
+     "mismatched": [],
+     "not_pinned": [],
+     "pinned_files": 158,
+     "pins_file": "research/layered-networks/FREEZE_PINS.json",
+     "pins_sha256": "bcbab4089ebc79ad1b5b9ff112a2f4ccd3655c88914861aaaef875731dfe1310",
+     "tree_clean": true,
+     "tree_commit": "1c0e7e9a57154994be020b0a1fe56f640052a900"
+    },
+    "rc": 0
+   },
+   "one pinned byte changed: launch": [
+    1,
+    "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']"
+   ],
+   "untracked .json in the kit tree: launch": [
+    1,
+    "refused: no clean worktree at kit_commit d599300d51fc (git worktree add --detach DIR d599300d51fcf3a1a4c33d103b89827f8ac4da41)"
+   ],
+   "untracked .py in the driver's tree: launch": [
+    1,
+    "refused: campaign mode: the tree at 1c0e7e9a5715 is not clean (a changed tracked file, or an untracked .py/.json)"
+   ],
+   "untracked .py: analysis.py campaign": [
+    1,
+    "refused: campaign mode: the tree at 1c0e7e9a5715 is not clean (a changed tracked file, or an untracked .py/.json)"
+   ]
+  },
+  "ok": true,
+  "seconds": 7.4
  },
  "refusals": {
   "detail": {
-   "campaign mode, test template": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not c558f20a3d62\"}",
+   "campaign mode, test template": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not f5df165e1f3e\"}",
    "disk at launch": [
     1,
-    "refused: 50.2 GB free at launch, 1e+06 GB needed (disk_launch_gb)"
+    "refused: 40.6 GB free at launch, 1e+06 GB needed (disk_launch_gb)"
    ],
    "extra key steps_until": [
     1,
@@ -299,7 +445,7 @@
    "test mode, frozen template": "{\"ok\": false, \"why\": \"refused: test mode needs a test template, not the frozen one\"}"
   },
   "ok": true,
-  "seconds": 5.8
+  "seconds": 6.0
  },
  "second_seal": {
   "detail": {
@@ -309,14 +455,56 @@
     "branch": "evidence/combined-seals-K02",
     "instance": "NOT1_6213",
     "pushed": false,
-    "remote": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc/log_secondseal.git",
+    "remote": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/log_secondseal.git",
     "why": "seals/NOT1_6213 is already on evidence/combined-seals-K02: a second seal is refused",
     "with_seal_folder": true
    },
    "second": "failed"
   },
   "ok": true,
-  "seconds": 914.8
+  "seconds": 926.6
+ },
+ "sigkill_driver_only": {
+  "detail": {
+   "children_after_kill": [
+    13944
+   ],
+   "resume_while_child": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+   "run_while_child": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+   "steps": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 175.5
+ },
+ "sigterm_driver_only": {
+  "detail": {
+   "children_before": [
+    13264
+   ],
+   "children_gone": true,
+   "pids": "2026-11-26T20:15:14.004918Z 13344 driver_resume_1.log\n",
+   "resume": "launched pid 13344",
+   "signals": [
+    {
+     "at": "2026-11-26T20:15:13.750850Z",
+     "killed_process_groups": [
+      13264
+     ],
+     "signal": "SIGTERM"
+    }
+   ],
+   "steps": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 170.5
  },
  "timeout": {
   "detail": {
@@ -327,6 +515,6 @@
    "why": "more than 0.001 s"
   },
   "ok": true,
-  "seconds": 13.6
+  "seconds": 13.2
  }
 }
