@@ -117,7 +117,7 @@ MUST_BE_PINNED = ("research/layered-networks/campaign.py", "research/layered-net
                   "research/layered-networks/campaign_template.json")
 PER_MACHINE = ("what", "groups", "U_groups", "remote_duplicates", "controls", "keep_raw")
 BRANCH = re.compile(r"evidence/combined-seals-K\d{2}")
-TEST_BRANCH = re.compile(r"evidence/(combined|devtest)-seals-K\d{2}")   # test mode only: the test-phase seal logs
+TEST_BRANCH = re.compile(r"evidence/(combined-seals|devtest-seals|devtest-seals2)-K\d{2}")   # test mode only: the test-phase seal logs
 KINDS = ("deck", "inverters", "D", "seal", "N", "C", "U", "dup")
 WAIT_MAX_S = 590
 LEAN_DIR = HERE.parent / "learned-coincidence"
@@ -303,7 +303,8 @@ def load_template(mode, path):
 
 def check_plan(plan, t, mode):
     """The plan against the template: a list of reasons (empty: it agrees). Campaign mode accepts only the campaign's
-    seal-log branches, evidence/combined-seals-K<nn>; test mode also evidence/devtest-seals-K<nn>."""
+    seal-log branches, evidence/combined-seals-K<nn>; test mode also evidence/devtest-seals-K<nn>
+    and evidence/devtest-seals2-K<nn> (the second test-phase run: a seal is append-only)."""
     bad = []
     branches = BRANCH if mode == "campaign" else TEST_BRANCH
     for k in sorted(t):
