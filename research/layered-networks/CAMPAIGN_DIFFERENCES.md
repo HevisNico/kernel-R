@@ -79,6 +79,11 @@ limit: test (a) is rerun on them, identical):
     when the window ends: only time_limits_s stops a step. The start order is the plan's submission order as the
     cores free, not the draw order.
 
+**A known cosmetic limit (no code change, by the coordinator's decision):** `campaign.py status OUTROOT` lists the
+instances' status.json files only, so it prints nothing for a root that holds only a remote duplicate (K06 in the
+test phase). The facts are recorded all the same: DUPX_<inst>/duplicate_here.json (the duplicate's run, exit and
+cost), DUPX_<inst>/seal_wait.json (the seal found, its commit and line), DONE, and RESULT.json.
+
 **Unchanged, and noted because the audit asked:**
 - **On SIGTERM**, neither driver kills its running children: each step runs in its own session. In test (c) the
   interruption therefore kills the child's process group as well, as a machine stop would.

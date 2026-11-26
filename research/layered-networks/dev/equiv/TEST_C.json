@@ -1,12 +1,114 @@
 {
  "all_pass": true,
+ "analysis_forged_pins": {
+  "detail": {
+   "a CAMPAIGN root whose driver checked another FREEZE_PINS.json": [
+    1,
+    "refused: roots whose driver checked another FREEZE_PINS.json than this tree's (7e769d6b1cad): ['machine_1']"
+   ],
+   "checks": [
+    {
+     "check": "times=bare",
+     "expected": "campaign mode: times must be github or lsremote:LOG, not 'bare'",
+     "matched": "refused: campaign mode: times must be github or lsremote:LOG, not 'bare'",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "thresholds=another file",
+     "expected": "campaign mode reads the pinned thresholds.json only",
+     "matched": "refused: campaign mode reads the pinned thresholds.json only",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "controls=another tree",
+     "expected": "campaign mode: controls must be the noise tree at",
+     "matched": "refused: campaign mode: controls must be the noise tree at 458bc7a6d763 (/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/tree_pins.wt-458bc7a6/research/layered-networks)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "the home run's TEST root itself",
+     "expected": "roots not run by this campaign.py on the frozen template in campaign mode",
+     "matched": "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['machine_1']",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .py in the analysis tree",
+     "expected": "is not clean (a changed tracked file, or an untracked .py/.json)",
+     "matched": "refused: campaign mode: the tree at 3361d01a6a98 is not clean (a changed tracked file, or an untracked .py/.json)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "a CAMPAIGN root whose driver checked another FREEZE_PINS.json",
+     "expected": "roots whose driver checked another FREEZE_PINS.json than this tree's",
+     "matched": "refused: roots whose driver checked another FREEZE_PINS.json than this tree's (7e769d6b1cad): ['machine_1']",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home_forged_pins",
+     "target_exists": true
+    },
+    {
+     "check": "control: the same forged root with this tree's pins",
+     "expected": "mixed environments in one OUTROOT",
+     "matched": "refused: mixed environments in one OUTROOT: NOT1_6212: status env cf066dc3544ecf218e7607a615865066ace5f6aee704cec170bcd1551ac79a78; NOT1_6212: prediction env cf066dc3544ecf218e7607a615865066ace5f6aee704cec170bcd1551ac79a78",
+     "must_not_contain": "another FREEZE_PINS.json",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home_forged_control",
+     "target_exists": true
+    }
+   ],
+   "control: the same forged root with this tree's pins": [
+    1,
+    "refused: mixed environments in one OUTROOT: NOT1_6212: status env cf066dc3544ecf218e7607a615865066ace5f6aee704cec170bcd1551ac79a78; NOT1_6212: prediction env cf066dc3544ecf218e7607a615865066ace5f6aee704cec170bcd1551ac79a78"
+   ],
+   "controls=another tree": [
+    1,
+    "refused: campaign mode: controls must be the noise tree at 458bc7a6d763 (/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/tree_pins.wt-458bc7a6/research/layered-networks)"
+   ],
+   "the home run's TEST root itself": [
+    1,
+    "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['machine_1']"
+   ],
+   "thresholds=another file": [
+    1,
+    "refused: campaign mode reads the pinned thresholds.json only"
+   ],
+   "times=bare": [
+    1,
+    "refused: campaign mode: times must be github or lsremote:LOG, not 'bare'"
+   ],
+   "untracked .py in the analysis tree": [
+    1,
+    "refused: campaign mode: the tree at 3361d01a6a98 is not clean (a changed tracked file, or an untracked .py/.json)"
+   ]
+  },
+  "ok": true,
+  "seconds": 14.6
+ },
  "analysis_refuses": {
   "detail": {
    "campaign_on_test": "refused: campaign mode: not in FREEZE_PINS.json: ['research/layered-networks/analysis.py', 'research/layered-networks/campaign.py', 'research/layered-networks/campaign_template.json']",
-   "outdir_inside": "ser-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/root_home/analysis lies inside the root /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/root_home"
+   "checks": [
+    {
+     "check": "campaign mode in the unpinned dev tree",
+     "expected": "campaign mode: not in FREEZE_PINS.json",
+     "matched": "refused: campaign mode: not in FREEZE_PINS.json: ['research/layered-networks/analysis.py', 'research/layered-networks/campaign.py', 'research/layered-networks/campaign_template.json']",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "OUTDIR inside the root",
+     "expected": "lies inside the root",
+     "matched": "refused: OUTDIR /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home/analysis lies inside the root /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home",
+     "target_exists": true
+    }
+   ],
+   "outdir_inside": "r-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home/analysis lies inside the root /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home"
   },
   "ok": true,
-  "seconds": 0.4
+  "seconds": 0.3
  },
  "analysis_tampered": {
   "detail": {
@@ -71,20 +173,36 @@
     "rc": 0,
     "seal": {
      "log": {
-      "commit": "501dcf9b6299c793c70edc7d41ed714784a0739e",
-      "margin_s": 2.017,
-      "pushed_utc": "2026-11-26T20:27:23.222969Z",
-      "stage_n_start": "2026-11-26T20:27:25.239948Z"
+      "commit": "8ac4211bdc1f119eefd8d0dac5a8468fb8beee5d",
+      "margin_s": 2.015,
+      "pushed_utc": "2026-11-26T21:57:19.870372Z",
+      "stage_n_start": "2026-11-26T21:57:21.884927Z"
      },
      "log_ok": true,
      "regenerated_identical": false,
      "regeneration_why": "D/prediction.json differs from its seal (the sealed prediction is the one read)"
     },
     "stage_d_room_K3": true
-   }
+   },
+   "checks": [
+    {
+     "check": "A1: K3 refuted beside a timed-out round",
+     "expected": "{\"counted\": true, \"refuted\": true}",
+     "matched": "{\"counted\": true, \"refuted\": true}",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_tampered_A1",
+     "target_exists": true
+    },
+    {
+     "check": "A2: the changed D/prediction.json is a seal defect",
+     "expected": "D/prediction.json differs from its seal",
+     "matched": "D/prediction.json differs from its seal (the sealed prediction is the one read)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_tampered_A2",
+     "target_exists": true
+    }
+   ]
   },
   "ok": true,
-  "seconds": 29.5
+  "seconds": 26.9
  },
  "crash": {
   "detail": {
@@ -92,8 +210,17 @@
     "status": "failed",
     "why": "exit -9, missing ['D/record.json', 'D/prediction.json']"
    },
+   "checks": [
+    {
+     "check": "D killed from outside",
+     "expected": "exit -9",
+     "matched": "exit -9, missing ['D/record.json', 'D/prediction.json']",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_crash",
+     "target_exists": true
+    }
+   ],
    "killed_pids": [
-    10047
+    16873
    ],
    "steps": {
     "D": "failed",
@@ -102,19 +229,28 @@
    }
   },
   "ok": true,
-  "seconds": 185.2
+  "seconds": 171.2
  },
  "differing_duplicate": {
   "detail": {
    "analysis_rc": 0,
    "checker_last": "DUPLICATE DIFFERS",
+   "checks": [
+    {
+     "check": "the duplicate judged not identical",
+     "expected": "\"identical\": false",
+     "matched": "{\"identical\": false}",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/analysis_dupdiff/RESULTS.json",
+     "target_exists": true
+    }
+   ],
    "comparison": {
     "equals_original": true,
     "verdict": "agrees"
    },
    "duplicate": [
     {
-     "cpu_s": 87.6,
+     "cpu_s": 81.1,
      "exit": 0,
      "group": "NOT1",
      "instance": "NOT1_6212",
@@ -125,27 +261,36 @@
    "identical": false
   },
   "ok": true,
-  "seconds": 123.8
+  "seconds": 113.4
  },
  "guard": {
   "detail": {
+   "checks": [
+    {
+     "check": "deck held below the guard",
+     "expected": "\"step\": \"deck\"",
+     "matched": "[{\"free_gb\": 32.92, \"instance\": \"NOT1_6213\", \"step\": \"deck\"}]",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/plans_guard/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
    "steps": {},
    "stopped_for_disk": [
     {
-     "free_gb": 40.0,
+     "free_gb": 32.92,
      "instance": "NOT1_6213",
      "step": "deck"
     }
    ]
   },
   "ok": true,
-  "seconds": 14.3
+  "seconds": 14.5
  },
  "home_run": {
   "detail": {
    "U": [
     {
-     "cpu_s": 27.2,
+     "cpu_s": 25.2,
      "exit": 0,
      "instance": "NOT1_6212",
      "inverter_fires_reported": [
@@ -159,14 +304,23 @@
      "r_cell_fires": [],
      "record_seal_log": {
       "branch": "evidence/combined-seals-K01",
-      "commit": "501dcf9b6299c793c70edc7d41ed714784a0739e"
+      "commit": "8ac4211bdc1f119eefd8d0dac5a8468fb8beee5d"
      },
      "seal_log": {
       "branch": "evidence/combined-seals-K01",
-      "commit": "501dcf9b6299c793c70edc7d41ed714784a0739e"
+      "commit": "8ac4211bdc1f119eefd8d0dac5a8468fb8beee5d"
      },
      "timed_out": false,
      "tool": "controls4.py"
+    }
+   ],
+   "checks": [
+    {
+     "check": "every step done",
+     "expected": "[\"done\"]",
+     "matched": "[\"done\"]",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_home/DONE",
+     "target_exists": true
     }
    ],
    "steps": {
@@ -186,7 +340,7 @@
    }
   },
   "ok": true,
-  "seconds": 590.4
+  "seconds": 557.9
  },
  "interrupt_and_resume": {
   "detail": {
@@ -201,23 +355,41 @@
     "deck": "done",
     "inverters": "done"
    },
+   "checks": [
+    {
+     "check": "D found running at the rerun",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_interrupt",
+     "target_exists": true
+    }
+   ],
    "env_resumes": [
     {
-     "static_sha256": "2a44f94b4b848a46c36377a255f549b10ca1bb8896524f250c71dc11ed3a72d0",
+     "static_sha256": "68796b2f1c804245bc8e7439e191c30bbc0d3d29efa523926939644ae76e3166",
      "uptime_s": "2026-11-26 16:02:52"
     }
    ]
   },
   "ok": true,
-  "seconds": 183.2
+  "seconds": 177.1
  },
  "k3_budget_stop": {
   "detail": {
    "D": {
-    "ended": "2026-11-26T20:21:03.863566Z",
+    "ended": "2026-11-26T21:51:18.891518Z",
     "status": "refused",
     "why": "inv/K3_BUDGET.json is not ok (the inverters' K3 budget)"
    },
+   "checks": [
+    {
+     "check": "D refused for the K3 budget",
+     "expected": "inv/K3_BUDGET.json is not ok",
+     "matched": "inv/K3_BUDGET.json is not ok (the inverters' K3 budget)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_k3stop/NOT1_6213/inv/K3_BUDGET.json",
+     "target_exists": true
+    }
+   ],
    "steps": {
     "D": "refused",
     "deck": "done",
@@ -225,11 +397,20 @@
    }
   },
   "ok": true,
-  "seconds": 169.2
+  "seconds": 160.5
  },
  "kernel_mirror_disagreement": {
   "detail": {
    "D": "failed",
+   "checks": [
+    {
+     "check": "the kernel disagrees with the stub mirror",
+     "expected": "\"clause\": \"dose > 0\"",
+     "matched": "[{\"cell\": \"c1_0\", \"clause\": \"cellValid\", \"level\": \"K0\"}, {\"cell\": \"c1_0\", \"clause\": \"dose > 0\", \"level\": \"K0\"}, {\"cell\": \"c1_0\", \"clause\": \"cellValid\", \"level\": \"K3\"}, {\"cell\": \"c1_0\", \"clause\": \"dose > 0\", \"level\": \"K3\"}]",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_kernel/NOT1_6213/D/prediction.json",
+     "target_exists": true
+    }
+   ],
    "disagreements": [
     {
      "cell": "c1_0",
@@ -254,25 +435,34 @@
    ]
   },
   "ok": true,
-  "seconds": 378.7
+  "seconds": 376.4
  },
  "no_pushed_seal": {
   "detail": {
+   "checks": [
+    {
+     "check": "the push refused by the log's hook",
+     "expected": "pre-receive hook declined",
+     "matched": "! [remote rejected] HEAD -> evidence/combined-seals-K02 (pre-receive hook declined)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_nopush/NOT1_6213/seal_push.json",
+     "target_exists": true
+    }
+   ],
    "seal_push": {
     "branch": "evidence/combined-seals-K02",
-    "commit": "ec2b84bb89a4c277a0516bc353a731e3fa2da687",
+    "commit": "a624f94ab6a03b708711457e80dc4663359c04c0",
     "instance": "NOT1_6213",
-    "line": "NOT1_6213 215c936dda36bffb9daf64e18e34a8dba7c9e2887347897620d6869b18d4ebdb 2026-11-26T19:57:01.891100Z",
+    "line": "NOT1_6213 10c273f511e736759e8110bdbc8e730c0365a55c3d41bbc2c964f1a5dd511af6 2026-11-26T21:27:08.439129Z",
     "previous": null,
     "pushed": false,
-    "remote": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/log_nopush.git",
+    "remote": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/log_nopush.git",
     "seal_folder": {
      "bytes": 5790,
      "files": 3,
      "path": "seals/NOT1_6213"
     },
-    "seal_sha256": "215c936dda36bffb9daf64e18e34a8dba7c9e2887347897620d6869b18d4ebdb",
-    "why": "push rejected: r-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/log_nopush.git\n ! [remote rejected] HEAD -> evidence/combined-seals-K02 (pre-receive hook declined)\nerror: failed to push some refs to '/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/log_nopush.git'",
+    "seal_sha256": "10c273f511e736759e8110bdbc8e730c0365a55c3d41bbc2c964f1a5dd511af6",
+    "why": "push rejected: kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/log_nopush.git\n ! [remote rejected] HEAD -> evidence/combined-seals-K02 (pre-receive hook declined)\nerror: failed to push some refs to '/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/log_nopush.git'",
     "with_seal_folder": true
    },
    "steps": {
@@ -284,13 +474,13 @@
    }
   },
   "ok": true,
-  "seconds": 371.4
+  "seconds": 350.5
  },
  "partial_guard_and_resume": {
   "detail": {
    "U_after": [
     {
-     "cpu_s": 28.7,
+     "cpu_s": 26.2,
      "exit": 0,
      "instance": "NOT1_6212",
      "inverter_fires_reported": [
@@ -304,26 +494,46 @@
      "r_cell_fires": [],
      "record_seal_log": {
       "branch": "evidence/combined-seals-K01",
-      "commit": "56e3585dd2dbbb5f16f51d343d600412ac679d86"
+      "commit": "4484a8c7d3cfca45c7fcb47749cd6eecc46f5234"
      },
      "seal_log": {
       "branch": "evidence/combined-seals-K01",
-      "commit": "56e3585dd2dbbb5f16f51d343d600412ac679d86"
+      "commit": "4484a8c7d3cfca45c7fcb47749cd6eecc46f5234"
      },
      "timed_out": false,
      "tool": "controls4.py"
     }
    ],
+   "checks": [
+    {
+     "check": "C0 exempt from the guard",
+     "expected": "\"step\": \"C0\"",
+     "matched": "[{\"free_gb\": 23.68, \"guard_gb\": 24.7, \"instance\": \"NOT1_6212\", \"step\": \"C0\"}]",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_partial/GUARD_EXEMPT.json",
+     "target_exists": true
+    },
+    {
+     "check": "N1 held below the guard",
+     "expected": "\"step\": \"N1\"",
+     "matched": "[{\"free_gb\": 23.68, \"instance\": \"NOT1_6212\", \"step\": \"N1\"}, {\"free_gb\": 23.68, \"instance\": \"NOT1_6212\", \"step\": \"N2\"}, {\"free_gb\": 23.68, \"instance\": \"U_NOT1_6212\", \"step\": \"U\"}, {\"free_gb\": 23.68, \"instance\": \"NOT1_6212\", \"step\": \"N3\"}]",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_partial",
+     "target_exists": true
+    }
+   ],
    "exempt": [
     {
-     "free_gb": 30.88,
-     "guard_gb": 31.9,
+     "free_gb": 23.68,
+     "guard_gb": 24.7,
      "instance": "NOT1_6212",
      "step": "C0"
     }
    ],
-   "guard_gb": 31.9,
+   "guard_gb": 24.7,
    "held_first": [
+    [
+     "NOT1_6212",
+     "N1"
+    ],
     [
      "NOT1_6212",
      "N2"
@@ -335,10 +545,6 @@
     [
      "NOT1_6212",
      "N3"
-    ],
-    [
-     "NOT1_6212",
-     "N1"
     ]
    ],
    "rc_resume": 0,
@@ -368,28 +574,33 @@
    }
   },
   "ok": true,
-  "seconds": 611.2
+  "seconds": 570.7
  },
  "pins": {
   "detail": {
-   "analysis.py campaign, clean pinned tree": {
-    "a TEST root": [
-     1,
-     "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['machine_1']"
-    ],
-    "controls=another tree": [
-     1,
-     ": campaign mode: controls must be the noise tree at 458bc7a6d763 (/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/tree_pins.wt-458bc7a6/research/layered-networks)"
-    ],
-    "thresholds=another file": [
-     1,
-     "refused: campaign mode reads the pinned thresholds.json only"
-    ],
-    "times=bare": [
-     1,
-     "refused: campaign mode: times must be github or lsremote:LOG, not 'bare'"
-    ]
-   },
+   "checks": [
+    {
+     "check": "one pinned byte changed: launch",
+     "expected": "pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']",
+     "matched": "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .py in the driver's tree: launch",
+     "expected": "is not clean (a changed tracked file, or an untracked .py/.json)",
+     "matched": "refused: campaign mode: the tree at 3361d01a6a98 is not clean (a changed tracked file, or an untracked .py/.json)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .json in the kit tree: launch",
+     "expected": "no clean worktree at kit_commit",
+     "matched": "refused: no clean worktree at kit_commit d599300d51fc (git worktree add --detach DIR d599300d51fcf3a1a4c33d103b89827f8ac4da41)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
    "clean tree, every pin matching: check": {
     "ok": true,
     "pins": {
@@ -397,9 +608,9 @@
      "not_pinned": [],
      "pinned_files": 158,
      "pins_file": "research/layered-networks/FREEZE_PINS.json",
-     "pins_sha256": "bcbab4089ebc79ad1b5b9ff112a2f4ccd3655c88914861aaaef875731dfe1310",
+     "pins_sha256": "7e769d6b1cadca8d5d7f3463dfee45cbb6c8422d397db12c864d41f92cd85b99",
      "tree_clean": true,
-     "tree_commit": "1c0e7e9a57154994be020b0a1fe56f640052a900"
+     "tree_commit": "3361d01a6a98d720ade5ab803a14dd9d6a64455a"
     },
     "rc": 0
    },
@@ -413,22 +624,62 @@
    ],
    "untracked .py in the driver's tree: launch": [
     1,
-    "refused: campaign mode: the tree at 1c0e7e9a5715 is not clean (a changed tracked file, or an untracked .py/.json)"
-   ],
-   "untracked .py: analysis.py campaign": [
-    1,
-    "refused: campaign mode: the tree at 1c0e7e9a5715 is not clean (a changed tracked file, or an untracked .py/.json)"
+    "refused: campaign mode: the tree at 3361d01a6a98 is not clean (a changed tracked file, or an untracked .py/.json)"
    ]
   },
   "ok": true,
-  "seconds": 7.4
+  "seconds": 6.4
  },
  "refusals": {
   "detail": {
-   "campaign mode, test template": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not f5df165e1f3e\"}",
+   "campaign mode, test template": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not e09b5a9a18b3\"}",
+   "checks": [
+    {
+     "check": "campaign mode, test template",
+     "expected": "campaign mode needs the frozen template",
+     "matched": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not e09b5a9a18b3\"}",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/T_refusals.json",
+     "target_exists": true
+    },
+    {
+     "check": "test mode, frozen template",
+     "expected": "test mode needs a test template, not the frozen one",
+     "matched": "{\"ok\": false, \"why\": \"refused: test mode needs a test template, not the frozen one\"}",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/tree_main/research/layered-networks/campaign_template.json",
+     "target_exists": true
+    },
+    {
+     "check": "missing key rounds",
+     "expected": "the plan differs from the template: missing key rounds",
+     "matched": "refused: the plan differs from the template: missing key rounds",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/PLAN_bad_missing_key_rounds.json",
+     "target_exists": true
+    },
+    {
+     "check": "extra key steps_until",
+     "expected": "the plan differs from the template: key steps_until is not allowed",
+     "matched": "refused: the plan differs from the template: key steps_until is not allowed",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/PLAN_bad_extra_key_steps_until.json",
+     "target_exists": true
+    },
+    {
+     "check": "short kit commit",
+     "expected": "the plan differs from the template: kit_commit is 'd599300d'",
+     "matched": "refused: the plan differs from the template: kit_commit is 'd599300d', the template's is 'd599300d51fcf3a1a4c33d103b89827f8ac4da41'",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/PLAN_bad_short_kit_commit.json",
+     "target_exists": true
+    },
+    {
+     "check": "disk at launch",
+     "expected": "GB free at launch, 1e+06 GB needed (disk_launch_gb)",
+     "matched": "refused: 33.5 GB free at launch, 1e+06 GB needed (disk_launch_gb)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/T_bigdisk.json",
+     "target_exists": true
+    }
+   ],
    "disk at launch": [
     1,
-    "refused: 40.6 GB free at launch, 1e+06 GB needed (disk_launch_gb)"
+    "refused: 33.5 GB free at launch, 1e+06 GB needed (disk_launch_gb)"
    ],
    "extra key steps_until": [
     1,
@@ -445,29 +696,61 @@
    "test mode, frozen template": "{\"ok\": false, \"why\": \"refused: test mode needs a test template, not the frozen one\"}"
   },
   "ok": true,
-  "seconds": 6.0
+  "seconds": 6.2
  },
  "second_seal": {
   "detail": {
+   "checks": [
+    {
+     "check": "the second seal refused",
+     "expected": "a second seal is refused",
+     "matched": "seals/NOT1_6213 is already on evidence/combined-seals-K02: a second seal is refused",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_secondseal_2/NOT1_6213/seal_push.json",
+     "target_exists": true
+    }
+   ],
    "first": "done",
    "log": "",
    "seal_push": {
     "branch": "evidence/combined-seals-K02",
     "instance": "NOT1_6213",
     "pushed": false,
-    "remote": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc7/log_secondseal.git",
+    "remote": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/log_secondseal.git",
     "why": "seals/NOT1_6213 is already on evidence/combined-seals-K02: a second seal is refused",
     "with_seal_folder": true
    },
    "second": "failed"
   },
   "ok": true,
-  "seconds": 926.6
+  "seconds": 947.7
  },
  "sigkill_driver_only": {
   "detail": {
+   "checks": [
+    {
+     "check": "run while the orphan child runs",
+     "expected": "ngspice process(es) running",
+     "matched": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_sigkill",
+     "target_exists": true
+    },
+    {
+     "check": "resume while the orphan child runs",
+     "expected": "ngspice process(es) running",
+     "matched": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_sigkill",
+     "target_exists": true
+    },
+    {
+     "check": "the later run found D running",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_sigkill",
+     "target_exists": true
+    }
+   ],
    "children_after_kill": [
-    13944
+    20911
    ],
    "resume_while_child": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
    "run_while_child": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
@@ -478,21 +761,37 @@
    }
   },
   "ok": true,
-  "seconds": 175.5
+  "seconds": 169.6
  },
  "sigterm_driver_only": {
   "detail": {
+   "checks": [
+    {
+     "check": "the driver logged the signal and killed its children",
+     "expected": "\"signal\": \"SIGTERM\"",
+     "matched": "[{\"at\": \"2026-11-26T21:45:43.352162Z\", \"killed_process_groups\": [20221], \"signal\": \"SIGTERM\"}]",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_sigterm/SIGNALS.json",
+     "target_exists": true
+    },
+    {
+     "check": "the resume found D running",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/root_sigterm",
+     "target_exists": true
+    }
+   ],
    "children_before": [
-    13264
+    20221
    ],
    "children_gone": true,
-   "pids": "2026-11-26T20:15:14.004918Z 13344 driver_resume_1.log\n",
-   "resume": "launched pid 13344",
+   "pids": "2026-11-26T21:45:43.610453Z 20303 driver_resume_1.log\n",
+   "resume": "launched pid 20303",
    "signals": [
     {
-     "at": "2026-11-26T20:15:13.750850Z",
+     "at": "2026-11-26T21:45:43.352162Z",
      "killed_process_groups": [
-      13264
+      20221
      ],
      "signal": "SIGTERM"
     }
@@ -504,10 +803,19 @@
    }
   },
   "ok": true,
-  "seconds": 170.5
+  "seconds": 172.5
  },
  "timeout": {
   "detail": {
+   "checks": [
+    {
+     "check": "deck timed out",
+     "expected": "more than 0.001 s",
+     "matched": "more than 0.001 s",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc10/plans_timeout/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
    "result_mode": "TEST",
    "steps": {
     "deck": "timeout"
@@ -515,6 +823,6 @@
    "why": "more than 0.001 s"
   },
   "ok": true,
-  "seconds": 13.2
+  "seconds": 14.6
  }
 }

@@ -24,7 +24,8 @@ is new, and you only add to it.
 Acknowledge in one line before acting. Report to the stage-D worker (session_01TzF7ZYVsvGaQ6EzEjxCJLM), with the
 coordinator (session_01TzF7ZYZVxJcErqniRxMQ4F) in copy, at each step marked REPORT.
 
-`<COMMIT>` is the commit named in the message that sent you this runbook. `<nn>` is your machine number (02, 03, 05
+`<COMMIT>` is the commit named in the message that sent you this runbook. For the second run it is
+86a00ac2479101f116f600626f05a13cddedb799, the commit (a) and (c) ran on (dev/equiv/TEST_C_NOTES.md). `<nn>` is your machine number (02, 03, 05
 or 06).
 
 ## 1. A fresh clone, fetched by name, at the exact commit
