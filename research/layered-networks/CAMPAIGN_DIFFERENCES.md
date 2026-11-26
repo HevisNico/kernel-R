@@ -49,6 +49,8 @@ limit: test (a) is rerun on them, identical):
 12. **D2, the children.**
     - On SIGTERM or SIGINT the driver kills its running children's process groups, logs them in SIGNALS.json and
       exits. The chain left them running.
+    - The child registry's lock is re-entrant (RLock): the handler runs in the main thread, which may hold it while
+      starting a child (remote_duplicate).
     - `run` and the new `resume` refuse while ngspice runs, while the OUTROOT's driver is alive, or while another
       process names the OUTROOT.
    - A zombie ngspice (state Z: killed, not yet reaped) is not counted as running. Test (c) first failed on it: a
@@ -57,7 +59,8 @@ limit: test (a) is rerun on them, identical):
     DRIVER_PIDS.log, and moves an earlier DONE aside to DONE.before_resume_<k>. This follows the rule of detached jobs
     and waits of at most 590 s.
 14. **D3, no silent stop.** When inverters is done but inv/K3_BUDGET.json is not ok, D is recorded "refused" with the
-    reason. The chain returned without an entry. With today's indeck_noise4, which exits 1 when not ok, inverters is
+    reason: in status.json the entry is under the step name `D` (status `refused`, why "inv/K3_BUDGET.json is not ok
+    (the inverters' K3 budget)"), although D itself never ran. The chain returned without an entry. With today's indeck_noise4, which exits 1 when not ok, inverters is
     "failed" first; the refused entry covers a K3_BUDGET that says not ok after an exit 0. Test (c) makes one with a
     stub tree.
 15. **D4, the instances' result before the duplicates.**
@@ -102,6 +105,8 @@ limit: test (a) is rerun on them, identical):
      thresholds are read once, before the first layer.
    - **A4:** the not_sealed rows list each instance with its comparison verdicts (analyze10: names only).
    - **A5:** campaign mode checks FREEZE_PINS.json over its own tree and that the tree is clean (campaign.pins_check).
+     It also refuses a root whose driver checked another FREEZE_PINS.json (TEMPLATE_CHECK.json pins.pins_sha256): the
+     same campaign.py at another commit, with another pinned list, is not accepted.
    - **A6:** first_failing uses the one step order ORDER, with sealpush in it.
    - A new top-level key, `pins`.
 5. **The rest is byte-identical to analyze10.** Equivalence (b) shows it on the final dry run's 8 roots and e2e17's

@@ -733,6 +733,12 @@ def root_driver(root):
     return dict(driver_sha256=c.get("driver_sha256"), template_sha256=c.get("template_sha256"), mode=c.get("mode"))
 
 
+def root_pins(root):
+    """The FREEZE_PINS.json sha256 a root's driver checked (TEMPLATE_CHECK.json pins.pins_sha256), or None."""
+    f = Path(root) / "TEMPLATE_CHECK.json"
+    return (json.loads(f.read_text()).get("pins") or {}).get("pins_sha256") if f.exists() else None
+
+
 def sums_of(roots):
     out = {}
     for k, root in enumerate(roots, start=1):
@@ -786,6 +792,10 @@ def main(mode, outdir, *args):
                                                           template_sha256=CP.FROZEN_TEMPLATE_SHA256, mode="CAMPAIGN")]
         if bad:
             raise Refused(f"refused: roots not run by this campaign.py on the frozen template in campaign mode: {bad}")
+        bad = [f"machine_{k}" for k, r in enumerate(roots, start=1) if root_pins(r) != pc["pins_sha256"]]
+        if bad:
+            raise Refused(f"refused: roots whose driver checked another FREEZE_PINS.json than this tree's "
+                          f"({pc['pins_sha256'][:12]}): {bad}")
     th = json.loads(tf.read_text())
     before = sums_of(roots)
     out.mkdir(parents=True, exist_ok=True)

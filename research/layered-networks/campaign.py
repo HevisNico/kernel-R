@@ -204,7 +204,8 @@ def pins_refusal(pc):
     return "; ".join(why) or None
 
 
-CHILDREN, CHILD_LOCK = set(), threading.Lock()   # the process groups of the running children
+CHILDREN, CHILD_LOCK = set(), threading.RLock()  # the process groups of the running children; re-entrant, because
+#   the signal handler runs in the main thread, which may hold the lock in run_child when the signal arrives
 
 
 def on_signal(root):

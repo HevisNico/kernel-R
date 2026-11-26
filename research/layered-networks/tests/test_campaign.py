@@ -448,13 +448,25 @@ def case_pins(w):
         a = sh(PY, "-B", L / "analysis.py", "campaign", w.wd / "an_pins", w.wd / "root_home", *extra)
         an[label] = (a.returncode, a.stderr.strip()[-200:])
     out["analysis.py campaign, clean pinned tree"] = an
+    forged = w.wd / "root_home_forged_pins"            # audit: a root of the same campaign.py, another pinned list
+    shutil.rmtree(forged, ignore_errors=True)
+    shutil.copytree(w.wd / "root_home", forged, symlinks=True)
+    import hashlib
+    env = json.loads((forged / "ENV.json").read_text())
+    env["campaign"] = dict(env["campaign"], driver_sha256=hashlib.sha256((L / "campaign.py").read_bytes()).hexdigest(),
+                           template_sha256=hashlib.sha256(frozen.read_bytes()).hexdigest(), mode="CAMPAIGN")
+    (forged / "ENV.json").write_text(json.dumps(env, indent=1, sort_keys=True) + "\n")
+    af = sh(PY, "-B", L / "analysis.py", "campaign", w.wd / "an_pins_forged", forged)
+    out["a CAMPAIGN root whose driver checked another FREEZE_PINS.json: analysis.py campaign"] = \
+        (af.returncode, af.stderr.strip()[-300:])
     ok = r.returncode == 0 and tc.get("ok") is True and not tc["pins"]["mismatched"] and tc["pins"]["tree_clean"] and \
         r1.returncode != 0 and "pinned files differ" in r1.stderr and "fit3.py" in r1.stderr and \
         r2.returncode != 0 and "not clean" in r2.stderr and a2.returncode != 0 and "not clean" in a2.stderr and \
         r3.returncode != 0 and "no clean worktree at kit_commit" in r3.stderr and \
         not any((w.wd / x).exists() for x in ("root_pins_byte", "root_pins_untracked", "root_pins_kit")) and \
         "times must be" in an["times=bare"][1] and "pinned thresholds" in an["thresholds=another file"][1] and \
-        "controls must be" in an["controls=another tree"][1] and "roots not run by this campaign.py" in an["a TEST root"][1]
+        "controls must be" in an["controls=another tree"][1] and "roots not run by this campaign.py" in an["a TEST root"][1] and \
+        af.returncode != 0 and "another FREEZE_PINS.json" in af.stderr
     return ok, out
 
 
