@@ -143,6 +143,15 @@ class Work:
         return {k: out / f"PLAN_{k}.json" for k in ("K01", "K02", "K03")}
 
 
+def check(checks, label, text, needle, target, exists_before):
+    """One record of a check: the expected message, the line that matched it (None: no match), the target and whether
+    it existed before the call. A check passes only if its own message matched and its target existed."""
+    line = next((ln for ln in str(text).splitlines() if needle in ln), None)
+    checks.append(dict(check=label, expected=needle, matched=line.strip()[-300:] if line else None,
+                       target=str(target), target_exists=exists_before))
+    return line is not None and exists_before is True
+
+
 def result(root):
     f = Path(root) / "RESULT.json"
     return json.loads(f.read_text()) if f.exists() else None
@@ -155,10 +164,19 @@ def case_refusals(w):
     rem = w.remote("refusals")
     tt = w.template("refusals", rem)
     pl = w.plans("refusals", tr, tt)
-    out = {}
+    out, checks, oks = {}, [], []
+    frozen = tr / "research/layered-networks/campaign_template.json"
+    e = tt.exists() and pl["K02"].exists()
     out["campaign mode, test template"] = campaign(tr, "check", "campaign", tt, pl["K02"]).stdout.strip()
-    out["test mode, frozen template"] = campaign(tr, "check", "test", tr / "research/layered-networks/campaign_template.json",
-                                                 pl["K02"]).stdout.strip()
+    oks.append(check(checks, "campaign mode, test template", out["campaign mode, test template"],
+                     "campaign mode needs the frozen template", tt, e))
+    e = frozen.exists() and pl["K02"].exists()
+    out["test mode, frozen template"] = campaign(tr, "check", "test", frozen, pl["K02"]).stdout.strip()
+    oks.append(check(checks, "test mode, frozen template", out["test mode, frozen template"],
+                     "test mode needs a test template, not the frozen one", frozen, e))
+    want = {"missing key rounds": "the plan differs from the template: missing key rounds",
+            "extra key steps_until": "the plan differs from the template: key steps_until is not allowed",
+            "short kit commit": "the plan differs from the template: kit_commit is 'd599300d'"}
     p = json.loads(pl["K02"].read_text())
     for label, mod in (("missing key rounds", lambda q: q.pop("rounds")), ("extra key steps_until", lambda q: q.update(steps_until="D")),
                        ("short kit commit", lambda q: q.update(kit_commit=q["kit_commit"][:8]))):
@@ -166,13 +184,19 @@ def case_refusals(w):
         mod(q)
         f = w.wd / f"PLAN_bad_{label.replace(' ', '_')}.json"
         f.write_text(json.dumps(q))
+        e = f.exists()
         r = campaign(tr, "launch", "test", tt, f, w.wd / f"root_bad_{label.replace(' ', '_')}")
         out[label] = (r.returncode, (r.stdout + r.stderr).strip()[-200:])
+        oks.append(r.returncode != 0 and check(checks, label, r.stdout + r.stderr, want[label], f, e))
     big = w.template("bigdisk", rem, disk_launch_gb=10 ** 6)
     plb = w.plans("bigdisk", tr, big)
+    e = big.exists() and plb["K02"].exists()
     r = campaign(tr, "launch", "test", big, plb["K02"], w.wd / "root_bigdisk")
     out["disk at launch"] = (r.returncode, (r.stdout + r.stderr).strip()[-200:])
-    ok = all("refused" in (v if isinstance(v, str) else v[1]) for v in out.values()) and \
+    oks.append(r.returncode != 0 and check(checks, "disk at launch", r.stdout + r.stderr,
+                                           "GB free at launch, 1e+06 GB needed (disk_launch_gb)", big, e))
+    out["checks"] = checks
+    ok = all(oks) and \
         all(not (w.wd / f"root_bad_{x}").exists() for x in ("missing_key_rounds", "extra_key_steps_until", "short_kit_commit")) and \
         not (w.wd / "root_bigdisk").exists()
     return ok, out
@@ -183,12 +207,16 @@ def case_timeout(w):
     tt = w.template("timeout", w.remote("timeout"), time_limits_s=dict(deck=0.001))
     pl = w.plans("timeout", tr, tt)
     root = w.wd / "root_timeout"
+    e = pl["K02"].exists()
     r = campaign(tr, "run", "test", tt, pl["K02"], root)
     st = status(root, "NOT1_6213")
     res = result(root)
-    ok = r.returncode == 0 and st.get("deck", {}).get("status") == "timeout" and set(st) == {"deck"} and (root / "DONE").exists()
+    checks = []
+    c = check(checks, "deck timed out", st.get("deck", {}).get("why"), "more than 0.001 s", pl["K02"], e)
+    ok = c and r.returncode == 0 and st.get("deck", {}).get("status") == "timeout" and set(st) == {"deck"} and \
+        (root / "DONE").exists()
     return ok, dict(steps={k: v["status"] for k, v in st.items()}, why=st.get("deck", {}).get("why"),
-                    result_mode=(res or {}).get("campaign", {}).get("mode"))
+                    result_mode=(res or {}).get("campaign", {}).get("mode"), checks=checks)
 
 
 def case_guard(w):
@@ -196,11 +224,14 @@ def case_guard(w):
     tt = w.template("guard", w.remote("guard"), disk_guard_gb=10 ** 6)
     pl = w.plans("guard", tr, tt)
     root = w.wd / "root_guard"
+    e = pl["K02"].exists()
     r = campaign(tr, "run", "test", tt, pl["K02"], root)
     res = result(root)
     st = status(root, "NOT1_6213")
-    ok = r.returncode == 0 and st == {} and [h["step"] for h in res["stopped_for_disk"]] == ["deck"]
-    return ok, dict(steps=st, stopped_for_disk=res["stopped_for_disk"])
+    checks = []
+    c = check(checks, "deck held below the guard", json.dumps(res["stopped_for_disk"]), '"step": "deck"', pl["K02"], e)
+    ok = c and r.returncode == 0 and st == {} and [h["step"] for h in res["stopped_for_disk"]] == ["deck"]
+    return ok, dict(steps=st, stopped_for_disk=res["stopped_for_disk"], checks=checks)
 
 
 def kill_group(pattern):
@@ -232,9 +263,11 @@ def case_crash(w):
     k = kill_group(f"stage_d6.py run .*{root}/NOT1_6213/D")   # the step's whole process group, from outside
     p.wait(timeout=1800)
     st = status(root, "NOT1_6213")
-    ok = st["D"]["status"] == "failed" and "N0" not in st and (root / "DONE").exists()
+    checks = []
+    c = check(checks, "D killed from outside", st["D"].get("why"), "exit -9", root, root.exists())
+    ok = c and bool(k) and st["D"]["status"] == "failed" and "N0" not in st and (root / "DONE").exists()
     return ok, dict(killed_pids=k, D=dict(status=st["D"]["status"], why=st["D"].get("why")),
-                    steps={k_: v["status"] for k_, v in st.items()})
+                    steps={k_: v["status"] for k_, v in st.items()}, checks=checks)
 
 
 def case_interrupt(w):
@@ -253,9 +286,11 @@ def case_interrupt(w):
     before = status(root, "NOT1_6213")
     r = campaign(tr, "run", "test", tt, pl["K02"], root)
     st = status(root, "NOT1_6213")
-    ok = before["D"]["status"] == "running" and st["D"]["status"] == "interrupted" and "N0" not in st and \
+    checks = []
+    c = check(checks, "D found running at the rerun", st["D"].get("why"), "found running at a resume", root, root.exists())
+    ok = c and before["D"]["status"] == "running" and st["D"]["status"] == "interrupted" and "N0" not in st and \
         st["D"].get("started") == before["D"].get("started") and r.returncode == 0 and (root / "DONE").exists()
-    return ok, dict(before={k: v["status"] for k, v in before.items()}, after={k: v["status"] for k, v in st.items()},
+    return ok, dict(checks=checks, before={k: v["status"] for k, v in before.items()}, after={k: v["status"] for k, v in st.items()},
                     D_why=st["D"].get("why"), env_resumes=json.loads((root / "ENV_RESUMES.json").read_text())
                     if (root / "ENV_RESUMES.json").exists() else None)
 
@@ -278,9 +313,12 @@ def case_kernel(w):
     st = status(root, "NOT1_6213")
     pred = json.loads((root / "NOT1_6213" / "D" / "prediction.json").read_text()) if (root / "NOT1_6213" / "D" / "prediction.json").exists() else {}
     k = pred.get("kernel") or {}
-    ok = st.get("D", {}).get("status") == "failed" and "seal" not in st and not k.get("agrees", True) and \
-        any(d["clause"] == "dose > 0" for d in k.get("disagreements", []))
-    return ok, dict(D=st.get("D", {}).get("status"), disagreements=k.get("disagreements"))
+    checks = []
+    c = check(checks, "the kernel disagrees with the stub mirror", json.dumps(k.get("disagreements", [])),
+              '"clause": "dose > 0"', root / "NOT1_6213" / "D" / "prediction.json",
+              (root / "NOT1_6213" / "D" / "prediction.json").exists())
+    ok = c and st.get("D", {}).get("status") == "failed" and "seal" not in st and not k.get("agrees", True)
+    return ok, dict(D=st.get("D", {}).get("status"), disagreements=k.get("disagreements"), checks=checks)
 
 
 def case_no_pushed_seal(w):
@@ -291,8 +329,11 @@ def case_no_pushed_seal(w):
     campaign(tr, "run", "test", tt, pl["K02"], root)
     st = status(root, "NOT1_6213")
     sp = json.loads((root / "NOT1_6213" / "seal_push.json").read_text()) if (root / "NOT1_6213" / "seal_push.json").exists() else None
-    ok = st.get("sealpush", {}).get("status") == "failed" and "N0" not in st
-    return ok, dict(steps={k: v["status"] for k, v in st.items()}, seal_push=sp)
+    checks = []
+    f = root / "NOT1_6213" / "seal_push.json"
+    c = check(checks, "the push refused by the log's hook", (sp or {}).get("why"), "pre-receive hook declined", f, f.exists())
+    ok = c and (sp or {}).get("pushed") is False and st.get("sealpush", {}).get("status") == "failed" and "N0" not in st
+    return ok, dict(steps={k: v["status"] for k, v in st.items()}, seal_push=sp, checks=checks)
 
 
 def case_second_seal(w):
@@ -306,10 +347,13 @@ def case_second_seal(w):
     st = status(root2, "NOT1_6213")
     sp = json.loads((root2 / "NOT1_6213" / "seal_push.json").read_text()) if (root2 / "NOT1_6213" / "seal_push.json").exists() else None
     log = (root2 / "NOT1_6213" / "sealpush.log").read_text()[-300:] if (root2 / "NOT1_6213" / "sealpush.log").exists() else ""
-    ok = status(root, "NOT1_6213").get("sealpush", {}).get("status") == "done" and \
+    checks = []
+    f = root2 / "NOT1_6213" / "seal_push.json"
+    c = check(checks, "the second seal refused", (sp or {}).get("why"), "a second seal is refused", f, f.exists())
+    ok = c and status(root, "NOT1_6213").get("sealpush", {}).get("status") == "done" and \
         st.get("sealpush", {}).get("status") == "failed" and "N0" not in st
     return ok, dict(first=status(root, "NOT1_6213").get("sealpush", {}).get("status"),
-                    second=st.get("sealpush", {}).get("status"), seal_push=sp, log=log)
+                    second=st.get("sealpush", {}).get("status"), seal_push=sp, log=log, checks=checks)
 
 
 def case_partial_guard(w):
@@ -337,11 +381,15 @@ def case_partial_guard(w):
     st2 = status(root, "NOT1_6212")
     res2 = result(root)
     held1 = [(h["instance"], h["step"]) for h in res1["stopped_for_disk"]]
-    ok = st1.get("C0", {}).get("status") == "done" and [e["step"] for e in ex] == ["C0"] and \
+    checks = []
+    c1 = check(checks, "C0 exempt from the guard", json.dumps(ex), '"step": "C0"', root / "GUARD_EXEMPT.json",
+               (root / "GUARD_EXEMPT.json").exists())
+    c2 = check(checks, "N1 held below the guard", json.dumps(res1["stopped_for_disk"]), '"step": "N1"', root, root.exists())
+    ok = c1 and c2 and st1.get("C0", {}).get("status") == "done" and [e["step"] for e in ex] == ["C0"] and \
         ("NOT1_6212", "N1") in held1 and ("U_NOT1_6212", "U") in held1 and "N1" not in st1 and \
         all(st2.get(f"C{n}", {}).get("status") == "done" for n in range(4)) and res2["stopped_for_disk"] == [] and \
         res2["controls"]["U"][0].get("ok") is True
-    return ok, dict(guard_gb=guard, held_first=held1, exempt=ex, steps_first={k: v["status"] for k, v in st1.items()},
+    return ok, dict(checks=checks, guard_gb=guard, held_first=held1, exempt=ex, steps_first={k: v["status"] for k, v in st1.items()},
                     steps_after_resume={k: v["status"] for k, v in st2.items()}, U_after=res2["controls"]["U"],
                     rc_resume=r.returncode), dict(root=root, remote=rem, template=tt, plans=pl)
 
@@ -356,8 +404,13 @@ def case_home(w):
     r = campaign(tr, "run", "test", tt, pl["K01"], root)
     st = status(root, "NOT1_6212")
     res = result(root)
-    ok = r.returncode == 0 and all(v["status"] == "done" for v in st.values()) and "C0" in st and (root / "DONE").exists()
-    return ok, dict(steps={k: v["status"] for k, v in st.items()}, U=res["controls"]["U"]), dict(root=root, remote=rem)
+    checks = []
+    c = check(checks, "every step done", json.dumps(sorted({v["status"] for v in st.values()})), '["done"]', root / "DONE",
+              (root / "DONE").exists())
+    ok = c and r.returncode == 0 and all(v["status"] == "done" for v in st.values()) and "C0" in st and \
+        (root / "INSTANCES_DONE").exists()
+    return ok, dict(steps={k: v["status"] for k, v in st.items()}, U=res["controls"]["U"], checks=checks), \
+        dict(root=root, remote=rem)
 
 
 def tamper_noise(t):
@@ -385,17 +438,26 @@ def case_differing_duplicate(w, home):
     a = sh(PY, "-B", HERE / "analysis.py", "test", an, home["root"], root, "times=bare")
     out = json.loads((an / "RESULTS.json").read_text()) if (an / "RESULTS.json").exists() else {}
     x = (out.get("controls") or {}).get("cross_machine_duplicates") or [{}]
-    ok = res["remote_duplicates"][0].get("ok") is True and x[0].get("identical") is False
-    return ok, dict(duplicate=res["remote_duplicates"], analysis_rc=a.returncode, identical=x[0].get("identical"),
+    checks = []
+    c = check(checks, "the duplicate judged not identical", json.dumps(dict(identical=x[0].get("identical"))),
+              '"identical": false', an / "RESULTS.json", (an / "RESULTS.json").exists())
+    ok = c and res["remote_duplicates"][0].get("ok") is True and x[0].get("identical") is False
+    return ok, dict(checks=checks, duplicate=res["remote_duplicates"], analysis_rc=a.returncode, identical=x[0].get("identical"),
                     checker_last=(x[0].get("checker_lines") or [""])[-1], comparison=x[0].get("comparison"))
 
 
 def case_analysis_refuses_test_root(w, root):
+    """analysis.py of the dev tree: campaign mode is refused first by the tree's own pins (campaign.py, analysis.py
+    and the template not pinned: the refusal of a TEST root is shown in analysis_forged_pins, in a pinned tree); an
+    OUTDIR inside a root is refused."""
     an = w.wd / "analysis_campaign_on_test"
+    checks, e = [], Path(root).exists()
     a = sh(PY, "-B", HERE / "analysis.py", "campaign", an, root, "times=bare")
+    c1 = check(checks, "campaign mode in the unpinned dev tree", a.stderr, "campaign mode: not in FREEZE_PINS.json", root, e)
     inside = sh(PY, "-B", HERE / "analysis.py", "test", Path(root) / "analysis", root, "times=bare")
-    ok = a.returncode != 0 and "refused" in a.stderr and inside.returncode != 0 and "inside the root" in inside.stderr
-    return ok, dict(campaign_on_test=a.stderr.strip()[-200:], outdir_inside=inside.stderr.strip()[-200:])
+    c2 = check(checks, "OUTDIR inside the root", inside.stderr, "lies inside the root", root, e)
+    ok = c1 and c2 and a.returncode != 0 and inside.returncode != 0
+    return ok, dict(campaign_on_test=a.stderr.strip()[-200:], outdir_inside=inside.stderr.strip()[-200:], checks=checks)
 
 
 # ------------------------------------------------------------------------------------- the audit's cases (D1–D3, A1–A5)
@@ -421,53 +483,90 @@ def case_pins(w):
     L = tr / "research" / "layered-networks"
     frozen = L / "campaign_template.json"
     pl = w.plans("pins", tr, frozen)
-    out = {}
+    out, checks = {}, []
     r = campaign(tr, "check", "campaign", frozen, pl["K02"])
     tc = json.loads(r.stdout or "{}")
     out["clean tree, every pin matching: check"] = dict(rc=r.returncode, ok=tc.get("ok"), pins=tc.get("pins"))
     pinned = L / "fit3.py"                                 # one pinned file changed by one byte, committed (tree clean)
     pinned.write_bytes(pinned.read_bytes() + b" ")
     sh("git", "-C", tr, "commit", "-q", "-am", "test: one byte (test)")
+    e = pl["K02"].exists() and frozen.exists()
     r1 = campaign(tr, "launch", "campaign", frozen, pl["K02"], w.wd / "root_pins_byte")
     out["one pinned byte changed: launch"] = (r1.returncode, (r1.stdout + r1.stderr).strip()[-300:])
+    c1 = check(checks, "one pinned byte changed: launch", r1.stderr,
+               "pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']", pl["K02"], e)
     sh("git", "-C", tr, "reset", "-q", "--hard", "HEAD~1")
     (L / "stray.py").write_text("# untracked (test)\n")    # an untracked .py in the driver's tree
     r2 = campaign(tr, "launch", "campaign", frozen, pl["K02"], w.wd / "root_pins_untracked")
     out["untracked .py in the driver's tree: launch"] = (r2.returncode, (r2.stdout + r2.stderr).strip()[-300:])
-    a2 = sh(PY, "-B", L / "analysis.py", "campaign", w.wd / "an_pins_untracked", w.wd / "root_home")
-    out["untracked .py: analysis.py campaign"] = (a2.returncode, a2.stderr.strip()[-300:])
+    c2 = check(checks, "untracked .py in the driver's tree: launch", r2.stderr, "is not clean (a changed tracked file, "
+               "or an untracked .py/.json)", pl["K02"], e)
     (L / "stray.py").unlink()
     kit = Path(f"{tr}.wt-{json.loads(frozen.read_text())['kit_commit'][:8]}")
     (kit / "stray.json").write_text("{}\n")                 # an untracked .json in the kit's tree
     r3 = campaign(tr, "launch", "campaign", frozen, pl["K02"], w.wd / "root_pins_kit")
     out["untracked .json in the kit tree: launch"] = (r3.returncode, (r3.stdout + r3.stderr).strip()[-300:])
+    c3 = check(checks, "untracked .json in the kit tree: launch", r3.stderr, "no clean worktree at kit_commit", pl["K02"], e)
     (kit / "stray.json").unlink()
-    an = {}
-    for label, extra in (("times=bare", ["times=bare"]), ("thresholds=another file", [f"thresholds={w.wd / 'DRAW.json'}"]),
-                         ("controls=another tree", [f"controls={L}"]), ("a TEST root", [])):
-        a = sh(PY, "-B", L / "analysis.py", "campaign", w.wd / "an_pins", w.wd / "root_home", *extra)
-        an[label] = (a.returncode, a.stderr.strip()[-200:])
-    out["analysis.py campaign, clean pinned tree"] = an
-    forged = w.wd / "root_home_forged_pins"            # audit: a root of the same campaign.py, another pinned list
-    shutil.rmtree(forged, ignore_errors=True)
-    shutil.copytree(w.wd / "root_home", forged, symlinks=True)
+    out["checks"] = checks                 # analysis.py campaign in this tree: analysis_forged_pins, on a real root
+    ok = r.returncode == 0 and tc.get("ok") is True and not tc["pins"]["mismatched"] and tc["pins"]["tree_clean"] and \
+        not tc["pins"]["not_pinned"] and r1.returncode != 0 and c1 and r2.returncode != 0 and c2 and \
+        r3.returncode != 0 and c3 and \
+        not any((w.wd / x).exists() for x in ("root_pins_byte", "root_pins_untracked", "root_pins_kit"))
+    return ok, out
+
+
+def case_analysis_forged_pins(w, root):
+    """analysis.py campaign in the pinned tree (tamper_pins), on real roots copied from the home run (TEST mode):
+    - the refusals of A3 (times, thresholds, controls), of an untracked .py, and of the TEST root itself;
+    - audit follow-up 1: a copy whose ENV.json is forged to this campaign.py, the frozen template and CAMPAIGN, but
+      whose driver checked another FREEZE_PINS.json (the dev tree's) → refused for its pins;
+    - the control: the same forged copy with TEMPLATE_CHECK.json's pins sha set to this tree's → NOT refused for its
+      pins or as a root of another driver; it goes on, and is refused later for the ENV.json the forgery changed."""
     import hashlib
+    info = w.tree("pins", tamper_pins)
+    L = info["tree"] / "research" / "layered-networks"
+    frozen = L / "campaign_template.json"
+    checks, oks, out = [], [], {}
+
+    def an(label, target, needle, *extra, absent=None):
+        e = Path(target).exists()
+        a = sh(PY, "-B", L / "analysis.py", "campaign", w.wd / f"an_forged_{len(checks)}", target, *extra)
+        out[label] = (a.returncode, a.stderr.strip()[-300:])
+        good = a.returncode != 0 and check(checks, label, a.stderr, needle, target, e)
+        if absent:
+            checks[-1]["must_not_contain"] = absent
+            good = good and absent not in a.stderr
+        oks.append(good)
+
+    an("times=bare", root, "campaign mode: times must be github or lsremote:LOG, not 'bare'", "times=bare")
+    an("thresholds=another file", root, "campaign mode reads the pinned thresholds.json only",
+       f"thresholds={w.wd / 'DRAW.json'}")
+    an("controls=another tree", root, "campaign mode: controls must be the noise tree at", f"controls={L}")
+    an("the home run's TEST root itself", root, "roots not run by this campaign.py on the frozen template in campaign mode")
+    (L / "stray.py").write_text("# untracked (test)\n")
+    an("untracked .py in the analysis tree", root, "is not clean (a changed tracked file, or an untracked .py/.json)")
+    (L / "stray.py").unlink()
+    forged = w.wd / "root_home_forged_pins"
+    shutil.rmtree(forged, ignore_errors=True)
+    shutil.copytree(root, forged, symlinks=True)
     env = json.loads((forged / "ENV.json").read_text())
     env["campaign"] = dict(env["campaign"], driver_sha256=hashlib.sha256((L / "campaign.py").read_bytes()).hexdigest(),
                            template_sha256=hashlib.sha256(frozen.read_bytes()).hexdigest(), mode="CAMPAIGN")
     (forged / "ENV.json").write_text(json.dumps(env, indent=1, sort_keys=True) + "\n")
-    af = sh(PY, "-B", L / "analysis.py", "campaign", w.wd / "an_pins_forged", forged)
-    out["a CAMPAIGN root whose driver checked another FREEZE_PINS.json: analysis.py campaign"] = \
-        (af.returncode, af.stderr.strip()[-300:])
-    ok = r.returncode == 0 and tc.get("ok") is True and not tc["pins"]["mismatched"] and tc["pins"]["tree_clean"] and \
-        r1.returncode != 0 and "pinned files differ" in r1.stderr and "fit3.py" in r1.stderr and \
-        r2.returncode != 0 and "not clean" in r2.stderr and a2.returncode != 0 and "not clean" in a2.stderr and \
-        r3.returncode != 0 and "no clean worktree at kit_commit" in r3.stderr and \
-        not any((w.wd / x).exists() for x in ("root_pins_byte", "root_pins_untracked", "root_pins_kit")) and \
-        "times must be" in an["times=bare"][1] and "pinned thresholds" in an["thresholds=another file"][1] and \
-        "controls must be" in an["controls=another tree"][1] and "roots not run by this campaign.py" in an["a TEST root"][1] and \
-        af.returncode != 0 and "another FREEZE_PINS.json" in af.stderr
-    return ok, out
+    an("a CAMPAIGN root whose driver checked another FREEZE_PINS.json", forged,
+       "roots whose driver checked another FREEZE_PINS.json than this tree's")
+    control = w.wd / "root_home_forged_control"
+    shutil.rmtree(control, ignore_errors=True)
+    shutil.copytree(forged, control, symlinks=True)
+    tc = json.loads((control / "TEMPLATE_CHECK.json").read_text())
+    tc["pins"]["pins_sha256"] = hashlib.sha256((L / "FREEZE_PINS.json").read_bytes()).hexdigest()
+    (control / "TEMPLATE_CHECK.json").write_text(json.dumps(tc, indent=1, sort_keys=True) + "\n")
+    an("control: the same forged root with this tree's pins", control, "mixed environments in one OUTROOT",
+       absent="another FREEZE_PINS.json")
+    oks[-1] = oks[-1] and "roots not run by this campaign.py" not in out["control: the same forged root with this tree's pins"][1]
+    out["checks"] = checks
+    return all(oks), out
 
 
 def children_of(root):
@@ -500,9 +599,13 @@ def case_sigterm_driver_only(w):
     r = campaign(tr, "resume", "test", tt, pl["K02"], root)
     done = r.returncode == 0 and wait_done(tr, root)
     st = status(root, "NOT1_6213")
-    ok = bool(kids) and gone and sig and sig[0]["signal"] == "SIGTERM" and sig[0]["killed_process_groups"] and \
+    checks = []
+    c1 = check(checks, "the driver logged the signal and killed its children", json.dumps(sig), '"signal": "SIGTERM"',
+               root / "SIGNALS.json", (root / "SIGNALS.json").exists())
+    c2 = check(checks, "the resume found D running", st.get("D", {}).get("why"), "found running at a resume", root, True)
+    ok = c1 and c2 and bool(kids) and gone and sig[0]["killed_process_groups"] and \
         r.returncode == 0 and done and st["D"]["status"] == "interrupted" and "seal" not in st and (root / "DONE").exists()
-    return ok, dict(children_before=kids, children_gone=gone, signals=sig, resume=(r.stdout + r.stderr).strip()[-300:],
+    return ok, dict(checks=checks, children_before=kids, children_gone=gone, signals=sig, resume=(r.stdout + r.stderr).strip()[-300:],
                     steps={k: v["status"] for k, v in st.items()}, pids=(root / "DRIVER_PIDS.log").read_text()
                     if (root / "DRIVER_PIDS.log").exists() else None)
 
@@ -527,9 +630,13 @@ def case_sigkill_driver_only(w):
     time.sleep(3)
     r3 = campaign(tr, "run", "test", tt, pl["K02"], root)
     st = status(root, "NOT1_6213")
-    ok = bool(kids) and r1.returncode != 0 and "refused" in r1.stderr and r2.returncode != 0 and "refused" in r2.stderr \
+    checks = []
+    c1 = check(checks, "run while the orphan child runs", r1.stderr, "ngspice process(es) running", root, True)
+    c2 = check(checks, "resume while the orphan child runs", r2.stderr, "ngspice process(es) running", root, True)
+    c3 = check(checks, "the later run found D running", st.get("D", {}).get("why"), "found running at a resume", root, True)
+    ok = c1 and c2 and c3 and bool(kids) and r1.returncode != 0 and r2.returncode != 0 \
         and r3.returncode == 0 and st["D"]["status"] == "interrupted" and "seal" not in st and (root / "DONE").exists()
-    return ok, dict(children_after_kill=kids, run_while_child=r1.stderr.strip()[-200:],
+    return ok, dict(checks=checks, children_after_kill=kids, run_while_child=r1.stderr.strip()[-200:],
                     resume_while_child=r2.stderr.strip()[-200:], steps={k: v["status"] for k, v in st.items()})
 
 
@@ -551,9 +658,12 @@ def case_k3_budget_stop(w):
     root = w.wd / "root_k3stop"
     r = campaign(tr, "run", "test", tt, pl["K02"], root)
     st = status(root, "NOT1_6213")
-    ok = r.returncode == 0 and st.get("inverters", {}).get("status") == "done" and \
-        st.get("D", {}).get("status") == "refused" and "K3_BUDGET" in st["D"].get("why", "") and "seal" not in st
-    return ok, dict(steps={k: v["status"] for k, v in st.items()}, D=st.get("D"))
+    checks = []
+    c = check(checks, "D refused for the K3 budget", st.get("D", {}).get("why"), "inv/K3_BUDGET.json is not ok",
+              root / "NOT1_6213" / "inv" / "K3_BUDGET.json", (root / "NOT1_6213" / "inv" / "K3_BUDGET.json").exists())
+    ok = c and r.returncode == 0 and st.get("inverters", {}).get("status") == "done" and \
+        st.get("D", {}).get("status") == "refused" and "seal" not in st
+    return ok, dict(steps={k: v["status"] for k, v in st.items()}, D=st.get("D"), checks=checks)
 
 
 def case_analysis_tampered(w, home):
@@ -561,7 +671,7 @@ def case_analysis_tampered(w, home):
     - round 1 refuted, round 2 timed out (its comparison gone) → refuted at K3, not 'not completed';
     - D/prediction.json changed (room_K3 false) → the sealed prediction is the one read, and the instance is a seal
       defect, not counted."""
-    out, oks = {}, []
+    out, oks, checks = {}, [], []
     for label in ("A1", "A2"):
         root = w.wd / f"root_tampered_{label}"
         if root.exists():
@@ -583,24 +693,30 @@ def case_analysis_tampered(w, home):
             p["room_K3"] = not p["room_K3"]
             (d / "D" / "prediction.json").write_text(json.dumps(p, indent=1, sort_keys=True) + "\n")
         an = w.wd / f"an_tampered_{label}"
+        e = root.exists()
         a = sh(PY, "-B", HERE / "analysis.py", "test", an, root, "times=bare")
         res = json.loads((an / "RESULTS.json").read_text()) if (an / "RESULTS.json").exists() else {}
         row = next((r for r in res.get("instances", []) if r["instance"] == "NOT1_6212"), {})
         cnt = (res.get("counts") or {}).get("NOT1", {})
         if label == "A1":
-            ok = a.returncode == 0 and row.get("K3") == dict(counted=True, refuted=True) and \
+            c = check(checks, "A1: K3 refuted beside a timed-out round", json.dumps(row.get("K3")),
+                      '{"counted": true, "refuted": true}', root, e)
+            ok = c and a.returncode == 0 and row.get("K3") == dict(counted=True, refuted=True) and \
                 cnt["K3"]["refuted"]["list"] == ["NOT1_6212"] and res["groups"]["NOT1"]["K3"]["verdict"] == "refuted"
             out[label] = dict(rc=a.returncode, K3=row.get("K3"), counts_K3=cnt.get("K3"),
                               verdict=res.get("groups", {}).get("NOT1", {}).get("K3", {}).get("verdict"))
         else:
             ns = cnt.get("K3", {}).get("not_sealed", {}).get("list", [])
-            ok = a.returncode == 0 and (row.get("stage_d") or {}).get("room_K3") is True and \
+            c = check(checks, "A2: the changed D/prediction.json is a seal defect", (row.get("seal") or {}).get("regeneration_why"),
+                      "D/prediction.json differs from its seal", root, e)
+            ok = c and a.returncode == 0 and (row.get("stage_d") or {}).get("room_K3") is True and \
                 (row.get("seal") or {}).get("regeneration_why", "").startswith("D/prediction.json differs") and \
                 not (row.get("K0") or {}).get("counted") and not (row.get("K3") or {}).get("counted") and \
                 [x["instance"] for x in ns] == ["NOT1_6212"] and "verdicts" in ns[0]
             out[label] = dict(rc=a.returncode, stage_d_room_K3=(row.get("stage_d") or {}).get("room_K3"),
                               seal=row.get("seal"), K0=row.get("K0"), K3=row.get("K3"), not_sealed_K3=ns)
         oks.append(ok)
+    out["checks"] = checks
     return all(oks), out
 
 
@@ -638,6 +754,7 @@ def main(wd, *only):
         run("differing_duplicate", case_differing_duplicate, r[2])
         run("analysis_refuses", case_analysis_refuses_test_root, r[2]["root"])
         run("analysis_tampered", case_analysis_tampered, r[2])
+        run("analysis_forged_pins", case_analysis_forged_pins, r[2]["root"])
     run("partial_guard_and_resume", case_partial_guard)
     ok = all(v["ok"] for v in report.values())
     report["all_pass"] = ok
