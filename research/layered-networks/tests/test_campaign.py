@@ -604,6 +604,7 @@ def main(wd, *only):
         (w.wd / "TEST_C.json").write_text(json.dumps(report, indent=1, sort_keys=True) + "\n")
         return r
     run("refusals", case_refusals)
+    run("pins", case_pins)
     run("timeout", case_timeout)
     run("guard", case_guard)
     run("crash", case_crash)
@@ -619,7 +620,6 @@ def main(wd, *only):
         run("differing_duplicate", case_differing_duplicate, r[2])
         run("analysis_refuses", case_analysis_refuses_test_root, r[2]["root"])
         run("analysis_tampered", case_analysis_tampered, r[2])
-        run("pins", case_pins)
     run("partial_guard_and_resume", case_partial_guard)
     ok = all(v["ok"] for v in report.values())
     report["all_pass"] = ok
