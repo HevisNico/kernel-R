@@ -966,7 +966,7 @@ def cmd_steps(mode, template_path, plan_path, root, *rest):
                 PY, "-B", plan.nz / "controls4.py", "untrained", HERE / gp["spec"], d / "U", seed,
                 f"seal_log=<seal commit>", f"seal_branch={plan.branch}", f"overlay={plan.overlay}"]],
                 cwd=str(plan.nz), env_added=env_add, outputs=["U/untrained_record.json"],
-                time_limit_s=plan.limits["U"], guarded=True, cores=1))
+                time_limit_s=plan.limits["U"], guarded=True, cores=0))
     for x in plan.duplicates:
         s = specmod.load(HERE / x["spec"])
         d = root / f"DUPX_{s['tag']}_{x['seed']}"
