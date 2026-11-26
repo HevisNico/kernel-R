@@ -1,0 +1,155 @@
+{
+ "K0": true,
+ "K3": true,
+ "config_sha256": "8fd92a1a09c4b71a3c187fd5ad166583bb931d2b6eccf888be5470c23305a5e7",
+ "deck": "/root/devtest_b/out_K05/NOT1_6220/deck.spice",
+ "deck_sha256": "519a6ce2db19bb6cf7b454f7b9fc6d86b0bf2ad8a4fdb8c6cfd09587272a4c02",
+ "inverters": {
+  "n0": {
+   "K0": true,
+   "K3": true,
+   "files": {
+    "gate": "n0/gates/GATE_6220.json",
+    "lean": "n0/gates/Inverter_6220.lean",
+    "measure": "n0/runs/6220/MEASURE.json"
+   },
+   "fingerprint": {
+    "names": [
+     "v(xn0.ibm)",
+     "@m.xn0.xcmpm.xm1.msky130_fd_pr__pfet_01v8_lvt[vth]",
+     "@m.xn0.xcmpm.xm2.msky130_fd_pr__pfet_01v8_lvt[vth]",
+     "@m.xn0.xmh1.msky130_fd_pr__nfet_01v8[vth]",
+     "@m.xn0.xmj1.msky130_fd_pr__pfet_01v8[vth]"
+    ],
+    "network": [
+     0.509468,
+     0.453507,
+     0.458229,
+     0.530336,
+     1.03856
+    ],
+    "runs": {
+     "R1_absent": [
+      0.509468,
+      0.453507,
+      0.458229,
+      0.530336,
+      1.03856
+     ],
+     "R2_present": [
+      0.509468,
+      0.453507,
+      0.458229,
+      0.530336,
+      1.03856
+     ],
+     "R3_leak_above": [
+      0.509468,
+      0.453507,
+      0.458229,
+      0.530336,
+      1.03856
+     ],
+     "R4_leak_below": [
+      0.509468,
+      0.453506,
+      0.458229,
+      0.530336,
+      1.03856
+     ],
+     "R5_static": [
+      0.509468,
+      0.453506,
+      0.458229,
+      0.530336,
+      1.03856
+     ]
+    }
+   },
+   "first_failing_K0": null,
+   "first_failing_K3": null,
+   "gate_eligible_K0": true,
+   "gate_room_K3": true,
+   "gate_sha256": "28d2671da6b1aa87d92a0493d2737026fba2e55b2d8226c0649b8c2b751c7239",
+   "kernel": {
+    "K0": true,
+    "K3": true
+   },
+   "lean_sha256": "41ccfa285076bfa0fbd6c73636745c999428d4161970d76bf2d62267f82c0a8e",
+   "machine_s": 95.4725694656372,
+   "margins": {
+    "K0": {
+     "firing_margin": 0.2527185192723315,
+     "leak_term": 0.00525825,
+     "silence_margin": 0.13797398936962996
+    },
+    "K3": {
+     "firing_margin": 0.2476155192723315,
+     "leak_term": 0.00525825,
+     "silence_margin": 0.13127811831380654
+    }
+   },
+   "measure_sha256": "88c1543942b300318fb59d91617973b5477466252bee7778ceb9e5f06086bc10",
+   "measures": {
+    "K0": {
+     "Q": "187187/200000",
+     "aHi": "48879/100000",
+     "aLo": "481/1000",
+     "aRef": "96979/200000",
+     "alpha": "779/200000",
+     "delta": "19703/1000000",
+     "early": "37/200",
+     "emit": "517767/1000000",
+     "eps0": "149/1000000",
+     "etaH": "50153/1000000",
+     "etaJ": "1421/50000",
+     "etaM": "4417/1000000",
+     "latchHi": "1041/1000000",
+     "latchLo": "13/12500"
+    },
+    "K3": {
+     "Q": "187187/200000",
+     "aHi": "48879/100000",
+     "aLo": "481/1000",
+     "aRef": "96979/200000",
+     "alpha": "779/200000",
+     "delta": "19703/1000000",
+     "early": "183/1000",
+     "emit": "517767/1000000",
+     "eps0": "149/1000000",
+     "etaH": "50153/1000000",
+     "etaJ": "1421/50000",
+     "etaM": "4417/1000000",
+     "latchHi": "1041/1000000",
+     "latchLo": "13/12500"
+    }
+   },
+   "same_sample": true,
+   "state_bound": {
+    "absent_on_whole_slot": 1.2363557745104,
+    "limit": "27/20",
+    "verdict": true,
+    "xAbsent": "19312/15625",
+    "xPresent": "17157/20000"
+   },
+   "status": "ok",
+   "why": []
+  }
+ },
+ "job_wall_s": {
+  "n0": 96.53162407875061
+ },
+ "kit_commit": "d599300d51fcf3a1a4c33d103b89827f8ac4da41",
+ "network_op_s": 13.784301996231079,
+ "open_premises": [
+  "[I] the leak along the trajectory: gate_silence and gate_firing (research/circuit/lean/CircuitInverterGateProof.lean, proof/inverter-bridge 13aba3a, built and audited here) take a time-varying leak with gap |leak u - a'| <= alpha and stateBound |actual u| <= X as hypotheses. The gate checks that both measured side rates lie in [a' - alpha, a' + alpha] and that the measured max |x| <= H0 hl (StateBound). That the cell's leak at every time is one of the two fitted side rates is a modelling step, not a measurement of leak(t).",
+  "the measured real hypotheses of gate_silence and gate_firing (actualLaw, integrability, initialError, helpError on every prefix, inhibitorySign and wrongSign split, wrongCharge, charge, offCharge, thresholdError, actualCont) are claims of the simulation, supplied as the outward-rounded numbers; they are not derived in Lean.",
+  "the latch: the contact-to-latch delay is a measured constant, not a proved bound."
+ ],
+ "package_tree_clean": true,
+ "rule": "instance eligible at K0 iff every inverter's K0 holds; room at K3 iff every K3 holds",
+ "schema": "inverter-indeck/1",
+ "seed": 6220,
+ "verdict_status": "conditional on open_premises",
+ "wall_minutes": 1.9689773321151733
+}
