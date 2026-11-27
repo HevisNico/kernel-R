@@ -45,3 +45,9 @@ Case 1 must reproduce stage D's recorded read for every cell: `F`, a latch time 
 - It explains two past cases. It does not by itself give a rule that predicts a new network.
 - Any such rule would have to bound each cell's arrival times before its run, and to measure whether the cell keeps its word over that whole range. It would then be tested on new development seeds before being frozen.
 - Under the preregistration, `ssFF` against `sssFF` stays a full refutation, even when the final XOR table is right.
+
+## Addendum, also before the replay (the owner's reading rules)
+
+- **Read per cell.** The four cells are read one by one, each starting from its case-1 validity check. The two instances are not pooled.
+- **A mixed result is kept as is.** If 27735 follows one row of the table and 88529 another, that result stands. Two identical training-word deviations may have different causes.
+- **"Over the whole range" needs a bound.** Three arrival times can separate the explanations above for these two cases. They do not establish a symbol over a continuous range of arrival times. A claim of the form "over the whole predicted arrival range the third symbol stays F" needs a justification between the tested times, for example a bound on how much the comparator margin can vary. Without such a bound, the result is stated as "stable at the tested times" and nothing more.
