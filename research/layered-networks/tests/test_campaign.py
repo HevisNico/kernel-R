@@ -880,9 +880,12 @@ def case_analysis_hardening(w, home):
     own message:
     - A4 an unknown key, a root path with '=', no root; A5 python -O; B10 a non-empty OUTDIR;
     - A6 an unknown verdict; B4 a comparison that compare_d2 does not reproduce; B8 a read file under no manifest line;
-    - A2 a round stopped by its own check (noisy_record status "failed: ...", the comparison recomputed): K3 refuted, in
-      its own row; and a simulator end is not;
-    - A1(ii) that refutation with a defective seal (D/prediction.json changed): still refuted, flagged seal_defect;
+    (A2 and A1(ii) are in analysis_own_check, on a real driver run.) How each state arises in a real run: A4, A5, B10
+    are command lines; A6, B4, B8, B16 are forgeries (a file changed and the manifests rewritten to match, or a draw
+    file changed); B1/B2 a seal folder changed after sealing; B9 a driver stopped before its end (DONE not written);
+    the stopped machine, a driver killed during N2 after a refuting N1 (here the refuting N1 is made by changing the
+    record and rerunning compare_d2 as C1 would, and the end-of-run files are removed as a killed driver never writes
+    them);
     - B1/B2 an extra file in the seal folder: a seal defect (held → not sealed);
     - B9 a root without DONE: analysed, "root not finished" at the top;
     - A7 the expected U control, present and passed;
@@ -935,44 +938,6 @@ def case_analysis_hardening(w, home):
     reseal(r8)
     refused("B8: a read file under no manifest line", "NOT1_6212/D/record.json is read but is under no verified "
             "manifest line", r8, "times=bare", target=r8)
-
-    def stopped(label, status, seal_changed=False):
-        r = copy_root(base, w.wd / f"root_h_{label}")
-        d = r / "NOT1_6212"
-        rec = json.loads((d / "N2" / "noisy_record.json").read_text())
-        rec["status"] = status
-        (d / "N2" / "noisy_record.json").write_text(json.dumps(rec, indent=1, default=str) + "\n")
-        recompare(d, 2)
-        if seal_changed:
-            p = json.loads((d / "D" / "prediction.json").read_text())
-            p["env_note"] = "changed (test)"
-            (d / "D" / "prediction.json").write_text(json.dumps(p, indent=1, sort_keys=True) + "\n")
-        reseal(r)
-        return r
-
-    ra = stopped("a2", "failed: the tail leak must be set before it starts")
-    a, res = run_analysis(w, "h_a2", ra, "times=bare")
-    cnt = ((res or {}).get("counts") or {}).get("NOT1", {}).get("K3", {})
-    lst = (cnt.get("refuted_stopped_by_own_check") or {}).get("list")
-    oks.append(a.returncode == 0 and check(checks, "A2: stopped by its own check is refuted, own row", json.dumps(lst),
-                                           '["NOT1_6212"]', ra, ra.exists())
-               and res["groups"]["NOT1"]["K3"]["verdict"].startswith("refuted"))
-    out["A2"] = dict(rc=a.returncode, stderr=a.stderr.strip()[-300:], K3=cnt, verdict=(res or {}).get("groups", {}).get("NOT1", {}).get("K3", {}).get("verdict"))
-    rs = stopped("a2sim", "failed: the simulator ended during: tran 1n 2n")
-    a, res = run_analysis(w, "h_a2sim", rs, "times=bare")
-    cnt = ((res or {}).get("counts") or {}).get("NOT1", {}).get("K3", {})
-    nc = [x["instance"] for x in (cnt.get("not_completed") or {}).get("list", [])]
-    oks.append(a.returncode == 0 and check(checks, "A2: a simulator end is not completed, not refuted", json.dumps(nc),
-                                           '["NOT1_6212"]', rs, rs.exists()))
-    out["A2_simulator_end"] = dict(rc=a.returncode, K3=cnt)
-    r1 = stopped("a1", "failed: the tail leak must be set before it starts", seal_changed=True)
-    a, res = run_analysis(w, "h_a1", r1, "times=bare")
-    row = next((x for x in (res or {}).get("instances", []) if x["instance"] == "NOT1_6212"), {})
-    oks.append(a.returncode == 0 and check(checks, "A1(ii): refuted with a defective seal, flagged", json.dumps(row.get("K3")),
-                                           '"seal_defect": true', r1, r1.exists())
-               and row["K3"].get("refuted") is True and row["K3"].get("counted") is True
-               and (row.get("K0") or {}).get("not_sealed") is True)
-    out["A1ii"] = dict(rc=a.returncode, K0=row.get("K0"), K3=row.get("K3"), seal=row.get("seal"))
 
     rb = copy_root(base, w.wd / "root_h_b2")
     (rb / "NOT1_6212" / "seal" / "NOT1_6212.copy.json").write_bytes((rb / "NOT1_6212" / "seal" / "NOT1_6212.json").read_bytes())
@@ -1071,6 +1036,120 @@ def case_analysis_hardening(w, home):
     return all(oks), out
 
 
+def tamper_own_check(t):
+    """A stub noise tree for analysis_own_check: controls4.py raises inside its try, after the lessons, at round 2,
+    an AssertionError for NOT1 6212 (a run's own check) and session.py's simulator-end RuntimeError for NOT1 6213.
+    controls4 then records status "failed: ..." in N2/noisy_record.json and exits 1, and campaign.py marks N2
+    "failed" and never runs C2: the driver's real state for both."""
+    tmpl = json.loads((HERE / "campaign_template.json").read_text())
+    wt = Path(f"{t}.wt-{tmpl['noise_commit'][:8]}")
+    f = wt / "research" / "layered-networks" / "controls4.py"
+    src = f.read_text()
+    old = "        lessons, words, tests = noise2.train_and_test(net, s, cfg, log)\n"
+    assert src.count(old) == 1
+    src = src.replace(old, old + "        if rnd == 2 and int(seed) == 6212:\n"
+                      "            raise AssertionError(\"stub: the run's own check (test)\")\n"
+                      "        if rnd == 2 and int(seed) == 6213:\n"
+                      "            raise RuntimeError(\"the simulator ended during: stub (test)\")\n")
+    f.write_text(src)
+    for k, v in (("user.name", "test"), ("user.email", "test@invalid")):
+        sh("git", "-C", wt, "config", k, v)
+    sh("git", "-C", wt, "commit", "-q", "-am", "stub: round 2 stopped by its own check, or by a simulator end (test)")
+    return dict(noise_commit=sh("git", "-C", wt, "rev-parse", "HEAD").stdout.strip())
+
+
+def case_analysis_own_check(w):
+    """A2 and A1(ii) on a real driver run (the audit's defect 1): campaign.py run, test mode, on a stub noise tree
+    (tamper_own_check), one machine holding NOT1 6212 and 6213 (plan K01 with 6213 added to its seeds, an input).
+    Round 2 of 6212 is stopped by its own check and round 2 of 6213 by a simulator end; neither has a comparison.json
+    (C2 never runs). Required, from analysis.py on that root: 6212 refuted at K3 in its own row, listed with its full
+    status; 6213 not completed at K3; both held at K0. Then A1(ii): the same root with 6212's D/prediction.json changed
+    (a seal defect, as when the file changes after sealing; the manifests rewritten to match) keeps 6212 refuted,
+    flagged seal_defect, and its K0 agreement no longer counts."""
+    info = w.tree("ownchk", tamper_own_check)
+    tr = info["tree"]
+    rem = w.remote("ownchk")
+    tt = w.template("ownchk", rem, noise_commit=info["noise_commit"])
+    pl = w.plans("ownchk", tr, tt)
+    p = json.loads(pl["K01"].read_text())
+    p["groups"]["NOT1"]["seeds"] = [6212, 6213]
+    plan = w.wd / "PLAN_ownchk.json"
+    plan.write_text(json.dumps(p, indent=1, sort_keys=True) + "\n")
+    root = w.wd / "root_ownchk"
+    r = campaign(tr, "run", "test", tt, plan, root)
+    checks, out = [], dict(run_rc=r.returncode)
+    st = {i: status(root, i) for i in ("NOT1_6212", "NOT1_6213")}
+    out["steps"] = {i: {k: v["status"] for k, v in s.items()} for i, s in st.items()}
+    real = all(s.get("N2", {}).get("status") == "failed" and "C2" not in s and
+               not (root / i / "N2" / "comparison.json").exists() for i, s in st.items())
+    a, res = run_analysis(w, "ownchk", root, "times=bare")
+    cnt = ((res or {}).get("counts") or {}).get("NOT1", {})
+    stopped = (res or {}).get("stopped_by_own_check") or []
+    c1 = check(checks, "6212 refuted at K3, stopped by its own check", json.dumps(
+        (cnt.get("K3", {}).get("refuted_stopped_by_own_check") or {}).get("list")), '["NOT1_6212"]', root, root.exists())
+    c2 = check(checks, "6212 listed with its full status", json.dumps(stopped),
+               "failed: stub: the run's own check (test)", root, root.exists())
+    c3 = check(checks, "6213, a simulator end: not completed at K3", json.dumps(
+        [x["instance"] for x in (cnt.get("K3", {}).get("not_completed") or {}).get("list", [])]), '["NOT1_6213"]', root,
+        root.exists())
+    ok = real and r.returncode == 0 and a.returncode == 0 and c1 and c2 and c3 and \
+        sorted(cnt["K0"]["held"]["list"]) == ["NOT1_6212", "NOT1_6213"] and \
+        [(x["instance"], x["round"]) for x in stopped] == [("NOT1_6212", "C2")]
+    out.update(analysis_rc=a.returncode, stderr=a.stderr.strip()[-300:], counts=cnt, stopped=stopped)
+    r1 = copy_root(root, w.wd / "root_ownchk_a1")
+    d = r1 / "NOT1_6212"
+    pr = json.loads((d / "D" / "prediction.json").read_text())
+    pr["env_note"] = "changed after sealing (test)"
+    (d / "D" / "prediction.json").write_text(json.dumps(pr, indent=1, sort_keys=True) + "\n")
+    reseal(r1)
+    a, res = run_analysis(w, "ownchk_a1", r1, "times=bare")
+    row = next((x for x in (res or {}).get("instances", []) if x["instance"] == "NOT1_6212"), {})
+    c4 = check(checks, "A1(ii): refuted with a defective seal, flagged", json.dumps(row.get("K3"), sort_keys=True),
+               '"seal_defect": true', r1, r1.exists())
+    ok = ok and a.returncode == 0 and c4 and row["K3"].get("refuted") is True and (row.get("K0") or {}).get("not_sealed") is True
+    out.update(A1ii=dict(rc=a.returncode, K0=row.get("K0"), K3=row.get("K3")), checks=checks, fixture_is_the_driver_state=real)
+    return ok, out
+
+
+def case_analysis_announce(w):
+    """The audit's defect 2 on recorded activity items: analysis.announce_time. The items of a clean announce branch
+    are GitHub's own (evidence/devtest-seals2-K05, 27 Nov 2026: its branch_creation and a later push), as a real
+    branch's activity reads. Required: the clean branch gives its creation's time for the commit it created; with a
+    branch_deletion and a second branch_creation appended (the announce deleted and pushed again), and with a
+    force_push appended, it refuses; a commit that is not the creation's `after` refuses."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("analysis_t", HERE / "analysis.py")
+    A = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(A)
+    z, c0, c1 = "0" * 40, "5226d975283f5a905ba54abea8f8570685eef388", "80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384"
+    ref = "refs/heads/evidence/devtest-seals2-K05"
+    clean = [dict(activity_type="push", before=c0, after=c1, timestamp="2026-11-26T22:27:29Z", ref=ref),
+             dict(activity_type="branch_creation", before=z, after=c0, timestamp="2026-11-26T22:25:58Z", ref=ref)]
+    redone = clean + [dict(activity_type="branch_deletion", before=c1, after=z, timestamp="2026-11-26T23:00:00Z", ref=ref),
+                      dict(activity_type="branch_creation", before=z, after="e" * 40, timestamp="2026-11-26T23:05:00Z", ref=ref)]
+    forced = clean + [dict(activity_type="force_push", before=c1, after="f" * 40, timestamp="2026-11-26T23:00:00Z", ref=ref)]
+    checks, out = [], {}
+
+    def run(label, items, commit):
+        try:
+            return "ok " + A.announce_time(items, commit, "evidence/combined-draw")
+        except SystemExit as e:
+            return str(e)
+    out["clean"] = run("clean", clean, c0)
+    out["redone"] = run("redone", redone, "e" * 40)
+    out["forced"] = run("forced", forced, c0)
+    out["not_the_creation"] = run("other", clean, c1)
+    e = (HERE / "analysis.py").exists()
+    ok = all([check(checks, "a clean creation gives its time", out["clean"], "ok 2026-11-26T22:25:58Z", HERE / "analysis.py", e),
+              check(checks, "deleted and created again: refused", out["redone"], "was rewritten or deleted (branch_deletion",
+                    HERE / "analysis.py", e),
+              check(checks, "a force push: refused", out["forced"], "was rewritten or deleted (force_push", HERE / "analysis.py", e),
+              check(checks, "not the creation's commit: refused", out["not_the_creation"],
+                    "is not the branch_creation that pushed the announce commit", HERE / "analysis.py", e)])
+    out["checks"] = checks
+    return ok, out
+
+
 def main(wd, *only):
     w = Work(wd)
     report = {}
@@ -1098,6 +1177,8 @@ def main(wd, *only):
     run("no_pushed_seal", case_no_pushed_seal)
     run("second_seal", case_second_seal)
     run("github_times", case_github_times)
+    run("analysis_announce", case_analysis_announce)
+    run("analysis_own_check", case_analysis_own_check)
     run("sigterm_driver_only", case_sigterm_driver_only)
     run("sigkill_driver_only", case_sigkill_driver_only)
     run("k3_budget_stop", case_k3_budget_stop)

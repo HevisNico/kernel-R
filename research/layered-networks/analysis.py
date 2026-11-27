@@ -25,6 +25,11 @@ THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
   (first-parent), read from GitHub, and GitHub's recorded push time of it (sealpush.github_times; every activity item
   saved in OUTDIR/activity/); both must equal DRAW.json's announce. DRAW_ANNOUNCE.txt is exactly four lines:
   `format layered-draw-announce/1`, `mode M`, `excluded_sha256 H`, `sizes NOT1=n ANDOR3=n XOR3=n`.
+- The announce cannot be redone (the audit's defect 2): no activity item of the announce branch may be a force_push
+  or a branch_deletion, and its OLDEST item must be its branch_creation, whose `after` is the announce commit; the
+  push time is that item's. N1: it must be later than GitHub's push time of this tree's commit (pins.tree_commit) on
+  FREEZE_BRANCH. N3: no drawn instance may have a SEALS.txt line pushed before the draw's round time (a reused seed,
+  or a rehearsal seed missing from the exclusion list). Test mode, offline, checks none of these three.
 - The exclusion list: excluded= must have the sha256 the announce names, and its seeds must be a superset of the
   freeze's pinned EXCLUDED.json (the second scan, after the rehearsal, only adds).
 - The round must be beacon_verify.round_after(the pinned quicknet chain, the announce's push time); the beacon value
@@ -80,7 +85,9 @@ THE COMPARISONS (A2, A6, B4):
   noisy_record.json, and must be byte-identical; its tag, seed, run_kind, noise_round, noise_seed and stage_n_status
   are checked, and a completed comparison must compare letters. Any mismatch refuses. A verdict outside VERDICTS
   refuses.
-- A run stopped by its own check (own_check below) counts as refuted, in its own row (the owner's rule A2), and
+- A run stopped by its own check (own_check below) counts as refuted, in its own row (the owner's rule A2). The
+  driver writes no comparison for it (controls4 exits 1, N<n> is "failed", C<n> never runs): it is read from
+  N<n>/noisy_record.json, whose tag, seed and round must be the instance's, with status.json's N<n> "failed". And
   RESULTS.json lists each one with its full status message (stopped_by_own_check). controls4.py records str(e) only,
   so a Python error in the noise tree also reads as the run's own check: it errs toward refuting, as the owner chose.
 
@@ -157,6 +164,7 @@ ANNOUNCE_FILE = "DRAW_ANNOUNCE.txt"
 ANNOUNCE_FORMAT = "layered-draw-announce/1"
 ANNOUNCE_KEYS = ("format", "mode", "excluded_sha256", "sizes")
 ANNOUNCE_BRANCH = dict(campaign="evidence/combined-draw", rehearsal="evidence/combined-rehearsal-draw")
+FREEZE_BRANCH = "research/layered-campaign-freeze"     # N1: the announce must come after the frozen tree's push
 PLAN_LOCAL_KEYS = ("kit_tree", "noise_tree")   # campaign.resolve_trees: the only machine-local keys of PLAN.json
 KEYS = ("draw", "excluded", "announce", "times", "thresholds", "controls", "tips")
 
@@ -418,7 +426,9 @@ def partial_instance(R, name, plan, group, seed, status):
     noisy_record.json's sha256 equal the step outputs in status.json (C<n>, N<n>); (3) the seal exists and seal.verify
     holds on its folder (else nothing can be recomputed). status.json is unmanifested: this anchors only what the
     machine wrote, and it can only lower the held counts, never raise them. Anything else of the instance is "not
-    completed, manifest not final", with its verdicts shown; an agreement is never counted."""
+    completed, manifest not final", with its verdicts shown; an agreement is never counted. A round stopped by its
+    own check is a FAILED step, which records no outputs: in a stopped machine it stays "not completed, manifest not
+    final"."""
     steps = status["steps"]
     row = dict(instance=name, group=group, seed=seed, steps={k: v["status"] for k, v in sorted(steps.items())},
                stage_d=None, unverified=True, manifest_not_final=True, K0=dict(counted=False), K3=dict(counted=False))
@@ -492,6 +502,16 @@ def analyze_root(R, plan, machine, campaign):
                 st = verify_comparison(R, name, plan, group, seed, n, c, seal_ok is not None)
                 if c["verdict"] == "run failed" and own_check(st):
                     stopped[n] = st
+            elif R.exists(f"{name}/N{n}/noisy_record.json"):    # the driver's real state: N<n> failed, exit 1, no C<n>
+                rec = R.json(f"{name}/N{n}/noisy_record.json")
+                if (rec.get("tag"), rec.get("seed"), rec.get("round")) != (tag_of(plan, group), seed, n):
+                    refuse(f"{R.path}: {name}/N{n}/noisy_record.json is not the record of {name} round {n}")
+                if own_check(rec.get("status")):
+                    if (status["steps"].get(f"N{n}") or {}).get("status") != "failed" or f"C{n}" in status["steps"]:
+                        refuse(f"{R.path}: {name}/N{n}: the record says {rec.get('status')!r} but status.json has "
+                               f"N{n} {(status['steps'].get(f'N{n}') or {}).get('status')!r}"
+                               f"{' and a C' + str(n) + ' step' if f'C{n}' in status['steps'] else ''}")
+                    stopped[n] = rec["status"]
         row = dict(base, steps={k: v["status"] for k, v in sorted(status["steps"].items())},
                    seal_folder=dict(file=seal_ok, why=seal_why))
         fail = first_failing(status)
@@ -510,16 +530,18 @@ def analyze_root(R, plan, machine, campaign):
                                         kit_commit=pred["inverter_gate"]["source"].get("kit_commit")),
                               inverter_K0=pred["inverter_gate"]["K0"], inverter_K3=pred["inverter_gate"]["K3"],
                               cells=cells)
-        row["comparisons"] = {f"C{n}": None if c is None else dict(
+        row["comparisons"] = {f"C{n}": (dict(run_kind="noiseless" if n == 0 else "noisy", verdict=None,
+                                             stopped_by_own_check=True, why=stopped[n]) if n in stopped else None)
+                              if c is None else dict(
             run_kind=c["run_kind"], verdict=c["verdict"], compared=c.get("compared"),
             differences=c.get("differences"), why=c.get("why"),
             **({"stopped_by_own_check": True} if n in stopped else {})) for n, c in comps.items()}
-        ref_ = lambda n: comps[n] is not None and (comps[n]["verdict"] == "refuted" or n in stopped)
-        done_ = lambda n: comps[n] is not None and (comps[n]["verdict"] in ("agrees", "refuted") or n in stopped)
+        ref_ = lambda n: n in stopped or (comps[n] is not None and comps[n]["verdict"] == "refuted")
+        done_ = lambda n: n in stopped or (comps[n] is not None and comps[n]["verdict"] in ("agrees", "refuted"))
         if pred["eligible_K0"]:
             if done_(0):
                 row["K0"] = dict(counted=True, refuted=ref_(0))
-                if 0 in stopped and comps[0]["verdict"] != "refuted":
+                if 0 in stopped and not (comps[0] is not None and comps[0]["verdict"] == "refuted"):
                     row["K0"]["stopped_by_own_check"] = True
             else:
                 row["K0"] = dict(counted=False)
@@ -675,15 +697,37 @@ def push_times(remote, branch, src, outdir):
     """B7: GitHub's recorded push times (every activity item saved in OUTDIR/activity/), or the local bare log in
     test mode."""
     if src == "github":
-        owner_repo = str(remote).rstrip("/").removesuffix(".git").split("github.com/")[-1]
-        r = subprocess.run(["gh", "api", "-X", "GET", f"repos/{owner_repo}/activity", "-f", f"ref=refs/heads/{branch}",
-                            "-f", "per_page=100", "--paginate"], capture_output=True, text=True, check=True)
-        items = SP.activity_pages(r.stdout)
-        a = Path(outdir) / "activity"
-        a.mkdir(exist_ok=True)
-        (a / f"{safe(branch)}.json").write_bytes(canon(dict(repository=owner_repo, ref=f"refs/heads/{branch}", items=items)))
-        return SP.github_times(items)
+        return SP.github_times(activity_items(remote, branch, outdir))
     return SP.times(remote, branch, src)
+
+
+def activity_items(remote, branch, outdir):
+    """Every item of GitHub's repository activity for one ref, saved in OUTDIR/activity/<branch>.json."""
+    owner_repo = str(remote).rstrip("/").removesuffix(".git").split("github.com/")[-1]
+    r = subprocess.run(["gh", "api", "-X", "GET", f"repos/{owner_repo}/activity", "-f", f"ref=refs/heads/{branch}",
+                        "-f", "per_page=100", "--paginate"], capture_output=True, text=True, check=True)
+    items = SP.activity_pages(r.stdout)
+    a = Path(outdir) / "activity"
+    a.mkdir(exist_ok=True)
+    (a / f"{safe(branch)}.json").write_bytes(canon(dict(repository=owner_repo, ref=f"refs/heads/{branch}", items=items)))
+    return items
+
+
+def announce_time(items, commit, branch):
+    """The audit's defect 2: the announce cannot be redone. On the announce branch no activity item may be a
+    force_push or a branch_deletion, and the OLDEST item of the ref must be its branch_creation, whose `after` is the
+    announce commit. Returns that push's time."""
+    bad = sorted({x.get("activity_type") for x in items} & {"force_push", "branch_deletion"})
+    if bad:
+        refuse(f"the announce branch {branch} was rewritten or deleted ({', '.join(bad)} in its activity): the draw "
+               f"could have been redone")
+    if not items:
+        refuse(f"GitHub records no activity for the announce branch {branch}")
+    oldest = min(items, key=lambda x: parse_utc(x["timestamp"]))
+    if oldest.get("activity_type") != "branch_creation" or oldest.get("after") != commit:
+        refuse(f"the oldest activity item of {branch} is not the branch_creation that pushed the announce commit "
+               f"{commit[:12]} ({oldest.get('activity_type')}, {str(oldest.get('after'))[:12]})")
+    return oldest["timestamp"]
 
 
 def log_for(sp_, logs, times_src, strict, outdir):
@@ -763,9 +807,9 @@ def seal_defect(r, level):
         r[level] = dict(counted=False, not_sealed=True)
 
 
-def layer_seals(M, times_src, kernel_build, th, campaign, rule, outdir):
+def layer_seals(M, times_src, kernel_build, th, campaign, rule, outdir, logs):
     rows, observed, failed, controls, envs, defects = [], [], [], dict(U=[], duplicate=[], S=[], cross_machine_duplicates=[]), {}, []
-    logs, by_inst = {}, {}
+    by_inst = {}
     for machine, m in M.items():
         R, plan = m["R"], m["plan"]
         if R is None:                                    # D8: a machine of the expected plans with no root
@@ -1266,17 +1310,27 @@ def announce_on_github(branch, outdir):
             commit = adds[0]
             text = subprocess.run(["git", "show", f"{commit}:{ANNOUNCE_FILE}"], cwd=w, capture_output=True,
                                   check=True).stdout
-            tm = push_times(remote, branch, "github", outdir)
+            items = activity_items(remote, branch, outdir)
         except Refused:
             raise
         except Exception as e:                            # never reinterpreted: the analysis is rerun later
             refuse(f"the draw's announce cannot be read from GitHub ({branch}): {e!r}"[:500])
-    if commit not in tm:
-        refuse(f"GitHub records no push of the announce commit {commit[:12]} as the tip of {branch}")
-    return commit, text, tm[commit]
+    return commit, text, announce_time(items, commit, branch)
 
 
-def check_draw(kw, mode, outdir):
+def freeze_time(tree_commit, outdir):
+    """N1: GitHub's push time of the frozen tree's commit on the freeze branch."""
+    remote = json.loads(CP.FROZEN_TEMPLATE.read_text())["seal_push"]["remote"]
+    try:
+        tm = SP.github_times(activity_items(remote, FREEZE_BRANCH, outdir))
+    except Exception as e:
+        refuse(f"the freeze branch's push times cannot be read ({FREEZE_BRANCH}): {e!r}"[:500])
+    if tree_commit not in tm:
+        refuse(f"GitHub records no push of this tree's commit {str(tree_commit)[:12]} on {FREEZE_BRANCH}")
+    return tm[tree_commit]
+
+
+def check_draw(kw, mode, outdir, tree_commit=None):
     """B16 and D8, the owner's rule: the draw recomputed in full from public inputs only. Returns (the RECOMPUTED
     draw, its record, a notice or None)."""
     import beacon_chain
@@ -1319,6 +1373,10 @@ def check_draw(kw, mode, outdir):
         if commit != an["commit"] or push_utc != an["push_utc"]:
             refuse(f"DRAW.json's announce ({an['commit'][:12]}, {an['push_utc']}) is not GitHub's: the first commit "
                    f"adding {ANNOUNCE_FILE} on {an['branch']} is {commit[:12]}, pushed {push_utc}")
+        ft = freeze_time(tree_commit, outdir)                 # N1: the draw is announced after the freeze
+        if not parse_utc(push_utc) > parse_utc(ft):
+            refuse(f"the announce was pushed at {push_utc}, not after the frozen tree {str(tree_commit)[:12]} "
+                   f"({FREEZE_BRANCH}, {ft})")
     A = parse_announce(ab)
     if A["mode"] != mode:
         refuse(f"DRAW_ANNOUNCE.txt says mode {A['mode']}, not {mode}")
@@ -1476,7 +1534,7 @@ def main(mode, outdir, *args):
     draw_info, notice, template_rule, sizes = None, [], None, None
     M = {}
     if "draw" in kw:
-        draw, draw_info, dn = check_draw(kw, mode, out)
+        draw, draw_info, dn = check_draw(kw, mode, out, pc.get("tree_commit"))
         sizes = draw_info["sizes"]
         if dn:
             notice.append(dn)
@@ -1509,11 +1567,28 @@ def main(mode, outdir, *args):
                 if (g, s) in seen:
                     refuse(f"the home instance {g} {s} is in more than one root: {seen[(g, s)]} and {k}")
                 seen[(g, s)] = k
+    logs = {}
+    if strict:                    # N3: no drawn instance was sealed before its draw's round (a seed reused or not excluded)
+        import beacon_chain
+        import beacon_verify
+        t_round = datetime.datetime.fromtimestamp(beacon_verify.round_time(beacon_chain.QUICKNET, draw_info["round"]),
+                                                  datetime.timezone.utc)
+        drawn = {n for m in M.values() for n, g, s in home_instances(m["plan"])}
+        early = []
+        for k, m in M.items():
+            sp_ = m["plan"].get("seal_push") or {}
+            if not sp_ or sp_.get("dry"):
+                continue
+            lines, tm, err = log_for(sp_, logs, times, strict, out)
+            early += [f"{x['instance']} on {sp_['branch']} ({tm[x['commit']]})" for x in lines
+                      if x["instance"] in drawn and x["commit"] in tm and parse_utc(tm[x["commit"]]) < t_round]
+        if early:
+            refuse(f"drawn instances sealed before the draw's round ({t_round.isoformat()}): {early}")
     if mode == "rehearsal":
         notice.insert(0, "REHEARSAL: not the campaign; its outcomes count for no claim")
     before = sums_of(roots)
     build = kernel_library(out)
-    res = layer_seals(M, times, build, th, strict, template_rule, out)
+    res = layer_seals(M, times, build, th, strict, template_rule, out, logs)
     res = layer_stage_n_seal_log(res, M, th)
     res = layer_thresholds(res, tf, th)
     res = layer_record_seal_log(res, M)
