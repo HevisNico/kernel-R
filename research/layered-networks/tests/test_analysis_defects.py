@@ -35,6 +35,9 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   sum to 2, and not_run entries for NOT1_6212 and NOT1_6213 at each level.
 - D9 same_root_30_times: K05 given 30 times by the same path. Must: refused, no RESULTS.json counting NOT1 more than
   twice, and no verdict "established".
+- D9 draw_same_machine_twice: two copies of the K01 draw root (see draw_machine_without_root) at two paths, with
+  draw=. Must: refused, the output naming K01 (the plan match names each root's machine). Without draw=, test mode
+  names roots machine_<k>, so the same machine is caught as a home instance given twice (same_machine_two_paths).
 - D9 same_machine_two_paths: two copies of K05 at two paths. Must: the same.
 - D9 home_instance_twice: K05 and a second root (out_K07: K05 without NOT1_6220, with its own seal branch, its
   records' seal_log branch and plan text changed to match) that also holds NOT1_6212. Must: the same.
@@ -385,6 +388,12 @@ def case_draw_duplicate_machine_only(tmp, src):
     return ok, obs
 
 
+def case_draw_same_machine_twice(tmp, src):
+    roots = [draw_root(src, tmp / x / "out_K01", tmp, "out_K05", "PLAN_K01.json") for x in ("a", "b")]
+    r, res, obs = run(tmp, roots, "draw_same_machine_twice", extra=[f"{DRAW_ARG}={DRAW}"])
+    return refused(r) and "K01" in (r.stdout + r.stderr) and not_inflated(res, most=1), obs
+
+
 def case_same_root_30_times(tmp, src):
     root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
     r, res, obs = run(tmp, [root] * 30, "same_root_30_times")
@@ -457,6 +466,8 @@ CASES = [
      "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; not_run entries for NOT1_6212 (K01) and NOT1_6213 (K02)"),
     ("D9", "same_root_30_times", case_same_root_30_times,
      "refused; NOT1 not counted more than twice; no verdict \"established\""),
+    ("D9", "draw_same_machine_twice", case_draw_same_machine_twice,
+     "draw=: refused, the output naming K01; NOT1 not counted more than once"),
     ("D9", "same_machine_two_paths", case_same_machine_two_paths, "refused; NOT1 not counted more than twice"),
     ("D9", "home_instance_twice", case_home_instance_twice, "refused; NOT1 not counted more than twice"),
     ("D10", "one_byte_in_comparison", case_one_byte_in_comparison, "refused; the output names N0/comparison.json"),
