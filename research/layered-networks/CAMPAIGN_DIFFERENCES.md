@@ -138,3 +138,6 @@ cost), DUPX_<inst>/seal_wait.json (the seal found, its commit and line), DONE, a
 
 - analysis.py, refuted_stopped_by_own_check: the C<n> label names round n's comparison slot; the run that stopped is
   N<n> (the driver never runs C<n> after a failed N<n>).
+- analysis.py, check_rehearsal_seeds: its refusal "(the second scan must read the rehearsal)" refers to the campaign
+  list's three-step construction in FREEZE.txt (the second scan's output PLUS the rehearsal's seeds and noise seeds,
+  added by step 1, then checked by step 3), not to rerunning the scan.

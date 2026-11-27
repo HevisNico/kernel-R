@@ -64,3 +64,11 @@ evidence/devtest-seals-K05 86377a55. The rerun writes only evidence/devtest-seal
   simulator end is not completed).
 - In refuted_stopped_by_own_check, the C<n> label names round n's comparison slot; the run that stopped is N<n>
   (its record N<n>/noisy_record.json; C<n> never ran).
+- **Run 3 at 051b3b5d**: 26 of 27 (dev/equiv/TEST_C_run3_051b3b5d.json, evidence/devtest-run3-K<nn>). The one failure,
+  K07 analysis_refuses, is the test's: it expected the dev tree's pin refusal to list analysis.py alone, and since the
+  draw fixes four files differed from their pins (analysis.py, beacon_verify.py, draw_seeds.py, plan_split.py); the
+  refusal itself happened. Fixed in the test (the list's prefix) at 8bac22cc. Superseded by the rehearsal-seeds fix.
+- **Run 4 at 8bac22cc** (the code of 04d05b47, audited): **27 of 27 pass** (dev/equiv/TEST_C_run4.json, from
+  evidence/devtest-run4-K07 ... K12, the owner's pattern evidence/devtest-run<N>-K<nn>; every case once, the machine
+  of each recorded, the same envcheck values on all six, rc from PIPESTATUS). The independent suite at that code:
+  51 of 51 (DEFECTS_R_AFTER.json).
