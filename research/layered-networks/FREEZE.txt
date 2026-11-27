@@ -9,14 +9,19 @@ Branch tips (on origin when this was written):
   main                              3f27bb36dadd77a57e27b8fa80f81c3864a02b0e
   research/layered-networks         458bc7a6d763127ff2fe0214e2cb79a1a6549f9b  (noise_commit)
   research/inverter-instances       d599300d51fcf3a1a4c33d103b89827f8ac4da41  (kit_commit)
-  research/layered-campaign-dev     072d1f987e3f0c0552eba1da93c8594524f2e120  (the tree these pins were made over;
-                                    code tip ef374ccd; this record is the commit after it)
+  research/layered-campaign-dev     63facf70458ab7c1e587bea583fa7761cb5f5631  (the tree these pins were made over,
+                                    with the exclusion list rescanned; code tip ef374ccd; this record is the commit
+                                    after it. Not final: analysis.py changes for D8-D10, then the pins are redone)
 
 Pins:
-  FREEZE_PINS.json                  sha256 7323d3ddc76204f704db0b12572c22c0135b5b5b96171b0d6c623220d263cd8f  (114 files)
-  EXCLUDED.json                     sha256 783da1ff72299e842ea303e7df88420490fc580428c2163028979703c5f01ebf
-    seeds_sha256                    eee874f2a48909db5a1bee09bf4759a4a23290d3edcff65c7a83bcac6b958988  (15561 integers, 219 refs)
-  EXCLUDED_PRINT.txt                sha256 52a206afbf0ef82a5a5584eb9234dff76342acfc99fb18b492f6d3b95975972d
+  FREEZE_PINS.json                  sha256 bb95f981160cee7d4971de33ac357d3f47801561b2162e65544c60fd28bea6a6  (114 files)
+  EXCLUDED.json                     sha256 c64cdc3980c61032861bdd8d730b6d4f44e50fe362d197953e7d473a15da7bce
+    seeds_sha256                    381b4ffe81026ba2d4a982394c7e44f51b8bec5f778d07d7d5f78fb906618a57  (15696 integers, 232 refs)
+  EXCLUDED_PRINT.txt                sha256 cfd87e7486728813d555a4e7277ca029584da395d5c45ce2ccfbe1ffe5f5acf1
+    the scan of 2026-11-27: draw_seeds.py scan over the 231 branches of origin, each fetched by name (depth 1), plus
+    HEAD = main 3f27bb36; against eee874f2, 13 new refs (the devtest, devtest-run2, devtest-seals, devtest-seals2
+    evidence branches and research/layered-campaign-dev at 63facf70), no ref changed or removed, 135 integers added,
+    none removed
   campaign_template.json            sha256 02af33e0c79b3dbdc320d3dd4e0dab26374cbd00a79bc249fcf20631a3cce756  (the template;
                                     campaign.FROZEN_TEMPLATE_SHA256)
   plan_split3.py (the splitter)     sha256 061f8b375aeef65adade60762866aab0fdc4da4562963b8776f4afe88a3635a9
@@ -66,6 +71,8 @@ Disk: 40 GB free at launch (disk_launch_gb); the 20 GB guard during the run (dis
 Stage D: stage_d6.py. The Lean kernel (leancell.py, decide +kernel, clause by clause) is the last word on Cell.Valid
   of every R cell at K0 and K3; a kernel-mirror disagreement fails step D (the instance is not completed). The
   calibration clauses, the trained word and the inverter gate's mirror stay on the Python mirror.
+Stage N: campaign.py runs controls4.py (stage N, U) from the noise tree at 458bc7a6 (noise_commit, pinned by commit in
+  the template); this tree's controls2/3/4.py and noise2/3.py are pinned as copies only.
 Trace extract: trace_extract.py on every N round of every instance, before the raw is deleted (parts over 50 MB with
   PARTS.txt). keep_raw keeps the N0 raw only (the originals of the remote duplicates).
 Remote duplicates (campaign_template.json duplicate_wait): each waits, polling every 60 s for at most 21600 s (6 h),

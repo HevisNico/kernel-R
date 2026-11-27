@@ -44,6 +44,9 @@ fix is in 86a00ac2, which also made every check assert its own message. Checks t
   refusals is refused by the template before the pins; pins and analysis_forged_pins run in the tamper_pins tree;
   every test-mode launch records the pins check and refuses nothing for it. None is affected.
 
+**analysis_refuses is a dev-tree test.** On the frozen tree (FREEZE_PINS.json at 34bd7513) its precondition, analysis.py
+not pinned, no longer holds, so its two pin checks do not apply there. The record of (c) stays at ef374ccd.
+
 **The first (b) run at a8303e8e was stopped and discarded** (the audit's follow-ups changed campaign.py and
 analysis.py). Its branches count for nothing and are left as they are: evidence/devtest-K05 7b13a91b,
 evidence/devtest-K06 90e87115, evidence/devtest-seals-K02 c3c36431, evidence/devtest-seals-K03 24818934,
