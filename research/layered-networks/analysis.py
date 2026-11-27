@@ -1212,7 +1212,9 @@ def layer_counts(res, sizes):
                 if r.get("not_run"):
                     row["not_run"].append(dict(instance=name, machine=r["machine"], why=r.get("why")))
                 elif x.get("counted") and x.get("refuted") and x.get("stopped_by_own_check"):
-                    row["refuted_stopped_by_own_check"].append(name)
+                    row["refuted_stopped_by_own_check"].append(dict(instance=name, stopped_by_own_check=[
+                        dict(round=k, status=c.get("why")) for k, c in sorted((r.get("comparisons") or {}).items())
+                        if c and c.get("stopped_by_own_check") and (k == "C0") == (lv == "K0")]))
                 elif x.get("counted") and x.get("refuted"):
                     row["refuted"].append(name)
                 elif x.get("counted"):

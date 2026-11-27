@@ -1,6 +1,6 @@
 # Runbook: equivalence test (c) split over K07–K12 (test phase only)
 
-Test (c), tests/test_campaign.py, runs its 23 cases once each, split over six machines that the owner approved for
+Test (c), tests/test_campaign.py, runs its 25 cases once each, split over six machines that the owner approved for
 it. Every machine runs the same commit, with the same environment check. **Nothing here counts for the campaign.**
 No case pushes to GitHub: every seal log of (c) is a local bare repository in the work folder.
 
@@ -9,13 +9,14 @@ No case pushes to GitHub: every seal log of (c) is a local bare repository in th
 | Machine | Cases (one call; test_campaign.py runs them in its own order) | Expected time (last full run) |
 |---|---|---|
 | K07 | home_run differing_duplicate analysis_refuses analysis_tampered analysis_forged_pins analysis_d8_not_run analysis_d9_copies analysis_d10_manifest analysis_hardening | about 17 min |
-| K08 | refusals pins github_times second_seal | about 15 min |
+| K08 | refusals pins github_times analysis_announce second_seal | about 15 min |
 | K09 | timeout guard partial_guard_and_resume | about 10 min |
 | K10 | kernel_mirror_disagreement no_pushed_seal | about 12 min |
 | K11 | crash interrupt_and_resume k3_budget_stop | about 8 min |
-| K12 | sigterm_driver_only sigkill_driver_only | about 6 min |
+| K12 | sigterm_driver_only sigkill_driver_only analysis_own_check | about 20 min |
 
-The analysis cases need the home run of the same call, so they all stay on K07.
+The analysis cases on copies of the home root need the home run of the same call, so they stay on K07;
+analysis_announce and analysis_own_check (a driver run of its own) do not.
 
 **Pushes allowed, and only this one:** your record folder to the new branch evidence/devtest-K<nn> at the end (step 5),
 plainly, never forced, with the owner identity and a subject-only message with no trailer.

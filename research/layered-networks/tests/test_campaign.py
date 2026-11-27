@@ -1085,8 +1085,10 @@ def case_analysis_own_check(w):
     a, res = run_analysis(w, "ownchk", root, "times=bare")
     cnt = ((res or {}).get("counts") or {}).get("NOT1", {})
     stopped = (res or {}).get("stopped_by_own_check") or []
-    c1 = check(checks, "6212 refuted at K3, stopped by its own check", json.dumps(
-        (cnt.get("K3", {}).get("refuted_stopped_by_own_check") or {}).get("list")), '["NOT1_6212"]', root, root.exists())
+    c1 = check(checks, "6212 refuted at K3, stopped by its own check, with its status", json.dumps(
+        (cnt.get("K3", {}).get("refuted_stopped_by_own_check") or {}).get("list")),
+        '[{"instance": "NOT1_6212", "stopped_by_own_check": [{"round": "C2", "status": "failed: stub: the run\'s own check '
+        '(test)"}]}]', root, root.exists())
     c2 = check(checks, "6212 listed with its full status", json.dumps(stopped),
                "failed: stub: the run's own check (test)", root, root.exists())
     c3 = check(checks, "6213, a simulator end: not completed at K3", json.dumps(
