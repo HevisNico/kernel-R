@@ -1,0 +1,189 @@
+{
+ "all_pass": true,
+ "github_times": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the branch-creating push counts",
+     "expected": "\"5226d975283f5a905ba54abea8f8570685eef388\": \"2026-11-26T22:25:58Z\"",
+     "matched": "{\"80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384\": \"2026-11-26T22:27:29Z\", \"5226d975283f5a905ba54abea8f8570685eef388\": \"2026-11-26T22:25:58Z\"}",
+     "target": "/root/devtest_c/kernel-R/research/layered-networks/sealpush.py",
+     "target_exists": true
+    },
+    {
+     "check": "the later push counts",
+     "expected": "\"80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384\": \"2026-11-26T22:27:29Z\"",
+     "matched": "{\"80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384\": \"2026-11-26T22:27:29Z\", \"5226d975283f5a905ba54abea8f8570685eef388\": \"2026-11-26T22:25:58Z\"}",
+     "target": "/root/devtest_c/kernel-R/research/layered-networks/sealpush.py",
+     "target_exists": true
+    },
+    {
+     "check": "the pages parsed one after the other",
+     "expected": "{\"one page\": true, \"two pages, a newline between\": true, \"two pages, no separator\": true}",
+     "matched": "{\"one page\": true, \"two pages, a newline between\": true, \"two pages, no separator\": true}",
+     "target": "/root/devtest_c/kernel-R/research/layered-networks/sealpush.py",
+     "target_exists": true
+    }
+   ],
+   "pages": {
+    "one page": true,
+    "two pages, a newline between": true,
+    "two pages, no separator": true
+   },
+   "times": {
+    "5226d975283f5a905ba54abea8f8570685eef388": "2026-11-26T22:25:58Z",
+    "80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384": "2026-11-26T22:27:29Z"
+   }
+  },
+  "ok": true,
+  "seconds": 0.0
+ },
+ "pins": {
+  "detail": {
+   "checks": [
+    {
+     "check": "one pinned byte changed: launch",
+     "expected": "pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']",
+     "matched": "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']",
+     "target": "/root/devtest_c/c/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .py in the driver's tree: launch",
+     "expected": "is not clean (a changed tracked file, or an untracked .py/.json)",
+     "matched": "refused: campaign mode: the tree at cf2bce0ca84d is not clean (a changed tracked file, or an untracked .py/.json)",
+     "target": "/root/devtest_c/c/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .json in the kit tree: launch",
+     "expected": "no clean worktree at kit_commit",
+     "matched": "refused: no clean worktree at kit_commit d599300d51fc (git worktree add --detach DIR d599300d51fcf3a1a4c33d103b89827f8ac4da41)",
+     "target": "/root/devtest_c/c/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
+   "clean tree, every pin matching: check": {
+    "ok": true,
+    "pins": {
+     "mismatched": [],
+     "not_pinned": [],
+     "pinned_files": 114,
+     "pins_file": "research/layered-networks/FREEZE_PINS.json",
+     "pins_sha256": "b0d4376ac65ff83fc1e760fcd563a78ae9bb97a44780358635e8cb4830a242bb",
+     "tree_clean": true,
+     "tree_commit": "cf2bce0ca84df3eee14d3801b816845b95599a36"
+    },
+    "rc": 0
+   },
+   "one pinned byte changed: launch": [
+    1,
+    "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']"
+   ],
+   "untracked .json in the kit tree: launch": [
+    1,
+    "refused: no clean worktree at kit_commit d599300d51fc (git worktree add --detach DIR d599300d51fcf3a1a4c33d103b89827f8ac4da41)"
+   ],
+   "untracked .py in the driver's tree: launch": [
+    1,
+    "refused: campaign mode: the tree at cf2bce0ca84d is not clean (a changed tracked file, or an untracked .py/.json)"
+   ]
+  },
+  "ok": true,
+  "seconds": 4.7
+ },
+ "refusals": {
+  "detail": {
+   "campaign mode, test template": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not 0b9aeb635041\"}",
+   "checks": [
+    {
+     "check": "campaign mode, test template",
+     "expected": "campaign mode needs the frozen template",
+     "matched": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not 0b9aeb635041\"}",
+     "target": "/root/devtest_c/c/T_refusals.json",
+     "target_exists": true
+    },
+    {
+     "check": "test mode, frozen template",
+     "expected": "test mode needs a test template, not the frozen one",
+     "matched": "{\"ok\": false, \"why\": \"refused: test mode needs a test template, not the frozen one\"}",
+     "target": "/root/devtest_c/c/tree_main/research/layered-networks/campaign_template.json",
+     "target_exists": true
+    },
+    {
+     "check": "missing key rounds",
+     "expected": "the plan differs from the template: missing key rounds",
+     "matched": "refused: the plan differs from the template: missing key rounds",
+     "target": "/root/devtest_c/c/PLAN_bad_missing_key_rounds.json",
+     "target_exists": true
+    },
+    {
+     "check": "extra key steps_until",
+     "expected": "the plan differs from the template: key steps_until is not allowed",
+     "matched": "refused: the plan differs from the template: key steps_until is not allowed",
+     "target": "/root/devtest_c/c/PLAN_bad_extra_key_steps_until.json",
+     "target_exists": true
+    },
+    {
+     "check": "short kit commit",
+     "expected": "the plan differs from the template: kit_commit is 'd599300d'",
+     "matched": "refused: the plan differs from the template: kit_commit is 'd599300d', the template's is 'd599300d51fcf3a1a4c33d103b89827f8ac4da41'",
+     "target": "/root/devtest_c/c/PLAN_bad_short_kit_commit.json",
+     "target_exists": true
+    },
+    {
+     "check": "disk at launch",
+     "expected": "GB free at launch, 1e+06 GB needed (disk_launch_gb)",
+     "matched": "refused: 57.0 GB free at launch, 1e+06 GB needed (disk_launch_gb)",
+     "target": "/root/devtest_c/c/T_bigdisk.json",
+     "target_exists": true
+    }
+   ],
+   "disk at launch": [
+    1,
+    "refused: 57.0 GB free at launch, 1e+06 GB needed (disk_launch_gb)"
+   ],
+   "extra key steps_until": [
+    1,
+    "refused: the plan differs from the template: key steps_until is not allowed"
+   ],
+   "missing key rounds": [
+    1,
+    "refused: the plan differs from the template: missing key rounds"
+   ],
+   "short kit commit": [
+    1,
+    "refused: the plan differs from the template: kit_commit is 'd599300d', the template's is 'd599300d51fcf3a1a4c33d103b89827f8ac4da41'"
+   ],
+   "test mode, frozen template": "{\"ok\": false, \"why\": \"refused: test mode needs a test template, not the frozen one\"}"
+  },
+  "ok": true,
+  "seconds": 4.4
+ },
+ "second_seal": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the second seal refused",
+     "expected": "a second seal is refused",
+     "matched": "seals/NOT1_6213 is already on evidence/combined-seals-K02: a second seal is refused",
+     "target": "/root/devtest_c/c/root_secondseal_2/NOT1_6213/seal_push.json",
+     "target_exists": true
+    }
+   ],
+   "first": "done",
+   "log": "",
+   "seal_push": {
+    "branch": "evidence/combined-seals-K02",
+    "instance": "NOT1_6213",
+    "pushed": false,
+    "remote": "/root/devtest_c/c/log_secondseal.git",
+    "why": "seals/NOT1_6213 is already on evidence/combined-seals-K02: a second seal is refused",
+    "with_seal_folder": true
+   },
+   "second": "failed"
+  },
+  "ok": true,
+  "seconds": 862.3
+ }
+}
