@@ -9,7 +9,8 @@ The rule (FREEZE.txt):
 
 The check of a round (`verify`):
 - **Scheme** bls-unchained-g1-rfc9380 (quicknet). The public key is a compressed G2 point (96 bytes), the signature a
-  compressed G1 point (48 bytes).
+  compressed G1 point (48 bytes), each exactly that length in lowercase hex: decompression ignores leading zero bytes,
+  so a padded signature would verify and change sha256(signature); it is refused.
 - **The message** is sha256(round as an 8-byte big-endian integer).
 - **The hash to G1** is RFC 9380's BLS12381G1_XMD:SHA-256_SSWU_RO_, with DST "BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_".
 - **Valid** iff e(signature, g2) = e(H(message), public key), with both points on the curve and in their subgroups.
@@ -68,6 +69,10 @@ def verify(chain, rnd):
     out = dict(round=int(rnd["round"]))
     if chain.get("schemeID") != "bls-unchained-g1-rfc9380":
         return dict(out, ok=False, why=f"scheme {chain.get('schemeID')} is not bls-unchained-g1-rfc9380")
+    hexes = lambda x, n: isinstance(x, str) and len(x) == 2 * n and all(c in "0123456789abcdef" for c in x)
+    if not hexes(rnd.get("signature"), 48) or not hexes(chain.get("public_key"), 96):
+        return dict(out, ok=False, why="the signature is not exactly 48 bytes (96 lowercase hex characters), or the "
+                                       "public key not exactly 96 bytes: a padded or re-written point is refused")
     sig_b, pk_b = bytes.fromhex(rnd["signature"]), bytes.fromhex(chain["public_key"])
     out["randomness_ok"] = hashlib.sha256(sig_b).hexdigest() == rnd["randomness"].lower()
     try:

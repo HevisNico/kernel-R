@@ -80,6 +80,16 @@ def scan(repo):
                 refs=per_ref, count=len(seeds), seeds=seeds, seeds_sha256=hashlib.sha256(canon(seeds)).hexdigest())
 
 
+MAX_EXCLUDED_FRACTION = 0.20     # N5: a list excluding more of the draw range than this is refused
+
+
+def excluded_fraction(excluded):
+    """The share of the draw range's candidates S (10000 <= S < 100000) that the list rejects: S itself excluded, or
+    one of its noise seeds 10 S + n (n = 0..3)."""
+    ex = set(excluded["seeds"])
+    return sum(1 for s in range(LO, LO + SPAN) if s in ex or any(10 * s + j in ex for j in range(4))) / SPAN
+
+
 def canonical_beacon(beacon):
     """The beacon's ONE accepted writing: the 32 bytes of drand's randomness, as 64 lowercase hex characters (or the
     32 bytes themselves). Any other writing of the same value (upper or mixed case, spaces, a 0x prefix) is refused,

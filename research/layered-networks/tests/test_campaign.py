@@ -972,7 +972,9 @@ def case_analysis_hardening(w, home):
     ex = json.loads(ex_f.read_text())
     n = dict(NOT1=2, ANDOR3=1, XOR3=1)
 
-    def make_draw(label, rnd=1000000, shift_s=0, seed_change=False, sig_change=False):
+    def make_draw(label, rnd=1000000, shift_s=0, seed_change=False, sig_change=False, pad=False, float_round=False,
+                  ex_file=None):
+        exf = ex_file or ex_f
         br = dict(round=1000000, randomness="b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3",
                   signature="83ad29e4c409f9470fc2ef02f90214df49e02b441a1a241a82d622d9f608ef98fd8b11a029f1bee9d9e83b45088"
                             "abe72")
@@ -980,17 +982,22 @@ def case_analysis_hardening(w, home):
         import datetime
         push = datetime.datetime.fromtimestamp(t0, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         ann = w.wd / f"ANNOUNCE_{label}.txt"
-        ann.write_text(f"format layered-draw-announce/1\nmode test\nexcluded_sha256 {hashlib.sha256(ex_f.read_bytes()).hexdigest()}\n"
+        ann.write_text(f"format layered-draw-announce/1\nmode test\nexcluded_sha256 {hashlib.sha256(exf.read_bytes()).hexdigest()}\n"
                        f"sizes NOT1={n['NOT1']} ANDOR3={n['ANDOR3']} XOR3={n['XOR3']}\n")
         if sig_change:                      # a changed signature, its randomness and the draw made consistent with it
             br["signature"] = br["signature"][:-2] + ("00" if br["signature"][-2:] != "00" else "11")
             br["randomness"] = hashlib.sha256(bytes.fromhex(br["signature"])).hexdigest()
+        if pad:                             # zero bytes in front: the same point, another sha256 (the audit's X1)
+            br["signature"] = "00" + br["signature"]
+            br["randomness"] = hashlib.sha256(bytes.fromhex(br["signature"])).hexdigest()
         d = draw_seeds.draw(br["randomness"], rnd, ex, dict(n))
+        if float_round:
+            br["round"] = float(br["round"])
         if seed_change:
             d["groups"]["NOT1"][0] += 1
         f = w.wd / f"DRAW_{label}.json"
         f.write_bytes(draw_seeds.canon(dict(d, beacon_round=br, announce=dict(branch="test", commit="0" * 40, push_utc=push))))
-        return [f"draw={f}", f"excluded={ex_f}", f"announce={ann}"]
+        return [f"draw={f}", f"excluded={exf}", f"announce={ann}"]
 
     refused("B16: one seed changed, the signature kept", "DRAW.json is not draw_seeds.draw of its beacon and round",
             base, "times=bare", *make_draw("seed", seed_change=True))
@@ -1000,6 +1007,16 @@ def case_analysis_hardening(w, home):
             *make_draw("sig", sig_change=True))
     refused("B16/D8: a verified draw, the root's plan is none of the expected plans", "PLAN.json is none of the "
             "expected plans of the draw", base, "times=bare", *make_draw("good"))
+    refused("X1: a zero-padded signature (it would verify)", "exactly 48 bytes", base, "times=bare",
+            *make_draw("pad", pad=True))
+    refused("N6: a round written 1000000.0", "is not an integer", base, "times=bare", *make_draw("float", float_round=True))
+    wide = dict(ex)
+    wide["seeds"] = sorted(set(ex["seeds"]) | set(range(10000, 40000)))
+    wide["count"], wide["seeds_sha256"] = len(wide["seeds"]), hashlib.sha256(draw_seeds.canon(wide["seeds"])).hexdigest()
+    wf = w.wd / "EXCLUDED_wide.json"
+    wf.write_bytes(draw_seeds.canon(wide))
+    refused("N5: an exclusion list rejecting more than 20 % of the range", "of the draw range, more than 20%", base,
+            "times=bare", *make_draw("wide", ex_file=wf), target=wf)
     for label, f in (("upper-case beacon", lambda d: dict(d, beacon=d["beacon"].upper())),
                      ("upper-case randomness", lambda d: dict(d, beacon_round=dict(d["beacon_round"], randomness=d["beacon_round"]["randomness"].upper()))),
                      ("upper-case signature", lambda d: dict(d, beacon_round=dict(d["beacon_round"], signature=d["beacon_round"]["signature"].upper())))):
@@ -1219,6 +1236,12 @@ def case_draw_canonical(w):
                          new_identical=D.draw(x, 1000000, ex, n1)["groups"] == D.draw(x, 1000000, ex, n2)["groups"])
             break
     out["order_evidence"] = found
+    import beacon_chain
+    import beacon_verify
+    br = dict(round=1000000, randomness=v, signature="83ad29e4c409f9470fc2ef02f90214df49e02b441a1a241a82d622d9f608ef98"
+              "fd8b11a029f1bee9d9e83b45088abe72")
+    out["beacon_verify"] = dict(published=beacon_verify.verify(beacon_chain.QUICKNET, br).get("ok"),
+                                padded=beacon_verify.verify(beacon_chain.QUICKNET, dict(br, signature="00" + br["signature"])).get("ok"))
     e = (HERE / "draw_seeds.py").exists()
     ok = all([check(checks, "lowercase: the seeds of ef374ccd", json.dumps(same_as_before, sort_keys=True),
                     '"campaign": true, "rehearsal": true, "standin": true', HERE / "draw_seeds.py", e),
@@ -1228,7 +1251,10 @@ def case_draw_canonical(w):
               check(checks, "every permutation of the sizes identical", json.dumps(perms, sort_keys=True),
                     '"campaign": true, "rehearsal": true, "standin": true', HERE / "draw_seeds.py", e),
               check(checks, "the order evidence", json.dumps(found), '"old_differs": true, "new_identical": true',
-                    HERE / "draw_seeds.py", e)]) and out["bytes_same"]
+                    HERE / "draw_seeds.py", e),
+              check(checks, "beacon_verify: the published signature verifies, the zero-padded one is refused",
+                    json.dumps(out["beacon_verify"], sort_keys=True), '"padded": false, "published": true',
+                    HERE / "beacon_verify.py", (HERE / "beacon_verify.py").exists())]) and out["bytes_same"]
     out["checks"] = checks
     return ok, out
 
@@ -1236,6 +1262,50 @@ def case_draw_canonical(w):
 def hashlib_sha(s):
     import hashlib
     return hashlib.sha256(s.encode()).hexdigest()
+
+
+def case_draw_plans_command(w):
+    """The audit's X2, through the real command: a DRAW.json file (the stand-in quicknet round 1000000 at 60/32/37 and
+    at 6/6/6, written as the coordinator writes it, with beacon_round and announce) split by `plan_split3.py DRAW.json
+    campaign_template.json OUTDIR`, as the procedure does; every PLAN_K<nn>.json must be byte for byte the plan
+    analysis.py expects (plan_split.canon of expected_plans of the recomputed draw), which is what campaign mode
+    matches a root's PLAN_INPUT.json against. And plan_split3.split gives byte-identical plans for every key order of
+    draw["groups"]."""
+    import importlib.util
+    import itertools
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as D
+    import plan_split as PS
+    import plan_split3 as P3
+    spec = importlib.util.spec_from_file_location("analysis_p", HERE / "analysis.py")
+    A = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(A)
+    ex = json.loads((HERE / "EXCLUDED.json").read_text())
+    v = "b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3"
+    br = dict(round=1000000, randomness=v, signature="83ad29e4c409f9470fc2ef02f90214df49e02b441a1a241a82d622d9f608ef98"
+              "fd8b11a029f1bee9d9e83b45088abe72")
+    tmpl = json.loads((HERE / "campaign_template.json").read_text())
+    checks, out = [], {}
+    for label, n in (("campaign", A.DRAW_SIZES), ("rehearsal", A.DRAW_SIZES_REHEARSAL)):
+        d = D.draw(v, 1000000, ex, dict(n))
+        f = w.wd / f"DRAW_plans_{label}.json"
+        f.write_bytes(D.canon(dict(d, beacon_round=br, announce=dict(branch="test", commit="0" * 40,
+                                                                     push_utc="2023-09-27T08:19:24Z"))))
+        od = w.wd / f"plans_cmd_{label}"
+        shutil.rmtree(od, ignore_errors=True)
+        r = sh(PY, "-B", HERE / "plan_split3.py", f, HERE / "campaign_template.json", od)
+        expected, _ = A.expected_plans(d)
+        match = {k: (od / f"PLAN_{k}.json").exists() and (od / f"PLAN_{k}.json").read_bytes() == PS.canon(p)
+                 for k, p in expected.items()}
+        perms = len({b"".join(PS.canon(p) for p in P3.split(dict(d, groups={g: d["groups"][g] for g in perm}), tmpl, 12)[0])
+                     for perm in itertools.permutations(d["groups"])}) == 1
+        out[label] = dict(rc=r.returncode, plans_match=match, every_key_order_identical=perms)
+        checks.append(dict(check=f"{label}: the 12 plan files are the expected plans", matched=json.dumps(match)
+                           if all(match.values()) and len(match) == 12 else None, target=str(f), target_exists=f.exists()))
+        checks.append(dict(check=f"{label}: one split for every key order", matched="identical" if perms else None,
+                           target=str(f), target_exists=f.exists()))
+    out["checks"] = checks
+    return all(c["matched"] for c in checks) and all(x["rc"] == 0 for k, x in out.items() if k != "checks"), out
 
 
 def main(wd, *only):
@@ -1267,6 +1337,7 @@ def main(wd, *only):
     run("github_times", case_github_times)
     run("analysis_announce", case_analysis_announce)
     run("draw_canonical", case_draw_canonical)
+    run("draw_plans_command", case_draw_plans_command)
     run("analysis_own_check", case_analysis_own_check)
     run("sigterm_driver_only", case_sigterm_driver_only)
     run("sigkill_driver_only", case_sigkill_driver_only)

@@ -36,8 +36,12 @@ THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
 - The round must be beacon_verify.round_after(the pinned quicknet chain, the announce's push time); the BLS signature
   must verify (beacon_verify.verify, beacon_chain.QUICKNET). ONE canonical value: the analysis derives it, sha256 of
   the signature's bytes, as 64 lowercase hex characters; the signature, the round's randomness and DRAW.json's beacon
-  must each be written exactly in canonical form (another writing of the same value is refused), and the seeds are
-  recomputed from that value, the groups in draw_seeds.GROUP_ORDER whatever the order of the sizes.
+  must each be written exactly in canonical form (another writing of the same value is refused; the signature is
+  exactly 48 bytes, so a zero-padded one, which would still verify, is refused), the rounds are integers, and the
+  seeds are recomputed from that value, the groups in draw_seeds.GROUP_ORDER whatever the order of the sizes. The
+  12 plans split the groups in that same order (plan_split.ordered_groups), so a DRAW.json read back from its file
+  and the draw in memory give the same plans.
+- N5: an excluded= list rejecting more than draw_seeds.MAX_EXCLUDED_FRACTION (20 %) of the draw range refuses.
 - The seeds are recomputed with the pinned draw_seeds.draw; the 12 expected plans are plan_split3.split of the
   RECOMPUTED draw on the frozen template, never of the file's own lists.
 - Each root's PLAN_INPUT.json must be byte-identical to plan_split.canon of one of them, which names the root's
@@ -1358,8 +1362,9 @@ def check_draw(kw, mode, outdir, tree_commit=None):
         refuse("DRAW.json has no beacon_round {round, signature, randomness}")
     if not isinstance(an, dict) or set(an) != {"branch", "commit", "push_utc"}:
         refuse("DRAW.json has no announce {branch, commit, push_utc}")
-    if not isinstance(d.get("beacon"), str) or not isinstance(d.get("round"), int):
-        refuse("DRAW.json has no beacon string and round integer")
+    isint = lambda x: isinstance(x, int) and not isinstance(x, bool)
+    if not isinstance(d.get("beacon"), str) or not isint(d.get("round")) or not isint(br.get("round")):
+        refuse("DRAW.json has no beacon string, or its round or beacon_round's round is not an integer")
     if "excluded" not in kw:
         refuse("a draw with a beacon needs excluded=EXCLUDED.json (the published exclusion list it used)")
     notice = None
@@ -1403,6 +1408,9 @@ def check_draw(kw, mode, outdir, tree_commit=None):
     pinned = json.loads((HERE / "EXCLUDED.json").read_text())
     if not set(pinned["seeds"]) <= set(ex.get("seeds") or []):
         refuse("the excluded= list is not a superset of the freeze's EXCLUDED.json")
+    frac = draw_seeds.excluded_fraction(ex)                # N5
+    if frac > draw_seeds.MAX_EXCLUDED_FRACTION:
+        refuse(f"the excluded= list rejects {frac:.1%} of the draw range, more than {draw_seeds.MAX_EXCLUDED_FRACTION:.0%}")
     # the round from the announce's push time, the beacon's signature
     if not beacon_chain.check():
         refuse("the pinned quicknet chain does not check")
@@ -1416,8 +1424,9 @@ def check_draw(kw, mode, outdir, tree_commit=None):
         sig_b = bytes.fromhex(br["signature"]) if isinstance(br["signature"], str) else None
     except ValueError:
         sig_b = None
-    if sig_b is None or sig_b.hex() != br["signature"]:
-        refuse("DRAW.json: the beacon round's signature is not written in canonical form (lowercase hex, no spaces)")
+    if sig_b is None or sig_b.hex() != br["signature"] or len(sig_b) != 48:
+        refuse("DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 "
+               "lowercase hex characters, no spaces, no padding)")
     value = hashlib.sha256(sig_b).hexdigest()
     if br["round"] != d["round"] or br["randomness"] != value or d["beacon"] != value:
         refuse(f"DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = {value} "
@@ -1436,7 +1445,7 @@ def check_draw(kw, mode, outdir, tree_commit=None):
                f"{sizes} (with its beacon_round and announce), byte for byte")
     return again, dict(sha256=hashlib.sha256(b).hexdigest(), beacon=d["beacon"], round=d["round"], sizes=dict(sizes),
                        machines=MACHINES, recomputed=True, signature_verified=True,
-                       excluded=dict(file=Path(kw["excluded"]).name, sha256=A["excluded_sha256"],
+                       excluded=dict(file=Path(kw["excluded"]).name, sha256=A["excluded_sha256"], fraction_of_range=round(frac, 4),
                                      seeds_sha256=ex.get("seeds_sha256"), count=ex.get("count"),
                                      superset_of_freeze=pinned["seeds_sha256"]),
                        announce=dict(an, from_github=mode != "test", sha256=hashlib.sha256(ab).hexdigest())), notice

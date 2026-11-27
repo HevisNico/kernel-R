@@ -22,6 +22,8 @@ import json
 from pathlib import Path
 import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 COST = dict(  # CPU-min per item [K: dry run 9804-9806, validations 9801/9803]; p_room [G: K3 rates of plan §3 with the one-port rule]
     NOT1=dict(gate=2.5, D=3.7, N0=1.5, noisy=2.0, p_room=0.79, d4=0.7),
     ANDOR3=dict(gate=0.0, D=50.0, N0=30.0, noisy=40.0, p_room=0.27, d4=45.0),
@@ -39,14 +41,27 @@ def expected(g, audited):
     return c["gate"] + c["D"] + c["N0"] + c["p_room"] * 3 * c["noisy"] + (c["d4"] if audited else 0.0)
 
 
+def ordered_groups(draw):
+    """The draw's groups in draw_seeds.GROUP_ORDER, never in the order of a dict's keys (a DRAW.json read back has
+    them sorted, the draw in memory in its own order): one draw gives one split."""
+    import draw_seeds
+    gs = draw["groups"]
+    if set(gs) - set(draw_seeds.GROUP_ORDER):
+        raise ValueError(f"groups {sorted(set(gs) - set(draw_seeds.GROUP_ORDER))} are not of {draw_seeds.GROUP_ORDER}")
+    return [(g, gs[g]) for g in draw_seeds.GROUP_ORDER if g in gs]
+
+
 def split(draw, template, m=12):
-    assert 8 <= m <= 12, f"m = {m}: the plan allows 8 to 12 machines"
+    if not 8 <= m <= 12:
+        raise ValueError(f"m = {m}: the plan allows 8 to 12 machines")
+    groups = ordered_groups(draw)
+    names = [g for g, _ in groups]
     items = []
-    for g, seeds in draw["groups"].items():
+    for g, seeds in groups:
         for pos, s in enumerate(seeds, start=1):
             audited = pos % 6 == 0
             items.append(dict(group=g, seed=s, pos=pos, audited=audited, cost=expected(g, audited)))
-    order = sorted(items, key=lambda x: (-x["cost"], list(draw["groups"]).index(x["group"]), x["pos"]))
+    order = sorted(items, key=lambda x: (-x["cost"], names.index(x["group"]), x["pos"]))
     load = [0.0] * m
     where = {}
     for x in order:
@@ -58,7 +73,7 @@ def split(draw, template, m=12):
         p = json.loads(json.dumps(template))
         p["what"] = f"campaign machine K{k + 1:02d} of {m}"
         p["groups"] = {}
-        for g, seeds in draw["groups"].items():
+        for g, seeds in groups:
             mine = [s for s in seeds if where[(g, s)] == k]
             if mine:
                 aud = [x["seed"] for x in items if x["group"] == g and x["audited"] and where[(g, x["seed"])] == k]
@@ -67,7 +82,7 @@ def split(draw, template, m=12):
         p["U_groups"], p["remote_duplicates"], p["controls"] = [], [], dict(duplicate={})
         plans.append(p)
     dup_load = list(load)
-    for g, seeds in draw["groups"].items():
+    for g, seeds in groups:
         first = seeds[0]
         home = where[(g, first)]
         plans[home]["U_groups"].append(g)
