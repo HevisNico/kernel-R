@@ -49,8 +49,8 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   (SHA256SUMS, SHA256SUMS.instances, RESULT*.json, DONE, INSTANCES_DONE, INVENTORY_END) are removed, and so are
   NOT1_6220/SHA256SUMS, N2, N3 and their logs. Its status.json has N2 "running" and no C2, N3, C3. One letter of
   N1/noisy_record.json is changed (word 1/0/0 "ssFF" -> "sFFF"), and N1/comparison.json is recomputed with
-  compare_d2.py, which gives "refuted". Must: exit 0, NOT1_6220 in the K3 refuted row, an entry naming NOT1_6220 that
-  says "manifest not final", and NOT1_6212 held at K0 and K3.
+  compare_d2.py, which gives "refuted". Must: exit 0, NOT1_6220 in the K3 refuted row, its instance row's K3 refuted
+  and flagged (a key or text "manifest_not_final" / "manifest not final"), and NOT1_6212 held at K0 and K3.
 - draw standin_*: a real draw stands in for the campaign's (see `standin`: quicknet round 1000000 as published, the
   announce push time 600 s before its time, draw_seeds.draw over the pinned EXCLUDED.json with NOT1=2 ANDOR3=1
   XOR3=1, DRAW_ANNOUNCE.txt in mode test, passed as draw=, excluded=, announce=). The root is K03's of that draw
@@ -347,10 +347,11 @@ def case_stopped_mid_instance(tmp, src):
     if res is None:
         return False, obs
     k3 = res["counts"]["NOT1"]["K3"]
-    flag = next((e for e in entries(res) if any(isinstance(v, str) and "NOT1_6220" in v for v in e.values())
-                 and "manifest not final" in json.dumps(e)), None)
-    obs["manifest_not_final_entry"] = None if flag is None else str(flag)[:300]
-    ok = (r.returncode == 0 and "NOT1_6220" in k3["refuted"]["list"] and flag is not None
+    row = next((i for i in res["instances"] if i["instance"] == "NOT1_6220"), {})
+    k3_row = row.get("K3") or {}
+    flag = k3_row.get("refuted") is True and any(x in json.dumps(k3_row) for x in ("manifest not final", "manifest_not_final"))
+    obs["NOT1_6220_K3"] = k3_row
+    ok = (r.returncode == 0 and "NOT1_6220" in k3["refuted"]["list"] and flag
           and all("NOT1_6212" in res["counts"]["NOT1"][lv]["held"]["list"] for lv in ("K0", "K3")))
     return ok, obs
 
@@ -614,7 +615,7 @@ CASES = [
     ("D10", "one_byte_in_comparison", case_one_byte_in_comparison, "refused; the output names N0/comparison.json"),
     ("D10", "listed_file_missing", case_listed_file_missing, "refused; the output names extract.json"),
     ("D10", "stopped_mid_instance", case_stopped_mid_instance,
-     "exit 0; NOT1_6220 refuted at K3 with an entry saying \"manifest not final\"; NOT1_6212 held at K0 and K3"),
+     "exit 0; NOT1_6220 refuted at K3, its K3 flagged manifest not final; NOT1_6212 held at K0 and K3"),
 ]
 
 
