@@ -1,0 +1,63 @@
+{
+ "revision": "5d02acce299de86f885a5b3d22ee86d08bcfafad",
+ "clean_clone_porcelain": [
+  "?? research/circuit/pdk"
+ ],
+ "script": "research/layered-networks/tests/test_analysis_defects.py, unchanged at that revision",
+ "script_sha256": "78a6485716f2f0e2ac20fdb2dc54b3027232aed0e6ae661d39cf7a0bedd68a00",
+ "python": "3.13.18",
+ "numpy": "2.3.5",
+ "command": "cd /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/rehearsal/kernel-R/research/layered-networks && LAYERED_DEFECT_SOURCES=/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/defsrc /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/prefreeze2/venvA/bin/python -B tests/test_analysis_defects.py /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/suite5d/SUITE_5d02acce.json",
+ "sources": "LAYERED_DEFECT_SOURCES = the run2 roots out_K05 and out_K06 of evidence/devtest-run2-K05/K06, as in the suite's earlier runs",
+ "total": 51,
+ "passed": 34,
+ "failed": 17,
+ "failing": [
+  "standin_draw_valid",
+  "standin_seed_changed",
+  "standin_round_off_by_one",
+  "standin_signature_byte",
+  "standin_excluded_not_superset",
+  "standin_excluded_sha_differs",
+  "beacon_canonical",
+  "standin_beacon_upper",
+  "standin_beacon_mixed",
+  "standin_beacon_spaces",
+  "standin_beacon_0x",
+  "standin_signature_pad00",
+  "standin_signature_pad0000",
+  "standin_signature_pad000000",
+  "standin_signature_flip",
+  "standin_signature_other_round",
+  "standin_plans_from_command"
+ ],
+ "summary_line": "34 of 51 cases pass; failing: ['standin_draw_valid', 'standin_seed_changed', 'standin_round_off_by_one', 'standin_signature_byte', 'standin_excluded_not_superset', 'standin_excluded_sha_differs', 'beacon_canonical', 'standin_beacon_upper', 'standin_beacon_mixed', 'standin_beacon_spaces', 'standin_beacon_0x', 'standin_signature_pad00', 'standin_signature_pad0000', 'standin_signature_pad000000', 'standin_signature_flip', 'standin_signature_other_round', 'standin_plans_from_command']",
+ "gating": "standin_draw_valid is the control of the draw mutations: the 16 other failing cases (standin_*, beacon_canonical, standin_plans_from_command) count only if that control passed, so they fail with it.",
+ "control_cause": {
+  "expected_by_the_case": [
+   "NOT1_65418",
+   "NOT1_69364"
+  ],
+  "standin_draw_at_this_revision": {
+   "NOT1": [
+    78394,
+    39363
+   ],
+   "ANDOR3": [
+    71018
+   ],
+   "XOR3": [
+    62982
+   ]
+  },
+  "excluded_json": {
+   "sha256": "abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c",
+   "seeds_sha256": "d9975dee4f80fb75ea5fb67d3d0301bbae2274b0857fc7d44dc216f1c67afbc6",
+   "count": 15741,
+   "has_65418": true,
+   "has_69364": true
+  },
+  "note": "The case hard-codes the stand-in draw's seeds (quicknet round 1000000 at 2/1/1 over the pinned EXCLUDED.json). The last exclusion scan (340e1c6c, pinned in this freeze) added 65418, 69364, 55321 and 61903, which appear in committed test files; the same draw now gives other seeds. The analysis exits 0 on the control; only the named seeds differ."
+ },
+ "earlier_record": "dev/equiv/DEFECTS_R_AFTER.json: 51 of 51 at 8bac22cc, before that scan; the suite was not rerun after the scan before the freeze 5d02acce."
+}
