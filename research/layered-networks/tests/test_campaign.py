@@ -503,6 +503,9 @@ def tamper_pins(t):
     import hashlib
     f = t / "research" / "layered-networks" / "FREEZE_PINS.json"
     d = json.loads(f.read_text())
+    for files in d["groups"].values():                  # every pin recomputed over this clone, as a freeze does
+        for m in files:
+            files[m] = hashlib.sha256((t / m).read_bytes()).hexdigest()
     must = ("research/layered-networks/campaign.py", "research/layered-networks/analysis.py",
             "research/layered-networks/campaign_template.json")
     d["groups"]["test: the consolidated driver, analysis and template"] = {
