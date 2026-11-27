@@ -76,6 +76,8 @@ assert beacon_verify.verify(beacon_chain.QUICKNET, R1M)["ok"]
 T1M = datetime.datetime.fromtimestamp(beacon_verify.round_time(beacon_chain.QUICKNET, 1000000) - beacon_verify.DELAY_S,
                                       datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 sh(f"git init -q --bare {W}/github_twin.git")
+sh(f"git init -q {W}/r1fetch && git -C {W}/r1fetch fetch -q {GH} refs/heads/evidence/combined-rehearsal-draw && "
+   f"git -C {W}/r1fetch show FETCH_HEAD:DRAW_ANNOUNCE.txt > {W}/REHEARSAL1_DRAW_ANNOUNCE.txt")   # rehearsal 1, as published
 sh(f"git init -q {W}/someclone && git -C {W}/someclone -c user.name=x -c user.email=x@invalid commit -q --allow-empty -m x")   # a git clone to start a block from (a negative case)
 TWIN = f"{W}/github_twin.git"
 
@@ -95,20 +97,22 @@ TWINS = {   # (block, written line or fragment) -> replacement; each must occur 
               "tempfile.mkdtemp(), '$F', offline=True)",
               "the GitHub read of the announce replaced by its offline mode on the twin's announce file"),
              (PUSH + "$R", f"git push -q {TWIN} HEAD:refs/heads/$R", "no push to GitHub: the push goes to the local twin")],
-    "rehearsal-draw": [(f"git fetch -q {GH} refs/heads/evidence/combined-rehearsal-draw-result",
-                        f"git fetch -q {TWIN} refs/heads/evidence/combined-rehearsal-draw-result",
-                        "the result branch exists only on the twin")],
+    "rehearsal-draw": [(f"git fetch -q {GH} refs/heads/evidence/combined-rehearsal2-draw-result",
+                        f"git fetch -q {TWIN} refs/heads/evidence/combined-rehearsal2-draw-result",
+                        "rehearsal 2's result branch exists only on the twin (rehearsal 1's two fetches stay on GitHub)")],
     "check-list": [("A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='$L/EXCLUDED.json'), 'rehearsal', tempfile.mkdtemp(), '$F')",
                     "A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='$L/EXCLUDED.json', "
                     "announce='announce_rehearsal/DRAW_ANNOUNCE.txt'), 'rehearsal', tempfile.mkdtemp(), '$F', offline=True)",
                     "the GitHub read of the rehearsal's announce replaced by its offline mode on the twin's announce file"),
-                   ("A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_SECOND.json'),",
-                    "A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_SECOND.json', "
-                    "rehearsal_announce='announce_rehearsal/DRAW_ANNOUNCE.txt'),",
-                    "the same, for check_rehearsal_seeds (its announce file)"),
-                   ("dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True)",
-                    "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False)",
-                    "strict=False: check_rehearsal_seeds checks the rehearsal draw offline (its only use of the flag)")],
+                   ("A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal1_draw='DRAW_REHEARSAL1.json',",
+                    "A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal1_draw='DRAW_REHEARSAL1.json', "
+                    f"rehearsal_announce='announce_rehearsal/DRAW_ANNOUNCE.txt', rehearsal1_announce='{W}/REHEARSAL1_DRAW_ANNOUNCE.txt',",
+                    "the announce files for check_rehearsal_seeds offline: rehearsal 2's from the twin, rehearsal 1's as "
+                    "published (its announce commit 9c3ec1e1 on GitHub, fetched by proof2)"),
+                   ("dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True, 'campaign')",
+                    "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False, 'campaign')",
+                    "strict=False: check_rehearsal_seeds checks both rehearsal draws offline (rehearsal 2 is on the twin "
+                    "only); rehearsal 1 is also checked from GitHub, verbatim, by the block's own check_draw with past=")],
     "vars": [("L=<a clean clone of research/layered-campaign-freeze, with research/circuit/pdk linked to the SKY130 PDK at 1232782c as on the machines>/research/layered-networks",
               f"L={L}", "placeholder: the freeze branch does not exist yet; the clean clone of the candidate"),
              ("PY=<the pinned Python 3.13.18 (numpy 2.3.5, py_ecc 8.0.0), the one envcheck_layered4.py passed with on this machine>",
@@ -266,7 +270,7 @@ STEPS = [dict(num="01", name="vars", kind="pass", body=B("vars")),
               body=B("announce") + "RC=$?\nX=$X_KEPT\n( exit $RC )\n", made="announce_$M", where=f"{W}/work/neg_oldlist"),
          dict(num="11", name="announce", kind="pass", body=B("announce")),
          dict(num="12", name="draw", kind="pass", body=B("draw")),
-         dict(num="13", name="owner-identity", kind="pass", body=ident_body(TWIN, W / "kernel-R", 4)),
+         dict(num="13", name="owner-identity", kind="pass", body=ident_body(TWIN, W / "kernel-R", 4)),   # rehearsal 2 and campaign: announce + result each
          dict(num="14", name="clone-clean", kind="pass", body=clean_body(W / "kernel-R"))]
 rc, summary = run_steps(STEPS, W / "work", LOG, head=[f"export GIT_CONFIG_GLOBAL={W}/gitconfig_global_other",
                                                     'echo "global identity during the run: $(git config --global user.name)"'])

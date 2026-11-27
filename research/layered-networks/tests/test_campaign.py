@@ -1390,6 +1390,98 @@ def case_draw_canonical(w):
     return ok, out
 
 
+def case_analysis_two_rehearsals(w):
+    """The owner's rule after rehearsal 1 (2026-11-27): the campaign's list must hold the seeds of BOTH rehearsals and
+    their noise seeds 10 S + 0..3, rehearsal 1 checked against its own freeze (analysis.REHEARSAL1). Called on
+    analysis.check_rehearsal_seeds, offline, with rehearsal 1's published files (tests/fixtures/rehearsal1: its DRAW.json
+    b8aaefd9, DRAW_ANNOUNCE.txt and EXCLUDED_PUBLISHED.json) and, for rehearsal 2, a stand-in draw on the published
+    quicknet round 20000000 (6/6/6 over the pinned EXCLUDED.json):
+    - both, with the full list: accepted, both checked (recomputed, signature verified);
+    - rehearsal 1 absent in campaign mode: refused; rehearsal 2 absent: refused;
+    - one rehearsal 1 seed, or one of its noise seeds, missing from the list: refused, naming it;
+    - rehearsal 1's DRAW.json changed (re-serialized, the same content): refused by its pinned sha256;
+    - rehearsal 1 with another list than its published one: refused;
+    - rehearsal 1's announce later than the campaign's: refused."""
+    import datetime
+    import hashlib
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("analysis_under_test", ANALYSIS)
+    A = importlib.util.module_from_spec(spec)
+    sys.path.insert(0, str(Path(ANALYSIS).parent))
+    spec.loader.exec_module(A)
+    import beacon_chain
+    import beacon_verify
+    import draw_seeds as D
+    fx = HERE / "tests" / "fixtures" / "rehearsal1"
+    ex_f = HERE / "EXCLUDED.json"
+    ex = json.loads(ex_f.read_text())
+    r1 = json.loads((fx / "DRAW.json").read_text())
+    br = dict(round=20000000, randomness="f39c98df5525968e6622e0c63edb3d1f9c5607cf780db78abdded36e4b3dba95",
+              signature="96892582a33552a7b67ba44ef09c3ccd535bbebe760c93ecf45be8958d0c0f06390c6d19d7bf492eb806af7eef6b125c")
+    t0 = beacon_verify.round_time(beacon_chain.QUICKNET, br["round"]) - beacon_verify.DELAY_S
+    push = datetime.datetime.fromtimestamp(t0, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    sizes = dict(NOT1=6, ANDOR3=6, XOR3=6)
+    a2 = w.wd / "ANNOUNCE_r2.txt"
+    a2.write_text(f"format layered-draw-announce/1\nmode rehearsal\nexcluded_sha256 {hashlib.sha256(ex_f.read_bytes()).hexdigest()}\n"
+                  "sizes NOT1=6 ANDOR3=6 XOR3=6\n")
+    d2 = D.draw(br["randomness"], br["round"], ex, dict(sizes))
+    f2 = w.wd / "DRAW_r2.json"
+    f2.write_bytes(D.canon(dict(d2, beacon_round=br, announce=dict(branch=A.ANNOUNCE_BRANCH["rehearsal"], commit="0" * 40,
+                                                                    push_utc=push))))
+    s1 = sorted(s for v in r1["groups"].values() for s in v)
+    s2 = sorted(s for v in d2["groups"].values() for s in v)
+    full = sorted(set(ex["seeds"]) | set(s1) | set(s2) | {10 * s + j for s in s1 + s2 for j in range(4)})
+
+    def listed(label, seeds):
+        x = dict(ex, seeds=seeds, count=len(seeds), seeds_sha256=hashlib.sha256(D.canon(seeds)).hexdigest())
+        f = w.wd / f"EXCLUDED_two_{label}.json"
+        f.write_bytes(D.canon(x))
+        return str(f)
+    later = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    base = dict(rehearsal_draw=str(f2), rehearsal_announce=str(a2), rehearsal1_draw=str(fx / "DRAW.json"),
+                rehearsal1_excluded=str(fx / "EXCLUDED_PUBLISHED.json"), rehearsal1_announce=str(fx / "DRAW_ANNOUNCE.txt"))
+    resaved = w.wd / "DRAW_r1_resaved.json"
+    resaved.write_text(json.dumps(r1, indent=1, sort_keys=True) + "\n")
+    other_list = listed("other", sorted(set(ex["seeds"]) | {1}))
+
+    def call(kw, campaign_push=later):
+        try:
+            r = A.check_rehearsal_seeds(dict(kw), dict(announce=dict(push_utc=campaign_push)), w.wd / "two_out", None,
+                                        False, "campaign")
+            return "accepted: " + json.dumps({k: dict(recomputed=v["recomputed"], signature_verified=v["signature_verified"],
+                                                      seeds=v["seeds"]) for k, v in r.items()}, sort_keys=True)
+        except SystemExit as e:
+            return str(e)
+    (w.wd / "two_out").mkdir(exist_ok=True)
+    cases = [
+        ("both, the full list: accepted", dict(base, excluded=listed("full", full)),
+         '"rehearsal1": {"recomputed": true, "seeds": 18, "signature_verified": true}'),
+        ("rehearsal 1 absent: refused", dict({k: v for k, v in base.items() if not k.startswith("rehearsal1_")},
+                                             excluded=listed("full", full)), "rehearsal1_draw= (rehearsal1's published DRAW.json) is required"),
+        ("rehearsal 2 absent: refused", dict({k: v for k, v in base.items() if not k.startswith("rehearsal_")},
+                                             excluded=listed("full", full)), "rehearsal_draw= (rehearsal2's published DRAW.json) is required"),
+        ("a rehearsal 1 seed missing: refused", dict(base, excluded=listed("no_s1", [s for s in full if s != s1[0]])),
+         f"lacks rehearsal1 seeds [{s1[0]}]"),
+        ("a rehearsal 1 noise seed missing: refused", dict(base, excluded=listed("no_n1", [s for s in full if s != 10 * s1[1] + 3])),
+         f"noise seeds [{10 * s1[1] + 3}]"),
+        ("rehearsal 1's DRAW.json re-serialized: refused", dict(base, rehearsal1_draw=str(resaved), excluded=listed("full", full)),
+         "the published rehearsal 1 draw is b8aaefd9f107"),
+        ("rehearsal 1 with another list: refused", dict(base, rehearsal1_excluded=other_list, excluded=listed("full", full)),
+         "not the one DRAW_ANNOUNCE.txt names"),
+    ]
+    checks, out = [], {}
+    oks = []
+    for label, kw, needle in cases:
+        got = call(kw)
+        out[label] = got
+        oks.append(check(checks, label, got, needle, w.wd / "two_out", True))
+    got = call(dict(base, excluded=listed("full", full)), campaign_push="2026-11-27T15:00:00Z")
+    out["rehearsal 1's announce later than the campaign's: refused"] = got
+    oks.append(check(checks, "rehearsal 1's announce later than the campaign's: refused", got,
+                     "rehearsal1's announce (2026-11-27T15:14:37Z) is not earlier", w.wd / "two_out", True))
+    return all(oks), dict(checks=checks, results=out, rehearsal1_seeds=s1, rehearsal2_standin_seeds=s2)
+
+
 def hashlib_sha(s):
     import hashlib
     return hashlib.sha256(s.encode()).hexdigest()
@@ -1469,6 +1561,7 @@ def main(wd, *only):
     run("analysis_announce", case_analysis_announce)
     run("draw_canonical", case_draw_canonical)
     run("draw_plans_command", case_draw_plans_command)
+    run("analysis_two_rehearsals", case_analysis_two_rehearsals)
     run("analysis_own_check", case_analysis_own_check)
     run("sigterm_driver_only", case_sigterm_driver_only)
     run("sigkill_driver_only", case_sigkill_driver_only)
