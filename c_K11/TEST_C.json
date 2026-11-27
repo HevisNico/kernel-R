@@ -1,0 +1,87 @@
+{
+ "all_pass": true,
+ "crash": {
+  "detail": {
+   "D": {
+    "status": "failed",
+    "why": "exit -9, missing ['D/record.json', 'D/prediction.json']"
+   },
+   "checks": [
+    {
+     "check": "D killed from outside",
+     "expected": "exit -9",
+     "matched": "exit -9, missing ['D/record.json', 'D/prediction.json']",
+     "target": "/root/devtest_c2/c/root_crash",
+     "target_exists": true
+    }
+   ],
+   "killed_pids": [
+    792
+   ],
+   "steps": {
+    "D": "failed",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 181.0
+ },
+ "interrupt_and_resume": {
+  "detail": {
+   "D_why": "found running at a resume (the driver or the machine stopped)",
+   "after": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   },
+   "before": {
+    "D": "running",
+    "deck": "done",
+    "inverters": "done"
+   },
+   "checks": [
+    {
+     "check": "D found running at the rerun",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/root/devtest_c2/c/root_interrupt",
+     "target_exists": true
+    }
+   ],
+   "env_resumes": [
+    {
+     "static_sha256": "2ca1a51902fa0a490df5d24482fe331fa2c81c15b21f13b9248de919309e2921",
+     "uptime_s": "2026-11-27 07:31:05"
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 171.0
+ },
+ "k3_budget_stop": {
+  "detail": {
+   "D": {
+    "ended": "2026-11-27T07:40:42.302402Z",
+    "status": "refused",
+    "why": "inv/K3_BUDGET.json is not ok (the inverters' K3 budget)"
+   },
+   "checks": [
+    {
+     "check": "D refused for the K3 budget",
+     "expected": "inv/K3_BUDGET.json is not ok",
+     "matched": "inv/K3_BUDGET.json is not ok (the inverters' K3 budget)",
+     "target": "/root/devtest_c2/c/root_k3stop/NOT1_6213/inv/K3_BUDGET.json",
+     "target_exists": true
+    }
+   ],
+   "steps": {
+    "D": "refused",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 165.3
+ }
+}
