@@ -72,7 +72,9 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   must raise or give the canonical seeds. sizes_permutations: the sizes dict in all 6 orders, at 166 per group (the
   smallest equal sizes where the groups collide at round 1000000), must give identical seeds. standin_beacon_<writing>:
   the analysis's entry point on a DRAW.json written that way (seeds drawn on that writing, a root matching its plan)
-  must refuse it, or accept it with the canonical seeds; gated on standin_draw_valid.
+  must refuse it, or accept it with the canonical seeds; gated on standin_draw_valid. That DRAW.json is built as a
+  forger would build it, with the ef374ccd seed formula inline (forger_groups), not with the pinned draw_seeds.py,
+  which may refuse the writing; a fixture that raises records setup_error and fails the case.
 - E1 round_own_check_failed: K05 with NOT1_6220's round N2 left as the driver leaves a run stopped by its own check
   (see failed_round: the record's status "failed: the tail leak must be set before it starts", N2 failed with why
   "exit 1", no C2, no N2/comparison.json, an unlisted placeholder N2/trace.raw (a real header, data cut off; only its
@@ -464,6 +466,36 @@ CANONICAL_SEEDS = {"NOT1": [65418, 69364], "ANDOR3": [55321], "XOR3": [61903]}  
 COLLIDING_SIZES = dict(NOT1=166, ANDOR3=166, XOR3=166)   # the smallest equal sizes where groups collide at round 1000000
 
 
+def forger_groups(beacon, rnd, excluded, sizes):
+    """The seed formula as draw_seeds.py had it at ef374ccd, inline: S = 10000 + sha256("<beacon>|<round>|<group>|<k>")
+    mod 90000, the beacon string hashed as given, groups in the order given, `drawn` shared across groups. It is how a
+    forger builds a DRAW.json without the fixed draw_seeds.py (which refuses a non-canonical writing)."""
+    ex, drawn, groups, tried = set(excluded["seeds"]), set(), {}, {}
+    for g, n in sizes.items():
+        out, k = [], 0
+        while len(out) < n:
+            s_ = 10000 + int.from_bytes(hashlib.sha256(f"{beacon}|{rnd}|{g}|{k}".encode()).digest(), "big") % 90000
+            k += 1
+            if s_ in ex or s_ in drawn or any(10 * s_ + j in ex for j in range(4)):
+                continue
+            out.append(s_)
+            drawn.add(s_)
+        groups[g], tried[g] = out, k
+    return groups, tried
+
+
+def forged_draw(canonical, written, excluded):
+    """The canonical stand-in DRAW (its keys as the pinned draw_seeds writes them), with the beacon and
+    beacon_round.randomness in another writing and the seeds a forger draws on that writing."""
+    D = json.loads(json.dumps(canonical))
+    groups, tried = forger_groups(written, ROUND_1M["round"], excluded, dict(STANDIN_SIZES))
+    D.update(beacon=written, groups=groups)
+    if "candidates_tried" in D:
+        D["candidates_tried"] = tried
+    D["beacon_round"]["randomness"] = written
+    return D
+
+
 def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinned", activity=None, writing=None):
     """Write DRAW.json, DRAW_ANNOUNCE.txt and the excluded file of the stand-in draw, one mutation applied, and the
     plans of the VALID draw. Returns (args, plans)."""
@@ -487,7 +519,8 @@ def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinn
         D["announce"] = dict(branch=STANDIN_BRANCH, commit=STANDIN_COMMIT, push_utc=utc(t0))
         return D
 
-    valid = make(pinned) if writing is None else make(pinned, WRITINGS[writing](ROUND_1M["randomness"]))
+    valid = make(pinned) if writing is None else forged_draw(make(pinned), WRITINGS[writing](ROUND_1M["randomness"]),
+                                                             pinned)
     plans = tmp / "draw_plans"                              # the plans of the draw as written (a matching root)
     plans.mkdir()
     for k, pl in enumerate(P3.split(valid, json.loads((HERE / "campaign_template.json").read_text()), 12)[0], start=1):
