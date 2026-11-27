@@ -66,6 +66,12 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   earlier, its branch_deletion, then the branch_creation of the announce commit that DRAW.json uses; must be refused.
   force_push: the clean creation, then a force_push; must be refused. The two refusals count only if clean passed in
   the same run. Not exercised: reading the activity from GitHub (campaign and rehearsal).
+- beacon draw_reference: a stable reference. draw_seeds.draw on fixed inputs (round 1000000's value, a small TEST
+  exclusion list, 2/1/1) must give the seeds established by hand from the hash trace (see REFERENCE_SEEDS), not
+  derived from the code under test. It exercises both rejections (an excluded seed, an excluded noise seed).
+- INTEGRATION on the pinned list: standin_draw_valid also checks that no drawn seed or noise seed of one is in the
+  pinned EXCLUDED.json; and each case gated on a control must reach its own check (REACHES: the check's words in the
+  refusal), not be refused earlier.
 - beacon *: one signed drand value has several writings the verifiers accept (upper case, mixed case; spaces and a 0x
   prefix pass bytes.fromhex), and draw_seeds.draw hashes the string as given. beacon_canonical (control): the
   lowercase draw gives the seeds of the ef374ccd formula over the pinned list (derived at run time). beacon_<writing>: draw_seeds.draw (the narrowest real function) on that writing
@@ -831,6 +837,32 @@ def draw_function(beacon, sizes=None):
     return DS.draw(beacon, ROUND_1M["round"], ex, dict(sizes or STANDIN_SIZES))["groups"]
 
 
+# A STABLE REFERENCE for the draw: fixed inputs (round 1000000's value, a small TEST exclusion list that is not the
+# pinned one, sizes 2/1/1) and seeds established independently of draw_seeds.py, by hand from the hash trace below
+# (S = 10000 + sha256("<value>|1000000|<group>|<k>") mod 90000; rejected if S is excluded, already drawn, or one of
+# 10 S + 0..3 is excluded). Hard-coded on purpose: the inputs are fixed, so an error shared by the formula and the code
+# under test cannot pass unseen. The trace:
+#   NOT1   k=0 65418 excluded   k=1 69364 rejected (noise seed 693640 excluded)   k=2 78394 taken   k=3 39363 taken
+#   ANDOR3 k=0 55321 excluded   k=1 71018 taken
+#   XOR3   k=0 61903 excluded   k=1 62982 taken
+REFERENCE_EXCLUDED = [55321, 61903, 65418, 693640]
+REFERENCE_SEEDS = {"NOT1": [78394, 39363], "ANDOR3": [71018], "XOR3": [62982]}
+REFERENCE_TRIED = {"NOT1": 4, "ANDOR3": 2, "XOR3": 2}
+
+
+def case_draw_reference(tmp, src):
+    """draw_seeds.draw (the code under test) on the reference inputs: the hand-established seeds and candidate counts."""
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as DS
+    seeds = sorted(REFERENCE_EXCLUDED)
+    ex = dict(format="layered-excluded-seeds/1", count=len(seeds), seeds=seeds,
+              seeds_sha256=hashlib.sha256(DS.canon(seeds)).hexdigest())
+    D = DS.draw(ROUND_1M["randomness"], ROUND_1M["round"], ex, dict(STANDIN_SIZES))
+    ok = D["groups"] == REFERENCE_SEEDS and D["candidates_tried"] == REFERENCE_TRIED
+    return ok, dict(groups=D["groups"], candidates_tried=D["candidates_tried"], want=REFERENCE_SEEDS,
+                    want_tried=REFERENCE_TRIED)
+
+
 def case_beacon_canonical(tmp, src):
     """draw_seeds.draw (the narrowest real function; no root needed) on the canonical lowercase beacon."""
     got = draw_function(ROUND_1M["randomness"])
@@ -982,6 +1014,12 @@ def case_standin_draw_valid(tmp, src):
         not_run_entry(res, f"NOT1_{n}", where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3")
         for n in canonical_seeds()["NOT1"])
     obs["expected_NOT1"] = canonical_seeds()["NOT1"]
+    # INTEGRATION on the pinned list: no drawn seed, and no noise seed of one, is in the pinned EXCLUDED.json.
+    pinned = set(json.loads((HERE / "EXCLUDED.json").read_text())["seeds"])
+    drawn = [s_ for v in draw_function(ROUND_1M["randomness"]).values() for s_ in v]
+    hit = sorted({s_ for s_ in drawn if s_ in pinned} | {10 * s_ + j for s_ in drawn for j in range(4)} & pinned)
+    obs["drawn_in_pinned_list"] = hit
+    ok = ok and not hit
     STANDIN_CONTROL["ok"] = ok
     return ok, obs
 
@@ -1099,6 +1137,26 @@ def case_listed_file_missing(tmp, src):
     return refused(r) and "extract.json" in (r.stdout + r.stderr), obs
 
 
+# INTEGRATION: each case that depends on a passing control must reach the specific check it exercises. Its refusal
+# must carry that check's words (the stable part of the analysis's message, at the fix's tip); a refusal by any
+# earlier check fails the case. The accepted cases (exit 0) are checked by their own assertions.
+REACHES = {
+    "standin_seed_changed": "is not draw_seeds.draw of its beacon and round",
+    "standin_round_off_by_one": "is not the round the announce's push time fixes",
+    "standin_signature_byte": "must both be exactly sha256(signature)",
+    "standin_excluded_not_superset": "is not a superset of the freeze's EXCLUDED.json",
+    "standin_excluded_sha_differs": "is not the one DRAW_ANNOUNCE.txt names",
+    **{f"standin_beacon_{w}": "must both be exactly sha256(signature)" for w in ("upper", "mixed", "spaces", "0x")},
+    **{f"standin_signature_{k}": "not written in canonical form" for k in ("pad00", "pad0000", "pad000000")},
+    "standin_signature_flip": "does not verify against the pinned quicknet key",
+    "standin_signature_other_round": "'signature_ok': False",
+    "standin_activity_redone": "(branch_deletion in its activity)",
+    "standin_activity_force_push": "(force_push in its activity)",
+    "rehearsal_seed_missing": "list lacks rehearsal seeds [",
+    "rehearsal_noise_missing": "and noise seeds [",
+    "rehearsal_announce_later": "is not earlier than the campaign's",
+}
+
 # The manifest problems a case makes on purpose. Every other case must leave its roots' manifests consistent: that is
 # asserted, so a refusal in a D8 or D9 case cannot come from the fixture.
 TAMPERED = {
@@ -1140,6 +1198,9 @@ CASES = [
      "(gated on standin_activity_clean)"),
     ("E2", "standin_activity_force_push", case_standin_activity_force_push,
      "activity= the clean branch_creation then a force_push on the announce branch: refused (gated)"),
+    ("beacon", "draw_reference", case_draw_reference,
+     "draw_seeds.draw on the fixed reference inputs (round 1000000, the TEST list REFERENCE_EXCLUDED, 2/1/1): the "
+     "hand-established seeds " + json.dumps(REFERENCE_SEEDS) + " and candidate counts"),
     ("beacon", "beacon_canonical", case_beacon_canonical,
      "draw_seeds.draw on the canonical lowercase beacon gives the seeds of the ef374ccd formula over the pinned list "
      "(canonical_seeds(), derived at run time)"),
@@ -1217,6 +1278,9 @@ def main(out_json=None):
                 want = sorted(TAMPERED.get(name, []))
                 obs["fixture_ok"] = got == want                       # only the D10 tampering, nothing else
                 ok = ok and obs["fixture_ok"]
+                if name in REACHES:
+                    obs["reached_check"] = REACHES[name] in (obs.get("message") or "")
+                    ok = ok and obs["reached_check"]
             except Exception as e:                                     # a crash of the setup, not of the analysis
                 ok, obs = False, dict(setup_error=repr(e))
             print(f"{'PASS' if ok else 'FAIL'}  {defect:7} {name}: {json.dumps(obs)[:400]}", flush=True)
