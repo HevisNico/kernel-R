@@ -68,7 +68,7 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   the same run. Not exercised: reading the activity from GitHub (campaign and rehearsal).
 - beacon *: one signed drand value has several writings the verifiers accept (upper case, mixed case; spaces and a 0x
   prefix pass bytes.fromhex), and draw_seeds.draw hashes the string as given. beacon_canonical (control): the
-  lowercase draw gives today's seeds. beacon_<writing>: draw_seeds.draw (the narrowest real function) on that writing
+  lowercase draw gives the seeds of the ef374ccd formula over the pinned list (derived at run time). beacon_<writing>: draw_seeds.draw (the narrowest real function) on that writing
   must raise or give the canonical seeds. sizes_permutations: the sizes dict in all 6 orders, at 166 per group (the
   smallest equal sizes where the groups collide at round 1000000), must give identical seeds. standin_beacon_<writing>:
   the analysis's entry point on a DRAW.json written that way (seeds drawn on that writing, a root matching its plan)
@@ -483,7 +483,12 @@ WRITINGS = {
     "spaces": lambda h: " ".join(h[i:i + 2] for i in range(0, len(h), 2)),
     "0x": lambda h: "0x" + h,
 }
-CANONICAL_SEEDS = {"NOT1": [65418, 69364], "ANDOR3": [55321], "XOR3": [61903]}   # draw_seeds.draw at c41a24c4
+def canonical_seeds():
+    """The stand-in's seeds, derived at run time (they follow the pinned EXCLUDED.json, which each rescan changes): the
+    seed formula as written at ef374ccd (forger_groups, inline), on the canonical lowercase value of round 1000000, over
+    the pinned list, at STANDIN_SIZES. At 2/1/1 no group collides, so the group order does not matter."""
+    ex = json.loads((HERE / "EXCLUDED.json").read_text())
+    return forger_groups(ROUND_1M["randomness"], ROUND_1M["round"], ex, dict(STANDIN_SIZES))[0]
 COLLIDING_SIZES = dict(NOT1=166, ANDOR3=166, XOR3=166)   # the smallest equal sizes where groups collide at round 1000000
 
 
@@ -829,7 +834,8 @@ def draw_function(beacon, sizes=None):
 def case_beacon_canonical(tmp, src):
     """draw_seeds.draw (the narrowest real function; no root needed) on the canonical lowercase beacon."""
     got = draw_function(ROUND_1M["randomness"])
-    return got == CANONICAL_SEEDS, dict(seeds=got, want=CANONICAL_SEEDS)
+    want = canonical_seeds()
+    return got == want, dict(seeds=got, want=want)
 
 
 def beacon_writing_case(name):
@@ -839,7 +845,8 @@ def beacon_writing_case(name):
             got = draw_function(w)
         except Exception as e:                                    # refused: acceptable
             return True, dict(writing=w, refused=repr(e)[:300])
-        return got == CANONICAL_SEEDS, dict(writing=w, seeds=got, canonical=CANONICAL_SEEDS)
+        want = canonical_seeds()
+        return got == want, dict(writing=w, seeds=got, canonical=want)
     case.__name__ = f"case_beacon_{name}"
     return case
 
@@ -867,7 +874,7 @@ def standin_writing_case(name):
             return False, obs
         if refused(r):
             return True, obs
-        planned = sorted(json.dumps(res or {}).count(f"NOT1_{s}") > 0 for s in CANONICAL_SEEDS["NOT1"])
+        planned = sorted(json.dumps(res or {}).count(f"NOT1_{s}") > 0 for s in canonical_seeds()["NOT1"])
         obs["accepted_with_canonical_NOT1"] = planned
         return r.returncode == 0 and all(planned), obs
     case.__name__ = f"case_standin_beacon_{name}"
@@ -972,7 +979,9 @@ def case_standin_draw_valid(tmp, src):
     """The control of the draw mutations: the valid stand-in draw, K03's root with none of its instances run."""
     r, res, obs = standin_run(tmp, src, "standin_draw_valid")
     ok = r.returncode == 0 and all(rows_sum(res, g, n) for g, n in STANDIN_SIZES.items()) and all(
-        not_run_entry(res, n, where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3") for n in ("NOT1_65418", "NOT1_69364"))
+        not_run_entry(res, f"NOT1_{n}", where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3")
+        for n in canonical_seeds()["NOT1"])
+    obs["expected_NOT1"] = canonical_seeds()["NOT1"]
     STANDIN_CONTROL["ok"] = ok
     return ok, obs
 
@@ -1115,8 +1124,8 @@ CASES = [
     ("D9", "same_machine_two_paths", case_same_machine_two_paths, "refused; NOT1 not counted more than twice"),
     ("D9", "home_instance_twice", case_home_instance_twice, "refused; NOT1 not counted more than twice"),
     ("draw", "standin_draw_valid", case_standin_draw_valid,
-     "the valid stand-in draw (round 1000000): exit 0; every group's rows sum to its size; not_run for NOT1_65418, "
-     "NOT1_69364"),
+     "the valid stand-in draw (round 1000000): exit 0; every group's rows sum to its size; not_run for both NOT1 "
+     "seeds of canonical_seeds() (derived at run time from the pinned list)"),
     ("draw", "standin_seed_changed", case_standin_seed_changed, "one drawn seed changed, signature kept: refused"),
     ("draw", "standin_round_off_by_one", case_standin_round_off_by_one, "push_utc + 3 s, the round off by one: refused"),
     ("draw", "standin_signature_byte", case_standin_signature_byte, "one signature byte changed: refused"),
@@ -1132,7 +1141,8 @@ CASES = [
     ("E2", "standin_activity_force_push", case_standin_activity_force_push,
      "activity= the clean branch_creation then a force_push on the announce branch: refused (gated)"),
     ("beacon", "beacon_canonical", case_beacon_canonical,
-     "draw_seeds.draw on the canonical lowercase beacon gives today's seeds " + json.dumps(CANONICAL_SEEDS)),
+     "draw_seeds.draw on the canonical lowercase beacon gives the seeds of the ef374ccd formula over the pinned list "
+     "(canonical_seeds(), derived at run time)"),
     *[("beacon", f"beacon_{n}", beacon_writing_case(n),
        f"draw_seeds.draw on the beacon written {n}: raises, or gives the canonical seeds") for n in WRITINGS],
     ("beacon", "sizes_permutations", case_sizes_permutations,
