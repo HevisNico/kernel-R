@@ -1,8 +1,8 @@
 # The freeze record's proof (dev/freeze)
 
-**Not redone after the rescan of 2026-11-27.** That commit changes EXCLUDED.json and EXCLUDED_PRINT.txt, hence
-FREEZE_PINS.json (now bb95f981); everything below is the proof at 34bd7513. The freeze record work is stopped
-until analysis.py is fixed (D8, D9, D10); FREEZE_PINS.json and this proof are redone after.
+**Superseded.** Everything below is the old proof at 34bd7513 (pins 7323d3dd), kept as a record. The final proof, at
+the freeze candidate after the last exclusion scan and the regenerated pins (340e1c6c), is in dev/freeze/final/
+(FINAL_PROOF.md), made on a clean clone.
 
 **Made on a clean clone of research/layered-campaign-dev at 34bd7513bc846f54b5bad87f875437675328c471** (the commit
 that regenerated FREEZE_PINS.json; FREEZE_PINS.json sha256 7323d3ddc76204f704db0b12572c22c0135b5b5b96171b0d6c623220d263cd8f,
