@@ -1,0 +1,441 @@
+* layered network NOT1: 1 R cells, 1 inverters (development, not preregistered)
+.lib "pdk/models/sky130.lib.spice" tt_mm
+* one period at rest, K pulses on port 1, K pulses on port 2, then one pulse on both.
+* Every edge of the stimulus is 0.1 us after an instant of the noise sources (sampled every 0.4 us),
+* so an edge never falls on a noise sample.
+.param vddv=1.8 tu=20u tper=440u t0=4.1u kp=10
+.param cq=5p vunit=0.5 vr0=1.25
+.param vfire={vr0 - 0.9*vunit} vreopen={vr0 - 0.1*vunit}
+.param rleak={2*tu/cq} at={log(4)/tu} ipk={cq*vunit*at} ioff=50n
+.param vcm=0.4 vhi=0.7 vlo=0.5 vpre=1.3 vinit=0.3895
+.param cs0=400f cf0=30p idis=8.2n wg=40 lg=2.5 rlk=1e18
+.option scale=1e-6
+.option reltol=1e-5 abstol=1e-13 vntol=1e-7 chgtol=1e-17
+* ngspice puts a conductance gmin across every junction, 1e-12 S by default. On the summing
+* node of the integrator that is a leak of 0.4 pA, far above the modelled junction leakage.
+.option gmin=1e-16
+.model swr sw vt=0.9 vh=0.1 ron=1e6 roff=1e13
+vdd vdd 0 {vddv}
+vr0 vr0 0 {vr0}
+vfire vfire 0 {vfire}
+vreopen vreopen 0 {vreopen}
+vcm vcm 0 {vcm}
+vhi vhi 0 {vhi}
+vlo vlo 0 {vlo}
+vpre vpre 0 {vpre}
+vinitc1_01 vinitc1_01 0 0.3895
+vksc1_01 ksc1_01 0 pulse(0 1 1.0 1n 1n 1.9999e-05 2)
+vkrc1_01 krc1_01 0 pulse(1 0 1.0 1n 1n 0.000121 2)
+vkpc1_01 kpc1_01 0 pulse(0 1 1.0 1n 1n 0.00012 2)
+vtsc1_01 tsc1_01 0 dc 1.0
+vampc1_01 ampc1_01 0 dc 1
+vinitc1_02 vinitc1_02 0 0.3895
+vksc1_02 ksc1_02 0 pulse(0 1 1.0 1n 1n 1.9999e-05 2)
+vkrc1_02 krc1_02 0 pulse(1 0 1.0 1n 1n 0.000121 2)
+vkpc1_02 kpc1_02 0 pulse(0 1 1.0 1n 1n 0.00012 2)
+vtsc1_02 tsc1_02 0 dc 1.0
+vampc1_02 ampc1_02 0 dc 1
+b.xc1_0.x1.bip vdd xc1_0.x1.gm i = {ioff} + v(ksc1_01) * (v(ampc1_01)*{ipk}*exp(-(time - v(tsc1_01))*{at}) - {ioff})
+b.xc1_0.x1.bsen xc1_0.x1.sen0 0 v = 1.8*v(ksc1_01)
+b.xc1_0.x1.brst xc1_0.x1.rst0 0 v = 1.8*v(krc1_01)
+b.xc1_0.x1.bpreb xc1_0.x1.preb0 0 v = 1.8*v(kpc1_01)
+r.xc1_0.x1.rsen xc1_0.x1.sen0 xc1_0.x1.sen 10k
+c.xc1_0.x1.csen xc1_0.x1.sen 0 20f
+r.xc1_0.x1.rrst xc1_0.x1.rst0 xc1_0.x1.rst 10k
+c.xc1_0.x1.crst xc1_0.x1.rst 0 20f
+r.xc1_0.x1.rpreb xc1_0.x1.preb0 xc1_0.x1.preb 10k
+c.xc1_0.x1.cpreb xc1_0.x1.preb 0 20f
+i.xc1_0.x1.ibs xc1_0.x1.ibs 0 10u
+i.xc1_0.x1.ibo xc1_0.x1.ibo 0 10u
+xc1_0.x1.xmin xc1_0.x1.gm xc1_0.x1.gm vcm 0 sky130_fd_pr__nfet_01v8 w={wg} l={lg} ad=7.25 as=7.25 pd=51.45 ps=51.45
+xc1_0.x1.xmout xc1_0.x1.dq xc1_0.x1.gm xc1_0.vmem1 0 sky130_fd_pr__nfet_01v8 w={wg} l={lg} ad=7.25 as=7.25 pd=51.45 ps=51.45
+xc1_0.x1.xnad.xmp1 xc1_0.x1.admb xc1_0.x1.sen vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnad.xmp2 xc1_0.x1.admb xc1_0.pb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnad.xmn1 xc1_0.x1.admb xc1_0.x1.sen xc1_0.x1.xnad.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xnad.xmn2 xc1_0.x1.xnad.n1 xc1_0.pb 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xiad.xmp xc1_0.x1.adm xc1_0.x1.admb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xiad.xmn xc1_0.x1.adm xc1_0.x1.admb 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xms1 xc1_0.x1.dq xc1_0.x1.adm xc1_0.vq 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xms2 xc1_0.x1.dq xc1_0.x1.admb vr0 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+c.xc1_0.x1.cs xc1_0.x1.vs 0 {cs0}
+xc1_0.x1.xmpre xc1_0.x1.vs xc1_0.x1.preb vpre vdd sky130_fd_pr__pfet_01v8 w=2 l=0.5 ad=0.58 as=0.58 pd=4.58 ps=4.58
+i.xc1_0.x1.idis vdd xc1_0.x1.vgd {idis}
+xc1_0.x1.xmbd xc1_0.x1.vgd xc1_0.x1.vgd vcm 0 sky130_fd_pr__nfet_01v8 w=0.42 l=8 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xmdis xc1_0.x1.vs xc1_0.x1.vgd xc1_0.x1.x 0 sky130_fd_pr__nfet_01v8 w=0.42 l=8 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xmsi xc1_0.x1.x xc1_0.x1.si xc1_0.x1.sum 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xmsd xc1_0.x1.x xc1_0.x1.sd vcm 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xop.xmb xc1_0.x1.ibo xc1_0.x1.ibo vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2 ad=2.32 as=2.32 pd=16.58 ps=16.58
+xc1_0.x1.xop.xmt xc1_0.x1.xop.tail xc1_0.x1.ibo vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2 ad=2.32 as=2.32 pd=16.58 ps=16.58
+xc1_0.x1.xop.xm1 xc1_0.x1.xop.o1m xc1_0.x1.sum xc1_0.x1.xop.tail vdd sky130_fd_pr__pfet_01v8_lvt w=16 l=1 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.x1.xop.xm2 xc1_0.x1.xop.o1 xc1_0.x1.vcmn xc1_0.x1.xop.tail vdd sky130_fd_pr__pfet_01v8_lvt w=16 l=1 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.x1.xop.xm3 xc1_0.x1.xop.o1m xc1_0.x1.xop.o1m 0 0 sky130_fd_pr__nfet_01v8 w=4 l=2 ad=1.16 as=1.16 pd=8.58 ps=8.58
+xc1_0.x1.xop.xm4 xc1_0.x1.xop.o1 xc1_0.x1.xop.o1m 0 0 sky130_fd_pr__nfet_01v8 w=4 l=2 ad=1.16 as=1.16 pd=8.58 ps=8.58
+xc1_0.x1.xop.xm5 xc1_0.vmem1 xc1_0.x1.xop.o1 0 0 sky130_fd_pr__nfet_01v8 w=16 l=1 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.x1.xop.xm6 xc1_0.vmem1 xc1_0.x1.ibo vdd vdd sky130_fd_pr__pfet_01v8 w=32 l=2 ad=5.8 as=5.8 pd=41.45 ps=41.45
+r.xc1_0.x1.xop.rz xc1_0.x1.xop.o1 xc1_0.x1.xop.oz 4k
+c.xc1_0.x1.xop.cc xc1_0.x1.xop.oz xc1_0.vmem1 1.5p
+b.xc1_0.x1.bvcmn xc1_0.x1.vcmn0 0 v = v(vcm) + v(xc1_0.x1.nzo)
+r.xc1_0.x1.rvcmn xc1_0.x1.vcmn0 xc1_0.x1.vcmn 1k
+c.xc1_0.x1.cvcmn xc1_0.x1.vcmn 0 20f
+c.xc1_0.x1.cf xc1_0.x1.sum xc1_0.vmem1 {cf0}
+b.xc1_0.x1.bleak xc1_0.x1.sum 0 i = v(xc1_0.x1.sum)*v(glc1_01)
+b.xc1_0.x1.bdrv xc1_0.x1.drv 0 v = min(1.8, max(0, v(vcm) + 10*(v(xc1_0.vmem1) - v(vinitc1_01))))
+v.xc1_0.x1.vrsti xc1_0.x1.rsti0 0 pwl(0 1.8 2.1u 1.8 2.101u 0)
+r.xc1_0.x1.rrsti xc1_0.x1.rsti0 xc1_0.x1.rsti 10k
+c.xc1_0.x1.crsti xc1_0.x1.rsti 0 20f
+s.xc1_0.x1.srst xc1_0.x1.sum xc1_0.x1.drv xc1_0.x1.rsti 0 swr
+xc1_0.x1.xcmps.xmb xc1_0.x1.ibs xc1_0.x1.ibs vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2 ad=2.32 as=2.32 pd=16.58 ps=16.58
+xc1_0.x1.xcmps.xmt xc1_0.x1.xcmps.tail xc1_0.x1.ibs vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=2 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.x1.xcmps.xm1 xc1_0.x1.xcmps.o1m xc1_0.x1.vrefsn xc1_0.x1.xcmps.tail vdd sky130_fd_pr__pfet_01v8_lvt w={(4)} l={(1)} ad=1.16 as=1.16 pd=8.58 ps=8.58
+xc1_0.x1.xcmps.xm2 xc1_0.x1.xcmps.o1 xc1_0.x1.vs xc1_0.x1.xcmps.tail vdd sky130_fd_pr__pfet_01v8_lvt w={(4)} l={(1)} ad=1.16 as=1.16 pd=8.58 ps=8.58
+xc1_0.x1.xcmps.xm3 xc1_0.x1.xcmps.o1m xc1_0.x1.xcmps.o1m 0 0 sky130_fd_pr__nfet_01v8 w=2 l=1 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.x1.xcmps.xm4 xc1_0.x1.xcmps.o1 xc1_0.x1.xcmps.o1m 0 0 sky130_fd_pr__nfet_01v8 w=2 l=1 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.x1.xcmps.xm5 xc1_0.x1.xcmps.o2 xc1_0.x1.xcmps.o1 0 0 sky130_fd_pr__nfet_01v8 w=2 l=0.5 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.x1.xcmps.xm6 xc1_0.x1.xcmps.o2 xc1_0.x1.ibs vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=2 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.x1.xcmps.xi1.xmp xc1_0.x1.xcmps.o3 xc1_0.x1.xcmps.o2 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xcmps.xi1.xmn xc1_0.x1.xcmps.o3 xc1_0.x1.xcmps.o2 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xcmps.xi2.xmp xc1_0.x1.cmps xc1_0.x1.xcmps.o3 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xcmps.xi2.xmn xc1_0.x1.cmps xc1_0.x1.xcmps.o3 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+b.xc1_0.x1.bvrs xc1_0.x1.vrefsn0 0 v = v(xc1_0.x1.vrefs) + v(xc1_0.x1.nzc)
+r.xc1_0.x1.rvrs xc1_0.x1.vrefsn0 xc1_0.x1.vrefsn 1k
+c.xc1_0.x1.cvrs xc1_0.x1.vrefsn 0 20f
+xc1_0.x1.xmr1n xc1_0.x1.vrefs xc1_0.x1.adb vhi 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xmr1p xc1_0.x1.vrefs xc1_0.x1.ad vhi vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.x1.xmr2n xc1_0.x1.vrefs xc1_0.x1.ad vlo 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xmr2p xc1_0.x1.vrefs xc1_0.x1.adb vlo vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15 ad=0.58 as=0.58 pd=4.58 ps=4.58
+v.xc1_0.x1.vnzc xc1_0.x1.nzc 0 dc 0
+r.xc1_0.x1.rnzc xc1_0.x1.nzc 0 1k
+v.xc1_0.x1.vnzo xc1_0.x1.nzo 0 dc 0
+r.xc1_0.x1.rnzo xc1_0.x1.nzo 0 1k
+v.xc1_0.x1.vnzi xc1_0.x1.nzi 0 dc 0
+r.xc1_0.x1.rnzi xc1_0.x1.nzi 0 1k
+g.xc1_0.x1.gnm xc1_0.x1.dq xc1_0.vmem1 xc1_0.x1.nzi 0 1
+xc1_0.x1.xien.xmp xc1_0.x1.en xc1_0.x1.rst vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xien.xmn xc1_0.x1.en xc1_0.x1.rst 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xicb.xmp xc1_0.x1.cmpb xc1_0.x1.cmps vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xicb.xmn xc1_0.x1.cmpb xc1_0.x1.cmps 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xnsa.xmp1 xc1_0.x1.sba xc1_0.x1.cmpb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnsa.xmp2 xc1_0.x1.sba xc1_0.x1.en vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnsa.xmn1 xc1_0.x1.sba xc1_0.x1.cmpb xc1_0.x1.xnsa.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xnsa.xmn2 xc1_0.x1.xnsa.n1 xc1_0.x1.en 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xla.x1.xmp1 xc1_0.x1.a xc1_0.x1.sba vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xla.x1.xmp2 xc1_0.x1.a xc1_0.x1.ab vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xla.x1.xmn1 xc1_0.x1.a xc1_0.x1.sba xc1_0.x1.xla.x1.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xla.x1.xmn2 xc1_0.x1.xla.x1.n1 xc1_0.x1.ab 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xla.x2.xmp1 xc1_0.x1.ab xc1_0.x1.en vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xla.x2.xmp2 xc1_0.x1.ab xc1_0.x1.a vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xla.x2.xmn1 xc1_0.x1.ab xc1_0.x1.en xc1_0.x1.xla.x2.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xla.x2.xmn2 xc1_0.x1.xla.x2.n1 xc1_0.x1.a 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+r.xc1_0.x1.rda xc1_0.x1.a xc1_0.x1.ad1 100k
+c.xc1_0.x1.cda xc1_0.x1.ad1 0 200f
+xc1_0.x1.xia1.xmp xc1_0.x1.adb xc1_0.x1.ad1 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xia1.xmn xc1_0.x1.adb xc1_0.x1.ad1 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xia2.xmp xc1_0.x1.ad xc1_0.x1.adb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xia2.xmn xc1_0.x1.ad xc1_0.x1.adb 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xnsc.xmp1 xc1_0.x1.sbc0 xc1_0.x1.ad vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnsc.xmp2 xc1_0.x1.sbc0 xc1_0.x1.cmps vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnsc.xmn1 xc1_0.x1.sbc0 xc1_0.x1.ad xc1_0.x1.xnsc.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xnsc.xmn2 xc1_0.x1.xnsc.n1 xc1_0.x1.cmps 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xlc.x1.xmp1 xc1_0.x1.c xc1_0.x1.sbc0 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xlc.x1.xmp2 xc1_0.x1.c xc1_0.x1.cbar vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xlc.x1.xmn1 xc1_0.x1.c xc1_0.x1.sbc0 xc1_0.x1.xlc.x1.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xlc.x1.xmn2 xc1_0.x1.xlc.x1.n1 xc1_0.x1.cbar 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xlc.x2.xmp1 xc1_0.x1.cbar xc1_0.x1.en vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xlc.x2.xmp2 xc1_0.x1.cbar xc1_0.x1.c vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xlc.x2.xmn1 xc1_0.x1.cbar xc1_0.x1.en xc1_0.x1.xlc.x2.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xlc.x2.xmn2 xc1_0.x1.xlc.x2.n1 xc1_0.x1.c 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+r.xc1_0.x1.rdl xc1_0.x1.c xc1_0.x1.cd1 100k
+c.xc1_0.x1.cdl xc1_0.x1.cd1 0 200f
+xc1_0.x1.xid1.xmp xc1_0.x1.cd2 xc1_0.x1.cd1 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xid1.xmn xc1_0.x1.cd2 xc1_0.x1.cd1 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xid2.xmp xc1_0.x1.cdel xc1_0.x1.cd2 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xid2.xmn xc1_0.x1.cdel xc1_0.x1.cd2 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xnsb.xmp1 xc1_0.x1.sbb xc1_0.x1.cdel vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnsb.xmp2 xc1_0.x1.sbb xc1_0.x1.cmpb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnsb.xmn1 xc1_0.x1.sbb xc1_0.x1.cdel xc1_0.x1.xnsb.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xnsb.xmn2 xc1_0.x1.xnsb.n1 xc1_0.x1.cmpb 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xlb.x1.xmp1 xc1_0.x1.b xc1_0.x1.sbb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xlb.x1.xmp2 xc1_0.x1.b xc1_0.x1.bb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xlb.x1.xmn1 xc1_0.x1.b xc1_0.x1.sbb xc1_0.x1.xlb.x1.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xlb.x1.xmn2 xc1_0.x1.xlb.x1.n1 xc1_0.x1.bb 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xlb.x2.xmp1 xc1_0.x1.bb xc1_0.x1.en vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xlb.x2.xmp2 xc1_0.x1.bb xc1_0.x1.b vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xlb.x2.xmn1 xc1_0.x1.bb xc1_0.x1.en xc1_0.x1.xlb.x2.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xlb.x2.xmn2 xc1_0.x1.xlb.x2.n1 xc1_0.x1.b 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x1.xnsi.xmp1 xc1_0.x1.sib xc1_0.x1.a vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnsi.xmp2 xc1_0.x1.sib xc1_0.x1.bb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnsi.xmp3 xc1_0.x1.sib xc1_0.pb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xnsi.xmn1 xc1_0.x1.sib xc1_0.x1.a xc1_0.x1.xnsi.n1 0 sky130_fd_pr__nfet_01v8 w=1.26 l=0.15 ad=0.3654 as=0.3654 pd=3.1 ps=3.1
+xc1_0.x1.xnsi.xmn2 xc1_0.x1.xnsi.n1 xc1_0.x1.bb xc1_0.x1.xnsi.n2 0 sky130_fd_pr__nfet_01v8 w=1.26 l=0.15 ad=0.3654 as=0.3654 pd=3.1 ps=3.1
+xc1_0.x1.xnsi.xmn3 xc1_0.x1.xnsi.n2 xc1_0.pb 0 0 sky130_fd_pr__nfet_01v8 w=1.26 l=0.15 ad=0.3654 as=0.3654 pd=3.1 ps=3.1
+xc1_0.x1.xisi.xmp xc1_0.x1.si xc1_0.x1.sib vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xisi.xmn xc1_0.x1.si xc1_0.x1.sib 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x1.xisd.xmp xc1_0.x1.sd xc1_0.x1.si vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x1.xisd.xmn xc1_0.x1.sd xc1_0.x1.si 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+b.xc1_0.x2.bip vdd xc1_0.x2.gm i = {ioff} + v(ksc1_02) * (v(ampc1_02)*{ipk}*exp(-(time - v(tsc1_02))*{at}) - {ioff})
+b.xc1_0.x2.bsen xc1_0.x2.sen0 0 v = 1.8*v(ksc1_02)
+b.xc1_0.x2.brst xc1_0.x2.rst0 0 v = 1.8*v(krc1_02)
+b.xc1_0.x2.bpreb xc1_0.x2.preb0 0 v = 1.8*v(kpc1_02)
+r.xc1_0.x2.rsen xc1_0.x2.sen0 xc1_0.x2.sen 10k
+c.xc1_0.x2.csen xc1_0.x2.sen 0 20f
+r.xc1_0.x2.rrst xc1_0.x2.rst0 xc1_0.x2.rst 10k
+c.xc1_0.x2.crst xc1_0.x2.rst 0 20f
+r.xc1_0.x2.rpreb xc1_0.x2.preb0 xc1_0.x2.preb 10k
+c.xc1_0.x2.cpreb xc1_0.x2.preb 0 20f
+i.xc1_0.x2.ibs xc1_0.x2.ibs 0 10u
+i.xc1_0.x2.ibo xc1_0.x2.ibo 0 10u
+xc1_0.x2.xmin xc1_0.x2.gm xc1_0.x2.gm vcm 0 sky130_fd_pr__nfet_01v8 w={wg} l={lg} ad=7.25 as=7.25 pd=51.45 ps=51.45
+xc1_0.x2.xmout xc1_0.x2.dq xc1_0.x2.gm xc1_0.vmem2 0 sky130_fd_pr__nfet_01v8 w={wg} l={lg} ad=7.25 as=7.25 pd=51.45 ps=51.45
+xc1_0.x2.xnad.xmp1 xc1_0.x2.admb xc1_0.x2.sen vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnad.xmp2 xc1_0.x2.admb xc1_0.pb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnad.xmn1 xc1_0.x2.admb xc1_0.x2.sen xc1_0.x2.xnad.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xnad.xmn2 xc1_0.x2.xnad.n1 xc1_0.pb 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xiad.xmp xc1_0.x2.adm xc1_0.x2.admb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xiad.xmn xc1_0.x2.adm xc1_0.x2.admb 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xms1 xc1_0.x2.dq xc1_0.x2.adm xc1_0.vq 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xms2 xc1_0.x2.dq xc1_0.x2.admb vr0 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+c.xc1_0.x2.cs xc1_0.x2.vs 0 {cs0}
+xc1_0.x2.xmpre xc1_0.x2.vs xc1_0.x2.preb vpre vdd sky130_fd_pr__pfet_01v8 w=2 l=0.5 ad=0.58 as=0.58 pd=4.58 ps=4.58
+i.xc1_0.x2.idis vdd xc1_0.x2.vgd {idis}
+xc1_0.x2.xmbd xc1_0.x2.vgd xc1_0.x2.vgd vcm 0 sky130_fd_pr__nfet_01v8 w=0.42 l=8 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xmdis xc1_0.x2.vs xc1_0.x2.vgd xc1_0.x2.x 0 sky130_fd_pr__nfet_01v8 w=0.42 l=8 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xmsi xc1_0.x2.x xc1_0.x2.si xc1_0.x2.sum 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xmsd xc1_0.x2.x xc1_0.x2.sd vcm 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xop.xmb xc1_0.x2.ibo xc1_0.x2.ibo vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2 ad=2.32 as=2.32 pd=16.58 ps=16.58
+xc1_0.x2.xop.xmt xc1_0.x2.xop.tail xc1_0.x2.ibo vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2 ad=2.32 as=2.32 pd=16.58 ps=16.58
+xc1_0.x2.xop.xm1 xc1_0.x2.xop.o1m xc1_0.x2.sum xc1_0.x2.xop.tail vdd sky130_fd_pr__pfet_01v8_lvt w=16 l=1 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.x2.xop.xm2 xc1_0.x2.xop.o1 xc1_0.x2.vcmn xc1_0.x2.xop.tail vdd sky130_fd_pr__pfet_01v8_lvt w=16 l=1 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.x2.xop.xm3 xc1_0.x2.xop.o1m xc1_0.x2.xop.o1m 0 0 sky130_fd_pr__nfet_01v8 w=4 l=2 ad=1.16 as=1.16 pd=8.58 ps=8.58
+xc1_0.x2.xop.xm4 xc1_0.x2.xop.o1 xc1_0.x2.xop.o1m 0 0 sky130_fd_pr__nfet_01v8 w=4 l=2 ad=1.16 as=1.16 pd=8.58 ps=8.58
+xc1_0.x2.xop.xm5 xc1_0.vmem2 xc1_0.x2.xop.o1 0 0 sky130_fd_pr__nfet_01v8 w=16 l=1 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.x2.xop.xm6 xc1_0.vmem2 xc1_0.x2.ibo vdd vdd sky130_fd_pr__pfet_01v8 w=32 l=2 ad=5.8 as=5.8 pd=41.45 ps=41.45
+r.xc1_0.x2.xop.rz xc1_0.x2.xop.o1 xc1_0.x2.xop.oz 4k
+c.xc1_0.x2.xop.cc xc1_0.x2.xop.oz xc1_0.vmem2 1.5p
+b.xc1_0.x2.bvcmn xc1_0.x2.vcmn0 0 v = v(vcm) + v(xc1_0.x2.nzo)
+r.xc1_0.x2.rvcmn xc1_0.x2.vcmn0 xc1_0.x2.vcmn 1k
+c.xc1_0.x2.cvcmn xc1_0.x2.vcmn 0 20f
+c.xc1_0.x2.cf xc1_0.x2.sum xc1_0.vmem2 {cf0}
+b.xc1_0.x2.bleak xc1_0.x2.sum 0 i = v(xc1_0.x2.sum)*v(glc1_02)
+b.xc1_0.x2.bdrv xc1_0.x2.drv 0 v = min(1.8, max(0, v(vcm) + 10*(v(xc1_0.vmem2) - v(vinitc1_02))))
+v.xc1_0.x2.vrsti xc1_0.x2.rsti0 0 pwl(0 1.8 2.1u 1.8 2.101u 0)
+r.xc1_0.x2.rrsti xc1_0.x2.rsti0 xc1_0.x2.rsti 10k
+c.xc1_0.x2.crsti xc1_0.x2.rsti 0 20f
+s.xc1_0.x2.srst xc1_0.x2.sum xc1_0.x2.drv xc1_0.x2.rsti 0 swr
+xc1_0.x2.xcmps.xmb xc1_0.x2.ibs xc1_0.x2.ibs vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2 ad=2.32 as=2.32 pd=16.58 ps=16.58
+xc1_0.x2.xcmps.xmt xc1_0.x2.xcmps.tail xc1_0.x2.ibs vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=2 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.x2.xcmps.xm1 xc1_0.x2.xcmps.o1m xc1_0.x2.vrefsn xc1_0.x2.xcmps.tail vdd sky130_fd_pr__pfet_01v8_lvt w={(4)} l={(1)} ad=1.16 as=1.16 pd=8.58 ps=8.58
+xc1_0.x2.xcmps.xm2 xc1_0.x2.xcmps.o1 xc1_0.x2.vs xc1_0.x2.xcmps.tail vdd sky130_fd_pr__pfet_01v8_lvt w={(4)} l={(1)} ad=1.16 as=1.16 pd=8.58 ps=8.58
+xc1_0.x2.xcmps.xm3 xc1_0.x2.xcmps.o1m xc1_0.x2.xcmps.o1m 0 0 sky130_fd_pr__nfet_01v8 w=2 l=1 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.x2.xcmps.xm4 xc1_0.x2.xcmps.o1 xc1_0.x2.xcmps.o1m 0 0 sky130_fd_pr__nfet_01v8 w=2 l=1 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.x2.xcmps.xm5 xc1_0.x2.xcmps.o2 xc1_0.x2.xcmps.o1 0 0 sky130_fd_pr__nfet_01v8 w=2 l=0.5 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.x2.xcmps.xm6 xc1_0.x2.xcmps.o2 xc1_0.x2.ibs vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=2 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.x2.xcmps.xi1.xmp xc1_0.x2.xcmps.o3 xc1_0.x2.xcmps.o2 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xcmps.xi1.xmn xc1_0.x2.xcmps.o3 xc1_0.x2.xcmps.o2 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xcmps.xi2.xmp xc1_0.x2.cmps xc1_0.x2.xcmps.o3 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xcmps.xi2.xmn xc1_0.x2.cmps xc1_0.x2.xcmps.o3 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+b.xc1_0.x2.bvrs xc1_0.x2.vrefsn0 0 v = v(xc1_0.x2.vrefs) + v(xc1_0.x2.nzc)
+r.xc1_0.x2.rvrs xc1_0.x2.vrefsn0 xc1_0.x2.vrefsn 1k
+c.xc1_0.x2.cvrs xc1_0.x2.vrefsn 0 20f
+xc1_0.x2.xmr1n xc1_0.x2.vrefs xc1_0.x2.adb vhi 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xmr1p xc1_0.x2.vrefs xc1_0.x2.ad vhi vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.x2.xmr2n xc1_0.x2.vrefs xc1_0.x2.ad vlo 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xmr2p xc1_0.x2.vrefs xc1_0.x2.adb vlo vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15 ad=0.58 as=0.58 pd=4.58 ps=4.58
+v.xc1_0.x2.vnzc xc1_0.x2.nzc 0 dc 0
+r.xc1_0.x2.rnzc xc1_0.x2.nzc 0 1k
+v.xc1_0.x2.vnzo xc1_0.x2.nzo 0 dc 0
+r.xc1_0.x2.rnzo xc1_0.x2.nzo 0 1k
+v.xc1_0.x2.vnzi xc1_0.x2.nzi 0 dc 0
+r.xc1_0.x2.rnzi xc1_0.x2.nzi 0 1k
+g.xc1_0.x2.gnm xc1_0.x2.dq xc1_0.vmem2 xc1_0.x2.nzi 0 1
+xc1_0.x2.xien.xmp xc1_0.x2.en xc1_0.x2.rst vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xien.xmn xc1_0.x2.en xc1_0.x2.rst 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xicb.xmp xc1_0.x2.cmpb xc1_0.x2.cmps vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xicb.xmn xc1_0.x2.cmpb xc1_0.x2.cmps 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xnsa.xmp1 xc1_0.x2.sba xc1_0.x2.cmpb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnsa.xmp2 xc1_0.x2.sba xc1_0.x2.en vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnsa.xmn1 xc1_0.x2.sba xc1_0.x2.cmpb xc1_0.x2.xnsa.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xnsa.xmn2 xc1_0.x2.xnsa.n1 xc1_0.x2.en 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xla.x1.xmp1 xc1_0.x2.a xc1_0.x2.sba vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xla.x1.xmp2 xc1_0.x2.a xc1_0.x2.ab vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xla.x1.xmn1 xc1_0.x2.a xc1_0.x2.sba xc1_0.x2.xla.x1.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xla.x1.xmn2 xc1_0.x2.xla.x1.n1 xc1_0.x2.ab 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xla.x2.xmp1 xc1_0.x2.ab xc1_0.x2.en vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xla.x2.xmp2 xc1_0.x2.ab xc1_0.x2.a vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xla.x2.xmn1 xc1_0.x2.ab xc1_0.x2.en xc1_0.x2.xla.x2.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xla.x2.xmn2 xc1_0.x2.xla.x2.n1 xc1_0.x2.a 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+r.xc1_0.x2.rda xc1_0.x2.a xc1_0.x2.ad1 100k
+c.xc1_0.x2.cda xc1_0.x2.ad1 0 200f
+xc1_0.x2.xia1.xmp xc1_0.x2.adb xc1_0.x2.ad1 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xia1.xmn xc1_0.x2.adb xc1_0.x2.ad1 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xia2.xmp xc1_0.x2.ad xc1_0.x2.adb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xia2.xmn xc1_0.x2.ad xc1_0.x2.adb 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xnsc.xmp1 xc1_0.x2.sbc0 xc1_0.x2.ad vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnsc.xmp2 xc1_0.x2.sbc0 xc1_0.x2.cmps vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnsc.xmn1 xc1_0.x2.sbc0 xc1_0.x2.ad xc1_0.x2.xnsc.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xnsc.xmn2 xc1_0.x2.xnsc.n1 xc1_0.x2.cmps 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xlc.x1.xmp1 xc1_0.x2.c xc1_0.x2.sbc0 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xlc.x1.xmp2 xc1_0.x2.c xc1_0.x2.cbar vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xlc.x1.xmn1 xc1_0.x2.c xc1_0.x2.sbc0 xc1_0.x2.xlc.x1.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xlc.x1.xmn2 xc1_0.x2.xlc.x1.n1 xc1_0.x2.cbar 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xlc.x2.xmp1 xc1_0.x2.cbar xc1_0.x2.en vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xlc.x2.xmp2 xc1_0.x2.cbar xc1_0.x2.c vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xlc.x2.xmn1 xc1_0.x2.cbar xc1_0.x2.en xc1_0.x2.xlc.x2.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xlc.x2.xmn2 xc1_0.x2.xlc.x2.n1 xc1_0.x2.c 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+r.xc1_0.x2.rdl xc1_0.x2.c xc1_0.x2.cd1 100k
+c.xc1_0.x2.cdl xc1_0.x2.cd1 0 200f
+xc1_0.x2.xid1.xmp xc1_0.x2.cd2 xc1_0.x2.cd1 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xid1.xmn xc1_0.x2.cd2 xc1_0.x2.cd1 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xid2.xmp xc1_0.x2.cdel xc1_0.x2.cd2 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xid2.xmn xc1_0.x2.cdel xc1_0.x2.cd2 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xnsb.xmp1 xc1_0.x2.sbb xc1_0.x2.cdel vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnsb.xmp2 xc1_0.x2.sbb xc1_0.x2.cmpb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnsb.xmn1 xc1_0.x2.sbb xc1_0.x2.cdel xc1_0.x2.xnsb.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xnsb.xmn2 xc1_0.x2.xnsb.n1 xc1_0.x2.cmpb 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xlb.x1.xmp1 xc1_0.x2.b xc1_0.x2.sbb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xlb.x1.xmp2 xc1_0.x2.b xc1_0.x2.bb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xlb.x1.xmn1 xc1_0.x2.b xc1_0.x2.sbb xc1_0.x2.xlb.x1.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xlb.x1.xmn2 xc1_0.x2.xlb.x1.n1 xc1_0.x2.bb 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xlb.x2.xmp1 xc1_0.x2.bb xc1_0.x2.en vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xlb.x2.xmp2 xc1_0.x2.bb xc1_0.x2.b vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xlb.x2.xmn1 xc1_0.x2.bb xc1_0.x2.en xc1_0.x2.xlb.x2.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xlb.x2.xmn2 xc1_0.x2.xlb.x2.n1 xc1_0.x2.b 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.x2.xnsi.xmp1 xc1_0.x2.sib xc1_0.x2.a vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnsi.xmp2 xc1_0.x2.sib xc1_0.x2.bb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnsi.xmp3 xc1_0.x2.sib xc1_0.pb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xnsi.xmn1 xc1_0.x2.sib xc1_0.x2.a xc1_0.x2.xnsi.n1 0 sky130_fd_pr__nfet_01v8 w=1.26 l=0.15 ad=0.3654 as=0.3654 pd=3.1 ps=3.1
+xc1_0.x2.xnsi.xmn2 xc1_0.x2.xnsi.n1 xc1_0.x2.bb xc1_0.x2.xnsi.n2 0 sky130_fd_pr__nfet_01v8 w=1.26 l=0.15 ad=0.3654 as=0.3654 pd=3.1 ps=3.1
+xc1_0.x2.xnsi.xmn3 xc1_0.x2.xnsi.n2 xc1_0.pb 0 0 sky130_fd_pr__nfet_01v8 w=1.26 l=0.15 ad=0.3654 as=0.3654 pd=3.1 ps=3.1
+xc1_0.x2.xisi.xmp xc1_0.x2.si xc1_0.x2.sib vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xisi.xmn xc1_0.x2.si xc1_0.x2.sib 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.x2.xisd.xmp xc1_0.x2.sd xc1_0.x2.si vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.x2.xisd.xmn xc1_0.x2.sd xc1_0.x2.si 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+i.xc1_0.ibm xc1_0.ibm 0 10u
+c.xc1_0.cq xc1_0.vq 0 {cq}
+r.xc1_0.rleak xc1_0.vq vr0 {rleak}
+v.xc1_0.vnzm xc1_0.nzm 0 dc 0
+r.xc1_0.rnzm xc1_0.nzm 0 1k
+b.xc1_0.bvrm xc1_0.vrefmn0 0 v = v(xc1_0.vrefm) + v(xc1_0.nzm)
+r.xc1_0.rvrm xc1_0.vrefmn0 xc1_0.vrefmn 1k
+c.xc1_0.cvrm xc1_0.vrefmn 0 20f
+xc1_0.xcmpm.xmb xc1_0.ibm xc1_0.ibm vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2 ad=2.32 as=2.32 pd=16.58 ps=16.58
+xc1_0.xcmpm.xmt xc1_0.xcmpm.tail xc1_0.ibm vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=2 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.xcmpm.xm1 xc1_0.xcmpm.o1m xc1_0.vq xc1_0.xcmpm.tail vdd sky130_fd_pr__pfet_01v8_lvt w={(16)} l={(4)} ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.xcmpm.xm2 xc1_0.xcmpm.o1 xc1_0.vrefmn xc1_0.xcmpm.tail vdd sky130_fd_pr__pfet_01v8_lvt w={(16)} l={(4)} ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.xcmpm.xm3 xc1_0.xcmpm.o1m xc1_0.xcmpm.o1m 0 0 sky130_fd_pr__nfet_01v8 w=2 l=1 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.xcmpm.xm4 xc1_0.xcmpm.o1 xc1_0.xcmpm.o1m 0 0 sky130_fd_pr__nfet_01v8 w=2 l=1 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.xcmpm.xm5 xc1_0.xcmpm.o2 xc1_0.xcmpm.o1 0 0 sky130_fd_pr__nfet_01v8 w=2 l=0.5 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.xcmpm.xm6 xc1_0.xcmpm.o2 xc1_0.ibm vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=2 ad=3.48 as=3.48 pd=24.87 ps=24.87
+xc1_0.xcmpm.xi1.xmp xc1_0.xcmpm.o3 xc1_0.xcmpm.o2 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xcmpm.xi1.xmn xc1_0.xcmpm.o3 xc1_0.xcmpm.o2 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.xcmpm.xi2.xmp xc1_0.cmpm xc1_0.xcmpm.o3 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xcmpm.xi2.xmn xc1_0.cmpm xc1_0.xcmpm.o3 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.xicm.xmp xc1_0.cmpmb xc1_0.cmpm vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xicm.xmn xc1_0.cmpmb xc1_0.cmpm 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.xnsp.xmp1 xc1_0.sbp xc1_0.cmpm vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xnsp.xmp2 xc1_0.sbp xc1_0.pbdel vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xnsp.xmn1 xc1_0.sbp xc1_0.cmpm xc1_0.xnsp.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.xnsp.xmn2 xc1_0.xnsp.n1 xc1_0.pbdel 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.xnrp.xmp1 xc1_0.rbp xc1_0.cmpmb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xnrp.xmp2 xc1_0.rbp xc1_0.pdel vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xnrp.xmn1 xc1_0.rbp xc1_0.cmpmb xc1_0.xnrp.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.xnrp.xmn2 xc1_0.xnrp.n1 xc1_0.pdel 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.xlp.x1.xmp1 xc1_0.p xc1_0.sbp vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xlp.x1.xmp2 xc1_0.p xc1_0.pb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xlp.x1.xmn1 xc1_0.p xc1_0.sbp xc1_0.xlp.x1.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.xlp.x1.xmn2 xc1_0.xlp.x1.n1 xc1_0.pb 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.xlp.x2.xmp1 xc1_0.pb xc1_0.rbp vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xlp.x2.xmp2 xc1_0.pb xc1_0.p vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xlp.x2.xmn1 xc1_0.pb xc1_0.rbp xc1_0.xlp.x2.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+xc1_0.xlp.x2.xmn2 xc1_0.xlp.x2.n1 xc1_0.p 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+r.xc1_0.rdp xc1_0.p xc1_0.pd1 100k
+c.xc1_0.cdp xc1_0.pd1 0 2p
+xc1_0.xip1.xmp xc1_0.pbdel xc1_0.pd1 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xip1.xmn xc1_0.pbdel xc1_0.pd1 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.xip2.xmp xc1_0.pdel xc1_0.pbdel vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xip2.xmn xc1_0.pdel xc1_0.pbdel 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+xc1_0.xmm1n xc1_0.vrefm xc1_0.pb vfire 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xmm1p xc1_0.vrefm xc1_0.p vfire vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15 ad=0.58 as=0.58 pd=4.58 ps=4.58
+xc1_0.xmm2n xc1_0.vrefm xc1_0.p vreopen 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+xc1_0.xmm2p xc1_0.vrefm xc1_0.pb vreopen vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15 ad=0.58 as=0.58 pd=4.58 ps=4.58
+vkhn0 khn0 0 pulse(0 1.8 1.6e-05 1e-09 1e-09 5.999e-06 2)
+vkin0 kin0 0 pulse(1.8 0 1e-05 1e-09 1e-09 4.999e-06 2)
+vkjn0 kjn0 0 pulse(0 1 1e-05 1e-09 1e-09 4.999e-06 2)
+vkrn0 krn0 0 pulse(0 1.8 3e-05 1e-09 1e-09 1.999e-06 2)
+vkbn0 kbn0 0 pulse(1.8 0 3e-05 1e-09 1e-09 1.999e-06 2)
+i.xn0.ibm xn0.ibm 0 10u
+c.xn0.cq xn0.vq 0 {cq}
+r.xn0.rleak xn0.vq vr0 {rleak}
+v.xn0.vnzm xn0.nzm 0 dc 0
+r.xn0.rnzm xn0.nzm 0 1k
+b.xn0.bvrm xn0.vrefmn0 0 v = v(xn0.vrefm) + v(xn0.nzm)
+r.xn0.rvrm xn0.vrefmn0 xn0.vrefmn 1k
+c.xn0.cvrm xn0.vrefmn 0 20f
+xn0.xcmpm.xmb xn0.ibm xn0.ibm vdd vdd sky130_fd_pr__pfet_01v8 w=8 l=2 ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xmt xn0.xcmpm.tail xn0.ibm vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=2 ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xm1 xn0.xcmpm.o1m xn0.vq xn0.xcmpm.tail vdd sky130_fd_pr__pfet_01v8_lvt w={(16)} l={(4)} ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xm2 xn0.xcmpm.o1 xn0.vrefmn xn0.xcmpm.tail vdd sky130_fd_pr__pfet_01v8_lvt w={(16)} l={(4)} ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xm3 xn0.xcmpm.o1m xn0.xcmpm.o1m 0 0 sky130_fd_pr__nfet_01v8 w=2 l=1 ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xm4 xn0.xcmpm.o1 xn0.xcmpm.o1m 0 0 sky130_fd_pr__nfet_01v8 w=2 l=1 ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xm5 xn0.xcmpm.o2 xn0.xcmpm.o1 0 0 sky130_fd_pr__nfet_01v8 w=2 l=0.5 ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xm6 xn0.xcmpm.o2 xn0.ibm vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=2 ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xi1.xmp xn0.xcmpm.o3 xn0.xcmpm.o2 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xi1.xmn xn0.xcmpm.o3 xn0.xcmpm.o2 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xi2.xmp xn0.cmpm xn0.xcmpm.o3 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xcmpm.xi2.xmn xn0.cmpm xn0.xcmpm.o3 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xicm.xmp xn0.cmpmb xn0.cmpm vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xicm.xmn xn0.cmpmb xn0.cmpm 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xnsp.xmp1 xn0.sbp xn0.cmpm vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xnsp.xmp2 xn0.sbp xn0.pbdel vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xnsp.xmn1 xn0.sbp xn0.cmpm xn0.xnsp.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xnsp.xmn2 xn0.xnsp.n1 xn0.pbdel 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xnrp.xmp1 xn0.rbp xn0.cmpmb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xnrp.xmp2 xn0.rbp xn0.pdel vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xnrp.xmn1 xn0.rbp xn0.cmpmb xn0.xnrp.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xnrp.xmn2 xn0.xnrp.n1 xn0.pdel 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xlp.x1.xmp1 xn0.p xn0.sbp vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xlp.x1.xmp2 xn0.p xn0.pb vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xlp.x1.xmn1 xn0.p xn0.sbp xn0.xlp.x1.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xlp.x1.xmn2 xn0.xlp.x1.n1 xn0.pb 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xlp.x2.xmp1 xn0.pb xn0.rbp vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xlp.x2.xmp2 xn0.pb xn0.p vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xlp.x2.xmn1 xn0.pb xn0.rbp xn0.xlp.x2.n1 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xlp.x2.xmn2 xn0.xlp.x2.n1 xn0.p 0 0 sky130_fd_pr__nfet_01v8 w=0.84 l=0.15 ad=0 as=0 pd=0 ps=0
+r.xn0.rdp xn0.p xn0.pd1 100k
+c.xn0.cdp xn0.pd1 0 2p
+xn0.xip1.xmp xn0.pbdel xn0.pd1 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xip1.xmn xn0.pbdel xn0.pd1 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xip2.xmp xn0.pdel xn0.pbdel vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xip2.xmn xn0.pdel xn0.pbdel 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xmm1n xn0.vrefm xn0.pb vfire 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xmm1p xn0.vrefm xn0.p vfire vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xmm2n xn0.vrefm xn0.p vreopen 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xmm2p xn0.vrefm xn0.pb vreopen vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15 ad=0 as=0 pd=0 ps=0
+i.xn0.ihref vdd xn0.hg dc 5.625e-07
+xn0.xmh1 xn0.hg xn0.hg 0 0 sky130_fd_pr__nfet_01v8 w=2 l=16 ad=0 as=0 pd=0 ps=0
+xn0.xmh2 xn0.hd xn0.hg 0 0 sky130_fd_pr__nfet_01v8 w=2 l=16 ad=0 as=0 pd=0 ps=0
+xn0.xsh xn0.hs khn0 xn0.hd 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+v.xn0.vah xn0.vq xn0.hs dc 0
+xn0.xmj1 xn0.jg xn0.jg vdd vdd sky130_fd_pr__pfet_01v8 w=4 l=4 ad=0 as=0 pd=0 ps=0
+xn0.xmj2 xn0.jd xn0.jg vdd vdd sky130_fd_pr__pfet_01v8 w=4 l=4 ad=0 as=0 pd=0 ps=0
+b.xn0.bjref xn0.jg 0 i = 5e-07*v(kjn0)
+xn0.xsj xn0.jd kin0 xn0.js vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15 ad=0 as=0 pd=0 ps=0
+v.xn0.vaj xn0.js xn0.vq dc 0
+xn0.xsrn xn0.vq krn0 vr0 0 sky130_fd_pr__nfet_01v8 w=1 l=0.15 ad=0 as=0 pd=0 ps=0
+xn0.xsrp xn0.vq kbn0 vr0 vdd sky130_fd_pr__pfet_01v8 w=2 l=0.15 ad=0 as=0 pd=0 ps=0
+.option temp=27
+vglc1_01 glc1_01 0 pulse(0 0 1 1n 1n 1u 2)
+vglc1_02 glc1_02 0 pulse(0 0 1 1n 1n 1u 2)
+vgl gl 0 dc 0
+.control
+setseed 94823
+reset
+op
+echo FINGER $&v(xn0.ibm) $&@m.xn0.xcmpm.xm1.msky130_fd_pr__pfet_01v8_lvt[vth] $&@m.xn0.xcmpm.xm2.msky130_fd_pr__pfet_01v8_lvt[vth] $&@m.xn0.xmh1.msky130_fd_pr__nfet_01v8[vth] $&@m.xn0.xmj1.msky130_fd_pr__pfet_01v8[vth]
+set wr_singlescale
+set wr_vecnames
+option numdgt=12
+tran 1n 3.6e-05 0 5n
+wrdata trace.txt v(xn0.vq) i(v.xn0.vah) i(v.xn0.vaj) v(xn0.p) v(xn0.cmpm)
+quit
+.endc
+.end
