@@ -60,6 +60,12 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   counts as passed only if standin_draw_valid passed in the same run (so a refusal of the arguments or of the root
   does not count).
   Not exercised: the push time read from GitHub, the round fetched from drand.
+- E2 standin_activity_*: the stand-in draw with activity=PATH, a JSON list of the raw GitHub activity items of the
+  announce branch (activity_type, after, before, ref, timestamp). clean: one branch_creation whose "after" is the
+  announce commit, at announce.push_utc; must be accepted. redone: a branch_creation of another commit an hour
+  earlier, its branch_deletion, then the branch_creation of the announce commit that DRAW.json uses; must be refused.
+  force_push: the clean creation, then a force_push; must be refused. The two refusals count only if clean passed in
+  the same run. Not exercised: reading the activity from GitHub (campaign and rehearsal).
 - E1 round_own_check_failed: K05 with NOT1_6220's round N2 left as the driver leaves a run stopped by its own check
   (see failed_round: the record's status "failed: the tail leak must be set before it starts", N2 failed with why
   "exit 1", no C2, no N2/comparison.json, an unlisted placeholder N2/trace.raw (a real header, data cut off; only its
@@ -421,7 +427,25 @@ STANDIN_SIZES = dict(NOT1=2, ANDOR3=1, XOR3=1)
 STANDIN_COMMIT = hashlib.sha1(b"defect test stand-in announce").hexdigest()
 
 
-def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinned"):
+STANDIN_BRANCH = "evidence/defect-test-standin-draw"
+
+
+def activity_items(kind, commit, t0, utc):
+    """Raw GET /repos/{o}/{r}/activity items of the announce branch (the keys sealpush.github_times reads)."""
+    ref, zero = f"refs/heads/{STANDIN_BRANCH}", "0" * 40
+    other = hashlib.sha1(b"defect test: the first, deleted announce").hexdigest()
+    item = lambda t, typ, after, before=zero: dict(activity_type=typ, after=after, before=before, ref=ref, timestamp=utc(t))
+    if kind == "clean":
+        return [item(t0, "branch_creation", commit)]
+    if kind == "redone":                    # created, deleted, created again later; the DRAW.json uses the second
+        return [item(t0 - 3600, "branch_creation", other), item(t0 - 1800, "branch_deletion", zero, other),
+                item(t0, "branch_creation", commit)]
+    if kind == "force_push":                # the clean creation, then a force push on the branch
+        return [item(t0, "branch_creation", commit), item(t0 + 60, "force_push", other, commit)]
+    raise ValueError(kind)
+
+
+def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinned", activity=None):
     """Write DRAW.json, DRAW_ANNOUNCE.txt and the excluded file of the stand-in draw, one mutation applied, and the
     plans of the VALID draw. Returns (args, plans)."""
     sys.path.insert(0, str(HERE))
@@ -441,7 +465,7 @@ def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinn
     def make(ex):
         D = DS.draw(ROUND_1M["randomness"], ROUND_1M["round"], ex, dict(STANDIN_SIZES))
         D["beacon_round"] = dict(ROUND_1M)
-        D["announce"] = dict(branch="evidence/defect-test-standin-draw", commit=STANDIN_COMMIT, push_utc=utc(t0))
+        D["announce"] = dict(branch=STANDIN_BRANCH, commit=STANDIN_COMMIT, push_utc=utc(t0))
         return D
 
     valid = make(pinned)
@@ -475,6 +499,9 @@ def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinn
     (d / "DRAW_ANNOUNCE.txt").write_text(f"format layered-draw-announce/1\nmode test\nexcluded_sha256 {announced}\n"
                                          f"sizes {sizes}\n")
     args = [f"{DRAW_ARG}={d / 'DRAW.json'}", f"excluded={d / 'EXCLUDED.json'}", f"announce={d / 'DRAW_ANNOUNCE.txt'}"]
+    if activity:
+        (d / "activity.json").write_text(json.dumps(activity_items(activity, STANDIN_COMMIT, t0, utc), indent=1) + "\n")
+        args.append(f"activity={d / 'activity.json'}")
     return args, plans
 
 
@@ -630,6 +657,29 @@ def case_standin_excluded_sha_differs(tmp, src):
     return mutation(r, obs), obs
 
 
+def case_standin_activity_clean(tmp, src):
+    """E2 control: the valid stand-in draw with activity= holding one clean branch_creation at announce.push_utc."""
+    r, res, obs = standin_run(tmp, src, "standin_activity_clean", activity="clean")
+    ok = r.returncode == 0 and all(rows_sum(res, g, n) for g, n in STANDIN_SIZES.items())
+    STANDIN_CONTROL["activity_ok"] = ok
+    return ok, obs
+
+
+def activity_mutation(r, obs):
+    obs["control_passed"] = STANDIN_CONTROL.get("activity_ok", False)
+    return refused(r) and obs["control_passed"]
+
+
+def case_standin_activity_redone(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_activity_redone", activity="redone")
+    return activity_mutation(r, obs), obs
+
+
+def case_standin_activity_force_push(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_activity_force_push", activity="force_push")
+    return activity_mutation(r, obs), obs
+
+
 def case_draw_same_machine_twice(tmp, src):
     roots = [draw_root(src, tmp / x / "out_K01", tmp, "out_K05", "PLAN_K01.json") for x in ("a", "b")]
     r, res, obs = run(tmp, roots, "draw_same_machine_twice", extra=[f"{DRAW_ARG}={DRAW}"])
@@ -722,6 +772,13 @@ CASES = [
      "an exclusion list missing one pinned seed (announced, and the draw recomputed over it): refused"),
     ("draw", "standin_excluded_sha_differs", case_standin_excluded_sha_differs,
      "an exclusion list with the pinned seeds but other bytes than announced: refused"),
+    ("E2", "standin_activity_clean", case_standin_activity_clean,
+     "the valid stand-in draw with activity= one clean branch_creation of the announce commit: exit 0, rows sum"),
+    ("E2", "standin_activity_redone", case_standin_activity_redone,
+     "activity= branch_creation, branch_deletion, a second later branch_creation used by DRAW.json: refused "
+     "(gated on standin_activity_clean)"),
+    ("E2", "standin_activity_force_push", case_standin_activity_force_push,
+     "activity= the clean branch_creation then a force_push on the announce branch: refused (gated)"),
     ("E1", "round_own_check_failed", case_round_own_check_failed,
      "N2 of NOT1_6220 stopped by its own check (" + OWN_CHECK + "): exit 0; refuted at K3, in a sub-row about the "
      "run's own check listing the status; NOT1_6212 held"),
