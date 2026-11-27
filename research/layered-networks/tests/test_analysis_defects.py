@@ -51,6 +51,15 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   N1/noisy_record.json is changed (word 1/0/0 "ssFF" -> "sFFF"), and N1/comparison.json is recomputed with
   compare_d2.py, which gives "refuted". Must: exit 0, NOT1_6220 in the K3 refuted row, an entry naming NOT1_6220 that
   says "manifest not final", and NOT1_6212 held at K0 and K3.
+- draw standin_*: a real draw stands in for the campaign's (see `standin`: quicknet round 1000000 as published, the
+  announce push time 600 s before its time, draw_seeds.draw over the pinned EXCLUDED.json with NOT1=2 ANDOR3=1
+  XOR3=1, DRAW_ANNOUNCE.txt in mode test, passed as draw=, excluded=, announce=). The root is K03's of that draw
+  (out_K05 with the plan's PLAN.json and no instance or U_ folder). standin_draw_valid must give exit 0 with every
+  planned instance not run; each mutation (one seed changed; the push time +3 s; one signature byte; an exclusion
+  list that is not a superset of the pinned one; one whose bytes are not the announced ones) must be refused, and
+  counts as passed only if standin_draw_valid passed in the same run (so a refusal of the arguments or of the root
+  does not count).
+  Not exercised: the push time read from GitHub, the round fetched from drand.
 - control k05_alone and control k05_with_dupx (K05 + K06): must pass before and after the fix: exit 0 and NOT1
   counted 2 at K0 and K3 (DUPX_ folders are controls, never counted).
 
@@ -355,18 +364,20 @@ def draw_plans(tmp):
     return out
 
 
-def draw_root(src, dst, tmp, source, plan):
+def draw_root(src, dst, tmp, source, plan, plans=None, controls=True):
     """A root of the dummy draw's machine `plan` (PLAN_Knn.json), from a run2 root: its PLAN.json is the plan
     plan_split3.py writes, byte for byte (seal_push remote and branch included), re-declared in SHA256SUMS; the
     instance folders the plan does not hold are removed."""
     shutil.copytree(src / source, dst, symlinks=True)
-    plans = draw_plans(tmp)
+    plans = plans or draw_plans(tmp)
     want = json.loads((plans / plan).read_text())
-    keep = {f"NOT1_{s}" for s in want["groups"].get("NOT1", {}).get("seeds", [])}
-    for st in sorted(dst.glob("*/status.json")):
-        if st.parent.name not in keep:
-            shutil.rmtree(st.parent)
-            drop_lines(dst, st.parent.name)
+    keep = {f"{g}_{s}" for g, v in want["groups"].items() for s in v.get("seeds", [])}
+    gone = [st.parent for st in sorted(dst.glob("*/status.json")) if st.parent.name not in keep]
+    if not controls:                                        # also the U_ controls (they belong to the old seeds)
+        gone += sorted(dst.glob("U_*"))
+    for d in gone:
+        shutil.rmtree(d)
+        drop_lines(dst, d.name)
     shutil.copyfile(plans / plan, dst / "PLAN.json")
     redeclare(dst, "PLAN.json")
     return dst
@@ -386,6 +397,126 @@ def case_draw_duplicate_machine_only(tmp, src):
     ok = r.returncode == 0 and rows_sum(res, "NOT1", 2) and all(
         not_run_entry(res, n, where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3") for n in ("NOT1_6212", "NOT1_6213"))
     return ok, obs
+
+
+# ------------------------------------------------------------------------------------------------ a real draw (stand-in)
+# drand quicknet round 1000000 as published (tests/test_beacon_published.py), the announce push time set 600 s before
+# its time, so that beacon_verify.round_after gives exactly 1000000; draw_seeds.draw over the pinned EXCLUDED.json with
+# small sizes; DRAW_ANNOUNCE.txt in mode test. What is exercised: the BLS signature, randomness = sha256(signature),
+# the round rule, the recomputation of the seeds and bytes, the exclusion list's sha and superset checks, the plans
+# from the recomputed draw. What is not: the push time read from GitHub and the round fetched from drand.
+
+ROUND_1M = dict(round=1000000, randomness="b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3",
+                signature="83ad29e4c409f9470fc2ef02f90214df49e02b441a1a241a82d622d9f608ef98fd8b11a029f1bee9d9e83b45088abe72")
+STANDIN_SIZES = dict(NOT1=2, ANDOR3=1, XOR3=1)
+STANDIN_COMMIT = hashlib.sha1(b"defect test stand-in announce").hexdigest()
+
+
+def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinned"):
+    """Write DRAW.json, DRAW_ANNOUNCE.txt and the excluded file of the stand-in draw, one mutation applied, and the
+    plans of the VALID draw. Returns (args, plans)."""
+    sys.path.insert(0, str(HERE))
+    import beacon_chain as BC
+    import beacon_verify as BV
+    import draw_seeds as DS
+    import plan_split3 as P3
+    import datetime
+    d = tmp / "draw"
+    d.mkdir(parents=True)
+    pinned_b = (HERE / "EXCLUDED.json").read_bytes()
+    pinned = json.loads(pinned_b)
+    t0 = BV.round_time(BC.QUICKNET, ROUND_1M["round"]) - 600
+    utc = lambda t: datetime.datetime.fromtimestamp(t, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    assert BV.round_after(BC.QUICKNET, utc(t0)) == ROUND_1M["round"]
+
+    def make(ex):
+        D = DS.draw(ROUND_1M["randomness"], ROUND_1M["round"], ex, dict(STANDIN_SIZES))
+        D["beacon_round"] = dict(ROUND_1M)
+        D["announce"] = dict(branch="evidence/defect-test-standin-draw", commit=STANDIN_COMMIT, push_utc=utc(t0))
+        return D
+
+    valid = make(pinned)
+    plans = tmp / "draw_plans"
+    plans.mkdir()
+    for k, pl in enumerate(P3.split(valid, json.loads((HERE / "campaign_template.json").read_text()), 12)[0], start=1):
+        (plans / f"PLAN_K{k:02d}.json").write_bytes(DS.canon(pl))
+    ex_b, announced = pinned_b, hashlib.sha256(pinned_b).hexdigest()
+    D = valid
+    if excluded == "not_superset":                          # one seed less, consistent in itself and announced
+        seeds = pinned["seeds"][1:]
+        ex = dict(pinned, seeds=seeds, count=len(seeds), seeds_sha256=hashlib.sha256(DS.canon(seeds)).hexdigest())
+        ex_b = DS.canon(ex)
+        announced = hashlib.sha256(ex_b).hexdigest()
+        D = make(ex)
+    elif excluded == "sha_differs":                         # the same seeds, other bytes: not the announced file
+        ex_b = (json.dumps(pinned, indent=1, sort_keys=True) + "\n").encode()
+        assert json.loads(ex_b) == pinned and ex_b != pinned_b
+    D = json.loads(json.dumps(D))
+    if seed_edit:
+        D["groups"]["NOT1"][1] += 1
+    if push_shift_s:
+        D["announce"]["push_utc"] = utc(t0 + push_shift_s)
+    if sig_flip:
+        b = bytearray(bytes.fromhex(D["beacon_round"]["signature"]))
+        b[10] ^= 1
+        D["beacon_round"]["signature"] = b.hex()
+    (d / "DRAW.json").write_bytes(DS.canon(D))
+    (d / "EXCLUDED.json").write_bytes(ex_b)
+    sizes = " ".join(f"{g}={n}" for g, n in STANDIN_SIZES.items())
+    (d / "DRAW_ANNOUNCE.txt").write_text(f"format layered-draw-announce/1\nmode test\nexcluded_sha256 {announced}\n"
+                                         f"sizes {sizes}\n")
+    args = [f"{DRAW_ARG}={d / 'DRAW.json'}", f"excluded={d / 'EXCLUDED.json'}", f"announce={d / 'DRAW_ANNOUNCE.txt'}"]
+    return args, plans
+
+
+def standin_run(tmp, src, label, **mutation):
+    args, plans = standin(tmp, **mutation)
+    root = draw_root(src, tmp / "a" / "out_K03", tmp, "out_K05", "PLAN_K03.json", plans=plans, controls=False)
+    return run(tmp, [root], label, extra=args)
+
+
+STANDIN_CONTROL = {}
+
+
+def case_standin_draw_valid(tmp, src):
+    """The control of the draw mutations: the valid stand-in draw, K03's root with none of its instances run."""
+    r, res, obs = standin_run(tmp, src, "standin_draw_valid")
+    ok = r.returncode == 0 and all(rows_sum(res, g, n) for g, n in STANDIN_SIZES.items()) and all(
+        not_run_entry(res, n, where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3") for n in ("NOT1_65418", "NOT1_69364"))
+    STANDIN_CONTROL["ok"] = ok
+    return ok, obs
+
+
+def mutation(r, obs):
+    """A draw mutation passes only if refused AND the valid control passed with the same code: a refusal of the
+    arguments themselves, or of the root, is then excluded."""
+    obs["control_passed"] = STANDIN_CONTROL.get("ok", False)
+    return refused(r) and obs["control_passed"]
+
+
+def case_standin_seed_changed(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_seed_changed", seed_edit=True)
+    return mutation(r, obs), obs
+
+
+def case_standin_round_off_by_one(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_round_off_by_one", push_shift_s=3)
+    return mutation(r, obs), obs
+
+
+def case_standin_signature_byte(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_signature_byte", sig_flip=True)
+    return mutation(r, obs), obs
+
+
+def case_standin_excluded_not_superset(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_excluded_not_superset", excluded="not_superset")
+    return mutation(r, obs), obs
+
+
+def case_standin_excluded_sha_differs(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_excluded_sha_differs", excluded="sha_differs")
+    return mutation(r, obs), obs
 
 
 def case_draw_same_machine_twice(tmp, src):
@@ -470,6 +601,16 @@ CASES = [
      "draw=: refused, the output naming K01; NOT1 not counted more than once"),
     ("D9", "same_machine_two_paths", case_same_machine_two_paths, "refused; NOT1 not counted more than twice"),
     ("D9", "home_instance_twice", case_home_instance_twice, "refused; NOT1 not counted more than twice"),
+    ("draw", "standin_draw_valid", case_standin_draw_valid,
+     "the valid stand-in draw (round 1000000): exit 0; every group's rows sum to its size; not_run for NOT1_65418, "
+     "NOT1_69364"),
+    ("draw", "standin_seed_changed", case_standin_seed_changed, "one drawn seed changed, signature kept: refused"),
+    ("draw", "standin_round_off_by_one", case_standin_round_off_by_one, "push_utc + 3 s, the round off by one: refused"),
+    ("draw", "standin_signature_byte", case_standin_signature_byte, "one signature byte changed: refused"),
+    ("draw", "standin_excluded_not_superset", case_standin_excluded_not_superset,
+     "an exclusion list missing one pinned seed (announced, and the draw recomputed over it): refused"),
+    ("draw", "standin_excluded_sha_differs", case_standin_excluded_sha_differs,
+     "an exclusion list with the pinned seeds but other bytes than announced: refused"),
     ("D10", "one_byte_in_comparison", case_one_byte_in_comparison, "refused; the output names N0/comparison.json"),
     ("D10", "listed_file_missing", case_listed_file_missing, "refused; the output names extract.json"),
     ("D10", "stopped_mid_instance", case_stopped_mid_instance,
