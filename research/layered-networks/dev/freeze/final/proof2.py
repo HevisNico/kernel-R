@@ -43,6 +43,8 @@ sh(f"git init -q {W}/kernel-R && cd {W}/kernel-R && git remote add origin {SRC} 
    f"git merge-base --is-ancestor {COMMIT} origin/research/layered-campaign-dev && "
    f"git checkout -q -B research/layered-campaign-dev {COMMIT}")
 L = W / "kernel-R" / "research" / "layered-networks"
+PDK = os.environ.get("PROOF_PDK", "/home/user/kernel-R/research/circuit/pdk")   # the SKY130 PDK at 1232782c, linked as on the machines
+os.symlink(os.path.realpath(PDK), W / "kernel-R" / "research" / "circuit" / "pdk")
 t = json.loads((L / "campaign_template.json").read_text())
 sh(f"cd {W}/kernel-R && git worktree add -q --detach {W}/kit {t['kit_commit']} && "
    f"git worktree add -q --detach {W}/noise {t['noise_commit']}")
@@ -106,7 +108,7 @@ TWINS = {   # (block, written line or fragment) -> replacement; each must occur 
                    ("dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True)",
                     "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False)",
                     "strict=False: check_rehearsal_seeds checks the rehearsal draw offline (its only use of the flag)")],
-    "vars": [("L=<a clean clone of research/layered-campaign-freeze>/research/layered-networks",
+    "vars": [("L=<a clean clone of research/layered-campaign-freeze, with research/circuit/pdk linked to the SKY130 PDK at 1232782c as on the machines>/research/layered-networks",
               f"L={L}", "placeholder: the freeze branch does not exist yet; the clean clone of the candidate"),
              ("PY=<the pinned Python 3.13.18 (numpy 2.3.5, py_ecc 8.0.0), the one envcheck_layered4.py passed with on this machine>",
               f"PY={PY}", "placeholder: the pinned venv's Python")],
@@ -147,6 +149,8 @@ for num, name, where in STEPS:
     (LOG / f"{tag}.block.sh").write_text(body)
     run += [f'echo "### {num} {name}"', f". {LOG}/{tag}.block.sh > {LOG}/{tag}.out 2>&1; echo \"rc=$?\" >> {LOG}/{tag}.out",
             f"tail -3 {LOG}/{tag}.out"]
+    if not name.startswith("NEGATIVE"):     # FREEZE.txt: stop at the first block that fails
+        run += [f'grep -qx "rc=0" {LOG}/{tag}.out || {{ echo "STOPPED: block {name} (step {num}) failed"; exit 1; }}']
 run += [f'echo "### the twin\'s branches and their commit counts"',
         f"for r in $(git --git-dir {TWIN} for-each-ref --format='%(refname)'); do echo $r $(git --git-dir {TWIN} rev-list --count $r); done",
         f"git -C {W}/kernel-R status --porcelain --untracked-files=all | wc -l",
