@@ -1,0 +1,8 @@
+Rehearsal 1, frozen analysis: the two runs compared (OUT1 against OUT2, the same command run twice).
+cmp OUT1/RESULTS.json OUT2/RESULTS.json: identical (sha256 f7ad053a5911ea65acdfcf2dd27ef9487efd63adc1b8921aa4e46e557844f7c0)
+cmp OUT1/SHA256SUMS OUT2/SHA256SUMS: identical (RESULTS.json and the 15 activity files listed there are identical)
+diff -r OUT1 OUT2: one other file differs: kernel_build/KERNEL_BUILD.json, its field "seconds" (the local Lean build
+time of the kernel library: 87.9 s in run 1 against 12.6 s in run 2). That file is not listed in SHA256SUMS and is
+not part of the results; the .olean files of kernel_build are identical between the two runs.
+The task script's line "THE TWO RUNS DIFFER" came from that diff -r over the whole OUTDIR.
+Only OUT1 is published here; OUT2 differs from it in that one field only.
