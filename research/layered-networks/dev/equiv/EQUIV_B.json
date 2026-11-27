@@ -1,0 +1,3728 @@
+{
+ "all_identical_except_listed": false,
+ "files_listed": [
+  {
+   "reason": "the instance's file list: follows the files above",
+   "regex": "(.*/)?SHA256SUMS"
+  },
+  {
+   "reason": "the driver's status file (steps' times, cores, mode)",
+   "regex": "(.*/)?status\\.json"
+  },
+  {
+   "reason": "the kernel build folder",
+   "regex": "D/kernel(/.*)?"
+  },
+  {
+   "reason": "trace extracts: compared through trace.digest.json",
+   "regex": "N\\d/extract(/.*)?"
+  },
+  {
+   "reason": "an older chain's extract file name",
+   "regex": "N\\d/ref_extract\\.json"
+  },
+  {
+   "reason": "the duplicate's wait log, written by campaign_run15 onwards and by campaign.py; campaign_run14 wrote none",
+   "regex": "seal_wait\\.json"
+  },
+  {
+   "reason": "deleted from the reference roots after their analysis (RAWS_DELETED_AFTER_ANALYSIS.txt); trace.digest.json is compared instead",
+   "regex": "N0/trace\\.raw"
+  }
+ ],
+ "format": "layered-equiv-b/1",
+ "listed_rules": [
+  {
+   "name": "cost",
+   "reason": "wall and CPU times (check_duplicate's exception)",
+   "regex": ".*:(.*/)?(cost|wall_s|cpu_s|[^/]*_wall_s|[^/]*_cpu_s)(/.*)?"
+  },
+  {
+   "name": "other_times",
+   "reason": "other wall and CPU time fields (Lean's seconds, the inverter measures' machine time)",
+   "regex": ".*:(.*/)?(cpu_min|seconds|seconds_total|machine_s|machine_s_total|wall_minutes|network_op_s)(/.*)?"
+  },
+  {
+   "name": "date_line",
+   "reason": "the trace's Date: line, as in check_duplicate",
+   "regex": ".*:(.*/)?date_line(/.*)?"
+  },
+  {
+   "name": "derived_hash",
+   "reason": "the sha256 of another file of the same pair, which is itself compared here field by field (it differs only by listed fields: times, the ENV hash)",
+   "regex": ".*:(.*/)?(inverter_gate/sha256|inverter_gate/source/sha256|prediction_sha256|instances/sha256|measure_sha256|extract/sha256|files/ngspice\\.log)"
+  },
+  {
+   "name": "kernel_paths",
+   "reason": "the absolute path of prediction.json given to Lean",
+   "regex": "D/kernel/.*:(.*/)?prediction"
+  },
+  {
+   "name": "times",
+   "reason": "UTC dates of the run",
+   "regex": ".*:(.*/)?(started|ended|at|time|utc|[^/]*_utc|pushed_at[^/]*|date)(/.*)?"
+  },
+  {
+   "name": "env",
+   "reason": "the ENV.json hash: ENV.json differs by its paths, uptime and the new `campaign` key",
+   "regex": ".*:(.*/)?(env_sha256|env|ENV_sha256)(/.*)?"
+  },
+  {
+   "name": "seal_log",
+   "reason": "the seal-log commit: another log repository, another commit and time",
+   "regex": ".*:(.*/)?(seal_log|record_seal_log|commit|line|seal_branch|branch|remote|seal_dir)(/.*)?"
+  },
+  {
+   "name": "seal_sha",
+   "reason": "the seal's hash, which follows the ENV hash sealed inside it",
+   "regex": ".*:(.*/)?(seal_sha256|seal_sha|manifest_sha256|sha256sums_sha256)(/.*)?"
+  },
+  {
+   "name": "seal_sums",
+   "reason": "the seal's file list hashes and the push record, which follow the ENV hash and the log repository",
+   "regex": "seal/SHA256SUMS:.*|N\\d/SEAL_LOG\\.json:.*|seal_push\\.json:.*"
+  },
+  {
+   "name": "code",
+   "reason": "hashes of the code files: another clone, and the chain's or campaign.py's driver",
+   "regex": ".*:(.*/)?(code|code_sha256|driver[^/]*|[^/]*script[^/]*_sha256|sources)(/.*)?"
+  },
+  {
+   "name": "kernel",
+   "reason": "the kernel build reference (absent in stage_d5-era roots)",
+   "regex": ".*:(.*/)?(kernel|kernel_build|kernel_[^/]*)(/.*)?"
+  },
+  {
+   "name": "paths",
+   "reason": "absolute paths of another root",
+   "regex": ".*:(.*/)?(path|dir|root|out|cwd|argv|deck)(/.*)?"
+  }
+ ],
+ "pairs": [
+  {
+   "files": {
+    "D/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "D/cost_d.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/cost/cpu_end_s",
+       "/cost/cpu_setup_s",
+       "/cost/cpu_test_s",
+       "/cost/cpu_train_s",
+       "/cost/wall_scan_s",
+       "/cost/wall_setup_s",
+       "/cost/wall_test_s",
+       "/cost/wall_train_s"
+      ],
+      "other_times": [
+       "/cpu_min"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/fit_d.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "D/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "28b8df4502b9"
+    },
+    "D/kernel/LEANCELL.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "kernel_paths": [
+       "/runs[0]/prediction"
+      ],
+      "other_times": [
+       "/runs[0]/seconds",
+       "/seconds_total"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/kernel/MANIFEST.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "kernel_paths": [
+       "[0]/prediction"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/kernel/prediction.lean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "d69c19eb4930"
+    },
+    "D/kernel/prediction.log": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "D/overlay_d.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "D/prediction.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/source/sha256"
+      ],
+      "env": [
+       "/env_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/record.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/cost/cpu_end_s",
+       "/cost/cpu_setup_s",
+       "/cost/cpu_test_s",
+       "/cost/cpu_train_s",
+       "/cost/wall_scan_s",
+       "/cost/wall_setup_s",
+       "/cost/wall_test_s",
+       "/cost/wall_train_s",
+       "/scans/wall_s"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (12515, 12059), 'other_diffs': []}"
+    },
+    "N0/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N0/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/extract/PARTS.txt": {
+     "compared": "bytes",
+     "identical": false,
+     "sha256": null
+    },
+    "N0/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N0/extract/extract.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": [
+      "/parts[0]/sha256"
+     ]
+    },
+    "N0/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/extract/trace.raw.part-000": {
+     "compared": "bytes",
+     "identical": false,
+     "sha256": null
+    },
+    "N0/extract/trace.raw.part-001": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "d538207e5272"
+    },
+    "N0/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "28b8df4502b9"
+    },
+    "N0/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (9754, 9447), 'other_diffs': []}"
+    },
+    "N0/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N1/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/extract/PARTS.txt": {
+     "compared": "bytes",
+     "identical": false,
+     "sha256": null
+    },
+    "N1/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N1/extract/extract.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": [
+      "/parts[0]/sha256"
+     ]
+    },
+    "N1/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/extract/trace.raw.part-000": {
+     "compared": "bytes",
+     "identical": false,
+     "sha256": null
+    },
+    "N1/extract/trace.raw.part-001": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e5afd4f8da82"
+    },
+    "N1/extract/trace.raw.part-002": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "56968cc2c8db"
+    },
+    "N1/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "22c24821fc29"
+    },
+    "N1/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (12981, 12743), 'other_diffs': []}"
+    },
+    "N1/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N2/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/extract/PARTS.txt": {
+     "compared": "bytes",
+     "identical": false,
+     "sha256": null
+    },
+    "N2/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N2/extract/extract.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": [
+      "/parts[0]/sha256"
+     ]
+    },
+    "N2/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/extract/trace.raw.part-000": {
+     "compared": "bytes",
+     "identical": false,
+     "sha256": null
+    },
+    "N2/extract/trace.raw.part-001": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "1d2265134559"
+    },
+    "N2/extract/trace.raw.part-002": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "c8b4205b7fec"
+    },
+    "N2/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "22c24821fc29"
+    },
+    "N2/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (12811, 12482), 'other_diffs': []}"
+    },
+    "N2/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N3/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/extract/PARTS.txt": {
+     "compared": "bytes",
+     "identical": false,
+     "sha256": null
+    },
+    "N3/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N3/extract/extract.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": [
+      "/parts[0]/sha256"
+     ]
+    },
+    "N3/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/extract/trace.raw.part-000": {
+     "compared": "bytes",
+     "identical": false,
+     "sha256": null
+    },
+    "N3/extract/trace.raw.part-001": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "b91b209d0209"
+    },
+    "N3/extract/trace.raw.part-002": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "bd72cecdae78"
+    },
+    "N3/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "22c24821fc29"
+    },
+    "N3/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (13021, 12707), 'other_diffs': []}"
+    },
+    "N3/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "deck.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "28b8df4502b9"
+    },
+    "inv/K3_BUDGET.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/NETWORK_FINGERPRINT.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "inv/inverter_gate.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/job_wall_s/n0",
+       "/job_wall_s/n1"
+      ],
+      "derived_hash": [
+       "/inverters/n0/measure_sha256",
+       "/inverters/n1/measure_sha256"
+      ],
+      "other_times": [
+       "/inverters/n0/machine_s",
+       "/inverters/n1/machine_s",
+       "/network_op_s",
+       "/wall_minutes"
+      ],
+      "paths": [
+       "/deck"
+      ]
+     },
+     "unlisted": []
+    },
+    "inv/lean_build/CircuitInverterGate.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "d4f4402594ac"
+    },
+    "inv/lean_build/InverterInstanceTiming.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "f2e8f6a7b3ba"
+    },
+    "inv/lean_build/InverterTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "961ae03c4184"
+    },
+    "inv/lean_build/MonotoneOneSidedTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "cac184d04063"
+    },
+    "inv/lean_build/MonotoneSupport.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "bf65f320d332"
+    },
+    "inv/lean_build/MonotoneTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "d9e549231d1d"
+    },
+    "inv/lean_build/Target.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "10fcc53ffe8a"
+    },
+    "inv/lean_build/TwoLayerTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "2f3ca34cfcb9"
+    },
+    "inv/lean_build/TwoRailsTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "706b0ab32daf"
+    },
+    "inv/n0/gates/GATE_9803.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/n0/gates/Inverter_9803.lean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "0b7c512f2c4e"
+    },
+    "inv/n0/gates/Inverter_9803.log": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "inv/n0/runs/9803/MEASURE.json": {
+     "compared": "json",
+     "differences": 11,
+     "listed": {
+      "derived_hash": [
+       "/runs/R1_absent/files/ngspice.log",
+       "/runs/R2_present/files/ngspice.log",
+       "/runs/R3_leak_above/files/ngspice.log",
+       "/runs/R4_leak_below/files/ngspice.log",
+       "/runs/R5_static/files/ngspice.log"
+      ],
+      "other_times": [
+       "/measures/machine_s/R1_absent",
+       "/measures/machine_s/R2_present",
+       "/measures/machine_s/R3_leak_above",
+       "/measures/machine_s/R4_leak_below",
+       "/measures/machine_s/R5_static",
+       "/measures/machine_s_total"
+      ]
+     },
+     "unlisted": []
+    },
+    "inv/n0/runs/9803/R1_absent/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/9803/R1_absent/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "b7f56f8bd96a"
+    },
+    "inv/n0/runs/9803/R1_absent/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (210, 210), 'other_diffs': []}"
+    },
+    "inv/n0/runs/9803/R1_absent/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "a3ec8bc8449f"
+    },
+    "inv/n0/runs/9803/R2_present/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/9803/R2_present/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "0db90ec642bd"
+    },
+    "inv/n0/runs/9803/R2_present/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (139, 130), 'other_diffs': []}"
+    },
+    "inv/n0/runs/9803/R2_present/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e1572cda0b82"
+    },
+    "inv/n0/runs/9803/R3_leak_above/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/9803/R3_leak_above/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "1b356da03387"
+    },
+    "inv/n0/runs/9803/R3_leak_above/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (118, 119), 'other_diffs': []}"
+    },
+    "inv/n0/runs/9803/R3_leak_above/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "148073726370"
+    },
+    "inv/n0/runs/9803/R4_leak_below/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/9803/R4_leak_below/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "4ce688d842a9"
+    },
+    "inv/n0/runs/9803/R4_leak_below/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (88, 82), 'other_diffs': []}"
+    },
+    "inv/n0/runs/9803/R4_leak_below/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "40fea06deed3"
+    },
+    "inv/n0/runs/9803/R5_static/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/9803/R5_static/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "6fe2fc236874"
+    },
+    "inv/n0/runs/9803/R5_static/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (236, 232), 'other_diffs': []}"
+    },
+    "inv/n0/runs/9803/R5_static/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "2ce8fc023e2a"
+    },
+    "inv/n1/gates/GATE_9803.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/n1/gates/Inverter_9803.lean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "08bbae85aa3e"
+    },
+    "inv/n1/gates/Inverter_9803.log": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "inv/n1/runs/9803/MEASURE.json": {
+     "compared": "json",
+     "differences": 11,
+     "listed": {
+      "derived_hash": [
+       "/runs/R1_absent/files/ngspice.log",
+       "/runs/R2_present/files/ngspice.log",
+       "/runs/R3_leak_above/files/ngspice.log",
+       "/runs/R4_leak_below/files/ngspice.log",
+       "/runs/R5_static/files/ngspice.log"
+      ],
+      "other_times": [
+       "/measures/machine_s/R1_absent",
+       "/measures/machine_s/R2_present",
+       "/measures/machine_s/R3_leak_above",
+       "/measures/machine_s/R4_leak_below",
+       "/measures/machine_s/R5_static",
+       "/measures/machine_s_total"
+      ]
+     },
+     "unlisted": []
+    },
+    "inv/n1/runs/9803/R1_absent/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n1/runs/9803/R1_absent/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "15d693e7c43b"
+    },
+    "inv/n1/runs/9803/R1_absent/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (210, 202), 'other_diffs': []}"
+    },
+    "inv/n1/runs/9803/R1_absent/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "14a562f6e112"
+    },
+    "inv/n1/runs/9803/R2_present/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n1/runs/9803/R2_present/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "6ad9bada5ba5"
+    },
+    "inv/n1/runs/9803/R2_present/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (141, 130), 'other_diffs': []}"
+    },
+    "inv/n1/runs/9803/R2_present/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "36ffb34c109d"
+    },
+    "inv/n1/runs/9803/R3_leak_above/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n1/runs/9803/R3_leak_above/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "589f67024dc6"
+    },
+    "inv/n1/runs/9803/R3_leak_above/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (120, 114), 'other_diffs': []}"
+    },
+    "inv/n1/runs/9803/R3_leak_above/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "0cda5ba51569"
+    },
+    "inv/n1/runs/9803/R4_leak_below/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n1/runs/9803/R4_leak_below/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "0b230faca5ed"
+    },
+    "inv/n1/runs/9803/R4_leak_below/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (91, 82), 'other_diffs': []}"
+    },
+    "inv/n1/runs/9803/R4_leak_below/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "2635bb14ed99"
+    },
+    "inv/n1/runs/9803/R5_static/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n1/runs/9803/R5_static/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "df7720ed4523"
+    },
+    "inv/n1/runs/9803/R5_static/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (233, 227), 'other_diffs': []}"
+    },
+    "inv/n1/runs/9803/R5_static/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "018f3d10f51e"
+    },
+    "inv/network_op/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/network_op/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "94091b751ac2"
+    },
+    "inv/network_op/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (1, 1), 'other_diffs': []}"
+    },
+    "inv/status/n0.ok": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "inv/status/n1.ok": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "seal/MANIFEST.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/instances[0]/inverter_gate/sha256",
+       "/instances[0]/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "seal/XOR3_9803.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/source/sha256"
+      ],
+      "env": [
+       "/env_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal_push.json": {
+     "compared": "json",
+     "differences": 7,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line",
+       "/remote"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ],
+      "times": [
+       "/push_started_machine_utc",
+       "/pushed_at_machine_utc"
+      ]
+     },
+     "unlisted": []
+    },
+    "status.json": {
+     "compared": "listed file, not compared",
+     "identical": false
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/b2/K02/out_K02/XOR3_9803",
+   "only_new": [],
+   "only_ref": [],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/final/out_K01/XOR3_9803",
+   "ref_driver": "campaign_run14",
+   "unlisted": [
+    "N0/extract/PARTS.txt: differs (bytes)",
+    "N0/extract/extract.json:/parts[0]/sha256",
+    "N0/extract/trace.raw.part-000: differs (bytes)",
+    "N1/extract/PARTS.txt: differs (bytes)",
+    "N1/extract/extract.json:/parts[0]/sha256",
+    "N1/extract/trace.raw.part-000: differs (bytes)",
+    "N2/extract/PARTS.txt: differs (bytes)",
+    "N2/extract/extract.json:/parts[0]/sha256",
+    "N2/extract/trace.raw.part-000: differs (bytes)",
+    "N3/extract/PARTS.txt: differs (bytes)",
+    "N3/extract/extract.json:/parts[0]/sha256",
+    "N3/extract/trace.raw.part-000: differs (bytes)"
+   ],
+   "verdict": "DIFFERS"
+  },
+  {
+   "files": {
+    "U/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "U/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "28b8df4502b9"
+    },
+    "U/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (603, 602), 'other_diffs': []}"
+    },
+    "U/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "U/untrained_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "untrained.json": {
+     "compared": "json",
+     "differences": 5,
+     "listed": {
+      "cost": [
+       "/cpu_s"
+      ],
+      "seal_log": [
+       "/record_seal_log/branch",
+       "/record_seal_log/commit",
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/b2/K02/out_K02/U_XOR3_9803",
+   "only_new": [],
+   "only_ref": [],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/final/out_K01/U_XOR3_9803",
+   "ref_driver": "campaign_run14",
+   "unlisted": [],
+   "verdict": "identical except listed"
+  },
+  {
+   "files": {
+    "D/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "D/cost_d.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/cost/cpu_end_s",
+       "/cost/cpu_setup_s",
+       "/cost/cpu_test_s",
+       "/cost/cpu_train_s",
+       "/cost/wall_scan_s",
+       "/cost/wall_setup_s",
+       "/cost/wall_test_s",
+       "/cost/wall_train_s"
+      ],
+      "other_times": [
+       "/cpu_min"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/fit_d.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "D/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "3afd629f4aae"
+    },
+    "D/overlay_d.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "D/prediction.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "code": [
+       "/code/leancell.py",
+       "/code/stage_d6.py"
+      ],
+      "env": [
+       "/env_sha256"
+      ],
+      "kernel": [
+       "/kernel"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/record.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/cost/cpu_end_s",
+       "/cost/cpu_setup_s",
+       "/cost/cpu_test_s",
+       "/cost/cpu_train_s",
+       "/cost/wall_scan_s",
+       "/cost/wall_setup_s",
+       "/cost/wall_test_s",
+       "/cost/wall_train_s",
+       "/scans/wall_s"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (10783, 11107), 'other_diffs': []}"
+    },
+    "N0/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N0/comparison.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "derived_hash": [
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "3afd629f4aae"
+    },
+    "N0/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (6100, 6269), 'other_diffs': []}"
+    },
+    "N0/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N1/comparison.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "derived_hash": [
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "58ca0724bd98"
+    },
+    "N1/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (8628, 9025), 'other_diffs': []}"
+    },
+    "N1/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N2/comparison.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "derived_hash": [
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "58ca0724bd98"
+    },
+    "N2/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (8664, 8897), 'other_diffs': []}"
+    },
+    "N2/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N3/comparison.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "derived_hash": [
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "58ca0724bd98"
+    },
+    "N3/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (8737, 9039), 'other_diffs': []}"
+    },
+    "N3/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "deck.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "3afd629f4aae"
+    },
+    "seal/ANDOR3_6104.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "code": [
+       "/code/leancell.py",
+       "/code/stage_d6.py"
+      ],
+      "env": [
+       "/env_sha256"
+      ],
+      "kernel": [
+       "/kernel"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/MANIFEST.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "derived_hash": [
+       "/instances[0]/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "seal_push.json": {
+     "compared": "json",
+     "differences": 8,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line",
+       "/remote"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ],
+      "seal_sums": [
+       "/seal_folder/bytes"
+      ],
+      "times": [
+       "/push_started_machine_utc",
+       "/pushed_at_machine_utc"
+      ]
+     },
+     "unlisted": []
+    },
+    "status.json": {
+     "compared": "listed file, not compared",
+     "identical": false
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/b2/K03/out_K03/ANDOR3_6104",
+   "only_new": [
+    {
+     "file": "D/kernel/LEANCELL.json",
+     "listed": "the kernel build folder"
+    },
+    {
+     "file": "D/kernel/MANIFEST.json",
+     "listed": "the kernel build folder"
+    },
+    {
+     "file": "D/kernel/prediction.lean",
+     "listed": "the kernel build folder"
+    },
+    {
+     "file": "D/kernel/prediction.log",
+     "listed": "the kernel build folder"
+    },
+    {
+     "file": "N0/extract/SHA256SUMS",
+     "listed": "the instance's file list: follows the files above"
+    },
+    {
+     "file": "N0/extract/extract.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N0/extract/noisy_record.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N0/extract/trace.raw",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/PARTS.txt",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/SHA256SUMS",
+     "listed": "the instance's file list: follows the files above"
+    },
+    {
+     "file": "N1/extract/extract.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/noisy_record.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/trace.raw.part-000",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/trace.raw.part-001",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/PARTS.txt",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/SHA256SUMS",
+     "listed": "the instance's file list: follows the files above"
+    },
+    {
+     "file": "N2/extract/extract.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/noisy_record.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/trace.raw.part-000",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/trace.raw.part-001",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/PARTS.txt",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/SHA256SUMS",
+     "listed": "the instance's file list: follows the files above"
+    },
+    {
+     "file": "N3/extract/extract.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/noisy_record.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/trace.raw.part-000",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/trace.raw.part-001",
+     "listed": "trace extracts: compared through trace.digest.json"
+    }
+   ],
+   "only_ref": [
+    {
+     "file": "N1/ref_extract.json",
+     "listed": "an older chain's extract file name"
+    }
+   ],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/eqbref/research/layered-networks/dev/prefreeze/g2/rootA/ANDOR3_6104",
+   "ref_driver": "campaign_run11",
+   "unlisted": [],
+   "verdict": "identical except listed"
+  },
+  {
+   "files": {
+    "U/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "U/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "3afd629f4aae"
+    },
+    "U/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (438, 449), 'other_diffs': []}"
+    },
+    "U/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "U/untrained_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "untrained.json": {
+     "compared": "json",
+     "differences": 5,
+     "listed": {
+      "cost": [
+       "/cpu_s"
+      ],
+      "seal_log": [
+       "/record_seal_log/branch",
+       "/record_seal_log/commit",
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/b2/K03/out_K03/U_ANDOR3_6104",
+   "only_new": [],
+   "only_ref": [],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/eqbref/research/layered-networks/dev/prefreeze/g2/rootA/U_ANDOR3_6104",
+   "ref_driver": "campaign_run11",
+   "unlisted": [],
+   "verdict": "identical except listed"
+  },
+  {
+   "files": {
+    "D/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "D/cost_d.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/cost/cpu_end_s",
+       "/cost/cpu_setup_s",
+       "/cost/cpu_test_s",
+       "/cost/cpu_train_s",
+       "/cost/wall_scan_s",
+       "/cost/wall_setup_s",
+       "/cost/wall_test_s",
+       "/cost/wall_train_s"
+      ],
+      "other_times": [
+       "/cpu_min"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/fit_d.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "D/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "519a6ce2db19"
+    },
+    "D/kernel/LEANCELL.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "kernel_paths": [
+       "/runs[0]/prediction"
+      ],
+      "other_times": [
+       "/runs[0]/seconds"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/kernel/MANIFEST.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "kernel_paths": [
+       "[0]/prediction"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/kernel/prediction.lean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "96faf952fd16"
+    },
+    "D/kernel/prediction.log": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "D/overlay_d.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "D/prediction.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/source/sha256"
+      ],
+      "env": [
+       "/env_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/record.json": {
+     "compared": "json",
+     "differences": 10,
+     "listed": {
+      "cost": [
+       "/cost/cpu_end_s",
+       "/cost/cpu_setup_s",
+       "/cost/cpu_test_s",
+       "/cost/cpu_train_s",
+       "/cost/wall_scan_s",
+       "/cost/wall_setup_s",
+       "/cost/wall_test_s",
+       "/cost/wall_train_s",
+       "/scans/solo/wall_s",
+       "/scans/wall_s"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (1043, 1255), 'other_diffs': []}"
+    },
+    "N0/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N0/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N0/extract/extract.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/extract/trace.raw": {
+     "compared": "raw_compare",
+     "identical": true,
+     "info": "{'size': (2974796, 2974796), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': 'dd4d0ee9aa81'}"
+    },
+    "N0/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "519a6ce2db19"
+    },
+    "N0/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (232, 296), 'other_diffs': []}"
+    },
+    "N0/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N1/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N1/extract/extract.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/extract/trace.raw": {
+     "compared": "raw_compare",
+     "identical": true,
+     "info": "{'size': (4852044, 4852044), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': '9a3e6c8c3dac'}"
+    },
+    "N1/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "37a9ef454179"
+    },
+    "N1/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (347, 414), 'other_diffs': []}"
+    },
+    "N1/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N2/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N2/extract/extract.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/extract/trace.raw": {
+     "compared": "raw_compare",
+     "identical": true,
+     "info": "{'size': (4871180, 4871180), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': 'e9710573c897'}"
+    },
+    "N2/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "37a9ef454179"
+    },
+    "N2/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (331, 436), 'other_diffs': []}"
+    },
+    "N2/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N3/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N3/extract/extract.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/extract/trace.raw": {
+     "compared": "raw_compare",
+     "identical": true,
+     "info": "{'size': (4860300, 4860300), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': '808bde92cd77'}"
+    },
+    "N3/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "37a9ef454179"
+    },
+    "N3/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (350, 422), 'other_diffs': []}"
+    },
+    "N3/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "deck.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "519a6ce2db19"
+    },
+    "inv/K3_BUDGET.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/NETWORK_FINGERPRINT.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "inv/inverter_gate.json": {
+     "compared": "json",
+     "differences": 6,
+     "listed": {
+      "cost": [
+       "/job_wall_s/n0"
+      ],
+      "derived_hash": [
+       "/inverters/n0/measure_sha256"
+      ],
+      "other_times": [
+       "/inverters/n0/machine_s",
+       "/network_op_s",
+       "/wall_minutes"
+      ],
+      "paths": [
+       "/deck"
+      ]
+     },
+     "unlisted": []
+    },
+    "inv/lean_build/CircuitInverterGate.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "d4f4402594ac"
+    },
+    "inv/lean_build/InverterInstanceTiming.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "f2e8f6a7b3ba"
+    },
+    "inv/lean_build/InverterTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "961ae03c4184"
+    },
+    "inv/lean_build/MonotoneOneSidedTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "cac184d04063"
+    },
+    "inv/lean_build/MonotoneSupport.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "bf65f320d332"
+    },
+    "inv/lean_build/MonotoneTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "d9e549231d1d"
+    },
+    "inv/lean_build/Target.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "10fcc53ffe8a"
+    },
+    "inv/lean_build/TwoLayerTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "2f3ca34cfcb9"
+    },
+    "inv/lean_build/TwoRailsTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "706b0ab32daf"
+    },
+    "inv/n0/gates/GATE_6220.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/n0/gates/Inverter_6220.lean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "41ccfa285076"
+    },
+    "inv/n0/gates/Inverter_6220.log": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "inv/n0/runs/6220/MEASURE.json": {
+     "compared": "json",
+     "differences": 11,
+     "listed": {
+      "derived_hash": [
+       "/runs/R1_absent/files/ngspice.log",
+       "/runs/R2_present/files/ngspice.log",
+       "/runs/R3_leak_above/files/ngspice.log",
+       "/runs/R4_leak_below/files/ngspice.log",
+       "/runs/R5_static/files/ngspice.log"
+      ],
+      "other_times": [
+       "/measures/machine_s/R1_absent",
+       "/measures/machine_s/R2_present",
+       "/measures/machine_s/R3_leak_above",
+       "/measures/machine_s/R4_leak_below",
+       "/measures/machine_s/R5_static",
+       "/measures/machine_s_total"
+      ]
+     },
+     "unlisted": []
+    },
+    "inv/n0/runs/6220/R1_absent/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/6220/R1_absent/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "2b81a08e1a8e"
+    },
+    "inv/n0/runs/6220/R1_absent/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (43, 46), 'other_diffs': []}"
+    },
+    "inv/n0/runs/6220/R1_absent/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "05af7c2db9eb"
+    },
+    "inv/n0/runs/6220/R2_present/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/6220/R2_present/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7c24f4e320ea"
+    },
+    "inv/n0/runs/6220/R2_present/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (29, 32), 'other_diffs': []}"
+    },
+    "inv/n0/runs/6220/R2_present/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "914e2e21af83"
+    },
+    "inv/n0/runs/6220/R3_leak_above/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/6220/R3_leak_above/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "0a5028ea0394"
+    },
+    "inv/n0/runs/6220/R3_leak_above/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (29, 33), 'other_diffs': []}"
+    },
+    "inv/n0/runs/6220/R3_leak_above/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "3b16d3954259"
+    },
+    "inv/n0/runs/6220/R4_leak_below/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/6220/R4_leak_below/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "1c0f56971322"
+    },
+    "inv/n0/runs/6220/R4_leak_below/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (18, 21), 'other_diffs': []}"
+    },
+    "inv/n0/runs/6220/R4_leak_below/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "3ad46bb9bde9"
+    },
+    "inv/n0/runs/6220/R5_static/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/6220/R5_static/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "11b10b4ca13e"
+    },
+    "inv/n0/runs/6220/R5_static/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (49, 55), 'other_diffs': []}"
+    },
+    "inv/n0/runs/6220/R5_static/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "43d7f6b473f6"
+    },
+    "inv/network_op/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/network_op/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "a2d4b5781491"
+    },
+    "inv/network_op/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (1, 1), 'other_diffs': []}"
+    },
+    "inv/status/n0.ok": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "seal/MANIFEST.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/instances[0]/inverter_gate/sha256",
+       "/instances[0]/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/NOT1_6220.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/source/sha256"
+      ],
+      "env": [
+       "/env_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "seal_push.json": {
+     "compared": "json",
+     "differences": 8,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line",
+       "/remote"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ],
+      "seal_sums": [
+       "/previous"
+      ],
+      "times": [
+       "/push_started_machine_utc",
+       "/pushed_at_machine_utc"
+      ]
+     },
+     "unlisted": []
+    },
+    "status.json": {
+     "compared": "listed file, not compared",
+     "identical": false
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/b2/K05/out_K05/NOT1_6220",
+   "only_new": [],
+   "only_ref": [],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/e2e17/out_K01/NOT1_6220",
+   "ref_driver": "campaign_run17",
+   "unlisted": [],
+   "verdict": "identical except listed"
+  },
+  {
+   "files": {
+    "D/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "D/cost_d.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/cost/cpu_end_s",
+       "/cost/cpu_setup_s",
+       "/cost/cpu_test_s",
+       "/cost/cpu_train_s",
+       "/cost/wall_scan_s",
+       "/cost/wall_setup_s",
+       "/cost/wall_test_s",
+       "/cost/wall_train_s"
+      ],
+      "other_times": [
+       "/cpu_min"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/fit_d.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "D/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "519a6ce2db19"
+    },
+    "D/kernel/LEANCELL.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "kernel_paths": [
+       "/runs[0]/prediction"
+      ],
+      "other_times": [
+       "/runs[0]/seconds",
+       "/seconds_total"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/kernel/MANIFEST.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "kernel_paths": [
+       "[0]/prediction"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/kernel/prediction.lean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "54f04323de3d"
+    },
+    "D/kernel/prediction.log": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "D/overlay_d.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "D/prediction.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/source/sha256"
+      ],
+      "env": [
+       "/env_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/record.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/cost/cpu_end_s",
+       "/cost/cpu_setup_s",
+       "/cost/cpu_test_s",
+       "/cost/cpu_train_s",
+       "/cost/wall_scan_s",
+       "/cost/wall_setup_s",
+       "/cost/wall_test_s",
+       "/cost/wall_train_s",
+       "/scans/wall_s"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (684, 822), 'other_diffs': []}"
+    },
+    "N0/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N0/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N0/extract/extract.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/extract/trace.raw": {
+     "compared": "raw_compare",
+     "identical": true,
+     "info": "{'size': (2989964, 2989964), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': '793eed0a81a5'}"
+    },
+    "N0/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "519a6ce2db19"
+    },
+    "N0/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (247, 315), 'other_diffs': []}"
+    },
+    "N0/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/trace.raw": {
+     "compared": "raw_compare",
+     "identical": true,
+     "info": "{'size': (19433552, 19433552), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': 'af272127d902'}"
+    },
+    "N1/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N1/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N1/extract/extract.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/extract/trace.raw": {
+     "compared": "raw_compare",
+     "identical": true,
+     "info": "{'size': (4892620, 4892620), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': 'd97959756cb7'}"
+    },
+    "N1/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "37a9ef454179"
+    },
+    "N1/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (338, 413), 'other_diffs': []}"
+    },
+    "N1/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N2/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N2/extract/extract.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/extract/trace.raw": {
+     "compared": "raw_compare",
+     "identical": true,
+     "info": "{'size': (4874636, 4874636), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': 'c6c35e1bf686'}"
+    },
+    "N2/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "37a9ef454179"
+    },
+    "N2/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (349, 404), 'other_diffs': []}"
+    },
+    "N2/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N3/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/extract/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "N3/extract/extract.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "date_line": [
+       "/source_digest/date_line"
+      ],
+      "derived_hash": [
+       "/extract/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/extract/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/extract/trace.raw": {
+     "compared": "raw_compare",
+     "identical": true,
+     "info": "{'size': (4874124, 4874124), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': '9871ae9e5cc6'}"
+    },
+    "N3/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "37a9ef454179"
+    },
+    "N3/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (329, 408), 'other_diffs': []}"
+    },
+    "N3/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "deck.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "519a6ce2db19"
+    },
+    "inv/K3_BUDGET.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/NETWORK_FINGERPRINT.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "inv/inverter_gate.json": {
+     "compared": "json",
+     "differences": 6,
+     "listed": {
+      "cost": [
+       "/job_wall_s/n0"
+      ],
+      "derived_hash": [
+       "/inverters/n0/measure_sha256"
+      ],
+      "other_times": [
+       "/inverters/n0/machine_s",
+       "/network_op_s",
+       "/wall_minutes"
+      ],
+      "paths": [
+       "/deck"
+      ]
+     },
+     "unlisted": []
+    },
+    "inv/lean_build/CircuitInverterGate.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "d4f4402594ac"
+    },
+    "inv/lean_build/InverterInstanceTiming.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "f2e8f6a7b3ba"
+    },
+    "inv/lean_build/InverterTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "961ae03c4184"
+    },
+    "inv/lean_build/MonotoneOneSidedTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "cac184d04063"
+    },
+    "inv/lean_build/MonotoneSupport.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "bf65f320d332"
+    },
+    "inv/lean_build/MonotoneTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "d9e549231d1d"
+    },
+    "inv/lean_build/Target.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "10fcc53ffe8a"
+    },
+    "inv/lean_build/TwoLayerTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "2f3ca34cfcb9"
+    },
+    "inv/lean_build/TwoRailsTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "706b0ab32daf"
+    },
+    "inv/n0/gates/GATE_6212.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/n0/gates/Inverter_6212.lean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "aa06e748b944"
+    },
+    "inv/n0/gates/Inverter_6212.log": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "inv/n0/runs/6212/MEASURE.json": {
+     "compared": "json",
+     "differences": 11,
+     "listed": {
+      "derived_hash": [
+       "/runs/R1_absent/files/ngspice.log",
+       "/runs/R2_present/files/ngspice.log",
+       "/runs/R3_leak_above/files/ngspice.log",
+       "/runs/R4_leak_below/files/ngspice.log",
+       "/runs/R5_static/files/ngspice.log"
+      ],
+      "other_times": [
+       "/measures/machine_s/R1_absent",
+       "/measures/machine_s/R2_present",
+       "/measures/machine_s/R3_leak_above",
+       "/measures/machine_s/R4_leak_below",
+       "/measures/machine_s/R5_static",
+       "/measures/machine_s_total"
+      ]
+     },
+     "unlisted": []
+    },
+    "inv/n0/runs/6212/R1_absent/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/6212/R1_absent/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "ff7dfb3ca28c"
+    },
+    "inv/n0/runs/6212/R1_absent/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (42, 49), 'other_diffs': []}"
+    },
+    "inv/n0/runs/6212/R1_absent/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "fcc481c9ecd7"
+    },
+    "inv/n0/runs/6212/R2_present/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/6212/R2_present/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "b4565e3fe8b1"
+    },
+    "inv/n0/runs/6212/R2_present/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (27, 35), 'other_diffs': []}"
+    },
+    "inv/n0/runs/6212/R2_present/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "f112df08da57"
+    },
+    "inv/n0/runs/6212/R3_leak_above/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/6212/R3_leak_above/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "c7a5dfcb5fda"
+    },
+    "inv/n0/runs/6212/R3_leak_above/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (26, 28), 'other_diffs': []}"
+    },
+    "inv/n0/runs/6212/R3_leak_above/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "833d6c9a725f"
+    },
+    "inv/n0/runs/6212/R4_leak_below/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/6212/R4_leak_below/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "be50d431736f"
+    },
+    "inv/n0/runs/6212/R4_leak_below/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (20, 21), 'other_diffs': []}"
+    },
+    "inv/n0/runs/6212/R4_leak_below/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "633c158d0a54"
+    },
+    "inv/n0/runs/6212/R5_static/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/6212/R5_static/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "2c9e45e5650d"
+    },
+    "inv/n0/runs/6212/R5_static/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (49, 53), 'other_diffs': []}"
+    },
+    "inv/n0/runs/6212/R5_static/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "a18be56df631"
+    },
+    "inv/network_op/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/network_op/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "81edb515b154"
+    },
+    "inv/network_op/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (1, 1), 'other_diffs': []}"
+    },
+    "inv/status/n0.ok": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "seal/MANIFEST.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/instances[0]/inverter_gate/sha256",
+       "/instances[0]/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/NOT1_6212.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/source/sha256"
+      ],
+      "env": [
+       "/env_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "seal_push.json": {
+     "compared": "json",
+     "differences": 7,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line",
+       "/remote"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ],
+      "times": [
+       "/push_started_machine_utc",
+       "/pushed_at_machine_utc"
+      ]
+     },
+     "unlisted": []
+    },
+    "status.json": {
+     "compared": "listed file, not compared",
+     "identical": false
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/b2/K05/out_K05/NOT1_6212",
+   "only_new": [],
+   "only_ref": [],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/e2e17/out_K02/NOT1_6212",
+   "ref_driver": "campaign_run17",
+   "unlisted": [],
+   "verdict": "identical except listed"
+  },
+  {
+   "files": {
+    "U/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "U/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "519a6ce2db19"
+    },
+    "U/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (39, 48), 'other_diffs': []}"
+    },
+    "U/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "U/untrained_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "untrained.json": {
+     "compared": "json",
+     "differences": 5,
+     "listed": {
+      "cost": [
+       "/cpu_s"
+      ],
+      "seal_log": [
+       "/record_seal_log/branch",
+       "/record_seal_log/commit",
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/b2/K05/out_K05/U_NOT1_6212",
+   "only_new": [],
+   "only_ref": [],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/e2e17/out_K02/U_NOT1_6212",
+   "ref_driver": "campaign_run17",
+   "unlisted": [],
+   "verdict": "identical except listed"
+  },
+  {
+   "files": {
+    "N0/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N0/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "519a6ce2db19"
+    },
+    "N0/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (303, 306), 'other_diffs': []}"
+    },
+    "N0/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/trace.raw": {
+     "compared": "raw_compare",
+     "identical": true,
+     "info": "{'size': (19433552, 19433552), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': 'af272127d902'}"
+    },
+    "SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "duplicate_here.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "cost": [
+       "/cpu_s"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/MANIFEST.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/instances[0]/inverter_gate/sha256",
+       "/instances[0]/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/NOT1_6212.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/source/sha256"
+      ],
+      "env": [
+       "/env_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "seal_check.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/seal_dir",
+       "/seal_log[0]",
+       "/seal_log[1]"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal_fetch.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/remote"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal_wait.json": {
+     "compared": "json",
+     "differences": 6,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/line",
+       "/remote"
+      ]
+     },
+     "unlisted": [
+      "/attempts (length 7 vs 9)",
+      "/waited_s"
+     ]
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/b2/K06/out_K06/DUPX_NOT1_6212",
+   "only_new": [],
+   "only_ref": [],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/e2e17/out_K07/DUPX_NOT1_6212",
+   "ref_driver": "campaign_run17",
+   "unlisted": [
+    "seal_wait.json:/attempts (length 7 vs 9)",
+    "seal_wait.json:/waited_s"
+   ],
+   "verdict": "DIFFERS"
+  }
+ ],
+ "script_sha256": "6b96af262ef8996b2a34e9e1505d1aa882524e02d21fb17224355581af73ce77"
+}
