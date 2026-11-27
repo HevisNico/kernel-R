@@ -1,0 +1,268 @@
+{
+ "all_pass": true,
+ "analysis_own_check": {
+  "detail": {
+   "A1ii": {
+    "K0": {
+     "counted": false,
+     "not_sealed": true
+    },
+    "K3": {
+     "counted": true,
+     "refuted": true,
+     "seal_defect": true,
+     "stopped_by_own_check": true
+    },
+    "rc": 0
+   },
+   "analysis_rc": 0,
+   "checks": [
+    {
+     "check": "6212 refuted at K3, stopped by its own check, with its status",
+     "expected": "[{\"instance\": \"NOT1_6212\", \"stopped_by_own_check\": [{\"round\": \"C2\", \"status\": \"failed: stub: the run's own check (test)\"}]}]",
+     "matched": "[{\"instance\": \"NOT1_6212\", \"stopped_by_own_check\": [{\"round\": \"C2\", \"status\": \"failed: stub: the run's own check (test)\"}]}]",
+     "target": "/root/devtest_c3/c/root_ownchk",
+     "target_exists": true
+    },
+    {
+     "check": "6212 listed with its full status",
+     "expected": "failed: stub: the run's own check (test)",
+     "matched": "[{\"instance\": \"NOT1_6212\", \"machine\": \"machine_1\", \"round\": \"C2\", \"status\": \"failed: stub: the run's own check (test)\"}]",
+     "target": "/root/devtest_c3/c/root_ownchk",
+     "target_exists": true
+    },
+    {
+     "check": "6213, a simulator end: not completed at K3",
+     "expected": "[\"NOT1_6213\"]",
+     "matched": "[\"NOT1_6213\"]",
+     "target": "/root/devtest_c3/c/root_ownchk",
+     "target_exists": true
+    },
+    {
+     "check": "A1(ii): refuted with a defective seal, flagged",
+     "expected": "\"seal_defect\": true",
+     "matched": "{\"counted\": true, \"refuted\": true, \"seal_defect\": true, \"stopped_by_own_check\": true}",
+     "target": "/root/devtest_c3/c/root_ownchk_a1",
+     "target_exists": true
+    }
+   ],
+   "counts": {
+    "K0": {
+     "counted": 2,
+     "held": {
+      "list": [
+       "NOT1_6212",
+       "NOT1_6213"
+      ],
+      "n": 2
+     },
+     "instances": 2,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [],
+      "n": 0
+     },
+     "not_run": {
+      "list": [],
+      "n": 0
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [],
+      "n": 0
+     },
+     "refuted_stopped_by_own_check": {
+      "list": [],
+      "n": 0
+     }
+    },
+    "K3": {
+     "counted": 1,
+     "held": {
+      "list": [],
+      "n": 0
+     },
+     "instances": 2,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [
+       {
+        "instance": "NOT1_6213",
+        "status": "failed",
+        "step": "N2"
+       }
+      ],
+      "n": 1
+     },
+     "not_run": {
+      "list": [],
+      "n": 0
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [],
+      "n": 0
+     },
+     "refuted_stopped_by_own_check": {
+      "list": [
+       {
+        "instance": "NOT1_6212",
+        "stopped_by_own_check": [
+         {
+          "round": "C2",
+          "status": "failed: stub: the run's own check (test)"
+         }
+        ]
+       }
+      ],
+      "n": 1
+     }
+    }
+   },
+   "fixture_is_the_driver_state": true,
+   "run_rc": 0,
+   "stderr": "",
+   "steps": {
+    "NOT1_6212": {
+     "C0": "done",
+     "C1": "done",
+     "C3": "done",
+     "D": "done",
+     "N0": "done",
+     "N1": "done",
+     "N2": "failed",
+     "N3": "done",
+     "deck": "done",
+     "inverters": "done",
+     "seal": "done",
+     "sealpush": "done"
+    },
+    "NOT1_6213": {
+     "C0": "done",
+     "C1": "done",
+     "C3": "done",
+     "D": "done",
+     "N0": "done",
+     "N1": "done",
+     "N2": "failed",
+     "N3": "done",
+     "deck": "done",
+     "inverters": "done",
+     "seal": "done",
+     "sealpush": "done"
+    }
+   },
+   "stopped": [
+    {
+     "instance": "NOT1_6212",
+     "machine": "machine_1",
+     "round": "C2",
+     "status": "failed: stub: the run's own check (test)"
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 876.4
+ },
+ "sigkill_driver_only": {
+  "detail": {
+   "checks": [
+    {
+     "check": "run while the orphan child runs",
+     "expected": "ngspice process(es) running",
+     "matched": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+     "target": "/root/devtest_c3/c/root_sigkill",
+     "target_exists": true
+    },
+    {
+     "check": "resume while the orphan child runs",
+     "expected": "ngspice process(es) running",
+     "matched": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+     "target": "/root/devtest_c3/c/root_sigkill",
+     "target_exists": true
+    },
+    {
+     "check": "the later run found D running",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/root/devtest_c3/c/root_sigkill",
+     "target_exists": true
+    }
+   ],
+   "children_after_kill": [
+    2997
+   ],
+   "resume_while_child": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+   "run_while_child": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+   "steps": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 241.9
+ },
+ "sigterm_driver_only": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the driver logged the signal and killed its children",
+     "expected": "\"signal\": \"SIGTERM\"",
+     "matched": "[{\"at\": \"2026-11-27T09:51:51.800126Z\", \"killed_process_groups\": [2262], \"signal\": \"SIGTERM\"}]",
+     "target": "/root/devtest_c3/c/root_sigterm/SIGNALS.json",
+     "target_exists": true
+    },
+    {
+     "check": "the resume found D running",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/root/devtest_c3/c/root_sigterm",
+     "target_exists": true
+    }
+   ],
+   "children_before": [
+    2262
+   ],
+   "children_gone": true,
+   "pids": "2026-11-27T09:51:52.099375Z 2343 driver_resume_1.log\n",
+   "resume": "launched pid 2343",
+   "signals": [
+    {
+     "at": "2026-11-27T09:51:51.800126Z",
+     "killed_process_groups": [
+      2262
+     ],
+     "signal": "SIGTERM"
+    }
+   ],
+   "steps": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 212.8
+ }
+}
