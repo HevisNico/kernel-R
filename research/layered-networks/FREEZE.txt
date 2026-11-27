@@ -1,27 +1,34 @@
-LAYERED CAMPAIGN FREEZE CANDIDATE (prepared 2026-11-26, local; not pushed)
+LAYERED CAMPAIGN FREEZE RECORD (prepared 2026-11-27 on research/layered-campaign-dev; not on the freeze branch,
+which waits for the owner's go)
 
-SUPERSEDES: the review candidate at 54689b62 on research/layered-campaign-int is superseded by this one and is not the freeze.
+SUPERSEDES: the freeze candidate record of 2026-11-26 (dff747c4) and its pins. The driver is now campaign.py and the
+analysis analysis.py; the chain of drivers, analyses and templates they replace is no longer pinned (FREEZE_PINS.json
+against_dff747c4).
 
 Branch tips (on origin when this was written):
   main                              3f27bb36dadd77a57e27b8fa80f81c3864a02b0e
-  research/layered-networks         458bc7a6d763127ff2fe0214e2cb79a1a6549f9b
-  research/inverter-instances       d599300d51fcf3a1a4c33d103b89827f8ac4da41
-  research/layered-campaign-int     54689b62e8348af41b483a5b6879ad2cf95cafd7 (the superseded review candidate)
-  research/layered-campaign-freeze  this commit (local; built on main 3f27bb36, additions only)
+  research/layered-networks         458bc7a6d763127ff2fe0214e2cb79a1a6549f9b  (noise_commit)
+  research/inverter-instances       d599300d51fcf3a1a4c33d103b89827f8ac4da41  (kit_commit)
+  research/layered-campaign-dev     072d1f987e3f0c0552eba1da93c8594524f2e120  (the tree these pins were made over;
+                                    code tip ef374ccd; this record is the commit after it)
 
 Pins:
-  FREEZE_PINS.json                  sha256 94ace83a37a04757f67899d16da28d1efdaf947ea2c73f19aa065a6e9d3bcaaa  (155 files)
+  FREEZE_PINS.json                  sha256 7323d3ddc76204f704db0b12572c22c0135b5b5b96171b0d6c623220d263cd8f  (114 files)
   EXCLUDED.json                     sha256 783da1ff72299e842ea303e7df88420490fc580428c2163028979703c5f01ebf
     seeds_sha256                    eee874f2a48909db5a1bee09bf4759a4a23290d3edcff65c7a83bcac6b958988  (15561 integers, 219 refs)
   EXCLUDED_PRINT.txt                sha256 52a206afbf0ef82a5a5584eb9234dff76342acfc99fb18b492f6d3b95975972d
-  TEMPLATE_CAMPAIGN_5.json          sha256 fbf0c7cc020704ff45ed88ebeed322b53990c3abfee7b43b9cf4f0dc0d0f2df2  (the plan template)
+  campaign_template.json            sha256 02af33e0c79b3dbdc320d3dd4e0dab26374cbd00a79bc249fcf20631a3cce756  (the template;
+                                    campaign.FROZEN_TEMPLATE_SHA256)
   plan_split3.py (the splitter)     sha256 061f8b375aeef65adade60762866aab0fdc4da4562963b8776f4afe88a3635a9
-  campaign_run17.py (the driver)    sha256 c62a84916f0b133b3e84ae54e47e1395ebb3ef627146ae68e54bb0a36ff6bbe1
+  campaign.py (the driver)          sha256 d031fd7c9f661db7b55aa4a8256ab8530597fe742b2aabf576f9e8c0136bf9f9
+  analysis.py (the analysis)        sha256 f12baa8f477d2f8e80b5b794a548e12fb6cb7acef27c020aa7b430a87c280033
   stage_d6.py (stage D, kernel)     sha256 a4e2d9335c9a068e0a94067ff6dd5f5d0ad8df27eecfccebfd3c1c7f385c8aca
   leancell.py (the kernel check)    sha256 aca47f5220868f4716bc9ec9a7bdacae60563c7eab28a40248fa731e48c55f2e
   trace_extract.py (the extract)    sha256 e8b1ef3d7f80eac86867f3bfbcae43ca9d6f2f33aa575bb3ac005d90949a6320
-  analyze10.py (the analysis)       sha256 f7891416608329e76369ccc95af4d038f83e0fcf246731989d1293daabcba95e
+  sealpush2.py (the seal push)      sha256 15a012f11d1d402ce51ff7bc0316780667b375a25877709883e019c783701fef
+  sealpush.py (the seal log times)  sha256 231f2d2e3df56a5e1d606c1e62e309f13574fa66c6ae113e254f9e284d3c69f1
   d4_regate.py (its D4 regate)      sha256 3827d1a5b2a1c7a819ef293afbe5b00f822e0a78fb4ce12171ace76a3aa5c59b
+  tests/check_duplicate.py          sha256 6686f0cdc1557dbd497971e8f83b504f6669e19b2f5102ab8603ee6f7a2eff9f
   draw_seeds.py (the draw)          sha256 d793da47f402d296018d62cebeb7ee01cce34c76047d80287c84b30092d20e32
   beacon_verify.py (the beacon)     sha256 2339e04eceb90533b6afd842cb6184bd4bfbeee288db22725747f345757e9bd8
   beacon_chain.py (the chain)       sha256 7188dda1e46e01570fd04e71287dbfd6703f8e6561dcd59ee3b3689825b4124c
@@ -34,24 +41,61 @@ Tools (checked by envcheck_layered4 before every run):
   SKY130 PDK (efabless sky130_fd_pr)       commit 1232782c1b9fab3aacda74d67ce7c92bf7da8105
   the beacon check                         py_ecc 8.0.0 and its dependencies (requirements_beacon.txt)
 
-Driver to run: research/layered-networks/campaign_run17.py (launch | wait), with the plans written by plan_split3.py
-  from the draw and TEMPLATE_CAMPAIGN_5.json. It refuses a plan that differs from the template (and templates 1-4),
-  a remote duplicate without its home branch, and a launch with less than 40 GB free. Per machine it builds the
-  kernel library from the 12 pinned Lean sources.
-Disk: 40 GB free at launch; the 20 GB guard during the run holds every step, U and the remote duplicates, but not
-  the comparisons C<n>, which run and delete their round's raw (D4_D5_AUDIT.md; D3_DECISION.md: worst per-machine peak 14.7 GB at m = 12, 16.6 GB at m = 8, within 20).
+Plans: plan_split3.py DRAW.json campaign_template.json OUTDIR (m=12), one PLAN_K<nn>.json per machine. A plan is
+  never edited: campaign.py refuses a plan that differs from the template (a missing, extra or different key).
+Driver to run: research/layered-networks/campaign.py, mode campaign, as MACHINE_BRIEF.md has it:
+  python -B campaign.py check  campaign campaign_template.json PLAN_K<nn>.json          the checks alone (JSON)
+  python -B campaign.py launch campaign campaign_template.json PLAN_K<nn>.json OUTROOT  the checks, then the run, detached
+  python -B campaign.py wait   OUTROOT 580                     exit 0 when the run has ended, 3 while it runs (<= 590 s)
+  python -B campaign.py resume campaign campaign_template.json PLAN_K<nn>.json OUTROOT  after a stop; never a relaunch
+  python -B campaign.py run    campaign campaign_template.json PLAN_K<nn>.json OUTROOT  the run in the foreground (what
+                                                               launch and resume start)
+  python -B campaign.py status OUTROOT
+  Campaign mode refuses, and nothing starts, if the template is not campaign_template.json at the sha256 above; if a
+  file of FREEZE_PINS.json differs from its sha256, or campaign.py, analysis.py or the template is not in it; if the
+  tree is not clean (a changed tracked file, or an untracked .py or .json); if the kit or noise tree is not a clean
+  worktree at kit_commit or noise_commit; if ngspice runs; if OUTROOT is not empty; or with less than 40 GB free. The
+  pins' check is recorded in OUTROOT/TEMPLATE_CHECK.json. Per machine it builds the kernel library from the 12 pinned
+  Lean sources (campaign.KERNEL_SOURCES).
+Time limits (campaign_template.json time_limits_s): deck 120 s, inverters 3600 s, D 7200 s, seal 120 s, N 7200 s,
+  C 300 s, U 3600 s, dup 7200 s. Only a step's own limit stops it; the window is an expectation, not a limit.
+  Cores: 4 (U takes none of the budget). Rounds: 3. seal_push_delay_s: 2.0.
+Disk: 40 GB free at launch (disk_launch_gb); the 20 GB guard during the run (disk_guard_gb) holds every step, U and
+  the remote duplicates, but not the comparisons C<n>, which run and delete their round's raw (D4_D5_AUDIT.md;
+  D3_DECISION.md: worst per-machine peak 14.7 GB at m = 12, 16.6 GB at m = 8, within 20).
 Stage D: stage_d6.py. The Lean kernel (leancell.py, decide +kernel, clause by clause) is the last word on Cell.Valid
   of every R cell at K0 and K3; a kernel-mirror disagreement fails step D (the instance is not completed). The
   calibration clauses, the trained word and the inverter gate's mirror stay on the Python mirror.
 Trace extract: trace_extract.py on every N round of every instance, before the raw is deleted (parts over 50 MB with
   PARTS.txt). keep_raw keeps the N0 raw only (the originals of the remote duplicates).
-Remote duplicates: each waits (60 s polls, at most 6 h) for its home's SEALS.txt line on the home branch fetched by
-  name, then checks the line and the folder, then runs N0; at the limit it is not completed. No plan is edited.
-Analysis: research/layered-networks/analyze10.py (analyze9; the stage-D script is the latest the prediction names,
-  stage_d6 names itself and must carry the kernel field; the regeneration with stage_d6 on the pinned kernel library
-  must equal the sealed bytes).
+Remote duplicates (campaign_template.json duplicate_wait): each waits, polling every 60 s for at most 21600 s (6 h),
+  for its home's SEALS.txt line on the home branch (home_branch, written by plan_split3.py) fetched by name, then
+  checks the line and the folder, then runs N0; at the limit it is not completed. No plan is edited.
+Seal log: sealpush2.py push, one seal at a time per machine, to evidence/combined-seals-K<nn> on
+  https://github.com/HevisNico/kernel-R (seal_push.remote).
+Analysis: analysis.py campaign OUTDIR ROOT ... times=github controls=<the noise worktree at noise_commit>
+  It refuses unless every file of FREEZE_PINS.json matches over its own tree and that tree is clean; it reads the
+  pinned thresholds.json only; it accepts only roots written by this campaign.py in campaign mode on the frozen
+  template, whose driver checked this FREEZE_PINS.json. The push times come from GitHub's activity API (times=github).
+  Declared fallback: times=lsremote:LOG, the coordinator's ls-remote log (first-seen times, upper bounds of the push
+  times), if the activity API cannot be read.
 Read-only answers: D4_AUDIT.md, dev/yield_lot/aggregate/RECOUNT_NOISE4.md, POSTCHECK_DATA.md, KERNEL_RCELLS.md,
-  REHEARSAL13.md, DRYRUN_FINAL.md, FIXES_D1_D3.md, D3_DECISION.md, D4_D5_AUDIT.md.
+  REHEARSAL13.md, DRYRUN_FINAL.md, FIXES_D1_D3.md, D3_DECISION.md, D4_D5_AUDIT.md; for the driver and the analysis,
+  CAMPAIGN_DIFFERENCES.md and dev/equiv/ (TEST_C_NOTES.md, EQUIV_B_NOTES.md).
+
+SINCE EQUIVALENCE TEST (b)
+  Equivalence test (b) ran at 86a00ac2 on four test machines (dev/equiv/EQUIV_B.json, EQUIV_B_NOTES.md). The frozen
+  tree differs from 86a00ac2 only by:
+  - sealpush.py: the fix of sealpush.times for times=github (2011058e). GitHub records the first push of a log branch
+    as a branch creation (activity type branch_creation), and the times read only the type push, so the first seal
+    on each log branch had no push time and was counted not sealed; (b) found it. Now push and branch_creation give
+    a push time, never a force push or a branch deletion. The push and the fetch of the seal log call no changed
+    function (dev/equiv/b/FIX_SHA_TABLE.json: of the 35 files campaign.py runs or imports, only sealpush.py differs),
+    so the roots of (b) stand. At ef374ccd: (a) 24 of 24 identical, its negative differs in 24 of 24; (c) 19 of 19
+    pass; the analysis of the four run2 roots with times=github, twice, byte-identical, every seal timed and sealed
+    (margins 2.832 to 3.493 s), no seal defect (dev/equiv/b/run2/RESULTS_times_github_ef374ccd.json);
+  - the tests, the notes and the records (tests/, dev/equiv/, CAMPAIGN_DIFFERENCES.md);
+  - this record: FREEZE_PINS.json and FREEZE.txt.
 
 SEED DRAW
   draw_seeds.py draw <beacon randomness> <ROUND> EXCLUDED.json DRAW.json NOT1=60 ANDOR3=32 XOR3=37
