@@ -29,7 +29,8 @@ THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
   or a branch_deletion, and its OLDEST item must be its branch_creation, whose `after` is the announce commit; the
   push time is that item's. N1: it must be later than GitHub's push time of this tree's commit (pins.tree_commit) on
   FREEZE_BRANCH. N3: no drawn instance may have a SEALS.txt line pushed before the draw's round time (a reused seed,
-  or a rehearsal seed missing from the exclusion list). Test mode, offline, checks none of these three.
+  or a rehearsal seed missing from the exclusion list). Test mode, offline, checks N1 and N3 never, and the activity
+  rule only from activity=PATH (a JSON list of the raw items).
 - The exclusion list: excluded= must have the sha256 the announce names, and its seeds must be a superset of the
   freeze's pinned EXCLUDED.json (the second scan, after the rehearsal, only adds).
 - The round must be beacon_verify.round_after(the pinned quicknet chain, the announce's push time); the beacon value
@@ -166,7 +167,7 @@ ANNOUNCE_KEYS = ("format", "mode", "excluded_sha256", "sizes")
 ANNOUNCE_BRANCH = dict(campaign="evidence/combined-draw", rehearsal="evidence/combined-rehearsal-draw")
 FREEZE_BRANCH = "research/layered-campaign-freeze"     # N1: the announce must come after the frozen tree's push
 PLAN_LOCAL_KEYS = ("kit_tree", "noise_tree")   # campaign.resolve_trees: the only machine-local keys of PLAN.json
-KEYS = ("draw", "excluded", "announce", "times", "thresholds", "controls", "tips")
+KEYS = ("draw", "excluded", "announce", "activity", "times", "thresholds", "controls", "tips")
 
 # ---- the comparisons (A2, A6)
 VERDICTS = ("agrees", "refuted", "run failed", "observed only (no prediction)")      # compare_d.compare's verdicts
@@ -1364,6 +1365,13 @@ def check_draw(kw, mode, outdir, tree_commit=None):
             refuse("test mode: a draw with a beacon needs announce=DRAW_ANNOUNCE.txt")
         ab, push_utc = Path(kw["announce"]).read_bytes(), an["push_utc"]
         notice = "test draw: the announce and its push time are DRAW.json's own, not read from GitHub (test mode)"
+        if "activity" in kw:                              # offline: the announce branch's recorded activity items
+            items = json.loads(Path(kw["activity"]).read_text())
+            if not isinstance(items, list):
+                refuse("activity= must be a JSON list of GitHub activity items")
+            if announce_time(items, an["commit"], an["branch"]) != push_utc:
+                refuse(f"DRAW.json's announce push time {push_utc} is not its branch_creation's in activity=")
+            notice += "; the announce branch's activity checked from activity="
     else:
         if "announce" in kw:
             refuse(f"{mode} mode reads the announce from GitHub, not announce=")
