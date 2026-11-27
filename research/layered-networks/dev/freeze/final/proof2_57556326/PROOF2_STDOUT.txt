@@ -1,0 +1,21 @@
+runner self-test: [('a required block that exits 1', 1, 'ok'), ('a negative block that succeeds', 1, 'ok'), ('a negative block that commits (then exits 1)', 1, 'ok'), ('a twin ref committed under another identity', 1, 'ok'), ('a dirty clone', 1, 'ok'), ('a passing block and a refusing negative block', 0, 'ok')]
+passed 13, refused as expected 5, failed 0; exit code 0
+   01 vars                   PASSED
+   02 vars-rehearsal         PASSED
+   03 announce               PASSED
+   04 draw                   PASSED
+  04a NEG-announce-exists    REFUSED AS EXPECTED
+  04b NEG-draw-exists        REFUSED AS EXPECTED
+  04c NEG-inside-clone       REFUSED AS EXPECTED
+  04d NEG-scan-missing-branch REFUSED AS EXPECTED
+   05 second-scan            PASSED
+   06 rehearsal-draw         PASSED
+   07 list                   PASSED
+   08 check-list             PASSED
+   09 vars-campaign          PASSED
+   10 NEG-old-list           REFUSED AS EXPECTED
+   11 announce               PASSED
+   12 draw                   PASSED
+   13 owner-identity         PASSED
+   14 clone-clean            PASSED
+proof2 exit=0

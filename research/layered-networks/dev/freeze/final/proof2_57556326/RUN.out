@@ -1,0 +1,73 @@
+global identity during the run: someone else
+### 01 vars (pass)
+envcheck ok
+rc=0
+### 02 vars-rehearsal (pass)
+rc=0
+### 03 announce (pass)
+announce ok
+announce pushed: evidence/combined-rehearsal-draw feefc63ffe7d65c03493de99db2da9e02e9e3b56
+rc=0
+### 04 draw (pass)
+{'sha256': '84554367a327a817d3c92872973d9c7155bf85a14dfc3e0ef063e00a199b8fe3', 'beacon': 'b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3', 'round': 1000000, 'sizes': {'NOT1': 6, 'ANDOR3': 6, 'XOR3': 6}, 'machines': 12, 'recomputed': True, 'signature_verified': True, 'excluded': {'file': 'EXCLUDED.json', 'sha256': 'abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c', 'fraction_of_range': 0.0686, 'seeds_sha256': 'd9975dee4f80fb75ea5fb67d3d0301bbae2274b0857fc7d44dc216f1c67afbc6', 'count': 15741, 'superset_of_freeze': 'd9975dee4f80fb75ea5fb67d3d0301bbae2274b0857fc7d44dc216f1c67afbc6'}, 'announce': {'branch': 'evidence/combined-rehearsal-draw', 'commit': 'feefc63ffe7d65c03493de99db2da9e02e9e3b56', 'push_utc': '2023-09-27T08:19:24Z', 'from_github': False, 'sha256': '050efd55df1c96288d48625042b341116ce6a7da6bbe1157111eac896f39c17f'}}
+{"machines": 12, "duplicates": {"K10": [["NOT1_78394", "evidence/combined-seals-K09"]], "K11": [["ANDOR3_71018", "evidence/combined-seals-K08"]], "K12": [["XOR3_62982", "evidence/combined-seals-K03"]]}}
+draw published: evidence/combined-rehearsal-draw-result 7ed6148909cf2988c18f0e1f4cb02660e9384085
+rc=0
+### 04a NEG-announce-exists (neg)
+NEGCHECK commit=no
+NEGCHECK twin=same
+NEGCHECK github=same
+rc=0
+### 04b NEG-draw-exists (neg)
+NEGCHECK commit=no
+NEGCHECK twin=same
+NEGCHECK github=same
+rc=0
+### 04c NEG-inside-clone (neg)
+NEGCHECK commit=no
+NEGCHECK twin=same
+NEGCHECK github=same
+rc=0
+### 04d NEG-scan-missing-branch (neg)
+NEGCHECK commit=no
+NEGCHECK twin=same
+NEGCHECK github=same
+rc=0
+### 05 second-scan (pass)
+255
+fetched: every branch of the ls-remote at its tip (255)
+15884 excluded integers from 256 refs; sha256 2f10897cc76515f1758203170127d2fcd202f6cf6f2bc046b026bae98dcc4abe
+rc=0
+### 06 rehearsal-draw (pass)
+84554367a327a817d3c92872973d9c7155bf85a14dfc3e0ef063e00a199b8fe3  DRAW_REHEARSAL.json
+rc=0
+### 07 list (pass)
+18 rehearsal seeds, 72 noise seeds; 15884 integers, seeds_sha256 2f10897cc76515f1758203170127d2fcd202f6cf6f2bc046b026bae98dcc4abe
+rc=0
+### 08 check-list (pass)
+the list is right 18 72 sha256 ef04a56865baf0d19f2b3188a3af824bbdfc7de7bdfb67175a1c7222fc158c49
+rc=0
+### 09 vars-campaign (pass)
+rc=0
+### 10 NEG-old-list (neg)
+NEGCHECK commit=no
+NEGCHECK twin=same
+NEGCHECK github=same
+rc=0
+### 11 announce (pass)
+announce ok
+announce pushed: evidence/combined-draw f56cffdcdff786d9dd2771e7f323f487f61f66db
+rc=0
+### 12 draw (pass)
+{'sha256': 'ad71fca4fe6a01149637bace73f9eed0d870843fee37df9ce779e35b6f3aaaf7', 'beacon': 'b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3', 'round': 1000000, 'sizes': {'NOT1': 60, 'ANDOR3': 32, 'XOR3': 37}, 'machines': 12, 'recomputed': True, 'signature_verified': True, 'excluded': {'file': 'EXCLUDED_SECOND.json', 'sha256': 'ef04a56865baf0d19f2b3188a3af824bbdfc7de7bdfb67175a1c7222fc158c49', 'fraction_of_range': 0.069, 'seeds_sha256': '2f10897cc76515f1758203170127d2fcd202f6cf6f2bc046b026bae98dcc4abe', 'count': 15884, 'superset_of_freeze': 'd9975dee4f80fb75ea5fb67d3d0301bbae2274b0857fc7d44dc216f1c67afbc6'}, 'announce': {'branch': 'evidence/combined-draw', 'commit': 'f56cffdcdff786d9dd2771e7f323f487f61f66db', 'push_utc': '2023-09-27T08:19:24Z', 'from_github': False, 'sha256': '876236ff9a7e2e0517c9b92ceaf699eba3ada32351322f92bc3e51d6208da07c'}}
+{"machines": 12, "duplicates": {"K04": [["NOT1_66390", "evidence/combined-seals-K10"]], "K05": [["ANDOR3_49442", "evidence/combined-seals-K01"]], "K06": [["XOR3_33454", "evidence/combined-seals-K12"]]}}
+draw published: evidence/combined-draw-result 520da9d5fcc56d6f80f263e08e785100d1c947e5
+rc=0
+### 13 owner-identity (pass)
+refs/heads/evidence/combined-draw-result: one commit, the owner's
+refs/heads/evidence/combined-rehearsal-draw: one commit, the owner's
+refs/heads/evidence/combined-rehearsal-draw-result: one commit, the owner's
+rc=0
+### 14 clone-clean (pass)
+the clone is clean (only the PDK link)
+rc=0
