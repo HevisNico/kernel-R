@@ -1,0 +1,685 @@
+{
+ "all_pass": true,
+ "analysis_d10_manifest": {
+  "detail": {
+   "K0": null,
+   "checks": [
+    {
+     "check": "the changed comparison refused, named",
+     "expected": "NOT1_6212/N0/comparison.json: differs from NOT1_6212/SHA256SUMS",
+     "matched": "refused: files that differ from their manifests, or are missing: {\"/root/devtest_c2/c/root_d10\": [\"NOT1_6212/N0/comparison.json: differs from NOT1_6212/SHA256SUMS\"]}",
+     "target": "/root/devtest_c2/c/root_d10/NOT1_6212/N0/comparison.json",
+     "target_exists": true
+    }
+   ],
+   "rc": 1,
+   "stderr": "refused: files that differ from their manifests, or are missing: {\"/root/devtest_c2/c/root_d10\": [\"NOT1_6212/N0/comparison.json: differs from NOT1_6212/SHA256SUMS\"]}"
+  },
+  "ok": true,
+  "seconds": 0.3
+ },
+ "analysis_d8_not_run": {
+  "detail": {
+   "checks": [
+    {
+     "check": "K0: NOT1_6213 not run",
+     "expected": "[\"NOT1_6213\"]",
+     "matched": "[\"NOT1_6213\"]",
+     "target": "/root/devtest_c2/c/root_d8",
+     "target_exists": true
+    },
+    {
+     "check": "K3: NOT1_6213 not run",
+     "expected": "[\"NOT1_6213\"]",
+     "matched": "[\"NOT1_6213\"]",
+     "target": "/root/devtest_c2/c/root_d8",
+     "target_exists": true
+    }
+   ],
+   "counts_NOT1": {
+    "K0": {
+     "counted": 1,
+     "held": {
+      "list": [
+       "NOT1_6212"
+      ],
+      "n": 1
+     },
+     "instances": 2,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [],
+      "n": 0
+     },
+     "not_run": {
+      "list": [
+       {
+        "instance": "NOT1_6213",
+        "machine": "machine_1",
+        "why": "no folder: never started"
+       }
+      ],
+      "n": 1
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [],
+      "n": 0
+     },
+     "refuted_stopped_by_own_check": {
+      "list": [],
+      "n": 0
+     }
+    },
+    "K3": {
+     "counted": 1,
+     "held": {
+      "list": [
+       "NOT1_6212"
+      ],
+      "n": 1
+     },
+     "instances": 2,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [],
+      "n": 0
+     },
+     "not_run": {
+      "list": [
+       {
+        "instance": "NOT1_6213",
+        "machine": "machine_1",
+        "why": "no folder: never started"
+       }
+      ],
+      "n": 1
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [],
+      "n": 0
+     },
+     "refuted_stopped_by_own_check": {
+      "list": [],
+      "n": 0
+     }
+    }
+   },
+   "rc": 0,
+   "stderr": ""
+  },
+  "ok": true,
+  "seconds": 15.1
+ },
+ "analysis_d9_copies": {
+  "detail": {
+   "checks": [
+    {
+     "check": "30 copies refused",
+     "expected": "the home instance NOT1 6212 is in more than one root",
+     "matched": "refused: the home instance NOT1 6212 is in more than one root: machine_1 and machine_2",
+     "target": "/root/devtest_c2/c/root_d9_01",
+     "target_exists": true
+    },
+    {
+     "check": "one root twice refused",
+     "expected": "a root is given more than once",
+     "matched": "refused: a root is given more than once: ['/root/devtest_c2/c/root_d9_00', '/root/devtest_c2/c/root_d9_00']",
+     "target": "/root/devtest_c2/c/root_d9_00",
+     "target_exists": true
+    }
+   ],
+   "rc": 1,
+   "stderr": "refused: the home instance NOT1 6212 is in more than one root: machine_1 and machine_2",
+   "twice_rc": 1
+  },
+  "ok": true,
+  "seconds": 1.6
+ },
+ "analysis_forged_pins": {
+  "detail": {
+   "a CAMPAIGN root whose driver checked another FREEZE_PINS.json": [
+    1,
+    "refused: roots whose driver checked another FREEZE_PINS.json than this tree's (ae3b8fb16db1): ['root_1']"
+   ],
+   "checks": [
+    {
+     "check": "times=bare",
+     "expected": "campaign mode: times must be github, not 'bare'",
+     "matched": "refused: campaign mode: times must be github, not 'bare'",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "thresholds=another file",
+     "expected": "campaign mode reads the pinned thresholds.json only",
+     "matched": "refused: campaign mode reads the pinned thresholds.json only",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "controls=another tree",
+     "expected": "campaign mode: controls must be the noise tree at",
+     "matched": "refused: campaign mode: controls must be the noise tree at 458bc7a6d763 (/root/devtest_c2/c/tree_pins.wt-458bc7a6/research/layered-networks)",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "the home run's TEST root itself",
+     "expected": "roots not run by this campaign.py on the frozen template in campaign mode",
+     "matched": "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['root_1']",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .py in the analysis tree",
+     "expected": "is not clean (a changed tracked file, or an untracked .py/.json)",
+     "matched": "refused: campaign mode: the tree at 8e41ad571eb2 is not clean (a changed tracked file, or an untracked .py/.json)",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "a CAMPAIGN root whose driver checked another FREEZE_PINS.json",
+     "expected": "roots whose driver checked another FREEZE_PINS.json than this tree's",
+     "matched": "refused: roots whose driver checked another FREEZE_PINS.json than this tree's (ae3b8fb16db1): ['root_1']",
+     "target": "/root/devtest_c2/c/root_home_forged_pins",
+     "target_exists": true
+    },
+    {
+     "check": "control: the same forged root with this tree's pins",
+     "expected": "campaign mode: draw=DRAW.json is required",
+     "matched": "refused: campaign mode: draw=DRAW.json is required",
+     "must_not_contain": "another FREEZE_PINS.json",
+     "target": "/root/devtest_c2/c/root_home_forged_control",
+     "target_exists": true
+    }
+   ],
+   "control: the same forged root with this tree's pins": [
+    1,
+    "refused: campaign mode: draw=DRAW.json is required"
+   ],
+   "controls=another tree": [
+    1,
+    "refused: campaign mode: controls must be the noise tree at 458bc7a6d763 (/root/devtest_c2/c/tree_pins.wt-458bc7a6/research/layered-networks)"
+   ],
+   "the home run's TEST root itself": [
+    1,
+    "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['root_1']"
+   ],
+   "thresholds=another file": [
+    1,
+    "refused: campaign mode reads the pinned thresholds.json only"
+   ],
+   "times=bare": [
+    1,
+    "refused: campaign mode: times must be github, not 'bare'"
+   ],
+   "untracked .py in the analysis tree": [
+    1,
+    "refused: campaign mode: the tree at 8e41ad571eb2 is not clean (a changed tracked file, or an untracked .py/.json)"
+   ]
+  },
+  "ok": true,
+  "seconds": 8.1
+ },
+ "analysis_hardening": {
+  "detail": {
+   "A4: a root path with '='": [
+    1,
+    "refused: unknown argument '/root/devtest_c2/c/root_h=eq' (keys: draw, excluded, announce, activity, times, thresholds, controls, tips; a root path cannot contain '=')"
+   ],
+   "A4: no root": [
+    1,
+    "refused: no root"
+   ],
+   "A4: unknown key": [
+    1,
+    "refused: unknown argument 'colour=red' (keys: draw, excluded, announce, activity, times, thresholds, controls, tips; a root path cannot contain '=')"
+   ],
+   "A5: python -O": [
+    1,
+    "refused: Python runs with -O (sys.flags.optimize): run analysis.py without it"
+   ],
+   "A6: an unknown verdict": [
+    1,
+    "refused: /root/devtest_c2/c/root_h_a6: NOT1_6212/N0/comparison.json: unknown verdict 'agrees mostly'"
+   ],
+   "A7": {
+    "expected": 1,
+    "failed": 0,
+    "not_judged": 0,
+    "passed": 1,
+    "present": 1
+   },
+   "B10: a non-empty OUTDIR": [
+    1,
+    "refused: OUTDIR /root/devtest_c2/c/an_h_full exists and is not an empty folder"
+   ],
+   "B16/D8: a verified draw, the root's plan is none of the expected plans": [
+    1,
+    "refused: /root/devtest_c2/c/root_home: PLAN.json is none of the expected plans of the draw"
+   ],
+   "B16: one changed signature byte": [
+    1,
+    "refused: DRAW.json: the beacon round does not verify against the pinned quicknet key: {'round': 1000000, 'randomness_ok': False, 'ok': False, 'why': \"point decoding: ValueError('The given point is not on G1: y**2 = x**3 + b')\"}"
+   ],
+   "B16: one seed changed, the signature kept": [
+    1,
+    "refused: DRAW.json is not draw_seeds.draw of its beacon and round on the excluded= list at the sizes {'ANDOR3': 1, 'NOT1': 2, 'XOR3': 1} (with its beacon_round and announce), byte for byte"
+   ],
+   "B16: the round off by one (the announce pushed 3 s later)": [
+    1,
+    "refused: DRAW.json's round 1000000 is not the round the announce's push time fixes (1000001, 2023-09-27T08:19:27Z + 600 s)"
+   ],
+   "B2": {
+    "K0": {
+     "counted": false,
+     "not_sealed": true
+    },
+    "rc": 0,
+    "seal": {
+     "log": {
+      "why": "no valid seal"
+     },
+     "log_ok": false,
+     "regenerated_identical": false,
+     "regeneration_why": "the seal folder holds ['MANIFEST.json', 'NOT1_6212.copy.json', 'NOT1_6212.json', 'SHA256SUMS'], not exactly MANIFEST.json, SHA256SUMS and NOT1_6212.json"
+    },
+    "stderr": ""
+   },
+   "B4: a comparison compare_d2 does not reproduce": [
+    1,
+    "refused: /root/devtest_c2/c/root_h_b4: NOT1_6212/N1/comparison.json is not what the pinned compare_d2 computes from its seal and noisy_record.json"
+   ],
+   "B8: a read file under no manifest line": [
+    1,
+    "refused: /root/devtest_c2/c/root_h_b8: NOT1_6212/D/record.json is read but is under no verified manifest line and not on UNMANIFESTED"
+   ],
+   "B9": {
+    "notice": [
+     "no draw: the expected plans are each root's own PLAN.json (test mode, no draw=)",
+     "root not finished: machine_1 (1 seal lines on evidence/combined-seals-K01)"
+    ],
+    "rc": 0,
+    "stderr": ""
+   },
+   "checks": [
+    {
+     "check": "A4: unknown key",
+     "expected": "unknown argument 'colour=red'",
+     "matched": "refused: unknown argument 'colour=red' (keys: draw, excluded, announce, activity, times, thresholds, controls, tips; a root path cannot contain '=')",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "A4: a root path with '='",
+     "expected": "unknown argument",
+     "matched": "refused: unknown argument '/root/devtest_c2/c/root_h=eq' (keys: draw, excluded, announce, activity, times, thresholds, controls, tips; a root path cannot contain '=')",
+     "target": "/root/devtest_c2/c/root_h=eq",
+     "target_exists": true
+    },
+    {
+     "check": "A4: no root",
+     "expected": "refused: no root",
+     "matched": "refused: no root",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "A5: python -O",
+     "expected": "Python runs with -O",
+     "matched": "refused: Python runs with -O (sys.flags.optimize): run analysis.py without it",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B10: a non-empty OUTDIR",
+     "expected": "exists and is not an empty folder",
+     "matched": "refused: OUTDIR /root/devtest_c2/c/an_h_full exists and is not an empty folder",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "A6: an unknown verdict",
+     "expected": "unknown verdict 'agrees mostly'",
+     "matched": "refused: /root/devtest_c2/c/root_h_a6: NOT1_6212/N0/comparison.json: unknown verdict 'agrees mostly'",
+     "target": "/root/devtest_c2/c/root_h_a6",
+     "target_exists": true
+    },
+    {
+     "check": "B4: a comparison compare_d2 does not reproduce",
+     "expected": "NOT1_6212/N1/comparison.json is not what the pinned compare_d2 computes",
+     "matched": "refused: /root/devtest_c2/c/root_h_b4: NOT1_6212/N1/comparison.json is not what the pinned compare_d2 computes from its seal and noisy_record.json",
+     "target": "/root/devtest_c2/c/root_h_b4",
+     "target_exists": true
+    },
+    {
+     "check": "B8: a read file under no manifest line",
+     "expected": "NOT1_6212/D/record.json is read but is under no verified manifest line",
+     "matched": "refused: /root/devtest_c2/c/root_h_b8: NOT1_6212/D/record.json is read but is under no verified manifest line and not on UNMANIFESTED",
+     "target": "/root/devtest_c2/c/root_h_b8",
+     "target_exists": true
+    },
+    {
+     "check": "B1/B2: an extra file in the seal folder is a seal defect",
+     "expected": "not exactly MANIFEST.json",
+     "matched": "the seal folder holds ['MANIFEST.json', 'NOT1_6212.copy.json', 'NOT1_6212.json', 'SHA256SUMS'], not exactly MANIFEST.json, SHA256SUMS and NOT1_6212.json",
+     "target": "/root/devtest_c2/c/root_h_b2",
+     "target_exists": true
+    },
+    {
+     "check": "B9: a root without DONE is analysed, not finished",
+     "expected": "root not finished: machine_1",
+     "matched": "[\"no draw: the expected plans are each root's own PLAN.json (test mode, no draw=)\", \"root not finished: machine_1 (1 seal lines on evidence/combined-seals-K01)\"]",
+     "target": "/root/devtest_c2/c/root_h_b9",
+     "target_exists": true
+    },
+    {
+     "check": "A7: the expected U, present and passed",
+     "expected": "\"expected\": 1, \"failed\": 0, \"not_judged\": 0, \"passed\": 1, \"present\": 1",
+     "matched": "{\"expected\": 1, \"failed\": 0, \"not_judged\": 0, \"passed\": 1, \"present\": 1}",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16: one seed changed, the signature kept",
+     "expected": "DRAW.json is not draw_seeds.draw of its beacon and round",
+     "matched": "refused: DRAW.json is not draw_seeds.draw of its beacon and round on the excluded= list at the sizes {'ANDOR3': 1, 'NOT1': 2, 'XOR3': 1} (with its beacon_round and announce), byte for byte",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16: the round off by one (the announce pushed 3 s later)",
+     "expected": "is not the round the announce's push time fixes",
+     "matched": "refused: DRAW.json's round 1000000 is not the round the announce's push time fixes (1000001, 2023-09-27T08:19:27Z + 600 s)",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16: one changed signature byte",
+     "expected": "the beacon round does not verify",
+     "matched": "refused: DRAW.json: the beacon round does not verify against the pinned quicknet key: {'round': 1000000, 'randomness_ok': False, 'ok': False, 'why': \"point decoding: ValueError('The given point is not on G1: y**2 = x**3 + b')\"}",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16/D8: a verified draw, the root's plan is none of the expected plans",
+     "expected": "PLAN.json is none of the expected plans of the draw",
+     "matched": "refused: /root/devtest_c2/c/root_home: PLAN.json is none of the expected plans of the draw",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "owner: stopped after a differing N1, refuted (manifest not final)",
+     "expected": "\"counted\": true, \"manifest_not_final\": true, \"refuted\": true",
+     "matched": "{\"counted\": true, \"manifest_not_final\": true, \"refuted\": true}",
+     "target": "/root/devtest_c2/c/root_h_partial",
+     "target_exists": true
+    }
+   ],
+   "partial": {
+    "K0": {
+     "counted": false
+    },
+    "K3": {
+     "counted": true,
+     "manifest_not_final": true,
+     "refuted": true
+    },
+    "counts_K0_not_completed": {
+     "list": [
+      {
+       "instance": "NOT1_6212",
+       "status": "not completed, manifest not final (no verified instance manifest: the machine stopped)",
+       "step": null
+      }
+     ],
+     "n": 1
+    },
+    "notice": [
+     "no draw: the expected plans are each root's own PLAN.json (test mode, no draw=)",
+     "root not finished: machine_1 (1 seal lines on evidence/combined-seals-K01)"
+    ],
+    "rc": 0,
+    "stderr": ""
+   }
+  },
+  "ok": true,
+  "seconds": 101.5
+ },
+ "analysis_refuses": {
+  "detail": {
+   "campaign_on_test": "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/analysis.py']",
+   "checks": [
+    {
+     "check": "campaign mode: the dev tree's analysis.py differs from its pin",
+     "expected": "pinned files differ from FREEZE_PINS.json: ['research/layered-networks/analysis.py']",
+     "matched": "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/analysis.py']",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "OUTDIR inside the root",
+     "expected": "lies inside the root",
+     "matched": "refused: OUTDIR /root/devtest_c2/c/root_home/analysis lies inside the root /root/devtest_c2/c/root_home",
+     "target": "/root/devtest_c2/c/root_home",
+     "target_exists": true
+    }
+   ],
+   "outdir_inside": "refused: OUTDIR /root/devtest_c2/c/root_home/analysis lies inside the root /root/devtest_c2/c/root_home"
+  },
+  "ok": true,
+  "seconds": 0.4
+ },
+ "analysis_tampered": {
+  "detail": {
+   "A1": {
+    "K3": {
+     "counted": true,
+     "refuted": true
+    },
+    "counts_K3": {
+     "counted": 1,
+     "held": {
+      "list": [],
+      "n": 0
+     },
+     "instances": 1,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [],
+      "n": 0
+     },
+     "not_run": {
+      "list": [],
+      "n": 0
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [
+       "NOT1_6212"
+      ],
+      "n": 1
+     },
+     "refuted_stopped_by_own_check": {
+      "list": [],
+      "n": 0
+     }
+    },
+    "rc": 0,
+    "verdict": "refuted (no D4 audit in this group)"
+   },
+   "A2": {
+    "K0": {
+     "counted": false,
+     "not_sealed": true
+    },
+    "K3": {
+     "counted": false,
+     "not_sealed": true
+    },
+    "not_sealed_K3": [
+     {
+      "instance": "NOT1_6212",
+      "verdicts": {
+       "C0": "agrees",
+       "C1": "agrees",
+       "C2": "agrees",
+       "C3": "agrees"
+      }
+     }
+    ],
+    "rc": 0,
+    "seal": {
+     "log": {
+      "commit": "d0d463c657485bcaffaaec3bc927f720d4eefa43",
+      "margin_s": 2.013,
+      "pushed_utc": "2026-11-27T07:38:35.149537Z",
+      "stage_n_start": "2026-11-27T07:38:37.162581Z"
+     },
+     "log_ok": true,
+     "regenerated_identical": false,
+     "regeneration_why": "D/prediction.json differs from its seal (the sealed prediction is the one read)"
+    },
+    "stage_d_room_K3": true
+   },
+   "checks": [
+    {
+     "check": "A1: K3 refuted beside a timed-out round",
+     "expected": "{\"counted\": true, \"refuted\": true}",
+     "matched": "{\"counted\": true, \"refuted\": true}",
+     "target": "/root/devtest_c2/c/root_tampered_A1",
+     "target_exists": true
+    },
+    {
+     "check": "A2: the changed D/prediction.json is a seal defect",
+     "expected": "D/prediction.json differs from its seal",
+     "matched": "D/prediction.json differs from its seal (the sealed prediction is the one read)",
+     "target": "/root/devtest_c2/c/root_tampered_A2",
+     "target_exists": true
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 30.4
+ },
+ "differing_duplicate": {
+  "detail": {
+   "analysis_rc": 0,
+   "checker_last": "DUPLICATE DIFFERS",
+   "checks": [
+    {
+     "check": "the duplicate judged not identical",
+     "expected": "\"identical\": false",
+     "matched": "{\"identical\": false}",
+     "target": "/root/devtest_c2/c/analysis_dupdiff/RESULTS.json",
+     "target_exists": true
+    }
+   ],
+   "comparison": {
+    "equals_original": true,
+    "verdict": "agrees"
+   },
+   "duplicate": [
+    {
+     "cpu_s": 86.2,
+     "exit": 0,
+     "group": "NOT1",
+     "instance": "NOT1_6212",
+     "ok": true,
+     "timed_out": false
+    }
+   ],
+   "identical": false
+  },
+  "ok": true,
+  "seconds": 119.5
+ },
+ "home_run": {
+  "detail": {
+   "U": [
+    {
+     "cpu_s": 25.9,
+     "exit": 0,
+     "instance": "NOT1_6212",
+     "inverter_fires_reported": [
+      {
+       "inverter": 0,
+       "slot": 0
+      }
+     ],
+     "ok": true,
+     "patterns": 2,
+     "r_cell_fires": [],
+     "record_seal_log": {
+      "branch": "evidence/combined-seals-K01",
+      "commit": "d0d463c657485bcaffaaec3bc927f720d4eefa43"
+     },
+     "seal_log": {
+      "branch": "evidence/combined-seals-K01",
+      "commit": "d0d463c657485bcaffaaec3bc927f720d4eefa43"
+     },
+     "timed_out": false,
+     "tool": "controls4.py"
+    }
+   ],
+   "checks": [
+    {
+     "check": "every step done",
+     "expected": "[\"done\"]",
+     "matched": "[\"done\"]",
+     "target": "/root/devtest_c2/c/root_home/DONE",
+     "target_exists": true
+    }
+   ],
+   "steps": {
+    "C0": "done",
+    "C1": "done",
+    "C2": "done",
+    "C3": "done",
+    "D": "done",
+    "N0": "done",
+    "N1": "done",
+    "N2": "done",
+    "N3": "done",
+    "deck": "done",
+    "inverters": "done",
+    "seal": "done",
+    "sealpush": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 596.1
+ }
+}
