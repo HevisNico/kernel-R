@@ -60,6 +60,13 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   counts as passed only if standin_draw_valid passed in the same run (so a refusal of the arguments or of the root
   does not count).
   Not exercised: the push time read from GitHub, the round fetched from drand.
+- E1 round_own_check_failed: K05 with NOT1_6220's round N2 left as the driver leaves a run stopped by its own check
+  (see failed_round: the record's status "failed: the tail leak must be set before it starts", N2 failed with why
+  "exit 1", no C2, no N2/comparison.json, the manifests and RESULT_INSTANCES.json rebuilt by the driver's rules). Must:
+  exit 0, NOT1_6220 among the K3 refuted instances, and a node of counts.NOT1.K3 naming it with its status and "own
+  check" in its key path or text; NOT1_6212 held at K0 and K3.
+- E1 round_simulator_ended (the twin): the same with "failed: the simulator ended during: tran 1n 2n". Must: exit 0,
+  NOT1_6220 in the K3 not_completed row and not refuted; NOT1_6212 held. (Expected to pass before the fix too.)
 - control k05_alone and control k05_with_dupx (K05 + K06): must pass before and after the fix: exit 0 and NOT1
   counted 2 at K0 and K3 (DUPX_ folders are controls, never counted).
 
@@ -476,6 +483,104 @@ def standin_run(tmp, src, label, **mutation):
     return run(tmp, [root], label, extra=args)
 
 
+# ------------------------------------------------------------------------------------------------ E1: a run's own check
+# How it arises (controls4.py stagen and campaign.py Instance.step / Instance.round): when noise2.train_and_test raises
+# inside controls4.stagen, the exception is caught, the trace is still written (trace.digest.json), and the record
+# N<n>/noisy_record.json is written with status "failed: <message>" and empty lessons, words, tests and skews; stagen
+# exits 1. Both outputs exist, so campaign.py records N<n> as {status: "failed", why: "exit 1"} with no outputs; the
+# round stops there, so C<n> never runs, N<n>/comparison.json does not exist, and after_comparison (the extract) never
+# runs. The other rounds run in parallel and are untouched. At the end the driver writes the instance's SHA256SUMS
+# (every *.json but status.json), RESULT_INSTANCES.json (its summary: step statuses, verdicts, times),
+# SHA256SUMS.instances, RESULT.json and the root SHA256SUMS. All are rebuilt here by the same rules.
+# Not rebuilt: the raw trace (N<n>/trace.raw would remain, no extract having run); it is listed in no manifest and the
+# analysis does not read it.
+
+OWN_CHECK = "failed: the tail leak must be set before it starts"      # instrument.py's assertion during training
+SIM_ENDED = "failed: the simulator ended during: tran 1n 2n"          # session.py's RuntimeError
+
+
+def driver_dumps(obj):
+    return json.dumps(obj, indent=1, sort_keys=True) + "\n"          # campaign.dumps
+
+
+def failed_round(root, inst, n, status):
+    """Instance `inst` of `root` as the driver leaves it when N<n>'s own run fails with `status`."""
+    d = root / inst
+    nd = d / f"N{n}"
+    rec = json.loads((nd / "noisy_record.json").read_text())
+    rec.update(status=status, lessons=[], words={}, tests=[], skews=[])
+    (nd / "noisy_record.json").write_text(json.dumps(rec, indent=1, default=str) + "\n")   # controls4's writer
+    (nd / "comparison.json").unlink()
+    shutil.rmtree(nd / "extract", ignore_errors=True)
+    (d / f"C{n}.log").unlink(missing_ok=True)
+    st = json.loads((d / "status.json").read_text())
+    old = st["steps"][f"N{n}"]
+    st["steps"][f"N{n}"] = dict(argv=old["argv"], started=old["started"], status="failed", why="exit 1",
+                                wall_s=old.get("wall_s"), cpu_s=old.get("cpu_s"), ended=old["ended"], cores=old.get("cores", 1))
+    st["steps"].pop(f"C{n}", None)
+    (d / "status.json").write_text(driver_dumps(st))
+    files = sorted(p for p in d.rglob("*.json") if p.name != "status.json" and "lean_build" not in p.parts)
+    (d / "SHA256SUMS").write_text("".join(f"{sha(p)}  {p.relative_to(d)}\n" for p in files))   # Instance.summary
+    for f in ("RESULT_INSTANCES.json", "RESULT.json"):
+        if not (root / f).exists():
+            continue
+        r = json.loads((root / f).read_text())
+        for x in r["instances"]:
+            if f"{x['tag']}_{x['seed']}" == inst:
+                x["steps"] = {k: v["status"] for k, v in st["steps"].items()}
+                x["verdicts"].pop(f"C{n}", None)
+                for k in ("cpu_s", "wall_s"):
+                    x[k] = {k_: v.get(k) for k_, v in st["steps"].items()}
+        (root / f).write_text(driver_dumps(r))
+    for f in (f"{inst}/SHA256SUMS", "RESULT_INSTANCES.json", "RESULT.json"):
+        redeclare(root, f)
+
+
+def own_check_entry(res, inst, status):
+    """A node under counts.NOT1.K3 naming `inst` and its status, with "own check" in its path or content."""
+    def walk(x, path):
+        if isinstance(x, dict):
+            yield path, x
+            for k, v in x.items():
+                yield from walk(v, path + [str(k)])
+        elif isinstance(x, list):
+            for i, v in enumerate(x):
+                yield from walk(v, path + [str(i)])
+    k3 = ((res or {}).get("counts", {}).get("NOT1") or {}).get("K3") or {}
+    for path, node in walk(k3, []):
+        if node is k3:
+            continue
+        text = json.dumps(node) + " " + " ".join(path)
+        if inst in text and status.split("failed: ", 1)[1] in text and ("own check" in text or "own_check" in text):
+            return dict(path=path, node=node)
+    return None
+
+
+def case_round_own_check_failed(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    failed_round(root, "NOT1_6220", 2, OWN_CHECK)
+    r, res, obs = run(tmp, [root], "round_own_check_failed")
+    hit = own_check_entry(res, "NOT1_6220", OWN_CHECK)
+    obs["own_check_entry"] = hit
+    g = ((res or {}).get("groups") or {}).get("NOT1", {}).get("K3", {})
+    ok = (r.returncode == 0 and hit is not None and "NOT1_6220" in g.get("refuted_instances", [])
+          and all("NOT1_6212" in res["counts"]["NOT1"][lv]["held"]["list"] for lv in ("K0", "K3")))
+    return ok, obs
+
+
+def case_round_simulator_ended(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    failed_round(root, "NOT1_6220", 2, SIM_ENDED)
+    r, res, obs = run(tmp, [root], "round_simulator_ended")
+    if res is None:
+        return False, obs
+    k3 = res["counts"]["NOT1"]["K3"]
+    nc = json.dumps(k3["not_completed"]["list"])
+    ok = (r.returncode == 0 and "NOT1_6220" in nc and "NOT1_6220" not in res["groups"]["NOT1"]["K3"]["refuted_instances"]
+          and all("NOT1_6212" in res["counts"]["NOT1"][lv]["held"]["list"] for lv in ("K0", "K3")))
+    return ok, obs
+
+
 STANDIN_CONTROL = {}
 
 
@@ -612,6 +717,12 @@ CASES = [
      "an exclusion list missing one pinned seed (announced, and the draw recomputed over it): refused"),
     ("draw", "standin_excluded_sha_differs", case_standin_excluded_sha_differs,
      "an exclusion list with the pinned seeds but other bytes than announced: refused"),
+    ("E1", "round_own_check_failed", case_round_own_check_failed,
+     "N2 of NOT1_6220 stopped by its own check (" + OWN_CHECK + "): exit 0; refuted at K3, in a sub-row about the "
+     "run's own check listing the status; NOT1_6212 held"),
+    ("E1", "round_simulator_ended", case_round_simulator_ended,
+     "the twin, N2 ended by the simulator (" + SIM_ENDED + "): exit 0; NOT1_6220 not completed at K3, not refuted; "
+     "NOT1_6212 held"),
     ("D10", "one_byte_in_comparison", case_one_byte_in_comparison, "refused; the output names N0/comparison.json"),
     ("D10", "listed_file_missing", case_listed_file_missing, "refused; the output names extract.json"),
     ("D10", "stopped_mid_instance", case_stopped_mid_instance,
