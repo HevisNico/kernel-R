@@ -8,6 +8,9 @@
    "research/layered-networks/campaign_template.json"
   ],
   "changed": [
+   "research/layered-networks/beacon_verify.py",
+   "research/layered-networks/draw_seeds.py",
+   "research/layered-networks/plan_split.py",
    "research/layered-networks/sealpush.py"
   ],
   "removed": [
@@ -62,7 +65,7 @@
    "kernel_library"
   ]
  },
- "base": "research/layered-campaign-dev, the tree at 63facf70 (code tip ef374ccd) with the exclusion list rescanned",
+ "base": "research/layered-campaign-dev, the tree at 483f90c5 (code of 04d05b47) with the exclusion list rescanned last (2026-11-27, 256 refs)",
  "count": 114,
  "format": "layered-freeze-pins/1",
  "groups": {
@@ -85,13 +88,13 @@
    "research/learned-coincidence/TwoRailsTarget.lean": "bf77dabd748aa9132d06cb87f5137b44c95aa528cf8c22232770276d11cd6347"
   },
   "campaign: the driver, the analysis and the template (MUST_BE_PINNED)": {
-   "research/layered-networks/analysis.py": "f12baa8f477d2f8e80b5b794a548e12fb6cb7acef27c020aa7b430a87c280033",
+   "research/layered-networks/analysis.py": "f63ee672a8cb1921bab5d7cec80b11442de798379675cf26330849e7a6909b5a",
    "research/layered-networks/campaign.py": "d031fd7c9f661db7b55aa4a8256ab8530597fe742b2aabf576f9e8c0136bf9f9",
    "research/layered-networks/campaign_template.json": "02af33e0c79b3dbdc320d3dd4e0dab26374cbd00a79bc249fcf20631a3cce756"
   },
   "code the campaign runs, imports or reads (closure of campaign.py, analysis.py, plan_split3, draw_seeds, beacon_verify, beacon_chain, d4_regate, leancell and tests/check_duplicate; noise4_gate/sitecustomize.py, which indeck_noise4 puts on the path)": {
    "research/layered-networks/beacon_chain.py": "7188dda1e46e01570fd04e71287dbfd6703f8e6561dcd59ee3b3689825b4124c",
-   "research/layered-networks/beacon_verify.py": "2339e04eceb90533b6afd842cb6184bd4bfbeee288db22725747f345757e9bd8",
+   "research/layered-networks/beacon_verify.py": "7817866f50d1414897a107986890ebfbfc0426557a776e04d556325b4c0a4f0a",
    "research/layered-networks/compare_d.py": "cc49c43c90f5a5d40ee387a0245d0ae5f01f60f2e3d3bb3dfdc643dde9ccdeef",
    "research/layered-networks/compare_d2.py": "0e783e6ffefdc4ac465481ef37974b5a3a2f589e1a562ea5e855970e7acc8221",
    "research/layered-networks/controls2.py": "c4391bd5f9386c1b53394021e87c0da04c83e665f3910115867caa552d7373f4",
@@ -99,7 +102,7 @@
    "research/layered-networks/controls4.py": "e209b46d4e518bd9b19be86fdce2f66c4213a3834e196b1f874015d22dd5f6fe",
    "research/layered-networks/d4_regate.py": "3827d1a5b2a1c7a819ef293afbe5b00f822e0a78fb4ce12171ace76a3aa5c59b",
    "research/layered-networks/deck.py": "3ae17285870c4842ba4d64bf47a96d157b711df73e61f0c25e30da973db25412",
-   "research/layered-networks/draw_seeds.py": "d793da47f402d296018d62cebeb7ee01cce34c76047d80287c84b30092d20e32",
+   "research/layered-networks/draw_seeds.py": "b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958",
    "research/layered-networks/envcheck_layered.py": "73ed8bd389b687dccf82d837bcae7e0312cdb30b3bfe0d30f1a072f5f217e28f",
    "research/layered-networks/envcheck_layered2.py": "7eed929b0f14d5b010b289979d4ed2b9febceb55977599555c2b0ab73f27781b",
    "research/layered-networks/envcheck_layered3.py": "ecb2e1b7f7c0ca2a8fb0e2cf94f6f61dcc54780297f046c596c795a414f7bc3f",
@@ -112,7 +115,7 @@
    "research/layered-networks/noise2.py": "789d6f18a27c84aa57fdaa6f4a3cd58adef28237c182165c0a0a7ffd164333e0",
    "research/layered-networks/noise3.py": "0962cfe5eb0bfd9375ec13fc07d9c8ee1b029742a868d4ba5c37094902b10bb2",
    "research/layered-networks/noise4_gate/sitecustomize.py": "f33f702a872a14a74ca1a5128094c6f453ba6e57eb9e8bf4754997f4a071bfa6",
-   "research/layered-networks/plan_split.py": "e5de29f09807cc6aafeb5cb482079a2a0073693f9f7fdf511584ab6c199d24e5",
+   "research/layered-networks/plan_split.py": "dafe100c1cf110301efbcf02d9c5835ffcb5d0f0468b6a90fd13edb9cc2f4c3a",
    "research/layered-networks/plan_split2.py": "898172a5ba9a68cf658245f6401443371ef18f43daa85dde6ec3484cb4aabfda",
    "research/layered-networks/plan_split3.py": "061f8b375aeef65adade60762866aab0fdc4da4562963b8776f4afe88a3635a9",
    "research/layered-networks/records.py": "d88d2bfbefd92cc609f3b726da501e13f931a0e986d12e7769a258f0f47f983c",
@@ -195,8 +198,8 @@
    "research/learned-coincidence/MonotonePremiseTargets.lean": "674e6783c0e4cba994d628f58e5ee66f8199010c5d5c25fb2f04c9393d27f30f"
   },
   "the seed draw's exclusion list": {
-   "research/layered-networks/EXCLUDED.json": "c64cdc3980c61032861bdd8d730b6d4f44e50fe362d197953e7d473a15da7bce",
-   "research/layered-networks/EXCLUDED_PRINT.txt": "cfd87e7486728813d555a4e7277ca029584da395d5c45ce2ccfbe1ffe5f5acf1"
+   "research/layered-networks/EXCLUDED.json": "abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c",
+   "research/layered-networks/EXCLUDED_PRINT.txt": "a9c808de9a22b998b44a6f3c3ae9be7695aac5589015d1c0e793ee21e5c2736c"
   }
  },
  "tools": {
