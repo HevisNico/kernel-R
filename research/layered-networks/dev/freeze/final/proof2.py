@@ -100,12 +100,12 @@ TWINS = {   # (block, written line or fragment) -> replacement; each must occur 
     "rehearsal-draw": [(f"git fetch -q {GH} refs/heads/evidence/combined-rehearsal2-draw-result",
                         f"git fetch -q {TWIN} refs/heads/evidence/combined-rehearsal2-draw-result",
                         "rehearsal 2's result branch exists only on the twin (rehearsal 1's two fetches stay on GitHub)")],
-    "check-list": [("A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='$L/EXCLUDED.json'), 'rehearsal', tempfile.mkdtemp(), '$F')",
-                    "A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='$L/EXCLUDED.json', "
+    "check-list": [("A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_REHEARSAL2.json'), 'rehearsal', tempfile.mkdtemp(), '$F')",
+                    "A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_REHEARSAL2.json', "
                     "announce='announce_rehearsal/DRAW_ANNOUNCE.txt'), 'rehearsal', tempfile.mkdtemp(), '$F', offline=True)",
                     "the GitHub read of the rehearsal's announce replaced by its offline mode on the twin's announce file"),
-                   ("A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal1_draw='DRAW_REHEARSAL1.json',",
-                    "A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal1_draw='DRAW_REHEARSAL1.json', "
+                   ("A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal_excluded='EXCLUDED_REHEARSAL2.json',",
+                    "A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal_excluded='EXCLUDED_REHEARSAL2.json', "
                     f"rehearsal_announce='announce_rehearsal/DRAW_ANNOUNCE.txt', rehearsal1_announce='{W}/REHEARSAL1_DRAW_ANNOUNCE.txt',",
                     "the announce files for check_rehearsal_seeds offline: rehearsal 2's from the twin, rehearsal 1's as "
                     "published (its announce commit 9c3ec1e1 on GitHub, fetched by proof2)"),
@@ -117,6 +117,9 @@ TWINS = {   # (block, written line or fragment) -> replacement; each must occur 
               f"L={L}", "placeholder: the freeze branch does not exist yet; the clean clone of the candidate"),
              ("PY=<the pinned Python 3.13.18 (numpy 2.3.5, py_ecc 8.0.0), the one envcheck_layered4.py passed with on this machine>",
               f"PY={PY}", "placeholder: the pinned venv's Python")],
+    "vars-rehearsal": [('H=<the 64 hex characters that ORDER 2 step (r3) printed after "sha256">',
+                        f"H=$(grep -o 'sha256 [0-9a-f]\\{{64\\}}' {LOG}/01c_check-rehearsal2-list.out | tail -1 | cut -c8-)",
+                        "placeholder: H read from step (r3)'s printed line (log/01c_check-rehearsal2-list.out)")],
     "vars-campaign": [('H=<the 64 hex characters that ORDER 3 step (3) printed after "sha256">',
                        f"H=$(grep -o 'sha256 [0-9a-f]\\{{64\\}}' {LOG}/08_check-list.out | tail -1 | cut -c8-)",
                        "placeholder: H read from step (3)'s printed line (log/08_check-list.out)")],
@@ -247,14 +250,17 @@ if not all(x["ok"] for x in selftest):
 (W / "gitconfig_global_other").write_text("[user]\n\tname = someone else\n\temail = someone-else@invalid\n")
 B = lambda n: ready[n]
 STEPS = [dict(num="01", name="vars", kind="pass", body=B("vars")),
+         dict(num="01a", name="rehearsal1-files", kind="pass", body=B("rehearsal1-files")),
+         dict(num="01b", name="rehearsal2-list", kind="pass", body=B("rehearsal2-list")),
+         dict(num="01c", name="check-rehearsal2-list", kind="pass", body=B("check-rehearsal2-list")),
          dict(num="02", name="vars-rehearsal", kind="pass", body=B("vars-rehearsal")),
          dict(num="03", name="announce", kind="pass", body=B("announce")),
          dict(num="04", name="draw", kind="pass", body=B("draw")),
-         dict(num="04a", name="NEG-announce-exists", kind="neg", setup="mkdir announce_$M\n", body=B("announce"),
+         dict(num="04a", name="NEG-announce-exists", kind="neg", setup=f"cp {W}/work/EXCLUDED_REHEARSAL2.json .\nmkdir announce_$M\n", body=B("announce"),
               made="announce_$M", where=f"{W}/work/neg_announce"),
-         dict(num="04b", name="NEG-draw-exists", kind="neg", setup="mkdir draw_$M\n", body=B("draw"),
+         dict(num="04b", name="NEG-draw-exists", kind="neg", setup=f"cp {W}/work/EXCLUDED_REHEARSAL2.json .\nmkdir draw_$M\n", body=B("draw"),
               made="draw_$M", where=f"{W}/work/neg_draw"),
-         dict(num="04c", name="NEG-inside-clone", kind="neg", body=B("announce"), made="announce_$M",
+         dict(num="04c", name="NEG-inside-clone", kind="neg", setup=f"cp {W}/work/EXCLUDED_REHEARSAL2.json .\n", body=B("announce"), made="announce_$M",
               where=f"{W}/someclone/sub"),
          dict(num="04d", name="NEG-scan-missing-branch", kind="neg", made="scanrepo", where=f"{W}/work/neg_scan",
               body=B("second-scan").replace(

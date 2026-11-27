@@ -1139,7 +1139,7 @@ def case_analysis_hardening(w, home):
         return f
     reh = [f"rehearsal_draw={rf}", f"rehearsal_excluded={ex_f}", f"rehearsal_announce={ra}"]
     for label, seeds, needle in (
-            ("a rehearsal seed missing", [s for s in full if s != rseeds[0]], f"lacks rehearsal seeds [{rseeds[0]}]"),
+            ("a rehearsal seed missing", [s for s in full if s != rseeds[0]], f"lacks rehearsal2 seeds [{rseeds[0]}]"),
             ("a rehearsal noise seed missing", [s for s in full if s != 10 * rseeds[1] + 2],
              f"noise seeds [{10 * rseeds[1] + 2}]"),
             ("the full list: accepted (refused later, at the root's plan)", full, "PLAN.json is none of the expected plans")):
@@ -1473,6 +1473,33 @@ def case_analysis_two_rehearsals(w):
     oks = []
     for label, kw, needle in cases:
         got = call(kw)
+        out[label] = got
+        oks.append(check(checks, label, got, needle, w.wd / "two_out", True))
+    # rehearsal mode (rehearsal 2's own analysis): its list must hold rehearsal 1's 18 seeds and 72 noise seeds
+    r2list = sorted(set(ex["seeds"]) | set(s1) | {10 * s + j for s in s1 for j in range(4)})
+
+    def call_r2(lst):
+        try:
+            r = A.check_rehearsal_seeds(dict(rehearsal1_draw=str(fx / "DRAW.json"), rehearsal1_excluded=str(fx / "EXCLUDED_PUBLISHED.json"),
+                                             rehearsal1_announce=str(fx / "DRAW_ANNOUNCE.txt"), excluded=lst),
+                                        dict(announce=dict(push_utc=later)), w.wd / "two_out", None, False, "rehearsal")
+            return "accepted: " + json.dumps(sorted(r))
+        except SystemExit as e:
+            return str(e)
+    for label, lst, needle in (
+            ("rehearsal mode: rehearsal 2's list with rehearsal 1's seeds: accepted", listed("r2_full", r2list), 'accepted: ["rehearsal1"]'),
+            ("rehearsal mode: rehearsal 2's list missing one rehearsal 1 noise seed: refused",
+             listed("r2_no_n1", [s for s in r2list if s != 10 * s1[2] + 1]), f"rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [{10 * s1[2] + 1}]"),
+            ("rehearsal mode: rehearsal 1 absent: refused", None, "rehearsal mode: rehearsal1_draw=")):
+        if lst is None:
+            try:
+                A.check_rehearsal_seeds(dict(excluded=listed("r2_full", r2list)), dict(announce=dict(push_utc=later)),
+                                        w.wd / "two_out", None, False, "rehearsal")
+                got = "accepted"
+            except SystemExit as e:
+                got = str(e)
+        else:
+            got = call_r2(lst)
         out[label] = got
         oks.append(check(checks, label, got, needle, w.wd / "two_out", True))
     got = call(dict(base, excluded=listed("full", full)), campaign_push="2026-11-27T15:00:00Z")

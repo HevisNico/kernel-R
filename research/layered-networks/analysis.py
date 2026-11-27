@@ -52,7 +52,10 @@ THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
   rules against ITS freeze (REHEARSAL1: its announce branch, its freeze commit for N1, its list and its DRAW.json pinned
   by sha256). Both announces must be earlier than the campaign's, and the campaign's excluded= list must hold every
   seed of both and their noise seeds 10 S + 0..3: one missing refuses, naming it (check_rehearsal_seeds). Test mode
-  checks each offline when given (rehearsal_announce=, rehearsal1_announce=, ..._activity=).
+  checks each offline when given (rehearsal_announce=, rehearsal1_announce=, ..._activity=). Rehearsal mode (rehearsal
+  2's own analysis) requires rehearsal1_draw= and rehearsal1_excluded= too: its excluded= list (rehearsal 2's list,
+  the freeze's scan plus rehearsal 1's seeds) must hold rehearsal 1's 18 seeds and their noise seeds, and rehearsal 1's
+  announce must be earlier than rehearsal 2's.
 - The seeds are recomputed with the pinned draw_seeds.draw; the 12 expected plans are plan_split3.split of the
   RECOMPUTED draw on the frozen template, never of the file's own lists.
 - Each root's PLAN_INPUT.json must be byte-identical to plan_split.canon of one of them, which names the root's
@@ -1494,13 +1497,20 @@ def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict, mode=None)
     by the same rules against its own freeze (REHEARSAL1). Both are mandatory in campaign mode; in test mode each is
     checked, offline (rehearsal_announce=, rehearsal1_announce=, ..._activity=), when given. A single seed missing from
     the campaign's excluded= list refuses, naming it."""
-    campaign = (mode == "campaign") if mode is not None else strict     # both rehearsals required
+    mode = mode if mode is not None else ("campaign" if strict else "test")
+    # campaign: both rehearsals required; rehearsal (rehearsal 2's own analysis, whose excluded= is rehearsal 2's
+    # list): rehearsal 1 required, its seeds and noise seeds in that list (the owner's rule for rehearsal 2's list);
+    # test: whichever is given
+    required = dict(campaign=("rehearsal2", "rehearsal1"), rehearsal=("rehearsal1",)).get(mode, ())
+    whose = "the campaign's" if mode != "rehearsal" else "rehearsal 2's"
     ex = set(json.loads(Path(kw["excluded"]).read_text())["seeds"])
     out = {}
     for name, pre, past in (("rehearsal2", "rehearsal_", None), ("rehearsal1", "rehearsal1_", REHEARSAL1)):
+        if mode == "rehearsal" and name == "rehearsal2":
+            continue                                       # rehearsal 2 is the draw= of rehearsal mode itself
         if f"{pre}draw" not in kw:
-            if campaign:
-                refuse(f"campaign mode: {pre}draw= ({name}'s published DRAW.json) is required (its seeds must be excluded)")
+            if name in required:
+                refuse(f"{mode} mode: {pre}draw= ({name}'s published DRAW.json) is required (its seeds must be excluded)")
             continue
         rkw = dict(draw=kw[f"{pre}draw"])
         if f"{pre}excluded" in kw:
@@ -1517,10 +1527,10 @@ def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict, mode=None)
         missing = [s for s in seeds if s not in ex]
         missing_noise = [10 * s + j for s in seeds for j in range(4) if 10 * s + j not in ex]
         if missing or missing_noise:
-            refuse(f"the campaign's excluded= list lacks {name} seeds {missing} and noise seeds {missing_noise} "
-                   f"(the second scan must read the rehearsals)")
+            refuse(f"{whose} excluded= list lacks {name} seeds {missing} and noise seeds {missing_noise} "
+                   f"(the list must add the earlier rehearsals' seeds)")
         if not parse_utc(rinfo["announce"]["push_utc"]) < parse_utc(draw_info["announce"]["push_utc"]):
-            refuse(f"{name}'s announce ({rinfo['announce']['push_utc']}) is not earlier than the campaign's "
+            refuse(f"{name}'s announce ({rinfo['announce']['push_utc']}) is not earlier than {whose} announce "
                    f"({draw_info['announce']['push_utc']})")
         out[name] = dict(rinfo, seeds=len(seeds), all_excluded_with_noise_seeds=True)
     return out
@@ -1644,7 +1654,8 @@ def main(mode, outdir, *args):
         sizes = draw_info["sizes"]
         if dn:
             notice.append(dn)
-        if mode == "campaign" or (("rehearsal_draw" in kw or "rehearsal1_draw" in kw) and draw_info.get("recomputed")):
+        if mode in ("campaign", "rehearsal") or (("rehearsal_draw" in kw or "rehearsal1_draw" in kw)
+                                                  and draw_info.get("recomputed")):
             draw_info["rehearsal"] = check_rehearsal_seeds(kw, draw_info, out, pc.get("tree_commit"), strict, mode)
         expected, tmpl = expected_plans(draw)
         template_rule = tmpl["testError_rule"]
