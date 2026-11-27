@@ -30,7 +30,7 @@
     "exit": 0,
     "message": null,
     "roots_manifest_problems": [],
-    "seconds": 10.5,
+    "seconds": 11.3,
     "verdicts": {
      "NOT1": {
       "K0": "held on 2 instances, not established",
@@ -68,7 +68,7 @@
     "exit": 0,
     "message": null,
     "roots_manifest_problems": [],
-    "seconds": 10.7,
+    "seconds": 11.3,
     "verdicts": {
      "NOT1": {
       "K0": "held on 2 instances, not established",
@@ -79,7 +79,7 @@
    "result": "PASS"
   },
   {
-   "asserts": "exit 0; NOT1 has 3 instances at K0 and K3; an entry naming NOT1_6230 contains \"not run\"",
+   "asserts": "exit 0; NOT1 rows sum to 3 at K0 and K3; a not_run entry for NOT1_6230 at each level",
    "case": "planned_seed_not_started",
    "defect": "D8",
    "observed": {
@@ -106,7 +106,7 @@
     "exit": 0,
     "message": null,
     "roots_manifest_problems": [],
-    "seconds": 11.5,
+    "seconds": 12.4,
     "verdicts": {
      "NOT1": {
       "K0": "held on 2 instances, not established",
@@ -117,22 +117,59 @@
    "result": "FAIL"
   },
   {
-   "asserts": "refused, or an entry with \"not run\" naming NOT1_6212 or K05",
-   "case": "planned_machine_no_root",
+   "asserts": "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; a not_run entry for NOT1_6213 (K02, no root) at each level",
+   "case": "draw_machine_without_root",
+   "defect": "D8",
+   "observed": {
+    "counts": {
+     "NOT1": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 1,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 1,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 13.1,
+    "verdicts": {
+     "NOT1": {
+      "K0": "not established",
+      "K3": "not established"
+     }
+    }
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; not_run entries for NOT1_6212 (K01) and NOT1_6213 (K02)",
+   "case": "draw_duplicate_machine_only",
    "defect": "D8",
    "observed": {
     "counts": {},
     "exit": 0,
     "message": null,
-    "not_run_entry": null,
     "roots_manifest_problems": [],
-    "seconds": 11.3,
+    "seconds": 11.9,
     "verdicts": {}
    },
    "result": "FAIL"
   },
   {
-   "asserts": "refused; NOT1 not counted more than twice",
+   "asserts": "refused; NOT1 not counted more than twice; no verdict \"established\"",
    "case": "same_root_30_times",
    "defect": "D9",
    "observed": {
@@ -159,7 +196,7 @@
     "exit": 0,
     "message": null,
     "roots_manifest_problems": [],
-    "seconds": 60.4,
+    "seconds": 60.8,
     "verdicts": {
      "NOT1": {
       "K0": "established",
@@ -235,7 +272,7 @@
     "exit": 0,
     "message": null,
     "roots_manifest_problems": [],
-    "seconds": 13.2,
+    "seconds": 14.0,
     "verdicts": {
      "NOT1": {
       "K0": "held on 3 instances, not established",
@@ -275,7 +312,7 @@
     "roots_manifest_problems": [
      "out_K05/NOT1_6212/N0/comparison.json: differs"
     ],
-    "seconds": 11.1,
+    "seconds": 12.6,
     "verdicts": {
      "NOT1": {
       "K0": "held on 2 instances, not established",
@@ -315,7 +352,7 @@
     "roots_manifest_problems": [
      "out_K05/NOT1_6212/N2/extract/extract.json: missing"
     ],
-    "seconds": 11.0,
+    "seconds": 14.4,
     "verdicts": {
      "NOT1": {
       "K0": "held on 2 instances, not established",
@@ -331,6 +368,6 @@
   "path": "/tmp/claude-0/-home-user-kernel-R/3fade9bc-3b00-50fc-bf7c-9bbd253ba330/scratchpad/lean/lean-4.35.0-linux/bin/lean",
   "sha256": "bf8d54e4714cc4b03d3f6bb34c83b7202b87e49c8bfcbff6895c085bb90ceb38"
  },
- "script_sha256": "a7f2f4255de41ebc33c1abcd2dfec719c1a77b5bc69ef7203bfaf3059c4bf4bf",
- "tree_head": "63facf70458ab7c1e587bea583fa7761cb5f5631"
+ "script_sha256": "8c7aef4ed88fdc0ae1395fc22a23077fbef94735cad4ec2f6bd7ee60ab4d9515",
+ "tree_head": "6000d72b6603d38ccaffb2862164b5866555501b"
 }

@@ -19,12 +19,18 @@ the mismatch is the point. So the roots stay consistent for a fix that verifies 
 `roots_manifest_problems`, the test's own check of every SHA256SUMS line of its roots: empty except in the D10 cases.
 
 Cases (a defect case passes only when the analysis behaves as the fix must; at ef374ccd each defect case fails):
-- D8 planned_seed_not_started: K05 with seed 6230 added to NOT1 in PLAN.json (no folder). Must: exit 0, NOT1 counts
-  over 3 instances at K0 and K3, and an entry naming NOT1_6230 that contains "not run".
-- D8 planned_machine_no_root: K06 alone. Its PLAN.json names K05 as the home machine of NOT1_6212, and K05 has no
-  root. Must: a refusal, or an entry with "not run" that names NOT1_6212 or K05.
-- D9 same_root_30_times: K05 given 30 times by the same path. Must: refused, and no RESULTS.json counting NOT1 more
-  than twice.
+- D8 planned_seed_not_started (test mode, no draw): K05 with seed 6230 added to NOT1 in PLAN.json (no folder).
+  Must: exit 0, each level's rows of NOT1 sum to 3 (the planned size), and a not_run entry for NOT1_6230 at K0 and K3.
+- D8 draw_machine_without_root: the dummy draw dev/freeze/DRAW_dummy.json (NOT1 6212, 6213 over 12 machines) split by
+  plan_split3.py with campaign_template.json, as in dev/freeze/PROOF.md: K01 holds NOT1_6212, K02 NOT1_6213, K03 the
+  duplicate of NOT1_6212. Only K01's root is given (out_K05 with its PLAN.json replaced by PLAN_K01.json byte for
+  byte, NOT1_6220 removed), with draw=DRAW_dummy.json. Must: exit 0, NOT1 rows sum to 2 at each level, and a not_run
+  entry for NOT1_6213. (NOT1_6212 is not sealed there: the plan's seal branch evidence/combined-seals-K01 does not
+  exist. That is not asserted either way.)
+- D8 draw_duplicate_machine_only: only K03's root (out_K06 with PLAN_K03.json), with draw=. Must: exit 0, NOT1 rows
+  sum to 2, and not_run entries for NOT1_6212 and NOT1_6213 at each level.
+- D9 same_root_30_times: K05 given 30 times by the same path. Must: refused, no RESULTS.json counting NOT1 more than
+  twice, and no verdict "established".
 - D9 same_machine_two_paths: two copies of K05 at two paths. Must: the same.
 - D9 home_instance_twice: K05 and a second root (out_K07: K05 without NOT1_6220, with its own seal branch, its
   records' seal_log branch and plan text changed to match) that also holds NOT1_6212. Must: the same.
@@ -36,7 +42,9 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   counted 2 at K0 and K3 (DUPX_ folders are controls, never counted).
 
 A refusal is matched on exit code != 0 and the substring "refused" (every refusal of analysis.py starts with
-"refused:"), plus, for D10, the name of the file. No other wording of the fix is assumed.
+"refused:"), plus, for D10, the name of the file. A not_run entry is a dict with a value "not_run" or "not run"
+beside a value naming the instance, or a key "not_run" (or "not run") whose content names it. The draw argument's
+name is the constant DRAW_ARG ("draw"). No other wording of the fix is assumed.
 """
 import hashlib
 import json
@@ -53,6 +61,8 @@ REPO = HERE.parents[1]
 ANALYSIS = HERE / "analysis.py"
 PY = sys.executable
 SEAL_BRANCH = "evidence/devtest-seals2-K05"
+DRAW_ARG = "draw"                                     # the fix's argument: draw=PATH (a DRAW.json)
+DRAW = HERE / "dev" / "freeze" / "DRAW_dummy.json"    # NOT1 [6212, 6213] over 12 machines
 TIMES_RECORD = HERE / "dev" / "equiv" / "b" / "run2" / "RESULTS_times_github_ef374ccd.json"
 
 
@@ -181,11 +191,11 @@ def manifest_problems(roots):
     return bad
 
 
-def run(tmp, roots, label):
+def run(tmp, roots, label, extra=()):
     out = tmp / f"OUT_{label}"
     problems = manifest_problems(roots)
     t0 = time.time()
-    r = subprocess.run([PY, "-B", str(ANALYSIS), "test", str(out), *map(str, roots), "times=bare"],
+    r = subprocess.run([PY, "-B", str(ANALYSIS), "test", str(out), *map(str, roots), "times=bare", *extra],
                        cwd=HERE, capture_output=True, text=True)
     res = json.loads((out / "RESULTS.json").read_text()) if r.returncode == 0 and (out / "RESULTS.json").exists() else None
     obs = dict(roots_manifest_problems=problems, exit=r.returncode, seconds=round(time.time() - t0, 1),
@@ -219,13 +229,29 @@ def entries(x):
             yield from entries(v)
 
 
+NOT_RUN = ("not run", "not_run")
+
+
 def not_run_entry(res, *names, where=None):
-    """An entry (a dict) holding the value "not run" and naming one of `names`."""
+    """An entry marking one of `names` as not run: a dict with a value "not run" (or "not_run") beside a value naming
+    it, or a key "not_run" (or "not run") whose content names it."""
     for e in entries(where if where is not None else res):
-        s = json.dumps(e)
-        if "not run" in s and any(n in s for n in names):
+        flat = [v for v in e.values() if isinstance(v, str)]
+        if any(v in NOT_RUN for v in flat) and any(n in v for v in flat for n in names):
             return e
+        for k in NOT_RUN:
+            if k in e and any(n in json.dumps(e[k]) for n in names):
+                return {k: e[k]}
     return None
+
+
+def rows_sum(res, group, size):
+    """Each level's rows of counts[group] sum to `size`, and `instances` is `size`."""
+    c = (res or {}).get("counts", {}).get(group)
+    if not c:
+        return False
+    return all(x["instances"] == size and sum(v["n"] for v in x.values() if isinstance(v, dict) and "n" in v) == size
+               for x in c.values())
 
 
 # ------------------------------------------------------------------------------------------------ the cases
@@ -247,23 +273,59 @@ def case_planned_seed_not_started(tmp, src):
     root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
     edit_plan(root, lambda d: d["groups"]["NOT1"]["seeds"].append(6230))
     r, res, obs = run(tmp, [root], "planned_seed_not_started")
-    ok = r.returncode == 0 and res is not None and all(
-        res["counts"]["NOT1"][lv]["instances"] == 3 and not_run_entry(res, "NOT1_6230", where=res["counts"]["NOT1"][lv])
-        for lv in ("K0", "K3"))
+    ok = r.returncode == 0 and rows_sum(res, "NOT1", 3) and all(
+        not_run_entry(res, "NOT1_6230", where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3"))
     return ok, obs
 
 
-def case_planned_machine_no_root(tmp, src):
-    r, res, obs = run(tmp, [place(src / "out_K06", tmp / "a" / "out_K06", tmp)], "planned_machine_no_root")
-    found = not_run_entry(res, "NOT1_6212", "K05") if res is not None else None
-    obs["not_run_entry"] = found
-    return refused(r) or found is not None, obs
+def draw_plans(tmp):
+    """The plans plan_split3.py writes from the dummy draw and campaign_template.json (as in dev/freeze/PROOF.md)."""
+    out = tmp / "draw_plans"
+    if not out.exists():
+        subprocess.run([PY, "-B", str(HERE / "plan_split3.py"), str(DRAW), str(HERE / "campaign_template.json"), str(out)],
+                       cwd=HERE, check=True, capture_output=True)
+    return out
+
+
+def draw_root(src, dst, tmp, source, plan):
+    """A root of the dummy draw's machine `plan` (PLAN_Knn.json), from a run2 root: its PLAN.json is the plan
+    plan_split3.py writes, byte for byte (seal_push remote and branch included), re-declared in SHA256SUMS; the
+    instance folders the plan does not hold are removed."""
+    shutil.copytree(src / source, dst, symlinks=True)
+    plans = draw_plans(tmp)
+    want = json.loads((plans / plan).read_text())
+    keep = {f"NOT1_{s}" for s in want["groups"].get("NOT1", {}).get("seeds", [])}
+    for st in sorted(dst.glob("*/status.json")):
+        if st.parent.name not in keep:
+            shutil.rmtree(st.parent)
+            drop_lines(dst, st.parent.name)
+    shutil.copyfile(plans / plan, dst / "PLAN.json")
+    redeclare(dst, "PLAN.json")
+    return dst
+
+
+def case_draw_machine_without_root(tmp, src):
+    root = draw_root(src, tmp / "a" / "out_K01", tmp, "out_K05", "PLAN_K01.json")
+    r, res, obs = run(tmp, [root], "draw_machine_without_root", extra=[f"{DRAW_ARG}={DRAW}"])
+    ok = r.returncode == 0 and rows_sum(res, "NOT1", 2) and all(
+        not_run_entry(res, "NOT1_6213", where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3"))
+    return ok, obs
+
+
+def case_draw_duplicate_machine_only(tmp, src):
+    root = draw_root(src, tmp / "a" / "out_K03", tmp, "out_K06", "PLAN_K03.json")
+    r, res, obs = run(tmp, [root], "draw_duplicate_machine_only", extra=[f"{DRAW_ARG}={DRAW}"])
+    ok = r.returncode == 0 and rows_sum(res, "NOT1", 2) and all(
+        not_run_entry(res, n, where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3") for n in ("NOT1_6212", "NOT1_6213"))
+    return ok, obs
 
 
 def case_same_root_30_times(tmp, src):
     root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
     r, res, obs = run(tmp, [root] * 30, "same_root_30_times")
-    return refused(r) and not_inflated(res), obs
+    established = res is not None and any(v[lv]["verdict"] == "established" for v in res["groups"].values()
+                                          for lv in ("K0", "K3"))
+    return refused(r) and not_inflated(res) and not established, obs
 
 
 def case_same_machine_two_paths(tmp, src):
@@ -314,10 +376,13 @@ CASES = [
     ("control", "k05_alone", case_k05_alone, "exit 0; NOT1 counted 2 at K0 and K3"),
     ("control", "k05_with_dupx", case_k05_with_dupx, "exit 0; NOT1 counted 2 at K0 and K3 (the DUPX_ folder is a control)"),
     ("D8", "planned_seed_not_started", case_planned_seed_not_started,
-     "exit 0; NOT1 has 3 instances at K0 and K3; an entry naming NOT1_6230 contains \"not run\""),
-    ("D8", "planned_machine_no_root", case_planned_machine_no_root,
-     "refused, or an entry with \"not run\" naming NOT1_6212 or K05"),
-    ("D9", "same_root_30_times", case_same_root_30_times, "refused; NOT1 not counted more than twice"),
+     "exit 0; NOT1 rows sum to 3 at K0 and K3; a not_run entry for NOT1_6230 at each level"),
+    ("D8", "draw_machine_without_root", case_draw_machine_without_root,
+     "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; a not_run entry for NOT1_6213 (K02, no root) at each level"),
+    ("D8", "draw_duplicate_machine_only", case_draw_duplicate_machine_only,
+     "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; not_run entries for NOT1_6212 (K01) and NOT1_6213 (K02)"),
+    ("D9", "same_root_30_times", case_same_root_30_times,
+     "refused; NOT1 not counted more than twice; no verdict \"established\""),
     ("D9", "same_machine_two_paths", case_same_machine_two_paths, "refused; NOT1 not counted more than twice"),
     ("D9", "home_instance_twice", case_home_instance_twice, "refused; NOT1 not counted more than twice"),
     ("D10", "one_byte_in_comparison", case_one_byte_in_comparison, "refused; the output names N0/comparison.json"),
