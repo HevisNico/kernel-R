@@ -1,0 +1,12 @@
+ERRATUM, 2026-11-27, to commit dd672b1264822f669894a6ee5aa37af05e18ec5d of this branch
+
+README.txt and the subject of dd672b12 say "(c) 28/29 at f46c49e0". That count is wrong.
+
+test_c_f46c49e0/TEST_C_f46c49e0.json in this branch holds 30 cases: the full test (c), tests/test_campaign.py at
+research/layered-campaign-dev f46c49e0. Of those, 29 are ok and 1 is failing: analysis_refuses. The right count is
+29 of 30. The file's "all_pass" key is false.
+
+The failing case's expectation was stale. 0ce2d1af made the test deterministic, and only that case was rerun.
+When this branch was created (2026-11-27T20:43:16Z), no full (c) had been run at 0ce2d1af or later.
+
+dd672b12 is left unchanged; this erratum is a later commit that adds this file only.
