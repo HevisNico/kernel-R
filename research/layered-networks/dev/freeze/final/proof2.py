@@ -187,7 +187,26 @@ def run_steps(steps, work, log, head=()):
                     failed=len(fails), runner_exit=out.returncode, exit_code=rc, steps=res)
 
 
-# the runner's self-test: three dummy runs that must fail the proof, one that must pass it
+def ident_body(twin, owner_repo, n_refs):
+    """every ref of the twin: one commit, author and committer equal main's (the owner), compared, never printed;
+    exactly n_refs refs. Fails (rc 1) otherwise."""
+    return ('O="$(git -C ' + str(owner_repo) + " log -1 --format='%an %ae' origin/main)\"\n"
+            'echo "the global identity is the owner\'s: $([ "$(git config --global user.name) $(git config --global user.email)" = "$O" ] && echo yes || echo no)"\n'
+            f"N=0\nfor r in $(git --git-dir {twin} for-each-ref --format='%(refname)'); do\n"
+            f"  a=\"$(git --git-dir {twin} log -1 --format='%an %ae' $r)\"; c=\"$(git --git-dir {twin} log -1 --format='%cn %ce' $r)\"; n=$(git --git-dir {twin} rev-list --count $r)\n"
+            "  if [ \"$a\" = \"$O\" ] && [ \"$c\" = \"$O\" ] && [ \"$n\" = 1 ]; then echo \"$r: one commit, the owner's\"; else echo \"$r: NOT one commit of the owner's\"; N=1; fi\n"
+            f"done\n[ $(git --git-dir {twin} for-each-ref | wc -l) = {n_refs} ] || {{ echo 'the twin does not hold exactly {n_refs} refs'; N=1; }}\n( exit $N )\n")
+
+
+def clean_body(repo):
+    """the clone clean: git status --porcelain lists nothing but the PDK link the proof made. Fails (rc 1) otherwise."""
+    return (f"x=$(git -C {repo} status --porcelain --untracked-files=all | grep -vx '?? research/circuit/pdk' || true)\n"
+            'if [ -z "$x" ]; then echo "the clone is clean (only the PDK link)"; else echo "THE CLONE IS NOT CLEAN:"; echo "$x"; fi\n'
+            '( exit $([ -z "$x" ] && echo 0 || echo 1) )\n')
+
+
+# the runner's self-test: five dummy runs that must fail the proof, one that must pass it. Each runs in its own
+# folder; the identity case uses its own bare twin (selftest/twin.git); nothing is pushed anywhere else.
 st = W / "selftest"
 (st / "work").mkdir(parents=True)
 CASES = [
@@ -198,10 +217,18 @@ CASES = [
     ("a negative block that commits (then exits 1)", 1,
      [dict(num="1", name="neg-commits", kind="neg", made="r", where=f"{st}/work/n2",
            body="( set -e\n  mkdir r\n  cd r\n  git init -q\n  git -c user.name=x -c user.email=x@invalid commit -q --allow-empty -m x\n  exit 1 )\n")]),
+    ("a twin ref committed under another identity", 1, None),
+    ("a dirty clone", 1, None),
     ("a passing block and a refusing negative block", 0, [dict(num="1", name="ok", kind="pass", body="true\n"),
                                                           dict(num="2", name="neg-refuses", kind="neg", body="( exit 1 )\n",
                                                                made="nothing", where=f"{st}/work/n3")]),
 ]
+stwin = st / "twin.git"
+sh(f"git init -q --bare {stwin} && git init -q {st}/other && git -C {st}/other -c user.name='someone else' "
+   f"-c user.email=someone-else@invalid commit -q --allow-empty -m x && git -C {st}/other push -q {stwin} HEAD:refs/heads/evidence/x")
+sh(f"git init -q {st}/dirty && git -C {st}/dirty -c user.name=x -c user.email=x@invalid commit -q --allow-empty -m x && touch {st}/dirty/stray.json")
+CASES[3] = (CASES[3][0], 1, [dict(num="1", name="identity", kind="pass", body=ident_body(stwin, W / "kernel-R", 1))])
+CASES[4] = (CASES[4][0], 1, [dict(num="1", name="clean", kind="pass", body=clean_body(st / "dirty"))])
 selftest = []
 for k, (what, want, steps) in enumerate(CASES, start=1):
     rc, summ = run_steps(steps, st / "work", st / f"case{k}")
@@ -234,13 +261,8 @@ STEPS = [dict(num="01", name="vars", kind="pass", body=B("vars")),
               body=B("announce") + "RC=$?\nX=$X_KEPT\n( exit $RC )\n", made="announce_$M", where=f"{W}/work/neg_oldlist"),
          dict(num="11", name="announce", kind="pass", body=B("announce")),
          dict(num="12", name="draw", kind="pass", body=B("draw")),
-         dict(num="13", name="owner-identity", kind="pass", body=(
-             'O="$(git -C ' + f'{W}/kernel-R' + " log -1 --format='%an %ae' origin/main)\"\n"
-             'echo "the global identity is the owner\'s: $([ "$(git config --global user.name) $(git config --global user.email)" = "$O" ] && echo yes || echo no)"\n'
-             f"N=0\nfor r in $(git --git-dir {TWIN} for-each-ref --format='%(refname)'); do\n"
-             f"  a=\"$(git --git-dir {TWIN} log -1 --format='%an %ae' $r)\"; c=\"$(git --git-dir {TWIN} log -1 --format='%cn %ce' $r)\"; n=$(git --git-dir {TWIN} rev-list --count $r)\n"
-             "  if [ \"$a\" = \"$O\" ] && [ \"$c\" = \"$O\" ] && [ \"$n\" = 1 ]; then echo \"$r: one commit, the owner's\"; else echo \"$r: NOT one commit of the owner's\"; N=1; fi\n"
-             "done\n[ $(git --git-dir " + TWIN + " for-each-ref | wc -l) = 4 ] || { echo 'the twin does not hold exactly the 4 branches'; N=1; }\n( exit $N )\n"))]
+         dict(num="13", name="owner-identity", kind="pass", body=ident_body(TWIN, W / "kernel-R", 4)),
+         dict(num="14", name="clone-clean", kind="pass", body=clean_body(W / "kernel-R"))]
 rc, summary = run_steps(STEPS, W / "work", LOG, head=[f"export GIT_CONFIG_GLOBAL={W}/gitconfig_global_other",
                                                     'echo "global identity during the run: $(git config --global user.name)"'])
 summary.update(commit=COMMIT, clone=clone, selftest_ok=True)
