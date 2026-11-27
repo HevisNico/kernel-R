@@ -1,6 +1,12 @@
 LAYERED CAMPAIGN FREEZE RECORD (prepared 2026-11-27 on research/layered-campaign-dev; not on the freeze branch,
 which waits for the owner's go)
 
+STATUS: THE SECOND FREEZE CANDIDATE, AFTER REHEARSAL 1, NOT FINAL. The first freeze (5d02acce) stays as it was; rehearsal 1
+ran under it. This candidate changes campaign.py (the remote duplicate records and verifies the seal's introducing
+commit) and analysis.py (rehearsal 2's branch names; both rehearsals' seeds in the campaign's list; rehearsal 1's seeds
+in rehearsal 2's list; rehearsal 1 checked against its own freeze). The exclusion list is rescanned LAST, just before
+the owner's go: the Pins below (EXCLUDED.json, EXCLUDED_PRINT.txt, the scan line, the branch tips) are then redone.
+
 SUPERSEDES: the freeze candidate record of 2026-11-26 (dff747c4) and its pins. The driver is now campaign.py and the
 analysis analysis.py; the chain of drivers, analyses and templates they replace is no longer pinned (FREEZE_PINS.json
 against_dff747c4).
@@ -14,7 +20,7 @@ Branch tips (on origin when this was written):
                                     that changes no pinned file)
 
 Pins:
-  FREEZE_PINS.json                  sha256 6baf8a51d4f4aca35d4789b1865da7692affca0106690f163b00d4e68f7e84f1  (114 files)
+  FREEZE_PINS.json                  sha256 779b35bd53291fba77979156a5c4f66adb59960aaab69fc96db7841564a20b2f  (114 files)
   EXCLUDED.json                     sha256 abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c
     seeds_sha256                    d9975dee4f80fb75ea5fb67d3d0301bbae2274b0857fc7d44dc216f1c67afbc6  (15741 integers, 256 refs)
   EXCLUDED_PRINT.txt                sha256 a9c808de9a22b998b44a6f3c3ae9be7695aac5589015d1c0e793ee21e5c2736c
@@ -25,8 +31,8 @@ Pins:
   campaign_template.json            sha256 02af33e0c79b3dbdc320d3dd4e0dab26374cbd00a79bc249fcf20631a3cce756  (the template;
                                     campaign.FROZEN_TEMPLATE_SHA256)
   plan_split3.py (the splitter)     sha256 061f8b375aeef65adade60762866aab0fdc4da4562963b8776f4afe88a3635a9
-  campaign.py (the driver)          sha256 d031fd7c9f661db7b55aa4a8256ab8530597fe742b2aabf576f9e8c0136bf9f9
-  analysis.py (the analysis)        sha256 f63ee672a8cb1921bab5d7cec80b11442de798379675cf26330849e7a6909b5a
+  campaign.py (the driver)          sha256 dbe738d1c88d79c734fab0affecf3f0d4387d1a5c92b2bf902c1b96191408e95
+  analysis.py (the analysis)        sha256 c16995e8eb2e501392bae95ad901f6de80d8f4addb86333a8e2acebbf0bc4367
   stage_d6.py (stage D, kernel)     sha256 a4e2d9335c9a068e0a94067ff6dd5f5d0ad8df27eecfccebfd3c1c7f385c8aca
   leancell.py (the kernel check)    sha256 aca47f5220868f4716bc9ec9a7bdacae60563c7eab28a40248fa731e48c55f2e
   trace_extract.py (the extract)    sha256 e8b1ef3d7f80eac86867f3bfbcae43ca9d6f2f33aa575bb3ac005d90949a6320
