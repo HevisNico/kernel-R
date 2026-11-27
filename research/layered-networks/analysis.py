@@ -5,6 +5,8 @@ JSON round trip between them as before.
   analysis.py MODE OUTDIR ROOT [ROOT ...] [draw=DRAW.json] [excluded=EXCLUDED.json] [announce=DRAW_ANNOUNCE.txt]
                                           [activity=ITEMS.json] [rehearsal_draw=DRAW_REHEARSAL.json]
                                           [rehearsal_excluded=EXCLUDED.json] [rehearsal_announce=...] [rehearsal_activity=...]
+                                          [rehearsal1_draw=DRAW_REHEARSAL1.json] [rehearsal1_excluded=EXCLUDED_PUBLISHED.json]
+                                          [rehearsal1_announce=...] [rehearsal1_activity=...]
                                           [times=github|bare|lsremote:LOG] [thresholds=FILE] [controls=DIR] [tips=FILE]
 
 MODE:
@@ -44,11 +46,13 @@ THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
   12 plans split the groups in that same order (plan_split.ordered_groups), so a DRAW.json read back from its file
   and the draw in memory give the same plans.
 - N5: an excluded= list rejecting more than draw_seeds.MAX_EXCLUDED_FRACTION (20 %) of the draw range refuses.
-- The rehearsal's seeds (the owner's rule): campaign mode requires rehearsal_draw=, the rehearsal's public draw,
-  checked in full as in rehearsal mode (rehearsal_excluded= defaults to the freeze's EXCLUDED.json). Its announce
-  must be earlier than the campaign's, and the campaign's excluded= list must hold every one of its 18 seeds and
-  their noise seeds 10 S + 0..3: one missing refuses, naming it (check_rehearsal_seeds). Test mode checks it
-  offline when rehearsal_draw= is given (rehearsal_announce=, rehearsal_activity=).
+- The rehearsals' seeds (the owner's rule): campaign mode requires BOTH rehearsal draws. rehearsal_draw= is rehearsal
+  2's public draw, checked in full as in rehearsal mode (rehearsal_excluded= defaults to the freeze's EXCLUDED.json);
+  rehearsal1_draw= and rehearsal1_excluded= are rehearsal 1's published DRAW.json and list, checked in full by the same
+  rules against ITS freeze (REHEARSAL1: its announce branch, its freeze commit for N1, its list and its DRAW.json pinned
+  by sha256). Both announces must be earlier than the campaign's, and the campaign's excluded= list must hold every
+  seed of both and their noise seeds 10 S + 0..3: one missing refuses, naming it (check_rehearsal_seeds). Test mode
+  checks each offline when given (rehearsal_announce=, rehearsal1_announce=, ..._activity=).
 - The seeds are recomputed with the pinned draw_seeds.draw; the 12 expected plans are plan_split3.split of the
   RECOMPUTED draw on the frozen template, never of the file's own lists.
 - Each root's PLAN_INPUT.json must be byte-identical to plan_split.canon of one of them, which names the root's
@@ -177,11 +181,19 @@ DRAW_EXTRA_KEYS = ("beacon_round", "announce")  # drand's /public/<round>; the a
 ANNOUNCE_FILE = "DRAW_ANNOUNCE.txt"
 ANNOUNCE_FORMAT = "layered-draw-announce/1"
 ANNOUNCE_KEYS = ("format", "mode", "excluded_sha256", "sizes")
-ANNOUNCE_BRANCH = dict(campaign="evidence/combined-draw", rehearsal="evidence/combined-rehearsal-draw")
+ANNOUNCE_BRANCH = dict(campaign="evidence/combined-draw", rehearsal="evidence/combined-rehearsal2-draw")
+RESULT_BRANCH = dict(campaign="evidence/combined-draw-result", rehearsal="evidence/combined-rehearsal2-draw-result")
+# rehearsal 1, published under the freeze of 5d02acce (its announce, its draw, its list), checked against that freeze
+REHEARSAL1 = dict(announce_branch="evidence/combined-rehearsal-draw", result_branch="evidence/combined-rehearsal-draw-result",
+                  result_commit="f74b75fbdf72a5e57abe4ef8c5694197df0335dd",
+                  draw_sha256="b8aaefd9f107ea72aae0e60d543396899a5d5fcf8fd335fc5ad445ecf291894f",
+                  excluded_sha256="abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c",
+                  freeze_commit="5d02acce299de86f885a5b3d22ee86d08bcfafad")
 FREEZE_BRANCH = "research/layered-campaign-freeze"     # N1: the announce must come after the frozen tree's push
 PLAN_LOCAL_KEYS = ("kit_tree", "noise_tree")   # campaign.resolve_trees: the only machine-local keys of PLAN.json
 KEYS = ("draw", "excluded", "announce", "activity", "rehearsal_draw", "rehearsal_excluded", "rehearsal_announce",
-        "rehearsal_activity", "times", "thresholds", "controls", "tips")
+        "rehearsal_activity", "rehearsal1_draw", "rehearsal1_excluded", "rehearsal1_announce", "rehearsal1_activity",
+        "times", "thresholds", "controls", "tips")
 
 # ---- the comparisons (A2, A6)
 VERDICTS = ("agrees", "refuted", "run failed", "observed only (no prediction)")      # compare_d.compare's verdicts
@@ -1347,15 +1359,21 @@ def freeze_time(tree_commit, outdir):
     return tm[tree_commit]
 
 
-def check_draw(kw, mode, outdir, tree_commit=None, offline=None):
+def check_draw(kw, mode, outdir, tree_commit=None, offline=None, past=None):
     """B16 and D8, the owner's rule: the draw recomputed in full from public inputs only. Returns (the RECOMPUTED
     draw, its record, a notice or None). `offline` (test mode): the announce from announce= and DRAW.json's push
-    time, not from GitHub; `mode` then still fixes the announce's mode and the sizes ("rehearsal": 6/6/6)."""
+    time, not from GitHub; `mode` then still fixes the announce's mode and the sizes ("rehearsal": 6/6/6).
+    `past` (REHEARSAL1): a draw published under an earlier freeze, checked by the same rules against THAT freeze: its
+    announce branch, its freeze commit for N1, its own published list (pinned sha256) for the superset rule, and its
+    DRAW.json pinned by sha256."""
     offline = (mode == "test") if offline is None else offline
     import beacon_chain
     import beacon_verify
     import draw_seeds
     b = Path(kw["draw"]).read_bytes()
+    if past is not None and hashlib.sha256(b).hexdigest() != past["draw_sha256"]:
+        refuse(f"the published rehearsal 1 draw is {past['draw_sha256'][:12]} (DRAW.json of {past['result_branch']} at "
+               f"{past['result_commit'][:12]}), not {hashlib.sha256(b).hexdigest()[:12]}")
     try:
         d = json.loads(b)
     except ValueError as e:
@@ -1394,15 +1412,17 @@ def check_draw(kw, mode, outdir, tree_commit=None, offline=None):
     else:
         if "announce" in kw:
             refuse(f"{mode} mode reads the announce from GitHub, not announce=")
-        if an["branch"] != ANNOUNCE_BRANCH[mode]:
-            refuse(f"{mode} mode: the announce branch is {ANNOUNCE_BRANCH[mode]}, not {an['branch']!r}")
+        want_branch = past["announce_branch"] if past is not None else ANNOUNCE_BRANCH[mode]
+        if an["branch"] != want_branch:
+            refuse(f"{mode} mode: the announce branch is {want_branch}, not {an['branch']!r}")
         commit, ab, push_utc = announce_on_github(an["branch"], outdir)
         if commit != an["commit"] or push_utc != an["push_utc"]:
             refuse(f"DRAW.json's announce ({an['commit'][:12]}, {an['push_utc']}) is not GitHub's: the first commit "
                    f"adding {ANNOUNCE_FILE} on {an['branch']} is {commit[:12]}, pushed {push_utc}")
-        ft = freeze_time(tree_commit, outdir)                 # N1: the draw is announced after the freeze
+        fc = past["freeze_commit"] if past is not None else tree_commit
+        ft = freeze_time(fc, outdir)                          # N1: the draw is announced after (its) freeze
         if not parse_utc(push_utc) > parse_utc(ft):
-            refuse(f"the announce was pushed at {push_utc}, not after the frozen tree {str(tree_commit)[:12]} "
+            refuse(f"the announce was pushed at {push_utc}, not after the frozen tree {str(fc)[:12]} "
                    f"({FREEZE_BRANCH}, {ft})")
     A = parse_announce(ab)
     if A["mode"] != mode:
@@ -1415,7 +1435,12 @@ def check_draw(kw, mode, outdir, tree_commit=None, offline=None):
     if hashlib.sha256(eb).hexdigest() != A["excluded_sha256"]:
         refuse("the excluded= file is not the one DRAW_ANNOUNCE.txt names (excluded_sha256)")
     ex = json.loads(eb)
-    pinned = json.loads((HERE / "EXCLUDED.json").read_text())
+    if past is not None:
+        if hashlib.sha256(eb).hexdigest() != past["excluded_sha256"]:
+            refuse(f"rehearsal 1's excluded= list is not its published one ({past['excluded_sha256'][:12]})")
+        pinned = ex                                        # its freeze's list, published with its announce
+    else:
+        pinned = json.loads((HERE / "EXCLUDED.json").read_text())
     if not set(pinned["seeds"]) <= set(ex.get("seeds") or []):
         refuse("the excluded= list is not a superset of the freeze's EXCLUDED.json")
     frac = draw_seeds.excluded_fraction(ex)                # N5
@@ -1461,30 +1486,44 @@ def check_draw(kw, mode, outdir, tree_commit=None, offline=None):
                        announce=dict(an, from_github=not offline, sha256=hashlib.sha256(ab).hexdigest())), notice
 
 
-def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict):
-    """The owner's rule: the campaign's exclusion list must hold every seed of the rehearsal and its noise seeds
-    10 S + 0..3. The rehearsal's public draw (rehearsal_draw=, mandatory in campaign mode) is checked in full as in
-    rehearsal mode (its announce on ANNOUNCE_BRANCH["rehearsal"] from GitHub, its signature, round, seeds and the
-    sizes DRAW_SIZES_REHEARSAL; offline in test mode, from rehearsal_announce=), its announce must be earlier than
-    the campaign's, and a single seed of it missing from the campaign's excluded= list refuses, naming it."""
-    if "rehearsal_draw" not in kw:
-        refuse("campaign mode: rehearsal_draw=DRAW_REHEARSAL.json is required (its seeds must be excluded)")
-    rkw = dict(draw=kw["rehearsal_draw"], excluded=kw.get("rehearsal_excluded", str(HERE / "EXCLUDED.json")))
-    for k in ("announce", "activity"):
-        if f"rehearsal_{k}" in kw:
-            rkw[k] = kw[f"rehearsal_{k}"]
-    rdraw, rinfo, _ = check_draw(rkw, "rehearsal", outdir, tree_commit, offline=not strict)
+def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict, mode=None):
+    """The owner's rule: the campaign's exclusion list must hold every seed of BOTH rehearsals and their noise seeds
+    10 S + 0..3, and both rehearsals' announces must be earlier than the campaign's. Rehearsal 2 (rehearsal_draw=,
+    rehearsal_excluded= defaulting to the freeze's EXCLUDED.json) is checked in full as in rehearsal mode (its announce
+    on ANNOUNCE_BRANCH["rehearsal"]); rehearsal 1 (rehearsal1_draw=, rehearsal1_excluded=: the published files) in full
+    by the same rules against its own freeze (REHEARSAL1). Both are mandatory in campaign mode; in test mode each is
+    checked, offline (rehearsal_announce=, rehearsal1_announce=, ..._activity=), when given. A single seed missing from
+    the campaign's excluded= list refuses, naming it."""
+    campaign = (mode == "campaign") if mode is not None else strict     # both rehearsals required
     ex = set(json.loads(Path(kw["excluded"]).read_text())["seeds"])
-    seeds = sorted(s for v in rdraw["groups"].values() for s in v)
-    missing = [s for s in seeds if s not in ex]
-    missing_noise = [10 * s + j for s in seeds for j in range(4) if 10 * s + j not in ex]
-    if missing or missing_noise:
-        refuse(f"the campaign's excluded= list lacks rehearsal seeds {missing} and noise seeds {missing_noise} "
-               f"(the second scan must read the rehearsal)")
-    if not parse_utc(rinfo["announce"]["push_utc"]) < parse_utc(draw_info["announce"]["push_utc"]):
-        refuse(f"the rehearsal's announce ({rinfo['announce']['push_utc']}) is not earlier than the campaign's "
-               f"({draw_info['announce']['push_utc']})")
-    return dict(rinfo, seeds=len(seeds), all_excluded_with_noise_seeds=True)
+    out = {}
+    for name, pre, past in (("rehearsal2", "rehearsal_", None), ("rehearsal1", "rehearsal1_", REHEARSAL1)):
+        if f"{pre}draw" not in kw:
+            if campaign:
+                refuse(f"campaign mode: {pre}draw= ({name}'s published DRAW.json) is required (its seeds must be excluded)")
+            continue
+        rkw = dict(draw=kw[f"{pre}draw"])
+        if f"{pre}excluded" in kw:
+            rkw["excluded"] = kw[f"{pre}excluded"]
+        elif past is None:
+            rkw["excluded"] = str(HERE / "EXCLUDED.json")
+        else:
+            refuse(f"{pre}excluded= is required: rehearsal 1's published list (sha256 {past['excluded_sha256'][:12]})")
+        for k in ("announce", "activity"):
+            if f"{pre}{k}" in kw:
+                rkw[k] = kw[f"{pre}{k}"]
+        rdraw, rinfo, _ = check_draw(rkw, "rehearsal", outdir, tree_commit, offline=not strict, past=past)
+        seeds = sorted(s for v in rdraw["groups"].values() for s in v)
+        missing = [s for s in seeds if s not in ex]
+        missing_noise = [10 * s + j for s in seeds for j in range(4) if 10 * s + j not in ex]
+        if missing or missing_noise:
+            refuse(f"the campaign's excluded= list lacks {name} seeds {missing} and noise seeds {missing_noise} "
+                   f"(the second scan must read the rehearsals)")
+        if not parse_utc(rinfo["announce"]["push_utc"]) < parse_utc(draw_info["announce"]["push_utc"]):
+            refuse(f"{name}'s announce ({rinfo['announce']['push_utc']}) is not earlier than the campaign's "
+                   f"({draw_info['announce']['push_utc']})")
+        out[name] = dict(rinfo, seeds=len(seeds), all_excluded_with_noise_seeds=True)
+    return out
 
 
 def expected_plans(draw):
@@ -1605,8 +1644,8 @@ def main(mode, outdir, *args):
         sizes = draw_info["sizes"]
         if dn:
             notice.append(dn)
-        if mode == "campaign" or ("rehearsal_draw" in kw and draw_info.get("recomputed")):
-            draw_info["rehearsal"] = check_rehearsal_seeds(kw, draw_info, out, pc.get("tree_commit"), strict)
+        if mode == "campaign" or (("rehearsal_draw" in kw or "rehearsal1_draw" in kw) and draw_info.get("recomputed")):
+            draw_info["rehearsal"] = check_rehearsal_seeds(kw, draw_info, out, pc.get("tree_commit"), strict, mode)
         expected, tmpl = expected_plans(draw)
         template_rule = tmpl["testError_rule"]
         by = {}

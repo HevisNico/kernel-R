@@ -33,6 +33,9 @@ The cases:
   - after the filler is removed, `run` again starts what was held and completes;
 - differing duplicate: the duplicate machine runs on a stub noise tree (a local commit raising the temperature by 1 °C)
   against the home's seal. check_duplicate says it differs (analysis.py, test mode);
+- duplicate after later seals (rehearsal 1's K09 scenario): the home pushes two more seals before the duplicate
+  fetches; the duplicate records the seal's own introducing commit (and the tip read apart), check_duplicate says
+  IDENTICAL; duplicate forged line: a forged line for the instance at the tip; the duplicate refuses, not completed;
 - the analysis on copies of the home root (analysis.py test mode; LAYERED_TEST_ANALYSIS names another analysis.py,
   to record a case against an earlier commit): analysis_tampered (A1, A2 of 2026-11-26, consistent forgeries);
   analysis_d8_not_run (a planned instance never started), analysis_d9_copies (30 copies of one root),
@@ -484,6 +487,90 @@ def case_differing_duplicate(w, home):
     ok = c and res["remote_duplicates"][0].get("ok") is True and x[0].get("identical") is False
     return ok, dict(checks=checks, duplicate=res["remote_duplicates"], analysis_rc=a.returncode, identical=x[0].get("identical"),
                     checker_last=(x[0].get("checker_lines") or [""])[-1], comparison=x[0].get("comparison"))
+
+
+def later_seals(remote, branch, lines, forged=None):
+    """Push commits on top of `branch` of the bare `remote` (a plain fast-forward push each, as the home would): one
+    per extra SEALS.txt line (another instance's seal), and, if `forged`, one that appends a forged line for an instance
+    already sealed (its seal folder left as it is)."""
+    with __import__("tempfile").TemporaryDirectory() as g:
+        sh("git", "clone", "-q", "--branch", branch, str(remote), g)
+        for k, v in (("user.name", "test"), ("user.email", "test@invalid")):
+            sh("git", "-C", g, "config", k, v)
+        for ln in list(lines) + ([forged] if forged else []):
+            f = Path(g) / "SEALS.txt"
+            f.write_text(f.read_text() + ln + "\n")
+            sh("git", "-C", g, "commit", "-q", "-am", f"test: SEALS.txt line {ln.split()[0]}")
+            assert sh("git", "-C", g, "push", "-q", "origin", f"HEAD:refs/heads/{branch}").returncode == 0
+        return sh("git", "-C", g, "rev-parse", "HEAD").stdout.strip()
+
+
+def home_seal_commit(home):
+    """The home's own seal commit of NOT1_6212 (its SEAL_LOG.json), and its seal branch."""
+    s = json.loads((Path(home["root"]) / "NOT1_6212" / "N0" / "SEAL_LOG.json").read_text())
+    return s.get("commit"), s.get("branch")
+
+
+def case_duplicate_after_later_seals(w, home):
+    """The K09 scenario of rehearsal 1: the home seals NOT1_6212, then pushes TWO more seals before the duplicate
+    fetches. The duplicate must name the seal's own (introducing) commit, not the tip it read, and check_duplicate
+    must say IDENTICAL (analysis.py, test mode)."""
+    rem = w.wd / "log_home_later.git"
+    if rem.exists():
+        shutil.rmtree(rem)
+    shutil.copytree(home["remote"], rem, symlinks=True)
+    own, branch = home_seal_commit(home)
+    tip = later_seals(rem, branch, ["NOT1_9001 " + "1" * 64, "NOT1_9002 " + "2" * 64])
+    tr = w.tree("main")["tree"]
+    tt = w.template("dup_later", rem)
+    pl = w.plans("dup_later", tr, tt)
+    root = w.wd / "root_dup_later"
+    campaign(tr, "run", "test", tt, pl["K03"], root)
+    res = result(root) or {}
+    d = root / "DUPX_NOT1_6212"
+    chk = json.loads((d / "seal_check.json").read_text()) if (d / "seal_check.json").exists() else {}
+    rec = json.loads((d / "N0" / "noisy_record.json").read_text()) if (d / "N0" / "noisy_record.json").exists() else {}
+    an = w.wd / "analysis_dup_later"
+    a = sh(PY, "-B", HERE / "analysis.py", "test", an, home["root"], root, "times=bare")
+    out = json.loads((an / "RESULTS.json").read_text()) if (an / "RESULTS.json").exists() else {}
+    x = ((out.get("controls") or {}).get("cross_machine_duplicates") or [{}])[0]
+    checks = []
+    c1 = check(checks, "the duplicate's seal_log commit is the home's own seal commit, not the tip read",
+               json.dumps(dict(seal_log=chk.get("seal_log"), tip_read=chk.get("seal_log_tip_read"),
+                               record=(rec.get("seal_log") or {}).get("commit"))),
+               f'"record": "{own}"', d / "seal_check.json", True)
+    c2 = check(checks, "check_duplicate: IDENTICAL", json.dumps((x.get("checker_lines") or [""])[-1]), "DUPLICATE IDENTICAL",
+               an / "RESULTS.json", (an / "RESULTS.json").exists())
+    ok = (c1 and c2 and own != tip and (chk.get("seal_log") or [None])[0] == own and chk.get("seal_log_tip_read") == tip
+          and x.get("identical") is True and res.get("remote_duplicates", [{}])[0].get("ok") is True)
+    return ok, dict(checks=checks, own_commit=own, tip_after_two_seals=tip, seal_check=chk, analysis_rc=a.returncode,
+                    identical=x.get("identical"), checker_lines=x.get("checker_lines"))
+
+
+def case_duplicate_forged_line(w, home):
+    """The converse: a forged SEALS.txt line for NOT1_6212 (another sha256) appended at the tip of the home branch. Its
+    introducing commit holds the original seal folder, which does not match the forged line: the duplicate refuses, is
+    not completed, and runs no N0."""
+    rem = w.wd / "log_home_forged.git"
+    if rem.exists():
+        shutil.rmtree(rem)
+    shutil.copytree(home["remote"], rem, symlinks=True)
+    own, branch = home_seal_commit(home)
+    tip = later_seals(rem, branch, [], forged="NOT1_6212 " + "f" * 64)
+    tr = w.tree("main")["tree"]
+    tt = w.template("dup_forged", rem)
+    pl = w.plans("dup_forged", tr, tt)
+    root = w.wd / "root_dup_forged"
+    campaign(tr, "run", "test", tt, pl["K03"], root)
+    d = root / "DUPX_NOT1_6212"
+    here = json.loads((d / "duplicate_here.json").read_text()) if (d / "duplicate_here.json").exists() else {}
+    chk = json.loads((d / "seal_check.json").read_text()) if (d / "seal_check.json").exists() else {}
+    checks = []
+    c = check(checks, "refused, not completed, at the forged line's commit", json.dumps(here.get("why")),
+              "refused, not completed", d / "duplicate_here.json", True)
+    ok = (c and here.get("refused") is True and here.get("not_completed") is True and not (d / "N0" / "noisy_record.json").exists()
+          and (chk.get("seal_log") or [None])[0] == tip)
+    return ok, dict(checks=checks, own_commit=own, forged_tip=tip, duplicate_here=here, seal_check=chk)
 
 
 def case_analysis_refuses_test_root(w, root):
@@ -1389,6 +1476,8 @@ def main(wd, *only):
     r = run("home_run", case_home)
     if r and len(r) > 2:
         run("differing_duplicate", case_differing_duplicate, r[2])
+        run("duplicate_after_later_seals", case_duplicate_after_later_seals, r[2])
+        run("duplicate_forged_line", case_duplicate_forged_line, r[2])
         run("analysis_refuses", case_analysis_refuses_test_root, r[2]["root"])
         run("analysis_tampered", case_analysis_tampered, r[2])
         run("analysis_forged_pins", case_analysis_forged_pins, r[2]["root"])

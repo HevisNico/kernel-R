@@ -816,15 +816,28 @@ def untrained(m, inst):
 # ================================================================================================ the remote duplicate
 
 def probe(remote, branch, inst):
+    """(tip, line, intro): the branch's tip as fetched by name, the instance's SEALS.txt line at that tip, and the
+    commit that INTRODUCED that exact line: the earliest commit of the branch's first-parent history whose SEALS.txt
+    holds it (None if there is none). The home may push other seals after this one, so the tip is not the seal's
+    commit; the duplicate fetches, verifies and records the introducing commit."""
     with tempfile.TemporaryDirectory() as g:
         run = lambda *a: subprocess.run(["git", "-C", g, *a], capture_output=True, text=True)
         run("init", "-q", "--bare")
         if run("fetch", "-q", str(remote), f"refs/heads/{branch}:refs/heads/{branch}").returncode:
-            return None, None
+            return None, None, None
         tip = run("rev-parse", f"refs/heads/{branch}").stdout.strip()
         s = run("show", f"{tip}:SEALS.txt")
         lines = [l for l in s.stdout.splitlines() if l.split() and l.split()[0] == inst] if not s.returncode else []
-        return tip, (lines[-1] if lines else None)
+        if not lines:
+            return tip, None, None
+        line = lines[-1]
+        intro = None
+        for c in run("rev-list", "--first-parent", "--reverse", tip).stdout.split():
+            sc = run("show", f"{c}:SEALS.txt")
+            if not sc.returncode and line in sc.stdout.splitlines():
+                intro = c
+                break
+        return tip, line, intro
 
 
 def wait_for_seal(m, x, inst, log_path):
@@ -832,14 +845,15 @@ def wait_for_seal(m, x, inst, log_path):
     log = dict(remote=str(m.plan.remote), branch=x["home_branch"], instance=inst, interval_s=m.plan.wait_interval_s,
                limit_s=m.plan.wait_limit_s, attempts=[])
     while True:
-        tip, line = probe(m.plan.remote, x["home_branch"], inst)
-        log["attempts"].append(dict(utc=now(), tip=tip, found=line is not None))
+        tip, line, intro = probe(m.plan.remote, x["home_branch"], inst)
+        log["attempts"].append(dict(utc=now(), tip=tip, found=line is not None, intro=intro))
         found = line is not None
         waited = time.time() - t0
         if found or waited + m.plan.wait_interval_s > m.plan.wait_limit_s:
-            log.update(found=found, commit=tip if found else None, line=line, waited_s=round(waited, 1))
+            log.update(found=found, commit=intro if found else None, tip_read=tip if found else None, line=line,
+                       introducing_commit_found=intro is not None if found else None, waited_s=round(waited, 1))
             Path(log_path).write_text(dumps(log))
-            return tip if found else None
+            return (intro, tip, line) if found else (None, tip, None)
         Path(log_path).write_text(dumps(log))
         time.sleep(m.plan.wait_interval_s)
 
@@ -879,10 +893,16 @@ def remote_duplicate(m, x):
     res_path = d / "duplicate_here.json"
     if res_path.exists():
         return json.loads(res_path.read_text())
-    commit = wait_for_seal(m, x, inst, d / "seal_wait.json")
-    if commit is None:
+    commit, tip_read, line = wait_for_seal(m, x, inst, d / "seal_wait.json")
+    if line is None:
         return dict(instance=inst, group=x["group"], ok=False, not_completed=True,
                     why=f"not completed: no SEALS.txt line for {inst} on {x['home_branch']} within {p.wait_limit_s} s")
+    if commit is None:
+        res = dict(instance=inst, group=x["group"], ok=False, not_completed=True, refused=True, tip_read=tip_read,
+                   why=f"refused, not completed: no commit of {x['home_branch']}'s first-parent history introduces "
+                       f"the line {line!r} of SEALS.txt")
+        res_path.write_text(dumps(res))
+        return res
     ok_disk, free = m.guard(d.name, "N0", "dup")
     if not ok_disk:
         return dict(instance=inst, group=x["group"], ok=False, not_completed=True, held_for_disk=True,
@@ -892,7 +912,28 @@ def remote_duplicate(m, x):
         sd = Path(t) / "seal"
         ok_fetch, why = fetch_seal(p.remote, branch, commit, inst, sd)
         (d / "seal_fetch.json").write_text(dumps(dict(remote=str(p.remote), branch=branch, commit=commit,
-                                                      path=f"seals/{inst}", ok=ok_fetch, why=why)))
+                                                      tip_read=tip_read, path=f"seals/{inst}", ok=ok_fetch, why=why)))
+        chk = dict(instance=inst, seal_dir=str(sd) if ok_fetch else None, seal_log=[commit, branch],
+                   seal_log_tip_read=tip_read)
+        # the seal folder and its manifest AT THE INTRODUCING COMMIT, verified before the duplicate runs
+        verified, want = False, None
+        if ok_fetch:
+            try:
+                verified = sd.is_dir() and sealmod.verify(sd, quiet=True)
+            except SystemExit as e:
+                chk["verify_error"] = str(e)
+            want = sha(sd / "SHA256SUMS") if (sd / "SHA256SUMS").exists() else None
+        ok, why2 = ((seal_log_line(p.remote, commit, branch, inst, want) if verified and want
+                     else (False, "seal.verify failed or no SHA256SUMS")) if ok_fetch
+                    else (False, f"the seal folder at {commit} could not be fetched: {why}"))
+        if not ok:
+            chk.update(ok=False, why=why2, seal_sha256=want)
+            (d / "seal_check.json").write_text(dumps(chk))
+            res = dict(instance=inst, group=x["group"], ok=False, not_completed=True, refused=True,
+                       why=f"refused, not completed: the seal of {inst} at its introducing commit {commit[:12]} does not "
+                           f"verify ({why2})")
+            res_path.write_text(dumps(res))
+            return res
         argv = [PY, "-B", p.nz / "controls4.py", "stagen", HERE / x["spec"], d / "N0", x["seed"], 0,
                 f"seal_log={commit}", f"seal_branch={branch}", f"overlay={p.overlay}"]
         got = m.budget.acquire(1)
@@ -903,33 +944,21 @@ def remote_duplicate(m, x):
         res = dict(instance=inst, group=x["group"], exit=rc, timed_out=to, cpu_s=cpu,
                    ok=rc == 0 and not to and (d / "N0" / "noisy_record.json").exists())
         res_path.write_text(dumps(res))
-        chk = dict(instance=inst, seal_dir=str(sd) if ok_fetch else None, seal_log=[commit, branch])
+        chk.update(ok=ok, why=why2, seal_sha256=want)
         if not res["ok"]:
             chk.update(ok=False, why="the duplicate's N0 did not complete")
-        elif not ok_fetch:
-            chk.update(ok=False, why="no seal_dir or seal_log in PLAN remote_duplicates")
         else:
-            try:
-                verified = sd.is_dir() and sealmod.verify(sd, quiet=True)
-            except SystemExit as e:
-                verified = False
-                chk["verify_error"] = str(e)
-            want = sha(sd / "SHA256SUMS") if (sd / "SHA256SUMS").exists() else None
-            ok, why2 = (seal_log_line(p.remote, commit, branch, inst, want) if verified and want
-                        else (False, "seal.verify failed or no SHA256SUMS"))
-            chk.update(ok=ok, why=why2, seal_sha256=want)
-            if ok:
-                if (d / "seal").exists():
-                    shutil.rmtree(d / "seal")
-                shutil.copytree(sd, d / "seal", symlinks=False)
-                comp = [PY, "-B", HERE / "compare_d2.py", d / "seal", HERE / x["spec"], d / "N0" / "noisy_record.json",
-                        "noiseless", d / "N0" / "comparison.json"]
-                rc2, cpu2, to2 = run_child(comp, HERE, d / "C0.log", p.limits["C"])
-                done = rc2 == 0 and not to2 and (d / "N0" / "comparison.json").exists()
-                chk.update(compare=dict(exit=rc2, timed_out=to2, cpu_s=cpu2, written=done))
-                if done:
-                    chk["verdict"] = json.loads((d / "N0" / "comparison.json").read_text())["verdict"]
-                chk["ok"] = done
+            if (d / "seal").exists():
+                shutil.rmtree(d / "seal")
+            shutil.copytree(sd, d / "seal", symlinks=False)
+            comp = [PY, "-B", HERE / "compare_d2.py", d / "seal", HERE / x["spec"], d / "N0" / "noisy_record.json",
+                    "noiseless", d / "N0" / "comparison.json"]
+            rc2, cpu2, to2 = run_child(comp, HERE, d / "C0.log", p.limits["C"])
+            done = rc2 == 0 and not to2 and (d / "N0" / "comparison.json").exists()
+            chk.update(compare=dict(exit=rc2, timed_out=to2, cpu_s=cpu2, written=done))
+            if done:
+                chk["verdict"] = json.loads((d / "N0" / "comparison.json").read_text())["verdict"]
+            chk["ok"] = done
         (d / "seal_check.json").write_text(dumps(chk))
     return res
 
