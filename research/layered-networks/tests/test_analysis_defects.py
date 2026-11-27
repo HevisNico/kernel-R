@@ -16,7 +16,9 @@ Sources, fetched by branch name only from this clone's `origin` into temporary r
   GitHub run, offline.
 Every file a case changes on purpose is re-declared in the SHA256SUMS that lists it, except in the D10 cases, where
 the mismatch is the point. So the roots stay consistent for a fix that verifies the manifests. Each case records
-`roots_manifest_problems`, the test's own check of every SHA256SUMS line of its roots: empty except in the D10 cases.
+`roots_manifest_problems`, the test's own check of every line of every manifest (SHA256SUMS*, SHA256SUMS.instances
+included) of its roots. It is ASSERTED: empty in every case except one_byte_in_comparison and listed_file_missing,
+where it must be exactly the file tampered with (`fixture_ok`).
 
 Cases (a defect case passes only when the analysis behaves as the fix must; at ef374ccd each defect case fails):
 - D8 planned_seed_not_started (test mode, no draw): K05 with seed 6230 added to NOT1 in PLAN.json (no folder).
@@ -129,10 +131,17 @@ def bare_remote(tmp, branch):
 
 # ------------------------------------------------------------------------------------------------ root edits
 
+def manifests(root):
+    """Every manifest of a root: the files named SHA256SUMS* (SHA256SUMS, SHA256SUMS.instances), deepest first."""
+    fs = [p for p in Path(root).rglob("SHA256SUMS*") if p.is_file() and "lean_build" not in p.parts]
+    return sorted(fs, key=lambda p: (-len(p.parts), str(p)))
+
+
 def redeclare(root, rel):
-    """Re-declare `rel` (relative to root) in every SHA256SUMS of the root that lists it."""
+    """Re-declare `rel` (relative to root) in every manifest of the root that lists it, then, in turn, each manifest
+    so changed: bottom-up, the instance SHA256SUMS, then SHA256SUMS.instances, then the root SHA256SUMS."""
     rel_p = root / rel
-    for sums in root.rglob("SHA256SUMS"):
+    for sums in manifests(root):
         base = sums.parent
         try:
             r = rel_p.relative_to(base)
@@ -146,7 +155,7 @@ def redeclare(root, rel):
             lines.append(f"{h}  {name}")
         if hit:
             sums.write_text("".join(x + "\n" for x in lines))
-            redeclare(root, sums.relative_to(root)) if sums != root / "SHA256SUMS" else None
+            redeclare(root, sums.relative_to(root))
 
 
 def drop_lines(root, prefix):
@@ -185,17 +194,16 @@ def place(src, dst, tmp, branch=None):
 # ------------------------------------------------------------------------------------------------ running
 
 def manifest_problems(roots):
-    """Every SHA256SUMS line of the roots whose file is missing or differs (the test's own check of its roots)."""
+    """Every manifest line (SHA256SUMS*) of the roots whose file is missing or differs (the test's own check)."""
     bad = []
     for root in dict.fromkeys(roots):
-        for sums in sorted(Path(root).rglob("SHA256SUMS")):
-            if "lean_build" in sums.parts:
-                continue
+        for sums in manifests(root):
             for line in sums.read_text().splitlines():
                 h, name = line.split("  ", 1)
                 f = sums.parent / name
                 if not f.exists() or sha(f) != h:
-                    bad.append(f"{Path(root).name}/{f.relative_to(root)}: {'missing' if not f.exists() else 'differs'}")
+                    bad.append(f"{Path(root).name}/{f.relative_to(root)}: {'missing' if not f.exists() else 'differs'}"
+                               f" (listed in {sums.relative_to(root)})")
     return bad
 
 
@@ -429,6 +437,13 @@ def case_listed_file_missing(tmp, src):
     return refused(r) and "extract.json" in (r.stdout + r.stderr), obs
 
 
+# The manifest problems a case makes on purpose. Every other case must leave its roots' manifests consistent: that is
+# asserted, so a refusal in a D8 or D9 case cannot come from the fixture.
+TAMPERED = {
+    "one_byte_in_comparison": ["out_K05/NOT1_6212/N0/comparison.json: differs"],
+    "listed_file_missing": ["out_K05/NOT1_6212/N2/extract/extract.json: missing"],
+}
+
 CASES = [
     ("control", "k05_alone", case_k05_alone, "exit 0; NOT1 counted 2 at K0 and K3"),
     ("control", "k05_with_dupx", case_k05_with_dupx, "exit 0; NOT1 counted 2 at K0 and K3 (the DUPX_ folder is a control)"),
@@ -466,6 +481,10 @@ def main(out_json=None):
             w.mkdir()
             try:
                 ok, obs = fn(w, src)
+                got = sorted(x.split(" (listed in")[0] for x in obs.get("roots_manifest_problems", []))
+                want = sorted(TAMPERED.get(name, []))
+                obs["fixture_ok"] = got == want                       # only the D10 tampering, nothing else
+                ok = ok and obs["fixture_ok"]
             except Exception as e:                                     # a crash of the setup, not of the analysis
                 ok, obs = False, dict(setup_error=repr(e))
             print(f"{'PASS' if ok else 'FAIL'}  {defect:7} {name}: {json.dumps(obs)[:400]}", flush=True)
