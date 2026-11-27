@@ -1,0 +1,146 @@
+{
+ "all_pass": true,
+ "guard": {
+  "detail": {
+   "checks": [
+    {
+     "check": "deck held below the guard",
+     "expected": "\"step\": \"deck\"",
+     "matched": "[{\"free_gb\": 57.79, \"instance\": \"NOT1_6213\", \"step\": \"deck\"}]",
+     "target": "/root/devtest_c/c/plans_guard/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
+   "steps": {},
+   "stopped_for_disk": [
+    {
+     "free_gb": 57.79,
+     "instance": "NOT1_6213",
+     "step": "deck"
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 14.9
+ },
+ "partial_guard_and_resume": {
+  "detail": {
+   "U_after": [
+    {
+     "cpu_s": 27.3,
+     "exit": 0,
+     "instance": "NOT1_6212",
+     "inverter_fires_reported": [
+      {
+       "inverter": 0,
+       "slot": 0
+      }
+     ],
+     "ok": true,
+     "patterns": 2,
+     "r_cell_fires": [],
+     "record_seal_log": {
+      "branch": "evidence/combined-seals-K01",
+      "commit": "edb82c4f61a9702f6bbaac6e778fb368ebbc1109"
+     },
+     "seal_log": {
+      "branch": "evidence/combined-seals-K01",
+      "commit": "edb82c4f61a9702f6bbaac6e778fb368ebbc1109"
+     },
+     "timed_out": false,
+     "tool": "controls4.py"
+    }
+   ],
+   "checks": [
+    {
+     "check": "C0 exempt from the guard",
+     "expected": "\"step\": \"C0\"",
+     "matched": "[{\"free_gb\": 50.78, \"guard_gb\": 51.8, \"instance\": \"NOT1_6212\", \"step\": \"C0\"}]",
+     "target": "/root/devtest_c/c/root_partial/GUARD_EXEMPT.json",
+     "target_exists": true
+    },
+    {
+     "check": "N1 held below the guard",
+     "expected": "\"step\": \"N1\"",
+     "matched": "[{\"free_gb\": 50.78, \"instance\": \"NOT1_6212\", \"step\": \"N2\"}, {\"free_gb\": 50.78, \"instance\": \"NOT1_6212\", \"step\": \"N1\"}, {\"free_gb\": 50.78, \"instance\": \"U_NOT1_6212\", \"step\": \"U\"}, {\"free_gb\": 50.78, \"instance\": \"NOT1_6212\", \"step\": \"N3\"}]",
+     "target": "/root/devtest_c/c/root_partial",
+     "target_exists": true
+    }
+   ],
+   "exempt": [
+    {
+     "free_gb": 50.78,
+     "guard_gb": 51.8,
+     "instance": "NOT1_6212",
+     "step": "C0"
+    }
+   ],
+   "guard_gb": 51.8,
+   "held_first": [
+    [
+     "NOT1_6212",
+     "N2"
+    ],
+    [
+     "NOT1_6212",
+     "N1"
+    ],
+    [
+     "U_NOT1_6212",
+     "U"
+    ],
+    [
+     "NOT1_6212",
+     "N3"
+    ]
+   ],
+   "rc_resume": 0,
+   "steps_after_resume": {
+    "C0": "done",
+    "C1": "done",
+    "C2": "done",
+    "C3": "done",
+    "D": "done",
+    "N0": "done",
+    "N1": "done",
+    "N2": "done",
+    "N3": "done",
+    "deck": "done",
+    "inverters": "done",
+    "seal": "done",
+    "sealpush": "done"
+   },
+   "steps_first": {
+    "C0": "done",
+    "D": "done",
+    "N0": "done",
+    "deck": "done",
+    "inverters": "done",
+    "seal": "done",
+    "sealpush": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 617.5
+ },
+ "timeout": {
+  "detail": {
+   "checks": [
+    {
+     "check": "deck timed out",
+     "expected": "more than 0.001 s",
+     "matched": "more than 0.001 s",
+     "target": "/root/devtest_c/c/plans_timeout/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
+   "result_mode": "TEST",
+   "steps": {
+    "deck": "timeout"
+   },
+   "why": "more than 0.001 s"
+  },
+  "ok": true,
+  "seconds": 110.6
+ }
+}
