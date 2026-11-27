@@ -1,0 +1,84 @@
+{
+ "all_pass": true,
+ "sigkill_driver_only": {
+  "detail": {
+   "checks": [
+    {
+     "check": "run while the orphan child runs",
+     "expected": "ngspice process(es) running",
+     "matched": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+     "target": "/root/devtest_c/c/root_sigkill",
+     "target_exists": true
+    },
+    {
+     "check": "resume while the orphan child runs",
+     "expected": "ngspice process(es) running",
+     "matched": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+     "target": "/root/devtest_c/c/root_sigkill",
+     "target_exists": true
+    },
+    {
+     "check": "the later run found D running",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/root/devtest_c/c/root_sigkill",
+     "target_exists": true
+    }
+   ],
+   "children_after_kill": [
+    1615
+   ],
+   "resume_while_child": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+   "run_while_child": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+   "steps": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 199.9
+ },
+ "sigterm_driver_only": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the driver logged the signal and killed its children",
+     "expected": "\"signal\": \"SIGTERM\"",
+     "matched": "[{\"at\": \"2026-11-27T06:49:59.003137Z\", \"killed_process_groups\": [901], \"signal\": \"SIGTERM\"}]",
+     "target": "/root/devtest_c/c/root_sigterm/SIGNALS.json",
+     "target_exists": true
+    },
+    {
+     "check": "the resume found D running",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/root/devtest_c/c/root_sigterm",
+     "target_exists": true
+    }
+   ],
+   "children_before": [
+    901
+   ],
+   "children_gone": true,
+   "pids": "2026-11-27T06:49:59.330146Z 982 driver_resume_1.log\n",
+   "resume": "launched pid 982",
+   "signals": [
+    {
+     "at": "2026-11-27T06:49:59.003137Z",
+     "killed_process_groups": [
+      901
+     ],
+     "signal": "SIGTERM"
+    }
+   ],
+   "steps": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 297.6
+ }
+}
