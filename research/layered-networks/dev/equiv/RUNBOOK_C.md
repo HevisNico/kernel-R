@@ -1,6 +1,6 @@
 # Runbook: equivalence test (c) split over K07–K12 (test phase only)
 
-Test (c), tests/test_campaign.py, runs its 25 cases once each, split over six machines that the owner approved for
+Test (c), tests/test_campaign.py, runs its 27 cases once each, split over six machines that the owner approved for
 it. Every machine runs the same commit, with the same environment check. **Nothing here counts for the campaign.**
 No case pushes to GitHub: every seal log of (c) is a local bare repository in the work folder.
 
@@ -9,7 +9,7 @@ No case pushes to GitHub: every seal log of (c) is a local bare repository in th
 | Machine | Cases (one call; test_campaign.py runs them in its own order) | Expected time (last full run) |
 |---|---|---|
 | K07 | home_run differing_duplicate analysis_refuses analysis_tampered analysis_forged_pins analysis_d8_not_run analysis_d9_copies analysis_d10_manifest analysis_hardening | about 17 min |
-| K08 | refusals pins github_times analysis_announce second_seal | about 15 min |
+| K08 | refusals pins github_times analysis_announce draw_canonical draw_plans_command second_seal | about 15 min |
 | K09 | timeout guard partial_guard_and_resume | about 10 min |
 | K10 | kernel_mirror_disagreement no_pushed_seal | about 12 min |
 | K11 | crash interrupt_and_resume k3_budget_stop | about 8 min |
@@ -18,9 +18,10 @@ No case pushes to GitHub: every seal log of (c) is a local bare repository in th
 The analysis cases on copies of the home root need the home run of the same call, so they stay on K07;
 analysis_announce and analysis_own_check (a driver run of its own) do not.
 
-This is the second (c) run; the first, at 0b603d54, is on evidence/devtest-K<nn> and stays as it is.
+This is the third (c) run; the first (0b603d54) is on evidence/devtest-K<nn>, the second (582e5dfc) on
+evidence/devtest-run2-K<nn>, and both stay as they are.
 
-**Pushes allowed, and only this one:** your record folder to the new branch evidence/devtest-run2-K<nn> at the end (step 5),
+**Pushes allowed, and only this one:** your record folder to the new branch evidence/devtest-run3-K<nn> at the end (step 5),
 plainly, never forced, with the owner identity and a subject-only message with no trailer.
 
 Acknowledge in one line before acting. Report to the stage-D worker (session_01TzF7ZYVsvGaQ6EzEjxCJLM), with the
@@ -31,7 +32,7 @@ coordinator (session_01TzF7ZYZVxJcErqniRxMQ4F) in copy, at each step marked REPO
 ```
 export PATH=$HOME/.elan/bin:$PATH
 V=<your pinned Python 3.13.18 with numpy 2.3.5, as used for envcheck, with py_ecc 8.0.0 (requirements_beacon.txt)>
-W=$HOME/devtest_c                      # must not exist yet: stop and report if it does
+W=$HOME/devtest_c3                     # must not exist yet: stop and report if it does
 mkdir $W && cd $W && git init -q kernel-R && cd kernel-R
 git remote add origin https://github.com/HevisNico/kernel-R
 for b in research/layered-campaign-dev research/inverter-instances research/layered-networks main; do
@@ -82,18 +83,18 @@ not retry.
 - the lines of $W/c.log (each case: PASS or FAIL, seconds);
 - `$V -c "import json; d=json.load(open('$W/c/TEST_C.json')); print({k: v['ok'] for k, v in d.items() if isinstance(v, dict)}, d.get('all_pass'))"`.
 
-## 5. Push the record to evidence/devtest-run2-K<nn> (additions only, new branch)
+## 5. Push the record to evidence/devtest-run3-K<nn> (additions only, new branch)
 
 ```
 cd $W
-git ls-remote https://github.com/HevisNico/kernel-R refs/heads/evidence/devtest-run2-K<nn>   # must print nothing
+git ls-remote https://github.com/HevisNico/kernel-R refs/heads/evidence/devtest-run3-K<nn>   # must print nothing
 git init -q push_K<nn> && cd push_K<nn>
-git checkout -q --orphan evidence/devtest-run2-K<nn>
+git checkout -q --orphan evidence/devtest-run3-K<nn>
 mkdir c_K<nn> && cp $W/c/TEST_C.json $W/c.log $W/envcheck.out c_K<nn>/
 (cd $W/kernel-R && git rev-parse HEAD) > c_K<nn>/COMMIT
-git add -A && git commit -q -m "devtest (c) run2: K<nn> cases of test (c), TEST mode"
-git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/evidence/devtest-run2-K<nn>
-git ls-remote https://github.com/HevisNico/kernel-R refs/heads/evidence/devtest-run2-K<nn>   # REPORT this line
+git add -A && git commit -q -m "devtest (c) run3: K<nn> cases of test (c), TEST mode"
+git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/evidence/devtest-run3-K<nn>
+git ls-remote https://github.com/HevisNico/kernel-R refs/heads/evidence/devtest-run3-K<nn>   # REPORT this line
 ```
 
 If the push is refused, REPORT it and stop: do not force, do not rename the branch. Then STOP.
