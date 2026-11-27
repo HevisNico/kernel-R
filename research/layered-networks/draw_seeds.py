@@ -16,10 +16,13 @@
 
 **The draw.**
 - A candidate seed is S = 10000 + (H mod 90000), with H the SHA-256 of `"<beacon>|<round>|<group>|<k>"` read as a
-  big-endian integer, for k = 0, 1, 2, …, group by group in the order given.
+  big-endian integer, for k = 0, 1, 2, …, group by group in GROUP_ORDER (NOT1, ANDOR3, XOR3), whatever the order the
+  sizes are given in. <beacon> is the canonical writing of drand's randomness, 64 lowercase hex characters: any other
+  writing is refused (canonical_beacon), so one signed value gives one list. <round> is an integer.
 - **Rejected:** an S that is excluded, already drawn, or whose noise seeds 10 S + n (n = 0..3) are excluded.
 - The first N accepted S of each group are its seeds, in draw order.
-- **Asserted:** no drawn seed and no noise seed of one is in the exclusion list, and all are distinct.
+- **Checked (an error, not an assert):** no drawn seed and no noise seed of one is in the exclusion list, and all are
+  distinct.
 - Deterministic: the same beacon, round and list give the same DRAW.json bytes.
 """
 import hashlib
@@ -35,6 +38,7 @@ LINE = re.compile(r"(?i)seed|fakepid|rehearsal|dry.run")
 INT = re.compile(r"(?<![0-9.])([0-9]{4,7})(?![0-9])")
 RANGE = re.compile(r"(?<![0-9.])([0-9]{4,7})\s*(?:–|-|\.\.)\s*([0-9]{4,7})(?![0-9])")
 DEFAULT_N = dict(NOT1=60, ANDOR3=49, XOR3=49)
+GROUP_ORDER = ("NOT1", "ANDOR3", "XOR3")      # the draw's group order, pinned (not the order of the sizes given)
 
 
 def canon(obj):
@@ -76,12 +80,33 @@ def scan(repo):
                 refs=per_ref, count=len(seeds), seeds=seeds, seeds_sha256=hashlib.sha256(canon(seeds)).hexdigest())
 
 
+def canonical_beacon(beacon):
+    """The beacon's ONE accepted writing: the 32 bytes of drand's randomness, as 64 lowercase hex characters (or the
+    32 bytes themselves). Any other writing of the same value (upper or mixed case, spaces, a 0x prefix) is refused,
+    so that one verified value gives one list of seeds."""
+    if isinstance(beacon, (bytes, bytearray)):
+        if len(beacon) != 32:
+            raise ValueError(f"the beacon is {len(beacon)} bytes, not 32")
+        return bytes(beacon).hex()
+    if not isinstance(beacon, str) or len(beacon) != 64 or any(c not in "0123456789abcdef" for c in beacon):
+        raise ValueError(f"the beacon {beacon!r} is not 64 lowercase hex characters (32 bytes)")
+    return beacon
+
+
 def draw(beacon, rnd, excluded, n=DEFAULT_N):
+    """The draw, from one canonical beacon (canonical_beacon), an integer round, and the groups in GROUP_ORDER whatever
+    the order of `n`. Every check raises (python -O cannot remove it)."""
+    beacon = canonical_beacon(beacon)
+    if not isinstance(rnd, int) or isinstance(rnd, bool) or rnd < 1:
+        raise ValueError(f"the round {rnd!r} is not a positive integer")
+    if set(n) - set(GROUP_ORDER) or any(not isinstance(v, int) or isinstance(v, bool) or v < 1 for v in n.values()):
+        raise ValueError(f"the sizes {n!r} are not positive integers for groups of {GROUP_ORDER}")
     ex = set(excluded["seeds"])
-    assert hashlib.sha256(canon(sorted(ex))).hexdigest() == excluded["seeds_sha256"], "the exclusion list was altered"
+    if hashlib.sha256(canon(sorted(ex))).hexdigest() != excluded["seeds_sha256"]:
+        raise ValueError("the exclusion list was altered")
     drawn, groups, tried = set(), {}, {}
-    for g, k_n in n.items():
-        out, k = [], 0
+    for g in (x for x in GROUP_ORDER if x in n):        # a fixed order: `drawn` is shared across the groups
+        k_n, out, k = n[g], [], 0
         while len(out) < k_n:
             h = int.from_bytes(hashlib.sha256(f"{beacon}|{rnd}|{g}|{k}".encode()).digest(), "big")
             s = LO + h % SPAN
@@ -92,11 +117,11 @@ def draw(beacon, rnd, excluded, n=DEFAULT_N):
             drawn.add(s)
         groups[g], tried[g] = out, k
     allseeds = [s for v in groups.values() for s in v]
-    assert len(set(allseeds)) == len(allseeds)
-    assert not (set(allseeds) & ex) and not ({10 * s + j for s in allseeds for j in range(4)} & ex)
-    return dict(format="layered-draw/1", beacon=beacon, round=rnd, n=n, groups=groups, candidates_tried=tried,
-                excluded_sha256=excluded["seeds_sha256"], excluded_count=excluded["count"],
-                draw_script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
+    if len(set(allseeds)) != len(allseeds) or set(allseeds) & ex or {10 * s + j for s in allseeds for j in range(4)} & ex:
+        raise ValueError("the drawn seeds are not distinct, or one of them or of their noise seeds is excluded")
+    return dict(format="layered-draw/1", beacon=beacon, round=rnd, n={g: n[g] for g in GROUP_ORDER if g in n},
+                groups=groups, candidates_tried=tried, excluded_sha256=excluded["seeds_sha256"],
+                excluded_count=excluded["count"], draw_script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
 
 
 def collapse(seeds):
@@ -119,7 +144,7 @@ if __name__ == "__main__":
     elif c == "draw":
         beacon, rnd, exf, out, *ns = a
         n = dict(DEFAULT_N, **{k: int(v) for k, v in (x.split("=") for x in ns)}) if ns else DEFAULT_N
-        r = draw(beacon, rnd, json.loads(Path(exf).read_text()), n)
+        r = draw(beacon, int(rnd), json.loads(Path(exf).read_text()), n)
         Path(out).write_bytes(canon(r))
         print(json.dumps({g: v[:5] + ["..."] for g, v in r["groups"].items()}))
     elif c == "print":

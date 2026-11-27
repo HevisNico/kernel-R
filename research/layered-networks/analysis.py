@@ -33,9 +33,11 @@ THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
   rule only from activity=PATH (a JSON list of the raw items).
 - The exclusion list: excluded= must have the sha256 the announce names, and its seeds must be a superset of the
   freeze's pinned EXCLUDED.json (the second scan, after the rehearsal, only adds).
-- The round must be beacon_verify.round_after(the pinned quicknet chain, the announce's push time); the beacon value
-  must be that round's randomness; the BLS signature must verify (beacon_verify.verify, beacon_chain.QUICKNET), which
-  also checks randomness = sha256(signature).
+- The round must be beacon_verify.round_after(the pinned quicknet chain, the announce's push time); the BLS signature
+  must verify (beacon_verify.verify, beacon_chain.QUICKNET). ONE canonical value: the analysis derives it, sha256 of
+  the signature's bytes, as 64 lowercase hex characters; the signature, the round's randomness and DRAW.json's beacon
+  must each be written exactly in canonical form (another writing of the same value is refused), and the seeds are
+  recomputed from that value, the groups in draw_seeds.GROUP_ORDER whatever the order of the sizes.
 - The seeds are recomputed with the pinned draw_seeds.draw; the 12 expected plans are plan_split3.split of the
   RECOMPUTED draw on the frozen template, never of the file's own lists.
 - Each root's PLAN_INPUT.json must be byte-identical to plan_split.canon of one of them, which names the root's
@@ -1408,16 +1410,26 @@ def check_draw(kw, mode, outdir, tree_commit=None):
     if d["round"] != want_round:
         refuse(f"DRAW.json's round {d['round']} is not the round the announce's push time fixes ({want_round}, "
                f"{push_utc} + {beacon_verify.DELAY_S} s)")
-    if br["round"] != d["round"] or br["randomness"].lower() != d["beacon"].lower():
-        refuse(f"DRAW.json: the beacon is not the randomness of round {d['round']}")
+    # ONE canonical value (the owner's rule): the randomness is derived here from the signature's bytes, and the
+    # signature, the randomness and the beacon must each be written exactly in canonical form
+    try:
+        sig_b = bytes.fromhex(br["signature"]) if isinstance(br["signature"], str) else None
+    except ValueError:
+        sig_b = None
+    if sig_b is None or sig_b.hex() != br["signature"]:
+        refuse("DRAW.json: the beacon round's signature is not written in canonical form (lowercase hex, no spaces)")
+    value = hashlib.sha256(sig_b).hexdigest()
+    if br["round"] != d["round"] or br["randomness"] != value or d["beacon"] != value:
+        refuse(f"DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = {value} "
+               f"(round {d['round']}); another writing of the value is refused")
     v = beacon_verify.verify(beacon_chain.QUICKNET, br)
     if not v.get("ok"):
         refuse(f"DRAW.json: the beacon round does not verify against the pinned quicknet key: {v}")
-    # the seeds, recomputed
+    # the seeds, recomputed from that value
     with contextlib.redirect_stdout(io.StringIO()):
         try:
-            again = draw_seeds.draw(d["beacon"], d["round"], ex, dict(sizes))
-        except AssertionError as e:
+            again = draw_seeds.draw(value, d["round"], ex, dict(sizes))
+        except (ValueError, AssertionError) as e:
             refuse(f"the draw cannot be recomputed: {e}")
     if b != draw_seeds.canon(dict(again, beacon_round=br, announce=an)):
         refuse("DRAW.json is not draw_seeds.draw of its beacon and round on the excluded= list at the sizes "

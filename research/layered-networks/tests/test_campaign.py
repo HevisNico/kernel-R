@@ -999,6 +999,14 @@ def case_analysis_hardening(w, home):
             *make_draw("sig", sig_change=True))
     refused("B16/D8: a verified draw, the root's plan is none of the expected plans", "PLAN.json is none of the "
             "expected plans of the draw", base, "times=bare", *make_draw("good"))
+    for label, f in (("upper-case beacon", lambda d: dict(d, beacon=d["beacon"].upper())),
+                     ("upper-case randomness", lambda d: dict(d, beacon_round=dict(d["beacon_round"], randomness=d["beacon_round"]["randomness"].upper()))),
+                     ("upper-case signature", lambda d: dict(d, beacon_round=dict(d["beacon_round"], signature=d["beacon_round"]["signature"].upper())))):
+        args = make_draw("w" + label[:5])
+        fd = Path(args[0].split("=", 1)[1])
+        fd.write_bytes(draw_seeds.canon(f(json.loads(fd.read_text()))))
+        refused(f"owner: one value, one writing ({label})", "not written in canonical form" if "signature" in label
+                else "another writing of the value is refused", base, "times=bare", *args, target=fd)
 
     # the owner's rule: a machine stopped after a differing N1 keeps that refutation (manifest not final)
     rp = copy_root(base, w.wd / "root_h_partial")
@@ -1152,6 +1160,83 @@ def case_analysis_announce(w):
     return ok, out
 
 
+def case_draw_canonical(w):
+    """The owner's draw defect: one signed drand value must give one list of seeds. On draw_seeds.draw, with the
+    published quicknet round 1000000 (the offline stand-in) and the pinned EXCLUDED.json:
+    - the lowercase value gives exactly the seeds draw_seeds.py gave at ef374ccd (the old file, from git), at the
+      stand-in sizes, at DRAW_SIZES and at DRAW_SIZES_REHEARSAL;
+    - the same value as its 32 bytes gives identical seeds; written in upper case, mixed case, with spaces, or with a
+      0x prefix, it is refused (ValueError), never drawn with other seeds; a round given as a string is refused;
+    - every permutation of the sizes dict gives byte-identical draws;
+    - the evidence for the fixed order: a value is found for which the OLD draw gives different seeds for two orders
+      of the same sizes (the groups collide), and the new draw gives one list for both."""
+    import importlib.util
+    import itertools
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as D
+    old_src = sh("git", "-C", HERE, "show", "ef374ccd:research/layered-networks/draw_seeds.py").stdout
+    of = w.wd / "draw_seeds_ef374ccd.py"
+    of.write_text(old_src)
+    spec = importlib.util.spec_from_file_location("draw_seeds_old", of)
+    O = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(O)
+    ex = json.loads((HERE / "EXCLUDED.json").read_text())
+    v = "b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3"
+    sizes = dict(standin=dict(NOT1=2, ANDOR3=1, XOR3=1), campaign=dict(NOT1=60, ANDOR3=32, XOR3=37),
+                 rehearsal=dict(NOT1=6, ANDOR3=6, XOR3=6))
+    checks, out = [], {}
+    same_as_before = {k: D.draw(v, 1000000, ex, n)["groups"] == O.draw(v, 1000000, ex, n)["groups"] for k, n in sizes.items()}
+    out["lowercase_same_as_ef374ccd"] = same_as_before
+    out["bytes_same"] = D.draw(bytes.fromhex(v), 1000000, ex, sizes["campaign"])["groups"] == D.draw(v, 1000000, ex, sizes["campaign"])["groups"]
+    writings = dict(upper=v.upper(), mixed="".join(c.upper() if i % 2 else c for i, c in enumerate(v)),
+                    spaced=" ".join(v[i:i + 2] for i in range(0, 64, 2)), prefixed="0x" + v)
+    refused = {}
+    for k, x in writings.items():
+        try:
+            D.draw(x, 1000000, ex, sizes["standin"])
+            refused[k] = False
+        except ValueError:
+            refused[k] = True
+    try:
+        D.draw(v, "1000000", ex, sizes["standin"])
+        refused["round_as_string"] = False
+    except ValueError:
+        refused["round_as_string"] = True
+    out["other_writings_refused"] = refused
+    perms = {}
+    for k, n in sizes.items():
+        outs = {D.canon(D.draw(v, 1000000, ex, dict(p))) for p in itertools.permutations(n.items())}
+        perms[k] = len(outs) == 1
+    out["permutations_identical"] = perms
+    found = None
+    for i in range(400):
+        x = hashlib_sha(f"order evidence {i}")
+        n1 = dict(NOT1=60, ANDOR3=32, XOR3=37)
+        n2 = dict(XOR3=37, ANDOR3=32, NOT1=60)
+        if O.draw(x, 1000000, ex, n1)["groups"] != O.draw(x, 1000000, ex, n2)["groups"]:
+            found = dict(value=x, old_differs=True,
+                         new_identical=D.draw(x, 1000000, ex, n1)["groups"] == D.draw(x, 1000000, ex, n2)["groups"])
+            break
+    out["order_evidence"] = found
+    e = (HERE / "draw_seeds.py").exists()
+    ok = all([check(checks, "lowercase: the seeds of ef374ccd", json.dumps(same_as_before, sort_keys=True),
+                    '"campaign": true, "rehearsal": true, "standin": true', HERE / "draw_seeds.py", e),
+              check(checks, "other writings refused", json.dumps(refused, sort_keys=True),
+                    '"mixed": true, "prefixed": true, "round_as_string": true, "spaced": true, "upper": true',
+                    HERE / "draw_seeds.py", e),
+              check(checks, "every permutation of the sizes identical", json.dumps(perms, sort_keys=True),
+                    '"campaign": true, "rehearsal": true, "standin": true', HERE / "draw_seeds.py", e),
+              check(checks, "the order evidence", json.dumps(found), '"old_differs": true, "new_identical": true',
+                    HERE / "draw_seeds.py", e)]) and out["bytes_same"]
+    out["checks"] = checks
+    return ok, out
+
+
+def hashlib_sha(s):
+    import hashlib
+    return hashlib.sha256(s.encode()).hexdigest()
+
+
 def main(wd, *only):
     w = Work(wd)
     report = {}
@@ -1180,6 +1265,7 @@ def main(wd, *only):
     run("second_seal", case_second_seal)
     run("github_times", case_github_times)
     run("analysis_announce", case_analysis_announce)
+    run("draw_canonical", case_draw_canonical)
     run("analysis_own_check", case_analysis_own_check)
     run("sigterm_driver_only", case_sigterm_driver_only)
     run("sigkill_driver_only", case_sigkill_driver_only)
