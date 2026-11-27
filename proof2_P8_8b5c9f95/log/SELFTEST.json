@@ -1,0 +1,148 @@
+[
+ {
+  "case": "a required block that exits 1",
+  "want_exit_nonzero": true,
+  "exit_code": 1,
+  "ok": true,
+  "summary": {
+   "passed": 1,
+   "refused_as_expected": 0,
+   "failed": 1,
+   "runner_exit": 1,
+   "exit_code": 1,
+   "steps": [
+    {
+     "step": "1",
+     "name": "ok",
+     "kind": "pass",
+     "result": "PASSED",
+     "why": null
+    },
+    {
+     "step": "2",
+     "name": "fails",
+     "kind": "pass",
+     "result": "FAILED",
+     "why": "rc 1"
+    }
+   ]
+  }
+ },
+ {
+  "case": "a negative block that succeeds",
+  "want_exit_nonzero": true,
+  "exit_code": 1,
+  "ok": true,
+  "summary": {
+   "passed": 0,
+   "refused_as_expected": 0,
+   "failed": 1,
+   "runner_exit": 0,
+   "exit_code": 1,
+   "steps": [
+    {
+     "step": "1",
+     "name": "neg-succeeds",
+     "kind": "neg",
+     "result": "FAILED",
+     "why": "the block exited 0"
+    }
+   ]
+  }
+ },
+ {
+  "case": "a negative block that commits (then exits 1)",
+  "want_exit_nonzero": true,
+  "exit_code": 1,
+  "ok": true,
+  "summary": {
+   "passed": 0,
+   "refused_as_expected": 0,
+   "failed": 1,
+   "runner_exit": 0,
+   "exit_code": 1,
+   "steps": [
+    {
+     "step": "1",
+     "name": "neg-commits",
+     "kind": "neg",
+     "result": "FAILED",
+     "why": "a commit was made"
+    }
+   ]
+  }
+ },
+ {
+  "case": "a twin ref committed under another identity",
+  "want_exit_nonzero": true,
+  "exit_code": 1,
+  "ok": true,
+  "summary": {
+   "passed": 0,
+   "refused_as_expected": 0,
+   "failed": 1,
+   "runner_exit": 1,
+   "exit_code": 1,
+   "steps": [
+    {
+     "step": "1",
+     "name": "identity",
+     "kind": "pass",
+     "result": "FAILED",
+     "why": "rc 1"
+    }
+   ]
+  }
+ },
+ {
+  "case": "a dirty clone",
+  "want_exit_nonzero": true,
+  "exit_code": 1,
+  "ok": true,
+  "summary": {
+   "passed": 0,
+   "refused_as_expected": 0,
+   "failed": 1,
+   "runner_exit": 1,
+   "exit_code": 1,
+   "steps": [
+    {
+     "step": "1",
+     "name": "clean",
+     "kind": "pass",
+     "result": "FAILED",
+     "why": "rc 1"
+    }
+   ]
+  }
+ },
+ {
+  "case": "a passing block and a refusing negative block",
+  "want_exit_nonzero": false,
+  "exit_code": 0,
+  "ok": true,
+  "summary": {
+   "passed": 1,
+   "refused_as_expected": 1,
+   "failed": 0,
+   "runner_exit": 0,
+   "exit_code": 0,
+   "steps": [
+    {
+     "step": "1",
+     "name": "ok",
+     "kind": "pass",
+     "result": "PASSED",
+     "why": null
+    },
+    {
+     "step": "2",
+     "name": "neg-refuses",
+     "kind": "neg",
+     "result": "REFUSED AS EXPECTED",
+     "why": "block rc 1, no commit, twin and GitHub unchanged"
+    }
+   ]
+  }
+ }
+]
