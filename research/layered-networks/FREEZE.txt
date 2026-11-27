@@ -142,7 +142,10 @@ SEED DRAW (the sizes are analysis.DRAW_SIZES; the rehearsal's analysis.DRAW_SIZE
   (no instance is dropped to save time or money).
   THE COMMANDS. Every command of the draw is in a block below, between a line "[block NAME]" and a line "[end]". The
   coordinator runs the blocks as written, in one bash shell, in a working folder outside the clone, in the order
-  ORDER gives. Placeholders are written <...>, and nothing else is to be changed. A block in ( set -e ... ) stops at
+  ORDER gives. Placeholders are written <...>, and nothing else is to be changed. Every `python` is the pinned
+  Python PY of the block vars, checked there by envcheck_layered4.py; the `python` of PATH is not pinned. Every
+  commit is made under the owner identity, taken from main into the new repository's own config (never printed),
+  whatever the machine's global git identity, and checked before its push. A block in ( set -e ... ) stops at
   its first failing command and exits non-zero. Each block prints its result. Stop at the first block that fails.
   Each announce branch and each result branch is created by one push of one commit and is never pushed again, never
   forced and never deleted. analysis.py refuses an announce branch with a force push or a deletion in its activity,
@@ -150,6 +153,10 @@ SEED DRAW (the sizes are analysis.DRAW_SIZES; the rehearsal's analysis.DRAW_SIZE
     [block vars]
     L=<a clean clone of research/layered-campaign-freeze>/research/layered-networks
     F=$(git -C "$L" rev-parse HEAD)
+    PY=<the pinned Python 3.13.18 (numpy 2.3.5, py_ecc 8.0.0), the one envcheck_layered4.py passed with on this machine>
+    python() { "$PY" "$@"; }                                # every `python` in the blocks is the pinned one
+    PATH=$HOME/.elan/bin:$PATH python -B "$L/envcheck_layered4.py" check > ENVCHECK.json
+    python -c "import json, sys; sys.exit(0 if json.load(open('ENVCHECK.json'))['ok'] is True else 1)" && echo "envcheck ok" || { echo "REFUSED: envcheck_layered4 is not ok with $PY: stop"; false; }
     [end]
     [block vars-rehearsal]
     M=rehearsal  B=evidence/combined-rehearsal-draw  R=evidence/combined-rehearsal-draw-result
@@ -208,7 +215,11 @@ SEED DRAW (the sizes are analysis.DRAW_SIZES; the rehearsal's analysis.DRAW_SIZE
       D=$(realpath -e DRAW.json)
       test -z "$(git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$R)" || { echo "REFUSED: $R already exists"; exit 1; }
       mkdir result && cd result && git init -q && git checkout -q --orphan $R
-      cp "$D" DRAW.json && git add DRAW.json && git commit -q -m "Draw result ($M)"     # owner identity
+      git fetch -q --depth 1 https://github.com/HevisNico/kernel-R refs/heads/main     # the owner identity, from main, never printed
+      git config user.name "$(git log -1 --format=%an FETCH_HEAD)" && git config user.email "$(git log -1 --format=%ae FETCH_HEAD)"
+      cp "$D" DRAW.json && git add DRAW.json && git commit -q -m "Draw result ($M)"     # the owner identity, set above
+      O=$(git log -1 --format='%an %ae' FETCH_HEAD)
+      [ "$(git log -1 --format='%an %ae' HEAD)" = "$O" ] && [ "$(git log -1 --format='%cn %ce' HEAD)" = "$O" ] || { echo "REFUSED: the commit's author or committer is not main's (the owner): no push"; exit 1; }
       git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/$R
       echo "draw published: $R $(git rev-parse HEAD)" )
     [end]
@@ -356,6 +367,8 @@ one push of one commit, never pushed again, never forced, never deleted)
       test ${#H} = 64 || { echo "REFUSED: H is not a sha256: no commit, no push"; exit 1; }
       test -z "$(git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$B)" || { echo "REFUSED: $B already exists: no commit, no push"; exit 1; }
       mkdir announce_$M && cd announce_$M && git init -q && git checkout -q --orphan $B
+      git fetch -q --depth 1 https://github.com/HevisNico/kernel-R refs/heads/main     # the owner identity, from main, never printed
+      git config user.name "$(git log -1 --format=%an FETCH_HEAD)" && git config user.email "$(git log -1 --format=%ae FETCH_HEAD)"
       cp "$X" EXCLUDED_PUBLISHED.json                         # the list the draw uses, published with it
       P=$(sha256sum EXCLUDED_PUBLISHED.json | cut -c1-64)
       [ "$P" = "$H" ] || { echo "REFUSED: EXCLUDED_PUBLISHED.json has sha256 $P, not the validated $H: no commit, no push"; exit 1; }
@@ -370,7 +383,9 @@ one push of one commit, never pushed again, never forced, never deleted)
                 and D.excluded_fraction(x) <= D.MAX_EXCLUDED_FRACTION)
           print('announce ok' if ok else 'REFUSED: the announce is wrong: no commit, no push'); sys.exit(0 if ok else 1)"
       git add DRAW_ANNOUNCE.txt EXCLUDED_PUBLISHED.json
-      git commit -q -m "Draw announce ($M)"                   # owner identity
+      git commit -q -m "Draw announce ($M)"                   # the owner identity, set above
+      O=$(git log -1 --format='%an %ae' FETCH_HEAD)
+      [ "$(git log -1 --format='%an %ae' HEAD)" = "$O" ] && [ "$(git log -1 --format='%cn %ce' HEAD)" = "$O" ] || { echo "REFUSED: the commit's author or committer is not main's (the owner): no push"; exit 1; }
       git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/$B   # the one push: the branch_creation that fixes t_push
       echo "announce pushed: $B $(git rev-parse HEAD)" )
     [end]

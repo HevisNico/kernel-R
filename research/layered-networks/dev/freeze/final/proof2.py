@@ -107,7 +107,9 @@ TWINS = {   # (block, written line or fragment) -> replacement; each must occur 
                     "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False)",
                     "strict=False: check_rehearsal_seeds checks the rehearsal draw offline (its only use of the flag)")],
     "vars": [("L=<a clean clone of research/layered-campaign-freeze>/research/layered-networks",
-              f"L={L}", "placeholder: the freeze branch does not exist yet; the clean clone of the candidate")],
+              f"L={L}", "placeholder: the freeze branch does not exist yet; the clean clone of the candidate"),
+             ("PY=<the pinned Python 3.13.18 (numpy 2.3.5, py_ecc 8.0.0), the one envcheck_layered4.py passed with on this machine>",
+              f"PY={PY}", "placeholder: the pinned venv's Python")],
     "vars-campaign": [('H=<the 64 hex characters that ORDER 3 step (3) printed after "sha256">',
                        f"H=$(grep -o 'sha256 [0-9a-f]\\{{64\\}}' {LOG}/08_check-list.out | tail -1 | cut -c8-)",
                        "placeholder: H read from step (3)'s printed line (log/08_check-list.out)")],
@@ -128,8 +130,10 @@ STEPS = [("01", "vars", "."), ("02", "vars-rehearsal", "."), ("03", "announce", 
          ("09", "vars-campaign", "."),
          ("10", "NEGATIVE: the freeze's old list as X, with H kept from (3)", "neg"),
          ("11", "announce", "."), ("12", "draw", ".")]
-run = ["set -u", f"cd {W}/work", f'python() {{ "{PY}" "$@"; }}', "export -f python 2>/dev/null",
-       "export GIT_AUTHOR_NAME=proof GIT_AUTHOR_EMAIL=proof@invalid GIT_COMMITTER_NAME=proof GIT_COMMITTER_EMAIL=proof@invalid"]
+# the owner's negative case for the identity: a global git identity that is NOT the owner's, for the whole run
+(W / "gitconfig_global_other").write_text("[user]\n\tname = someone else\n\temail = someone-else@invalid\n")
+run = ["set -u", f"cd {W}/work", f"export GIT_CONFIG_GLOBAL={W}/gitconfig_global_other",
+       'echo "global identity during the run: $(git config --global user.name)"']
 for num, name, where in STEPS:
     if name.startswith("NEGATIVE"):
         body = ('mkdir neg && cd neg\nX_KEPT=$X\nX=$L/EXCLUDED.json\n' + ready["announce"] +
@@ -145,7 +149,13 @@ for num, name, where in STEPS:
             f"tail -3 {LOG}/{tag}.out"]
 run += [f'echo "### the twin\'s branches and their commit counts"',
         f"for r in $(git --git-dir {TWIN} for-each-ref --format='%(refname)'); do echo $r $(git --git-dir {TWIN} rev-list --count $r); done",
-        f"git -C {W}/kernel-R status --porcelain --untracked-files=all | wc -l"]
+        f"git -C {W}/kernel-R status --porcelain --untracked-files=all | wc -l",
+        'echo "### every commit on the twin: author and committer equal main\'s (the owner), compared, never printed"',
+        f'O="$(git -C {W}/kernel-R log -1 --format=\'%an %ae\' origin/main)"',
+        f"for r in $(git --git-dir {TWIN} for-each-ref --format='%(refname)'); do "
+        f"a=\"$(git --git-dir {TWIN} log -1 --format='%an %ae' $r)\"; c=\"$(git --git-dir {TWIN} log -1 --format='%cn %ce' $r)\"; "
+        f"[ \"$a\" = \"$O\" ] && [ \"$c\" = \"$O\" ] && echo \"$r: the owner's\" || echo \"$r: NOT THE OWNER'S\"; done",
+        'echo "global identity is the owner\'s: $([ "$(git config --global user.name) $(git config --global user.email)" = "$O" ] && echo yes || echo no)"']
 (LOG / "RUN.sh").write_text("\n".join(run) + "\n")
 out = subprocess.run(["bash", str(LOG / "RUN.sh")], capture_output=True, text=True)
 (LOG / "RUN.out").write_text(out.stdout + out.stderr)
