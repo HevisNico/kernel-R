@@ -128,54 +128,124 @@ for name, b in blocks.items():
 (LOG / "TWINS.md").write_text("\n".join(twins_md) + "\n")
 
 # the order (ORDER 2, 3, 4) and the owner's negative case
-STEPS = [("01", "vars", "."), ("02", "vars-rehearsal", "."), ("03", "announce", "."), ("04", "draw", "."),
-         ("04a", "NEG-announce-exists", ""), ("04b", "NEG-draw-exists", ""), ("04c", "NEG-inside-clone", ""),
-         ("05", "second-scan", "."), ("06", "rehearsal-draw", "."), ("07", "list", "."), ("08", "check-list", "."),
-         ("09", "vars-campaign", "."),
-         ("10", "NEGATIVE: the freeze's old list as X, with H kept from (3)", "neg"),
-         ("11", "announce", "."), ("12", "draw", ".")]
-SNAP = f"git --git-dir {TWIN} for-each-ref --format='%(refname) %(objectname)'"
-def neg(folder, setup, block, made):
-    """a negative case: the block must refuse (rc != 0) with no commit and no push (the twin's refs unchanged)"""
-    return (f"{SNAP} > {W}/twin_before.txt\nmkdir -p {folder}\ncd {folder}\n{setup}" + ready[block] +
-            'echo "rc of the block=$?"\n'
-            f'git -C {made} rev-parse -q --verify HEAD >/dev/null 2>&1 && echo "A COMMIT WAS MADE in {made}" || echo "no commit made in {made}"\n'
-            f'{SNAP} | diff -q - {W}/twin_before.txt >/dev/null && echo "no push: the twin is unchanged" || echo "THE TWIN CHANGED"\n'
-            f"cd {W}/work\n")
-NEGS = {"NEG-announce-exists": neg(f"{W}/work/neg_announce", "mkdir announce_$M\n", "announce", "announce_$M"),
-        "NEG-draw-exists": neg(f"{W}/work/neg_draw", "mkdir draw_$M\n", "draw", "draw_$M"),
-        "NEG-inside-clone": neg(f"{W}/someclone/sub", "", "announce", "announce_$M")}
-# the owner's negative case for the identity: a global git identity that is NOT the owner's, for the whole run
+GHPAT = "refs/heads/evidence/combined-*"     # the remote refs a block could create; compared before and after
+
+
+def run_steps(steps, work, log, head=()):
+    """Run the steps in one bash shell, in order. steps: dicts num, name, kind ("pass" or "neg"), body, made (neg:
+    the folder whose repository must hold no commit), where (neg: the folder to run from). Returns (rc, summary).
+    A "pass" step must give rc 0; the run stops at the first that does not. A "neg" step must refuse: its block
+    exits non-zero, makes no commit, and changes neither the twin's refs nor GitHub's evidence/combined-* refs."""
+    log.mkdir(parents=True, exist_ok=True)
+    snap = (f"git --git-dir {TWIN} for-each-ref --format='%(refname) %(objectname)' > {log}/.twin_$1; "
+            f"git ls-remote {GH} '{GHPAT}' > {log}/.gh_$1")
+    run = ["set -u", f"cd {work}", f"snap() {{ {snap}; }}", *head]
+    for s in steps:
+        tag = f"{s['num']}_{s['name']}"
+        if s["kind"] == "neg":
+            body = (f"snap before\nmkdir -p {s['where']}\ncd {s['where']}\n{s.get('setup', '')}{s['body']}"
+                    'echo "rc of the block=$?"\n'
+                    f"git -C {s['made']} rev-parse -q --verify HEAD >/dev/null 2>&1 && echo 'NEGCHECK commit=yes' || echo 'NEGCHECK commit=no'\n"
+                    f"cd {work}\nsnap after\n"
+                    f"cmp -s {log}/.twin_before {log}/.twin_after && echo 'NEGCHECK twin=same' || echo 'NEGCHECK twin=changed'\n"
+                    f"cmp -s {log}/.gh_before {log}/.gh_after && echo 'NEGCHECK github=same' || echo 'NEGCHECK github=changed'\n")
+        else:
+            body = s["body"]
+        (log / f"{tag}.block.sh").write_text(body)
+        run += [f'echo "### {s["num"]} {s["name"]} ({s["kind"]})"',
+                f". {log}/{tag}.block.sh > {log}/{tag}.out 2>&1; echo \"rc=$?\" >> {log}/{tag}.out", f"tail -4 {log}/{tag}.out"]
+        if s["kind"] == "pass":
+            run += [f'grep -qx "rc=0" {log}/{tag}.out || {{ echo "STOPPED: step {s["num"]} {s["name"]} failed"; exit 1; }}']
+    (log / "RUN.sh").write_text("\n".join(run) + "\n")
+    out = subprocess.run(["bash", str(log / "RUN.sh")], capture_output=True, text=True)
+    (log / "RUN.out").write_text(out.stdout + out.stderr)
+    res = []
+    for s in steps:
+        f = log / f"{s['num']}_{s['name']}.out"
+        o = f.read_text() if f.exists() else None
+        if o is None:
+            res.append(dict(step=s["num"], name=s["name"], kind=s["kind"], result="FAILED", why="not run (the run stopped before it)"))
+            continue
+        rcs = re.findall(r"^rc=(\d+)$", o, re.M)
+        if s["kind"] == "pass":
+            ok = bool(rcs) and rcs[-1] == "0"
+            res.append(dict(step=s["num"], name=s["name"], kind="pass", result="PASSED" if ok else "FAILED",
+                            why=None if ok else f"rc {rcs[-1] if rcs else 'none'}"))
+        else:
+            brc = re.findall(r"^rc of the block=(\d+)$", o, re.M)
+            checks = dict(re.findall(r"^NEGCHECK (\w+)=(\w+)$", o, re.M))
+            bad = ([f"the block exited {brc[-1] if brc else 'none'}"] if not brc or brc[-1] == "0" else []) + \
+                  (["a commit was made"] if checks.get("commit") != "no" else []) + \
+                  (["the twin changed"] if checks.get("twin") != "same" else []) + \
+                  (["GitHub's refs changed"] if checks.get("github") != "same" else [])
+            res.append(dict(step=s["num"], name=s["name"], kind="neg", result="FAILED" if bad else "REFUSED AS EXPECTED",
+                            why="; ".join(bad) or f"block rc {brc[-1]}, no commit, twin and GitHub unchanged"))
+    fails = [r for r in res if r["result"] == "FAILED"]
+    rc = 1 if fails or out.returncode != 0 else 0
+    return rc, dict(passed=sum(r["result"] == "PASSED" for r in res),
+                    refused_as_expected=sum(r["result"] == "REFUSED AS EXPECTED" for r in res),
+                    failed=len(fails), runner_exit=out.returncode, exit_code=rc, steps=res)
+
+
+# the runner's self-test: three dummy runs that must fail the proof, one that must pass it
+st = W / "selftest"
+(st / "work").mkdir(parents=True)
+CASES = [
+    ("a required block that exits 1", 1, [dict(num="1", name="ok", kind="pass", body="true\n"),
+                                           dict(num="2", name="fails", kind="pass", body="( exit 1 )\n")]),
+    ("a negative block that succeeds", 1, [dict(num="1", name="neg-succeeds", kind="neg", body="( exit 0 )\n",
+                                                made="nothing", where=f"{st}/work/n1")]),
+    ("a negative block that commits (then exits 1)", 1,
+     [dict(num="1", name="neg-commits", kind="neg", made="r", where=f"{st}/work/n2",
+           body="( set -e\n  mkdir r\n  cd r\n  git init -q\n  git -c user.name=x -c user.email=x@invalid commit -q --allow-empty -m x\n  exit 1 )\n")]),
+    ("a passing block and a refusing negative block", 0, [dict(num="1", name="ok", kind="pass", body="true\n"),
+                                                          dict(num="2", name="neg-refuses", kind="neg", body="( exit 1 )\n",
+                                                               made="nothing", where=f"{st}/work/n3")]),
+]
+selftest = []
+for k, (what, want, steps) in enumerate(CASES, start=1):
+    rc, summ = run_steps(steps, st / "work", st / f"case{k}")
+    selftest.append(dict(case=what, want_exit_nonzero=bool(want), exit_code=rc, ok=(rc != 0) == bool(want), summary=summ))
+(LOG / "SELFTEST.json").write_text(json.dumps(selftest, indent=1) + "\n")
+print("runner self-test:", [(x["case"], x["exit_code"], "ok" if x["ok"] else "WRONG") for x in selftest])
+if not all(x["ok"] for x in selftest):
+    print("THE RUNNER'S SELF-TEST FAILED: no proof run")
+    sys.exit(2)
+
+# the real run: the order of ORDER 2, 3, 4, with the negative cases
 (W / "gitconfig_global_other").write_text("[user]\n\tname = someone else\n\temail = someone-else@invalid\n")
-run = ["set -u", f"cd {W}/work", f"export GIT_CONFIG_GLOBAL={W}/gitconfig_global_other",
-       'echo "global identity during the run: $(git config --global user.name)"']
-for num, name, where in STEPS:
-    if name in NEGS:
-        body, tag = NEGS[name], f"{num}_{name}"
-    elif name.startswith("NEGATIVE"):
-        body = ('mkdir neg && cd neg\nX_KEPT=$X\nX=$L/EXCLUDED.json\n' + ready["announce"] +
-                'echo "rc of the block=$?"\nX=$X_KEPT\n'
-                'git -C announce_campaign rev-parse -q --verify HEAD >/dev/null && echo "A COMMIT WAS MADE" || echo "no commit made"\n'
-                f'git --git-dir {TWIN} rev-parse -q --verify refs/heads/$B >/dev/null && echo "$B ON THE TWIN" || echo "$B not pushed"\n'
-                'cd ..\n')
-        tag = "10_negative"
-    else:
-        body, tag = ready[name], f"{num}_{name}"
-    (LOG / f"{tag}.block.sh").write_text(body)
-    run += [f'echo "### {num} {name}"', f". {LOG}/{tag}.block.sh > {LOG}/{tag}.out 2>&1; echo \"rc=$?\" >> {LOG}/{tag}.out",
-            f"tail -3 {LOG}/{tag}.out"]
-    if not name.startswith("NEG"):     # FREEZE.txt: stop at the first block that fails
-        run += [f'grep -qx "rc=0" {LOG}/{tag}.out || {{ echo "STOPPED: block {name} (step {num}) failed"; exit 1; }}']
-run += [f'echo "### the twin\'s branches and their commit counts"',
-        f"for r in $(git --git-dir {TWIN} for-each-ref --format='%(refname)'); do echo $r $(git --git-dir {TWIN} rev-list --count $r); done",
-        f"git -C {W}/kernel-R status --porcelain --untracked-files=all | wc -l",
-        'echo "### every commit on the twin: author and committer equal main\'s (the owner), compared, never printed"',
-        f'O="$(git -C {W}/kernel-R log -1 --format=\'%an %ae\' origin/main)"',
-        f"for r in $(git --git-dir {TWIN} for-each-ref --format='%(refname)'); do "
-        f"a=\"$(git --git-dir {TWIN} log -1 --format='%an %ae' $r)\"; c=\"$(git --git-dir {TWIN} log -1 --format='%cn %ce' $r)\"; "
-        f"[ \"$a\" = \"$O\" ] && [ \"$c\" = \"$O\" ] && echo \"$r: the owner's\" || echo \"$r: NOT THE OWNER'S\"; done",
-        'echo "global identity is the owner\'s: $([ "$(git config --global user.name) $(git config --global user.email)" = "$O" ] && echo yes || echo no)"']
-(LOG / "RUN.sh").write_text("\n".join(run) + "\n")
-out = subprocess.run(["bash", str(LOG / "RUN.sh")], capture_output=True, text=True)
-(LOG / "RUN.out").write_text(out.stdout + out.stderr)
-print(out.stdout + out.stderr)
+B = lambda n: ready[n]
+STEPS = [dict(num="01", name="vars", kind="pass", body=B("vars")),
+         dict(num="02", name="vars-rehearsal", kind="pass", body=B("vars-rehearsal")),
+         dict(num="03", name="announce", kind="pass", body=B("announce")),
+         dict(num="04", name="draw", kind="pass", body=B("draw")),
+         dict(num="04a", name="NEG-announce-exists", kind="neg", setup="mkdir announce_$M\n", body=B("announce"),
+              made="announce_$M", where=f"{W}/work/neg_announce"),
+         dict(num="04b", name="NEG-draw-exists", kind="neg", setup="mkdir draw_$M\n", body=B("draw"),
+              made="draw_$M", where=f"{W}/work/neg_draw"),
+         dict(num="04c", name="NEG-inside-clone", kind="neg", body=B("announce"), made="announce_$M",
+              where=f"{W}/someclone/sub"),
+         dict(num="05", name="second-scan", kind="pass", body=B("second-scan")),
+         dict(num="06", name="rehearsal-draw", kind="pass", body=B("rehearsal-draw")),
+         dict(num="07", name="list", kind="pass", body=B("list")),
+         dict(num="08", name="check-list", kind="pass", body=B("check-list")),
+         dict(num="09", name="vars-campaign", kind="pass", body=B("vars-campaign")),
+         dict(num="10", name="NEG-old-list", kind="neg", setup="X_KEPT=$X\nX=$L/EXCLUDED.json\n",
+              body=B("announce") + "RC=$?\nX=$X_KEPT\n( exit $RC )\n", made="announce_$M", where=f"{W}/work/neg_oldlist"),
+         dict(num="11", name="announce", kind="pass", body=B("announce")),
+         dict(num="12", name="draw", kind="pass", body=B("draw")),
+         dict(num="13", name="owner-identity", kind="pass", body=(
+             'O="$(git -C ' + f'{W}/kernel-R' + " log -1 --format='%an %ae' origin/main)\"\n"
+             'echo "the global identity is the owner\'s: $([ "$(git config --global user.name) $(git config --global user.email)" = "$O" ] && echo yes || echo no)"\n'
+             f"N=0\nfor r in $(git --git-dir {TWIN} for-each-ref --format='%(refname)'); do\n"
+             f"  a=\"$(git --git-dir {TWIN} log -1 --format='%an %ae' $r)\"; c=\"$(git --git-dir {TWIN} log -1 --format='%cn %ce' $r)\"; n=$(git --git-dir {TWIN} rev-list --count $r)\n"
+             "  if [ \"$a\" = \"$O\" ] && [ \"$c\" = \"$O\" ] && [ \"$n\" = 1 ]; then echo \"$r: one commit, the owner's\"; else echo \"$r: NOT one commit of the owner's\"; N=1; fi\n"
+             "done\n[ $(git --git-dir " + TWIN + " for-each-ref | wc -l) = 4 ] || { echo 'the twin does not hold exactly the 4 branches'; N=1; }\n( exit $N )\n"))]
+rc, summary = run_steps(STEPS, W / "work", LOG, head=[f"export GIT_CONFIG_GLOBAL={W}/gitconfig_global_other",
+                                                    'echo "global identity during the run: $(git config --global user.name)"'])
+summary.update(commit=COMMIT, clone=clone, selftest_ok=True)
+(LOG / "SUMMARY.json").write_text(json.dumps(summary, indent=1) + "\n")
+print(f"passed {summary['passed']}, refused as expected {summary['refused_as_expected']}, failed {summary['failed']}; exit code {rc}")
+for r in summary["steps"]:
+    print(f"  {r['step']:>3} {r['name']:<22} {r['result']}" + (f"  ({r['why']})" if r["result"] == "FAILED" else ""))
+sys.exit(rc)
