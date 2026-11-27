@@ -75,6 +75,17 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   must refuse it, or accept it with the canonical seeds; gated on standin_draw_valid. That DRAW.json is built as a
   forger would build it, with the ef374ccd seed formula inline (forger_groups), not with the pinned draw_seeds.py,
   which may refuse the writing; a fixture that raises records setup_error and fails the case.
+- X1 *: one signature has several byte strings that decode to the same point (zero bytes in front). The real function
+  beacon_verify.verify must accept round 1000000 as published (control) and refuse it with 00, 0000 or 000000 in
+  front (value = sha256 of the padded bytes). standin_signature_<pad>: a forged DRAW.json with that signature, its value
+  as beacon and randomness, and the seeds a forger draws on it (forger_groups); the analysis must refuse it.
+  standin_signature_flip: one signature byte flipped, value and seeds from it; the refusal must come from the
+  signature check ("does not verify against the pinned quicknet key" or a decoding failure). The earlier
+  standin_signature_byte (flip only, value kept) stays.
+- X2 *: plan_split3.py run as a command on the DRAW.json file (json.loads sorts the keys) must give, at 6/6/6 and at
+  60/32/37, the same 12 plans as plan_split3.split of the draw in memory (the analysis's expected plans).
+  standin_plans_from_command: the 6/6/6 stand-in with plans from the command, a root for each machine holding remote
+  duplicates, draw=; must be accepted (exit 0). Gated on standin_draw_valid.
 - E1 round_own_check_failed: K05 with NOT1_6220's round N2 left as the driver leaves a run stopped by its own check
   (see failed_round: the record's status "failed: the tail leak must be set before it starts", N2 failed with why
   "exit 1", no C2, no N2/comparison.json, an unlisted placeholder N2/trace.raw (a real header, data cut off; only its
@@ -397,8 +408,8 @@ def draw_root(src, dst, tmp, source, plan, plans=None, controls=True):
     want = json.loads((plans / plan).read_text())
     keep = {f"{g}_{s}" for g, v in want["groups"].items() for s in v.get("seeds", [])}
     gone = [st.parent for st in sorted(dst.glob("*/status.json")) if st.parent.name not in keep]
-    if not controls:                                        # also the U_ controls (they belong to the old seeds)
-        gone += sorted(dst.glob("U_*"))
+    if not controls:                                        # also the controls (they belong to the old seeds)
+        gone += sorted(dst.glob("U_*")) + sorted(dst.glob("DUPX_*"))
     for d in gone:
         shutil.rmtree(d)
         drop_lines(dst, d.name)
@@ -484,19 +495,38 @@ def forger_groups(beacon, rnd, excluded, sizes):
     return groups, tried
 
 
-def forged_draw(canonical, written, excluded):
+def forged_draw(canonical, written, excluded, sizes=None, signature=None):
     """The canonical stand-in DRAW (its keys as the pinned draw_seeds writes them), with the beacon and
-    beacon_round.randomness in another writing and the seeds a forger draws on that writing."""
+    beacon_round.randomness set to `written` (another writing, or the value of another signature) and the seeds a
+    forger draws on it; `signature`, if given, replaces beacon_round.signature."""
     D = json.loads(json.dumps(canonical))
-    groups, tried = forger_groups(written, ROUND_1M["round"], excluded, dict(STANDIN_SIZES))
+    groups, tried = forger_groups(written, ROUND_1M["round"], excluded, dict(sizes or STANDIN_SIZES))
     D.update(beacon=written, groups=groups)
     if "candidates_tried" in D:
         D["candidates_tried"] = tried
     D["beacon_round"]["randomness"] = written
+    if signature is not None:
+        D["beacon_round"]["signature"] = signature
     return D
 
 
-def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinned", activity=None, writing=None):
+def forged_signature(kind):
+    """Signature bytes a forger can publish for round 1000000: zero bytes in front ("pad00", "pad0000", ...), or one
+    byte flipped ("flip"). Returns (signature hex, value = sha256(signature bytes) hex)."""
+    sig = bytes.fromhex(ROUND_1M["signature"])
+    if kind.startswith("pad"):
+        sig = bytes.fromhex(kind[3:]) + sig
+    elif kind == "flip":
+        b = bytearray(sig)
+        b[10] ^= 1
+        sig = bytes(b)
+    else:
+        raise ValueError(kind)
+    return sig.hex(), hashlib.sha256(sig).hexdigest()
+
+
+def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinned", activity=None, writing=None,
+            sizes=None, sig_forge=None, plans_cmd=False):
     """Write DRAW.json, DRAW_ANNOUNCE.txt and the excluded file of the stand-in draw, one mutation applied, and the
     plans of the VALID draw. Returns (args, plans)."""
     sys.path.insert(0, str(HERE))
@@ -513,14 +543,21 @@ def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinn
     utc = lambda t: datetime.datetime.fromtimestamp(t, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     assert BV.round_after(BC.QUICKNET, utc(t0)) == ROUND_1M["round"]
 
+    sizes = dict(sizes or STANDIN_SIZES)
+
     def make(ex, beacon=ROUND_1M["randomness"]):
-        D = DS.draw(beacon, ROUND_1M["round"], ex, dict(STANDIN_SIZES))
+        D = DS.draw(beacon, ROUND_1M["round"], ex, dict(sizes))
         D["beacon_round"] = dict(ROUND_1M, randomness=beacon)
         D["announce"] = dict(branch=STANDIN_BRANCH, commit=STANDIN_COMMIT, push_utc=utc(t0))
         return D
 
-    valid = make(pinned) if writing is None else forged_draw(make(pinned), WRITINGS[writing](ROUND_1M["randomness"]),
-                                                             pinned)
+    if writing is not None:
+        valid = forged_draw(make(pinned), WRITINGS[writing](ROUND_1M["randomness"]), pinned, sizes)
+    elif sig_forge is not None:
+        sig_hex, value = forged_signature(sig_forge)
+        valid = forged_draw(make(pinned), value, pinned, sizes, signature=sig_hex)
+    else:
+        valid = make(pinned)
     plans = tmp / "draw_plans"                              # the plans of the draw as written (a matching root)
     plans.mkdir()
     for k, pl in enumerate(P3.split(valid, json.loads((HERE / "campaign_template.json").read_text()), 12)[0], start=1):
@@ -547,9 +584,13 @@ def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinn
         D["beacon_round"]["signature"] = b.hex()
     (d / "DRAW.json").write_bytes(DS.canon(D))
     (d / "EXCLUDED.json").write_bytes(ex_b)
-    sizes = " ".join(f"{g}={n}" for g, n in STANDIN_SIZES.items())
+    if plans_cmd:                                          # the plans as the procedure makes them: the command, on the file
+        shutil.rmtree(plans)
+        subprocess.run([PY, "-B", str(HERE / "plan_split3.py"), str(d / "DRAW.json"), str(HERE / "campaign_template.json"),
+                        str(plans)], cwd=HERE, check=True, capture_output=True)
+    words = " ".join(f"{g}={n}" for g, n in sizes.items())
     (d / "DRAW_ANNOUNCE.txt").write_text(f"format layered-draw-announce/1\nmode test\nexcluded_sha256 {announced}\n"
-                                         f"sizes {sizes}\n")
+                                         f"sizes {words}\n")
     args = [f"{DRAW_ARG}={d / 'DRAW.json'}", f"excluded={d / 'EXCLUDED.json'}", f"announce={d / 'DRAW_ANNOUNCE.txt'}"]
     if activity:
         (d / "activity.json").write_text(json.dumps(activity_items(activity, STANDIN_COMMIT, t0, utc), indent=1) + "\n")
@@ -561,6 +602,90 @@ def standin_run(tmp, src, label, **mutation):
     args, plans = standin(tmp, **mutation)
     root = draw_root(src, tmp / "a" / "out_K03", tmp, "out_K05", "PLAN_K03.json", plans=plans, controls=False)
     return run(tmp, [root], label, extra=args)
+
+
+# ------------------------------------------------------------------------------------------------ X1: padded signatures
+PADS = ("pad00", "pad0000", "pad000000")
+
+
+def bv_verify(sig_hex, value):
+    sys.path.insert(0, str(HERE))
+    import beacon_chain as BC
+    import beacon_verify as BV
+    return BV.verify(BC.QUICKNET, dict(round=ROUND_1M["round"], signature=sig_hex, randomness=value))
+
+
+def case_verify_signature_real(tmp, src):
+    """beacon_verify.verify (the real function) on round 1000000 as published: accepted."""
+    r = bv_verify(ROUND_1M["signature"], ROUND_1M["randomness"])
+    return r.get("ok") is True, dict(verify=r)
+
+
+def verify_pad_case(kind):
+    def case(tmp, src):
+        sig_hex, value = forged_signature(kind)
+        try:
+            r = bv_verify(sig_hex, value)
+        except Exception as e:                                   # a refusal by exception is a refusal
+            return True, dict(signature_prefix=sig_hex[:12], raised=repr(e)[:300])
+        return r.get("ok") is not True, dict(signature_prefix=sig_hex[:12], value=value, verify=r)
+    case.__name__ = f"case_verify_signature_{kind}"
+    return case
+
+
+def standin_sig_case(kind, want=None):
+    def case(tmp, src):
+        r, res, obs = standin_run(tmp, src, f"standin_signature_{kind}", sig_forge=kind)
+        obs["control_passed"] = STANDIN_CONTROL.get("ok", False)
+        text = r.stdout + r.stderr
+        ok = refused(r) and obs["control_passed"] and (want is None or any(w in text for w in want))
+        return ok, obs
+    case.__name__ = f"case_standin_signature_{kind}"
+    return case
+
+
+# ------------------------------------------------------------------------------------------------ X2: the plan split
+X2_SIZES = (dict(NOT1=6, ANDOR3=6, XOR3=6), dict(NOT1=60, ANDOR3=32, XOR3=37))
+
+
+def command_vs_split(tmp, sizes):
+    """plan_split3.py run as a command on the DRAW.json file, against plan_split3.split on the draw in memory (the
+    analysis's expected plans: plan_split3.split of the recomputed draw, the frozen template, 12 machines)."""
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as DS
+    import plan_split3 as P3
+    ex = json.loads((HERE / "EXCLUDED.json").read_text())
+    D = DS.draw(ROUND_1M["randomness"], ROUND_1M["round"], ex, dict(sizes))
+    (tmp / "DRAW.json").write_bytes(DS.canon(D))
+    subprocess.run([PY, "-B", str(HERE / "plan_split3.py"), str(tmp / "DRAW.json"), str(HERE / "campaign_template.json"),
+                    str(tmp / "plans")], cwd=HERE, check=True, capture_output=True)
+    mem = P3.split(D, json.loads((HERE / "campaign_template.json").read_text()), 12)[0]
+    diff = {}
+    for k, pl in enumerate(mem, start=1):
+        f = json.loads((tmp / "plans" / f"PLAN_K{k:02d}.json").read_text())
+        if f != pl:
+            diff[f"K{k:02d}"] = {key: dict(command=f.get(key), split=pl.get(key)) for key in sorted(set(f) | set(pl))
+                                 if f.get(key) != pl.get(key)}
+    return diff
+
+
+def plans_case(sizes):
+    def case(tmp, src):
+        diff = command_vs_split(tmp, sizes)
+        return not diff, dict(sizes=sizes, differing=json.loads(json.dumps(diff))) if diff else dict(sizes=sizes)
+    case.__name__ = "case_plans_command_" + "_".join(str(n) for n in sizes.values())
+    return case
+
+
+def case_standin_plans_from_command(tmp, src):
+    """The stand-in draw at 6/6/6, its plans made by the plan_split3.py command on the DRAW.json file; a root for each
+    machine holding remote duplicates (out_K06 with that plan, no instance, U_ or DUPX_ folder), with draw=."""
+    args, plans = standin(tmp, sizes=X2_SIZES[0], plans_cmd=True)
+    ks = [f.name for f in sorted(plans.glob("PLAN_K*.json")) if json.loads(f.read_text())["remote_duplicates"]]
+    roots = [draw_root(src, tmp / "a" / f"out_{f[5:8]}", tmp, "out_K06", f, plans=plans, controls=False) for f in ks]
+    r, res, obs = run(tmp, roots, "standin_plans_from_command", extra=args)
+    obs.update(machines=[f[5:8] for f in ks], control_passed=STANDIN_CONTROL.get("ok", False))
+    return r.returncode == 0 and obs["control_passed"], obs
 
 
 # ------------------------------------------------------------------------------------------------ E1: a run's own check
@@ -896,6 +1021,23 @@ CASES = [
        f"analysis with a DRAW.json whose beacon and beacon_round.randomness are written {n} (the seeds drawn on that "
        f"writing, a matching root): refused, or accepted with the canonical NOT1 seeds (gated on standin_draw_valid)")
       for n in WRITINGS],
+    ("X1", "verify_signature_real", case_verify_signature_real,
+     "beacon_verify.verify on round 1000000 as published: ok (control)"),
+    *[("X1", f"verify_signature_{k}", verify_pad_case(k),
+       f"beacon_verify.verify on the signature with {k[3:]} in front and value sha256(those bytes): not ok")
+      for k in PADS],
+    *[("X1", f"standin_signature_{k}", standin_sig_case(k),
+       f"analysis on a forged DRAW.json: the signature with {k[3:]} in front, value and seeds from it: refused (gated)")
+      for k in PADS],
+    ("X1", "standin_signature_flip", standin_sig_case("flip", ("does not verify against the pinned quicknet key",
+                                                               "decod")),
+     "analysis on a forged DRAW.json: one signature byte flipped, value = sha256(flipped bytes), seeds from it: "
+     "refused by the signature check (\"does not verify against the pinned quicknet key\" or a decoding failure)"),
+    *[("X2", "plans_command_" + "_".join(str(n) for n in sz.values()), plans_case(sz),
+       f"plan_split3.py on the DRAW.json file at {sz}: all 12 plans equal plan_split3.split of the draw") for sz in X2_SIZES],
+    ("X2", "standin_plans_from_command", case_standin_plans_from_command,
+     "the 6/6/6 stand-in, plans from the plan_split3.py command, roots for its remote-duplicate machines, draw=: "
+     "exit 0 (gated)"),
     ("E1", "round_own_check_failed", case_round_own_check_failed,
      "N2 of NOT1_6220 stopped by its own check (" + OWN_CHECK + "): exit 0; refuted at K3, in a sub-row about the "
      "run's own check listing the status; NOT1_6212 held"),
