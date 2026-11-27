@@ -395,7 +395,7 @@ def analyze_root(R, plan, machine, campaign):
             row = dict(base, steps={k: v["status"] for k, v in sorted(status["steps"].items())}, stage_d=None,
                        unverified=True, K0=dict(counted=False), K3=dict(counted=False))
             run_failed.append(dict(instance=name, group=group, level="stage D", first_failing=dict(
-                step=None, status="no verified instance manifest (the root did not finish this instance)")))
+                step=None, status="no verified instance manifest (manifest not final: the root did not finish this instance)")))
             insts.append(row)
             continue
         if summ is not None and summ_steps.get(name) != {k: v["status"] for k, v in status["steps"].items()}:
@@ -475,10 +475,16 @@ def analyze_root(R, plan, machine, campaign):
         insts.append(row)
     controls = dict(U=[], duplicate=[], S=[])
     for p in sorted(R.path.glob("U_*/untrained.json")):
+        if not R.covered(str(p.relative_to(R.path))):       # a root that did not finish: never read, never counted
+            controls["U"].append(dict(instance=p.parent.name[2:], holds=None, unverified=True,
+                                      why="under no verified manifest (the root did not finish)"))
+            continue
         u = R.json(str(p.relative_to(R.path)))
         controls["U"].append(dict(instance=u["instance"], holds=u.get("ok"), r_cell_fires=u.get("r_cell_fires"),
                                   inverter_fires_reported=len(u.get("inverter_fires_reported") or [])))
     for p in sorted(R.path.glob("DUP_*/duplicate.json")):
+        if not R.covered(str(p.relative_to(R.path))):
+            continue
         x = R.json(str(p.relative_to(R.path)))
         controls["duplicate"].append(dict(instance=x["instance"], identical=x.get("ok"), checker=x.get("checker"),
                                           check_exit=x.get("check_duplicate_exit")))
@@ -717,6 +723,8 @@ def layer_seals(M, times_src, kernel_build, th, campaign, rule, outdir):
             entry = dict(instance=name, duplicate_machine=machine)
             if name not in by_inst:
                 entry["why"] = "original instance not in the analysed OUTROOTs"
+            elif by_inst[name][1].get("unverified") or f"{dx.name}/N0/noisy_record.json" not in m["R"].verified:
+                entry["why"] = "the original or the duplicate is under no verified manifest"
             else:
                 om = by_inst[name][0]
                 entry.update(original_machine=om, **{f"{k_}_identical": v for k_, v in
@@ -870,6 +878,10 @@ def layer_duplicates(res, M, controls_dir):
             e = dict(instance=name, duplicate_machine=machine)
             if name not in where:
                 e["why"] = "original instance not in the analysed OUTROOTs"
+                xs.append(e)
+                continue
+            if f"{dx.name}/N0/noisy_record.json" not in R.verified:   # its SHA256SUMS is written last: not finished
+                e.update(identical=None, unverified=True, why="the duplicate's files are under no verified manifest")
                 xs.append(e)
                 continue
             om = where[name]
