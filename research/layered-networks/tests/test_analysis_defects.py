@@ -66,9 +66,11 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   earlier, its branch_deletion, then the branch_creation of the announce commit that DRAW.json uses; must be refused.
   force_push: the clean creation, then a force_push; must be refused. The two refusals count only if clean passed in
   the same run. Not exercised: reading the activity from GitHub (campaign and rehearsal).
-- beacon draw_reference: a stable reference. draw_seeds.draw on fixed inputs (round 1000000's value, a small TEST
-  exclusion list, 2/1/1) must give the seeds established by hand from the hash trace (see REFERENCE_SEEDS), not
-  derived from the code under test. It exercises both rejections (an excluded seed, an excluded noise seed).
+- beacon draw_reference: a stable reference. Fixed inputs: round 1000000's published signature (its value checked as
+  sha256 of it), the fixture tests/fixtures/REFERENCE_EXCLUDED.json (a small test list, not the campaign's), sizes
+  2/1/1. The seeds are hard-coded (REFERENCE_SEEDS), established by hand from the hash trace written beside them and
+  re-derived in the case by a minimal SHA-256 loop written there, independent of draw_seeds.py; draw_seeds.draw must
+  give the same. It exercises both rejections (an excluded seed, an excluded noise seed).
 - INTEGRATION on the pinned list: standin_draw_valid also checks that no drawn seed or noise seed of one is in the
   pinned EXCLUDED.json; and each case gated on a control must reach its own check (REACHES: the check's words in the
   refusal), not be refused earlier.
@@ -845,22 +847,40 @@ def draw_function(beacon, sizes=None):
 #   NOT1   k=0 65418 excluded   k=1 69364 rejected (noise seed 693640 excluded)   k=2 78394 taken   k=3 39363 taken
 #   ANDOR3 k=0 55321 excluded   k=1 71018 taken
 #   XOR3   k=0 61903 excluded   k=1 62982 taken
-REFERENCE_EXCLUDED = [55321, 61903, 65418, 693640]
+REFERENCE_FIXTURE = HERE / "tests" / "fixtures" / "REFERENCE_EXCLUDED.json"   # seeds [55321, 61903, 65418, 693640]
 REFERENCE_SEEDS = {"NOT1": [78394, 39363], "ANDOR3": [71018], "XOR3": [62982]}
 REFERENCE_TRIED = {"NOT1": 4, "ANDOR3": 2, "XOR3": 2}
 
 
 def case_draw_reference(tmp, src):
-    """draw_seeds.draw (the code under test) on the reference inputs: the hand-established seeds and candidate counts."""
+    """The reference, three ways: (1) the value is sha256 of round 1000000's published signature; (2) a minimal SHA-256
+    loop written here, independent of draw_seeds.py, gives the hard-coded seeds on the fixture list; (3) draw_seeds.draw
+    (the code under test) gives the same seeds and candidate counts."""
     sys.path.insert(0, str(HERE))
     import draw_seeds as DS
-    seeds = sorted(REFERENCE_EXCLUDED)
-    ex = dict(format="layered-excluded-seeds/1", count=len(seeds), seeds=seeds,
-              seeds_sha256=hashlib.sha256(DS.canon(seeds)).hexdigest())
-    D = DS.draw(ROUND_1M["randomness"], ROUND_1M["round"], ex, dict(STANDIN_SIZES))
-    ok = D["groups"] == REFERENCE_SEEDS and D["candidates_tried"] == REFERENCE_TRIED
-    return ok, dict(groups=D["groups"], candidates_tried=D["candidates_tried"], want=REFERENCE_SEEDS,
-                    want_tried=REFERENCE_TRIED)
+    ex = json.loads(REFERENCE_FIXTURE.read_text())
+    value = hashlib.sha256(bytes.fromhex(ROUND_1M["signature"])).hexdigest()
+    ok_value = value == ROUND_1M["randomness"]
+    # (2) the minimal computation: S = 10000 + sha256("<value>|<round>|<group>|<k>") mod 90000, in NOT1, ANDOR3, XOR3
+    # order, rejecting an excluded S, a drawn S, or an S with an excluded 10 S + 0..3.
+    excl, drawn, mine, tried = set(ex["seeds"]), set(), {}, {}
+    for g, n in (("NOT1", 2), ("ANDOR3", 1), ("XOR3", 1)):
+        got, k = [], 0
+        while len(got) < n:
+            cand = 10000 + int(hashlib.sha256(f"{value}|1000000|{g}|{k}".encode()).hexdigest(), 16) % 90000
+            k += 1
+            if cand in excl or cand in drawn or any(10 * cand + j in excl for j in range(4)):
+                continue
+            got.append(cand)
+            drawn.add(cand)
+        mine[g], tried[g] = got, k
+    ok_minimal = mine == REFERENCE_SEEDS and tried == REFERENCE_TRIED
+    D = DS.draw(value, ROUND_1M["round"], ex, dict(STANDIN_SIZES))
+    ok_code = D["groups"] == REFERENCE_SEEDS and D["candidates_tried"] == REFERENCE_TRIED
+    return ok_value and ok_minimal and ok_code, dict(value_is_sha256_of_signature=ok_value, minimal=mine,
+                                                    minimal_tried=tried, draw_seeds=D["groups"],
+                                                    draw_seeds_tried=D["candidates_tried"], want=REFERENCE_SEEDS,
+                                                    want_tried=REFERENCE_TRIED)
 
 
 def case_beacon_canonical(tmp, src):
@@ -1199,8 +1219,9 @@ CASES = [
     ("E2", "standin_activity_force_push", case_standin_activity_force_push,
      "activity= the clean branch_creation then a force_push on the announce branch: refused (gated)"),
     ("beacon", "draw_reference", case_draw_reference,
-     "draw_seeds.draw on the fixed reference inputs (round 1000000, the TEST list REFERENCE_EXCLUDED, 2/1/1): the "
-     "hand-established seeds " + json.dumps(REFERENCE_SEEDS) + " and candidate counts"),
+     "fixed reference (round 1000000's signature and value, tests/fixtures/REFERENCE_EXCLUDED.json, 2/1/1): value = "
+     "sha256(signature); a minimal SHA-256 loop in the test and draw_seeds.draw both give the hard-coded seeds "
+     + json.dumps(REFERENCE_SEEDS) + " and candidate counts"),
     ("beacon", "beacon_canonical", case_beacon_canonical,
      "draw_seeds.draw on the canonical lowercase beacon gives the seeds of the ef374ccd formula over the pinned list "
      "(canonical_seeds(), derived at run time)"),
