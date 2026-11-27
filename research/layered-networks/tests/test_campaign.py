@@ -886,9 +886,12 @@ def case_analysis_hardening(w, home):
     - B1/B2 an extra file in the seal folder: a seal defect (held → not sealed);
     - B9 a root without DONE: analysed, "root not finished" at the top;
     - A7 the expected U control, present and passed;
-    - B16/D8 a draw that is not draw_seeds.draw of its beacon refuses; a real one (quicknet round 1000000, its
-      signature verified) goes on and refuses the root's plan as none of the expected plans; one changed signature
-      byte refuses."""
+    - B16/D8, the owner's full recomputation (test mode, offline announce): one seed changed with the signature kept,
+      the round off by one (the announce 3 s later), one signature byte changed: each refuses; a valid draw (quicknet
+      round 1000000, its signature verified, its announce 600 s before) goes on and refuses the root's plan as none of
+      the expected plans;
+    - the owner's rule on an incomplete machine: stopped after a differing N1 (no final manifest), NOT1_6212 counts
+      refuted at K3, flagged manifest not final; K0 is not completed; the root is listed not finished."""
     out, checks, oks = {}, [], []
     base = home["root"]
 
@@ -996,25 +999,74 @@ def case_analysis_hardening(w, home):
     out["A7"] = s
 
     sys.path.insert(0, str(HERE))
+    import beacon_chain
+    import beacon_verify
     import draw_seeds
-    br = dict(round=1000000, randomness="b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3",
-              signature="83ad29e4c409f9470fc2ef02f90214df49e02b441a1a241a82d622d9f608ef98fd8b11a029f1bee9d9e83b45088abe72")
-    ex = json.loads((HERE / "EXCLUDED.json").read_text())
-    good = dict(draw_seeds.draw(br["randomness"], 1000000, ex, dict(NOT1=60, ANDOR3=32, XOR3=37)), beacon_round=br)
-    gd = w.wd / "DRAW_good.json"
-    gd.write_bytes(draw_seeds.canon(good))
-    bad = dict(good, groups=dict(good["groups"], NOT1=[6212] + good["groups"]["NOT1"][1:]))
-    bd = w.wd / "DRAW_forged.json"
-    bd.write_bytes(draw_seeds.canon(bad))
-    sg = dict(good, beacon_round=dict(br, signature=br["signature"][:-2] + ("00" if br["signature"][-2:] != "00" else "11")))
-    sd = w.wd / "DRAW_badsig.json"
-    sd.write_bytes(draw_seeds.canon(sg))
-    refused("B16: a forged draw", "DRAW.json is not draw_seeds.draw of its beacon and round", base, "times=bare",
-            f"draw={bd}", target=bd)
-    refused("B16: one changed signature byte", "the beacon round does not verify", base, "times=bare", f"draw={sd}",
-            target=sd)
+    import hashlib
+    ex_f = HERE / "EXCLUDED.json"
+    ex = json.loads(ex_f.read_text())
+    n = dict(NOT1=2, ANDOR3=1, XOR3=1)
+
+    def make_draw(label, rnd=1000000, shift_s=0, seed_change=False, sig_change=False):
+        br = dict(round=1000000, randomness="b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3",
+                  signature="83ad29e4c409f9470fc2ef02f90214df49e02b441a1a241a82d622d9f608ef98fd8b11a029f1bee9d9e83b45088"
+                            "abe72")
+        t0 = beacon_verify.round_time(beacon_chain.QUICKNET, 1000000) - beacon_verify.DELAY_S + shift_s
+        import datetime
+        push = datetime.datetime.fromtimestamp(t0, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        ann = w.wd / f"ANNOUNCE_{label}.txt"
+        ann.write_text(f"format layered-draw-announce/1\nmode test\nexcluded_sha256 {hashlib.sha256(ex_f.read_bytes()).hexdigest()}\n"
+                       f"sizes NOT1={n['NOT1']} ANDOR3={n['ANDOR3']} XOR3={n['XOR3']}\n")
+        d = draw_seeds.draw(br["randomness"], rnd, ex, dict(n))
+        if seed_change:
+            d["groups"]["NOT1"][0] += 1
+        if sig_change:
+            br["signature"] = br["signature"][:-2] + ("00" if br["signature"][-2:] != "00" else "11")
+        f = w.wd / f"DRAW_{label}.json"
+        f.write_bytes(draw_seeds.canon(dict(d, beacon_round=br, announce=dict(branch="test", commit="0" * 40, push_utc=push))))
+        return [f"draw={f}", f"excluded={ex_f}", f"announce={ann}"]
+
+    refused("B16: one seed changed, the signature kept", "DRAW.json is not draw_seeds.draw of its beacon and round",
+            base, "times=bare", *make_draw("seed", seed_change=True))
+    refused("B16: the round off by one (the announce pushed 3 s later)", "is not the round the announce's push time "
+            "fixes", base, "times=bare", *make_draw("round", shift_s=3))
+    refused("B16: one changed signature byte", "the beacon round does not verify", base, "times=bare",
+            *make_draw("sig", sig_change=True))
     refused("B16/D8: a verified draw, the root's plan is none of the expected plans", "PLAN.json is none of the "
-            "expected plans of the draw", base, "times=bare", f"draw={gd}", target=gd)
+            "expected plans of the draw", base, "times=bare", *make_draw("good"))
+
+    # the owner's rule: a machine stopped after a differing N1 keeps that refutation (manifest not final)
+    rp = copy_root(base, w.wd / "root_h_partial")
+    d = rp / "NOT1_6212"
+    for f in ("SHA256SUMS", "SHA256SUMS.instances", "RESULT.json", "RESULT_INSTANCES.json", "DONE", "INSTANCES_DONE",
+              "INVENTORY_END"):
+        (rp / f).unlink(missing_ok=True)
+    (d / "SHA256SUMS").unlink()
+    for x in ("N2", "N3"):
+        shutil.rmtree(d / x)
+    rec = json.loads((d / "N1" / "noisy_record.json").read_text())
+    k = sorted(rec["words"])[0]
+    rec["words"][k] = ("s" if rec["words"][k][0] == "F" else "F") + rec["words"][k][1:]
+    (d / "N1" / "noisy_record.json").write_text(json.dumps(rec, indent=1, default=str) + "\n")
+    recompare(d, 1)
+    st = json.loads((d / "status.json").read_text())
+    for x in ("C2", "N3", "C3"):
+        st["steps"].pop(x, None)
+    st["steps"]["N2"] = dict(status="running", started=st["steps"]["N2"].get("started"))
+    st["steps"]["N1"]["outputs"]["N1/noisy_record.json"] = hashlib.sha256((d / "N1" / "noisy_record.json").read_bytes()).hexdigest()
+    st["steps"]["C1"]["outputs"]["N1/comparison.json"] = hashlib.sha256((d / "N1" / "comparison.json").read_bytes()).hexdigest()
+    (d / "status.json").write_text(json.dumps(st, indent=1, sort_keys=True) + "\n")
+    a, res = run_analysis(w, "h_partial", rp, "times=bare")
+    row = next((x for x in (res or {}).get("instances", []) if x["instance"] == "NOT1_6212"), {})
+    cnt = ((res or {}).get("counts") or {}).get("NOT1", {})
+    oks.append(a.returncode == 0 and check(checks, "owner: stopped after a differing N1, refuted (manifest not final)",
+                                           json.dumps(row.get("K3"), sort_keys=True),
+                                           '"counted": true, "manifest_not_final": true, "refuted": true', rp, rp.exists())
+               and cnt["K3"]["refuted"]["list"] == ["NOT1_6212"]
+               and [x["instance"] for x in cnt["K0"]["not_completed"]["list"]] == ["NOT1_6212"]
+               and any("root not finished: machine_1" in x for x in res["NOTICE"]))
+    out["partial"] = dict(rc=a.returncode, stderr=a.stderr.strip()[-300:], K0=row.get("K0"), K3=row.get("K3"),
+                          notice=(res or {}).get("NOTICE"), counts_K0_not_completed=cnt.get("K0", {}).get("not_completed"))
     out["checks"] = checks
     return all(oks), out
 

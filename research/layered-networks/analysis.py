@@ -2,30 +2,45 @@
 It is analyze10 flattened, with the defect fixes listed below. Each former layer is a function, applied in order, with a
 JSON round trip between them as before.
 
-  analysis.py MODE OUTDIR ROOT [ROOT ...] [draw=DRAW.json] [rehearsal=1] [times=github|bare|lsremote:LOG]
-                                          [thresholds=FILE] [controls=DIR] [tips=FILE]
+  analysis.py MODE OUTDIR ROOT [ROOT ...] [draw=DRAW.json] [excluded=EXCLUDED.json] [announce=DRAW_ANNOUNCE.txt]
+                                          [times=github|bare|lsremote:LOG] [thresholds=FILE] [controls=DIR] [tips=FILE]
 
 MODE:
 - **campaign:** every ROOT must come from campaign.py in campaign mode: its ENV.json names this tree's campaign.py by
   sha256, the frozen template (campaign.FROZEN_TEMPLATE_SHA256), and mode CAMPAIGN. Any other root is refused, and so
-  is a mix. draw= is required, times must be github, thresholds the pinned file, controls the noise tree at the
-  template's noise_commit.
-- **test:** any root of this driver. RESULTS.json then says "mode": "TEST". draw= is optional: given, every check of
-  the draw and of the expected plans runs as in campaign mode.
-- **rehearsal=1:** the draw's sizes are DRAW_SIZES_REHEARSAL instead of DRAW_SIZES. RESULTS.json then carries
-  "REHEARSAL" in its first field (NOTICE), in `mode` and in every verdict line: it can never be read as the campaign.
+  is a mix. draw= and excluded= are required, times must be github, thresholds the pinned file, controls the noise
+  tree at the template's noise_commit. The sizes are DRAW_SIZES, pinned here.
+- **rehearsal:** every refusal of campaign mode, with the sizes DRAW_SIZES_REHEARSAL and the rehearsal's own announce
+  (ANNOUNCE_BRANCH). RESULTS.json says "mode": "REHEARSAL", in its first field (NOTICE) and in every verdict line: it
+  can never be read as the campaign.
+- **test:** any root of this driver. RESULTS.json then says "mode": "TEST". draw= is optional. A draw with a beacon is
+  recomputed and verified as in campaign mode, offline: announce= gives DRAW_ANNOUNCE.txt and the push time is
+  DRAW.json's own. A draw without one (format, groups) is not recomputed: its plans are checked on PLAN.json, its own
+  sizes used. NOTICE says which.
 
-THE DRAW AND THE EXPECTED PLANS (D8, B5, B16):
-- DRAW.json must be, byte for byte, draw_seeds.canon of draw_seeds.draw(beacon, round, the pinned EXCLUDED.json,
-  DRAW_SIZES) with one key added, `beacon_round`: drand's /public/<round> (round, signature, randomness). The beacon
-  value must be the round's randomness, and the round's BLS signature must verify (beacon_verify.verify) against the
-  pinned quicknet chain (beacon_chain.QUICKNET). Any failure refuses.
-- The expected plans are plan_split3.split(draw, the frozen template, MACHINES). Each root's PLAN_INPUT.json must be
-  byte-identical to plan_split.canon of one of them, which names the root's machine K<nn>; its PLAN.json and
-  PLAN_RESOLVED.json must be that plan plus PLAN_LOCAL_KEYS only, equal to TEMPLATE_CHECK.json's trees. Two roots on
-  one machine refuse. Everything the analysis reads from a plan is then read from the expected plan.
+THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
+- DRAW.json is draw_seeds.canon of draw_seeds.draw(beacon, round, EXCLUDED, sizes) plus `beacon_round` (drand's
+  /public/<round>: round, signature, randomness) and `announce` (branch, commit, push_utc), byte for byte.
+- The announce: in campaign and rehearsal modes, the first commit adding DRAW_ANNOUNCE.txt on ANNOUNCE_BRANCH[mode]
+  (first-parent), read from GitHub, and GitHub's recorded push time of it (sealpush.github_times; every activity item
+  saved in OUTDIR/activity/); both must equal DRAW.json's announce. DRAW_ANNOUNCE.txt is exactly four lines:
+  `format layered-draw-announce/1`, `mode M`, `excluded_sha256 H`, `sizes NOT1=n ANDOR3=n XOR3=n`.
+- The exclusion list: excluded= must have the sha256 the announce names, and its seeds must be a superset of the
+  freeze's pinned EXCLUDED.json (the second scan, after the rehearsal, only adds).
+- The round must be beacon_verify.round_after(the pinned quicknet chain, the announce's push time); the beacon value
+  must be that round's randomness; the BLS signature must verify (beacon_verify.verify, beacon_chain.QUICKNET), which
+  also checks randomness = sha256(signature).
+- The seeds are recomputed with the pinned draw_seeds.draw; the 12 expected plans are plan_split3.split of the
+  RECOMPUTED draw on the frozen template, never of the file's own lists.
+- Each root's PLAN_INPUT.json must be byte-identical to plan_split.canon of one of them, which names the root's
+  machine K<nn>; its PLAN.json and PLAN_RESOLVED.json must be that plan plus PLAN_LOCAL_KEYS only, equal to
+  TEMPLATE_CHECK.json's trees (in test mode: PLAN.json only). Two roots on one machine refuse. Everything the analysis
+  reads from a plan is then read from the expected plan.
 - Every expected home instance is a row. One with no folder, and every instance of a machine with no root, is "not
-  run" (counted for nothing); the rows of each group and level sum to the drawn size.
+  run" (counted for nothing), looked up in its machine's seal log (sealed_in_log, the push time): a sealed one reads
+  "sealed, no result given". The rows of each group and level sum to the drawn size. NOTICE lists every machine with
+  no root or an unfinished root, with its number of seal lines. An unfinished root is finished by resuming its driver,
+  which starts nothing that had started; a root is never left out.
 
 THE ROOTS (D9, D10, A3, A4, B2, B8, B9, B10):
 - A repeated root path, two roots of one machine, and a (group, seed) home instance in more than one folder refuse.
@@ -37,18 +52,24 @@ THE ROOTS (D9, D10, A3, A4, B2, B8, B9, B10):
   writes lists a deleted raw trace: an instance's SHA256SUMS is written after the raws are dropped, and lists its
   *.json files only.
 - Every file this script reads from a root is under a verified manifest line or on the named list UNMANIFESTED.
-- A root without DONE or without its final SHA256SUMS is "not finished": it is named at the top of RESULTS.json, its
-  instances with a verified instance manifest are analysed as usual, the others are "not completed". A machine of
-  the expected plans with no root is named at the top too, and its instances are "not run". Neither refuses.
+- A root without DONE or without its final SHA256SUMS is "not finished": it is named at the top of RESULTS.json and
+  its instances with a verified instance manifest are analysed as usual. An instance without one (its machine stopped)
+  keeps its traces (the owner's rule, partial_instance): a completed comparison that differs counts refuted, flagged
+  "manifest not final", when compare_d2 reproduces it, its files match status.json's step outputs, and its seal
+  verifies; anything else of it is "not completed, manifest not final". An agreement is never counted without a
+  final verified manifest. status.json is unmanifested: this anchors only what the machine wrote, and can only lower
+  the held counts. A machine of the expected plans with no root is named at the top too, and its instances are "not
+  run". Neither refuses.
 - OUTDIR must be new or empty, and outside every root. Every root's SHA256SUMS files are hashed before and after the
   analysis; a change refuses.
 
 THE SEALS (A1, B1, B2, B3, B6, B7, B11):
 - A seal is exactly seal/<TAG>_<seed>.json beside MANIFEST.json and SHA256SUMS, and seal.verify must hold. The seal
   log must hold exactly one line for the instance, with this seal's sha256, pushed (GitHub's recorded push time)
-  before stage N started. In campaign mode an unreadable seal log or unreadable push times REFUSE the analysis (it is
-  rerun later, never reinterpreted); times=lsremote is not accepted there. The activity items read for each seal
-  branch are saved in OUTDIR/activity/.
+  before stage N started. In campaign and rehearsal modes an unreadable seal log or unreadable push times REFUSE the
+  analysis (it is rerun later, never reinterpreted); times=lsremote is not accepted there (the coordinator's ls-remote
+  log stays a cross-check outside the analysis). The activity items read for each seal branch are saved in
+  OUTDIR/activity/.
 - A seal defect makes an agreement count for nothing (not_sealed). A completed comparison that differs, or a run
   stopped by its own check, stays "refuted" with a defective seal, flagged seal_defect (the owner's rule A1(ii)).
 - The regeneration child gets a minimal environment (REGEN_ENV).
@@ -59,7 +80,9 @@ THE COMPARISONS (A2, A6, B4):
   noisy_record.json, and must be byte-identical; its tag, seed, run_kind, noise_round, noise_seed and stage_n_status
   are checked, and a completed comparison must compare letters. Any mismatch refuses. A verdict outside VERDICTS
   refuses.
-- A run stopped by its own check (own_check below) counts as refuted, in its own row (the owner's rule A2).
+- A run stopped by its own check (own_check below) counts as refuted, in its own row (the owner's rule A2), and
+  RESULTS.json lists each one with its full status message (stopped_by_own_check). controls4.py records str(e) only,
+  so a Python error in the noise tree also reads as the run's own check: it errs toward refuting, as the owner chose.
 
 THE LAYERS, in order (each as its file's docstring states):
 1. per root (analyze, analyze2): the instances, K0/K3 counting, the observed-only list, run_failed, the controls, the
@@ -126,11 +149,16 @@ ORDER = ["deck", "inverters", "D", "seal", "sealpush", "N0", "C0", "N1", "C1", "
 
 # ---- the draw (D8, B16): the sizes and the machine count are pinned here, with this file
 DRAW_SIZES = dict(NOT1=60, ANDOR3=32, XOR3=37)
-DRAW_SIZES_REHEARSAL = dict(NOT1=4, ANDOR3=4, XOR3=4)
+DRAW_SIZES_REHEARSAL = dict(NOT1=6, ANDOR3=6, XOR3=6)   # one D4 audit per group (plan_split: every 6th instance)
 MACHINES = 12
-DRAW_EXTRA_KEY = "beacon_round"          # drand's /public/<round>: {"round", "signature", "randomness"}
+MODES = ("campaign", "rehearsal", "test")
+DRAW_EXTRA_KEYS = ("beacon_round", "announce")  # drand's /public/<round>; the announce's branch, commit, push time
+ANNOUNCE_FILE = "DRAW_ANNOUNCE.txt"
+ANNOUNCE_FORMAT = "layered-draw-announce/1"
+ANNOUNCE_KEYS = ("format", "mode", "excluded_sha256", "sizes")
+ANNOUNCE_BRANCH = dict(campaign="evidence/combined-draw", rehearsal="evidence/combined-rehearsal-draw")
 PLAN_LOCAL_KEYS = ("kit_tree", "noise_tree")   # campaign.resolve_trees: the only machine-local keys of PLAN.json
-KEYS = ("draw", "rehearsal", "times", "thresholds", "controls", "tips")
+KEYS = ("draw", "excluded", "announce", "times", "thresholds", "controls", "tips")
 
 # ---- the comparisons (A2, A6)
 VERDICTS = ("agrees", "refuted", "run failed", "observed only (no prediction)")      # compare_d.compare's verdicts
@@ -238,6 +266,7 @@ class Root:
         self.finished = (self.path / "DONE").exists() and (self.path / "SHA256SUMS").exists()
         self.instances_done = (self.path / "INSTANCES_DONE").exists() and (self.path / "SHA256SUMS.instances").exists()
         self.reads = set()
+        self.anchored = {}                         # rel path -> sha256: a partial instance's files, by status.json
 
     def walk(self):
         for m in sorted(self.path.rglob("SHA256SUMS*")):
@@ -263,7 +292,7 @@ class Root:
 
     def covered(self, rel):
         rel = str(rel)
-        return rel in self.verified or any(fnmatch.fnmatch(rel, p) for p in UNMANIFESTED)
+        return rel in self.verified or rel in self.anchored or any(fnmatch.fnmatch(rel, p) for p in UNMANIFESTED)
 
     def file(self, rel):
         rel = str(rel)
@@ -379,6 +408,61 @@ def verify_comparison(R, name, plan, group, seed, n, comp, seal_ok):
     return rec.get("status")
 
 
+NOT_FINAL = "manifest not final"
+
+
+def partial_instance(R, name, plan, group, seed, status):
+    """An instance with no final verified manifest (its machine stopped). The owner's rule: a COMPLETED comparison that
+    differs counts REFUTED, flagged "manifest not final", when (1) compare_d2 recomputed from the sealed prediction and
+    that round's noisy_record.json gives comparison.json byte for byte, and it differs; (2) comparison.json's and
+    noisy_record.json's sha256 equal the step outputs in status.json (C<n>, N<n>); (3) the seal exists and seal.verify
+    holds on its folder (else nothing can be recomputed). status.json is unmanifested: this anchors only what the
+    machine wrote, and it can only lower the held counts, never raise them. Anything else of the instance is "not
+    completed, manifest not final", with its verdicts shown; an agreement is never counted."""
+    steps = status["steps"]
+    row = dict(instance=name, group=group, seed=seed, steps={k: v["status"] for k, v in sorted(steps.items())},
+               stage_d=None, unverified=True, manifest_not_final=True, K0=dict(counted=False), K3=dict(counted=False))
+    nf = dict(step=None, status=f"not completed, {NOT_FINAL} (no verified instance manifest: the machine stopped)")
+    rf = [dict(instance=name, group=group, level=lv, first_failing=nf) for lv in ("K0", "K3")]
+    import seal as sealmod
+    sd = R.path / name / "seal"
+    sf = sd / f"{name}.json"
+    with contextlib.redirect_stdout(io.StringIO()):
+        seal_ok = sf.is_file() and (sd / "SHA256SUMS").is_file() and sealmod.verify(sd, quiet=True)
+    row["seal_folder"] = dict(file=f"{name}/seal/{name}.json" if seal_ok else None,
+                              why=None if seal_ok else "no seal, or seal.verify fails: nothing is recomputed")
+    if not seal_ok:
+        return row, rf
+    for f in sorted(sd.iterdir()):                             # covered by the seal's own SHA256SUMS (seal.verify)
+        if f.name != "SHA256SUMS":
+            R.anchored[f"{name}/seal/{f.name}"] = sha(f)
+    pred = json.loads(sf.read_bytes())
+    comps, refuting = {}, []
+    for n in range(plan["rounds"] + 1):
+        cr, nr = f"{name}/N{n}/comparison.json", f"{name}/N{n}/noisy_record.json"
+        outs_c = (steps.get(f"C{n}") or {}).get("outputs") or {}
+        outs_n = (steps.get(f"N{n}") or {}).get("outputs") or {}
+        if not (R.exists(cr) and R.exists(nr)):
+            continue
+        if outs_c.get(f"N{n}/comparison.json") != sha(R.path / cr) or outs_n.get(f"N{n}/noisy_record.json") != sha(R.path / nr):
+            comps[f"C{n}"] = dict(verdict=None, why="its sha256 is not status.json's step output: not read")
+            continue
+        R.anchored[cr], R.anchored[nr] = sha(R.path / cr), sha(R.path / nr)
+        c = json.loads(R.file(cr).read_text())
+        verify_comparison(R, name, plan, group, seed, n, c, True)     # refuses if compare_d2 does not reproduce it
+        comps[f"C{n}"] = dict(verdict=c["verdict"], run_kind=c["run_kind"], differences=c.get("differences"))
+        if c["verdict"] == "refuted":
+            refuting.append(n)
+    row["comparisons"] = comps
+    row["stage_d_sealed"] = dict(eligible_K0=pred["eligible_K0"], room_K3=pred["room_K3"])
+    if 0 in refuting and pred["eligible_K0"]:
+        row["K0"] = dict(counted=True, refuted=True, manifest_not_final=True)
+    if any(n > 0 for n in refuting) and pred["room_K3"]:
+        row["K3"] = dict(counted=True, refuted=True, manifest_not_final=True)
+    rf = [x for x in rf if not row[x["level"]].get("counted")]
+    return row, rf
+
+
 def analyze_root(R, plan, machine, campaign):
     rounds = plan["rounds"]
     insts, observed_only, run_failed = [], [], []
@@ -391,11 +475,9 @@ def analyze_root(R, plan, machine, campaign):
                               why="no folder: never started" if (R.path / "PLAN_INPUT.json").exists() else "no root"))
             continue
         status = R.json(f"{name}/status.json")
-        if name not in R.inst_manifest:
-            row = dict(base, steps={k: v["status"] for k, v in sorted(status["steps"].items())}, stage_d=None,
-                       unverified=True, K0=dict(counted=False), K3=dict(counted=False))
-            run_failed.append(dict(instance=name, group=group, level="stage D", first_failing=dict(
-                step=None, status="no verified instance manifest (manifest not final: the root did not finish this instance)")))
+        if name not in R.inst_manifest:                    # the owner's rule: a verified refutation stays counted
+            row, rf = partial_instance(R, name, plan, group, seed, status)
+            run_failed += rf
             insts.append(row)
             continue
         if summ is not None and summ_steps.get(name) != {k: v["status"] for k, v in status["steps"].items()}:
@@ -604,24 +686,36 @@ def push_times(remote, branch, src, outdir):
     return SP.times(remote, branch, src)
 
 
+def log_for(sp_, logs, times_src, strict, outdir):
+    """The seal log of a plan's seal_push branch: (lines, push times, error), fetched once. A branch that does not
+    exist on the remote has no line. In campaign and rehearsal modes an unreadable log or unreadable push times REFUSE
+    (A1(i)): the analysis is rerun later, never reinterpreted."""
+    key = (str(sp_["remote"]), sp_["branch"])
+    if key not in logs:
+        with tempfile.TemporaryDirectory() as w:
+            try:
+                ls = subprocess.run(["git", "ls-remote", str(sp_["remote"]), f"refs/heads/{sp_['branch']}"],
+                                    capture_output=True, text=True, check=True).stdout
+                if not ls.strip():
+                    logs[key] = ([], {}, None)
+                else:
+                    lines = SP.log_lines(sp_["remote"], sp_["branch"], w)
+                    tm = push_times(sp_["remote"], sp_["branch"], times_src, outdir)
+                    logs[key] = (lines, tm, None)
+            except Exception as e:
+                if strict:
+                    refuse(f"the seal log or its push times cannot be read ({sp_['branch']}): {e!r}"[:500])
+                logs[key] = ([], {}, repr(e))
+    return logs[key]
+
+
 def seal_log(R, name, plan, status, logs, times_src, campaign, outdir):
     sp_ = plan.get("seal_push")
     if not sp_:
         return False, dict(why="the plan has no seal_push")
     if sp_.get("dry"):
         return False, dict(why="dry seal push (nothing was pushed)")
-    key = (str(sp_["remote"]), sp_["branch"])
-    if key not in logs:
-        with tempfile.TemporaryDirectory() as w:
-            try:
-                lines = SP.log_lines(sp_["remote"], sp_["branch"], w)
-                tm = push_times(sp_["remote"], sp_["branch"], times_src, outdir)
-                logs[key] = (lines, tm, None)
-            except Exception as e:
-                if campaign:                              # A1(i): never reinterpreted; rerun the analysis later
-                    refuse(f"campaign mode: the seal log or its push times cannot be read ({sp_['branch']}): {e!r}"[:500])
-                logs[key] = ([], {}, repr(e))
-    lines, tm, err = logs[key]
+    lines, tm, err = log_for(sp_, logs, times_src, campaign, outdir)
     if err:
         return False, dict(why=f"the seal log cannot be read: {err}")
     want = sha(R.path / name / "seal" / "SHA256SUMS")
@@ -635,7 +729,7 @@ def seal_log(R, name, plan, status, logs, times_src, campaign, outdir):
     pushed = tm.get(x["commit"])
     if pushed is None:
         if campaign:
-            refuse(f"campaign mode: no recorded push time for {x['commit']} ({sp_['branch']}, {name})")
+            refuse(f"no recorded push time for {x['commit']} ({sp_['branch']}, {name})")
         return False, dict(why="no recorded push time for the commit that logged the seal", commit=x["commit"])
     n0 = status["steps"].get("N0", {}).get("started")
     if n0 is None:
@@ -696,7 +790,7 @@ def layer_seals(M, times_src, kernel_build, th, campaign, rule, outdir):
                     if campaign:                              # B6
                         p = json.loads(R.bytes(seal_rel))
                         if "stage_d6.py" not in p.get("code", {}) or p.get("testError_rule") != rule:
-                            refuse(f"campaign mode: {machine} {r['instance']}: the sealed prediction does not name "
+                            refuse(f"{machine} {r['instance']}: the sealed prediction does not name "
                                    f"stage_d6.py with the template's testError_rule {rule!r}")
                 if seal_rel is None:
                     ok2, det2 = False, dict(why="no valid seal")
@@ -715,6 +809,25 @@ def layer_seals(M, times_src, kernel_build, th, campaign, rule, outdir):
         failed += [dict(f, machine=machine) for f in res["run_failed"]]
         for c in ("U", "duplicate", "S"):
             controls[c] += [dict(x, machine=machine) for x in res["controls"][c]]
+    # omission visibility: a planned instance with no result, looked up in its machine's seal log
+    attention = []
+    for machine, m in M.items():
+        sp_ = m["plan"].get("seal_push") or {}
+        if not sp_ or sp_.get("dry"):
+            continue
+        nr = [r for r in rows if r["machine"] == machine and r.get("not_run")]
+        if not nr and m["R"] is not None and m["R"].finished:
+            continue
+        lines, tm, err = log_for(sp_, logs, times_src, campaign, outdir)
+        for r in nr:
+            mine = [x for x in lines if x["instance"] == r["instance"]]
+            r.update(sealed_in_log=bool(mine) if err is None else None, seal_log_lines=len(mine),
+                     pushed_utc=[tm.get(x["commit"]) for x in mine], seal_log_error=err)
+            if mine:
+                r["why"] = "sealed, no result given"
+        if m["R"] is None or not m["R"].finished:
+            attention.append(f"{'no root' if m['R'] is None else 'root not finished'}: {machine} "
+                             f"({len(lines)} seal lines on {sp_['branch']}{'; the log cannot be read: ' + err if err else ''})")
     for machine, m in M.items():
         if m["R"] is None:
             continue
@@ -757,7 +870,9 @@ def layer_seals(M, times_src, kernel_build, th, campaign, rule, outdir):
         src_desc = dict(source={"github": "GitHub repository activity API (push timestamps; push and branch_creation "
                                           "items only; every item saved in activity/)",
                                 "bare": "local bare repository post-receive log"}.get(times_src, times_src))
-    return rt(dict(times_source=src_desc, machines=len(M),
+    stopped = [dict(machine=r["machine"], instance=r["instance"], round=k, status=c.get("why"))
+               for r in rows for k, c in sorted((r.get("comparisons") or {}).items()) if c and c.get("stopped_by_own_check")]
+    return rt(dict(times_source=src_desc, machines=len(M), machines_attention=attention, stopped_by_own_check=stopped,
                    env={m: (None if e is None else dict(static_sha256=e["static_sha256"], env_json_sha256=e["env_json_sha256"]))
                         for m, e in envs.items()},
                    groups=groups, family=family_of(groups), seal_defects=defects, observed_only=observed, run_failed=failed,
@@ -790,7 +905,7 @@ def completed_rounds(r, level):
 
 def layer_stage_n_seal_log(res, M, th):
     for r in res["instances"]:
-        if r.get("not_run"):
+        if r.get("not_run") or r.get("unverified"):
             continue
         R = M[r["machine"]]["R"]
         commit = ((r.get("seal") or {}).get("log") or {}).get("commit")
@@ -822,7 +937,7 @@ def layer_thresholds(res, tf, th):
 
 def layer_record_seal_log(res, M):
     for r in res["instances"]:
-        if r.get("not_run"):
+        if r.get("not_run") or r.get("unverified"):
             continue
         R, plan = M[r["machine"]]["R"], M[r["machine"]]["plan"]
         branch = (plan.get("seal_push") or {}).get("branch")
@@ -1117,50 +1232,138 @@ def kernel_library(outdir):
     return CP.build_kernel(outdir)
 
 
-def check_draw(path, sizes, campaign):
-    """B16 and D8: DRAW.json recomputed from its own beacon and round, the pinned EXCLUDED.json and the pinned sizes;
-    the beacon round's signature verified against the pinned chain."""
+def parse_announce(b):
+    """DRAW_ANNOUNCE.txt: exactly the lines `format layered-draw-announce/1`, `mode M`, `excluded_sha256 H`,
+    `sizes NOT1=n ANDOR3=n XOR3=n`."""
+    try:
+        lines = b.decode().split("\n")
+    except UnicodeDecodeError:
+        refuse("DRAW_ANNOUNCE.txt is not UTF-8")
+    if lines and lines[-1] == "":
+        lines = lines[:-1]
+    kv = dict((ln.split(" ", 1) + [""])[:2] for ln in lines)
+    if len(kv) != len(lines) or set(kv) != set(ANNOUNCE_KEYS) or kv["format"] != ANNOUNCE_FORMAT:
+        refuse(f"DRAW_ANNOUNCE.txt is not exactly the lines {ANNOUNCE_KEYS} ({ANNOUNCE_FORMAT})")
+    try:
+        sizes = {g: int(v) for g, v in (x.split("=") for x in kv["sizes"].split())}
+    except ValueError:
+        refuse(f"DRAW_ANNOUNCE.txt: sizes {kv['sizes']!r}")
+    return dict(mode=kv["mode"], excluded_sha256=kv["excluded_sha256"], sizes=sizes)
+
+
+def announce_on_github(branch, outdir):
+    """The first commit adding DRAW_ANNOUNCE.txt on `branch` (first-parent), its file, and GitHub's push time of it
+    (sealpush.github_times; every activity item saved in OUTDIR/activity/)."""
+    remote = json.loads(CP.FROZEN_TEMPLATE.read_text())["seal_push"]["remote"]
+    with tempfile.TemporaryDirectory() as w:
+        try:
+            SP.git("init", "-q", cwd=w)
+            SP.git("fetch", "-q", str(remote), f"refs/heads/{branch}", cwd=w)
+            adds = SP.git("log", "--first-parent", "--reverse", "--diff-filter=A", "--format=%H", "FETCH_HEAD", "--",
+                          ANNOUNCE_FILE, cwd=w).stdout.split()
+            if not adds:
+                refuse(f"no commit adds {ANNOUNCE_FILE} on {branch}")
+            commit = adds[0]
+            text = subprocess.run(["git", "show", f"{commit}:{ANNOUNCE_FILE}"], cwd=w, capture_output=True,
+                                  check=True).stdout
+            tm = push_times(remote, branch, "github", outdir)
+        except Refused:
+            raise
+        except Exception as e:                            # never reinterpreted: the analysis is rerun later
+            refuse(f"the draw's announce cannot be read from GitHub ({branch}): {e!r}"[:500])
+    if commit not in tm:
+        refuse(f"GitHub records no push of the announce commit {commit[:12]} as the tip of {branch}")
+    return commit, text, tm[commit]
+
+
+def check_draw(kw, mode, outdir):
+    """B16 and D8, the owner's rule: the draw recomputed in full from public inputs only. Returns (the RECOMPUTED
+    draw, its record, a notice or None)."""
     import beacon_chain
     import beacon_verify
     import draw_seeds
-    b = Path(path).read_bytes()
+    b = Path(kw["draw"]).read_bytes()
     try:
         d = json.loads(b)
     except ValueError as e:
         refuse(f"DRAW.json is not JSON: {e}")
-    if not campaign and DRAW_EXTRA_KEY not in d:       # a test draw (no beacon): the plans are checked, not the draw
+    if mode == "test" and DRAW_EXTRA_KEYS[0] not in d:   # a test draw with no beacon: plans checked, not the draw
         if not isinstance(d.get("groups"), dict):
             refuse("DRAW.json has no groups")
         return d, dict(sha256=hashlib.sha256(b).hexdigest(), sizes={g: len(v) for g, v in d["groups"].items()},
-                       machines=MACHINES, signature_verified=False,
-                       note="test mode, a draw with no beacon_round: not recomputed, no signature; its own sizes")
-    br = d.get(DRAW_EXTRA_KEY)
+                       machines=MACHINES, recomputed=False,
+                       note="test mode, a draw with no beacon_round: not recomputed, no signature; its own sizes"), \
+            "test draw: not recomputed, no beacon signature (test mode)"
+    br, an = d.get("beacon_round"), d.get("announce")
     if not isinstance(br, dict) or set(br) != {"round", "signature", "randomness"}:
-        refuse(f"DRAW.json has no {DRAW_EXTRA_KEY} {{round, signature, randomness}}")
+        refuse("DRAW.json has no beacon_round {round, signature, randomness}")
+    if not isinstance(an, dict) or set(an) != {"branch", "commit", "push_utc"}:
+        refuse("DRAW.json has no announce {branch, commit, push_utc}")
     if not isinstance(d.get("beacon"), str) or not isinstance(d.get("round"), int):
         refuse("DRAW.json has no beacon string and round integer")
-    ex = json.loads((HERE / "EXCLUDED.json").read_text())
+    if "excluded" not in kw:
+        refuse("a draw with a beacon needs excluded=EXCLUDED.json (the published exclusion list it used)")
+    notice = None
+    # the announce: on GitHub in campaign and rehearsal modes; offline (announce=, DRAW.json's push time) in test mode
+    if mode == "test":
+        if "announce" not in kw:
+            refuse("test mode: a draw with a beacon needs announce=DRAW_ANNOUNCE.txt")
+        ab, push_utc = Path(kw["announce"]).read_bytes(), an["push_utc"]
+        notice = "test draw: the announce and its push time are DRAW.json's own, not read from GitHub (test mode)"
+    else:
+        if "announce" in kw:
+            refuse(f"{mode} mode reads the announce from GitHub, not announce=")
+        if an["branch"] != ANNOUNCE_BRANCH[mode]:
+            refuse(f"{mode} mode: the announce branch is {ANNOUNCE_BRANCH[mode]}, not {an['branch']!r}")
+        commit, ab, push_utc = announce_on_github(an["branch"], outdir)
+        if commit != an["commit"] or push_utc != an["push_utc"]:
+            refuse(f"DRAW.json's announce ({an['commit'][:12]}, {an['push_utc']}) is not GitHub's: the first commit "
+                   f"adding {ANNOUNCE_FILE} on {an['branch']} is {commit[:12]}, pushed {push_utc}")
+    A = parse_announce(ab)
+    if A["mode"] != mode:
+        refuse(f"DRAW_ANNOUNCE.txt says mode {A['mode']}, not {mode}")
+    sizes = DRAW_SIZES if mode == "campaign" else DRAW_SIZES_REHEARSAL if mode == "rehearsal" else d.get("n")
+    if not isinstance(sizes, dict) or A["sizes"] != sizes:
+        refuse(f"DRAW_ANNOUNCE.txt's sizes {A['sizes']} are not the sizes of {mode} mode {sizes}")
+    # the exclusion list: the announced one, a superset of the freeze's
+    eb = Path(kw["excluded"]).read_bytes()
+    if hashlib.sha256(eb).hexdigest() != A["excluded_sha256"]:
+        refuse("the excluded= file is not the one DRAW_ANNOUNCE.txt names (excluded_sha256)")
+    ex = json.loads(eb)
+    pinned = json.loads((HERE / "EXCLUDED.json").read_text())
+    if not set(pinned["seeds"]) <= set(ex.get("seeds") or []):
+        refuse("the excluded= list is not a superset of the freeze's EXCLUDED.json")
+    # the round from the announce's push time, the beacon's signature
+    if not beacon_chain.check():
+        refuse("the pinned quicknet chain does not check")
+    want_round = beacon_verify.round_after(beacon_chain.QUICKNET, push_utc)
+    if d["round"] != want_round:
+        refuse(f"DRAW.json's round {d['round']} is not the round the announce's push time fixes ({want_round}, "
+               f"{push_utc} + {beacon_verify.DELAY_S} s)")
+    if br["round"] != d["round"] or br["randomness"].lower() != d["beacon"].lower():
+        refuse(f"DRAW.json: the beacon is not the randomness of round {d['round']}")
+    v = beacon_verify.verify(beacon_chain.QUICKNET, br)
+    if not v.get("ok"):
+        refuse(f"DRAW.json: the beacon round does not verify against the pinned quicknet key: {v}")
+    # the seeds, recomputed
     with contextlib.redirect_stdout(io.StringIO()):
         try:
             again = draw_seeds.draw(d["beacon"], d["round"], ex, dict(sizes))
         except AssertionError as e:
             refuse(f"the draw cannot be recomputed: {e}")
-    want = draw_seeds.canon(dict(again, **{DRAW_EXTRA_KEY: br}))
-    if b != want:
-        refuse("DRAW.json is not draw_seeds.draw of its beacon and round on the pinned EXCLUDED.json at the pinned "
-               f"sizes {sizes} (with its {DRAW_EXTRA_KEY} added), byte for byte")
-    if br["round"] != d["round"] or br["randomness"].lower() != d["beacon"].lower():
-        refuse(f"DRAW.json: the beacon is not the randomness of round {d['round']}")
-    if not beacon_chain.check():
-        refuse("the pinned quicknet chain does not check")
-    v = beacon_verify.verify(beacon_chain.QUICKNET, br)
-    if not v.get("ok"):
-        refuse(f"DRAW.json: the beacon round does not verify against the pinned quicknet key: {v}")
-    return d, dict(sha256=hashlib.sha256(b).hexdigest(), beacon=d["beacon"], round=d["round"], sizes=dict(sizes),
-                   machines=MACHINES, excluded_sha256=d["excluded_sha256"], signature_verified=True)
+    if b != draw_seeds.canon(dict(again, beacon_round=br, announce=an)):
+        refuse("DRAW.json is not draw_seeds.draw of its beacon and round on the excluded= list at the sizes "
+               f"{sizes} (with its beacon_round and announce), byte for byte")
+    return again, dict(sha256=hashlib.sha256(b).hexdigest(), beacon=d["beacon"], round=d["round"], sizes=dict(sizes),
+                       machines=MACHINES, recomputed=True, signature_verified=True,
+                       excluded=dict(file=Path(kw["excluded"]).name, sha256=A["excluded_sha256"],
+                                     seeds_sha256=ex.get("seeds_sha256"), count=ex.get("count"),
+                                     superset_of_freeze=pinned["seeds_sha256"]),
+                       announce=dict(an, from_github=mode != "test", sha256=hashlib.sha256(ab).hexdigest())), notice
 
 
 def expected_plans(draw):
+    """The 12 plans of the RECOMPUTED draw (plan_split3 on the frozen template)."""
     import plan_split3
     t = json.loads(CP.FROZEN_TEMPLATE.read_text())
     plans, _ = plan_split3.split(draw, t, MACHINES)
@@ -1201,9 +1404,9 @@ def match_plan(R, expected, campaign):
 def main(mode, outdir, *args):
     if sys.flags.optimize:                                 # A5
         refuse("Python runs with -O (sys.flags.optimize): run analysis.py without it")
-    if mode not in ("campaign", "test"):
-        refuse(f"mode {mode!r} is neither campaign nor test")
-    campaign = mode == "campaign"
+    if mode not in MODES:
+        refuse(f"mode {mode!r} is none of {', '.join(MODES)}")
+    strict = mode != "test"                                # campaign and rehearsal: every campaign-mode refusal
     args = [str(a) for a in args]
     kw = {}
     for a in args:                                          # A4
@@ -1228,30 +1431,26 @@ def main(mode, outdir, *args):
             refuse(f"OUTDIR {out} lies inside the root {r}")
     if out.exists() and (not out.is_dir() or any(out.iterdir())):     # B10
         refuse(f"OUTDIR {out} exists and is not an empty folder")
-    rehearsal = kw.get("rehearsal")
-    if rehearsal not in (None, "1"):
-        refuse(f"rehearsal={rehearsal!r}: only rehearsal=1")
-    sizes = DRAW_SIZES_REHEARSAL if rehearsal == "1" else DRAW_SIZES
     drivers = {f"root_{k}": root_driver(r) for k, r in enumerate(roots, start=1)}
     times = kw.get("times", "github")
     tf = Path(kw.get("thresholds", str(HERE / "thresholds.json"))).resolve()
     controls = kw.get("controls")
     pc = CP.pins_check()
-    if campaign:
+    if strict:
         if CP.pins_refusal(pc):
-            refuse("campaign mode: " + CP.pins_refusal(pc))
+            refuse(f"{mode} mode: " + CP.pins_refusal(pc))
         pinned = {p: h for fs in json.loads(CP.PINS.read_text())["groups"].values() for p, h in fs.items()}
         if tf != (HERE / "thresholds.json").resolve() or pinned.get("research/layered-networks/thresholds.json") != sha(tf):
-            refuse("campaign mode reads the pinned thresholds.json only")
+            refuse(f"{mode} mode reads the pinned thresholds.json only")
         if times != "github":                                          # B7
-            refuse(f"campaign mode: times must be github, not {times!r}")
+            refuse(f"{mode} mode: times must be github, not {times!r}")
         noise_commit = json.loads(CP.FROZEN_TEMPLATE.read_text())["noise_commit"]
         trees = [p for p, h in CP.worktrees() if h == noise_commit and CP.git_head(p)[1]]
         if not trees:
-            refuse(f"campaign mode: no clean worktree at the template's noise_commit {noise_commit[:12]}")
+            refuse(f"{mode} mode: no clean worktree at the template's noise_commit {noise_commit[:12]}")
         want = (Path(trees[0]) / "research" / "layered-networks").resolve()
         if controls is not None and Path(controls).resolve() != want:
-            refuse(f"campaign mode: controls must be the noise tree at {noise_commit[:12]} ({want})")
+            refuse(f"{mode} mode: controls must be the noise tree at {noise_commit[:12]} ({want})")
         controls = str(want)
         bad = [m for m, d in drivers.items() if d != dict(driver_sha256=sha(HERE / "campaign.py"),
                                                           template_sha256=CP.FROZEN_TEMPLATE_SHA256, mode="CAMPAIGN")]
@@ -1261,9 +1460,7 @@ def main(mode, outdir, *args):
         if bad:
             refuse(f"roots whose driver checked another FREEZE_PINS.json than this tree's ({pc['pins_sha256'][:12]}): {bad}")
         if "draw" not in kw:
-            refuse("campaign mode: draw=DRAW.json is required")
-    elif rehearsal == "1" and "draw" not in kw:
-        refuse("rehearsal=1 needs draw=")
+            refuse(f"{mode} mode: draw=DRAW.json is required")
     th = json.loads(tf.read_text())
     tips = None
     if "tips" in kw:
@@ -1275,25 +1472,24 @@ def main(mode, outdir, *args):
     if bad:
         refuse("files that differ from their manifests, or are missing: " + json.dumps(bad)[:4000])
     # D8, D9: the machines
-    draw_info, notice, template_rule = None, [], None
+    out.mkdir(parents=True, exist_ok=True)
+    draw_info, notice, template_rule, sizes = None, [], None, None
     M = {}
     if "draw" in kw:
-        draw, draw_info = check_draw(kw["draw"], sizes, campaign)
+        draw, draw_info, dn = check_draw(kw, mode, out)
         sizes = draw_info["sizes"]
-        if not draw_info["signature_verified"]:
-            notice.append("test draw: not recomputed, no beacon signature (test mode)")
+        if dn:
+            notice.append(dn)
         expected, tmpl = expected_plans(draw)
         template_rule = tmpl["testError_rule"]
         by = {}
         for R in Rs:
-            k = match_plan(R, expected, campaign)
+            k = match_plan(R, expected, strict)
             if k in by:
                 refuse(f"two roots on machine {k}: {by[k].path} and {R.path}")
             by[k] = R
         for k, p in expected.items():
             M[k] = dict(R=by.get(k), plan=rt(p))
-            if k not in by:
-                notice.append(f"no root: {k} (its instances are not run)")
     else:
         for k, R in enumerate(Rs, start=1):
             plan = R.json("PLAN.json") or R.json("PLAN_INPUT.json")
@@ -1301,35 +1497,33 @@ def main(mode, outdir, *args):
                 refuse(f"{R.path}: no PLAN.json")
             M[f"machine_{k}"] = dict(R=R, plan=plan)
         notice.append("no draw: the expected plans are each root's own PLAN.json (test mode, no draw=)")
-    if campaign and template_rule is None:
-        refuse("campaign mode: no expected plans")
+    if strict and template_rule is None:
+        refuse(f"{mode} mode: no expected plans")
     seen = {}
     for k, m in M.items():
         if m["R"] is None:
             continue
         check_folders(m["R"], m["plan"])
-        if not m["R"].finished:
-            notice.append(f"root not finished: {k}")
         for name, g, s in home_instances(m["plan"]):
             if (m["R"].path / name / "status.json").exists():
                 if (g, s) in seen:
                     refuse(f"the home instance {g} {s} is in more than one root: {seen[(g, s)]} and {k}")
                 seen[(g, s)] = k
-    if rehearsal == "1":
+    if mode == "rehearsal":
         notice.insert(0, "REHEARSAL: not the campaign; its outcomes count for no claim")
     before = sums_of(roots)
-    out.mkdir(parents=True, exist_ok=True)
     build = kernel_library(out)
-    res = layer_seals(M, times, build, th, campaign, template_rule, out)
+    res = layer_seals(M, times, build, th, strict, template_rule, out)
     res = layer_stage_n_seal_log(res, M, th)
     res = layer_thresholds(res, tf, th)
     res = layer_record_seal_log(res, M)
     res = layer_duplicates(res, M, controls)
     res = layer_d4(res, M)
-    res = layer_counts(res, sizes if "draw" in kw else None)
+    res = layer_counts(res, sizes)
     after = sums_of(roots)
     if after != before:
         refuse(f"a root's SHA256SUMS changed during the analysis: {before} -> {after}")
+    notice += res.pop("machines_attention", [])
     detail = {}
     for k, m in M.items():
         R = m["R"]
@@ -1339,22 +1533,22 @@ def main(mode, outdir, *args):
         rr = R.json("RESULT.json") if R.finished else R.json("RESULT_INSTANCES.json") if R.instances_done else None
         detail[k] = dict(root=str(R.path), finished=R.finished, instances_done=R.instances_done,
                          job_errors=(rr or {}).get("job_errors"), stopped_for_disk=(rr or {}).get("stopped_for_disk"),
-                         files_verified=len(R.verified), files_read=len(R.reads),
-                         files_read_unmanifested=sorted(x for x in R.reads if x not in R.verified))
-    pre = "REHEARSAL: " if rehearsal == "1" else ""
+                         files_verified=len(R.verified), files_anchored_by_status=sorted(R.anchored),
+                         files_read=len(R.reads), files_read_unmanifested=sorted(x for x in R.reads
+                                                                                 if x not in R.verified and x not in R.anchored))
+    pre = "REHEARSAL: " if mode == "rehearsal" else ""
     for g, v in res["groups"].items():                    # A8 and the rehearsal, in the verdict lines
         note = ((res.get("d4_audit") or {}).get("groups") or {}).get(g, {}).get("note")
         for lv in ("K0", "K3"):
             v[lv]["verdict"] = pre + v[lv]["verdict"] + (f" ({note})" if note else "")
     res["family"] = {lv: pre + x for lv, x in res["family"].items()}
-    res.update(format=FORMAT, analysis_sha256=sha(__file__),
-               mode=("REHEARSAL " if rehearsal == "1" else "") + ("CAMPAIGN" if campaign else "TEST"),
+    res.update(format=FORMAT, analysis_sha256=sha(__file__), mode=mode.upper(),
                NOTICE=notice, draw=draw_info, machines_detail=detail, tips=tips,
                unmanifested_rule=UNMANIFESTED, own_check_rule=dict(prefix="failed: ", simulator_end=list(SIMULATOR_END)),
                stage_d_script_rule=RULE10, kernel_sources_sha256=CP.KERNEL_SOURCES, root_drivers=drivers,
                roots_sha256sums=dict(before=before, after=after), pins=pc)
     (out / "RESULTS.json").write_bytes(canon(res))
-    listed = [out / "RESULTS.json"] + sorted((out / "activity").glob("*.json")) if (out / "activity").exists() else [out / "RESULTS.json"]
+    listed = [out / "RESULTS.json"] + (sorted((out / "activity").glob("*.json")) if (out / "activity").exists() else [])
     (out / "SHA256SUMS").write_text("".join(f"{sha(p)}  {p.relative_to(out)}\n" for p in listed))
     print(json.dumps(dict(results_sha256=sha(out / "RESULTS.json"), mode=res["mode"], notice=notice,
                           counts={g: {lv: {k: (x[k]["n"] if isinstance(x[k], dict) else x[k]) for k in ("counted",) + ROWS}
