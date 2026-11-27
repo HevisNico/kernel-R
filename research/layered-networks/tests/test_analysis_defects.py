@@ -22,7 +22,7 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
 - D8 planned_seed_not_started (test mode, no draw): K05 with seed 6230 added to NOT1 in PLAN.json (no folder).
   Must: exit 0, each level's rows of NOT1 sum to 3 (the planned size), and a not_run entry for NOT1_6230 at K0 and K3.
 - D8 planned_machine_no_root (test mode, no draw): K06 alone. Its PLAN.json names K05 as the home machine of
-  NOT1_6212, and K05 has no root. Must: a refusal, or a not_run entry naming NOT1_6212 or K05.
+  NOT1_6212, and K05 has no root. Must: exit 0 (no refusal) and a not_run entry naming NOT1_6212.
 - D8 draw_machine_without_root: the dummy draw dev/freeze/DRAW_dummy.json (NOT1 6212, 6213 over 12 machines) split by
   plan_split3.py with campaign_template.json, as in dev/freeze/PROOF.md: K01 holds NOT1_6212, K02 NOT1_6213, K03 the
   duplicate of NOT1_6212. Only K01's root is given (out_K05 with its PLAN.json replaced by PLAN_K01.json byte for
@@ -40,6 +40,12 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   kept. Must: refused, the output naming "N0/comparison.json".
 - D10 listed_file_missing: NOT1_6212/N2/extract/extract.json deleted, still listed, with no declaration. Must:
   refused, the output naming "extract.json".
+- D10 stopped_mid_instance: K05 as a machine stopped during NOT1_6220's round N2. The end-of-run files of the root
+  (SHA256SUMS, SHA256SUMS.instances, RESULT*.json, DONE, INSTANCES_DONE, INVENTORY_END) are removed, and so are
+  NOT1_6220/SHA256SUMS, N2, N3 and their logs. Its status.json has N2 "running" and no C2, N3, C3. One letter of
+  N1/noisy_record.json is changed (word 1/0/0 "ssFF" -> "sFFF"), and N1/comparison.json is recomputed with
+  compare_d2.py, which gives "refuted". Must: exit 0, NOT1_6220 in the K3 refuted row, an entry naming NOT1_6220 that
+  says "manifest not final", and NOT1_6212 held at K0 and K3.
 - control k05_alone and control k05_with_dupx (K05 + K06): must pass before and after the fix: exit 0 and NOT1
   counted 2 at K0 and K3 (DUPX_ folders are controls, never counted).
 
@@ -282,9 +288,51 @@ def case_planned_seed_not_started(tmp, src):
 
 def case_planned_machine_no_root(tmp, src):
     r, res, obs = run(tmp, [place(src / "out_K06", tmp / "a" / "out_K06", tmp)], "planned_machine_no_root")
-    found = not_run_entry(res, "NOT1_6212", "K05") if res is not None else None
+    found = not_run_entry(res, "NOT1_6212") if res is not None else None
     obs["not_run_entry"] = found
-    return refused(r) or found is not None, obs
+    return r.returncode == 0 and found is not None, obs
+
+
+END_OF_RUN = ("SHA256SUMS", "SHA256SUMS.instances", "RESULT.json", "RESULT_INSTANCES.json", "DONE", "INSTANCES_DONE",
+              "INVENTORY_END")
+
+
+def case_stopped_mid_instance(tmp, src):
+    """K05 stopped during NOT1_6220's round N2: no final manifest, no N2/N3, a refuting N1."""
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    d = root / "NOT1_6220"
+    for f in END_OF_RUN:                                    # a stopped driver writes none of its end-of-run files
+        (root / f).unlink(missing_ok=True)
+    (d / "SHA256SUMS").unlink()
+    for x in ("N2", "N3"):
+        shutil.rmtree(d / x)
+    for x in ("N2.log", "N3.log", "C2.log", "C3.log"):
+        (d / x).unlink(missing_ok=True)
+    rec = d / "N1" / "noisy_record.json"
+    b = rec.read_bytes()
+    assert b.count(b'"ssFF"') == 1
+    rec.write_bytes(b.replace(b'"ssFF"', b'"sFFF"'))       # one letter: position 1, s -> F
+    c = subprocess.run([PY, "-B", str(HERE / "compare_d2.py"), str(d / "seal"), str(HERE / "specs" / "not1.json"),
+                        str(rec), "noisy", str(d / "N1" / "comparison.json")], cwd=HERE, capture_output=True, text=True)
+    assert c.returncode == 0 and json.loads((d / "N1" / "comparison.json").read_text())["verdict"] == "refuted", c.stderr
+    st = json.loads((d / "status.json").read_text())
+    for k in ("C2", "N3", "C3"):
+        st["steps"].pop(k, None)
+    st["steps"]["N2"] = {k: v for k, v in st["steps"]["N2"].items() if k not in ("ended", "outputs", "cpu_s", "wall_s")}
+    st["steps"]["N2"]["status"] = "running"
+    st["steps"]["N1"]["outputs"]["N1/noisy_record.json"] = sha(rec)
+    st["steps"]["C1"]["outputs"]["N1/comparison.json"] = sha(d / "N1" / "comparison.json")
+    (d / "status.json").write_text(json.dumps(st, indent=1, sort_keys=True) + "\n")
+    r, res, obs = run(tmp, [root], "stopped_mid_instance")
+    if res is None:
+        return False, obs
+    k3 = res["counts"]["NOT1"]["K3"]
+    flag = next((e for e in entries(res) if any(isinstance(v, str) and "NOT1_6220" in v for v in e.values())
+                 and "manifest not final" in json.dumps(e)), None)
+    obs["manifest_not_final_entry"] = None if flag is None else str(flag)[:300]
+    ok = (r.returncode == 0 and "NOT1_6220" in k3["refuted"]["list"] and flag is not None
+          and all("NOT1_6212" in res["counts"]["NOT1"][lv]["held"]["list"] for lv in ("K0", "K3")))
+    return ok, obs
 
 
 def draw_plans(tmp):
@@ -387,7 +435,7 @@ CASES = [
     ("D8", "planned_seed_not_started", case_planned_seed_not_started,
      "exit 0; NOT1 rows sum to 3 at K0 and K3; a not_run entry for NOT1_6230 at each level"),
     ("D8", "planned_machine_no_root", case_planned_machine_no_root,
-     "no draw: refused, or a not_run entry naming NOT1_6212 or K05 (the home that K06's plan names)"),
+     "no draw: exit 0 and a not_run entry naming NOT1_6212 (the home instance K06's plan names); no refusal"),
     ("D8", "draw_machine_without_root", case_draw_machine_without_root,
      "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; a not_run entry for NOT1_6213 (K02, no root) at each level"),
     ("D8", "draw_duplicate_machine_only", case_draw_duplicate_machine_only,
@@ -398,6 +446,8 @@ CASES = [
     ("D9", "home_instance_twice", case_home_instance_twice, "refused; NOT1 not counted more than twice"),
     ("D10", "one_byte_in_comparison", case_one_byte_in_comparison, "refused; the output names N0/comparison.json"),
     ("D10", "listed_file_missing", case_listed_file_missing, "refused; the output names extract.json"),
+    ("D10", "stopped_mid_instance", case_stopped_mid_instance,
+     "exit 0; NOT1_6220 refuted at K3 with an entry saying \"manifest not final\"; NOT1_6212 held at K0 and K3"),
 ]
 
 
