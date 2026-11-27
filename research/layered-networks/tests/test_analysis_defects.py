@@ -66,6 +66,13 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   earlier, its branch_deletion, then the branch_creation of the announce commit that DRAW.json uses; must be refused.
   force_push: the clean creation, then a force_push; must be refused. The two refusals count only if clean passed in
   the same run. Not exercised: reading the activity from GitHub (campaign and rehearsal).
+- beacon *: one signed drand value has several writings the verifiers accept (upper case, mixed case; spaces and a 0x
+  prefix pass bytes.fromhex), and draw_seeds.draw hashes the string as given. beacon_canonical (control): the
+  lowercase draw gives today's seeds. beacon_<writing>: draw_seeds.draw (the narrowest real function) on that writing
+  must raise or give the canonical seeds. sizes_permutations: the sizes dict in all 6 orders, at 166 per group (the
+  smallest equal sizes where the groups collide at round 1000000), must give identical seeds. standin_beacon_<writing>:
+  the analysis's entry point on a DRAW.json written that way (seeds drawn on that writing, a root matching its plan)
+  must refuse it, or accept it with the canonical seeds; gated on standin_draw_valid.
 - E1 round_own_check_failed: K05 with NOT1_6220's round N2 left as the driver leaves a run stopped by its own check
   (see failed_round: the record's status "failed: the tail leak must be set before it starts", N2 failed with why
   "exit 1", no C2, no N2/comparison.json, an unlisted placeholder N2/trace.raw (a real header, data cut off; only its
@@ -445,7 +452,19 @@ def activity_items(kind, commit, t0, utc):
     raise ValueError(kind)
 
 
-def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinned", activity=None):
+# One drand value, several writings: the verifiers compare the randomness case-insensitively (and bytes.fromhex accepts
+# spaces), while draw_seeds.draw hashes the beacon string as given.
+WRITINGS = {
+    "upper": lambda h: h.upper(),
+    "mixed": lambda h: "".join(c.upper() if i % 2 else c for i, c in enumerate(h)),
+    "spaces": lambda h: " ".join(h[i:i + 2] for i in range(0, len(h), 2)),
+    "0x": lambda h: "0x" + h,
+}
+CANONICAL_SEEDS = {"NOT1": [65418, 69364], "ANDOR3": [55321], "XOR3": [61903]}   # draw_seeds.draw at c41a24c4
+COLLIDING_SIZES = dict(NOT1=166, ANDOR3=166, XOR3=166)   # the smallest equal sizes where groups collide at round 1000000
+
+
+def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinned", activity=None, writing=None):
     """Write DRAW.json, DRAW_ANNOUNCE.txt and the excluded file of the stand-in draw, one mutation applied, and the
     plans of the VALID draw. Returns (args, plans)."""
     sys.path.insert(0, str(HERE))
@@ -462,14 +481,14 @@ def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinn
     utc = lambda t: datetime.datetime.fromtimestamp(t, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     assert BV.round_after(BC.QUICKNET, utc(t0)) == ROUND_1M["round"]
 
-    def make(ex):
-        D = DS.draw(ROUND_1M["randomness"], ROUND_1M["round"], ex, dict(STANDIN_SIZES))
-        D["beacon_round"] = dict(ROUND_1M)
+    def make(ex, beacon=ROUND_1M["randomness"]):
+        D = DS.draw(beacon, ROUND_1M["round"], ex, dict(STANDIN_SIZES))
+        D["beacon_round"] = dict(ROUND_1M, randomness=beacon)
         D["announce"] = dict(branch=STANDIN_BRANCH, commit=STANDIN_COMMIT, push_utc=utc(t0))
         return D
 
-    valid = make(pinned)
-    plans = tmp / "draw_plans"
+    valid = make(pinned) if writing is None else make(pinned, WRITINGS[writing](ROUND_1M["randomness"]))
+    plans = tmp / "draw_plans"                              # the plans of the draw as written (a matching root)
     plans.mkdir()
     for k, pl in enumerate(P3.split(valid, json.loads((HERE / "campaign_template.json").read_text()), 12)[0], start=1):
         (plans / f"PLAN_K{k:02d}.json").write_bytes(DS.canon(pl))
@@ -614,6 +633,61 @@ def case_round_simulator_ended(tmp, src):
 
 
 STANDIN_CONTROL = {}
+
+
+def draw_function(beacon, sizes=None):
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as DS
+    ex = json.loads((HERE / "EXCLUDED.json").read_text())
+    return DS.draw(beacon, ROUND_1M["round"], ex, dict(sizes or STANDIN_SIZES))["groups"]
+
+
+def case_beacon_canonical(tmp, src):
+    """draw_seeds.draw (the narrowest real function; no root needed) on the canonical lowercase beacon."""
+    got = draw_function(ROUND_1M["randomness"])
+    return got == CANONICAL_SEEDS, dict(seeds=got, want=CANONICAL_SEEDS)
+
+
+def beacon_writing_case(name):
+    def case(tmp, src):
+        w = WRITINGS[name](ROUND_1M["randomness"])
+        try:
+            got = draw_function(w)
+        except Exception as e:                                    # refused: acceptable
+            return True, dict(writing=w, refused=repr(e)[:300])
+        return got == CANONICAL_SEEDS, dict(writing=w, seeds=got, canonical=CANONICAL_SEEDS)
+    case.__name__ = f"case_beacon_{name}"
+    return case
+
+
+def case_sizes_permutations(tmp, src):
+    """draw_seeds.draw with the sizes dict in each of its 6 orders, at sizes where the groups collide."""
+    import itertools
+    out = {}
+    for perm in itertools.permutations(COLLIDING_SIZES):
+        try:
+            g = draw_function(ROUND_1M["randomness"], {k: COLLIDING_SIZES[k] for k in perm})
+        except Exception as e:
+            return False, dict(order=perm, error=repr(e)[:300])
+        out[",".join(perm)] = g
+    first = next(iter(out.values()))
+    diff = {o: {k: sorted(set(v[k]) ^ set(first[k])) for k in v if v[k] != first[k]} for o, v in out.items() if v != first}
+    return not diff, dict(sizes=COLLIDING_SIZES, reference_order=next(iter(out)), differing_orders=diff)
+
+
+def standin_writing_case(name):
+    def case(tmp, src):
+        r, res, obs = standin_run(tmp, src, f"standin_beacon_{name}", writing=name)
+        obs["control_passed"] = STANDIN_CONTROL.get("ok", False)
+        if not obs["control_passed"]:
+            return False, obs
+        if refused(r):
+            return True, obs
+        planned = sorted(json.dumps(res or {}).count(f"NOT1_{s}") > 0 for s in CANONICAL_SEEDS["NOT1"])
+        obs["accepted_with_canonical_NOT1"] = planned
+        return r.returncode == 0 and all(planned), obs
+    case.__name__ = f"case_standin_beacon_{name}"
+    return case
 
 
 def case_standin_draw_valid(tmp, src):
@@ -779,6 +853,16 @@ CASES = [
      "(gated on standin_activity_clean)"),
     ("E2", "standin_activity_force_push", case_standin_activity_force_push,
      "activity= the clean branch_creation then a force_push on the announce branch: refused (gated)"),
+    ("beacon", "beacon_canonical", case_beacon_canonical,
+     "draw_seeds.draw on the canonical lowercase beacon gives today's seeds " + json.dumps(CANONICAL_SEEDS)),
+    *[("beacon", f"beacon_{n}", beacon_writing_case(n),
+       f"draw_seeds.draw on the beacon written {n}: raises, or gives the canonical seeds") for n in WRITINGS],
+    ("beacon", "sizes_permutations", case_sizes_permutations,
+     "draw_seeds.draw with the sizes dict in all 6 orders at sizes 166 each: identical seeds"),
+    *[("beacon", f"standin_beacon_{n}", standin_writing_case(n),
+       f"analysis with a DRAW.json whose beacon and beacon_round.randomness are written {n} (the seeds drawn on that "
+       f"writing, a matching root): refused, or accepted with the canonical NOT1 seeds (gated on standin_draw_valid)")
+      for n in WRITINGS],
     ("E1", "round_own_check_failed", case_round_own_check_failed,
      "N2 of NOT1_6220 stopped by its own check (" + OWN_CHECK + "): exit 0; refuted at K3, in a sub-row about the "
      "run's own check listing the status; NOT1_6212 held"),
@@ -796,7 +880,7 @@ def main(out_json=None):
     lean = shutil.which("lean")
     head = git("rev-parse", "HEAD", cwd=REPO).strip()
     code = git("log", "-1", "--format=%H", "--", "research/layered-networks/analysis.py", cwd=REPO).strip()
-    report = dict(format="layered-analysis-defects/1", script_sha256=sha(__file__), analysis_sha256=sha(ANALYSIS),
+    report = dict(format="layered-analysis-defects/1", script_sha256=sha(__file__), analysis_sha256=sha(ANALYSIS), draw_seeds_sha256=sha(HERE / "draw_seeds.py"),
                   tree_head=head, analysis_last_commit=code, lean=dict(path=lean, sha256=sha(lean) if lean else None),
                   cases=[])
     with tempfile.TemporaryDirectory() as t:
