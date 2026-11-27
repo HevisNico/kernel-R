@@ -175,7 +175,10 @@ SEED DRAW (the sizes are analysis.DRAW_SIZES; the rehearsal's analysis.DRAW_SIZE
     [block draw]
     ( set -e
       X=$(realpath -e "$X")                                   # absolute, before any cd
-      mkdir draw_$M && cd draw_$M
+      ! git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "REFUSED: started inside a git work tree: no commit, no push"; exit 1; }
+      [ ! -e draw_$M ] || { echo "REFUSED: draw_$M already exists: no commit, no push"; exit 1; }
+      mkdir draw_$M
+      cd draw_$M
       # 1. the announce commit and GitHub's push time of its branch_creation, read as analysis.py reads them
       CT=$(python -B -c "if True:
           import sys, tempfile; sys.path.insert(0, '$L'); import analysis as A
@@ -214,10 +217,20 @@ SEED DRAW (the sizes are analysis.DRAW_SIZES; the rehearsal's analysis.DRAW_SIZE
       #    single push)
       D=$(realpath -e DRAW.json)
       test -z "$(git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$R)" || { echo "REFUSED: $R already exists"; exit 1; }
-      mkdir result && cd result && git init -q && git checkout -q --orphan $R
+      [ ! -e result ] || { echo "REFUSED: result already exists: no commit, no push"; exit 1; }
+      mkdir result
+      cd result
+      git init -q
+      git checkout -q --orphan $R
       git fetch -q --depth 1 https://github.com/HevisNico/kernel-R refs/heads/main     # the owner identity, from main, never printed
-      git config user.name "$(git log -1 --format=%an FETCH_HEAD)" && git config user.email "$(git log -1 --format=%ae FETCH_HEAD)"
-      cp "$D" DRAW.json && git add DRAW.json && git commit -q -m "Draw result ($M)"     # the owner identity, set above
+      git config user.name "$(git log -1 --format=%an FETCH_HEAD)"
+      git config user.email "$(git log -1 --format=%ae FETCH_HEAD)"
+      cp "$D" DRAW.json
+      [ "$(git rev-parse --show-toplevel)" = "$(pwd -P)" ] || { echo "REFUSED: the repository is not this new folder: no commit, no push"; exit 1; }
+      [ "$(git symbolic-ref --short HEAD)" = "$R" ] || { echo "REFUSED: HEAD is not the orphan $R: no commit, no push"; exit 1; }
+      ! git rev-parse -q --verify HEAD >/dev/null || { echo "REFUSED: the new repository already has a commit: no commit, no push"; exit 1; }
+      git add DRAW.json
+      git commit -q -m "Draw result ($M)"                     # the owner identity, set above
       O=$(git log -1 --format='%an %ae' FETCH_HEAD)
       [ "$(git log -1 --format='%an %ae' HEAD)" = "$O" ] && [ "$(git log -1 --format='%cn %ce' HEAD)" = "$O" ] || { echo "REFUSED: the commit's author or committer is not main's (the owner): no push"; exit 1; }
       git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/$R
@@ -277,7 +290,11 @@ ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_A
      EXCLUDED_SECOND_SCAN.json from its creation.
     [block second-scan]
     ( set -e
-      mkdir scanrepo && cd scanrepo && git init -q
+      [ ! -e scanrepo ] || { echo "REFUSED: scanrepo already exists: no commit, no push"; exit 1; }
+      [ ! -e EXCLUDED_SECOND_SCAN.json ] || { echo "REFUSED: EXCLUDED_SECOND_SCAN.json already exists: no commit, no push"; exit 1; }
+      mkdir scanrepo
+      cd scanrepo
+      git init -q
       git remote add origin https://github.com/HevisNico/kernel-R
       git ls-remote --heads origin | awk '{print $2}' | sed 's#refs/heads/##' > ../SCAN_BRANCHES.txt
       wc -l < ../SCAN_BRANCHES.txt
@@ -287,7 +304,8 @@ ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_A
       done
       git update-ref refs/heads/master "$(git rev-parse refs/remotes/origin/main)"
       git symbolic-ref HEAD refs/heads/master
-      cd .. && python -B "$L/draw_seeds.py" scan EXCLUDED_SECOND_SCAN.json scanrepo )
+      cd ..
+      python -B "$L/draw_seeds.py" scan EXCLUDED_SECOND_SCAN.json scanrepo )
     [end]
      - It must contain every seed of the freeze's EXCLUDED.json (analysis.py refuses otherwise), and so the
        rehearsal's seeds, which its SEALS.txt lines name.
@@ -308,10 +326,15 @@ ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_A
      (0) The rehearsal's published DRAW.json, from its result branch:
     [block rehearsal-draw]
     ( set -e
-      mkdir fetch_rehearsal && cd fetch_rehearsal && git init -q
+      [ ! -e fetch_rehearsal ] || { echo "REFUSED: fetch_rehearsal already exists: no commit, no push"; exit 1; }
+      [ ! -e DRAW_REHEARSAL.json ] || { echo "REFUSED: DRAW_REHEARSAL.json already exists: no commit, no push"; exit 1; }
+      mkdir fetch_rehearsal
+      cd fetch_rehearsal
+      git init -q
       git fetch -q https://github.com/HevisNico/kernel-R refs/heads/evidence/combined-rehearsal-draw-result
       git show FETCH_HEAD:DRAW.json > ../DRAW_REHEARSAL.json
-      cd .. && sha256sum DRAW_REHEARSAL.json )
+      cd ..
+      sha256sum DRAW_REHEARSAL.json )
     [end]
      (1) and (2): add, deduplicate, sort, regenerate (count, seeds_sha256, the "added" field). It must print 18
      rehearsal seeds and 72 noise seeds:
@@ -366,9 +389,15 @@ one push of one commit, never pushed again, never forced, never deleted)
       X=$(realpath -e "$X")                                   # absolute, before any cd
       test ${#H} = 64 || { echo "REFUSED: H is not a sha256: no commit, no push"; exit 1; }
       test -z "$(git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$B)" || { echo "REFUSED: $B already exists: no commit, no push"; exit 1; }
-      mkdir announce_$M && cd announce_$M && git init -q && git checkout -q --orphan $B
+      ! git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "REFUSED: started inside a git work tree: no commit, no push"; exit 1; }
+      [ ! -e announce_$M ] || { echo "REFUSED: announce_$M already exists: no commit, no push"; exit 1; }
+      mkdir announce_$M
+      cd announce_$M
+      git init -q
+      git checkout -q --orphan $B
       git fetch -q --depth 1 https://github.com/HevisNico/kernel-R refs/heads/main     # the owner identity, from main, never printed
-      git config user.name "$(git log -1 --format=%an FETCH_HEAD)" && git config user.email "$(git log -1 --format=%ae FETCH_HEAD)"
+      git config user.name "$(git log -1 --format=%an FETCH_HEAD)"
+      git config user.email "$(git log -1 --format=%ae FETCH_HEAD)"
       cp "$X" EXCLUDED_PUBLISHED.json                         # the list the draw uses, published with it
       P=$(sha256sum EXCLUDED_PUBLISHED.json | cut -c1-64)
       [ "$P" = "$H" ] || { echo "REFUSED: EXCLUDED_PUBLISHED.json has sha256 $P, not the validated $H: no commit, no push"; exit 1; }
@@ -382,6 +411,9 @@ one push of one commit, never pushed again, never forced, never deleted)
                 and a['excluded_sha256'] == '$H' == hashlib.sha256(open('EXCLUDED_PUBLISHED.json', 'rb').read()).hexdigest()
                 and D.excluded_fraction(x) <= D.MAX_EXCLUDED_FRACTION)
           print('announce ok' if ok else 'REFUSED: the announce is wrong: no commit, no push'); sys.exit(0 if ok else 1)"
+      [ "$(git rev-parse --show-toplevel)" = "$(pwd -P)" ] || { echo "REFUSED: the repository is not this new folder: no commit, no push"; exit 1; }
+      [ "$(git symbolic-ref --short HEAD)" = "$B" ] || { echo "REFUSED: HEAD is not the orphan $B: no commit, no push"; exit 1; }
+      ! git rev-parse -q --verify HEAD >/dev/null || { echo "REFUSED: the new repository already has a commit: no commit, no push"; exit 1; }
       git add DRAW_ANNOUNCE.txt EXCLUDED_PUBLISHED.json
       git commit -q -m "Draw announce ($M)"                   # the owner identity, set above
       O=$(git log -1 --format='%an %ae' FETCH_HEAD)

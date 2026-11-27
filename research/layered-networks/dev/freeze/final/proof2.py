@@ -76,6 +76,7 @@ assert beacon_verify.verify(beacon_chain.QUICKNET, R1M)["ok"]
 T1M = datetime.datetime.fromtimestamp(beacon_verify.round_time(beacon_chain.QUICKNET, 1000000) - beacon_verify.DELAY_S,
                                       datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 sh(f"git init -q --bare {W}/github_twin.git")
+sh(f"git init -q {W}/someclone && git -C {W}/someclone -c user.name=x -c user.email=x@invalid commit -q --allow-empty -m x")   # a git clone to start a block from (a negative case)
 TWIN = f"{W}/github_twin.git"
 
 PUSH = f"git push -q {GH} HEAD:refs/heads/"
@@ -128,16 +129,30 @@ for name, b in blocks.items():
 
 # the order (ORDER 2, 3, 4) and the owner's negative case
 STEPS = [("01", "vars", "."), ("02", "vars-rehearsal", "."), ("03", "announce", "."), ("04", "draw", "."),
+         ("04a", "NEG-announce-exists", ""), ("04b", "NEG-draw-exists", ""), ("04c", "NEG-inside-clone", ""),
          ("05", "second-scan", "."), ("06", "rehearsal-draw", "."), ("07", "list", "."), ("08", "check-list", "."),
          ("09", "vars-campaign", "."),
          ("10", "NEGATIVE: the freeze's old list as X, with H kept from (3)", "neg"),
          ("11", "announce", "."), ("12", "draw", ".")]
+SNAP = f"git --git-dir {TWIN} for-each-ref --format='%(refname) %(objectname)'"
+def neg(folder, setup, block, made):
+    """a negative case: the block must refuse (rc != 0) with no commit and no push (the twin's refs unchanged)"""
+    return (f"{SNAP} > {W}/twin_before.txt\nmkdir -p {folder}\ncd {folder}\n{setup}" + ready[block] +
+            'echo "rc of the block=$?"\n'
+            f'git -C {made} rev-parse -q --verify HEAD >/dev/null 2>&1 && echo "A COMMIT WAS MADE in {made}" || echo "no commit made in {made}"\n'
+            f'{SNAP} | diff -q - {W}/twin_before.txt >/dev/null && echo "no push: the twin is unchanged" || echo "THE TWIN CHANGED"\n'
+            f"cd {W}/work\n")
+NEGS = {"NEG-announce-exists": neg(f"{W}/work/neg_announce", "mkdir announce_$M\n", "announce", "announce_$M"),
+        "NEG-draw-exists": neg(f"{W}/work/neg_draw", "mkdir draw_$M\n", "draw", "draw_$M"),
+        "NEG-inside-clone": neg(f"{W}/someclone/sub", "", "announce", "announce_$M")}
 # the owner's negative case for the identity: a global git identity that is NOT the owner's, for the whole run
 (W / "gitconfig_global_other").write_text("[user]\n\tname = someone else\n\temail = someone-else@invalid\n")
 run = ["set -u", f"cd {W}/work", f"export GIT_CONFIG_GLOBAL={W}/gitconfig_global_other",
        'echo "global identity during the run: $(git config --global user.name)"']
 for num, name, where in STEPS:
-    if name.startswith("NEGATIVE"):
+    if name in NEGS:
+        body, tag = NEGS[name], f"{num}_{name}"
+    elif name.startswith("NEGATIVE"):
         body = ('mkdir neg && cd neg\nX_KEPT=$X\nX=$L/EXCLUDED.json\n' + ready["announce"] +
                 'echo "rc of the block=$?"\nX=$X_KEPT\n'
                 'git -C announce_campaign rev-parse -q --verify HEAD >/dev/null && echo "A COMMIT WAS MADE" || echo "no commit made"\n'
@@ -149,7 +164,7 @@ for num, name, where in STEPS:
     (LOG / f"{tag}.block.sh").write_text(body)
     run += [f'echo "### {num} {name}"', f". {LOG}/{tag}.block.sh > {LOG}/{tag}.out 2>&1; echo \"rc=$?\" >> {LOG}/{tag}.out",
             f"tail -3 {LOG}/{tag}.out"]
-    if not name.startswith("NEGATIVE"):     # FREEZE.txt: stop at the first block that fails
+    if not name.startswith("NEG"):     # FREEZE.txt: stop at the first block that fails
         run += [f'grep -qx "rc=0" {LOG}/{tag}.out || {{ echo "STOPPED: block {name} (step {num}) failed"; exit 1; }}']
 run += [f'echo "### the twin\'s branches and their commit counts"',
         f"for r in $(git --git-dir {TWIN} for-each-ref --format='%(refname)'); do echo $r $(git --git-dir {TWIN} rev-list --count $r); done",
