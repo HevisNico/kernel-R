@@ -982,11 +982,12 @@ def case_analysis_hardening(w, home):
         ann = w.wd / f"ANNOUNCE_{label}.txt"
         ann.write_text(f"format layered-draw-announce/1\nmode test\nexcluded_sha256 {hashlib.sha256(ex_f.read_bytes()).hexdigest()}\n"
                        f"sizes NOT1={n['NOT1']} ANDOR3={n['ANDOR3']} XOR3={n['XOR3']}\n")
+        if sig_change:                      # a changed signature, its randomness and the draw made consistent with it
+            br["signature"] = br["signature"][:-2] + ("00" if br["signature"][-2:] != "00" else "11")
+            br["randomness"] = hashlib.sha256(bytes.fromhex(br["signature"])).hexdigest()
         d = draw_seeds.draw(br["randomness"], rnd, ex, dict(n))
         if seed_change:
             d["groups"]["NOT1"][0] += 1
-        if sig_change:
-            br["signature"] = br["signature"][:-2] + ("00" if br["signature"][-2:] != "00" else "11")
         f = w.wd / f"DRAW_{label}.json"
         f.write_bytes(draw_seeds.canon(dict(d, beacon_round=br, announce=dict(branch="test", commit="0" * 40, push_utc=push))))
         return [f"draw={f}", f"excluded={ex_f}", f"announce={ann}"]

@@ -56,3 +56,13 @@ record. analysis.py refuses any root that campaign.py did not write in campaign 
     inverters take m cores, and a remote duplicate's N0 takes one.
 11. **Record** `uptime -s` at the start and end (INVENTORY_START, INVENTORY_END). Report DONE, RESULT.json's
     job_errors and stopped_for_disk, and the free disk.
+
+## The rehearsal
+
+- **Size:** 6/6/6, that is 18 instances over the 12 machines (plan_split3.py; analysis.DRAW_SIZES_REHEARSAL), with a
+  D4 audit on the 6th instance of each group in draw order (one per group).
+- **Its draw:** the drand quicknet round fixed by ITS OWN GitHub announce, on evidence/combined-rehearsal-draw
+  (pushed after the freeze, by one creating push; FREEZE.txt, DRAW_ANNOUNCE). The published round 1000000 serves the
+  offline tests only, never a run.
+- **Its run:** campaign.py in campaign mode on the frozen template, as for the campaign; analysis.py rehearsal reads
+  it. Nothing of it counts for the campaign; its seeds enter the second exclusion scan.
