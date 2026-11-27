@@ -18,7 +18,9 @@ No case pushes to GitHub: every seal log of (c) is a local bare repository in th
 The analysis cases on copies of the home root need the home run of the same call, so they stay on K07;
 analysis_announce and analysis_own_check (a driver run of its own) do not.
 
-**Pushes allowed, and only this one:** your record folder to the new branch evidence/devtest-K<nn> at the end (step 5),
+This is the second (c) run; the first, at 0b603d54, is on evidence/devtest-K<nn> and stays as it is.
+
+**Pushes allowed, and only this one:** your record folder to the new branch evidence/devtest-run2-K<nn> at the end (step 5),
 plainly, never forced, with the owner identity and a subject-only message with no trailer.
 
 Acknowledge in one line before acting. Report to the stage-D worker (session_01TzF7ZYVsvGaQ6EzEjxCJLM), with the
@@ -80,18 +82,18 @@ not retry.
 - the lines of $W/c.log (each case: PASS or FAIL, seconds);
 - `$V -c "import json; d=json.load(open('$W/c/TEST_C.json')); print({k: v['ok'] for k, v in d.items() if isinstance(v, dict)}, d.get('all_pass'))"`.
 
-## 5. Push the record to evidence/devtest-K<nn> (additions only, new branch)
+## 5. Push the record to evidence/devtest-run2-K<nn> (additions only, new branch)
 
 ```
 cd $W
-git ls-remote https://github.com/HevisNico/kernel-R refs/heads/evidence/devtest-K<nn>   # must print nothing
+git ls-remote https://github.com/HevisNico/kernel-R refs/heads/evidence/devtest-run2-K<nn>   # must print nothing
 git init -q push_K<nn> && cd push_K<nn>
-git checkout -q --orphan evidence/devtest-K<nn>
+git checkout -q --orphan evidence/devtest-run2-K<nn>
 mkdir c_K<nn> && cp $W/c/TEST_C.json $W/c.log $W/envcheck.out c_K<nn>/
 (cd $W/kernel-R && git rev-parse HEAD) > c_K<nn>/COMMIT
-git add -A && git commit -q -m "devtest (c): K<nn> cases of test (c), TEST mode"
-git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/evidence/devtest-K<nn>
-git ls-remote https://github.com/HevisNico/kernel-R refs/heads/evidence/devtest-K<nn>   # REPORT this line
+git add -A && git commit -q -m "devtest (c) run2: K<nn> cases of test (c), TEST mode"
+git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/evidence/devtest-run2-K<nn>
+git ls-remote https://github.com/HevisNico/kernel-R refs/heads/evidence/devtest-run2-K<nn>   # REPORT this line
 ```
 
 If the push is refused, REPORT it and stop: do not force, do not rename the branch. Then STOP.

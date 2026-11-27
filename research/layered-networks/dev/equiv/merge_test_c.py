@@ -1,6 +1,6 @@
 """Test (c) split over K07–K12 (RUNBOOK_C.md), a record helper: one TEST_C.json from the six machines' records.
 
-  merge_test_c.py OUT.json COMMIT [REMOTE]
+  merge_test_c.py OUT.json COMMIT [PREFIX] [REMOTE]      PREFIX: evidence/devtest- (default) or evidence/devtest-run2-
 
 The case list is tests/test_campaign.py's at COMMIT. Fetches evidence/devtest-K07 … K12 by branch name from REMOTE (default: this clone's origin), reads each
 c_K<nn>/TEST_C.json, COMMIT and envcheck.out, and writes OUT.json: every case once, with the machine it ran on.
@@ -32,21 +32,21 @@ def git(*a, cwd):
     return subprocess.run(["git", *a], cwd=cwd, check=True, capture_output=True)
 
 
-def main(out, commit, remote=None):
+def main(out, commit, prefix="evidence/devtest-", remote=None):
     remote = remote or git("remote", "get-url", "origin", cwd=HERE).stdout.decode().strip()
     want = cases_of_test_c(commit)
     merged, machines, bad = {}, {}, []
     with tempfile.TemporaryDirectory() as w:
         git("init", "-q", cwd=w)
         for m in MACHINES:
-            git("fetch", "-q", remote, f"refs/heads/evidence/devtest-{m}", cwd=w)
+            git("fetch", "-q", remote, f"refs/heads/{prefix}{m}", cwd=w)
             tip = git("rev-parse", "FETCH_HEAD", cwd=w).stdout.decode().strip()
             show = lambda f: git("show", f"FETCH_HEAD:c_{m}/{f}", cwd=w).stdout
             c = show("COMMIT").decode().strip()
             env = json.loads(show("envcheck.out"))
             tc = json.loads(show("TEST_C.json"))
             got = {k: v.get("got") for k, v in sorted((env.get("checks") or {}).items())}
-            machines[m] = dict(branch=f"evidence/devtest-{m}", tip=tip, commit=c, envcheck_ok=env.get("ok"),
+            machines[m] = dict(branch=f"{prefix}{m}", tip=tip, commit=c, envcheck_ok=env.get("ok"),
                                envcheck_got_sha256=hashlib.sha256(json.dumps(got, sort_keys=True).encode()).hexdigest(),
                                test_c_sha256=hashlib.sha256(show("TEST_C.json")).hexdigest(), all_pass=tc.get("all_pass"))
             if c != commit:
