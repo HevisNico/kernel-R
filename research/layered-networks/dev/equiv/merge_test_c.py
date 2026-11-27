@@ -2,7 +2,7 @@
 
   merge_test_c.py OUT.json COMMIT [REMOTE]
 
-Fetches evidence/devtest-K07 … K12 by branch name from REMOTE (default: this clone's origin), reads each
+The case list is tests/test_campaign.py's at COMMIT. Fetches evidence/devtest-K07 … K12 by branch name from REMOTE (default: this clone's origin), reads each
 c_K<nn>/TEST_C.json, COMMIT and envcheck.out, and writes OUT.json: every case once, with the machine it ran on.
 Refuses (exit 1, nothing written) when a machine's COMMIT is not COMMIT, its envcheck is not ok or its checked values
 ("got") differ from another machine's, a case of tests/test_campaign.py is missing, or a case ran on two machines.
@@ -20,9 +20,10 @@ HERE = Path(__file__).resolve().parents[2]
 MACHINES = [f"K{k:02d}" for k in range(7, 13)]
 
 
-def cases_of_test_c():
-    """The case names tests/test_campaign.py's main() runs, in order."""
-    text = (HERE / "tests" / "test_campaign.py").read_text()
+def cases_of_test_c(commit=None):
+    """The case names tests/test_campaign.py's main() runs, in order, at COMMIT (default: the working tree)."""
+    text = (HERE / "tests" / "test_campaign.py").read_text() if commit is None else git(
+        "show", f"{commit}:research/layered-networks/tests/test_campaign.py", cwd=HERE).stdout.decode()
     main = text[text.index("def main(wd, *only):"):]
     return re.findall(r'run\("([a-z0-9_]+)"', main)
 
@@ -33,7 +34,7 @@ def git(*a, cwd):
 
 def main(out, commit, remote=None):
     remote = remote or git("remote", "get-url", "origin", cwd=HERE).stdout.decode().strip()
-    want = cases_of_test_c()
+    want = cases_of_test_c(commit)
     merged, machines, bad = {}, {}, []
     with tempfile.TemporaryDirectory() as w:
         git("init", "-q", cwd=w)
