@@ -141,3 +141,18 @@ cost), DUPX_<inst>/seal_wait.json (the seal found, its commit and line), DONE, a
 - analysis.py, check_rehearsal_seeds: its refusal "(the second scan must read the rehearsal)" refers to the campaign
   list's three-step construction in FREEZE.txt (the second scan's output PLUS the rehearsal's seeds and noise seeds,
   added by step 1, then checked by step 3), not to rerunning the scan.
+
+## Closing note of 2026-11-27 (the freeze candidate 0b33340d's analysis.py, format layered-campaign-analysis/2)
+
+Two statements above held for analysis.py before 2026-11-27 and no longer hold:
+
+- **l.108, A3, "times github or lsremote:LOG only":** lsremote is removed. Campaign and rehearsal modes take times
+  from GitHub only (times=github, B7), and every activity item read is saved in OUTDIR/activity/. analysis.py's other
+  modes (test) still accept other time sources, and their results count for no claim.
+- **Item 5, "The rest is byte-identical to analyze10":** this held at the e2e17 and dry-run equivalence (b) only.
+  Since then analysis.py has changed its output and its rows: D8 not_run rows and NOTICE, D9 and D10 refusals,
+  verified manifests, refuted_stopped_by_own_check, partial machines (option ii), recomputed comparisons (B4), the
+  recomputed draw and its announce, the rehearsal mode, the rehearsal's seeds, the exclusion cap, and the new format
+  layered-campaign-analysis/2. Its RESULTS.json is no longer byte-identical to analyze10's. What stands instead is
+  the record at the frozen code: the four run2 roots of (b), analysed twice with times=github at the candidate,
+  byte-identical, with the same seals and verdicts as at ef374ccd (dev/equiv/RECORDS_0b33340d.md).
