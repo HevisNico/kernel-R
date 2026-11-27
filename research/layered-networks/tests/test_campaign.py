@@ -574,20 +574,44 @@ def case_duplicate_forged_line(w, home):
 
 
 def case_analysis_refuses_test_root(w, root):
-    """analysis.py of the dev tree: campaign mode is refused first by the tree's own pins (the dev tree's files that
-    changed since FREEZE_PINS.json was made, analysis.py first among them in sorted order: the list is not fixed, it
-    grows with each dev change until the freeze record refreshes the pins; the refusal of a TEST root is shown in
-    analysis_forged_pins, in a pinned tree); an OUTDIR inside a root is refused."""
+    """analysis.py of the dev tree in campaign mode on a TEST root, made deterministic: the case first computes on its
+    own whether every FREEZE_PINS.json entry matches this tree (the sha256 of each file). If one differs, it requires
+    the pin refusal naming exactly the differing files it computed (the first five, sorted, as pins_refusal prints
+    them). If all match but the tree is not clean (a changed tracked file, or an untracked .py/.json, computed here
+    from git status), it requires the not-clean refusal naming the tree's HEAD. If all match and the tree is clean (a
+    freeze candidate), it requires the next refusal, the roots not run by this campaign.py in campaign mode, naming
+    root_1. It records the branch it took. An OUTDIR inside a root is refused."""
+    import hashlib
     an = w.wd / "analysis_campaign_on_test"
     checks, e = [], Path(root).exists()
+    top = HERE.parents[1]
+    pins = json.loads((HERE / "FREEZE_PINS.json").read_text())
+    differ = sorted(p for fs in pins["groups"].values() for p, h in fs.items()
+                    if not (top / p).is_file() or hashlib.sha256((top / p).read_bytes()).hexdigest() != h)
+    head = subprocess.run(["git", "-C", str(top), "rev-parse", "HEAD"], capture_output=True, text=True,
+                          check=True).stdout.strip()
+    st = subprocess.run(["git", "-C", str(top), "status", "--porcelain", "--untracked-files=all"], capture_output=True,
+                        text=True, check=True).stdout.splitlines()
+    dirty = [ln for ln in st if not ln.startswith("??") or ln.rstrip('"').endswith((".py", ".json"))]
     a = sh(PY, "-B", HERE / "analysis.py", "campaign", an, root, "times=github")
-    c1 = check(checks, "campaign mode: the dev tree's files differ from their pins (analysis.py among them)", a.stderr,
-               "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/analysis.py'",
-               root, e)
+    if differ:
+        branch = "pins differ"
+        needle = f"refused: campaign mode: pinned files differ from FREEZE_PINS.json: {differ[:5]}"
+        label = "campaign mode, a pin differs: the pin refusal names exactly the differing files"
+    elif dirty:
+        branch = "pins match, tree not clean"
+        needle = f"refused: campaign mode: the tree at {head[:12]} is not clean"
+        label = "campaign mode, every pin matches but the tree is not clean: the not-clean refusal"
+    else:
+        branch = "pins match"
+        needle = "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['root_1']"
+        label = "campaign mode, every pin matches: the test root is refused as not run by this campaign.py"
+    c1 = check(checks, label, a.stderr, needle, root, e)
     inside = sh(PY, "-B", HERE / "analysis.py", "test", Path(root) / "analysis", root, "times=bare")
     c2 = check(checks, "OUTDIR inside the root", inside.stderr, "lies inside the root", root, e)
     ok = c1 and c2 and a.returncode != 0 and inside.returncode != 0
-    return ok, dict(campaign_on_test=a.stderr.strip()[-200:], outdir_inside=inside.stderr.strip()[-200:], checks=checks)
+    return ok, dict(branch=branch, pins_differing=differ, tree_head=head, tree_dirty=dirty, campaign_on_test=a.stderr.strip()[-200:],
+                    outdir_inside=inside.stderr.strip()[-200:], checks=checks)
 
 def tamper_pins(t):
     """A test commit regenerating FREEZE_PINS.json over this clone, so that every pin matches and campaign.py,
