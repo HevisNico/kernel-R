@@ -1,0 +1,357 @@
+"""Reproduction tests for the defects D8, D9 and D10 of analysis.py, written from the defect descriptions and the code
+at ef374ccd, not from the fix.
+
+  python -B tests/test_analysis_defects.py [OUT.json]
+
+Each case builds small roots in a temporary folder from the run2 test roots and runs analysis.py's real entry point
+(`analysis.py test OUTDIR ROOT ... times=bare`) as a subprocess. Lean 4.35.0 (the pinned binary) must be on PATH:
+the entry point builds the kernel library and regenerates each seal with stage_d6.py. No case needs ngspice.
+
+Sources, fetched by branch name only from this clone's `origin` into temporary repositories:
+- the roots: evidence/devtest-run2-K05 (out_K05: NOT1_6212, NOT1_6220) and evidence/devtest-run2-K06 (out_K06: the
+  control DUPX_NOT1_6212). Set LAYERED_DEFECT_SOURCES to a folder holding out_K05 and out_K06 to skip this fetch.
+- the seal log: evidence/devtest-seals2-K05, pushed into a local bare repository. Each root's PLAN.json then names
+  that bare repository as its seal_push remote, and its push_times.log holds the GitHub push times recorded in
+  dev/equiv/b/run2/RESULTS_times_github_ef374ccd.json. So `times=bare` gives the same seal-log verdicts as the
+  GitHub run, offline.
+Every file a case changes on purpose is re-declared in the SHA256SUMS that lists it, except in the D10 cases, where
+the mismatch is the point. So the roots stay consistent for a fix that verifies the manifests. Each case records
+`roots_manifest_problems`, the test's own check of every SHA256SUMS line of its roots: empty except in the D10 cases.
+
+Cases (a defect case passes only when the analysis behaves as the fix must; at ef374ccd each defect case fails):
+- D8 planned_seed_not_started: K05 with seed 6230 added to NOT1 in PLAN.json (no folder). Must: exit 0, NOT1 counts
+  over 3 instances at K0 and K3, and an entry naming NOT1_6230 that contains "not run".
+- D8 planned_machine_no_root: K06 alone. Its PLAN.json names K05 as the home machine of NOT1_6212, and K05 has no
+  root. Must: a refusal, or an entry with "not run" that names NOT1_6212 or K05.
+- D9 same_root_30_times: K05 given 30 times by the same path. Must: refused, and no RESULTS.json counting NOT1 more
+  than twice.
+- D9 same_machine_two_paths: two copies of K05 at two paths. Must: the same.
+- D9 home_instance_twice: K05 and a second root (out_K07: K05 without NOT1_6220, with its own seal branch, its
+  records' seal_log branch and plan text changed to match) that also holds NOT1_6212. Must: the same.
+- D10 one_byte_in_comparison: one byte of NOT1_6212/N0/comparison.json changed ("cell_bits": 2 -> 3), its manifest
+  kept. Must: refused, the output naming "N0/comparison.json".
+- D10 listed_file_missing: NOT1_6212/N2/extract/extract.json deleted, still listed, with no declaration. Must:
+  refused, the output naming "extract.json".
+- control k05_alone and control k05_with_dupx (K05 + K06): must pass before and after the fix: exit 0 and NOT1
+  counted 2 at K0 and K3 (DUPX_ folders are controls, never counted).
+
+A refusal is matched on exit code != 0 and the substring "refused" (every refusal of analysis.py starts with
+"refused:"), plus, for D10, the name of the file. No other wording of the fix is assumed.
+"""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+HERE = Path(__file__).resolve().parents[1]
+REPO = HERE.parents[1]
+ANALYSIS = HERE / "analysis.py"
+PY = sys.executable
+SEAL_BRANCH = "evidence/devtest-seals2-K05"
+TIMES_RECORD = HERE / "dev" / "equiv" / "b" / "run2" / "RESULTS_times_github_ef374ccd.json"
+
+
+def sha(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def git(*a, cwd=None):
+    return subprocess.run(["git", *a], cwd=cwd, check=True, capture_output=True, text=True).stdout
+
+
+def origin_url():
+    return git("remote", "get-url", "origin", cwd=REPO).strip()
+
+
+# ------------------------------------------------------------------------------------------------ the sources
+
+def sources(tmp):
+    given = os.environ.get("LAYERED_DEFECT_SOURCES")
+    if given:
+        return Path(given)
+    out = tmp / "sources"
+    work = tmp / "fetch"
+    work.mkdir(parents=True)
+    git("init", "-q", cwd=work)
+    out.mkdir()
+    for m in ("K05", "K06"):
+        git("fetch", "-q", origin_url(), f"refs/heads/evidence/devtest-run2-{m}", cwd=work)
+        tar = subprocess.run(["git", "archive", "FETCH_HEAD", f"out_{m}"], cwd=work, check=True, capture_output=True).stdout
+        subprocess.run(["tar", "-x", "-C", str(out)], input=tar, check=True)
+    return out
+
+
+def push_times():
+    """{commit: GitHub push time} recorded for the K05 seal log."""
+    r = json.loads(TIMES_RECORD.read_text())
+    return {i["seal"]["log"]["commit"]: i["seal"]["log"]["pushed_utc"] for i in r["instances"]
+            if i["machine"] == "machine_3"}
+
+
+def bare_remote(tmp, branch):
+    """A local bare repository holding the K05 seal log under `branch`, with a push_times.log."""
+    b = tmp / "remotes" / (branch.replace("/", "_") + ".git")
+    if b.exists():
+        return b
+    b.mkdir(parents=True)
+    git("init", "-q", "--bare", cwd=b)
+    git("fetch", "-q", origin_url(), f"refs/heads/{SEAL_BRANCH}:refs/heads/{branch}", cwd=b)
+    tip = git("rev-parse", f"refs/heads/{branch}", cwd=b).strip()
+    chain = git("rev-list", "--first-parent", "--reverse", tip, cwd=b).split()
+    tm = push_times()
+    assert set(tm) <= set(chain), (tm, chain)
+    (b / "push_times.log").write_text("".join(f"{c} refs/heads/{branch} {tm[c]}\n" for c in chain if c in tm))
+    return b
+
+
+# ------------------------------------------------------------------------------------------------ root edits
+
+def redeclare(root, rel):
+    """Re-declare `rel` (relative to root) in every SHA256SUMS of the root that lists it."""
+    rel_p = root / rel
+    for sums in root.rglob("SHA256SUMS"):
+        base = sums.parent
+        try:
+            r = rel_p.relative_to(base)
+        except ValueError:
+            continue
+        lines, hit = [], False
+        for line in sums.read_text().splitlines():
+            h, name = line.split("  ", 1)
+            if name == str(r):
+                h, hit = sha(rel_p), True
+            lines.append(f"{h}  {name}")
+        if hit:
+            sums.write_text("".join(x + "\n" for x in lines))
+            redeclare(root, sums.relative_to(root)) if sums != root / "SHA256SUMS" else None
+
+
+def drop_lines(root, prefix):
+    """Remove the lines naming `prefix`/... from the root-level manifests (SHA256SUMS, SHA256SUMS.instances)."""
+    for f in ("SHA256SUMS", "SHA256SUMS.instances"):
+        p = root / f
+        if p.exists():
+            keep = [x for x in p.read_text().splitlines() if not x.split("  ", 1)[1].startswith(prefix + "/")]
+            p.write_text("".join(x + "\n" for x in keep))
+    redeclare(root, "SHA256SUMS.instances")
+
+
+def edit_plan(root, edit):
+    p = root / "PLAN.json"
+    d = json.loads(p.read_text())
+    edit(d)
+    p.write_text(json.dumps(d, indent=1) + "\n")
+    redeclare(root, "PLAN.json")
+
+
+def place(src, dst, tmp, branch=None):
+    """Copy a source root to dst, its seal_push remote pointed at a local bare repository."""
+    shutil.copytree(src, dst, symlinks=True)
+    plan = json.loads((dst / "PLAN.json").read_text())
+    sp = plan.get("seal_push") or {}
+    if sp and not sp.get("dry"):
+        br = branch or sp["branch"]
+        rem = bare_remote(tmp, br)
+
+        def e(d):
+            d["seal_push"].update(remote=str(rem), branch=br)
+        edit_plan(dst, e)
+    return dst
+
+
+# ------------------------------------------------------------------------------------------------ running
+
+def manifest_problems(roots):
+    """Every SHA256SUMS line of the roots whose file is missing or differs (the test's own check of its roots)."""
+    bad = []
+    for root in dict.fromkeys(roots):
+        for sums in sorted(Path(root).rglob("SHA256SUMS")):
+            if "lean_build" in sums.parts:
+                continue
+            for line in sums.read_text().splitlines():
+                h, name = line.split("  ", 1)
+                f = sums.parent / name
+                if not f.exists() or sha(f) != h:
+                    bad.append(f"{Path(root).name}/{f.relative_to(root)}: {'missing' if not f.exists() else 'differs'}")
+    return bad
+
+
+def run(tmp, roots, label):
+    out = tmp / f"OUT_{label}"
+    problems = manifest_problems(roots)
+    t0 = time.time()
+    r = subprocess.run([PY, "-B", str(ANALYSIS), "test", str(out), *map(str, roots), "times=bare"],
+                       cwd=HERE, capture_output=True, text=True)
+    res = json.loads((out / "RESULTS.json").read_text()) if r.returncode == 0 and (out / "RESULTS.json").exists() else None
+    obs = dict(roots_manifest_problems=problems, exit=r.returncode, seconds=round(time.time() - t0, 1),
+               message=(r.stderr.strip().splitlines() or [""])[-1][:600] if r.returncode else None)
+    if res is not None:
+        obs["counts"] = {g: {lv: dict(instances=x["instances"], counted=x["counted"],
+                                      **{k: x[k]["n"] for k in ("held", "refuted", "not_completed", "no_prediction")})
+                             for lv, x in v.items()} for g, v in res["counts"].items()}
+        obs["verdicts"] = {g: {lv: v[lv]["verdict"] for lv in ("K0", "K3")} for g, v in res["groups"].items()}
+    return r, res, obs
+
+
+def refused(r):
+    return r.returncode != 0 and "refused" in (r.stdout + r.stderr)
+
+
+def not_inflated(res, group="NOT1", most=2):
+    if res is None:
+        return True
+    c = res["counts"].get(group, {})
+    return all(c[lv]["counted"] <= most for lv in c)
+
+
+def entries(x):
+    if isinstance(x, dict):
+        yield x
+        for v in x.values():
+            yield from entries(v)
+    elif isinstance(x, list):
+        for v in x:
+            yield from entries(v)
+
+
+def not_run_entry(res, *names, where=None):
+    """An entry (a dict) holding the value "not run" and naming one of `names`."""
+    for e in entries(where if where is not None else res):
+        s = json.dumps(e)
+        if "not run" in s and any(n in s for n in names):
+            return e
+    return None
+
+
+# ------------------------------------------------------------------------------------------------ the cases
+
+def case_k05_alone(tmp, src):
+    r, res, obs = run(tmp, [place(src / "out_K05", tmp / "a" / "out_K05", tmp)], "k05_alone")
+    ok = r.returncode == 0 and res is not None and all(res["counts"]["NOT1"][lv]["counted"] == 2 for lv in ("K0", "K3"))
+    return ok, obs
+
+
+def case_k05_with_dupx(tmp, src):
+    roots = [place(src / "out_K05", tmp / "a" / "out_K05", tmp), place(src / "out_K06", tmp / "a" / "out_K06", tmp)]
+    r, res, obs = run(tmp, roots, "k05_with_dupx")
+    ok = r.returncode == 0 and res is not None and all(res["counts"]["NOT1"][lv]["counted"] == 2 for lv in ("K0", "K3"))
+    return ok, obs
+
+
+def case_planned_seed_not_started(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    edit_plan(root, lambda d: d["groups"]["NOT1"]["seeds"].append(6230))
+    r, res, obs = run(tmp, [root], "planned_seed_not_started")
+    ok = r.returncode == 0 and res is not None and all(
+        res["counts"]["NOT1"][lv]["instances"] == 3 and not_run_entry(res, "NOT1_6230", where=res["counts"]["NOT1"][lv])
+        for lv in ("K0", "K3"))
+    return ok, obs
+
+
+def case_planned_machine_no_root(tmp, src):
+    r, res, obs = run(tmp, [place(src / "out_K06", tmp / "a" / "out_K06", tmp)], "planned_machine_no_root")
+    found = not_run_entry(res, "NOT1_6212", "K05") if res is not None else None
+    obs["not_run_entry"] = found
+    return refused(r) or found is not None, obs
+
+
+def case_same_root_30_times(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    r, res, obs = run(tmp, [root] * 30, "same_root_30_times")
+    return refused(r) and not_inflated(res), obs
+
+
+def case_same_machine_two_paths(tmp, src):
+    roots = [place(src / "out_K05", tmp / "a" / "out_K05", tmp), place(src / "out_K05", tmp / "b" / "out_K05", tmp)]
+    r, res, obs = run(tmp, roots, "same_machine_two_paths")
+    return refused(r) and not_inflated(res), obs
+
+
+def case_home_instance_twice(tmp, src):
+    a = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    b = place(src / "out_K05", tmp / "a" / "out_K07", tmp, branch="evidence/devtest-seals2-K07")
+    shutil.rmtree(b / "NOT1_6220")
+    drop_lines(b, "NOT1_6220")
+    old, new = b'"branch": "evidence/devtest-seals2-K05"', b'"branch": "evidence/devtest-seals2-K07"'
+    for f in sorted((b / "NOT1_6212").glob("N*/**/noisy_record.json")):   # the records name their machine's seal branch
+        if old in f.read_bytes():
+            f.write_bytes(f.read_bytes().replace(old, new))
+            redeclare(b, f.relative_to(b))
+
+    def e(d):
+        d["groups"]["NOT1"].update(seeds=[6212], d4_audit=[])
+        d["what"] = "defect test D9: a copy of K05 without NOT1_6220, on its own seal branch (TEST)"
+    edit_plan(b, e)
+    r, res, obs = run(tmp, [a, b], "home_instance_twice")
+    return refused(r) and not_inflated(res), obs
+
+
+def case_one_byte_in_comparison(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    f = root / "NOT1_6212" / "N0" / "comparison.json"
+    b = f.read_bytes()
+    assert b.count(b'"cell_bits": 2') == 1
+    f.write_bytes(b.replace(b'"cell_bits": 2', b'"cell_bits": 3'))
+    r, res, obs = run(tmp, [root], "one_byte_in_comparison")
+    return refused(r) and "N0/comparison.json" in (r.stdout + r.stderr), obs
+
+
+def case_listed_file_missing(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    f = root / "NOT1_6212" / "N2" / "extract" / "extract.json"
+    assert "N2/extract/extract.json" in (root / "NOT1_6212" / "SHA256SUMS").read_text()
+    f.unlink()
+    r, res, obs = run(tmp, [root], "listed_file_missing")
+    return refused(r) and "extract.json" in (r.stdout + r.stderr), obs
+
+
+CASES = [
+    ("control", "k05_alone", case_k05_alone, "exit 0; NOT1 counted 2 at K0 and K3"),
+    ("control", "k05_with_dupx", case_k05_with_dupx, "exit 0; NOT1 counted 2 at K0 and K3 (the DUPX_ folder is a control)"),
+    ("D8", "planned_seed_not_started", case_planned_seed_not_started,
+     "exit 0; NOT1 has 3 instances at K0 and K3; an entry naming NOT1_6230 contains \"not run\""),
+    ("D8", "planned_machine_no_root", case_planned_machine_no_root,
+     "refused, or an entry with \"not run\" naming NOT1_6212 or K05"),
+    ("D9", "same_root_30_times", case_same_root_30_times, "refused; NOT1 not counted more than twice"),
+    ("D9", "same_machine_two_paths", case_same_machine_two_paths, "refused; NOT1 not counted more than twice"),
+    ("D9", "home_instance_twice", case_home_instance_twice, "refused; NOT1 not counted more than twice"),
+    ("D10", "one_byte_in_comparison", case_one_byte_in_comparison, "refused; the output names N0/comparison.json"),
+    ("D10", "listed_file_missing", case_listed_file_missing, "refused; the output names extract.json"),
+]
+
+
+def main(out_json=None):
+    lean = shutil.which("lean")
+    head = git("rev-parse", "HEAD", cwd=REPO).strip()
+    code = git("log", "-1", "--format=%H", "--", "research/layered-networks/analysis.py", cwd=REPO).strip()
+    report = dict(format="layered-analysis-defects/1", script_sha256=sha(__file__), analysis_sha256=sha(ANALYSIS),
+                  tree_head=head, analysis_last_commit=code, lean=dict(path=lean, sha256=sha(lean) if lean else None),
+                  cases=[])
+    with tempfile.TemporaryDirectory() as t:
+        t = Path(t)
+        src = sources(t)
+        for defect, name, fn, asserts in CASES:
+            w = t / name
+            w.mkdir()
+            try:
+                ok, obs = fn(w, src)
+            except Exception as e:                                     # a crash of the setup, not of the analysis
+                ok, obs = False, dict(setup_error=repr(e))
+            print(f"{'PASS' if ok else 'FAIL'}  {defect:7} {name}: {json.dumps(obs)[:400]}", flush=True)
+            report["cases"].append(dict(defect=defect, case=name, asserts=asserts, result="PASS" if ok else "FAIL",
+                                        observed=obs))
+            shutil.rmtree(w, ignore_errors=True)
+    if out_json:
+        Path(out_json).write_text(json.dumps(report, indent=1, sort_keys=True) + "\n")
+    bad = [c["case"] for c in report["cases"] if c["result"] != "PASS"]
+    print(f"{len(report['cases']) - len(bad)} of {len(report['cases'])} cases pass" + (f"; failing: {bad}" if bad else ""))
+    return not bad
+
+
+if __name__ == "__main__":
+    sys.exit(0 if main(*sys.argv[1:2]) else 1)
