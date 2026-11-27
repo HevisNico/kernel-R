@@ -482,16 +482,20 @@ def case_differing_duplicate(w, home):
 
 
 def case_analysis_refuses_test_root(w, root):
-    """analysis.py of the dev tree: campaign mode is refused first by the tree's own pins (campaign.py, analysis.py
-    and the template not pinned: the refusal of a TEST root is shown in analysis_forged_pins, in a pinned tree); an
+    """analysis.py of the dev tree: campaign mode is refused first by the tree's own pins (sealpush.py differs from its
+    pin since the github_times fix; campaign.py, analysis.py and the template not pinned: the refusal of a TEST root is shown in analysis_forged_pins, in a pinned tree); an
     OUTDIR inside a root is refused."""
     an = w.wd / "analysis_campaign_on_test"
     checks, e = [], Path(root).exists()
     a = sh(PY, "-B", HERE / "analysis.py", "campaign", an, root, "times=bare")
-    c1 = check(checks, "campaign mode in the unpinned dev tree", a.stderr, "campaign mode: not in FREEZE_PINS.json", root, e)
+    c1 = check(checks, "campaign mode in the unpinned dev tree", a.stderr, "not in FREEZE_PINS.json: "
+               "['research/layered-networks/analysis.py', 'research/layered-networks/campaign.py', "
+               "'research/layered-networks/campaign_template.json']", root, e)
+    c1b = check(checks, "campaign mode: the dev tree's sealpush.py differs from its pin", a.stderr,
+                "pinned files differ from FREEZE_PINS.json: ['research/layered-networks/sealpush.py']", root, e)
     inside = sh(PY, "-B", HERE / "analysis.py", "test", Path(root) / "analysis", root, "times=bare")
     c2 = check(checks, "OUTDIR inside the root", inside.stderr, "lies inside the root", root, e)
-    ok = c1 and c2 and a.returncode != 0 and inside.returncode != 0
+    ok = c1 and c1b and c2 and a.returncode != 0 and inside.returncode != 0
     return ok, dict(campaign_on_test=a.stderr.strip()[-200:], outdir_inside=inside.stderr.strip()[-200:], checks=checks)
 
 
