@@ -15,19 +15,23 @@ Branch tips (on origin when this was written):
   main                              3f27bb36dadd77a57e27b8fa80f81c3864a02b0e
   research/layered-networks         458bc7a6d763127ff2fe0214e2cb79a1a6549f9b  (noise_commit)
   research/inverter-instances       d599300d51fcf3a1a4c33d103b89827f8ac4da41  (kit_commit)
-  research/layered-campaign-dev     340e1c6c722213dbb6060d896b5cfc038273e00e  (the tree these pins were made over,
-                                    after its last dev commit and the exclusion scan; this record is a later commit
-                                    that changes no pinned file)
+  research/layered-campaign-dev     9219986b09be4c7ec8660c591ddf78f67d77fbeb  (the tree the exclusion scan ran over,
+                                    recorded by rescan.sh as CLONE_HEAD; the pins are made over that tree plus this
+                                    record's commit, which changes only EXCLUDED.json, EXCLUDED_PRINT.txt,
+                                    FREEZE_PINS.json and FREEZE.txt)
 
 Pins:
-  FREEZE_PINS.json                  sha256 779b35bd53291fba77979156a5c4f66adb59960aaab69fc96db7841564a20b2f  (114 files)
-  EXCLUDED.json                     sha256 abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c
-    seeds_sha256                    d9975dee4f80fb75ea5fb67d3d0301bbae2274b0857fc7d44dc216f1c67afbc6  (15741 integers, 256 refs)
-  EXCLUDED_PRINT.txt                sha256 a9c808de9a22b998b44a6f3c3ae9be7695aac5589015d1c0e793ee21e5c2736c
-    the last scan, 2026-11-27: draw_seeds.py scan over the 255 branches of origin, each fetched by name (depth 1), plus
-    HEAD = main 3f27bb36; against 381b4ffe (232 refs), 24 new refs (the evidence branches devtest-K07..K12,
-    devtest-run2/run3/run4-K07..K12), one ref changed (research/layered-campaign-dev, now 483f90c5), none removed,
-    45 integers added, none removed; excluded fraction 6.86% (draw_seeds.MAX_EXCLUDED_FRACTION 20%)
+  FREEZE_PINS.json                  sha256 ba66c3fa4b1fe3e7e749b7bfeaa3eefe1061a2c31ab852dfcd0025d9f094969d  (114 files)
+  EXCLUDED.json                     sha256 a3a76e1a8552fa054faf616faee0771669432b19d3aa1722a9988e7029cb8940
+    seeds_sha256                    1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb  (16333 integers, 286 refs)
+  EXCLUDED_PRINT.txt                sha256 efc8d463affe0f24b6f3b80a57ea7acaac74e0c428c69c15f900434f685cbca1
+    the last scan, 2026-11-27: dev/freeze/final/rescan/rescan.sh, its PART 1 [block second-scan] verbatim: draw_seeds.py
+    scan over the 285 branches of origin, each fetched by name (depth 1), plus HEAD = main 3f27bb36; against abdc38e8
+    (256 refs), 30 new refs (the evidence branches combined-rehearsal-K01..K12, combined-seals-K01..K12,
+    combined-rehearsal-analysis, combined-rehearsal-draw, combined-rehearsal-draw-result,
+    combined-rehearsal1-local-records; research/layered-campaign-freeze, research/layered-campaign-prediction), two refs
+    changed (research/layered-campaign-dev, now 9219986b; review/prediction-candidate, now 95a98fc4), none removed,
+    592 integers added, none removed; excluded fraction 7.16% (draw_seeds.MAX_EXCLUDED_FRACTION 20%)
   campaign_template.json            sha256 02af33e0c79b3dbdc320d3dd4e0dab26374cbd00a79bc249fcf20631a3cce756  (the template;
                                     campaign.FROZEN_TEMPLATE_SHA256)
   plan_split3.py (the splitter)     sha256 061f8b375aeef65adade60762866aab0fdc4da4562963b8776f4afe88a3635a9
