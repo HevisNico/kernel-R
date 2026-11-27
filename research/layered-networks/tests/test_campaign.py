@@ -1017,6 +1017,48 @@ def case_analysis_hardening(w, home):
     wf.write_bytes(draw_seeds.canon(wide))
     refused("N5: an exclusion list rejecting more than 20 % of the range", "of the draw range, more than 20%", base,
             "times=bare", *make_draw("wide", ex_file=wf), target=wf)
+
+    # the owner's rule: the campaign's list must hold the rehearsal's seeds and their noise seeds. Two published
+    # quicknet rounds stand in: 20000000 for the rehearsal (6/6/6 over the freeze's list), 34278954 for the campaign
+    # (the stand-in sizes, over list E); each announce 600 s before its round, as GitHub would have recorded it.
+    import datetime
+
+    def stand_in(label, br, mode, sizes, exf):
+        t0 = beacon_verify.round_time(beacon_chain.QUICKNET, br["round"]) - beacon_verify.DELAY_S
+        push = datetime.datetime.fromtimestamp(t0, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        ann = w.wd / f"ANNOUNCE_{label}.txt"
+        ann.write_text(f"format layered-draw-announce/1\nmode {mode}\nexcluded_sha256 "
+                       f"{hashlib.sha256(exf.read_bytes()).hexdigest()}\nsizes NOT1={sizes['NOT1']} ANDOR3={sizes['ANDOR3']} "
+                       f"XOR3={sizes['XOR3']}\n")
+        d = draw_seeds.draw(br["randomness"], br["round"], json.loads(exf.read_text()), dict(sizes))
+        f = w.wd / f"DRAW_{label}.json"
+        f.write_bytes(draw_seeds.canon(dict(d, beacon_round=br, announce=dict(
+            branch="evidence/combined-rehearsal-draw" if mode == "rehearsal" else "test", commit="0" * 40, push_utc=push))))
+        return d, f, ann
+    rbr = dict(round=20000000, randomness="f39c98df5525968e6622e0c63edb3d1f9c5607cf780db78abdded36e4b3dba95",
+               signature="96892582a33552a7b67ba44ef09c3ccd535bbebe760c93ecf45be8958d0c0f06390c6d19d7bf492eb806af7eef6b125c")
+    cbr = dict(round=34278954, randomness="ca4a4015bcf54c6951e39ee81c085a65742d5794a66a9dceccb400d8cd97764e",
+               signature="8fe9e583f82cdb77b61bf625b8e8f51782fbb4da2776f56455dc227b0e46e857fb6354a12b554bd530f8c8a5285f126d")
+    rd, rf, ra = stand_in("rehearsal", rbr, "rehearsal", dict(NOT1=6, ANDOR3=6, XOR3=6), ex_f)
+    rseeds = sorted(s for v in rd["groups"].values() for s in v)
+    full = sorted(set(ex["seeds"]) | set(rseeds) | {10 * s + j for s in rseeds for j in range(4)})
+
+    def listed(label, seeds):
+        x = dict(ex, seeds=seeds, count=len(seeds), seeds_sha256=hashlib.sha256(draw_seeds.canon(seeds)).hexdigest())
+        f = w.wd / f"EXCLUDED_{label}.json"
+        f.write_bytes(draw_seeds.canon(x))
+        return f
+    reh = [f"rehearsal_draw={rf}", f"rehearsal_excluded={ex_f}", f"rehearsal_announce={ra}"]
+    for label, seeds, needle in (
+            ("a rehearsal seed missing", [s for s in full if s != rseeds[0]], f"lacks rehearsal seeds [{rseeds[0]}]"),
+            ("a rehearsal noise seed missing", [s for s in full if s != 10 * rseeds[1] + 2],
+             f"noise seeds [{10 * rseeds[1] + 2}]"),
+            ("the full list: accepted (refused later, at the root's plan)", full, "PLAN.json is none of the expected plans")):
+        exf = listed(label.split()[1] + str(len(seeds)), seeds)
+        cd, cf, ca = stand_in("campaign" + str(len(seeds)), cbr, "test", n, exf)
+        refused(f"owner: rehearsal seeds, {label}", needle, base, "times=bare", f"draw={cf}", f"excluded={exf}",
+                f"announce={ca}", *reh, target=cf)
+    out["rehearsal_seeds"] = rseeds
     for label, f in (("upper-case beacon", lambda d: dict(d, beacon=d["beacon"].upper())),
                      ("upper-case randomness", lambda d: dict(d, beacon_round=dict(d["beacon_round"], randomness=d["beacon_round"]["randomness"].upper()))),
                      ("upper-case signature", lambda d: dict(d, beacon_round=dict(d["beacon_round"], signature=d["beacon_round"]["signature"].upper())))):

@@ -71,7 +71,7 @@ The check must print `"ok": true`. REPORT: its output, the Python line, `uptime 
 ```
 cd $W/kernel-R/research/layered-networks
 $V -B tests/test_campaign.py $W/c <your cases from the table, in its order> 2>&1 | tee $W/c.log
-echo rc=$?
+echo "rc=${PIPESTATUS[0]}"   # the test's status, not tee's
 ```
 
 Run it once, in the foreground (or detached with nohup and the same tee, if your session limits a call's length).
