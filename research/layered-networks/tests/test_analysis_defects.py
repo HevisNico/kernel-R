@@ -81,7 +81,9 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   as beacon and randomness, and the seeds a forger draws on it (forger_groups); the analysis must refuse it.
   standin_signature_flip: one signature byte flipped, value and seeds from it; the refusal must come from the
   signature check ("does not verify against the pinned quicknet key" or a decoding failure). The earlier
-  standin_signature_byte (flip only, value kept) stays.
+  standin_signature_byte (flip only, value kept) stays. verify_other_round and standin_signature_other_round present
+  round 20000000's valid signature as round 1000000's (value = sha256 of it, the forger's seeds): the point decodes and
+  is in the subgroup, so the refusal must come from the pairing itself (no decoding failure).
 - X2 *: plan_split3.py run as a command on the DRAW.json file (json.loads sorts the keys) must give, at 6/6/6 and at
   60/32/37, the same 12 plans as plan_split3.split of the draw in memory (the analysis's expected plans).
   standin_plans_from_command: the 6/6/6 stand-in with plans from the command, a root for each machine holding remote
@@ -516,6 +518,8 @@ def forged_signature(kind):
     sig = bytes.fromhex(ROUND_1M["signature"])
     if kind.startswith("pad"):
         sig = bytes.fromhex(kind[3:]) + sig
+    elif kind == "other_round":                              # a valid on-curve point: round 20000000's signature
+        sig = bytes.fromhex(ROUND_20M["signature"])
     elif kind == "flip":
         b = bytearray(sig)
         b[10] ^= 1
@@ -606,6 +610,19 @@ def standin_run(tmp, src, label, **mutation):
 
 # ------------------------------------------------------------------------------------------------ X1: padded signatures
 PADS = ("pad00", "pad0000", "pad000000")
+# Published by drand quicknet (tests/test_beacon_published.py): a valid signature, but of another round.
+ROUND_20M = dict(round=20000000, randomness="f39c98df5525968e6622e0c63edb3d1f9c5607cf780db78abdded36e4b3dba95",
+                 signature="96892582a33552a7b67ba44ef09c3ccd535bbebe760c93ecf45be8958d0c0f06390c6d19d7bf492eb806af7eef6b125c")
+
+
+def case_verify_other_round(tmp, src):
+    """beacon_verify.verify: round 20000000's signature (and its own randomness) presented as round 1000000's. The
+    point decodes and is in the subgroup; only the pairing can refuse it."""
+    sig_hex, value = forged_signature("other_round")
+    assert value == ROUND_20M["randomness"]
+    r = bv_verify(sig_hex, value)
+    ok = r.get("ok") is False and r.get("subgroups_ok") is True and r.get("signature_ok") is False and not r.get("why")
+    return ok, dict(verify=r)
 
 
 def bv_verify(sig_hex, value):
@@ -633,12 +650,13 @@ def verify_pad_case(kind):
     return case
 
 
-def standin_sig_case(kind, want=None):
+def standin_sig_case(kind, want=None, avoid=()):
     def case(tmp, src):
         r, res, obs = standin_run(tmp, src, f"standin_signature_{kind}", sig_forge=kind)
         obs["control_passed"] = STANDIN_CONTROL.get("ok", False)
         text = r.stdout + r.stderr
-        ok = refused(r) and obs["control_passed"] and (want is None or any(w in text for w in want))
+        ok = (refused(r) and obs["control_passed"] and (want is None or any(w in text for w in want))
+              and not any(a in text for a in avoid))
         return ok, obs
     case.__name__ = f"case_standin_signature_{kind}"
     return case
@@ -1035,6 +1053,13 @@ CASES = [
      "refused by the signature check (\"does not verify against the pinned quicknet key\" or a decoding failure)"),
     *[("X2", "plans_command_" + "_".join(str(n) for n in sz.values()), plans_case(sz),
        f"plan_split3.py on the DRAW.json file at {sz}: all 12 plans equal plan_split3.split of the draw") for sz in X2_SIZES],
+    ("X1", "verify_other_round", case_verify_other_round,
+     "beacon_verify.verify on round 20000000's signature presented as round 1000000's: not ok, with subgroups_ok "
+     "true and signature_ok false (the pairing refuses it, not the decoding)"),
+    ("X1", "standin_signature_other_round", standin_sig_case("other_round", ("does not verify against the pinned "
+                                                                             "quicknet key",), avoid=("decod",)),
+     "analysis on a forged DRAW.json: round 20000000's signature as round 1000000's, value = sha256 of it, seeds "
+     "from it: refused by the pairing (\"does not verify against the pinned quicknet key\", no decoding failure)"),
     ("X2", "standin_plans_from_command", case_standin_plans_from_command,
      "the 6/6/6 stand-in, plans from the plan_split3.py command, roots for its remote-duplicate machines, draw=: "
      "exit 0 (gated)"),
