@@ -1,0 +1,96 @@
+stage D lesson c1_0 group 0: ssFF
+stage D lesson c1_1 group 0: ssFF
+stage D lesson c2_0 group 0: ssFF
+stage D lesson c3_0 group 0: ssFF
+stage D lesson c2_0 group 1: ssFF
+stage D mask reads: c1_0[1]=s, c1_1[1]=s, c2_0[1]=F, c3_0[1]=F
+stage D mask reads: c1_0[2]=s, c1_1[2]=s, c2_0[2]=F
+stage D mask reads: c1_0[1, 2]=F, c1_1[1, 2]=F, c2_0[1, 2]=F
+scan c1_0 group 0: s* 1.36415 +- 0.00186 in 43 slots
+scan c1_1 group 0: s* 1.93191 +- 0.00179 in 43 slots
+scan c2_0 group 0: s* 1.96858 +- 0.00002 in 45 slots
+scan c2_0 group 1: s* 1.61844 +- 0.00002 in 41 slots
+scan c3_0 group 0: s* 1.46920 +- 0.00193 in 46 slots
+solo scan c1_0 group 0: s* 1.36290 +- 0.00195 in 47 slots
+solo scan c1_1 group 0: s* 1.93288 +- 0.00215 in 28 slots
+solo scan c2_0 group 0: s* 1.97074 +- 0.00214 in 28 slots
+solo scan c2_0 group 1: s* 1.61786 +- 0.00215 in 28 slots
+solo scan c3_0 group 0: s* 1.46917 +- 0.00193 in 14 slots
+{
+ "status": "done",
+ "cost": {
+  "wall_setup_s": 16.572187900543213,
+  "wall_train_s": 769.7299659252167,
+  "wall_test_s": 150.59279417991638,
+  "wall_scan_s": 2408.5572514533997,
+  "cpu_setup_s": 16.37,
+  "cpu_train_s": 779.0,
+  "cpu_test_s": 928.4,
+  "cpu_end_s": 5913.75,
+  "simulated_s": 0.09250010564248137,
+  "lesson_slots": 8,
+  "test_slots": 3,
+  "scan_slots": 78,
+  "solo_scan_slots": 117
+ },
+ "words": {
+  "1/0/0": "ssFF",
+  "1/1/0": "ssFF",
+  "2/0/0": "ssFF",
+  "3/0/0": "ssFF",
+  "2/0/1": "ssFF"
+ }
+}
+{
+ "eligible_K0": true,
+ "room_K3": false,
+ "prediction": {
+  "words": {
+   "1/0/0": "ssFF",
+   "1/1/0": "ssFF",
+   "2/0/0": "ssFF",
+   "3/0/0": "ssFF",
+   "2/0/1": "ssFF"
+  },
+  "outputs": {
+   "0": false,
+   "1": true,
+   "2": true,
+   "3": false
+  },
+  "cells": {
+   "0": {
+    "c1_0": false,
+    "c1_1": false,
+    "c2_0": false,
+    "c3_0": false
+   },
+   "1": {
+    "c1_0": true,
+    "c1_1": false,
+    "c2_0": true,
+    "c3_0": true
+   },
+   "2": {
+    "c1_0": false,
+    "c1_1": true,
+    "c2_0": true,
+    "c3_0": true
+   },
+   "3": {
+    "c1_0": false,
+    "c1_1": false,
+    "c2_0": false,
+    "c3_0": false
+   }
+  },
+  "skew_silent": [
+   "c1_0",
+   "c1_1"
+  ],
+  "output_equals_function": true
+ }
+}
+{"label": "prediction", "seconds": 1.33, "theorems": 110, "kernel_agrees_everywhere": true, "sealed_failing_equals_mirror": true}
+{"kernel_agrees": true, "theorems": 110, "disagreements": []}
+{"testError_rule": "one-port", "eligible_K0": true, "room_K3": false}
