@@ -1,0 +1,51 @@
+$ B=evidence/combined-rehearsal-draw; M=rehearsal; X=/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R/research/layered-networks/EXCLUDED.json; Z='NOT1=6 ANDOR3=6 XOR3=6'; TREE=/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R; echo B=$B M=$M X=$X Z=$Z; git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$B | wc -l; mkdir /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/announce_rehearsal && cd /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/announce_rehearsal && git init -q && git checkout -q --orphan $B && cat /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/work/preannounce.sh && . /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/work/preannounce.sh && cat DRAW_ANNOUNCE.txt
+B=evidence/combined-rehearsal-draw M=rehearsal X=/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R/research/layered-networks/EXCLUDED.json Z=NOT1=6 ANDOR3=6 XOR3=6
+0
+cp $X EXCLUDED_PUBLISHED.json                                           # the list the draw uses, published with it
+printf 'format layered-draw-announce/1\nmode %s\nexcluded_sha256 %s\nsizes %s\n' $M \
+  "$(sha256sum EXCLUDED_PUBLISHED.json | cut -c1-64)" "$Z" > DRAW_ANNOUNCE.txt
+python -B -c "if True:
+    import hashlib, json, sys; sys.path.insert(0, '$TREE/research/layered-networks');
+    import analysis as A, draw_seeds as D;
+    a = A.parse_announce(open('DRAW_ANNOUNCE.txt', 'rb').read()); x = json.load(open('EXCLUDED_PUBLISHED.json'));
+    want = A.DRAW_SIZES if '$M' == 'campaign' else A.DRAW_SIZES_REHEARSAL;
+    frz = json.load(open('$TREE/research/layered-networks/EXCLUDED.json'));
+    ok = (a['mode'] == '$M' and a['sizes'] == want and set(frz['seeds']) <= set(x['seeds']) and
+    a['excluded_sha256'] == hashlib.sha256(open('EXCLUDED_PUBLISHED.json', 'rb').read()).hexdigest() and
+    D.excluded_fraction(x) <= D.MAX_EXCLUDED_FRACTION);
+    print('announce ok' if ok else 'ANNOUNCE WRONG: do not push'); sys.exit(0 if ok else 1)"
+announce ok
+format layered-draw-announce/1
+mode rehearsal
+excluded_sha256 abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c
+sizes NOT1=6 ANDOR3=6 XOR3=6
+rc=0
+
+$ B=evidence/combined-draw; M=campaign; X=/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/work/A/EXCLUDED_SECOND.json; Z='NOT1=60 ANDOR3=32 XOR3=37'; TREE=/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R; echo B=$B M=$M X=$X Z=$Z; git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$B | wc -l; mkdir /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/announce_campaign && cd /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/announce_campaign && git init -q && git checkout -q --orphan $B && cat /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/work/preannounce.sh && . /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/work/preannounce.sh && cat DRAW_ANNOUNCE.txt
+B=evidence/combined-draw M=campaign X=/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/work/A/EXCLUDED_SECOND.json Z=NOT1=60 ANDOR3=32 XOR3=37
+0
+cp $X EXCLUDED_PUBLISHED.json                                           # the list the draw uses, published with it
+printf 'format layered-draw-announce/1\nmode %s\nexcluded_sha256 %s\nsizes %s\n' $M \
+  "$(sha256sum EXCLUDED_PUBLISHED.json | cut -c1-64)" "$Z" > DRAW_ANNOUNCE.txt
+python -B -c "if True:
+    import hashlib, json, sys; sys.path.insert(0, '$TREE/research/layered-networks');
+    import analysis as A, draw_seeds as D;
+    a = A.parse_announce(open('DRAW_ANNOUNCE.txt', 'rb').read()); x = json.load(open('EXCLUDED_PUBLISHED.json'));
+    want = A.DRAW_SIZES if '$M' == 'campaign' else A.DRAW_SIZES_REHEARSAL;
+    frz = json.load(open('$TREE/research/layered-networks/EXCLUDED.json'));
+    ok = (a['mode'] == '$M' and a['sizes'] == want and set(frz['seeds']) <= set(x['seeds']) and
+    a['excluded_sha256'] == hashlib.sha256(open('EXCLUDED_PUBLISHED.json', 'rb').read()).hexdigest() and
+    D.excluded_fraction(x) <= D.MAX_EXCLUDED_FRACTION);
+    print('announce ok' if ok else 'ANNOUNCE WRONG: do not push'); sys.exit(0 if ok else 1)"
+announce ok
+format layered-draw-announce/1
+mode campaign
+excluded_sha256 efb15ecb60f469e008932575f7d16901cc87d7126fe069f4df929a0e3c134b0f
+sizes NOT1=60 ANDOR3=32 XOR3=37
+rc=0
+
+$ cd /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R && git status --porcelain --untracked-files=all | wc -l && git rev-parse HEAD
+0
+0b33340d16cbac3edc00ffae7b6416dddfbdb013
+rc=0
+

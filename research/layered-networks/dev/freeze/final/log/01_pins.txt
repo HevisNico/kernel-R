@@ -1,0 +1,19 @@
+$ cd /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/work && python3 /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/closure2.py /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R campaign.py analysis.py plan_split3.py draw_seeds.py beacon_verify.py beacon_chain.py d4_regate.py leancell.py tests/check_duplicate.py > closure.json && python3 -c "import json;print(len(json.load(open('closure.json'))['files']), 'files in the closure')"
+58 files in the closure
+rc=0
+
+$ cd /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/work && python3 /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/make_pins3.py /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R closure.json FREEZE_PINS.regenerated.json research/layered-campaign-dev\,\ the\ tree\ at\ 483f90c5\ \(code\ of\ 04d05b47\)\ with\ the\ exclusion\ list\ rescanned\ last\ \(2026-11-27\,\ 256\ refs\) | tail -3
+"kernel_library"
+]
+}
+rc=0
+
+$ cmp /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/work/FREEZE_PINS.regenerated.json /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R/research/layered-networks/FREEZE_PINS.json && echo IDENTICAL && sha256sum /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R/research/layered-networks/FREEZE_PINS.json
+IDENTICAL
+6baf8a51d4f4aca35d4789b1865da7692affca0106690f163b00d4e68f7e84f1  /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R/research/layered-networks/FREEZE_PINS.json
+rc=0
+
+$ cd /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R && python3 -c "import json,subprocess as s; a=json.loads(s.run(['git','show','483f90c5:research/layered-networks/FREEZE_PINS.json'],capture_output=True,check=True).stdout); b=json.load(open('/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R/research/layered-networks/FREEZE_PINS.json')); fa={p:h for g in a['groups'].values() for p,h in g.items()}; fb={p:h for g in b['groups'].values() for p,h in g.items()}; print('against the pins before (483f90c5): added', sorted(set(fb)-set(fa)), 'removed', sorted(set(fa)-set(fb)), 'changed', sorted(p for p in fa if p in fb and fa[p]!=fb[p]), 'groups the same', {k:sorted(v) for k,v in a['groups'].items()}=={k:sorted(v) for k,v in b['groups'].items()}, 'tools the same', a['tools']==b['tools'])"
+against the pins before (483f90c5): added [] removed [] changed ['research/layered-networks/EXCLUDED.json', 'research/layered-networks/EXCLUDED_PRINT.txt', 'research/layered-networks/analysis.py', 'research/layered-networks/beacon_verify.py', 'research/layered-networks/draw_seeds.py', 'research/layered-networks/plan_split.py'] groups the same True tools the same True
+rc=0
+
