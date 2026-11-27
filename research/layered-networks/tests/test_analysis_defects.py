@@ -21,6 +21,8 @@ the mismatch is the point. So the roots stay consistent for a fix that verifies 
 Cases (a defect case passes only when the analysis behaves as the fix must; at ef374ccd each defect case fails):
 - D8 planned_seed_not_started (test mode, no draw): K05 with seed 6230 added to NOT1 in PLAN.json (no folder).
   Must: exit 0, each level's rows of NOT1 sum to 3 (the planned size), and a not_run entry for NOT1_6230 at K0 and K3.
+- D8 planned_machine_no_root (test mode, no draw): K06 alone. Its PLAN.json names K05 as the home machine of
+  NOT1_6212, and K05 has no root. Must: a refusal, or a not_run entry naming NOT1_6212 or K05.
 - D8 draw_machine_without_root: the dummy draw dev/freeze/DRAW_dummy.json (NOT1 6212, 6213 over 12 machines) split by
   plan_split3.py with campaign_template.json, as in dev/freeze/PROOF.md: K01 holds NOT1_6212, K02 NOT1_6213, K03 the
   duplicate of NOT1_6212. Only K01's root is given (out_K05 with its PLAN.json replaced by PLAN_K01.json byte for
@@ -42,7 +44,7 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   counted 2 at K0 and K3 (DUPX_ folders are controls, never counted).
 
 A refusal is matched on exit code != 0 and the substring "refused" (every refusal of analysis.py starts with
-"refused:"), plus, for D10, the name of the file. A not_run entry is a dict with a value "not_run" or "not run"
+"refused:"), plus, for D10, the name of the file. A not_run entry is a dict with a value starting with "not_run" or "not run"
 beside a value naming the instance, or a key "not_run" (or "not run") whose content names it. The draw argument's
 name is the constant DRAW_ARG ("draw"). No other wording of the fix is assumed.
 """
@@ -233,11 +235,11 @@ NOT_RUN = ("not run", "not_run")
 
 
 def not_run_entry(res, *names, where=None):
-    """An entry marking one of `names` as not run: a dict with a value "not run" (or "not_run") beside a value naming
-    it, or a key "not_run" (or "not run") whose content names it."""
+    """An entry marking one of `names` as not run: a dict with a value starting with "not run" (or "not_run", e.g.
+    "not run (home root absent)") beside a value naming it, or a key "not_run" (or "not run") whose content names it."""
     for e in entries(where if where is not None else res):
         flat = [v for v in e.values() if isinstance(v, str)]
-        if any(v in NOT_RUN for v in flat) and any(n in v for v in flat for n in names):
+        if any(v.startswith(NOT_RUN) for v in flat) and any(n in v for v in flat for n in names):
             return e
         for k in NOT_RUN:
             if k in e and any(n in json.dumps(e[k]) for n in names):
@@ -276,6 +278,13 @@ def case_planned_seed_not_started(tmp, src):
     ok = r.returncode == 0 and rows_sum(res, "NOT1", 3) and all(
         not_run_entry(res, "NOT1_6230", where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3"))
     return ok, obs
+
+
+def case_planned_machine_no_root(tmp, src):
+    r, res, obs = run(tmp, [place(src / "out_K06", tmp / "a" / "out_K06", tmp)], "planned_machine_no_root")
+    found = not_run_entry(res, "NOT1_6212", "K05") if res is not None else None
+    obs["not_run_entry"] = found
+    return refused(r) or found is not None, obs
 
 
 def draw_plans(tmp):
@@ -377,6 +386,8 @@ CASES = [
     ("control", "k05_with_dupx", case_k05_with_dupx, "exit 0; NOT1 counted 2 at K0 and K3 (the DUPX_ folder is a control)"),
     ("D8", "planned_seed_not_started", case_planned_seed_not_started,
      "exit 0; NOT1 rows sum to 3 at K0 and K3; a not_run entry for NOT1_6230 at each level"),
+    ("D8", "planned_machine_no_root", case_planned_machine_no_root,
+     "no draw: refused, or a not_run entry naming NOT1_6212 or K05 (the home that K06's plan names)"),
     ("D8", "draw_machine_without_root", case_draw_machine_without_root,
      "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; a not_run entry for NOT1_6213 (K02, no root) at each level"),
     ("D8", "draw_duplicate_machine_only", case_draw_duplicate_machine_only,
