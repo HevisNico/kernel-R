@@ -1,0 +1,80 @@
+{
+ "all_pass": true,
+ "kernel_mirror_disagreement": {
+  "detail": {
+   "D": "failed",
+   "checks": [
+    {
+     "check": "the kernel disagrees with the stub mirror",
+     "expected": "\"clause\": \"dose > 0\"",
+     "matched": "[{\"cell\": \"c1_0\", \"clause\": \"cellValid\", \"level\": \"K0\"}, {\"cell\": \"c1_0\", \"clause\": \"dose > 0\", \"level\": \"K0\"}, {\"cell\": \"c1_0\", \"clause\": \"cellValid\", \"level\": \"K3\"}, {\"cell\": \"c1_0\", \"clause\": \"dose > 0\", \"level\": \"K3\"}]",
+     "target": "/root/devtest_c/c/root_kernel/NOT1_6213/D/prediction.json",
+     "target_exists": true
+    }
+   ],
+   "disagreements": [
+    {
+     "cell": "c1_0",
+     "clause": "cellValid",
+     "level": "K0"
+    },
+    {
+     "cell": "c1_0",
+     "clause": "dose > 0",
+     "level": "K0"
+    },
+    {
+     "cell": "c1_0",
+     "clause": "cellValid",
+     "level": "K3"
+    },
+    {
+     "cell": "c1_0",
+     "clause": "dose > 0",
+     "level": "K3"
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 465.8
+ },
+ "no_pushed_seal": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the push refused by the log's hook",
+     "expected": "pre-receive hook declined",
+     "matched": "! [remote rejected] HEAD -> evidence/combined-seals-K02 (pre-receive hook declined)",
+     "target": "/root/devtest_c/c/root_nopush/NOT1_6213/seal_push.json",
+     "target_exists": true
+    }
+   ],
+   "seal_push": {
+    "branch": "evidence/combined-seals-K02",
+    "commit": "80011a94171b9805a21d379a26245e18313e06a9",
+    "instance": "NOT1_6213",
+    "line": "NOT1_6213 78b30a6a9d46b3335cc5741e9add85ff9b60ef8046caa3184f6737ba12c6b20d 2026-11-27T06:59:15.008211Z",
+    "previous": null,
+    "pushed": false,
+    "remote": "/root/devtest_c/c/log_nopush.git",
+    "seal_folder": {
+     "bytes": 5790,
+     "files": 3,
+     "path": "seals/NOT1_6213"
+    },
+    "seal_sha256": "78b30a6a9d46b3335cc5741e9add85ff9b60ef8046caa3184f6737ba12c6b20d",
+    "why": "push rejected: kfile'\nwarning: push negotiation failed; proceeding anyway with push\nremote: refused by the test hook        \nTo /root/devtest_c/c/log_nopush.git\n ! [remote rejected] HEAD -> evidence/combined-seals-K02 (pre-receive hook declined)\nerror: failed to push some refs to '/root/devtest_c/c/log_nopush.git'",
+    "with_seal_folder": true
+   },
+   "steps": {
+    "D": "done",
+    "deck": "done",
+    "inverters": "done",
+    "seal": "done",
+    "sealpush": "failed"
+   }
+  },
+  "ok": true,
+  "seconds": 375.6
+ }
+}
