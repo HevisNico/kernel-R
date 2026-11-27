@@ -1,0 +1,141 @@
+{
+ "env_sha256": "fbf2378fc3de14a59c40d0564e70c8c80546407b43217a8e1d8e36cc7d0affab",
+ "group": "ANDOR3",
+ "mode": "CAMPAIGN",
+ "seed": 49299,
+ "steps": {
+  "C0": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/compare_d2.py",
+    "/root/reh/out_K11/ANDOR3_49299/seal",
+    "/root/reh/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/reh/out_K11/ANDOR3_49299/N0/noisy_record.json",
+    "noiseless",
+    "/root/reh/out_K11/ANDOR3_49299/N0/comparison.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.0,
+   "ended": "2026-11-27T16:49:54.545273Z",
+   "outputs": {
+    "N0/comparison.json": "8e9027670c8869adfc1cf25362c591a97761ffda83a87863cd71b48bc08e7a5f"
+   },
+   "started": "2026-11-27T16:49:54.506566Z",
+   "status": "done",
+   "wall_s": 0.0
+  },
+  "D": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/stage_d6.py",
+    "run",
+    "/root/reh/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/reh/out_K11/ANDOR3_49299/D",
+    "49299",
+    "overlay=config_inverter_c5.json",
+    "rule=one-port"
+   ],
+   "cores": 1,
+   "cpu_s": 2906.1,
+   "ended": "2026-11-27T16:20:03.944207Z",
+   "outputs": {
+    "D/prediction.json": "3f636397e722d5d163af9d8d0cad511eddaaf8d1b66e65a175b7137677da9afa",
+    "D/record.json": "2b72759c64963d1b89e9dd9e02762a587c7d2859ff3d326204bad53a3acb68f7"
+   },
+   "started": "2026-11-27T15:31:17.413595Z",
+   "status": "done",
+   "wall_s": 2926.5
+  },
+  "N0": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/noise/research/layered-networks/controls4.py",
+    "stagen",
+    "/root/reh/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/reh/out_K11/ANDOR3_49299/N0",
+    "49299",
+    "0",
+    "seal_log=98ed6ad42edd2004e1bb5bfdde5530f1ae83c79c",
+    "seal_branch=evidence/combined-seals-K11",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cores": 1,
+   "cpu_s": 1774.4,
+   "ended": "2026-11-27T16:49:54.505721Z",
+   "outputs": {
+    "N0/noisy_record.json": "aaae72fd1d9ed79f6767f173d76ef3bc49b05f29ae0b4f83abd4c5951f47c6bf",
+    "N0/trace.digest.json": "bcd24cbeedbd671a2092ef63377050b2d4ec803d95a326c9854cddd30be0de79"
+   },
+   "started": "2026-11-27T16:20:09.039304Z",
+   "status": "done",
+   "wall_s": 1785.5
+  },
+  "deck": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/stage_d6.py",
+    "deck",
+    "/root/reh/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/reh/out_K11/ANDOR3_49299/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-27T15:31:17.412831Z",
+   "outputs": {
+    "deck.spice": "3afd629f4aae973b5a357069fd52ba3c01d65b64f7a1bce14d0d95b1e033364b"
+   },
+   "started": "2026-11-27T15:31:17.141744Z",
+   "status": "done",
+   "wall_s": 0.3
+  },
+  "seal": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/stage_d6.py",
+    "seal",
+    "/root/reh/out_K11/ANDOR3_49299/seal",
+    "/root/reh/out_K11/ANDOR3_49299/D"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-27T16:20:04.026467Z",
+   "outputs": {
+    "seal/MANIFEST.json": "481ce9af284dae93b476425d95b27211457f4133ff76fd92022f8f3b65ffd961",
+    "seal/SHA256SUMS": "724133d525156ded53e4a83b4e43460b5c89654ef5c788b84974534a8bc30450"
+   },
+   "started": "2026-11-27T16:20:03.944983Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "sealpush": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/sealpush2.py",
+    "push",
+    "https://github.com/HevisNico/kernel-R",
+    "evidence/combined-seals-K11",
+    "ANDOR3_49299",
+    "/root/reh/out_K11/ANDOR3_49299/seal",
+    "/root/reh/out_K11/.seal_log_work",
+    "/root/reh/out_K11/ANDOR3_49299/seal_push.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.6,
+   "ended": "2026-11-27T16:20:07.050402Z",
+   "outputs": {
+    "seal_push.json": "27605c7946be2a1596d0b468c9c6836b8a65e603dcfdd456bbb88fbcee4ff141"
+   },
+   "started": "2026-11-27T16:20:04.027124Z",
+   "status": "done",
+   "wall_s": 3.0
+  }
+ },
+ "tag": "ANDOR3"
+}

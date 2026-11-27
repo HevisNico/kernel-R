@@ -1,0 +1,167 @@
+{
+ "env_sha256": "fbf2378fc3de14a59c40d0564e70c8c80546407b43217a8e1d8e36cc7d0affab",
+ "group": "NOT1",
+ "mode": "CAMPAIGN",
+ "seed": 34095,
+ "steps": {
+  "C0": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/compare_d2.py",
+    "/root/reh/out_K11/NOT1_34095/seal",
+    "/root/reh/kernel-R/research/layered-networks/specs/not1.json",
+    "/root/reh/out_K11/NOT1_34095/N0/noisy_record.json",
+    "noiseless",
+    "/root/reh/out_K11/NOT1_34095/N0/comparison.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-27T15:39:05.542861Z",
+   "outputs": {
+    "N0/comparison.json": "e1aa9b72f5800ce7019e335f20cc49a5762f34b3632c2280572c76aaca31441e"
+   },
+   "started": "2026-11-27T15:39:05.485964Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "D": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/stage_d6.py",
+    "run",
+    "/root/reh/kernel-R/research/layered-networks/specs/not1.json",
+    "/root/reh/out_K11/NOT1_34095/D",
+    "34095",
+    "overlay=config_inverter_c5.json",
+    "rule=one-port",
+    "inverters=/root/reh/out_K11/NOT1_34095/inv/inverter_gate.json"
+   ],
+   "cores": 1,
+   "cpu_s": 197.1,
+   "ended": "2026-11-27T15:37:25.281385Z",
+   "outputs": {
+    "D/prediction.json": "daf2a74e1a1436238600b5df35052cb7102a0992f57fb368146b71eeea27bed7",
+    "D/record.json": "5fdf6764258694d0a1b5435317564e93ede0172fa3364bc3f61afb1bd1bf542e"
+   },
+   "started": "2026-11-27T15:34:06.961196Z",
+   "status": "done",
+   "wall_s": 198.3
+  },
+  "N0": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/noise/research/layered-networks/controls4.py",
+    "stagen",
+    "/root/reh/kernel-R/research/layered-networks/specs/not1.json",
+    "/root/reh/out_K11/NOT1_34095/N0",
+    "34095",
+    "0",
+    "seal_log=487b2d27c0ace30cdd3fa7aadbd14a2d2a0c5667",
+    "seal_branch=evidence/combined-seals-K11",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cores": 1,
+   "cpu_s": 94.0,
+   "ended": "2026-11-27T15:39:05.485189Z",
+   "outputs": {
+    "N0/noisy_record.json": "67558e222170c7933abb93fa06ab53b37777042ba77e251ea698f95a15677072",
+    "N0/trace.digest.json": "81a649bb87a9b6ccea0333138e552bf02192871b10bbc99b271453f9cb110986"
+   },
+   "started": "2026-11-27T15:37:30.622267Z",
+   "status": "done",
+   "wall_s": 94.9
+  },
+  "deck": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/stage_d6.py",
+    "deck",
+    "/root/reh/kernel-R/research/layered-networks/specs/not1.json",
+    "/root/reh/out_K11/NOT1_34095/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-27T15:31:17.412548Z",
+   "outputs": {
+    "deck.spice": "519a6ce2db19bb6cf7b454f7b9fc6d86b0bf2ad8a4fdb8c6cfd09587272a4c02"
+   },
+   "started": "2026-11-27T15:31:17.141427Z",
+   "status": "done",
+   "wall_s": 0.3
+  },
+  "inverters": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/indeck_noise4.py",
+    "/root/reh/kit/research/circuit/inverter/instances",
+    "/root/reh/noise/research/layered-networks/noise4_budget.json",
+    "/root/reh/out_K11/NOT1_34095/inv",
+    "--deck",
+    "/root/reh/out_K11/NOT1_34095/deck.spice",
+    "--seed",
+    "34095"
+   ],
+   "cores": 1,
+   "cpu_s": 166.5,
+   "ended": "2026-11-27T15:34:06.959928Z",
+   "outputs": {
+    "inv/K3_BUDGET.json": "b28bb6e93a9f3bedc177f86782476897856c70c00d01be7caee4903c1f363fae",
+    "inv/SHA256SUMS": "a179db443591ad39b9744fb18da7e8a19f8df253fda327dd4832f6dc3e5009f7",
+    "inv/inverter_gate.json": "678483a18fe533de72df773793e140d9e92327a9ed46d7a48a9d98694163e66b"
+   },
+   "started": "2026-11-27T15:31:17.413872Z",
+   "status": "done",
+   "wall_s": 169.5
+  },
+  "seal": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/stage_d6.py",
+    "seal",
+    "/root/reh/out_K11/NOT1_34095/seal",
+    "/root/reh/out_K11/NOT1_34095/D"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-27T15:37:25.387435Z",
+   "outputs": {
+    "seal/MANIFEST.json": "8db9817cc3e9a9f1b9dfcb48b1430ee6bb6a19dd6e9afa6eda079ba82e1c62d5",
+    "seal/SHA256SUMS": "da36cb6c9b18b2868e9d8dfbbd63c6a71201516f11335e264258c69b9cbc6f2d"
+   },
+   "started": "2026-11-27T15:37:25.282177Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "sealpush": {
+   "argv": [
+    "/root/yieldK11/venv/bin/python",
+    "-B",
+    "/root/reh/kernel-R/research/layered-networks/sealpush2.py",
+    "push",
+    "https://github.com/HevisNico/kernel-R",
+    "evidence/combined-seals-K11",
+    "NOT1_34095",
+    "/root/reh/out_K11/NOT1_34095/seal",
+    "/root/reh/out_K11/.seal_log_work",
+    "/root/reh/out_K11/NOT1_34095/seal_push.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.4,
+   "ended": "2026-11-27T15:37:28.628422Z",
+   "outputs": {
+    "seal_push.json": "564e969b54c706b3822735eadcede4e94086ccdd28ca4fc861b8d04e5ee766ea"
+   },
+   "started": "2026-11-27T15:37:25.388367Z",
+   "status": "done",
+   "wall_s": 3.2
+  }
+ },
+ "tag": "NOT1"
+}
