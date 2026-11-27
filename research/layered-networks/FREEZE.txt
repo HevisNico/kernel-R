@@ -73,7 +73,8 @@ Remote duplicates (campaign_template.json duplicate_wait): each waits, polling e
   checks the line and the folder, then runs N0; at the limit it is not completed. No plan is edited.
 Seal log: sealpush2.py push, one seal at a time per machine, to evidence/combined-seals-K<nn> on
   https://github.com/HevisNico/kernel-R (seal_push.remote).
-Analysis: analysis.py campaign OUTDIR ROOT ... times=github controls=<the noise worktree at noise_commit>
+Analysis: analysis.py campaign OUTDIR ROOT ... times=github [controls=<noise worktree>/research/layered-networks]
+  (controls defaults to the clean worktree at the template's noise_commit, and any other value is refused.)
   It refuses unless every file of FREEZE_PINS.json matches over its own tree and that tree is clean; it reads the
   pinned thresholds.json only; it accepts only roots written by this campaign.py in campaign mode on the frozen
   template, whose driver checked this FREEZE_PINS.json. The push times come from GitHub's activity API (times=github).
