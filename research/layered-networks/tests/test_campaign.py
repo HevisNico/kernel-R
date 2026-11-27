@@ -336,6 +336,41 @@ def case_no_pushed_seal(w):
     return ok, dict(steps={k: v["status"] for k, v in st.items()}, seal_push=sp, checks=checks)
 
 
+def case_github_times(w):
+    """sealpush.github_times on a recorded activity API response (evidence/devtest-seals2-K05, 27 Nov 2026, the two
+    seals' pushes) plus synthetic force_push and branch_deletion items: the branch-creating push and the later push
+    count; the force push and the deletion never do."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("sealpush_t", HERE / "sealpush.py")
+    SPm = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(SPm)
+    z = "0" * 40
+    items = [dict(activity_type="push", before="5226d975283f5a905ba54abea8f8570685eef388",
+                  after="80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384", timestamp="2026-11-26T22:27:29Z",
+                  ref="refs/heads/evidence/devtest-seals2-K05"),
+             dict(activity_type="branch_creation", before=z, after="5226d975283f5a905ba54abea8f8570685eef388",
+                  timestamp="2026-11-26T22:25:58Z", ref="refs/heads/evidence/devtest-seals2-K05"),
+             dict(activity_type="force_push", before="80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384", after="f" * 40,
+                  timestamp="2026-11-26T23:00:00Z", ref="refs/heads/evidence/devtest-seals2-K05"),
+             dict(activity_type="branch_deletion", before="f" * 40, after=z, timestamp="2026-11-26T23:10:00Z",
+                  ref="refs/heads/evidence/devtest-seals2-K05")]
+    tm = SPm.github_times(items)
+    checks = []
+    c1 = check(checks, "the branch-creating push counts", json.dumps(tm), '"5226d975283f5a905ba54abea8f8570685eef388": '
+               '"2026-11-26T22:25:58Z"', HERE / "sealpush.py", (HERE / "sealpush.py").exists())
+    c2 = check(checks, "the later push counts", json.dumps(tm), '"80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384": '
+               '"2026-11-26T22:27:29Z"', HERE / "sealpush.py", (HERE / "sealpush.py").exists())
+    pages = {"two pages, no separator": json.dumps(items[:2]) + json.dumps(items[2:]),
+             "two pages, a newline between": json.dumps(items[:2]) + "\n" + json.dumps(items[2:]) + "\n",
+             "one page": json.dumps(items)}
+    parsed = {k: SPm.github_times(SPm.activity_pages(v)) == tm for k, v in pages.items()}
+    c3 = check(checks, "the pages parsed one after the other", json.dumps(parsed, sort_keys=True),
+               '{"one page": true, "two pages, a newline between": true, "two pages, no separator": true}',
+               HERE / "sealpush.py", (HERE / "sealpush.py").exists())
+    ok = c1 and c2 and c3 and ("f" * 40) not in tm and z not in tm and len(tm) == 2
+    return ok, dict(times=tm, pages=parsed, checks=checks)
+
+
 def case_second_seal(w):
     tr = w.tree("main")["tree"]
     template = w.template("secondseal", w.remote("secondseal"))
@@ -746,6 +781,7 @@ def main(wd, *only):
     run("kernel_mirror_disagreement", case_kernel)
     run("no_pushed_seal", case_no_pushed_seal)
     run("second_seal", case_second_seal)
+    run("github_times", case_github_times)
     run("sigterm_driver_only", case_sigterm_driver_only)
     run("sigkill_driver_only", case_sigkill_driver_only)
     run("k3_budget_stop", case_k3_budget_stop)

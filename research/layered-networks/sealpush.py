@@ -118,6 +118,31 @@ def install_hook(bare):
     h.chmod(0o755)
 
 
+GITHUB_PUSH_TYPES = ("push", "branch_creation")   # GitHub records the push that creates a branch as branch_creation
+
+
+def activity_pages(text):
+    """The items of every page `gh api --paginate` printed: one JSON array per page, concatenated with or without
+    whitespace between them, parsed one after the other (not by joining the text)."""
+    dec, items, i = json.JSONDecoder(), [], 0
+    while True:
+        while i < len(text) and text[i].isspace():
+            i += 1
+        if i == len(text):
+            return items
+        page, i = dec.raw_decode(text, i)
+        if not isinstance(page, list):
+            raise ValueError(f"an activity page is not a list: {type(page).__name__}")
+        items += page
+
+
+def github_times(items):
+    """{commit sha: push time} from the repository activity API's items for one ref. Only a push (activity_type push)
+    or the push that created the branch (branch_creation) counts: never force_push, branch_deletion, or any other
+    type. The time is the one of the push that made the commit the branch tip (`after`)."""
+    return {x["after"]: x["timestamp"] for x in items if x.get("activity_type") in GITHUB_PUSH_TYPES}
+
+
 def times(remote, branch, source):
     """{commit sha: UTC time the remote received the push that made it the branch tip}."""
     if source == "bare":
@@ -134,9 +159,8 @@ def times(remote, branch, source):
     if source == "github":
         owner_repo = str(remote).rstrip("/").removesuffix(".git").split("github.com/")[-1]
         r = subprocess.run(["gh", "api", "-X", "GET", f"repos/{owner_repo}/activity", "-f", f"ref=refs/heads/{branch}",
-                            "-f", "activity_type=push", "--paginate"], capture_output=True, text=True, check=True)
-        items = json.loads(r.stdout.replace("][", ","))
-        return {x["after"]: x["timestamp"] for x in items}
+                            "-f", "per_page=100", "--paginate"], capture_output=True, text=True, check=True)
+        return github_times(activity_pages(r.stdout))
     raise ValueError(source)
 
 
