@@ -252,6 +252,11 @@ STEPS = [dict(num="01", name="vars", kind="pass", body=B("vars")),
               made="draw_$M", where=f"{W}/work/neg_draw"),
          dict(num="04c", name="NEG-inside-clone", kind="neg", body=B("announce"), made="announce_$M",
               where=f"{W}/someclone/sub"),
+         dict(num="04d", name="NEG-scan-missing-branch", kind="neg", made="scanrepo", where=f"{W}/work/neg_scan",
+              body=B("second-scan").replace(
+                  "git ls-remote --heads origin > ../SCAN_LSREMOTE.txt",
+                  "{ printf '0000000000000000000000000000000000000000\\trefs/heads/no-such-branch-for-the-proof\\n'; "
+                  "git ls-remote --heads origin; } > ../SCAN_LSREMOTE.txt", 1)),
          dict(num="05", name="second-scan", kind="pass", body=B("second-scan")),
          dict(num="06", name="rehearsal-draw", kind="pass", body=B("rehearsal-draw")),
          dict(num="07", name="list", kind="pass", body=B("list")),
