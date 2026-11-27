@@ -44,9 +44,34 @@ analysis.py test, twice for each times source, on the four roots; the two runs o
   `activity_type=push` only, and GitHub records the push that creates a branch as `branch_creation`. The first seal
   on each log branch therefore has no push time, and is a seal defect: XOR3_9803, ANDOR3_6104 and NOT1_6212 are not
   sealed. Only NOT1_6220, the second seal on K05's branch, is counted (NOT1 K0 and K3: held on one instance). The
-  regeneration is identical for all four seals. The fix is the owner's decision (reported to the coordinator).
+  regeneration is identical for all four seals. Fixed in 2011058e (next section).
 - In both: U holds in the three groups. The cross-machine duplicate's comparison agrees with its original; its
   check_duplicate verdict is null here because no controls tree was given in test mode.
 
 No committed analysis result in this repository's layered tree used times=github: all RESULTS.json files record
 `bare`, the local bare post-receive log, or no times source.
+
+## After the fix (dev/equiv/b/run2/RESULTS_times_github_ef374ccd.json)
+
+**The simulations ran at 86a00ac2. The fixed commit ef374ccd differs from it only in sealpush.py and the tests**
+(dev/equiv/b/FIX_SHA_TABLE.json: of the 35 files campaign.py runs or imports, every one is byte-identical except
+sealpush.py). In sealpush.py only `times` changed, and `GITHUB_PUSH_TYPES`, `github_times` and `activity_pages`
+were added; the `__main__` block is identical. sealpush2.py, which pushes the seals and fetches the log, uses
+sealpush's LOG, git, seal_sha and utc only, and campaign.py runs `sealpush2.py push` and imports sealpush2.fetch.
+Neither the push nor the fetch calls a changed function, so **the roots stand**; only the analysis reads times.
+No new run of (b).
+
+The fix: sealpush.times(github) reads every activity item of the ref (paged with activity_pages) and keeps the types
+push and branch_creation (github_times). GitHub records the first push of a log branch as a branch creation, and that
+event counts as its push. A force push or a branch deletion never gives a time; whether one on a log branch should
+make a seal defect is left to the complementary analysis.
+
+analysis.py test at ef374ccd, twice, on the four roots with `times=github`:
+- RESULTS.json and SHA256SUMS byte-identical between the two runs (kernel_build/KERNEL_BUILD.json differs only in
+  its `seconds`, the build's duration);
+- `seal_defects` empty; the four instances sealed, each seal pushed before its stage N started:
+  XOR3_9803 margin 3.493 s, ANDOR3_6104 2.832 s, NOT1_6212 2.909 s, NOT1_6220 3.368 s;
+- verdicts at K0 and K3: XOR3 and ANDOR3 held on one instance, NOT1 held on 2 instances, not established;
+- against RESULTS_times_github.json (before the fix, kept as the record of the defect), the only differences are the
+  three seals now timed and what follows from them in counts and verdicts, and `pins` (tree_commit ef374ccd;
+  sealpush.py listed as differing from its FREEZE_PINS.json pin, which the next freeze regenerates).

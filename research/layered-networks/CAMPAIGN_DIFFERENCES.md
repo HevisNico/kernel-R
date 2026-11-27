@@ -113,6 +113,11 @@ cost), DUPX_<inst>/seal_wait.json (the seal found, its commit and line), DONE, a
      It also refuses a root whose driver checked another FREEZE_PINS.json (TEMPLATE_CHECK.json pins.pins_sha256): the
      same campaign.py at another commit, with another pinned list, is not accepted.
    - **A6:** first_failing uses the one step order ORDER, with sealpush in it.
+   - **The seal log's push times (sealpush.times, source github; fixed in 2011058e, found by equivalence (b)):**
+     GitHub records the first push of a log branch as a branch creation, and that event counts as its push. Only
+     the activity types push and branch_creation give a push time; a force push or a branch deletion never does.
+     Whether such an event on a log branch should itself make a seal defect is left to the complementary analysis
+     (text only, no code).
    - A new top-level key, `pins`.
 5. **The rest is byte-identical to analyze10.** Equivalence (b) shows it on the final dry run's 8 roots and e2e17's
    3 roots, where none of A1, A2 and A4 applies.

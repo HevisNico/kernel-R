@@ -1,15 +1,16 @@
 # Notes on the test records (dev/equiv)
 
-**The code commit these records were made on: 86a00ac2479101f116f600626f05a13cddedb799.** Equivalence test (b) on the
-test machines runs at exactly this commit (RUNBOOK_B.md's `<COMMIT>`). The commits after it change no code file: only
-these records, the runbook's notes and the documents.
+**The code commit these records were made on: ef374ccd389cf026491d56213cfd064b42ef29df** (the tip after the
+github_times fix). From 86a00ac2, the commit equivalence (b) ran on, it differs in sealpush.py and the tests only
+(dev/equiv/b/FIX_SHA_TABLE.json); EQUIV_B_NOTES.md says why the (b) roots still stand.
 
-| Record | Run at 86a00ac2 | Result |
+| Record | Run at ef374ccd | Result |
 |---|---|---|
-| EQUIV_A.json | tests/equiv_campaign.py | 24 of 24 cases identical to the chain's steps (the file is byte-identical to the one committed before) |
-| EQUIV_A_NEGATIVE.json | tests/equiv_campaign.py negative | differs in all 24 cases, as it must |
-| TEST_C.json | tests/test_campaign.py, all 18 cases | all pass; every check has its expected message matched and its target existing before the call (the `checks` list of each case) |
-| EQUIV_B_ANALYSIS.json | analysis.py test, twice, on the final dry run's 8 roots and e2e17's 3; tests/equiv_b.py analysis | two runs byte-identical; identical to analyze10 except the listed keys; `pins.tree_commit` 86a00ac2 |
+| EQUIV_A.json | tests/equiv_campaign.py | 24 of 24 cases identical to the chain's steps (byte-identical to the record at 86a00ac2) |
+| EQUIV_A_NEGATIVE.json | tests/equiv_campaign.py negative | differs in all 24 cases, as it must (only the temporary paths changed from the record at 86a00ac2) |
+| TEST_C.json | tests/test_campaign.py, all 19 cases | all pass; every check has its expected message matched and its target existing before the call (the `checks` list of each case) |
+| b/run2/RESULTS_times_github_ef374ccd.json | analysis.py test, twice, on the four run2 roots, times=github | see EQUIV_B_NOTES.md |
+| EQUIV_B_ANALYSIS.json | at 86a00ac2 (not rerun): analysis.py test, twice, on the final dry run's 8 roots and e2e17's 3; tests/equiv_b.py analysis | two runs byte-identical; identical to analyze10 except the listed keys; `pins.tree_commit` 86a00ac2 |
 
 TEST_C.json is kept exactly as test (c) wrote it.
 
@@ -28,6 +29,20 @@ fix is in 86a00ac2, which also made every check assert its own message. Checks t
   (now asserted as such; the TEST-root refusal is shown in analysis_forged_pins);
 - sigkill_driver_only, no_pushed_seal, second_seal: the reason was not checked (now "ngspice process(es) running",
   "pre-receive hook declined", "a second seal is refused").
+
+**Since 86a00ac2.**
+- 2011058e fixed sealpush.times(github) (EQUIV_B_NOTES.md) and added the case `github_times`: sealpush.github_times
+  on the activity items recorded for evidence/devtest-seals2-K05 (a branch_creation and a push), plus a synthetic
+  force_push and branch_deletion. It asserts that the two real commits have their times and the other two none.
+- (c) at 2011058e failed at `pins`: tamper_pins kept FREEZE_PINS.json's old pin of sealpush.py. d234834e makes it
+  recompute every pin over the clone, as a freeze does; the one-byte change to fit3.py is still refused.
+- (c) at d234834e failed at `analysis_refuses` (18 of 19 pass): the check, not the behaviour. Campaign mode was still
+  refused, but in the dev tree sealpush.py now differs from its pin in FREEZE_PINS.json (left untouched), so the
+  refusal begins "pinned files differ from FREEZE_PINS.json: ['research/layered-networks/sealpush.py']", and the
+  needle "campaign mode: not in FREEZE_PINS.json" was no longer contiguous. ef374ccd (test only, the coordinator's
+  option 1) asserts both parts with their exact lists. The other cases on the dev tree's own pins were reviewed:
+  refusals is refused by the template before the pins; pins and analysis_forged_pins run in the tamper_pins tree;
+  every test-mode launch records the pins check and refuses nothing for it. None is affected.
 
 **The first (b) run at a8303e8e was stopped and discarded** (the audit's follow-ups changed campaign.py and
 analysis.py). Its branches count for nothing and are left as they are: evidence/devtest-K05 7b13a91b,
