@@ -1152,7 +1152,7 @@ REACHES = {
     "standin_signature_other_round": "'signature_ok': False",
     "standin_activity_redone": "(branch_deletion in its activity)",
     "standin_activity_force_push": "(force_push in its activity)",
-    "rehearsal_seed_missing": "list lacks rehearsal seeds [",
+    "rehearsal_seed_missing": "list lacks rehearsal",           # "rehearsal seeds [" at 04d05b47, "rehearsal2 seeds [" at 8b5c9f95
     "rehearsal_noise_missing": "and noise seeds [",
     "rehearsal_announce_later": "is not earlier than the campaign's",
 }
