@@ -51,3 +51,16 @@ not pinned, no longer holds, so its two pin checks do not apply there. The recor
 analysis.py). Its branches count for nothing and are left as they are: evidence/devtest-K05 7b13a91b,
 evidence/devtest-K06 90e87115, evidence/devtest-seals-K02 c3c36431, evidence/devtest-seals-K03 24818934,
 evidence/devtest-seals-K05 86377a55. The rerun writes only evidence/devtest-seals2-K<nn> and evidence/devtest-run2-K<nn>.
+
+## (c) after the analysis fixes (D8-D10, the audit's selection, its two defects), split over K07-K12
+
+- **Run 1 at 0b603d54** (before the audit's two defects): 23 of 23 pass, one machine per case
+  (dev/equiv/TEST_C_run1_0b603d54.json, merged by dev/equiv/merge_test_c.py from evidence/devtest-K07 ... K12). Kept
+  as a record only: its analysis.py was changed after it.
+- **Run 2 at 582e5dfc** (code e14c3200, the frozen analysis.py): **25 of 25 pass** (dev/equiv/TEST_C_run2.json, from
+  evidence/devtest-run2-K07 ... K12; every case once, the machine of each recorded, the same envcheck values on all
+  six). The two new cases: analysis_announce (the announce cannot be redone, on recorded activity items) and
+  analysis_own_check (a real driver run on a stub noise tree: a round stopped by its own check is refuted, a
+  simulator end is not completed).
+- In refuted_stopped_by_own_check, the C<n> label names round n's comparison slot; the run that stopped is N<n>
+  (its record N<n>/noisy_record.json; C<n> never ran).

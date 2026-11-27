@@ -135,3 +135,6 @@ cost), DUPX_<inst>/seal_wait.json (the seal found, its commit and line), DONE, a
   says this; the review copy 0a025464 is outdated on this point.
 - **§7's "One analysis … analyze8.py"** names the analysis of the review candidate; it is analysis.py now. This needs
   an amendment of the text, not of the code.
+
+- analysis.py, refuted_stopped_by_own_check: the C<n> label names round n's comparison slot; the run that stopped is
+  N<n> (the driver never runs C<n> after a failed N<n>).
