@@ -62,10 +62,11 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   Not exercised: the push time read from GitHub, the round fetched from drand.
 - E1 round_own_check_failed: K05 with NOT1_6220's round N2 left as the driver leaves a run stopped by its own check
   (see failed_round: the record's status "failed: the tail leak must be set before it starts", N2 failed with why
-  "exit 1", no C2, no N2/comparison.json, the manifests and RESULT_INSTANCES.json rebuilt by the driver's rules). Must:
+  "exit 1", no C2, no N2/comparison.json, an unlisted placeholder N2/trace.raw (a real header, data cut off; only its
+  presence matters), the manifests and RESULT_INSTANCES.json rebuilt by the driver's rules). Must:
   exit 0, NOT1_6220 among the K3 refuted instances, and a node of counts.NOT1.K3 naming it with its status and "own
   check" in its key path or text; NOT1_6212 held at K0 and K3.
-- E1 round_simulator_ended (the twin): the same with "failed: the simulator ended during: tran 1n 2n". Must: exit 0,
+- E1 round_simulator_ended (the twin): the same (placeholder trace.raw included) with "failed: the simulator ended during: tran 1n 2n". Must: exit 0,
   NOT1_6220 in the K3 not_completed row and not refuted; NOT1_6212 held. (Expected to pass before the fix too.)
 - control k05_alone and control k05_with_dupx (K05 + K06): must pass before and after the fix: exit 0 and NOT1
   counted 2 at K0 and K3 (DUPX_ folders are controls, never counted).
@@ -492,8 +493,9 @@ def standin_run(tmp, src, label, **mutation):
 # runs. The other rounds run in parallel and are untouched. At the end the driver writes the instance's SHA256SUMS
 # (every *.json but status.json), RESULT_INSTANCES.json (its summary: step statuses, verdicts, times),
 # SHA256SUMS.instances, RESULT.json and the root SHA256SUMS. All are rebuilt here by the same rules.
-# Not rebuilt: the raw trace (N<n>/trace.raw would remain, no extract having run); it is listed in no manifest and the
-# analysis does not read it.
+# The raw trace stays: N<n>/trace.raw is left in place, in no manifest, since neither the extract nor the comparison
+# ran. The fixture puts a placeholder there: the header of a real trace.raw of the same root (up to and including its
+# "Binary:" line), the data cut off. Its content is not read; only its presence matters (an unlisted file).
 
 OWN_CHECK = "failed: the tail leak must be set before it starts"      # instrument.py's assertion during training
 SIM_ENDED = "failed: the simulator ended during: tran 1n 2n"          # session.py's RuntimeError
@@ -512,6 +514,9 @@ def failed_round(root, inst, n, status):
     (nd / "noisy_record.json").write_text(json.dumps(rec, indent=1, default=str) + "\n")   # controls4's writer
     (nd / "comparison.json").unlink()
     shutil.rmtree(nd / "extract", ignore_errors=True)
+    real = next(iter(sorted(root.glob("*/N*/trace.raw"))))                # kept raws of the root (plan keep_raw)
+    head = real.read_bytes()
+    (nd / "trace.raw").write_bytes(head[:head.index(b"Binary:\n") + len(b"Binary:\n")])
     (d / f"C{n}.log").unlink(missing_ok=True)
     st = json.loads((d / "status.json").read_text())
     old = st["steps"][f"N{n}"]
