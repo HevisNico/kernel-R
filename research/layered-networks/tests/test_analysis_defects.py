@@ -88,6 +88,14 @@ Cases (a defect case passes only when the analysis behaves as the fix must; at e
   60/32/37, the same 12 plans as plan_split3.split of the draw in memory (the analysis's expected plans).
   standin_plans_from_command: the 6/6/6 stand-in with plans from the command, a root for each machine holding remote
   duplicates, draw=; must be accepted (exit 0). Gated on standin_draw_valid.
+- R *: the rehearsal draw (round 1000000, 6/6/6, mode rehearsal, the pinned list) and a campaign draw on round
+  20000000 (n 2/1/1, mode test), each with its announce, excluded file and clean activity, passed offline as draw=,
+  excluded=, announce=, activity= and rehearsal_draw=, rehearsal_excluded=, rehearsal_announce=, rehearsal_activity=;
+  one root, the first campaign machine holding a home instance (out_K05, no instance folder). rehearsal_full_list
+  (control): the campaign list is the pinned list plus every rehearsal seed S and 10 S + 0..3; exit 0. Then one S left
+  out, one 10 S + 1 left out (each refused and named), and the rounds swapped so the rehearsal's announce is later
+  (refused). The mutations count only if the control passed. Not tested: campaign mode without rehearsal_draw= (campaign
+  mode refuses these TEST roots before any draw check).
 - E1 round_own_check_failed: K05 with NOT1_6220's round N2 left as the driver leaves a run stopped by its own check
   (see failed_round: the record's status "failed: the tail leak must be set before it starts", N2 failed with why
   "exit 1", no C2, no N2/comparison.json, an unlisted placeholder N2/trace.raw (a real header, data cut off; only its
@@ -866,6 +874,100 @@ def standin_writing_case(name):
     return case
 
 
+# ------------------------------------------------------------------------------------------------ R: rehearsal seeds
+# The rehearsal draw (6/6/6, mode rehearsal, the pinned list) and a campaign draw on another published round, whose
+# announced exclusion list must hold every rehearsal seed S and its noise seeds 10 S + n (n = 0..3). Test mode,
+# offline: draw=/excluded=/announce=/activity= for the campaign draw, rehearsal_draw=/rehearsal_excluded=/
+# rehearsal_announce=/rehearsal_activity= for the rehearsal's.
+REHEARSAL_SIZES = dict(NOT1=6, ANDOR3=6, XOR3=6)
+
+
+def announced_draw(d, name, rnd, ex_obj, ex_bytes, sizes, mode, branch):
+    """Write <name>.json (DRAW), <name>_EXCLUDED.json, <name>_ANNOUNCE.txt and <name>_activity.json for `rnd` (a
+    published round dict). The announce is pushed 600 s before the round's time. Returns (draw, paths, push time)."""
+    sys.path.insert(0, str(HERE))
+    import beacon_chain as BC
+    import beacon_verify as BV
+    import draw_seeds as DS
+    import datetime
+    t0 = BV.round_time(BC.QUICKNET, rnd["round"]) - 600
+    utc = lambda t: datetime.datetime.fromtimestamp(t, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    commit = hashlib.sha1(f"defect test announce {name}".encode()).hexdigest()
+    D = DS.draw(rnd["randomness"], rnd["round"], ex_obj, dict(sizes))
+    D["beacon_round"] = dict(rnd)
+    D["announce"] = dict(branch=branch, commit=commit, push_utc=utc(t0))
+    paths = dict(draw=d / f"{name}.json", excluded=d / f"{name}_EXCLUDED.json", announce=d / f"{name}_ANNOUNCE.txt",
+                 activity=d / f"{name}_activity.json")
+    paths["draw"].write_bytes(DS.canon(D))
+    paths["excluded"].write_bytes(ex_bytes)
+    words = " ".join(f"{g}={n}" for g, n in sizes.items())
+    paths["announce"].write_text(f"format layered-draw-announce/1\nmode {mode}\nexcluded_sha256 "
+                                 f"{hashlib.sha256(ex_bytes).hexdigest()}\nsizes {words}\n")
+    paths["activity"].write_text(json.dumps([dict(activity_type="branch_creation", after=commit, before="0" * 40,
+                                                  ref=f"refs/heads/{branch}", timestamp=utc(t0))], indent=1) + "\n")
+    return D, paths, t0
+
+
+def rehearsal_run(tmp, src, label, drop=None, swap_rounds=False):
+    """drop: None (the full list), "seed" (one rehearsal seed left out) or "noise" (one of its noise seeds left out).
+    swap_rounds: the rehearsal on round 20000000 and the campaign on 1000000, so the rehearsal's announce is later."""
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as DS
+    import plan_split3 as P3
+    d = tmp / "draws"
+    d.mkdir(parents=True)
+    pinned_b = (HERE / "EXCLUDED.json").read_bytes()
+    pinned = json.loads(pinned_b)
+    r_round, c_round = (ROUND_20M, ROUND_1M) if swap_rounds else (ROUND_1M, ROUND_20M)
+    R, rp, rt0 = announced_draw(d, "REHEARSAL", r_round, pinned, pinned_b, REHEARSAL_SIZES, "rehearsal",
+                                "evidence/combined-rehearsal-draw")
+    rseeds = sorted(s_ for v in R["groups"].values() for s_ in v)
+    extra = set(rseeds) | {10 * s_ + j for s_ in rseeds for j in range(4)}
+    removed = None
+    if drop == "seed":
+        removed = rseeds[0]
+    elif drop == "noise":
+        removed = 10 * rseeds[0] + 1
+    seeds = sorted((set(pinned["seeds"]) | extra) - ({removed} if removed is not None and removed not in pinned["seeds"]
+                                                      else set()))
+    assert removed is None or removed not in seeds, "the removed seed is in the pinned list itself"
+    ex = dict(pinned, seeds=seeds, count=len(seeds), seeds_sha256=hashlib.sha256(DS.canon(seeds)).hexdigest())
+    C, cp, ct0 = announced_draw(d, "CAMPAIGN", c_round, ex, DS.canon(ex), STANDIN_SIZES, "test",
+                                "evidence/combined-draw")
+    plans = tmp / "plans"
+    plans.mkdir()
+    for k, pl in enumerate(P3.split(C, json.loads((HERE / "campaign_template.json").read_text()), 12)[0], start=1):
+        (plans / f"PLAN_K{k:02d}.json").write_bytes(DS.canon(pl))
+    home = next(f.name for f in sorted(plans.glob("PLAN_K*.json")) if json.loads(f.read_text())["groups"])
+    root = draw_root(src, tmp / "a" / f"out_{home[5:8]}", tmp, "out_K05", home, plans=plans, controls=False)
+    args = [f"{DRAW_ARG}={cp['draw']}", f"excluded={cp['excluded']}", f"announce={cp['announce']}",
+            f"activity={cp['activity']}", f"rehearsal_draw={rp['draw']}", f"rehearsal_excluded={rp['excluded']}",
+            f"rehearsal_announce={rp['announce']}", f"rehearsal_activity={rp['activity']}"]
+    r, res, obs = run(tmp, [root], label, extra=args)
+    obs.update(rehearsal_seeds=rseeds, removed=removed, rehearsal_push=rt0, campaign_push=ct0, root=home[5:8])
+    return r, res, obs
+
+
+REHEARSAL_CONTROL = {}
+
+
+def case_rehearsal_full_list(tmp, src):
+    r, res, obs = rehearsal_run(tmp, src, "rehearsal_full_list")
+    REHEARSAL_CONTROL["ok"] = ok = r.returncode == 0
+    return ok, obs
+
+
+def rehearsal_mutation(label, **kw):
+    def case(tmp, src):
+        r, res, obs = rehearsal_run(tmp, src, label, **kw)
+        obs["control_passed"] = REHEARSAL_CONTROL.get("ok", False)
+        text = r.stdout + r.stderr
+        named = obs["removed"] is None or str(obs["removed"]) in text
+        return refused(r) and obs["control_passed"] and named, obs
+    case.__name__ = f"case_{label}"
+    return case
+
+
 def case_standin_draw_valid(tmp, src):
     """The control of the draw mutations: the valid stand-in draw, K03's root with none of its instances run."""
     r, res, obs = standin_run(tmp, src, "standin_draw_valid")
@@ -1063,6 +1165,16 @@ CASES = [
     ("X2", "standin_plans_from_command", case_standin_plans_from_command,
      "the 6/6/6 stand-in, plans from the plan_split3.py command, roots for its remote-duplicate machines, draw=: "
      "exit 0 (gated)"),
+    ("R", "rehearsal_full_list", case_rehearsal_full_list,
+     "rehearsal draw (round 1000000, 6/6/6) and campaign draw (round 20000000) whose excluded= list is the pinned list "
+     "plus every rehearsal seed and its noise seeds: exit 0 (control)"),
+    ("R", "rehearsal_seed_missing", rehearsal_mutation("rehearsal_seed_missing", drop="seed"),
+     "the same with one rehearsal seed left out of the campaign's list: refused, naming the seed (gated)"),
+    ("R", "rehearsal_noise_missing", rehearsal_mutation("rehearsal_noise_missing", drop="noise"),
+     "the same with one rehearsal noise seed (10 S + 1) left out: refused, naming it (gated)"),
+    ("R", "rehearsal_announce_later", rehearsal_mutation("rehearsal_announce_later", swap_rounds=True),
+     "the rehearsal on round 20000000 and the campaign on 1000000 (the rehearsal announced later), the list full: "
+     "refused (gated)"),
     ("E1", "round_own_check_failed", case_round_own_check_failed,
      "N2 of NOT1_6220 stopped by its own check (" + OWN_CHECK + "): exit 0; refuted at K3, in a sub-row about the "
      "run's own check listing the status; NOT1_6212 held"),
