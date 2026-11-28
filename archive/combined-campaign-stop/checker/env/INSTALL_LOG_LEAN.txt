@@ -1,0 +1,39 @@
+# 2026-11-27T20:42:03Z
+$ curl -sSfL -o /tmp/claude-0/-home-user-kernel-R/57bcf436-6729-551f-875c-5d4b96a0af30/scratchpad/elan-init.sh https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh
+rc=0
+a620ff1641616222c8d37c54845492004bb84d6877cdbc944dd65c1aa685bf53  /tmp/claude-0/-home-user-kernel-R/57bcf436-6729-551f-875c-5d4b96a0af30/scratchpad/elan-init.sh
+$ sh /tmp/claude-0/-home-user-kernel-R/57bcf436-6729-551f-875c-5d4b96a0af30/scratchpad/elan-init.sh -y --default-toolchain leanprover/lean4:v4.35.0
+info: downloading installer
+info: default toolchain set to 'leanprover/lean4:v4.35.0'
+rc=0
+$ elan which lean
+warning: could not canonicalize path: '/root/.elan/toolchains'
+warning: could not canonicalize path: '/root/.elan/toolchains'
+warning: could not canonicalize path: '/root/.elan/toolchains'
+warning: could not canonicalize path: '/root/.elan/toolchains'
+error: not a file: '/root/.elan/toolchains/leanprover--lean4---v4.35.0/bin/lean'
+info: backtrace:
+
+   0: backtrace::backtrace::trace::<<backtrace::capture::Backtrace>::create::{closure#0}>
+   1: <backtrace::capture::Backtrace>::create
+   2: <error_chain::backtrace::imp::InternalBacktrace>::new
+   3: <error_chain::State as core::default::Default>::default
+   4: elan_utils::utils::assert_is_file
+   5: elan_init::elan_mode::main
+   6: elan_init::main
+   7: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+   8: std::rt::lang_start::<()>::{closure#0}
+   9: std::rt::lang_start_internal
+  10: main
+
+rc=1
+$ lean --version
+warning: could not canonicalize path: '/root/.elan/toolchains'
+warning: could not canonicalize path: '/root/.elan/toolchains'
+warning: could not canonicalize path: '/root/.elan/toolchains'
+warning: could not canonicalize path: '/root/.elan/toolchains'
+warning: could not check for elan self-update: failed to fetch https://github.com/leanprover/elan/releases/latest: HTTP status 403
+info: downloading https://releases.lean-lang.org/lean4/v4.35.0/lean-4.35.0-linux.tar.zst
+info: installing /root/.elan/toolchains/leanprover--lean4---v4.35.0
+Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)
+rc=0

@@ -1,0 +1,22 @@
+# install log, 2026-11-27T20:41:26Z
+$ apt-get update -qq
+rc=0
+$ apt-get install -y -qq ngspice=42+ds-3build1
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package ngspice.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 56372 files and directories currently installed.)
+Preparing to unpack .../ngspice_42+ds-3build1_amd64.deb ...
+Unpacking ngspice (42+ds-3build1) ...
+Setting up ngspice (42+ds-3build1) ...
+rc=0
+$ /usr/local/bin/python3.13 -m venv /opt/layered-venv
+rc=0
+$ /opt/layered-venv/bin/pip install -q numpy==2.3.5 -r /home/user/dev/research/layered-networks/requirements_beacon.txt
+
+[notice] A new release of pip is available: 26.2.2 -> 26.3
+[notice] To update, run: /opt/layered-venv/bin/python3.13 -m pip install --upgrade pip
+rc=0
+ln -s /opt/sky130_fd_pr {/home/user/dev,/home/user/kernel-R}/research/circuit/pdk
+$ PATH=$HOME/.elan/bin:$PATH /opt/layered-venv/bin/python -B -c "import sys; sys.path.insert(0,\"/home/user/dev/research/layered-networks\"); import campaign as C; print(C.build_kernel(\"/tmp/claude-0/-home-user-kernel-R/57bcf436-6729-551f-875c-5d4b96a0af30/scratchpad/kbuild\"))"
+$ PATH=$HOME/.elan/bin:$PATH /opt/layered-venv/bin/python -B /home/user/dev/research/layered-networks/envcheck_layered4.py check
+rc=0
