@@ -2311,8 +2311,9 @@ def case_verify_scan(w):
       FAILS ("THE SCAN IS NOT REPRODUCED", the reproduced sha256 named), creates no record (no commit, no verify branch
       on the twin), before any announce; then [block announce] (campaign) with VS (the reproduction's sha256) and HS
       (the enriched scan's): refused "VS ... is not HS" before any commit (no announce_campaign repository);
-    - the honest scan: [block verify-scan] passes, prints VS = HS, and publishes its record (one commit, the three
-      files) on the twin's evidence/combined-scan-verify;
+    - the honest scan: [block verify-scan] passes, prints VS = HS, and publishes its record (one commit, the four
+      files) on the twin's evidence/combined-scan-verify; its VERIFY_INPUTS.txt states the freeze commit F, the sha256
+      of draw_seeds.py and analysis.py, of both scan outputs and of both inventories (what a later replay needs);
     - analysis.verify_scan on the inventory: a branch on the remote and not in the scan, in the scan and not on the
       remote, at another tip, and the scan's HEAD not main's tip: each named."""
     import hashlib
@@ -2402,7 +2403,20 @@ def case_verify_scan(w):
                                    text=True).stdout.split() if refs else []
             note("[block verify-scan]: the honest scan passes, VS = HS, its record published once",
                  f"rc {rc}, twin refs {refs}, files {files}: {txt}", f"the scan is reproduced scan_sha256 {sha_b(honest)} VS {sha_b(honest)}", fd)
-            oks.append(rc == 0 and files == ["SCAN_LSREMOTE.txt", "VERIFY.txt", "VERIFY_LSREMOTE.txt"])
+            oks.append(rc == 0 and files == ["SCAN_LSREMOTE.txt", "VERIFY.txt", "VERIFY_INPUTS.txt", "VERIFY_LSREMOTE.txt"])
+            # what a later replay needs, in the record (the owner's decision): F, the scan code, both outputs, both inventories
+            inputs = subprocess.run(["git", "--git-dir", str(twin), "show", f"{refs[0]}:VERIFY_INPUTS.txt"], capture_output=True,
+                                    text=True).stdout if refs else ""
+            want = ("format layered-scan-verify-inputs/1\n"
+                    f"freeze_commit {F}\n"
+                    f"draw_seeds_py_sha256 {sha_b((HERE / 'draw_seeds.py').read_bytes())}\n"
+                    f"analysis_py_sha256 {sha_b((HERE / 'analysis.py').read_bytes())}\n"
+                    f"scan_to_verify_sha256 {sha_b(honest)}\n"
+                    f"reproduced_scan_sha256 {sha_b((fd / 'EXCLUDED_SECOND_SCAN.json').read_bytes())}\n"
+                    f"verify_lsremote_sha256 {sha_b((fd / 'VERIFY_LSREMOTE.txt').read_bytes())}\n"
+                    f"scan_lsremote_sha256 {sha_b((fd / 'SCAN_LSREMOTE.txt').read_bytes())}\n")
+            note("[block verify-scan]: the record's VERIFY_INPUTS.txt states F, the scan code, both outputs and both inventories",
+                 "identical" if inputs == want else f"DIFFERS: {inputs!r}", "identical", fd)
     # the inventory, on analysis.verify_scan
     ls = (wd / "verifier_honest" / "VERIFY_LSREMOTE.txt").read_text()
     lines = [ln for ln in ls.splitlines() if ln.strip() and "combined-scan-verify" not in ln]
