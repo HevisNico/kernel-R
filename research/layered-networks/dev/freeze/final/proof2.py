@@ -121,8 +121,14 @@ TWINS = {   # (block, written line or fragment) -> replacement; each must occur 
                         f"H=$(grep -o 'sha256 [0-9a-f]\\{{64\\}}' {LOG}/01c_check-rehearsal2-list.out | tail -1 | cut -c8-)",
                         "placeholder: H read from step (r3)'s printed line (log/01c_check-rehearsal2-list.out)")],
     "vars-campaign": [('H=<the 64 hex characters that ORDER 3 step (3) printed after "sha256">',
-                       f"H=$(grep -o 'sha256 [0-9a-f]\\{{64\\}}' {LOG}/08_check-list.out | tail -1 | cut -c8-)",
-                       "placeholder: H read from step (3)'s printed line (log/08_check-list.out)")],
+                       f"H=$(grep -o ' sha256 [0-9a-f]\\{{64\\}}' {LOG}/08_check-list.out | tail -1 | cut -c9-)",
+                       "placeholder: H read from step (3)'s printed line (log/08_check-list.out)"),
+                      ('HS=<the 64 hex characters that ORDER 3 step (3) printed after "scan_sha256">',
+                       f"HS=$(grep -o 'scan_sha256 [0-9a-f]\\{{64\\}}' {LOG}/08_check-list.out | tail -1 | cut -c13-)",
+                       "placeholder: HS read from step (3)'s printed line (log/08_check-list.out)")],
+    # [block check-rehearsal2-list]'s analysis.check_rehearsal_seeds call (rehearsal mode, strict) needs no twin: it
+    # checks rehearsal 1 only, on GitHub, as the block's own check_draw with past= does (proof2 runs that verbatim).
+    # [block check-list]'s call keeps its three twins (listed above); its new second_scan= argument is the scan's file.
 }
 twins_md = ["# Changes made to the blocks of FREEZE.txt (placeholders and offline twins), line by line", ""]
 ready = {}
