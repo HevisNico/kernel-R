@@ -541,7 +541,22 @@ ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_A
          commit (VERIFY.txt, its printed result; VERIFY_LSREMOTE.txt, its own ls-remote; SCAN_LSREMOTE.txt, the
          ls-remote of its own [block second-scan]), never pushed again, never forced, never deleted. The branch is
          created BEFORE the announce, so the announce comes after a public record of the reproduction.
-       The campaign announce refuses, with no commit and no push, unless VS equals HS.
+       The campaign announce refuses, with no commit and no push, unless VS equals HS AND the published record says
+       so: [block announce] fetches evidence/combined-scan-verify by name, takes its creation commit (the branch's
+       history must be that single commit), reads VERIFY.txt there, and refuses unless its final line is the success
+       verdict with scan_sha256 = HS and VS = HS (analysis.scan_verify_record, the reader analysis.py campaign uses
+       too). A record that is absent, not a success, or of another hash stops the announce before any commit.
+     THE ORDER, explicitly:
+       - [block second-scan] on the first machine, then (3), then [block second-scan] on the second machine, then
+         [block verify-scan] there;
+       - evidence/combined-scan-verify is created AFTER both scans and BEFORE the announce: it is the FIRST
+         publication allowed after the successful comparison, so it is naturally absent from both inventories (the
+         scans' and the verifier's own ls-remote, all taken before it exists);
+       - GitHub's creation time of evidence/combined-scan-verify (its branch_creation, in the activity API)
+         establishes that the record existed before the announce; analysis.py campaign requires it strictly earlier
+         than the announce's, and the branch single-use;
+       - the two runs' hardware independence is a property of the procedure (two machines, each with its own clone,
+         Python and fetch), not of the files: the record shows an independent run, not which machine made it.
     [block verify-scan]
     ( set -e
       ! git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "REFUSED: started inside a git work tree: no commit, no push"; exit 1; }
@@ -590,7 +605,9 @@ DRAW_ANNOUNCE (after the block vars and the block vars-rehearsal or vars-campaig
 one push of one commit, never pushed again, never forced, never deleted. Rehearsal 2's DRAW_ANNOUNCE.txt is format
 layered-draw-announce/1, exactly four lines, as rehearsal 1's. The campaign's is format layered-draw-announce/2, with a
 fifth line second_scan_sha256 naming the second scan's raw output, EXCLUDED_SECOND_SCAN.json, which the campaign's
-commit also carries)
+commit also carries. The campaign's announce comes after the published scan verify record evidence/combined-scan-verify
+(ORDER 3 (3b)), which it reads before anything else: no record, a failed one, or one of another hash, and nothing is
+committed or pushed)
     [block announce]
     ( set -e
       X=$(realpath -e "$X")                                   # absolute, before any cd
@@ -599,6 +616,12 @@ commit also carries)
         S=$(realpath -e "$S")
         test ${#HS} = 64 || { echo "REFUSED: HS is not a sha256: no commit, no push"; exit 1; }
         [ "$VS" = "$HS" ] || { echo "REFUSED: VS ($VS), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS ($HS): no commit, no push"; exit 1; }
+        # the PUBLISHED record, read (analysis.scan_verify_record), not the copied VS: before any ls-remote of $B,
+        # mkdir or commit
+        python -B -c "if True:
+            import sys; sys.path.insert(0, '$L'); import analysis as A
+            c, s, v = A.scan_verify_record('https://github.com/HevisNico/kernel-R', '$HS')
+            print('the scan verify record', A.VERIFY_BRANCH, c, 'verified scan_sha256', s, 'VS', v)" || { echo "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS ($HS): no commit, no push"; exit 1; }
       else
         [ -z "$S$HS$VS" ] || { echo "REFUSED: S, HS and VS are for the campaign only: no commit, no push"; exit 1; }
       fi
@@ -650,5 +673,6 @@ commit also carries)
   2, H is the sha256 of the final EXCLUDED_REHEARSAL2.json, printed by ORDER 2 step (r3); for the campaign, H names the
   final list EXCLUDED_SECOND.json and HS the source scan EXCLUDED_SECOND_SCAN.json, both printed by ORDER 3 step (3),
   and VS the second machine's independent reproduction of that scan, printed by ORDER 3 step (3b), which must equal
-  HS. It is not checked against a sha256 it computes itself. A wrong file, for example the freeze's list in place of
+  HS; and the published record of (3b), read on GitHub at its creation commit, must say the same of HS. It is not
+  checked against a sha256 it computes itself. A wrong file, for example the freeze's list in place of
   EXCLUDED_SECOND.json, or a scan copy with one byte changed, is refused before the commit, so before the single push.

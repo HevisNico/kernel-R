@@ -78,6 +78,11 @@ THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
   (F2); only [block check-list], before the announce exists, skips it, by the function argument pre_announce of
   check_rehearsal_seeds, which no command-line key reaches. Level 2, the scan reproduced on a second machine before
   the announce, is FREEZE.txt's [block verify-scan] (verify_scan).
+- THE SCAN VERIFY RECORD (campaign mode, the GitHub path; check_scan_verify, with scan_verify_record, the reader
+  [block announce] uses too): evidence/combined-scan-verify fetched by name, exactly one commit (its creation), its
+  VERIFY.txt's final line the success verdict with scan_sha256 and VS both the announce's second_scan_sha256; the
+  branch single-use (no force_push, no branch_deletion, its oldest activity item the branch_creation of that commit);
+  created strictly before the announce. Each failure refuses with its own message. Rehearsal mode reads no record.
 - THE ANNOUNCE COMMIT'S FILES (O1; check_announce_files), in campaign and rehearsal modes: EXCLUDED_PUBLISHED.json and,
   for the campaign, EXCLUDED_SECOND_SCAN.json are read at the exact announce commit; each must have the announced
   sha256 (excluded_sha256, second_scan_sha256) and be byte-equal to the excluded= and second_scan= files used.
@@ -215,6 +220,9 @@ ANNOUNCE_LIST_FILE = "EXCLUDED_PUBLISHED.json"   # the announce commit's list (e
 ANNOUNCE_SCAN_FILE = "EXCLUDED_SECOND_SCAN.json"  # the campaign announce commit's scan (second_scan_sha256)
 ANNOUNCE_PUBLISHED = (ANNOUNCE_LIST_FILE, ANNOUNCE_SCAN_FILE)
 SCAN_FORMAT = "layered-excluded-seeds/1"          # draw_seeds.scan's format (its literal)
+VERIFY_BRANCH = "evidence/combined-scan-verify"   # [block verify-scan]'s record, created before the campaign announce
+VERIFY_FILE = "VERIFY.txt"
+VERIFY_OK = "the scan is reproduced"              # [block verify-scan]'s success verdict, its final line's start
 ANNOUNCE_BRANCH = dict(campaign="evidence/combined-draw", rehearsal="evidence/combined-rehearsal2-draw")
 RESULT_BRANCH = dict(campaign="evidence/combined-draw-result", rehearsal="evidence/combined-rehearsal2-draw-result")
 # rehearsal 1, published under the freeze of 5d02acce (its announce, its draw, its list), checked against that freeze
@@ -774,10 +782,22 @@ def activity_items(remote, branch, outdir):
     return items
 
 
-def announce_time(items, commit, branch):
+def announce_time(items, commit, branch, what=None):
     """The audit's defect 2: the announce cannot be redone. On the announce branch no activity item may be a
     force_push or a branch_deletion, and the OLDEST item of the ref must be its branch_creation, whose `after` is the
-    announce commit. Returns that push's time."""
+    announce commit. Returns that push's time. `what` (e.g. "the scan verify record"): the same rule for another
+    single-use branch, named so in the refusals."""
+    if what is not None:
+        bad = sorted({x.get("activity_type") for x in items} & {"force_push", "branch_deletion"})
+        if bad:
+            refuse(f"{what} {branch} is not single-use: {', '.join(bad)} in its activity")
+        if not items:
+            refuse(f"GitHub records no activity for {what} {branch}")
+        oldest = min(items, key=lambda x: parse_utc(x["timestamp"]))
+        if oldest.get("activity_type") != "branch_creation" or oldest.get("after") != commit:
+            refuse(f"the oldest activity item of {what} {branch} is not the branch_creation that pushed its commit "
+                   f"{commit[:12]} ({oldest.get('activity_type')}, {str(oldest.get('after'))[:12]})")
+        return oldest["timestamp"]
     bad = sorted({x.get("activity_type") for x in items} & {"force_push", "branch_deletion"})
     if bad:
         refuse(f"the announce branch {branch} was rewritten or deleted ({', '.join(bad)} in its activity): the draw "
@@ -1481,8 +1501,11 @@ def check_draw(kw, mode, outdir, tree_commit=None, offline=None, past=None):
             refuse(f"the announce was pushed at {push_utc}, not after the frozen tree {str(fc)[:12]} "
                    f"({FREEZE_BRANCH}, {ft})")
     A = parse_announce(ab)
+    verify = None
     if not offline:                                        # O1: the files at the exact announce commit
         check_announce_files(at, A, kw, mode)
+        if mode == "campaign" and past is None:            # the scan verify record, read, before the announce
+            verify = check_scan_verify(A[ANNOUNCE_SCAN_KEY], push_utc, outdir)
     if A["mode"] != mode:
         refuse(f"DRAW_ANNOUNCE.txt says mode {A['mode']}, not {mode}")
     sizes = DRAW_SIZES if mode == "campaign" else DRAW_SIZES_REHEARSAL if mode == "rehearsal" else d.get("n")
@@ -1542,7 +1565,8 @@ def check_draw(kw, mode, outdir, tree_commit=None, offline=None, past=None):
                                      seeds_sha256=ex.get("seeds_sha256"), count=ex.get("count"),
                                      superset_of_freeze=pinned["seeds_sha256"]),
                        announce=dict(an, from_github=not offline, sha256=hashlib.sha256(ab).hexdigest(),
-                                     **{k: A[k] for k in (ANNOUNCE_SCAN_KEY,) if k in A})), notice
+                                     **{k: A[k] for k in (ANNOUNCE_SCAN_KEY,) if k in A}),
+                       **({"scan_verify": verify} if verify is not None else {})), notice
 
 
 def draw_seeds_of(draw):
@@ -1738,6 +1762,70 @@ def verify_scan(sv, sr, lsremote):
         problems.append(f"the reproduced scan has sha256 {hashlib.sha256(sr).hexdigest()}, not the scan's "
                         f"{hashlib.sha256(sv).hexdigest()}")
     return problems
+
+
+def parse_verify(text):
+    """VERIFY.txt's final line: (success, scan_sha256, VS). [block verify-scan] prints exactly one of
+    `the scan is reproduced scan_sha256 <64hex> VS <64hex>` and
+    `THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 <64hex> VS <64hex>`, after its PROBLEM lines."""
+    import re
+    lines = [ln for ln in text.decode(errors="replace").splitlines() if ln.strip()]
+    m = re.fullmatch(r"(.*) scan_sha256 ([0-9a-f]{64}) VS ([0-9a-f]{64})", lines[-1]) if lines else None
+    if m is None:
+        refuse(f"the scan verify record's {VERIFY_FILE} has no final verdict line of [block verify-scan]")
+    return m.group(1) == VERIFY_OK, m.group(2), m.group(3)
+
+
+def scan_verify_record(remote, hs, branch=VERIFY_BRANCH):
+    """THE shared reader of the published scan verify record ([block announce] and analysis.py campaign): `branch`
+    fetched BY NAME from `remote`; its history must be exactly one commit, its creation commit; VERIFY.txt read there;
+    its final line must be the success verdict, with scan_sha256 and VS both equal to `hs`. Returns (the creation
+    commit, scan_sha256, VS). Each failure refuses with its own message (no commit, no push in [block announce])."""
+    with tempfile.TemporaryDirectory() as w:
+        if not subprocess.run(["git", "ls-remote", str(remote), f"refs/heads/{branch}"], capture_output=True,
+                              text=True).stdout.strip():
+            refuse(f"the scan verify record {branch} is absent from {remote}: [block verify-scan] has not published it")
+        SP.git("init", "-q", cwd=w)
+        f = subprocess.run(["git", "fetch", "-q", str(remote), f"refs/heads/{branch}"], cwd=w, capture_output=True, text=True)
+        if f.returncode != 0:
+            refuse(f"the scan verify record {branch} cannot be fetched from {remote}: {f.stderr.strip()[:200]}")
+        n = SP.git("rev-list", "--count", "FETCH_HEAD", cwd=w).stdout.strip()
+        if n != "1":
+            refuse(f"the scan verify record {branch} has {n} commits: it must be exactly its creation commit (single-use)")
+        commit = SP.git("rev-parse", "FETCH_HEAD", cwd=w).stdout.strip()
+        g = subprocess.run(["git", "show", f"{commit}:{VERIFY_FILE}"], cwd=w, capture_output=True)
+        if g.returncode != 0:
+            refuse(f"the scan verify record {branch} has no {VERIFY_FILE} at its creation commit {commit[:12]}")
+    ok, ssha, vs = parse_verify(g.stdout)
+    if not ok:
+        refuse(f"the scan verify record {branch}'s verdict is not success ([block verify-scan] did not reproduce the scan)")
+    if ssha != hs:
+        refuse(f"the scan verify record {branch} verified the scan {ssha[:12]}, not {str(hs)[:12]}")
+    if vs != hs:
+        refuse(f"the scan verify record {branch}'s reproduction VS {vs[:12]} is not {str(hs)[:12]}")
+    return commit, ssha, vs
+
+
+def verify_remote():
+    """The repository the analysis reads the scan verify record from (the template's seal_push remote, GitHub)."""
+    return json.loads(CP.FROZEN_TEMPLATE.read_text())["seal_push"]["remote"]
+
+
+def check_scan_verify(hs, announce_push_utc, outdir):
+    """Campaign mode, the GitHub path: the scan verify record read by scan_verify_record against the announce's
+    second_scan_sha256 `hs`; the record branch single-use (no force_push, no branch_deletion, its oldest activity item
+    the branch_creation of its one commit); created STRICTLY before the announce. Returns its record."""
+    remote = verify_remote()
+    commit, ssha, vs = scan_verify_record(remote, hs)
+    try:
+        items = activity_items(remote, VERIFY_BRANCH, outdir)
+    except Exception as e:
+        refuse(f"the scan verify record's push times cannot be read ({VERIFY_BRANCH}): {e!r}"[:500])
+    created = announce_time(items, commit, VERIFY_BRANCH, what="the scan verify record")
+    if not parse_utc(created) < parse_utc(announce_push_utc):
+        refuse(f"the scan verify record {VERIFY_BRANCH} was created at {created}, not before the campaign announce "
+               f"({announce_push_utc})")
+    return dict(branch=VERIFY_BRANCH, commit=commit, created_utc=created, scan_sha256=ssha, vs=vs)
 
 
 def second_scan_refusal_missing():

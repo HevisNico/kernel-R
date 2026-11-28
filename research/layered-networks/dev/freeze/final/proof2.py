@@ -84,7 +84,9 @@ TWIN = f"{W}/github_twin.git"
 PUSH = f"git push -q {GH} HEAD:refs/heads/"
 TWINS = {   # (block, written line or fragment) -> replacement; each must occur exactly once in its block
     "announce": [(PUSH + "$B", f"git push -q {TWIN} HEAD:refs/heads/$B",
-                  "no push to GitHub: the push goes to the local twin")],
+                  "no push to GitHub: the push goes to the local twin"),
+                 (f"A.scan_verify_record('{GH}', '$HS')", f"A.scan_verify_record('{TWIN}', '$HS')",
+                  "the published scan verify record is read from the twin, where step 08b pushed it")],
     "draw": [("c, text, t = A.announce_on_github('$B', tempfile.mkdtemp()); print(c, t)",
               f"import subprocess; c = subprocess.run(['git', '--git-dir', '{TWIN}', 'rev-parse', 'refs/heads/$B'], "
               f"capture_output=True, text=True, check=True).stdout.strip(); t = '{T1M}'; print(c, t)",
