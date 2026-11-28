@@ -141,3 +141,24 @@ The paths are under research/layered-networks/ unless the table says otherwise.
   copy, or against the published copies:
   - the replay raws: dev/rehearsal1/replay/runs/RAW_SHA256SUMS.txt (9618a665);
   - the trace raw: evidence/combined-rehearsal1-local-records.
+
+## 4. Complement (second commit): the six XOR replay traces
+
+The owner approved adding them («Oui aux six traces du rejeu XOR»). They are TASK 3's six ngspice raws, which the
+first commit had left out as raw data. They are now under `scratchpad/rehearsal/replay/`, and they are removed from
+NOT_COPIED_INVENTORY.tsv.
+
+| Path | Size (bytes) | sha256 |
+|---|---|---|
+| scratchpad/rehearsal/replay/r_27735_case1/replay.raw | 15178249 | 8f4ccd74f6566dd419f4eff3edd5fe90c93a223d9263aba4aacb441caae2f322 |
+| scratchpad/rehearsal/replay/r_27735_case2/replay.raw | 15613929 | 29206d64613abac02a1a14f5d63c57195fb9bdfc100a74fffd1d5a21a8b9a8aa |
+| scratchpad/rehearsal/replay/r_27735_case3/replay.raw | 15501929 | 7221a809319d0b982406106d84321152dac50dd8eb8b3f119548acf3d09bd2ba |
+| scratchpad/rehearsal/replay/r_88529_case1/replay.raw | 15779409 | 08d018acc01c405134ba352d56a02650bbbc6c37fe9aa189cbd608702cfd03d2 |
+| scratchpad/rehearsal/replay/r_88529_case2/replay.raw | 16227969 | c4e25a3189557f20713e1b1670d87a503dfdb30065de111951773d4cf4397c57 |
+| scratchpad/rehearsal/replay/r_88529_case3/replay.raw | 16170849 | f7ae92bc901204a5f78ca15aaae367c74af2e0b34bcf6b67d869300337c09949 |
+
+- **Published reference:** research/layered-networks/dev/rehearsal1/replay/runs/RAW_SHA256SUMS.txt at
+  research/layered-campaign-dev 9618a665.
+- **Status: TESTED.** Each file's sha256 equals its line in RAW_SHA256SUMS.txt at 9618a665. This was checked before
+  the copy, and again on the copy.
+- The same six files are also on evidence/combined-rehearsal1-local-records (dd672b12), under replay/.
