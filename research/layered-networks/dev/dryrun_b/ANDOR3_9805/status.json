@@ -1,0 +1,109 @@
+{
+ "group": "ANDOR3",
+ "seed": 9805,
+ "steps": {
+  "C0": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/compare_d2.py",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun_b/ANDOR3_9805/seal",
+    "/home/user/kernel-R/research/layered-networks/specs/andor3.json",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun_b/ANDOR3_9805/N0/noisy_record.json",
+    "noiseless",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun_b/ANDOR3_9805/N0/comparison.json"
+   ],
+   "cpu_s": 0.1,
+   "ended": "2026-11-24T17:14:31Z",
+   "outputs": {
+    "N0/comparison.json": "089328e16fdc6fde38ed556a6b6d8e53492270631de33544418a451c04d43d1f"
+   },
+   "started": "2026-11-24T17:14:31Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "D": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d4.py",
+    "run",
+    "/home/user/kernel-R/research/layered-networks/specs/andor3.json",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun_b/ANDOR3_9805/D",
+    "9805",
+    "overlay=config_inverter_c5.json",
+    "rule=one-port"
+   ],
+   "cpu_s": 2989.8,
+   "ended": "2026-11-24T16:44:27Z",
+   "outputs": {
+    "D/prediction.json": "0d1a96abd0df2dcff6b5d0eac5ea9c85a511a7a2113d82f55b69d0f2050e6614",
+    "D/record.json": "39e4d5d244f839718b50168d113dc7a97940f626c1affdf38badc6a023c13e47"
+   },
+   "started": "2026-11-24T15:54:01Z",
+   "status": "done",
+   "wall_s": 3026.0
+  },
+  "N0": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/noise/research/layered-networks/controls2.py",
+    "stagen",
+    "/home/user/kernel-R/research/layered-networks/specs/andor3.json",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun_b/ANDOR3_9805/N0",
+    "9805",
+    "0",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cpu_s": 1777.5,
+   "ended": "2026-11-24T17:14:31Z",
+   "outputs": {
+    "N0/noisy_record.json": "6df6c6e178bd9a7ea98c89f9c9f6bcb1a70d52dd50a5df6a2b6282756199f74f",
+    "N0/trace.digest.json": "95014e1ae47a5658565fb00e30ef2e3203f50ce8fe486ca6e3f1771a8e5ca4bf"
+   },
+   "started": "2026-11-24T16:44:27Z",
+   "status": "done",
+   "wall_s": 1803.7
+  },
+  "deck": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d4.py",
+    "deck",
+    "/home/user/kernel-R/research/layered-networks/specs/andor3.json",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun_b/ANDOR3_9805/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cpu_s": 0.1,
+   "ended": "2026-11-24T15:54:01Z",
+   "outputs": {
+    "deck.spice": "3afd629f4aae973b5a357069fd52ba3c01d65b64f7a1bce14d0d95b1e033364b"
+   },
+   "started": "2026-11-24T15:54:01Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "seal": {
+   "argv": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/home/user/kernel-R/research/layered-networks/stage_d4.py",
+    "seal",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun_b/ANDOR3_9805/seal",
+    "/home/user/kernel-R/research/layered-networks/dev/dryrun_b/ANDOR3_9805/D"
+   ],
+   "cpu_s": 0.1,
+   "ended": "2026-11-24T16:44:27Z",
+   "outputs": {
+    "seal/MANIFEST.json": "457a5425a91ace33db2014453cd478cb423884d15a31613c24f9b23a76ab684c",
+    "seal/SHA256SUMS": "469d2f29c7b7a2baa4aee4e39eb5970d5e52814f0d3cef29e32a21752f0f9e32"
+   },
+   "started": "2026-11-24T16:44:27Z",
+   "status": "done",
+   "wall_s": 0.1
+  }
+ },
+ "tag": "ANDOR3"
+}

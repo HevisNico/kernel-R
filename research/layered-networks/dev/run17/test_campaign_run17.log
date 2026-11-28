@@ -1,0 +1,10 @@
+ campaign_run16 K01: [{'error': "RecursionError('maximum recursion depth exceeded')", 'instance': 'NOT1_6220', 'job': 'chain'}]
+ok test_campaign_run16_recursion
+ campaign_run17 K01: C0 done | exempt ['C0'] | N0 raw deleted True | extract True | held [('NOT1_6220', 'N1'), ('NOT1_6220', 'N2'), ('NOT1_6220', 'N3')] | errors []
+ok test_campaign_run17_c_exempt_n_held
+ campaign_run17 K02: C0 done | N0 raw kept True | U [{'held_for_disk': True, 'instance': 'NOT1_6212', 'ok': None, 'why': 'held: 1.0 GB free, below the 20.0 GB guard'}] | errors []
+ok test_campaign_run17_u_held
+ campaign_run17 K07: [{'group': 'NOT1', 'held_for_disk': True, 'instance': 'NOT1_6212', 'not_completed': True, 'ok': False, 'why': 'not completed: held, 1.0 GB free, below the 20.0 GB guard'}] | wait attempts 1 found True
+ok test_campaign_run17_duplicate_held
+ok test_templates_and_binding
+5 tests passed

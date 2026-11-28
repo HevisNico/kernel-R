@@ -1,0 +1,439 @@
+LAYERED CAMPAIGN FREEZE RECORD (prepared 2026-11-27 on research/layered-campaign-dev; not on the freeze branch,
+which waits for the owner's go)
+
+SUPERSEDES: the freeze candidate record of 2026-11-26 (dff747c4) and its pins. The driver is now campaign.py and the
+analysis analysis.py; the chain of drivers, analyses and templates they replace is no longer pinned (FREEZE_PINS.json
+against_dff747c4).
+
+Branch tips (on origin when this was written):
+  main                              3f27bb36dadd77a57e27b8fa80f81c3864a02b0e
+  research/layered-networks         458bc7a6d763127ff2fe0214e2cb79a1a6549f9b  (noise_commit)
+  research/inverter-instances       d599300d51fcf3a1a4c33d103b89827f8ac4da41  (kit_commit)
+  research/layered-campaign-dev     340e1c6c722213dbb6060d896b5cfc038273e00e  (the tree these pins were made over,
+                                    after its last dev commit and the exclusion scan; this record is a later commit
+                                    that changes no pinned file)
+
+Pins:
+  FREEZE_PINS.json                  sha256 6baf8a51d4f4aca35d4789b1865da7692affca0106690f163b00d4e68f7e84f1  (114 files)
+  EXCLUDED.json                     sha256 abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c
+    seeds_sha256                    d9975dee4f80fb75ea5fb67d3d0301bbae2274b0857fc7d44dc216f1c67afbc6  (15741 integers, 256 refs)
+  EXCLUDED_PRINT.txt                sha256 a9c808de9a22b998b44a6f3c3ae9be7695aac5589015d1c0e793ee21e5c2736c
+    the last scan, 2026-11-27: draw_seeds.py scan over the 255 branches of origin, each fetched by name (depth 1), plus
+    HEAD = main 3f27bb36; against 381b4ffe (232 refs), 24 new refs (the evidence branches devtest-K07..K12,
+    devtest-run2/run3/run4-K07..K12), one ref changed (research/layered-campaign-dev, now 483f90c5), none removed,
+    45 integers added, none removed; excluded fraction 6.86% (draw_seeds.MAX_EXCLUDED_FRACTION 20%)
+  campaign_template.json            sha256 02af33e0c79b3dbdc320d3dd4e0dab26374cbd00a79bc249fcf20631a3cce756  (the template;
+                                    campaign.FROZEN_TEMPLATE_SHA256)
+  plan_split3.py (the splitter)     sha256 061f8b375aeef65adade60762866aab0fdc4da4562963b8776f4afe88a3635a9
+  campaign.py (the driver)          sha256 d031fd7c9f661db7b55aa4a8256ab8530597fe742b2aabf576f9e8c0136bf9f9
+  analysis.py (the analysis)        sha256 f63ee672a8cb1921bab5d7cec80b11442de798379675cf26330849e7a6909b5a
+  stage_d6.py (stage D, kernel)     sha256 a4e2d9335c9a068e0a94067ff6dd5f5d0ad8df27eecfccebfd3c1c7f385c8aca
+  leancell.py (the kernel check)    sha256 aca47f5220868f4716bc9ec9a7bdacae60563c7eab28a40248fa731e48c55f2e
+  trace_extract.py (the extract)    sha256 e8b1ef3d7f80eac86867f3bfbcae43ca9d6f2f33aa575bb3ac005d90949a6320
+  sealpush2.py (the seal push)      sha256 15a012f11d1d402ce51ff7bc0316780667b375a25877709883e019c783701fef
+  sealpush.py (the seal log times)  sha256 231f2d2e3df56a5e1d606c1e62e309f13574fa66c6ae113e254f9e284d3c69f1
+  d4_regate.py (its D4 regate)      sha256 3827d1a5b2a1c7a819ef293afbe5b00f822e0a78fb4ce12171ace76a3aa5c59b
+  compare_d2.py (the comparisons)   sha256 0e783e6ffefdc4ac465481ef37974b5a3a2f589e1a562ea5e855970e7acc8221
+  tests/check_duplicate.py          sha256 6686f0cdc1557dbd497971e8f83b504f6669e19b2f5102ab8603ee6f7a2eff9f
+  draw_seeds.py (the draw)          sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958
+  beacon_verify.py (the beacon)     sha256 7817866f50d1414897a107986890ebfbfc0426557a776e04d556325b4c0a4f0a
+  beacon_chain.py (the chain)       sha256 7188dda1e46e01570fd04e71287dbfd6703f8e6561dcd59ee3b3689825b4124c
+
+Tools (checked by envcheck_layered4 before every run):
+  Python 3.13.18
+  Lean 4.35.0, the toolchain's bin/lean    sha256 bf8d54e4714cc4b03d3f6bb34c83b7202b87e49c8bfcbff6895c085bb90ceb38
+  numpy 2.3.5, package files               files_sha256 cd6ab151bc776cb27294b0cdf325a96cd493bd3553887c944d610061c779e887
+  ngspice 42                               sha256 820658317b0b54035208da41936fd6871ce924036e5ea4113a4168b821b7fc45
+  SKY130 PDK (efabless sky130_fd_pr)       commit 1232782c1b9fab3aacda74d67ce7c92bf7da8105
+  the beacon check                         py_ecc 8.0.0 and its dependencies (requirements_beacon.txt)
+
+Plans: plan_split3.py DRAW.json campaign_template.json OUTDIR (m=12), one PLAN_K<nn>.json per machine. A plan is
+  never edited: campaign.py refuses a plan that differs from the template (a missing, extra or different key).
+Driver to run: research/layered-networks/campaign.py, mode campaign, as MACHINE_BRIEF.md has it:
+  python -B campaign.py check  campaign campaign_template.json PLAN_K<nn>.json          the checks alone (JSON)
+  python -B campaign.py launch campaign campaign_template.json PLAN_K<nn>.json OUTROOT  the checks, then the run, detached
+  python -B campaign.py wait   OUTROOT 580                     exit 0 when the run has ended, 3 while it runs (<= 590 s)
+  python -B campaign.py resume campaign campaign_template.json PLAN_K<nn>.json OUTROOT  after a stop; never a relaunch
+  python -B campaign.py run    campaign campaign_template.json PLAN_K<nn>.json OUTROOT  the run in the foreground (what
+                                                               launch and resume start)
+  python -B campaign.py status OUTROOT
+  Campaign mode refuses, and nothing starts, if the template is not campaign_template.json at the sha256 above; if a
+  file of FREEZE_PINS.json differs from its sha256, or campaign.py, analysis.py or the template is not in it; if the
+  tree is not clean (a changed tracked file, or an untracked .py or .json); if the kit or noise tree is not a clean
+  worktree at kit_commit or noise_commit; if ngspice runs; if OUTROOT is not empty; or with less than 40 GB free. The
+  pins' check is recorded in OUTROOT/TEMPLATE_CHECK.json. Per machine it builds the kernel library from the 12 pinned
+  Lean sources (campaign.KERNEL_SOURCES).
+Time limits (campaign_template.json time_limits_s): deck 120 s, inverters 3600 s, D 7200 s, seal 120 s, N 7200 s,
+  C 300 s, U 3600 s, dup 7200 s. Only a step's own limit stops it; the window is an expectation, not a limit.
+  Cores: 4 (U takes none of the budget). Rounds: 3. seal_push_delay_s: 2.0.
+Disk: 40 GB free at launch (disk_launch_gb); the 20 GB guard during the run (disk_guard_gb) holds every step, U and
+  the remote duplicates, but not the comparisons C<n>, which run and delete their round's raw (D4_D5_AUDIT.md;
+  D3_DECISION.md: worst per-machine peak 14.7 GB at m = 12, 16.6 GB at m = 8, within 20).
+Stage D: stage_d6.py. The Lean kernel (leancell.py, decide +kernel, clause by clause) is the last word on Cell.Valid
+  of every R cell at K0 and K3; a kernel-mirror disagreement fails step D (the instance is not completed). The
+  calibration clauses, the trained word and the inverter gate's mirror stay on the Python mirror.
+Stage N: campaign.py runs controls4.py (stage N, U) from the noise tree at 458bc7a6 (noise_commit, pinned by commit in
+  the template); this tree's controls2/3/4.py and noise2/3.py are pinned as copies only.
+Trace extract: trace_extract.py on every N round of every instance, before the raw is deleted (parts over 50 MB with
+  PARTS.txt). keep_raw keeps the N0 raw only (the originals of the remote duplicates).
+Remote duplicates (campaign_template.json duplicate_wait): each waits, polling every 60 s for at most 21600 s (6 h),
+  for its home's SEALS.txt line on the home branch (home_branch, written by plan_split3.py) fetched by name, then
+  checks the line and the folder, then runs N0; at the limit it is not completed. No plan is edited.
+Seal log: sealpush2.py push, one seal at a time per machine, to evidence/combined-seals-K<nn> on
+  https://github.com/HevisNico/kernel-R (seal_push.remote).
+Analysis: analysis.py, one MODE per run, all with the same refusals except the sizes and the announce branch:
+  python -B analysis.py campaign  OUTDIR ROOT ... draw=DRAW.json excluded=EXCLUDED_SECOND.json
+                                   rehearsal_draw=DRAW_REHEARSAL.json   (the DRAW.json of
+                                   evidence/combined-rehearsal-draw-result; draw= is that of evidence/combined-draw-result)
+  python -B analysis.py rehearsal OUTDIR ROOT ... draw=DRAW_REHEARSAL.json excluded=EXCLUDED.json
+  (times=github is the default and the only value accepted; controls defaults to the clean worktree at the template's
+  noise_commit, and any other value is refused; thresholds is the pinned thresholds.json.)
+  It refuses unless every file of FREEZE_PINS.json matches over its own tree and that tree is clean; it accepts only
+  roots written by this campaign.py in campaign mode on the frozen template, whose driver checked this
+  FREEZE_PINS.json. It recomputes the draw in full from public inputs (DRAW_ANNOUNCE below), rebuilds the 12 plans
+  from it and checks every root's plan against them; it verifies every line of every manifest of every root (a
+  mismatch refuses); every planned instance gets a state (held, refuted, refuted stopped by the run's own check,
+  premise flagged, not sealed, not completed, no prediction, not run). The push times are GitHub's recorded ones
+  (activity API, push and branch_creation items): if GitHub cannot answer, the analysis refuses and is rerun later,
+  never reinterpreted. The coordinator's ls-remote log stays a cross-check outside the analysis. A root is never left
+  out: an unfinished root is finished by resuming its driver, which starts nothing that had started; a machine with
+  no root, or an unfinished root, is listed at the top of RESULTS.json with its number of seal lines.
+  The sizes are pinned in analysis.py: DRAW_SIZES = NOT1 60, ANDOR3 32, XOR3 37 (the draw command below);
+  DRAW_SIZES_REHEARSAL = NOT1 6, ANDOR3 6, XOR3 6 (one D4 audit per group).
+Read-only answers: D4_AUDIT.md, dev/yield_lot/aggregate/RECOUNT_NOISE4.md, POSTCHECK_DATA.md, KERNEL_RCELLS.md,
+  REHEARSAL13.md, DRYRUN_FINAL.md, FIXES_D1_D3.md, D3_DECISION.md, D4_D5_AUDIT.md; for the driver and the analysis,
+  CAMPAIGN_DIFFERENCES.md and dev/equiv/ (TEST_C_NOTES.md, EQUIV_B_NOTES.md).
+
+SINCE EQUIVALENCE TEST (b)
+  Equivalence test (b) ran at 86a00ac2 on four test machines (dev/equiv/EQUIV_B.json, EQUIV_B_NOTES.md). Seven
+  pinned files differ from 86a00ac2 (git diff 86a00ac2 against this tree, over FREEZE_PINS.json's 114 files):
+  - sealpush.py: the fix of sealpush.times for times=github (2011058e). GitHub records the first push of a log branch
+    as a branch creation (activity type branch_creation), and the times read only the type push, so the first seal
+    on each log branch had no push time and was counted not sealed; (b) found it. Now push and branch_creation give
+    a push time, never a force push or a branch deletion.
+  - analysis.py: the owner's defects D8 (a planned instance that never started disappeared), D9 (duplicates inflated
+    the counts) and D10 (manifests were hashed, not verified), the coordinator's selection of the audit's list (A1-A8,
+    B1-B16), the owner's rules (the draw recomputed in full from public inputs; a refutation of a stopped machine kept;
+    a run stopped by its own check refuted; times from GitHub only), the rehearsal mode, the audit's two defects
+    (a stopped run read from its record, as the driver leaves it; the announce cannot be redone), N1 and N3, the one
+    canonical beacon value (64 lowercase hex, sha256 of the signature), the exactly-48-byte signature, the exclusion
+    cap (N5, 20 % of the range) and the rehearsal's seeds and noise seeds in the campaign's list (check_rehearsal_seeds).
+  - beacon_verify.py: verify refuses a signature that is not exactly 96 lowercase hex characters (48 bytes; a
+    zero-padded signature verified, X1) and a public key that is not 192.
+  - draw_seeds.py: the canonical beacon (canonical_beacon), the pinned group order (GROUP_ORDER, X2), the exclusion
+    cap (MAX_EXCLUDED_FRACTION, excluded_fraction; N5), integer rounds (N6), explicit errors instead of asserts.
+  - plan_split.py: ordered_groups splits in draw_seeds.GROUP_ORDER (X2), so plan_split3.py on DRAW.json and the
+    analysis on the recomputed draw give byte-identical plans; split refuses m outside 8-12.
+  - EXCLUDED.json and EXCLUDED_PRINT.txt: the exclusion list, rescanned last (2026-11-27; the Pins section above).
+  Of the 35 files campaign.py runs, imports or reads (dev/equiv/b/FIX_SHA_TABLE.json), two differ from 86a00ac2:
+  sealpush.py (above) and FREEZE_PINS.json (regenerated for the files above; the driver only checks the tree against
+  it). The push and the fetch of the seal log call no changed function, and none of analysis.py, beacon_verify.py,
+  draw_seeds.py, plan_split.py or the exclusion list is run or imported by campaign.py (it names analysis.py only as
+  a file to pin), so the roots of (b) stand.
+  Records at the frozen code: (a) 24 of 24 identical, its negative differs in 24 of 24; (c) run4, 27 of 27 at 8bac22cc (code of 04d05b47; dev/equiv/TEST_C_run4.json, merged from evidence/devtest-run4-K07..K12; run3's 26 of 27 kept as a record); the
+  independent defect tests (tests/test_analysis_defects.py, not written by the implementer) 51 of 51 at 8bac22cc (DEFECTS_R_AFTER.json); the
+  analysis of the four run2 roots with times=github, twice, byte-identical, the same seals and verdicts as at ef374ccd
+  (dev/equiv/RECORDS_e14c3200.md), and again at the freeze candidate 0b33340d (dev/equiv/RECORDS_0b33340d.md).
+  Also changed: the tests, the notes and the records (tests/, dev/equiv/, dev/freeze/, CAMPAIGN_DIFFERENCES.md,
+  PROMISES_CODE.md), and this record; none of them is pinned.
+
+SEED DRAW (the sizes are analysis.DRAW_SIZES; the rehearsal's analysis.DRAW_SIZES_REHEARSAL)
+  The owner's decision: the sizes 60/32/37 are final. A cost overrun lengthens the window; there is no cut order
+  (no instance is dropped to save time or money).
+  THE COMMANDS. Every command of the draw is in a block below, between a line "[block NAME]" and a line "[end]". The
+  coordinator runs the blocks as written, in one bash shell, in a working folder outside the clone, in the order
+  ORDER gives. Placeholders are written <...>, and nothing else is to be changed. Every `python` is the pinned
+  Python PY of the block vars, checked there by envcheck_layered4.py; the `python` of PATH is not pinned. Every
+  commit is made under the owner identity, taken from main into the new repository's own config (never printed),
+  whatever the machine's global git identity, and checked before its push. A block in ( set -e ... ) stops at
+  its first failing command and exits non-zero. Each block prints its result. Stop at the first block that fails.
+  Each announce branch and each result branch is created by one push of one commit and is never pushed again, never
+  forced and never deleted. analysis.py refuses an announce branch with a force push or a deletion in its activity,
+  or whose oldest activity item is not the branch_creation of the announce commit.
+    [block vars]
+    L=<a clean clone of research/layered-campaign-freeze, with research/circuit/pdk linked to the SKY130 PDK at 1232782c as on the machines>/research/layered-networks
+    F=$(git -C "$L" rev-parse HEAD)
+    PY=<the pinned Python 3.13.18 (numpy 2.3.5, py_ecc 8.0.0), the one envcheck_layered4.py passed with on this machine>
+    python() { "$PY" "$@"; }                                # every `python` in the blocks is the pinned one
+    PATH=$HOME/.elan/bin:$PATH python -B "$L/envcheck_layered4.py" check > ENVCHECK.json
+    python -c "import json, sys; sys.exit(0 if json.load(open('ENVCHECK.json'))['ok'] is True else 1)" && echo "envcheck ok" || { echo "REFUSED: envcheck_layered4 is not ok with $PY: stop"; false; }
+    [end]
+    [block vars-rehearsal]
+    M=rehearsal  B=evidence/combined-rehearsal-draw  R=evidence/combined-rehearsal-draw-result
+    X=$L/EXCLUDED.json  SIZES="NOT1=6 ANDOR3=6 XOR3=6"
+    H=abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c
+    [end]
+  (H is the sha256 of the freeze's EXCLUDED.json, as in the Pins section above.)
+    [block vars-campaign]
+    M=campaign  B=evidence/combined-draw  R=evidence/combined-draw-result
+    X=EXCLUDED_SECOND.json  SIZES="NOT1=60 ANDOR3=32 XOR3=37"
+    H=<the 64 hex characters that ORDER 3 step (3) printed after "sha256">
+    [end]
+  (H is KEPT from step (3)'s printed line: the announce block publishes the list only if the copied file has that
+  sha256.)
+  The announce (DRAW_ANNOUNCE below) comes first. Then the draw:
+    [block draw]
+    ( set -e
+      X=$(realpath -e "$X")                                   # absolute, before any cd
+      ! git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "REFUSED: started inside a git work tree: no commit, no push"; exit 1; }
+      [ ! -e draw_$M ] || { echo "REFUSED: draw_$M already exists: no commit, no push"; exit 1; }
+      mkdir draw_$M
+      cd draw_$M
+      # 1. the announce commit and GitHub's push time of its branch_creation, read as analysis.py reads them
+      CT=$(python -B -c "if True:
+          import sys, tempfile; sys.path.insert(0, '$L'); import analysis as A
+          c, text, t = A.announce_on_github('$B', tempfile.mkdtemp()); print(c, t)")
+      C=${CT% *}; T=${CT#* }; echo "announce commit $C, pushed $T"
+      # 2. the round that push time fixes (ROUND below); wait until its time has passed
+      python -B -c "if True:
+          import json, sys; sys.path.insert(0, '$L'); import beacon_chain
+          open('CHAIN.json', 'w').write(json.dumps(beacon_chain.QUICKNET))"
+      python -B "$L/beacon_verify.py" round CHAIN.json "$T" | tee ROUND_RULE.json
+      ROUND=$(python -B -c "import json; print(json.load(open('ROUND_RULE.json'))['round'])")
+      RT=$(python -B -c "import json; print(json.load(open('ROUND_RULE.json'))['round_time_unix'])")
+      while [ "$(date +%s)" -lt "$RT" ]; do sleep 5; done
+      # 3. the round from drand (api.drand.sh, else api2.drand.sh; any relay will do), verified against the pinned key
+      CH=52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971
+      curl -sf https://api.drand.sh/$CH/public/$ROUND > ROUND_RAW.json || curl -sf https://api2.drand.sh/$CH/public/$ROUND > ROUND_RAW.json
+      python -B -c "if True:
+          import json; r = json.load(open('ROUND_RAW.json'))
+          open('ROUND.json', 'w').write(json.dumps({k: r[k] for k in ('round', 'signature', 'randomness')}))"
+      python -B "$L/beacon_verify.py" verify CHAIN.json ROUND.json
+      # 4. the draw, on the published list X, and DRAW.json (DRAW_CORE.json and two keys, byte for byte draw_seeds.canon)
+      python -B "$L/draw_seeds.py" draw "$(python -B -c "import json; print(json.load(open('ROUND.json'))['randomness'])")" "$ROUND" "$X" DRAW_CORE.json $SIZES
+      python -B -c "if True:
+          import json, sys; sys.path.insert(0, '$L'); import draw_seeds as D
+          d = json.load(open('DRAW_CORE.json')); d['beacon_round'] = json.load(open('ROUND.json'))
+          d['announce'] = dict(branch='$B', commit='$C', push_utc='$T')
+          open('DRAW.json', 'wb').write(D.canon(d))"
+      # 5. THE CHECK BEFORE ANY MACHINE STARTS, on the file itself: it reads the announce on GitHub and refuses as
+      #    analysis.py would; it must print the draw's record
+      python -B -c "if True:
+          import sys, tempfile; sys.path.insert(0, '$L'); import analysis as A
+          d, info, n = A.check_draw(dict(draw='DRAW.json', excluded='$X'), '$M', tempfile.mkdtemp(), '$F'); print(info)"
+      # 6. the plans made from that checked file (m=12), PLAN_K01..K12.json, each sent to its machine unedited
+      python -B "$L/plan_split3.py" DRAW.json "$L/campaign_template.json" PLANS
+      # 7. DRAW.json published on its own result branch R, by one creating push (the announce branch B keeps its
+      #    single push)
+      D=$(realpath -e DRAW.json)
+      test -z "$(git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$R)" || { echo "REFUSED: $R already exists"; exit 1; }
+      [ ! -e result ] || { echo "REFUSED: result already exists: no commit, no push"; exit 1; }
+      mkdir result
+      cd result
+      git init -q
+      git checkout -q --orphan $R
+      git fetch -q --depth 1 https://github.com/HevisNico/kernel-R refs/heads/main     # the owner identity, from main, never printed
+      git config user.name "$(git log -1 --format=%an FETCH_HEAD)"
+      git config user.email "$(git log -1 --format=%ae FETCH_HEAD)"
+      cp "$D" DRAW.json
+      [ "$(git rev-parse --show-toplevel)" = "$(pwd -P)" ] || { echo "REFUSED: the repository is not this new folder: no commit, no push"; exit 1; }
+      [ "$(git symbolic-ref --short HEAD)" = "$R" ] || { echo "REFUSED: HEAD is not the orphan $R: no commit, no push"; exit 1; }
+      ! git rev-parse -q --verify HEAD >/dev/null || { echo "REFUSED: the new repository already has a commit: no commit, no push"; exit 1; }
+      git add DRAW.json
+      git commit -q -m "Draw result ($M)"                     # the owner identity, set above
+      O=$(git log -1 --format='%an %ae' FETCH_HEAD)
+      [ "$(git log -1 --format='%an %ae' HEAD)" = "$O" ] && [ "$(git log -1 --format='%cn %ce' HEAD)" = "$O" ] || { echo "REFUSED: the commit's author or committer is not main's (the owner): no push"; exit 1; }
+      git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/$R
+      echo "draw published: $R $(git rev-parse HEAD)" )
+    [end]
+  ROUND.json is drand's /public/<ROUND>, reduced to exactly round, signature and randomness. analysis.py recomputes
+  all of it. The rehearsal's DRAW.json is on evidence/combined-rehearsal-draw-result, and the campaign's analysis
+  reads it there (rehearsal_draw=). The campaign's DRAW.json is on evidence/combined-draw-result.
+
+BEACON: drand quicknet (pinned; beacon_chain.QUICKNET, its /info of 2026-11-25 from api.drand.sh and api2.drand.sh)
+  chain hash   52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971
+               (recomputed offline by beacon_chain.chain_hash: sha256(period u32 BE, genesis i64 BE, public key,
+               groupHash, beacon ID "quicknet"))
+  public key   83cf0f2896adee7eb8b5f01fcad3912212c437e0073e911fb90022d3e760183c8c4b450b6a0a6c3ac6a5776a2d1064510d
+               1fec758c921cc22b0e17e63aaf4bcb5ed66304de9cf809bd274ca73bab4af5a6e9c76a4bc09e76eae8991ef5ece45a
+               (one string, wrapped here)
+  genesis      1692803367
+  period       3 s
+  scheme       bls-unchained-g1-rfc9380
+  groupHash    f477d5c89f21a17c863a7f937c6a6d15859414d2be09cd448d4279af331c5d3e
+  Checked: beacon_verify.py verifies the published rounds 1000000, 20000000 and 34278954 against this key, and fails
+  on one changed byte of a signature, round or key (tests/test_beacon_published.py).
+
+ROUND (the rule; no fixed time)
+  ROUND is the first quicknet round whose time, 1692803367 + (ROUND - 1) * 3, is at least 600 s after t_push.
+  t_push is GitHub's recorded push time of the branch_creation of the announce branch, whose only commit adds
+  DRAW_ANNOUNCE.txt. So ROUND = ceil((t_push + 600 - 1692803367) / 3) + 1 (beacon_verify.round_after), t_push in
+  seconds UTC.
+  - The coordinator draws, and verifies the round with the frozen beacon_verify.py against the pinned key above: the
+    BLS signature, and randomness = sha256(signature).
+  - ONE canonical value: the beacon is drand's randomness written as 64 lowercase hex characters, exactly
+    sha256(signature) in that form, with the signature exactly 48 bytes (a zero-padded signature still verifies and
+    is refused) and the rounds integers; draw_seeds.draw refuses any other writing of it (upper or mixed case, spaces, a
+    0x prefix) and draws the groups in its pinned GROUP_ORDER (NOT1, ANDOR3, XOR3) whatever the order of the sizes;
+    analysis.py derives the value from the signature and refuses a DRAW.json that writes it otherwise. The plans
+    split the groups in the same order (plan_split.ordered_groups): plan_split3.py on the DRAW.json file and the
+    analysis on the draw it recomputes give byte-identical plans.
+  - It publishes DRAW.json on the result branch: evidence/combined-draw-result for the campaign,
+    evidence/combined-rehearsal-draw-result for the rehearsal (SEED DRAW, block draw, step 7), so that anyone can
+    recheck the draw offline (analysis.py test mode, announce= and activity=). The announce branch keeps its single
+    push. The campaign's analysis reads the rehearsal's DRAW.json from evidence/combined-rehearsal-draw-result
+    (rehearsal_draw=).
+  - FALLBACK: if both api.drand.sh and api2.drand.sh are down at draw time, the owner fetches the round from any drand
+    relay, and the frozen beacon_verify.py verifies it against the pinned key. The source of the round does not matter.
+
+ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_ANNOUNCE and this section)
+  1. The freeze: this tree is pushed to research/layered-campaign-freeze (analysis.FREEZE_BRANCH). analysis.py refuses
+     an announce pushed before the frozen tree's commit (N1).
+  2. The rehearsal: 6/6/6, 18 instances over the 12 machines, with a D4 audit on the 6th instance of each group in
+     draw order.
+     - Blocks: vars, vars-rehearsal, announce, draw. Its announce, on evidence/combined-rehearsal-draw, fixes ITS drand
+       round. Its DRAW.json goes on evidence/combined-rehearsal-draw-result.
+     - Then its run (the drivers in campaign mode on the frozen template) and analysis.py rehearsal.
+     - The published quicknet round 1000000 serves the offline tests only (tests/), never a run.
+  3. THE SECOND SCAN, required: every branch of origin fetched by name (depth 1), including the seal branches
+     evidence/combined-seals-K<nn>, the rehearsal's roots and its announce and result branches. The raw scan output is
+     EXCLUDED_SECOND_SCAN.json from its creation. The scan repository takes about 25 GB (the tips of every evidence
+     branch, 23 GB on 2026-11-27): check the free disk first; a full disk makes a batch fail and the block refuse.
+    [block second-scan]
+    ( set -e
+      [ ! -e scanrepo ] || { echo "REFUSED: scanrepo already exists: no commit, no push"; exit 1; }
+      [ ! -e EXCLUDED_SECOND_SCAN.json ] || { echo "REFUSED: EXCLUDED_SECOND_SCAN.json already exists: no commit, no push"; exit 1; }
+      mkdir scanrepo
+      cd scanrepo
+      git init -q
+      git remote add origin https://github.com/HevisNico/kernel-R
+      [ ! -e ../SCAN_LSREMOTE.txt ] || { echo "REFUSED: SCAN_LSREMOTE.txt already exists"; exit 1; }
+      git ls-remote --heads origin > ../SCAN_LSREMOTE.txt          # ONE ls-remote: the branches and their tips
+      awk '{print $2}' ../SCAN_LSREMOTE.txt | sed 's#refs/heads/##' > ../SCAN_BRANCHES.txt
+      wc -l < ../SCAN_BRANCHES.txt
+      rm -f ../SCAN_BATCH_*
+      split -l 10 ../SCAN_BRANCHES.txt ../SCAN_BATCH_              # fetched 10 branches at a time, each batch retried
+      for f in ../SCAN_BATCH_*; do
+        for i in 1 2 3 4; do
+          timeout 3600 git fetch -q --depth 1 origin $(sed 's#.*#+refs/heads/&:refs/remotes/origin/&#' "$f") && break
+          [ $i = 4 ] && { echo "REFUSED: the fetch of $f failed 4 times"; exit 1; }; sleep $((i * 10))
+        done
+      done
+      # exactly the branches of the ls-remote, each at the tip the ls-remote gave
+      git for-each-ref --format='%(objectname) %(refname)' refs/remotes/origin | sed 's# refs/remotes/origin/# refs/heads/#' | sort > ../SCAN_FETCHED.txt
+      awk '{print $1" "$2}' ../SCAN_LSREMOTE.txt | sort > ../SCAN_EXPECTED.txt
+      cmp -s ../SCAN_FETCHED.txt ../SCAN_EXPECTED.txt || { echo "REFUSED: the fetched refs are not the ls-remote's"; diff ../SCAN_EXPECTED.txt ../SCAN_FETCHED.txt | head; exit 1; }
+      echo "fetched: every branch of the ls-remote at its tip ($(wc -l < ../SCAN_FETCHED.txt))"
+      git update-ref refs/heads/master "$(git rev-parse refs/remotes/origin/main)"
+      git symbolic-ref HEAD refs/heads/master
+      cd ..
+      python -B "$L/draw_seeds.py" scan EXCLUDED_SECOND_SCAN.json scanrepo )
+    [end]
+     - It must contain every seed of the freeze's EXCLUDED.json (analysis.py refuses otherwise), and so the
+       rehearsal's seeds, which its SEALS.txt lines name.
+     - analysis.py campaign re-reads the rehearsal's public draw (rehearsal_draw=, checked in full as in rehearsal
+       mode). It refuses if one of the rehearsal's 18 seeds, or of their noise seeds 10 S + 0..3, is missing from the
+       campaign's list, or if the rehearsal's announce is not earlier than the campaign's.
+     - It also refuses any drawn instance sealed before its round (N3).
+     - The scan output must be draw_seeds.py scan's, unedited, at the refs and tips it names, so that anyone can rerun
+       the scan and get the same bytes.
+     - A list rejecting more than draw_seeds.MAX_EXCLUDED_FRACTION (20 %) of the draw range is refused, by the
+       pre-announce check below and by analysis.py.
+     - DRAW.json publishes candidates_tried per group (how many candidates each group's draw read).
+     IN ONE SENTENCE: the rehearsal's list is the freeze's scan output (EXCLUDED.json); the campaign's list is the
+     second scan's output plus the rehearsal's 18 seeds and 72 noise seeds, named in its "added" field.
+     THE CAMPAIGN'S LIST (the owner's option A): the second scan's output PLUS every seed S of the VERIFIED rehearsal
+     draw and its noise seeds 10 S + 0..3. The blocks below run in the same working folder, after the block vars.
+     Each prints its result; stop at the first that fails.
+     (0) The rehearsal's published DRAW.json, from its result branch:
+    [block rehearsal-draw]
+    ( set -e
+      [ ! -e fetch_rehearsal ] || { echo "REFUSED: fetch_rehearsal already exists: no commit, no push"; exit 1; }
+      [ ! -e DRAW_REHEARSAL.json ] || { echo "REFUSED: DRAW_REHEARSAL.json already exists: no commit, no push"; exit 1; }
+      mkdir fetch_rehearsal
+      cd fetch_rehearsal
+      git init -q
+      git fetch -q https://github.com/HevisNico/kernel-R refs/heads/evidence/combined-rehearsal-draw-result
+      git show FETCH_HEAD:DRAW.json > ../DRAW_REHEARSAL.json
+      cd ..
+      sha256sum DRAW_REHEARSAL.json )
+    [end]
+     (1) and (2): add, deduplicate, sort, regenerate (count, seeds_sha256, the "added" field). It must print 18
+     rehearsal seeds and 72 noise seeds:
+    [block list]
+    python -B -c "if True:
+        import hashlib, json, sys; sys.path.insert(0, '$L'); import draw_seeds as D
+        scan = json.load(open('EXCLUDED_SECOND_SCAN.json')); rb = open('DRAW_REHEARSAL.json', 'rb').read()
+        rs = sorted(s for v in json.loads(rb)['groups'].values() for s in v)
+        noise = sorted(10 * s + n for s in rs for n in range(4))
+        seeds = sorted(set(scan['seeds']) | set(rs) | set(noise))
+        out = dict(scan, seeds=seeds, count=len(seeds), seeds_sha256=hashlib.sha256(D.canon(seeds)).hexdigest(),
+        added=dict(rehearsal_seeds=rs, noise_seeds=noise, rehearsal_draw_sha256=hashlib.sha256(rb).hexdigest()))
+        open('EXCLUDED_SECOND.json', 'wb').write(D.canon(out))
+        print(len(rs), 'rehearsal seeds,', len(noise), 'noise seeds;', out['count'], 'integers, seeds_sha256', out['seeds_sha256'])"
+    [end]
+     (3) Re-read the FINAL file and check it, BEFORE the announce. It checks:
+       - the rehearsal draw, verified in full (its announce and push time read from GitHub, its signature, round and
+         seeds at 6/6/6);
+       - its 18 seeds and 72 noise seeds, all in the file;
+       - the file's own count and seeds_sha256;
+       - the 20 % cap;
+       - the superset of the freeze's list;
+       - analysis.check_rehearsal_seeds, with now as the campaign announce's earliest time.
+    [block check-list]
+    python -B -c "if True:
+        import datetime, hashlib, json, sys, tempfile; sys.path.insert(0, '$L'); import analysis as A, draw_seeds as D
+        x = json.load(open('EXCLUDED_SECOND.json')); frz = json.load(open('$L/EXCLUDED.json')); have = set(x['seeds'])
+        r, info, _ = A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='$L/EXCLUDED.json'), 'rehearsal', tempfile.mkdtemp(), '$F')
+        rs = sorted(s for v in r['groups'].values() for s in v); noise = [10 * s + n for s in rs for n in range(4)]
+        now = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_SECOND.json'),
+        dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True)
+        ok = (len(rs) == 18 and len(noise) == 72 and set(rs + noise) <= have and set(frz['seeds']) <= have
+        and x['count'] == len(x['seeds']) == len(have) and x['seeds'] == sorted(have)
+        and hashlib.sha256(D.canon(x['seeds'])).hexdigest() == x['seeds_sha256']
+        and D.excluded_fraction(x) <= D.MAX_EXCLUDED_FRACTION)
+        print('the list is right' if ok else 'THE LIST IS WRONG: rebuild it, push nothing', len(rs), len(noise),
+        'sha256', hashlib.sha256(open('EXCLUDED_SECOND.json', 'rb').read()).hexdigest()); sys.exit(0 if ok else 1)"
+    [end]
+     If (3) fails, the list is rebuilt from (1) and rechecked; nothing is pushed until (3) passes. The sha256 that (3)
+     prints is KEPT as H (block vars-campaign). The announce block refuses, with no commit and no push, unless its
+     copy of X has exactly that sha256. The published list is therefore the scan's output with the "added" field,
+     which names what was added.
+  4. The campaign: blocks vars-campaign, announce, draw. Its announce is on evidence/combined-draw, with mode campaign,
+     EXCLUDED_SECOND.json and 60/32/37. Its DRAW.json is on evidence/combined-draw-result. Then the campaign, and
+     analysis.py campaign with rehearsal_draw= the DRAW.json of evidence/combined-rehearsal-draw-result.
+
+DRAW_ANNOUNCE (after the block vars and the block vars-rehearsal or vars-campaign; one announce branch, created by
+one push of one commit, never pushed again, never forced, never deleted)
+    [block announce]
+    ( set -e
+      X=$(realpath -e "$X")                                   # absolute, before any cd
+      test ${#H} = 64 || { echo "REFUSED: H is not a sha256: no commit, no push"; exit 1; }
+      test -z "$(git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$B)" || { echo "REFUSED: $B already exists: no commit, no push"; exit 1; }
+      ! git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "REFUSED: started inside a git work tree: no commit, no push"; exit 1; }
+      [ ! -e announce_$M ] || { echo "REFUSED: announce_$M already exists: no commit, no push"; exit 1; }
+      mkdir announce_$M
+      cd announce_$M
+      git init -q
+      git checkout -q --orphan $B
+      git fetch -q --depth 1 https://github.com/HevisNico/kernel-R refs/heads/main     # the owner identity, from main, never printed
+      git config user.name "$(git log -1 --format=%an FETCH_HEAD)"
+      git config user.email "$(git log -1 --format=%ae FETCH_HEAD)"
+      cp "$X" EXCLUDED_PUBLISHED.json                         # the list the draw uses, published with it
+      P=$(sha256sum EXCLUDED_PUBLISHED.json | cut -c1-64)
+      [ "$P" = "$H" ] || { echo "REFUSED: EXCLUDED_PUBLISHED.json has sha256 $P, not the validated $H: no commit, no push"; exit 1; }
+      printf 'format layered-draw-announce/1\nmode %s\nexcluded_sha256 %s\nsizes %s\n' $M "$H" "$SIZES" > DRAW_ANNOUNCE.txt
+      python -B -c "if True:
+          import hashlib, json, sys; sys.path.insert(0, '$L'); import analysis as A, draw_seeds as D
+          a = A.parse_announce(open('DRAW_ANNOUNCE.txt', 'rb').read()); x = json.load(open('EXCLUDED_PUBLISHED.json'))
+          want = A.DRAW_SIZES if '$M' == 'campaign' else A.DRAW_SIZES_REHEARSAL
+          frz = json.load(open('$L/EXCLUDED.json'))
+          ok = (a['mode'] == '$M' and a['sizes'] == want and set(frz['seeds']) <= set(x['seeds'])
+                and a['excluded_sha256'] == '$H' == hashlib.sha256(open('EXCLUDED_PUBLISHED.json', 'rb').read()).hexdigest()
+                and D.excluded_fraction(x) <= D.MAX_EXCLUDED_FRACTION)
+          print('announce ok' if ok else 'REFUSED: the announce is wrong: no commit, no push'); sys.exit(0 if ok else 1)"
+      [ "$(git rev-parse --show-toplevel)" = "$(pwd -P)" ] || { echo "REFUSED: the repository is not this new folder: no commit, no push"; exit 1; }
+      [ "$(git symbolic-ref --short HEAD)" = "$B" ] || { echo "REFUSED: HEAD is not the orphan $B: no commit, no push"; exit 1; }
+      ! git rev-parse -q --verify HEAD >/dev/null || { echo "REFUSED: the new repository already has a commit: no commit, no push"; exit 1; }
+      git add DRAW_ANNOUNCE.txt EXCLUDED_PUBLISHED.json
+      git commit -q -m "Draw announce ($M)"                   # the owner identity, set above
+      O=$(git log -1 --format='%an %ae' FETCH_HEAD)
+      [ "$(git log -1 --format='%an %ae' HEAD)" = "$O" ] && [ "$(git log -1 --format='%cn %ce' HEAD)" = "$O" ] || { echo "REFUSED: the commit's author or committer is not main's (the owner): no push"; exit 1; }
+      git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/$B   # the one push: the branch_creation that fixes t_push
+      echo "announce pushed: $B $(git rev-parse HEAD)" )
+    [end]
+  The announce is checked against H, the sha256 kept from a check made BEFORE it: for the rehearsal, the freeze's
+  EXCLUDED.json (Pins); for the campaign, the line printed by ORDER 3 step (3). It is not checked against a sha256 it
+  computes itself. A wrong file, for example the freeze's list in place of EXCLUDED_SECOND.json, is refused before
+  the commit, so before the single push.

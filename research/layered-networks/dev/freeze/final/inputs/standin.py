@@ -1,0 +1,16 @@
+import datetime, hashlib, json, sys
+sys.path.insert(0, '/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R/research/layered-networks'); import beacon_chain, beacon_verify, draw_seeds as D
+br = dict(round=1000000, randomness="b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3",
+          signature="83ad29e4c409f9470fc2ef02f90214df49e02b441a1a241a82d622d9f608ef98fd8b11a029f1bee9d9e83b45088abe72")
+assert beacon_verify.verify(beacon_chain.QUICKNET, br)["ok"]
+t0 = beacon_verify.round_time(beacon_chain.QUICKNET, 1000000) - beacon_verify.DELAY_S
+push = datetime.datetime.fromtimestamp(t0, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+exf = '/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/final/W/kernel-R/research/layered-networks/EXCLUDED.json'; ex = json.load(open(exf)); xs = hashlib.sha256(open(exf, 'rb').read()).hexdigest()
+for label, mode, branch, sizes in (("REHEARSAL", "rehearsal", "evidence/combined-rehearsal-draw", dict(NOT1=6, ANDOR3=6, XOR3=6)),
+                                   ("CAMPAIGN_SIZES", "campaign", "evidence/combined-draw", dict(NOT1=60, ANDOR3=32, XOR3=37))):
+    d = D.draw(br["randomness"], br["round"], ex, dict(sizes))
+    open(f"DRAW_{label}.json", "wb").write(D.canon(dict(d, beacon_round=br, announce=dict(branch=branch, commit="0" * 40, push_utc=push))))
+    open(f"ANNOUNCE_{label}.txt", "w").write(f"format layered-draw-announce/1\nmode {mode}\nexcluded_sha256 {xs}\nsizes "
+                                             + " ".join(f"{g}={sizes[g]}" for g in ("NOT1", "ANDOR3", "XOR3")) + "\n")
+    print(label, {g: len(v) for g, v in d["groups"].items()}, "push_utc", push, "sha256",
+          hashlib.sha256(open(f"DRAW_{label}.json", "rb").read()).hexdigest())
