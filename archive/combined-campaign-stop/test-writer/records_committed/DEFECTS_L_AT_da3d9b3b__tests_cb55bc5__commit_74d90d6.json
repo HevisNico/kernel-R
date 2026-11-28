@@ -1,0 +1,811 @@
+{
+ "analysis_last_commit": "83a2f37c342323131b54ed0ad95ccb50cf59fc2c",
+ "analysis_sha256": "c16995e8eb2e501392bae95ad901f6de80d8f4addb86333a8e2acebbf0bc4367",
+ "cases": [
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: the exact list (control): accepted",
+   "case": "list_blocks_rehearsal_exact",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": null,
+    "exit": 0,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "mutation": null,
+    "pinned_superset": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\n",
+    "stdout": "the list is right 18 72 sha256 8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_extra",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": 1000001,
+    "control_passed": true,
+    "exit": 0,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c",
+    "message": "the list is right 18 72 sha256 8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "reached_own_check": false,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\n",
+    "stdout": "the list is right 18 72 sha256 8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c\n"
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_drop_noise",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": 189850,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105",
+    "message": "THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\n",
+    "stdout": "THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_drop_scan",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": 0,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "check_draw's existing superset check (the removed seed is in the pinned EXCLUDED.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "message": "THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "mutation": "drop_scan",
+    "pinned_superset": false,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\n",
+    "stdout": "THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_field",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": "added.rehearsal1_draw_sha256",
+    "control_passed": true,
+    "exit": 0,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa",
+    "message": "the list is right 18 72 sha256 374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa",
+    "mutation": "field",
+    "pinned_superset": true,
+    "reached_own_check": false,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\n",
+    "stdout": "the list is right 18 72 sha256 374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa\n"
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: the exact list (control): accepted",
+   "case": "list_blocks_campaign_exact",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": null,
+    "exit": 0,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "mutation": null,
+    "pinned_superset": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\n",
+    "stdout": "the list is right 36 144 sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_extra",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 1000001,
+    "control_passed": true,
+    "exit": 0,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4",
+    "message": "the list is right 36 144 sha256 2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "reached_own_check": false,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\n",
+    "stdout": "the list is right 36 144 sha256 2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4\n"
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_drop_noise",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 218210,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "f5673159668bb35f4bc120fb150987cdf628c78cba1488e68145610a3f064b7a",
+    "message": "refused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [218210] (the list must add the earlier rehearsals' seeds)",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [218210] (the list must add the earlier rehearsals' seeds)\n",
+    "stdout": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_drop_scan",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 1234567,
+    "control_passed": true,
+    "exit": 0,
+    "expected_check": "the new exactness check (1234567 is in the scan only, not pinned, not a rehearsal seed)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2",
+    "message": "the list is right 36 144 sha256 4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2",
+    "mutation": "drop_scan",
+    "pinned_superset": true,
+    "reached_own_check": false,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\n",
+    "stdout": "the list is right 36 144 sha256 4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2\n"
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_blocks_campaign_field",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": "added.rehearsal_draw_sha256",
+    "control_passed": true,
+    "exit": 0,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752",
+    "message": "the list is right 36 144 sha256 0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752",
+    "mutation": "field",
+    "pinned_superset": true,
+    "reached_own_check": false,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\n",
+    "stdout": "the list is right 36 144 sha256 0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752\n"
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: no EXCLUDED_SECOND_SCAN.json / no second_scan=: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_no_scan",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": null,
+    "control_passed": true,
+    "exit": 0,
+    "expected_check": "the new check that second_scan= is given (blocks: the read of EXCLUDED_SECOND_SCAN.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "the list is right 36 144 sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "mutation": "no_scan",
+    "pinned_superset": true,
+    "reached_own_check": false,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\n",
+    "stdout": "the list is right 36 144 sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\n"
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: the scan without one pinned seed (one rehearsal 1 drew, so the rebuilt list is byte-equal): refused (gated on the exact case)",
+   "case": "list_blocks_campaign_scan_short",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 18985,
+    "control_passed": true,
+    "exit": 0,
+    "expected_check": "the new check that second_scan is a superset of the pinned EXCLUDED.json",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "the list is right 36 144 sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "mutation": "scan_short",
+    "pinned_superset": true,
+    "reached_own_check": false,
+    "rebuilt_list_equal": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\n",
+    "stdout": "the list is right 36 144 sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\n"
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: the exact list (control): accepted",
+   "case": "list_funcs_rehearsal_exact",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": null,
+    "earlier_checks_passed": true,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "mode": "rehearsal",
+    "mutation": null,
+    "pinned_superset": true,
+    "reached": "accepted",
+    "recomputed": [],
+    "refused": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_extra",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": 1000001,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c",
+    "mode": "rehearsal",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "reached": "accepted",
+    "reached_own_check": false,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": false
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_drop_noise",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": 189850,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105",
+    "message": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [189850] (the list must add the earlier rehearsals' seeds)",
+    "mode": "rehearsal",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "raised_in": "check_rehearsal_seeds",
+    "reached": "check_rehearsal_seeds",
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_drop_scan",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": 0,
+    "control_passed": true,
+    "earlier_checks_passed": false,
+    "expected_check": "check_draw's existing superset check (the removed seed is in the pinned EXCLUDED.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "message": "refused: the excluded= list is not a superset of the freeze's EXCLUDED.json",
+    "mode": "rehearsal",
+    "mutation": "drop_scan",
+    "pinned_superset": false,
+    "raised_in": "check_draw",
+    "reached": "check_draw",
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_field",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": "added.rehearsal1_draw_sha256",
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa",
+    "mode": "rehearsal",
+    "mutation": "field",
+    "pinned_superset": true,
+    "reached": "accepted",
+    "reached_own_check": false,
+    "recomputed": [],
+    "refused": false
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: the exact list (control): accepted",
+   "case": "list_funcs_campaign_exact",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": null,
+    "earlier_checks_passed": true,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "mode": "campaign",
+    "mutation": null,
+    "pinned_superset": true,
+    "reached": "accepted",
+    "recomputed": [],
+    "refused": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_extra",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 1000001,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4",
+    "mode": "campaign",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "reached": "accepted",
+    "reached_own_check": false,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": false
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_drop_noise",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "f5673159668bb35f4bc120fb150987cdf628c78cba1488e68145610a3f064b7a",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 218210,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "f5673159668bb35f4bc120fb150987cdf628c78cba1488e68145610a3f064b7a",
+    "message": "refused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [218210] (the list must add the earlier rehearsals' seeds)",
+    "mode": "campaign",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "raised_in": "check_rehearsal_seeds",
+    "reached": "check_rehearsal_seeds",
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_drop_scan",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 1234567,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (1234567 is in the scan only, not pinned, not a rehearsal seed)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2",
+    "mode": "campaign",
+    "mutation": "drop_scan",
+    "pinned_superset": true,
+    "reached": "accepted",
+    "reached_own_check": false,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": false
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_funcs_campaign_field",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": "added.rehearsal_draw_sha256",
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752",
+    "mode": "campaign",
+    "mutation": "field",
+    "pinned_superset": true,
+    "reached": "accepted",
+    "reached_own_check": false,
+    "recomputed": [],
+    "refused": false
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: no EXCLUDED_SECOND_SCAN.json / no second_scan=: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_no_scan",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded"
+    ],
+    "changed": null,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new check that second_scan= is given (blocks: the read of EXCLUDED_SECOND_SCAN.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "mode": "campaign",
+    "mutation": "no_scan",
+    "pinned_superset": true,
+    "reached": "accepted",
+    "reached_own_check": false,
+    "recomputed": [],
+    "refused": false
+   },
+   "result": "FAIL"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: the scan without one pinned seed (one rehearsal 1 drew, so the rebuilt list is byte-equal): refused (gated on the exact case)",
+   "case": "list_funcs_campaign_scan_short",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 18985,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new check that second_scan is a superset of the pinned EXCLUDED.json",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "mode": "campaign",
+    "mutation": "scan_short",
+    "pinned_superset": true,
+    "reached": "accepted",
+    "reached_own_check": false,
+    "recomputed": [],
+    "refused": false
+   },
+   "result": "FAIL"
+  }
+ ],
+ "draw_seeds_sha256": "b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958",
+ "format": "layered-analysis-defects/1",
+ "lean": {
+  "path": null,
+  "sha256": null
+ },
+ "only": [
+  "L"
+ ],
+ "script_sha256": "aac61a833bebb6f577640b74a5eb9e2f80b24dee19e98a9e0977a4fc4640fc55",
+ "tree_head": "cb55bc5925fa12f1c40d4c9ecf83d155fd6c2a96"
+}

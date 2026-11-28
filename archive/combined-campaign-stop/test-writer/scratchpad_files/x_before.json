@@ -1,0 +1,1102 @@
+{
+ "analysis_last_commit": "f47201f73eeaed9644223c64ea32cded694cb27b",
+ "analysis_sha256": "360e99f9fe3c5cbef35fa13bce91b3f1bdc87a3a6405d79a679c3c7619bcdee7",
+ "cases": [
+  {
+   "asserts": "exit 0; NOT1 counted 2 at K0 and K3",
+   "case": "k05_alone",
+   "defect": "control",
+   "observed": {
+    "counts": {
+     "NOT1": {
+      "K0": {
+       "counted": 2,
+       "held": 2,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 2,
+       "held": 2,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 17.3,
+    "verdicts": {
+     "NOT1": {
+      "K0": "held on 2 instances, not established",
+      "K3": "held on 2 instances, not established"
+     }
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "exit 0; NOT1 counted 2 at K0 and K3 (the DUPX_ folder is a control)",
+   "case": "k05_with_dupx",
+   "defect": "control",
+   "observed": {
+    "counts": {
+     "NOT1": {
+      "K0": {
+       "counted": 2,
+       "held": 2,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 2,
+       "held": 2,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 17.0,
+    "verdicts": {
+     "NOT1": {
+      "K0": "held on 2 instances, not established",
+      "K3": "held on 2 instances, not established"
+     }
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "exit 0; NOT1 rows sum to 3 at K0 and K3; a not_run entry for NOT1_6230 at each level",
+   "case": "planned_seed_not_started",
+   "defect": "D8",
+   "observed": {
+    "counts": {
+     "NOT1": {
+      "K0": {
+       "counted": 2,
+       "held": 2,
+       "instances": 3,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 2,
+       "held": 2,
+       "instances": 3,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 15.3,
+    "verdicts": {
+     "NOT1": {
+      "K0": "held on 2 instances, not established",
+      "K3": "held on 2 instances, not established"
+     }
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "no draw: exit 0 and a not_run entry naming NOT1_6212 (the home instance K06's plan names); no refusal",
+   "case": "planned_machine_no_root",
+   "defect": "D8",
+   "observed": {
+    "counts": {},
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "not_run_entry": {
+     "home_machine": "K05",
+     "instance": "NOT1_6212",
+     "status": "not run (its home root is not among the roots; counted for nothing)"
+    },
+    "roots_manifest_problems": [],
+    "seconds": 13.8,
+    "verdicts": {}
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; a not_run entry for NOT1_6213 (K02, no root) at each level",
+   "case": "draw_machine_without_root",
+   "defect": "D8",
+   "observed": {
+    "counts": {
+     "NOT1": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 17.5,
+    "verdicts": {
+     "NOT1": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     }
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; not_run entries for NOT1_6212 (K01) and NOT1_6213 (K02)",
+   "case": "draw_duplicate_machine_only",
+   "defect": "D8",
+   "observed": {
+    "counts": {
+     "NOT1": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 17.3,
+    "verdicts": {
+     "NOT1": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     }
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "refused; NOT1 not counted more than twice; no verdict \"established\"",
+   "case": "same_root_30_times",
+   "defect": "D9",
+   "observed": {
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: a root is given more than once: ['/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/same_root_30_times/a/out_K05', '/tmp/tmpe3fdteva/s",
+    "roots_manifest_problems": [],
+    "seconds": 0.2
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "draw=: refused, the output naming K01; NOT1 not counted more than once",
+   "case": "draw_same_machine_twice",
+   "defect": "D9",
+   "observed": {
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: two roots on machine K01: /tmp/tmpe3fdteva/draw_same_machine_twice/a/out_K01 and /tmp/tmpe3fdteva/draw_same_machine_twice/b/out_K01",
+    "roots_manifest_problems": [],
+    "seconds": 0.4
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "refused; NOT1 not counted more than twice",
+   "case": "same_machine_two_paths",
+   "defect": "D9",
+   "observed": {
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: the home instance NOT1 6212 is in more than one root: machine_1 and machine_2",
+    "roots_manifest_problems": [],
+    "seconds": 0.4
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "refused; NOT1 not counted more than twice",
+   "case": "home_instance_twice",
+   "defect": "D9",
+   "observed": {
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: the home instance NOT1 6212 is in more than one root: machine_1 and machine_2",
+    "roots_manifest_problems": [],
+    "seconds": 0.4
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the valid stand-in draw (round 1000000): exit 0; every group's rows sum to its size; not_run for NOT1_65418, NOT1_69364",
+   "case": "standin_draw_valid",
+   "defect": "draw",
+   "observed": {
+    "counts": {
+     "ANDOR3": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 1,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 1,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     },
+     "NOT1": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     },
+     "XOR3": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 1,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 1,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 17.4,
+    "verdicts": {
+     "ANDOR3": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     },
+     "NOT1": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     },
+     "XOR3": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     }
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "one drawn seed changed, signature kept: refused",
+   "case": "standin_seed_changed",
+   "defect": "draw",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json is not draw_seeds.draw of its beacon and round on the excluded= list at the sizes {'ANDOR3': 1, 'NOT1': 2, 'XOR3': 1} (with its beacon_round and announce), byte for byte",
+    "roots_manifest_problems": [],
+    "seconds": 1.5
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "push_utc + 3 s, the round off by one: refused",
+   "case": "standin_round_off_by_one",
+   "defect": "draw",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json's round 1000000 is not the round the announce's push time fixes (1000001, 2023-09-27T08:19:27Z + 600 s)",
+    "roots_manifest_problems": [],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "one signature byte changed: refused",
+   "case": "standin_signature_byte",
+   "defect": "draw",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = 69d95bb9aacf81587cea934ce63e42266328042fdcca1db86fd77cf0d3de7dc6 (round 1000000); another writing of the value is refused",
+    "roots_manifest_problems": [],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "an exclusion list missing one pinned seed (announced, and the draw recomputed over it): refused",
+   "case": "standin_excluded_not_superset",
+   "defect": "draw",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: the excluded= list is not a superset of the freeze's EXCLUDED.json",
+    "roots_manifest_problems": [],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "an exclusion list with the pinned seeds but other bytes than announced: refused",
+   "case": "standin_excluded_sha_differs",
+   "defect": "draw",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: the excluded= file is not the one DRAW_ANNOUNCE.txt names (excluded_sha256)",
+    "roots_manifest_problems": [],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the valid stand-in draw with activity= one clean branch_creation of the announce commit: exit 0, rows sum",
+   "case": "standin_activity_clean",
+   "defect": "E2",
+   "observed": {
+    "counts": {
+     "ANDOR3": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 1,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 1,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     },
+     "NOT1": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     },
+     "XOR3": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 1,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 1,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 18.8,
+    "verdicts": {
+     "ANDOR3": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     },
+     "NOT1": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     },
+     "XOR3": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     }
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "activity= branch_creation, branch_deletion, a second later branch_creation used by DRAW.json: refused (gated on standin_activity_clean)",
+   "case": "standin_activity_redone",
+   "defect": "E2",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: the announce branch evidence/defect-test-standin-draw was rewritten or deleted (branch_deletion in its activity): the draw could have been redone",
+    "roots_manifest_problems": [],
+    "seconds": 0.2
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "activity= the clean branch_creation then a force_push on the announce branch: refused (gated)",
+   "case": "standin_activity_force_push",
+   "defect": "E2",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: the announce branch evidence/defect-test-standin-draw was rewritten or deleted (force_push in its activity): the draw could have been redone",
+    "roots_manifest_problems": [],
+    "seconds": 0.2
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "draw_seeds.draw on the canonical lowercase beacon gives today's seeds {\"NOT1\": [65418, 69364], \"ANDOR3\": [55321], \"XOR3\": [61903]}",
+   "case": "beacon_canonical",
+   "defect": "beacon",
+   "observed": {
+    "fixture_ok": true,
+    "seeds": {
+     "ANDOR3": [
+      55321
+     ],
+     "NOT1": [
+      65418,
+      69364
+     ],
+     "XOR3": [
+      61903
+     ]
+    },
+    "want": {
+     "ANDOR3": [
+      55321
+     ],
+     "NOT1": [
+      65418,
+      69364
+     ],
+     "XOR3": [
+      61903
+     ]
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "draw_seeds.draw on the beacon written upper: raises, or gives the canonical seeds",
+   "case": "beacon_upper",
+   "defect": "beacon",
+   "observed": {
+    "fixture_ok": true,
+    "refused": "ValueError(\"the beacon 'B22AAD4794F7451896F7A371AA46106FD84D919F3F569ACD5B2FDDF1D1440AF3' is not 64 lowercase hex characters (32 bytes)\")",
+    "writing": "B22AAD4794F7451896F7A371AA46106FD84D919F3F569ACD5B2FDDF1D1440AF3"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "draw_seeds.draw on the beacon written mixed: raises, or gives the canonical seeds",
+   "case": "beacon_mixed",
+   "defect": "beacon",
+   "observed": {
+    "fixture_ok": true,
+    "refused": "ValueError(\"the beacon 'b22AaD4794f7451896f7a371aA46106Fd84D919F3F569AcD5B2FdDf1d1440Af3' is not 64 lowercase hex characters (32 bytes)\")",
+    "writing": "b22AaD4794f7451896f7a371aA46106Fd84D919F3F569AcD5B2FdDf1d1440Af3"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "draw_seeds.draw on the beacon written spaces: raises, or gives the canonical seeds",
+   "case": "beacon_spaces",
+   "defect": "beacon",
+   "observed": {
+    "fixture_ok": true,
+    "refused": "ValueError(\"the beacon 'b2 2a ad 47 94 f7 45 18 96 f7 a3 71 aa 46 10 6f d8 4d 91 9f 3f 56 9a cd 5b 2f dd f1 d1 44 0a f3' is not 64 lowercase hex characters (32 bytes)\")",
+    "writing": "b2 2a ad 47 94 f7 45 18 96 f7 a3 71 aa 46 10 6f d8 4d 91 9f 3f 56 9a cd 5b 2f dd f1 d1 44 0a f3"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "draw_seeds.draw on the beacon written 0x: raises, or gives the canonical seeds",
+   "case": "beacon_0x",
+   "defect": "beacon",
+   "observed": {
+    "fixture_ok": true,
+    "refused": "ValueError(\"the beacon '0xb22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3' is not 64 lowercase hex characters (32 bytes)\")",
+    "writing": "0xb22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "draw_seeds.draw with the sizes dict in all 6 orders at sizes 166 each: identical seeds",
+   "case": "sizes_permutations",
+   "defect": "beacon",
+   "observed": {
+    "differing_orders": {},
+    "fixture_ok": true,
+    "reference_order": "NOT1,ANDOR3,XOR3",
+    "sizes": {
+     "ANDOR3": 166,
+     "NOT1": 166,
+     "XOR3": 166
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis with a DRAW.json whose beacon and beacon_round.randomness are written upper (the seeds drawn on that writing, a matching root): refused, or accepted with the canonical NOT1 seeds (gated on standin_draw_valid)",
+   "case": "standin_beacon_upper",
+   "defect": "beacon",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused",
+    "roots_manifest_problems": [],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis with a DRAW.json whose beacon and beacon_round.randomness are written mixed (the seeds drawn on that writing, a matching root): refused, or accepted with the canonical NOT1 seeds (gated on standin_draw_valid)",
+   "case": "standin_beacon_mixed",
+   "defect": "beacon",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused",
+    "roots_manifest_problems": [],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis with a DRAW.json whose beacon and beacon_round.randomness are written spaces (the seeds drawn on that writing, a matching root): refused, or accepted with the canonical NOT1 seeds (gated on standin_draw_valid)",
+   "case": "standin_beacon_spaces",
+   "defect": "beacon",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused",
+    "roots_manifest_problems": [],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis with a DRAW.json whose beacon and beacon_round.randomness are written 0x (the seeds drawn on that writing, a matching root): refused, or accepted with the canonical NOT1 seeds (gated on standin_draw_valid)",
+   "case": "standin_beacon_0x",
+   "defect": "beacon",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused",
+    "roots_manifest_problems": [],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "beacon_verify.verify on round 1000000 as published: ok (control)",
+   "case": "verify_signature_real",
+   "defect": "X1",
+   "observed": {
+    "fixture_ok": true,
+    "verify": {
+     "ok": true,
+     "randomness_ok": true,
+     "round": 1000000,
+     "signature_ok": true,
+     "subgroups_ok": true
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "beacon_verify.verify on the signature with 00 in front and value sha256(those bytes): not ok",
+   "case": "verify_signature_pad00",
+   "defect": "X1",
+   "observed": {
+    "fixture_ok": true,
+    "signature_prefix": "0083ad29e4c4",
+    "value": "525d1741903eae2a7fd3aba307aad11a8f7d60d354e062122a8df20b2dd7e0b1",
+    "verify": {
+     "ok": false,
+     "round": 1000000,
+     "why": "the signature is not exactly 48 bytes (96 lowercase hex characters), or the public key not exactly 96 bytes: a padded or re-written point is refused"
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "beacon_verify.verify on the signature with 0000 in front and value sha256(those bytes): not ok",
+   "case": "verify_signature_pad0000",
+   "defect": "X1",
+   "observed": {
+    "fixture_ok": true,
+    "signature_prefix": "000083ad29e4",
+    "value": "ecd2eb7c6500d73ca386f85a306e0a41df94cfbf50b1f15fbd52dcf2d967f8eb",
+    "verify": {
+     "ok": false,
+     "round": 1000000,
+     "why": "the signature is not exactly 48 bytes (96 lowercase hex characters), or the public key not exactly 96 bytes: a padded or re-written point is refused"
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "beacon_verify.verify on the signature with 000000 in front and value sha256(those bytes): not ok",
+   "case": "verify_signature_pad000000",
+   "defect": "X1",
+   "observed": {
+    "fixture_ok": true,
+    "signature_prefix": "00000083ad29",
+    "value": "4e1d11ee705db92430a53e039aac4013f5ca8a78609f864876a9175a8da229cc",
+    "verify": {
+     "ok": false,
+     "round": 1000000,
+     "why": "the signature is not exactly 48 bytes (96 lowercase hex characters), or the public key not exactly 96 bytes: a padded or re-written point is refused"
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis on a forged DRAW.json: the signature with 00 in front, value and seeds from it: refused (gated)",
+   "case": "standin_signature_pad00",
+   "defect": "X1",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)",
+    "roots_manifest_problems": [],
+    "seconds": 0.2
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis on a forged DRAW.json: the signature with 0000 in front, value and seeds from it: refused (gated)",
+   "case": "standin_signature_pad0000",
+   "defect": "X1",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)",
+    "roots_manifest_problems": [],
+    "seconds": 0.2
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis on a forged DRAW.json: the signature with 000000 in front, value and seeds from it: refused (gated)",
+   "case": "standin_signature_pad000000",
+   "defect": "X1",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)",
+    "roots_manifest_problems": [],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis on a forged DRAW.json: one signature byte flipped, value = sha256(flipped bytes), seeds from it: refused by the signature check (\"does not verify against the pinned quicknet key\" or a decoding failure)",
+   "case": "standin_signature_flip",
+   "defect": "X1",
+   "observed": {
+    "control_passed": true,
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: DRAW.json: the beacon round does not verify against the pinned quicknet key: {'round': 1000000, 'randomness_ok': True, 'ok': False, 'why': \"point decoding: ValueError('The given point is not on G1: y**2 = x**3 + b')\"}",
+    "roots_manifest_problems": [],
+    "seconds": 0.6
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "plan_split3.py on the DRAW.json file at {'NOT1': 6, 'ANDOR3': 6, 'XOR3': 6}: all 12 plans equal plan_split3.split of the draw",
+   "case": "plans_command_6_6_6",
+   "defect": "X2",
+   "observed": {
+    "fixture_ok": true,
+    "sizes": {
+     "ANDOR3": 6,
+     "NOT1": 6,
+     "XOR3": 6
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "plan_split3.py on the DRAW.json file at {'NOT1': 60, 'ANDOR3': 32, 'XOR3': 37}: all 12 plans equal plan_split3.split of the draw",
+   "case": "plans_command_60_32_37",
+   "defect": "X2",
+   "observed": {
+    "fixture_ok": true,
+    "sizes": {
+     "ANDOR3": 32,
+     "NOT1": 60,
+     "XOR3": 37
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the 6/6/6 stand-in, plans from the plan_split3.py command, roots for its remote-duplicate machines, draw=: exit 0 (gated)",
+   "case": "standin_plans_from_command",
+   "defect": "X2",
+   "observed": {
+    "control_passed": true,
+    "counts": {
+     "ANDOR3": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 6,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 6,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     },
+     "NOT1": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 6,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 6,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     },
+     "XOR3": {
+      "K0": {
+       "counted": 0,
+       "held": 0,
+       "instances": 6,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 0,
+       "held": 0,
+       "instances": 6,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "machines": [
+     "K10",
+     "K11",
+     "K12"
+    ],
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 17.3,
+    "verdicts": {
+     "ANDOR3": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     },
+     "NOT1": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     },
+     "XOR3": {
+      "K0": "not established (no D4 audit in this group)",
+      "K3": "not established (no D4 audit in this group)"
+     }
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "N2 of NOT1_6220 stopped by its own check (failed: the tail leak must be set before it starts): exit 0; refuted at K3, in a sub-row about the run's own check listing the status; NOT1_6212 held",
+   "case": "round_own_check_failed",
+   "defect": "E1",
+   "observed": {
+    "counts": {
+     "NOT1": {
+      "K0": {
+       "counted": 2,
+       "held": 2,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 2,
+       "held": 1,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "own_check_entry": {
+     "node": {
+      "list": [
+       {
+        "instance": "NOT1_6220",
+        "stopped_by_own_check": [
+         {
+          "round": "C2",
+          "status": "failed: the tail leak must be set before it starts"
+         }
+        ]
+       }
+      ],
+      "n": 1
+     },
+     "path": [
+      "refuted_stopped_by_own_check"
+     ]
+    },
+    "roots_manifest_problems": [],
+    "seconds": 16.5,
+    "verdicts": {
+     "NOT1": {
+      "K0": "held on 2 instances, not established",
+      "K3": "refuted"
+     }
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the twin, N2 ended by the simulator (failed: the simulator ended during: tran 1n 2n): exit 0; NOT1_6220 not completed at K3, not refuted; NOT1_6212 held",
+   "case": "round_simulator_ended",
+   "defect": "E1",
+   "observed": {
+    "counts": {
+     "NOT1": {
+      "K0": {
+       "counted": 2,
+       "held": 2,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 1,
+       "held": 1,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 1,
+       "refuted": 0
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 17.1,
+    "verdicts": {
+     "NOT1": {
+      "K0": "held on 2 instances, not established",
+      "K3": "held on one instance"
+     }
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "refused; the output names N0/comparison.json",
+   "case": "one_byte_in_comparison",
+   "defect": "D10",
+   "observed": {
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: files that differ from their manifests, or are missing: {\"/tmp/tmpe3fdteva/one_byte_in_comparison/a/out_K05\": [\"NOT1_6212/N0/comparison.json: differs from NOT1_6212/SHA256SUMS\"]}",
+    "roots_manifest_problems": [
+     "out_K05/NOT1_6212/N0/comparison.json: differs (listed in NOT1_6212/SHA256SUMS)"
+    ],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "refused; the output names extract.json",
+   "case": "listed_file_missing",
+   "defect": "D10",
+   "observed": {
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: files that differ from their manifests, or are missing: {\"/tmp/tmpe3fdteva/listed_file_missing/a/out_K05\": [\"NOT1_6212/N2/extract/extract.json: missing (listed in NOT1_6212/SHA256SUMS)\"]}",
+    "roots_manifest_problems": [
+     "out_K05/NOT1_6212/N2/extract/extract.json: missing (listed in NOT1_6212/SHA256SUMS)"
+    ],
+    "seconds": 0.3
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "exit 0; NOT1_6220 refuted at K3, its K3 flagged manifest not final; NOT1_6212 held at K0 and K3",
+   "case": "stopped_mid_instance",
+   "defect": "D10",
+   "observed": {
+    "NOT1_6220_K3": {
+     "counted": true,
+     "manifest_not_final": true,
+     "refuted": true
+    },
+    "counts": {
+     "NOT1": {
+      "K0": {
+       "counted": 1,
+       "held": 1,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 1,
+       "refuted": 0
+      },
+      "K3": {
+       "counted": 2,
+       "held": 1,
+       "instances": 2,
+       "no_prediction": 0,
+       "not_completed": 0,
+       "refuted": 1
+      }
+     }
+    },
+    "exit": 0,
+    "fixture_ok": true,
+    "message": null,
+    "roots_manifest_problems": [],
+    "seconds": 16.5,
+    "verdicts": {
+     "NOT1": {
+      "K0": "held on one instance (no D4 audit in this group)",
+      "K3": "refuted (no D4 audit in this group)"
+     }
+    }
+   },
+   "result": "PASS"
+  }
+ ],
+ "draw_seeds_sha256": "b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958",
+ "format": "layered-analysis-defects/1",
+ "lean": {
+  "path": "/tmp/claude-0/-home-user-kernel-R/3fade9bc-3b00-50fc-bf7c-9bbd253ba330/scratchpad/lean/lean-4.35.0-linux/bin/lean",
+  "sha256": "bf8d54e4714cc4b03d3f6bb34c83b7202b87e49c8bfcbff6895c085bb90ceb38"
+ },
+ "script_sha256": "16c1a338a842dc9ea0bc3b37c5687cbfdc6fa0d4f5543977eef03abd86f2cb96",
+ "tree_head": "f679ac54b11ffcb728ef581797a54d384211e094"
+}

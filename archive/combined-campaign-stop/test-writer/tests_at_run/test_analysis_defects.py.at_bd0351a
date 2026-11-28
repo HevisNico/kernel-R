@@ -1,0 +1,2673 @@
+"""Reproduction tests for the defects D8, D9 and D10 of analysis.py, written from the defect descriptions and the code
+at ef374ccd, not from the fix.
+
+  python -B tests/test_analysis_defects.py [OUT.json]
+
+Each case builds small roots in a temporary folder from the run2 test roots and runs analysis.py's real entry point
+(`analysis.py test OUTDIR ROOT ... times=bare`) as a subprocess. Lean 4.35.0 (the pinned binary) must be on PATH:
+the entry point builds the kernel library and regenerates each seal with stage_d6.py. No case needs ngspice.
+
+Sources, fetched by branch name only from this clone's `origin` into temporary repositories:
+- the roots: evidence/devtest-run2-K05 (out_K05: NOT1_6212, NOT1_6220) and evidence/devtest-run2-K06 (out_K06: the
+  control DUPX_NOT1_6212). Set LAYERED_DEFECT_SOURCES to a folder holding out_K05 and out_K06 to skip this fetch.
+- the seal log: evidence/devtest-seals2-K05, pushed into a local bare repository. Each root's PLAN.json then names
+  that bare repository as its seal_push remote, and its push_times.log holds the GitHub push times recorded in
+  dev/equiv/b/run2/RESULTS_times_github_ef374ccd.json. So `times=bare` gives the same seal-log verdicts as the
+  GitHub run, offline.
+Every file a case changes on purpose is re-declared in the SHA256SUMS that lists it, except in the D10 cases, where
+the mismatch is the point. So the roots stay consistent for a fix that verifies the manifests. Each case records
+`roots_manifest_problems`, the test's own check of every line of every manifest (SHA256SUMS*, SHA256SUMS.instances
+included) of its roots. It is ASSERTED: empty in every case except one_byte_in_comparison and listed_file_missing,
+where it must be exactly the file tampered with (`fixture_ok`).
+
+Cases (a defect case passes only when the analysis behaves as the fix must; at ef374ccd each defect case fails):
+- D8 planned_seed_not_started (test mode, no draw): K05 with seed 6230 added to NOT1 in PLAN.json (no folder).
+  Must: exit 0, each level's rows of NOT1 sum to 3 (the planned size), and a not_run entry for NOT1_6230 at K0 and K3.
+- D8 planned_machine_no_root (test mode, no draw): K06 alone. Its PLAN.json names K05 as the home machine of
+  NOT1_6212, and K05 has no root. Must: exit 0 (no refusal) and a not_run entry naming NOT1_6212.
+- D8 draw_machine_without_root: the dummy draw dev/freeze/DRAW_dummy.json (NOT1 6212, 6213 over 12 machines) split by
+  plan_split3.py with campaign_template.json, as in dev/freeze/PROOF.md: K01 holds NOT1_6212, K02 NOT1_6213, K03 the
+  duplicate of NOT1_6212. Only K01's root is given (out_K05 with its PLAN.json replaced by PLAN_K01.json byte for
+  byte, NOT1_6220 removed), with draw=DRAW_dummy.json. Must: exit 0, NOT1 rows sum to 2 at each level, and a not_run
+  entry for NOT1_6213. (NOT1_6212 is not sealed there: the plan's seal branch evidence/combined-seals-K01 does not
+  exist. That is not asserted either way.)
+- D8 draw_duplicate_machine_only: only K03's root (out_K06 with PLAN_K03.json), with draw=. Must: exit 0, NOT1 rows
+  sum to 2, and not_run entries for NOT1_6212 and NOT1_6213 at each level.
+- D9 same_root_30_times: K05 given 30 times by the same path. Must: refused, no RESULTS.json counting NOT1 more than
+  twice, and no verdict "established".
+- D9 draw_same_machine_twice: two copies of the K01 draw root (see draw_machine_without_root) at two paths, with
+  draw=. Must: refused, the output naming K01 (the plan match names each root's machine). Without draw=, test mode
+  names roots machine_<k>, so the same machine is caught as a home instance given twice (same_machine_two_paths).
+- D9 same_machine_two_paths: two copies of K05 at two paths. Must: the same.
+- D9 home_instance_twice: K05 and a second root (out_K07: K05 without NOT1_6220, with its own seal branch, its
+  records' seal_log branch and plan text changed to match) that also holds NOT1_6212. Must: the same.
+- D10 one_byte_in_comparison: one byte of NOT1_6212/N0/comparison.json changed ("cell_bits": 2 -> 3), its manifest
+  kept. Must: refused, the output naming "N0/comparison.json".
+- D10 listed_file_missing: NOT1_6212/N2/extract/extract.json deleted, still listed, with no declaration. Must:
+  refused, the output naming "extract.json".
+- D10 stopped_mid_instance: K05 as a machine stopped during NOT1_6220's round N2. The end-of-run files of the root
+  (SHA256SUMS, SHA256SUMS.instances, RESULT*.json, DONE, INSTANCES_DONE, INVENTORY_END) are removed, and so are
+  NOT1_6220/SHA256SUMS, N2, N3 and their logs. Its status.json has N2 "running" and no C2, N3, C3. One letter of
+  N1/noisy_record.json is changed (word 1/0/0 "ssFF" -> "sFFF"), and N1/comparison.json is recomputed with
+  compare_d2.py, which gives "refuted". Must: exit 0, NOT1_6220 in the K3 refuted row, its instance row's K3 refuted
+  and flagged (a key or text "manifest_not_final" / "manifest not final"), and NOT1_6212 held at K0 and K3.
+- draw standin_*: a real draw stands in for the campaign's (see `standin`: quicknet round 1000000 as published, the
+  announce push time 600 s before its time, draw_seeds.draw over the pinned EXCLUDED.json with NOT1=2 ANDOR3=1
+  XOR3=1, DRAW_ANNOUNCE.txt in mode test, passed as draw=, excluded=, announce=). The root is K03's of that draw
+  (out_K05 with the plan's PLAN.json and no instance or U_ folder). standin_draw_valid must give exit 0 with every
+  planned instance not run; each mutation (one seed changed; the push time +3 s; one signature byte; an exclusion
+  list that is not a superset of the pinned one; one whose bytes are not the announced ones) must be refused, and
+  counts as passed only if standin_draw_valid passed in the same run (so a refusal of the arguments or of the root
+  does not count).
+  Not exercised: the push time read from GitHub, the round fetched from drand.
+- E2 standin_activity_*: the stand-in draw with activity=PATH, a JSON list of the raw GitHub activity items of the
+  announce branch (activity_type, after, before, ref, timestamp). clean: one branch_creation whose "after" is the
+  announce commit, at announce.push_utc; must be accepted. redone: a branch_creation of another commit an hour
+  earlier, its branch_deletion, then the branch_creation of the announce commit that DRAW.json uses; must be refused.
+  force_push: the clean creation, then a force_push; must be refused. The two refusals count only if clean passed in
+  the same run. Not exercised: reading the activity from GitHub (campaign and rehearsal).
+- beacon draw_reference: a stable reference. Fixed inputs: round 1000000's published signature (its value checked as
+  sha256 of it), the fixture tests/fixtures/REFERENCE_EXCLUDED.json (a small test list, not the campaign's), sizes
+  2/1/1. The seeds are hard-coded (REFERENCE_SEEDS), established by hand from the hash trace written beside them and
+  re-derived in the case by a minimal SHA-256 loop written there, independent of draw_seeds.py; draw_seeds.draw must
+  give the same. It exercises both rejections (an excluded seed, an excluded noise seed).
+- INTEGRATION on the pinned list: standin_draw_valid also checks that no drawn seed or noise seed of one is in the
+  pinned EXCLUDED.json; and each case gated on a control must reach its own check (REACHES: the check's words in the
+  refusal), not be refused earlier.
+- beacon *: one signed drand value has several writings the verifiers accept (upper case, mixed case; spaces and a 0x
+  prefix pass bytes.fromhex), and draw_seeds.draw hashes the string as given. beacon_canonical (control): the
+  lowercase draw gives the seeds of the ef374ccd formula over the pinned list (derived at run time). beacon_<writing>: draw_seeds.draw (the narrowest real function) on that writing
+  must raise or give the canonical seeds. sizes_permutations: the sizes dict in all 6 orders, at 166 per group (the
+  smallest equal sizes where the groups collide at round 1000000), must give identical seeds. standin_beacon_<writing>:
+  the analysis's entry point on a DRAW.json written that way (seeds drawn on that writing, a root matching its plan)
+  must refuse it, or accept it with the canonical seeds; gated on standin_draw_valid. That DRAW.json is built as a
+  forger would build it, with the ef374ccd seed formula inline (forger_groups), not with the pinned draw_seeds.py,
+  which may refuse the writing; a fixture that raises records setup_error and fails the case.
+- X1 *: one signature has several byte strings that decode to the same point (zero bytes in front). The real function
+  beacon_verify.verify must accept round 1000000 as published (control) and refuse it with 00, 0000 or 000000 in
+  front (value = sha256 of the padded bytes). standin_signature_<pad>: a forged DRAW.json with that signature, its value
+  as beacon and randomness, and the seeds a forger draws on it (forger_groups); the analysis must refuse it.
+  standin_signature_flip: one signature byte flipped, value and seeds from it; the refusal must come from the
+  signature check ("does not verify against the pinned quicknet key" or a decoding failure). The earlier
+  standin_signature_byte (flip only, value kept) stays. verify_other_round and standin_signature_other_round present
+  round 20000000's valid signature as round 1000000's (value = sha256 of it, the forger's seeds): the point decodes and
+  is in the subgroup, so the refusal must come from the pairing itself (no decoding failure).
+- X2 *: plan_split3.py run as a command on the DRAW.json file (json.loads sorts the keys) must give, at 6/6/6 and at
+  60/32/37, the same 12 plans as plan_split3.split of the draw in memory (the analysis's expected plans).
+  standin_plans_from_command: the 6/6/6 stand-in with plans from the command, a root for each machine holding remote
+  duplicates, draw=; must be accepted (exit 0). Gated on standin_draw_valid.
+- R *: the rehearsal draw (round 1000000, 6/6/6, mode rehearsal, the pinned list) and a campaign draw on round
+  20000000 (n 2/1/1, mode test), each with its announce, excluded file and clean activity, passed offline as draw=,
+  excluded=, announce=, activity= and rehearsal_draw=, rehearsal_excluded=, rehearsal_announce=, rehearsal_activity=;
+  one root, the first campaign machine holding a home instance (out_K05, no instance folder). rehearsal_full_list
+  (control): the campaign list is the pinned list plus every rehearsal seed S and 10 S + 0..3; exit 0. Then one S left
+  out, one 10 S + 1 left out (each refused and named), and the rounds swapped so the rehearsal's announce is later
+  (refused). The mutations count only if the control passed. Not tested: campaign mode without rehearsal_draw= (campaign
+  mode refuses these TEST roots before any draw check).
+- E1 round_own_check_failed: K05 with NOT1_6220's round N2 left as the driver leaves a run stopped by its own check
+  (see failed_round: the record's status "failed: the tail leak must be set before it starts", N2 failed with why
+  "exit 1", no C2, no N2/comparison.json, an unlisted placeholder N2/trace.raw (a real header, data cut off; only its
+  presence matters), the manifests and RESULT_INSTANCES.json rebuilt by the driver's rules). Must:
+  exit 0, NOT1_6220 among the K3 refuted instances, and a node of counts.NOT1.K3 naming it with its status and "own
+  check" in its key path or text; NOT1_6212 held at K0 and K3.
+- E1 round_simulator_ended (the twin): the same (placeholder trace.raw included) with "failed: the simulator ended during: tran 1n 2n". Must: exit 0,
+  NOT1_6220 in the K3 not_completed row and not refuted; NOT1_6212 held. (Expected to pass before the fix too.)
+- control k05_alone and control k05_with_dupx (K05 + K06): must pass before and after the fix: exit 0 and NOT1
+  counted 2 at K0 and K3 (DUPX_ folders are controls, never counted).
+
+- L list_<side>_<list>_<mutation> (see the L section in the code for the fixture and the shim): the exclusion lists
+  must be exactly what the blocks build. side: "blocks" (FREEZE.txt's [block check-rehearsal2-list] / [block
+  check-list], run verbatim after [block rehearsal2-list] / [block list]) or "funcs" (analysis.check_draw offline, then
+  check_rehearsal_seeds with strict=False, in rehearsal mode on rehearsal 2's list or campaign mode on the campaign's
+  with second_scan=). list: rehearsal (EXCLUDED_REHEARSAL2.json) or campaign (EXCLUDED_SECOND.json). Mutations:
+  exact (the control: accepted); extra (one integer added); drop_noise (one noise seed 10 S + j removed); drop_scan (one
+  scan seed removed: for rehearsal 2 a pinned seed, refused by check_draw's superset check; for the campaign one of the
+  scan's seeds beyond the pinned list); field (the "added" field's draw sha256 changed); campaign only: no_scan
+  (EXCLUDED_SECOND_SCAN.json absent, or no second_scan=) and scan_short (the scan without a pinned seed that rehearsal 1
+  drew, so the list rebuilt from it is byte-equal to the exact one). Seed mutations recompute count and seeds_sha256.
+  Each mutation is gated on its exact case and must reach its own check: in the blocks "THE LIST IS WRONG", or a
+  refusal of the analysis check the block calls, with no traceback (no_scan: a refusal naming
+  EXCLUDED_SECOND_SCAN.json); in the functions a refusal whose innermost frame among check_draw,
+  check_rehearsal_seeds and parse_announce is check_rehearsal_seeds (a helper it calls, such as check_exact_list, counts
+  as it), not its pre-existing inclusion check (drop_noise may be refused by that check if it names the seed); no_scan
+  and scan_short name second_scan, with messages different from each other and from the extra case's. Each refusal is
+  also pinned to the message substring of a5ba132b's check (REACHES).
+  campaign also r2_extra: rehearsal_excluded= with one extra integer (count and sha recomputed), rehearsal 2 drawn and
+  announced over it and the campaign list rebuilt from it by [block list]: refused by the exactness check of
+  rehearsal 2's list. The campaign's announces are /2 (format layered-draw-announce/2, the line second_scan_sha256
+  after excluded_sha256, naming second_scan='s sha256); rehearsal announces stay /1.
+  LAYERED_DEFECT_CAMPAIGN_ANNOUNCE=1 writes the campaign's in /1, for code from before the /2 change (the report
+  records the setting).
+- L announce_rehearsal1_parses: rehearsal 1's real /1 DRAW_ANNOUNCE.txt parses with analysis.parse_announce.
+- L format_*: with the exact lists, a campaign /1 announce, a rehearsal /2 announce, a campaign /2 announce without
+  second_scan_sha256, and one naming another scan's sha256: each refused (gated on list_funcs_<mode>_exact).
+- L announce_block_exact / announce_block_scan_byte: [block announce] verbatim in campaign mode, every
+  https://github.com/HevisNico/kernel-R URL sent to a local bare repository (url.insteadOf in a test GIT_CONFIG_GLOBAL,
+  GIT_ALLOW_PROTOCOL=file: no network). Exact: pushed to the twin, a /2 announce naming the scan's sha256. One byte of
+  the scan copy changed: refused, with no commit in the new repository and nothing pushed.
+  LAYERED_DEFECT_ONLY=L runs these cases only (no roots fetched, no Lean needed).
+
+A refusal is matched on exit code != 0 and the substring "refused" (every refusal of analysis.py starts with
+"refused:"), plus, for D10, the name of the file. A not_run entry is a dict with a value starting with "not_run" or "not run"
+beside a value naming the instance, or a key "not_run" (or "not run") whose content names it. The draw argument's
+name is the constant DRAW_ARG ("draw"). No other wording of the fix is assumed.
+"""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+HERE = Path(__file__).resolve().parents[1]
+REPO = HERE.parents[1]
+ANALYSIS = HERE / "analysis.py"
+PY = sys.executable
+SEAL_BRANCH = "evidence/devtest-seals2-K05"
+DRAW_ARG = "draw"                                     # the fix's argument: draw=PATH (a DRAW.json)
+DRAW = HERE / "dev" / "freeze" / "DRAW_dummy.json"    # NOT1 [6212, 6213] over 12 machines
+TIMES_RECORD = HERE / "dev" / "equiv" / "b" / "run2" / "RESULTS_times_github_ef374ccd.json"
+
+
+def sha(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def git(*a, cwd=None):
+    return subprocess.run(["git", *a], cwd=cwd, check=True, capture_output=True, text=True).stdout
+
+
+def origin_url():
+    return git("remote", "get-url", "origin", cwd=REPO).strip()
+
+
+# ------------------------------------------------------------------------------------------------ the sources
+
+def sources(tmp):
+    given = os.environ.get("LAYERED_DEFECT_SOURCES")
+    if given:
+        return Path(given)
+    out = tmp / "sources"
+    work = tmp / "fetch"
+    work.mkdir(parents=True)
+    git("init", "-q", cwd=work)
+    out.mkdir()
+    for m in ("K05", "K06"):
+        git("fetch", "-q", origin_url(), f"refs/heads/evidence/devtest-run2-{m}", cwd=work)
+        tar = subprocess.run(["git", "archive", "FETCH_HEAD", f"out_{m}"], cwd=work, check=True, capture_output=True).stdout
+        subprocess.run(["tar", "-x", "-C", str(out)], input=tar, check=True)
+    return out
+
+
+def push_times():
+    """{commit: GitHub push time} recorded for the K05 seal log."""
+    r = json.loads(TIMES_RECORD.read_text())
+    return {i["seal"]["log"]["commit"]: i["seal"]["log"]["pushed_utc"] for i in r["instances"]
+            if i["machine"] == "machine_3"}
+
+
+def bare_remote(tmp, branch):
+    """A local bare repository holding the K05 seal log under `branch`, with a push_times.log."""
+    b = tmp / "remotes" / (branch.replace("/", "_") + ".git")
+    if b.exists():
+        return b
+    b.mkdir(parents=True)
+    git("init", "-q", "--bare", cwd=b)
+    git("fetch", "-q", origin_url(), f"refs/heads/{SEAL_BRANCH}:refs/heads/{branch}", cwd=b)
+    tip = git("rev-parse", f"refs/heads/{branch}", cwd=b).strip()
+    chain = git("rev-list", "--first-parent", "--reverse", tip, cwd=b).split()
+    tm = push_times()
+    assert set(tm) <= set(chain), (tm, chain)
+    (b / "push_times.log").write_text("".join(f"{c} refs/heads/{branch} {tm[c]}\n" for c in chain if c in tm))
+    return b
+
+
+# ------------------------------------------------------------------------------------------------ root edits
+
+def manifests(root):
+    """Every manifest of a root: the files named SHA256SUMS* (SHA256SUMS, SHA256SUMS.instances), deepest first."""
+    fs = [p for p in Path(root).rglob("SHA256SUMS*") if p.is_file() and "lean_build" not in p.parts]
+    return sorted(fs, key=lambda p: (-len(p.parts), str(p)))
+
+
+def redeclare(root, rel):
+    """Re-declare `rel` (relative to root) in every manifest of the root that lists it, then, in turn, each manifest
+    so changed: bottom-up, the instance SHA256SUMS, then SHA256SUMS.instances, then the root SHA256SUMS."""
+    rel_p = root / rel
+    for sums in manifests(root):
+        base = sums.parent
+        try:
+            r = rel_p.relative_to(base)
+        except ValueError:
+            continue
+        lines, hit = [], False
+        for line in sums.read_text().splitlines():
+            h, name = line.split("  ", 1)
+            if name == str(r):
+                h, hit = sha(rel_p), True
+            lines.append(f"{h}  {name}")
+        if hit:
+            sums.write_text("".join(x + "\n" for x in lines))
+            redeclare(root, sums.relative_to(root))
+
+
+def drop_lines(root, prefix):
+    """Remove the lines naming `prefix`/... from the root-level manifests (SHA256SUMS, SHA256SUMS.instances)."""
+    for f in ("SHA256SUMS", "SHA256SUMS.instances"):
+        p = root / f
+        if p.exists():
+            keep = [x for x in p.read_text().splitlines() if not x.split("  ", 1)[1].startswith(prefix + "/")]
+            p.write_text("".join(x + "\n" for x in keep))
+    redeclare(root, "SHA256SUMS.instances")
+
+
+def edit_plan(root, edit):
+    p = root / "PLAN.json"
+    d = json.loads(p.read_text())
+    edit(d)
+    p.write_text(json.dumps(d, indent=1) + "\n")
+    redeclare(root, "PLAN.json")
+
+
+def place(src, dst, tmp, branch=None):
+    """Copy a source root to dst, its seal_push remote pointed at a local bare repository."""
+    shutil.copytree(src, dst, symlinks=True)
+    plan = json.loads((dst / "PLAN.json").read_text())
+    sp = plan.get("seal_push") or {}
+    if sp and not sp.get("dry"):
+        br = branch or sp["branch"]
+        rem = bare_remote(tmp, br)
+
+        def e(d):
+            d["seal_push"].update(remote=str(rem), branch=br)
+        edit_plan(dst, e)
+    return dst
+
+
+# ------------------------------------------------------------------------------------------------ running
+
+def manifest_problems(roots):
+    """Every manifest line (SHA256SUMS*) of the roots whose file is missing or differs (the test's own check)."""
+    bad = []
+    for root in dict.fromkeys(roots):
+        for sums in manifests(root):
+            for line in sums.read_text().splitlines():
+                h, name = line.split("  ", 1)
+                f = sums.parent / name
+                if not f.exists() or sha(f) != h:
+                    bad.append(f"{Path(root).name}/{f.relative_to(root)}: {'missing' if not f.exists() else 'differs'}"
+                               f" (listed in {sums.relative_to(root)})")
+    return bad
+
+
+def run(tmp, roots, label, extra=()):
+    out = tmp / f"OUT_{label}"
+    problems = manifest_problems(roots)
+    t0 = time.time()
+    r = subprocess.run([PY, "-B", str(ANALYSIS), "test", str(out), *map(str, roots), "times=bare", *extra],
+                       cwd=HERE, capture_output=True, text=True)
+    res = json.loads((out / "RESULTS.json").read_text()) if r.returncode == 0 and (out / "RESULTS.json").exists() else None
+    obs = dict(roots_manifest_problems=problems, exit=r.returncode, seconds=round(time.time() - t0, 1),
+               message=(r.stderr.strip().splitlines() or [""])[-1][:600] if r.returncode else None)
+    if res is not None:
+        obs["counts"] = {g: {lv: dict(instances=x["instances"], counted=x["counted"],
+                                      **{k: x[k]["n"] for k in ("held", "refuted", "not_completed", "no_prediction")})
+                             for lv, x in v.items()} for g, v in res["counts"].items()}
+        obs["verdicts"] = {g: {lv: v[lv]["verdict"] for lv in ("K0", "K3")} for g, v in res["groups"].items()}
+    return r, res, obs
+
+
+def refused(r):
+    return r.returncode != 0 and "refused" in (r.stdout + r.stderr)
+
+
+def not_inflated(res, group="NOT1", most=2):
+    if res is None:
+        return True
+    c = res["counts"].get(group, {})
+    return all(c[lv]["counted"] <= most for lv in c)
+
+
+def entries(x):
+    if isinstance(x, dict):
+        yield x
+        for v in x.values():
+            yield from entries(v)
+    elif isinstance(x, list):
+        for v in x:
+            yield from entries(v)
+
+
+NOT_RUN = ("not run", "not_run")
+
+
+def not_run_entry(res, *names, where=None):
+    """An entry marking one of `names` as not run: a dict with a value starting with "not run" (or "not_run", e.g.
+    "not run (home root absent)") beside a value naming it, or a key "not_run" (or "not run") whose content names it."""
+    for e in entries(where if where is not None else res):
+        flat = [v for v in e.values() if isinstance(v, str)]
+        if any(v.startswith(NOT_RUN) for v in flat) and any(n in v for v in flat for n in names):
+            return e
+        for k in NOT_RUN:
+            if k in e and any(n in json.dumps(e[k]) for n in names):
+                return {k: e[k]}
+    return None
+
+
+def rows_sum(res, group, size):
+    """Each level's rows of counts[group] sum to `size`, and `instances` is `size`."""
+    c = (res or {}).get("counts", {}).get(group)
+    if not c:
+        return False
+    return all(x["instances"] == size and sum(v["n"] for v in x.values() if isinstance(v, dict) and "n" in v) == size
+               for x in c.values())
+
+
+# ------------------------------------------------------------------------------------------------ the cases
+
+def case_k05_alone(tmp, src):
+    r, res, obs = run(tmp, [place(src / "out_K05", tmp / "a" / "out_K05", tmp)], "k05_alone")
+    ok = r.returncode == 0 and res is not None and all(res["counts"]["NOT1"][lv]["counted"] == 2 for lv in ("K0", "K3"))
+    return ok, obs
+
+
+def case_k05_with_dupx(tmp, src):
+    roots = [place(src / "out_K05", tmp / "a" / "out_K05", tmp), place(src / "out_K06", tmp / "a" / "out_K06", tmp)]
+    r, res, obs = run(tmp, roots, "k05_with_dupx")
+    ok = r.returncode == 0 and res is not None and all(res["counts"]["NOT1"][lv]["counted"] == 2 for lv in ("K0", "K3"))
+    return ok, obs
+
+
+def case_planned_seed_not_started(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    edit_plan(root, lambda d: d["groups"]["NOT1"]["seeds"].append(6230))
+    r, res, obs = run(tmp, [root], "planned_seed_not_started")
+    ok = r.returncode == 0 and rows_sum(res, "NOT1", 3) and all(
+        not_run_entry(res, "NOT1_6230", where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3"))
+    return ok, obs
+
+
+def case_planned_machine_no_root(tmp, src):
+    r, res, obs = run(tmp, [place(src / "out_K06", tmp / "a" / "out_K06", tmp)], "planned_machine_no_root")
+    found = not_run_entry(res, "NOT1_6212") if res is not None else None
+    obs["not_run_entry"] = found
+    return r.returncode == 0 and found is not None, obs
+
+
+END_OF_RUN = ("SHA256SUMS", "SHA256SUMS.instances", "RESULT.json", "RESULT_INSTANCES.json", "DONE", "INSTANCES_DONE",
+              "INVENTORY_END")
+
+
+def case_stopped_mid_instance(tmp, src):
+    """K05 stopped during NOT1_6220's round N2: no final manifest, no N2/N3, a refuting N1."""
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    d = root / "NOT1_6220"
+    for f in END_OF_RUN:                                    # a stopped driver writes none of its end-of-run files
+        (root / f).unlink(missing_ok=True)
+    (d / "SHA256SUMS").unlink()
+    for x in ("N2", "N3"):
+        shutil.rmtree(d / x)
+    for x in ("N2.log", "N3.log", "C2.log", "C3.log"):
+        (d / x).unlink(missing_ok=True)
+    rec = d / "N1" / "noisy_record.json"
+    b = rec.read_bytes()
+    assert b.count(b'"ssFF"') == 1
+    rec.write_bytes(b.replace(b'"ssFF"', b'"sFFF"'))       # one letter: position 1, s -> F
+    c = subprocess.run([PY, "-B", str(HERE / "compare_d2.py"), str(d / "seal"), str(HERE / "specs" / "not1.json"),
+                        str(rec), "noisy", str(d / "N1" / "comparison.json")], cwd=HERE, capture_output=True, text=True)
+    assert c.returncode == 0 and json.loads((d / "N1" / "comparison.json").read_text())["verdict"] == "refuted", c.stderr
+    st = json.loads((d / "status.json").read_text())
+    for k in ("C2", "N3", "C3"):
+        st["steps"].pop(k, None)
+    st["steps"]["N2"] = {k: v for k, v in st["steps"]["N2"].items() if k not in ("ended", "outputs", "cpu_s", "wall_s")}
+    st["steps"]["N2"]["status"] = "running"
+    st["steps"]["N1"]["outputs"]["N1/noisy_record.json"] = sha(rec)
+    st["steps"]["C1"]["outputs"]["N1/comparison.json"] = sha(d / "N1" / "comparison.json")
+    (d / "status.json").write_text(json.dumps(st, indent=1, sort_keys=True) + "\n")
+    r, res, obs = run(tmp, [root], "stopped_mid_instance")
+    if res is None:
+        return False, obs
+    k3 = res["counts"]["NOT1"]["K3"]
+    row = next((i for i in res["instances"] if i["instance"] == "NOT1_6220"), {})
+    k3_row = row.get("K3") or {}
+    flag = k3_row.get("refuted") is True and any(x in json.dumps(k3_row) for x in ("manifest not final", "manifest_not_final"))
+    obs["NOT1_6220_K3"] = k3_row
+    ok = (r.returncode == 0 and "NOT1_6220" in k3["refuted"]["list"] and flag
+          and all("NOT1_6212" in res["counts"]["NOT1"][lv]["held"]["list"] for lv in ("K0", "K3")))
+    return ok, obs
+
+
+def draw_plans(tmp):
+    """The plans plan_split3.py writes from the dummy draw and campaign_template.json (as in dev/freeze/PROOF.md)."""
+    out = tmp / "draw_plans"
+    if not out.exists():
+        subprocess.run([PY, "-B", str(HERE / "plan_split3.py"), str(DRAW), str(HERE / "campaign_template.json"), str(out)],
+                       cwd=HERE, check=True, capture_output=True)
+    return out
+
+
+def draw_root(src, dst, tmp, source, plan, plans=None, controls=True):
+    """A root of the dummy draw's machine `plan` (PLAN_Knn.json), from a run2 root: its PLAN.json is the plan
+    plan_split3.py writes, byte for byte (seal_push remote and branch included), re-declared in SHA256SUMS; the
+    instance folders the plan does not hold are removed."""
+    shutil.copytree(src / source, dst, symlinks=True)
+    plans = plans or draw_plans(tmp)
+    want = json.loads((plans / plan).read_text())
+    keep = {f"{g}_{s}" for g, v in want["groups"].items() for s in v.get("seeds", [])}
+    gone = [st.parent for st in sorted(dst.glob("*/status.json")) if st.parent.name not in keep]
+    if not controls:                                        # also the controls (they belong to the old seeds)
+        gone += sorted(dst.glob("U_*")) + sorted(dst.glob("DUPX_*"))
+    for d in gone:
+        shutil.rmtree(d)
+        drop_lines(dst, d.name)
+    shutil.copyfile(plans / plan, dst / "PLAN.json")
+    redeclare(dst, "PLAN.json")
+    return dst
+
+
+def case_draw_machine_without_root(tmp, src):
+    root = draw_root(src, tmp / "a" / "out_K01", tmp, "out_K05", "PLAN_K01.json")
+    r, res, obs = run(tmp, [root], "draw_machine_without_root", extra=[f"{DRAW_ARG}={DRAW}"])
+    ok = r.returncode == 0 and rows_sum(res, "NOT1", 2) and all(
+        not_run_entry(res, "NOT1_6213", where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3"))
+    return ok, obs
+
+
+def case_draw_duplicate_machine_only(tmp, src):
+    root = draw_root(src, tmp / "a" / "out_K03", tmp, "out_K06", "PLAN_K03.json")
+    r, res, obs = run(tmp, [root], "draw_duplicate_machine_only", extra=[f"{DRAW_ARG}={DRAW}"])
+    ok = r.returncode == 0 and rows_sum(res, "NOT1", 2) and all(
+        not_run_entry(res, n, where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3") for n in ("NOT1_6212", "NOT1_6213"))
+    return ok, obs
+
+
+# ------------------------------------------------------------------------------------------------ a real draw (stand-in)
+# drand quicknet round 1000000 as published (tests/test_beacon_published.py), the announce push time set 600 s before
+# its time, so that beacon_verify.round_after gives exactly 1000000; draw_seeds.draw over the pinned EXCLUDED.json with
+# small sizes; DRAW_ANNOUNCE.txt in mode test. What is exercised: the BLS signature, randomness = sha256(signature),
+# the round rule, the recomputation of the seeds and bytes, the exclusion list's sha and superset checks, the plans
+# from the recomputed draw. What is not: the push time read from GitHub and the round fetched from drand.
+
+ROUND_1M = dict(round=1000000, randomness="b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3",
+                signature="83ad29e4c409f9470fc2ef02f90214df49e02b441a1a241a82d622d9f608ef98fd8b11a029f1bee9d9e83b45088abe72")
+STANDIN_SIZES = dict(NOT1=2, ANDOR3=1, XOR3=1)
+STANDIN_COMMIT = hashlib.sha1(b"defect test stand-in announce").hexdigest()
+
+
+STANDIN_BRANCH = "evidence/defect-test-standin-draw"
+
+
+def activity_items(kind, commit, t0, utc):
+    """Raw GET /repos/{o}/{r}/activity items of the announce branch (the keys sealpush.github_times reads)."""
+    ref, zero = f"refs/heads/{STANDIN_BRANCH}", "0" * 40
+    other = hashlib.sha1(b"defect test: the first, deleted announce").hexdigest()
+    item = lambda t, typ, after, before=zero: dict(activity_type=typ, after=after, before=before, ref=ref, timestamp=utc(t))
+    if kind == "clean":
+        return [item(t0, "branch_creation", commit)]
+    if kind == "redone":                    # created, deleted, created again later; the DRAW.json uses the second
+        return [item(t0 - 3600, "branch_creation", other), item(t0 - 1800, "branch_deletion", zero, other),
+                item(t0, "branch_creation", commit)]
+    if kind == "force_push":                # the clean creation, then a force push on the branch
+        return [item(t0, "branch_creation", commit), item(t0 + 60, "force_push", other, commit)]
+    raise ValueError(kind)
+
+
+# One drand value, several writings: the verifiers compare the randomness case-insensitively (and bytes.fromhex accepts
+# spaces), while draw_seeds.draw hashes the beacon string as given.
+WRITINGS = {
+    "upper": lambda h: h.upper(),
+    "mixed": lambda h: "".join(c.upper() if i % 2 else c for i, c in enumerate(h)),
+    "spaces": lambda h: " ".join(h[i:i + 2] for i in range(0, len(h), 2)),
+    "0x": lambda h: "0x" + h,
+}
+def canonical_seeds():
+    """The stand-in's seeds, derived at run time (they follow the pinned EXCLUDED.json, which each rescan changes): the
+    seed formula as written at ef374ccd (forger_groups, inline), on the canonical lowercase value of round 1000000, over
+    the pinned list, at STANDIN_SIZES. At 2/1/1 no group collides, so the group order does not matter."""
+    ex = json.loads((HERE / "EXCLUDED.json").read_text())
+    return forger_groups(ROUND_1M["randomness"], ROUND_1M["round"], ex, dict(STANDIN_SIZES))[0]
+COLLIDING_SIZES = dict(NOT1=166, ANDOR3=166, XOR3=166)   # the smallest equal sizes where groups collide at round 1000000
+
+
+def forger_groups(beacon, rnd, excluded, sizes):
+    """The seed formula as draw_seeds.py had it at ef374ccd, inline: S = 10000 + sha256("<beacon>|<round>|<group>|<k>")
+    mod 90000, the beacon string hashed as given, groups in the order given, `drawn` shared across groups. It is how a
+    forger builds a DRAW.json without the fixed draw_seeds.py (which refuses a non-canonical writing)."""
+    ex, drawn, groups, tried = set(excluded["seeds"]), set(), {}, {}
+    for g, n in sizes.items():
+        out, k = [], 0
+        while len(out) < n:
+            s_ = 10000 + int.from_bytes(hashlib.sha256(f"{beacon}|{rnd}|{g}|{k}".encode()).digest(), "big") % 90000
+            k += 1
+            if s_ in ex or s_ in drawn or any(10 * s_ + j in ex for j in range(4)):
+                continue
+            out.append(s_)
+            drawn.add(s_)
+        groups[g], tried[g] = out, k
+    return groups, tried
+
+
+def forged_draw(canonical, written, excluded, sizes=None, signature=None):
+    """The canonical stand-in DRAW (its keys as the pinned draw_seeds writes them), with the beacon and
+    beacon_round.randomness set to `written` (another writing, or the value of another signature) and the seeds a
+    forger draws on it; `signature`, if given, replaces beacon_round.signature."""
+    D = json.loads(json.dumps(canonical))
+    groups, tried = forger_groups(written, ROUND_1M["round"], excluded, dict(sizes or STANDIN_SIZES))
+    D.update(beacon=written, groups=groups)
+    if "candidates_tried" in D:
+        D["candidates_tried"] = tried
+    D["beacon_round"]["randomness"] = written
+    if signature is not None:
+        D["beacon_round"]["signature"] = signature
+    return D
+
+
+def forged_signature(kind):
+    """Signature bytes a forger can publish for round 1000000: zero bytes in front ("pad00", "pad0000", ...), or one
+    byte flipped ("flip"). Returns (signature hex, value = sha256(signature bytes) hex)."""
+    sig = bytes.fromhex(ROUND_1M["signature"])
+    if kind.startswith("pad"):
+        sig = bytes.fromhex(kind[3:]) + sig
+    elif kind == "other_round":                              # a valid on-curve point: round 20000000's signature
+        sig = bytes.fromhex(ROUND_20M["signature"])
+    elif kind == "flip":
+        b = bytearray(sig)
+        b[10] ^= 1
+        sig = bytes(b)
+    else:
+        raise ValueError(kind)
+    return sig.hex(), hashlib.sha256(sig).hexdigest()
+
+
+def standin(tmp, seed_edit=False, push_shift_s=0, sig_flip=False, excluded="pinned", activity=None, writing=None,
+            sizes=None, sig_forge=None, plans_cmd=False):
+    """Write DRAW.json, DRAW_ANNOUNCE.txt and the excluded file of the stand-in draw, one mutation applied, and the
+    plans of the VALID draw. Returns (args, plans)."""
+    sys.path.insert(0, str(HERE))
+    import beacon_chain as BC
+    import beacon_verify as BV
+    import draw_seeds as DS
+    import plan_split3 as P3
+    import datetime
+    d = tmp / "draw"
+    d.mkdir(parents=True)
+    pinned_b = (HERE / "EXCLUDED.json").read_bytes()
+    pinned = json.loads(pinned_b)
+    t0 = BV.round_time(BC.QUICKNET, ROUND_1M["round"]) - 600
+    utc = lambda t: datetime.datetime.fromtimestamp(t, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    assert BV.round_after(BC.QUICKNET, utc(t0)) == ROUND_1M["round"]
+
+    sizes = dict(sizes or STANDIN_SIZES)
+
+    def make(ex, beacon=ROUND_1M["randomness"]):
+        D = DS.draw(beacon, ROUND_1M["round"], ex, dict(sizes))
+        D["beacon_round"] = dict(ROUND_1M, randomness=beacon)
+        D["announce"] = dict(branch=STANDIN_BRANCH, commit=STANDIN_COMMIT, push_utc=utc(t0))
+        return D
+
+    if writing is not None:
+        valid = forged_draw(make(pinned), WRITINGS[writing](ROUND_1M["randomness"]), pinned, sizes)
+    elif sig_forge is not None:
+        sig_hex, value = forged_signature(sig_forge)
+        valid = forged_draw(make(pinned), value, pinned, sizes, signature=sig_hex)
+    else:
+        valid = make(pinned)
+    plans = tmp / "draw_plans"                              # the plans of the draw as written (a matching root)
+    plans.mkdir()
+    for k, pl in enumerate(P3.split(valid, json.loads((HERE / "campaign_template.json").read_text()), 12)[0], start=1):
+        (plans / f"PLAN_K{k:02d}.json").write_bytes(DS.canon(pl))
+    ex_b, announced = pinned_b, hashlib.sha256(pinned_b).hexdigest()
+    D = valid
+    if excluded == "not_superset":                          # one seed less, consistent in itself and announced
+        seeds = pinned["seeds"][1:]
+        ex = dict(pinned, seeds=seeds, count=len(seeds), seeds_sha256=hashlib.sha256(DS.canon(seeds)).hexdigest())
+        ex_b = DS.canon(ex)
+        announced = hashlib.sha256(ex_b).hexdigest()
+        D = make(ex)
+    elif excluded == "sha_differs":                         # the same seeds, other bytes: not the announced file
+        ex_b = (json.dumps(pinned, indent=1, sort_keys=True) + "\n").encode()
+        assert json.loads(ex_b) == pinned and ex_b != pinned_b
+    D = json.loads(json.dumps(D))
+    if seed_edit:
+        D["groups"]["NOT1"][1] += 1
+    if push_shift_s:
+        D["announce"]["push_utc"] = utc(t0 + push_shift_s)
+    if sig_flip:
+        b = bytearray(bytes.fromhex(D["beacon_round"]["signature"]))
+        b[10] ^= 1
+        D["beacon_round"]["signature"] = b.hex()
+    (d / "DRAW.json").write_bytes(DS.canon(D))
+    (d / "EXCLUDED.json").write_bytes(ex_b)
+    if plans_cmd:                                          # the plans as the procedure makes them: the command, on the file
+        shutil.rmtree(plans)
+        subprocess.run([PY, "-B", str(HERE / "plan_split3.py"), str(d / "DRAW.json"), str(HERE / "campaign_template.json"),
+                        str(plans)], cwd=HERE, check=True, capture_output=True)
+    words = " ".join(f"{g}={n}" for g, n in sizes.items())
+    (d / "DRAW_ANNOUNCE.txt").write_text(f"format layered-draw-announce/1\nmode test\nexcluded_sha256 {announced}\n"
+                                         f"sizes {words}\n")
+    args = [f"{DRAW_ARG}={d / 'DRAW.json'}", f"excluded={d / 'EXCLUDED.json'}", f"announce={d / 'DRAW_ANNOUNCE.txt'}"]
+    if activity:
+        (d / "activity.json").write_text(json.dumps(activity_items(activity, STANDIN_COMMIT, t0, utc), indent=1) + "\n")
+        args.append(f"activity={d / 'activity.json'}")
+    return args, plans
+
+
+def standin_run(tmp, src, label, **mutation):
+    args, plans = standin(tmp, **mutation)
+    root = draw_root(src, tmp / "a" / "out_K03", tmp, "out_K05", "PLAN_K03.json", plans=plans, controls=False)
+    return run(tmp, [root], label, extra=args)
+
+
+# ------------------------------------------------------------------------------------------------ X1: padded signatures
+PADS = ("pad00", "pad0000", "pad000000")
+# Published by drand quicknet (tests/test_beacon_published.py): a valid signature, but of another round.
+ROUND_20M = dict(round=20000000, randomness="f39c98df5525968e6622e0c63edb3d1f9c5607cf780db78abdded36e4b3dba95",
+                 signature="96892582a33552a7b67ba44ef09c3ccd535bbebe760c93ecf45be8958d0c0f06390c6d19d7bf492eb806af7eef6b125c")
+
+
+def case_verify_other_round(tmp, src):
+    """beacon_verify.verify: round 20000000's signature (and its own randomness) presented as round 1000000's. The
+    point decodes and is in the subgroup; only the pairing can refuse it."""
+    sig_hex, value = forged_signature("other_round")
+    assert value == ROUND_20M["randomness"]
+    r = bv_verify(sig_hex, value)
+    ok = r.get("ok") is False and r.get("subgroups_ok") is True and r.get("signature_ok") is False and not r.get("why")
+    return ok, dict(verify=r)
+
+
+def bv_verify(sig_hex, value):
+    sys.path.insert(0, str(HERE))
+    import beacon_chain as BC
+    import beacon_verify as BV
+    return BV.verify(BC.QUICKNET, dict(round=ROUND_1M["round"], signature=sig_hex, randomness=value))
+
+
+def case_verify_signature_real(tmp, src):
+    """beacon_verify.verify (the real function) on round 1000000 as published: accepted."""
+    r = bv_verify(ROUND_1M["signature"], ROUND_1M["randomness"])
+    return r.get("ok") is True, dict(verify=r)
+
+
+def verify_pad_case(kind):
+    def case(tmp, src):
+        sig_hex, value = forged_signature(kind)
+        try:
+            r = bv_verify(sig_hex, value)
+        except Exception as e:                                   # a refusal by exception is a refusal
+            return True, dict(signature_prefix=sig_hex[:12], raised=repr(e)[:300])
+        return r.get("ok") is not True, dict(signature_prefix=sig_hex[:12], value=value, verify=r)
+    case.__name__ = f"case_verify_signature_{kind}"
+    return case
+
+
+def standin_sig_case(kind, want=None, avoid=()):
+    def case(tmp, src):
+        r, res, obs = standin_run(tmp, src, f"standin_signature_{kind}", sig_forge=kind)
+        obs["control_passed"] = STANDIN_CONTROL.get("ok", False)
+        text = r.stdout + r.stderr
+        ok = (refused(r) and obs["control_passed"] and (want is None or any(w in text for w in want))
+              and not any(a in text for a in avoid))
+        return ok, obs
+    case.__name__ = f"case_standin_signature_{kind}"
+    return case
+
+
+# ------------------------------------------------------------------------------------------------ X2: the plan split
+X2_SIZES = (dict(NOT1=6, ANDOR3=6, XOR3=6), dict(NOT1=60, ANDOR3=32, XOR3=37))
+
+
+def command_vs_split(tmp, sizes):
+    """plan_split3.py run as a command on the DRAW.json file, against plan_split3.split on the draw in memory (the
+    analysis's expected plans: plan_split3.split of the recomputed draw, the frozen template, 12 machines)."""
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as DS
+    import plan_split3 as P3
+    ex = json.loads((HERE / "EXCLUDED.json").read_text())
+    D = DS.draw(ROUND_1M["randomness"], ROUND_1M["round"], ex, dict(sizes))
+    (tmp / "DRAW.json").write_bytes(DS.canon(D))
+    subprocess.run([PY, "-B", str(HERE / "plan_split3.py"), str(tmp / "DRAW.json"), str(HERE / "campaign_template.json"),
+                    str(tmp / "plans")], cwd=HERE, check=True, capture_output=True)
+    mem = P3.split(D, json.loads((HERE / "campaign_template.json").read_text()), 12)[0]
+    diff = {}
+    for k, pl in enumerate(mem, start=1):
+        f = json.loads((tmp / "plans" / f"PLAN_K{k:02d}.json").read_text())
+        if f != pl:
+            diff[f"K{k:02d}"] = {key: dict(command=f.get(key), split=pl.get(key)) for key in sorted(set(f) | set(pl))
+                                 if f.get(key) != pl.get(key)}
+    return diff
+
+
+def plans_case(sizes):
+    def case(tmp, src):
+        diff = command_vs_split(tmp, sizes)
+        return not diff, dict(sizes=sizes, differing=json.loads(json.dumps(diff))) if diff else dict(sizes=sizes)
+    case.__name__ = "case_plans_command_" + "_".join(str(n) for n in sizes.values())
+    return case
+
+
+def case_standin_plans_from_command(tmp, src):
+    """The stand-in draw at 6/6/6, its plans made by the plan_split3.py command on the DRAW.json file; a root for each
+    machine holding remote duplicates (out_K06 with that plan, no instance, U_ or DUPX_ folder), with draw=."""
+    args, plans = standin(tmp, sizes=X2_SIZES[0], plans_cmd=True)
+    ks = [f.name for f in sorted(plans.glob("PLAN_K*.json")) if json.loads(f.read_text())["remote_duplicates"]]
+    roots = [draw_root(src, tmp / "a" / f"out_{f[5:8]}", tmp, "out_K06", f, plans=plans, controls=False) for f in ks]
+    r, res, obs = run(tmp, roots, "standin_plans_from_command", extra=args)
+    obs.update(machines=[f[5:8] for f in ks], control_passed=STANDIN_CONTROL.get("ok", False))
+    return r.returncode == 0 and obs["control_passed"], obs
+
+
+# ------------------------------------------------------------------------------------------------ E1: a run's own check
+# How it arises (controls4.py stagen and campaign.py Instance.step / Instance.round): when noise2.train_and_test raises
+# inside controls4.stagen, the exception is caught, the trace is still written (trace.digest.json), and the record
+# N<n>/noisy_record.json is written with status "failed: <message>" and empty lessons, words, tests and skews; stagen
+# exits 1. Both outputs exist, so campaign.py records N<n> as {status: "failed", why: "exit 1"} with no outputs; the
+# round stops there, so C<n> never runs, N<n>/comparison.json does not exist, and after_comparison (the extract) never
+# runs. The other rounds run in parallel and are untouched. At the end the driver writes the instance's SHA256SUMS
+# (every *.json but status.json), RESULT_INSTANCES.json (its summary: step statuses, verdicts, times),
+# SHA256SUMS.instances, RESULT.json and the root SHA256SUMS. All are rebuilt here by the same rules.
+# The raw trace stays: N<n>/trace.raw is left in place, in no manifest, since neither the extract nor the comparison
+# ran. The fixture puts a placeholder there: the header of a real trace.raw of the same root (up to and including its
+# "Binary:" line), the data cut off. Its content is not read; only its presence matters (an unlisted file).
+
+OWN_CHECK = "failed: the tail leak must be set before it starts"      # instrument.py's assertion during training
+SIM_ENDED = "failed: the simulator ended during: tran 1n 2n"          # session.py's RuntimeError
+
+
+def driver_dumps(obj):
+    return json.dumps(obj, indent=1, sort_keys=True) + "\n"          # campaign.dumps
+
+
+def failed_round(root, inst, n, status):
+    """Instance `inst` of `root` as the driver leaves it when N<n>'s own run fails with `status`."""
+    d = root / inst
+    nd = d / f"N{n}"
+    rec = json.loads((nd / "noisy_record.json").read_text())
+    rec.update(status=status, lessons=[], words={}, tests=[], skews=[])
+    (nd / "noisy_record.json").write_text(json.dumps(rec, indent=1, default=str) + "\n")   # controls4's writer
+    (nd / "comparison.json").unlink()
+    shutil.rmtree(nd / "extract", ignore_errors=True)
+    real = next(iter(sorted(root.glob("*/N*/trace.raw"))))                # kept raws of the root (plan keep_raw)
+    head = real.read_bytes()
+    (nd / "trace.raw").write_bytes(head[:head.index(b"Binary:\n") + len(b"Binary:\n")])
+    (d / f"C{n}.log").unlink(missing_ok=True)
+    st = json.loads((d / "status.json").read_text())
+    old = st["steps"][f"N{n}"]
+    st["steps"][f"N{n}"] = dict(argv=old["argv"], started=old["started"], status="failed", why="exit 1",
+                                wall_s=old.get("wall_s"), cpu_s=old.get("cpu_s"), ended=old["ended"], cores=old.get("cores", 1))
+    st["steps"].pop(f"C{n}", None)
+    (d / "status.json").write_text(driver_dumps(st))
+    files = sorted(p for p in d.rglob("*.json") if p.name != "status.json" and "lean_build" not in p.parts)
+    (d / "SHA256SUMS").write_text("".join(f"{sha(p)}  {p.relative_to(d)}\n" for p in files))   # Instance.summary
+    for f in ("RESULT_INSTANCES.json", "RESULT.json"):
+        if not (root / f).exists():
+            continue
+        r = json.loads((root / f).read_text())
+        for x in r["instances"]:
+            if f"{x['tag']}_{x['seed']}" == inst:
+                x["steps"] = {k: v["status"] for k, v in st["steps"].items()}
+                x["verdicts"].pop(f"C{n}", None)
+                for k in ("cpu_s", "wall_s"):
+                    x[k] = {k_: v.get(k) for k_, v in st["steps"].items()}
+        (root / f).write_text(driver_dumps(r))
+    for f in (f"{inst}/SHA256SUMS", "RESULT_INSTANCES.json", "RESULT.json"):
+        redeclare(root, f)
+
+
+def own_check_entry(res, inst, status):
+    """A node under counts.NOT1.K3 naming `inst` and its status, with "own check" in its path or content."""
+    def walk(x, path):
+        if isinstance(x, dict):
+            yield path, x
+            for k, v in x.items():
+                yield from walk(v, path + [str(k)])
+        elif isinstance(x, list):
+            for i, v in enumerate(x):
+                yield from walk(v, path + [str(i)])
+    k3 = ((res or {}).get("counts", {}).get("NOT1") or {}).get("K3") or {}
+    for path, node in walk(k3, []):
+        if node is k3:
+            continue
+        text = json.dumps(node) + " " + " ".join(path)
+        if inst in text and status.split("failed: ", 1)[1] in text and ("own check" in text or "own_check" in text):
+            return dict(path=path, node=node)
+    return None
+
+
+def case_round_own_check_failed(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    failed_round(root, "NOT1_6220", 2, OWN_CHECK)
+    r, res, obs = run(tmp, [root], "round_own_check_failed")
+    hit = own_check_entry(res, "NOT1_6220", OWN_CHECK)
+    obs["own_check_entry"] = hit
+    g = ((res or {}).get("groups") or {}).get("NOT1", {}).get("K3", {})
+    ok = (r.returncode == 0 and hit is not None and "NOT1_6220" in g.get("refuted_instances", [])
+          and all("NOT1_6212" in res["counts"]["NOT1"][lv]["held"]["list"] for lv in ("K0", "K3")))
+    return ok, obs
+
+
+def case_round_simulator_ended(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    failed_round(root, "NOT1_6220", 2, SIM_ENDED)
+    r, res, obs = run(tmp, [root], "round_simulator_ended")
+    if res is None:
+        return False, obs
+    k3 = res["counts"]["NOT1"]["K3"]
+    nc = json.dumps(k3["not_completed"]["list"])
+    ok = (r.returncode == 0 and "NOT1_6220" in nc and "NOT1_6220" not in res["groups"]["NOT1"]["K3"]["refuted_instances"]
+          and all("NOT1_6212" in res["counts"]["NOT1"][lv]["held"]["list"] for lv in ("K0", "K3")))
+    return ok, obs
+
+
+STANDIN_CONTROL = {}
+
+
+def draw_function(beacon, sizes=None):
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as DS
+    ex = json.loads((HERE / "EXCLUDED.json").read_text())
+    return DS.draw(beacon, ROUND_1M["round"], ex, dict(sizes or STANDIN_SIZES))["groups"]
+
+
+# A STABLE REFERENCE for the draw: fixed inputs (round 1000000's value, a small TEST exclusion list that is not the
+# pinned one, sizes 2/1/1) and seeds established independently of draw_seeds.py, by hand from the hash trace below
+# (S = 10000 + sha256("<value>|1000000|<group>|<k>") mod 90000; rejected if S is excluded, already drawn, or one of
+# 10 S + 0..3 is excluded). Hard-coded on purpose: the inputs are fixed, so an error shared by the formula and the code
+# under test cannot pass unseen. The trace:
+#   NOT1   k=0 65418 excluded   k=1 69364 rejected (noise seed 693640 excluded)   k=2 78394 taken   k=3 39363 taken
+#   ANDOR3 k=0 55321 excluded   k=1 71018 taken
+#   XOR3   k=0 61903 excluded   k=1 62982 taken
+REFERENCE_FIXTURE = HERE / "tests" / "fixtures" / "REFERENCE_EXCLUDED.json"   # seeds [55321, 61903, 65418, 693640]
+REFERENCE_SEEDS = {"NOT1": [78394, 39363], "ANDOR3": [71018], "XOR3": [62982]}
+REFERENCE_TRIED = {"NOT1": 4, "ANDOR3": 2, "XOR3": 2}
+
+
+def case_draw_reference(tmp, src):
+    """The reference, three ways: (1) the value is sha256 of round 1000000's published signature; (2) a minimal SHA-256
+    loop written here, independent of draw_seeds.py, gives the hard-coded seeds on the fixture list; (3) draw_seeds.draw
+    (the code under test) gives the same seeds and candidate counts."""
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as DS
+    ex = json.loads(REFERENCE_FIXTURE.read_text())
+    value = hashlib.sha256(bytes.fromhex(ROUND_1M["signature"])).hexdigest()
+    ok_value = value == ROUND_1M["randomness"]
+    # (2) the minimal computation: S = 10000 + sha256("<value>|<round>|<group>|<k>") mod 90000, in NOT1, ANDOR3, XOR3
+    # order, rejecting an excluded S, a drawn S, or an S with an excluded 10 S + 0..3.
+    excl, drawn, mine, tried = set(ex["seeds"]), set(), {}, {}
+    for g, n in (("NOT1", 2), ("ANDOR3", 1), ("XOR3", 1)):
+        got, k = [], 0
+        while len(got) < n:
+            cand = 10000 + int(hashlib.sha256(f"{value}|1000000|{g}|{k}".encode()).hexdigest(), 16) % 90000
+            k += 1
+            if cand in excl or cand in drawn or any(10 * cand + j in excl for j in range(4)):
+                continue
+            got.append(cand)
+            drawn.add(cand)
+        mine[g], tried[g] = got, k
+    ok_minimal = mine == REFERENCE_SEEDS and tried == REFERENCE_TRIED
+    D = DS.draw(value, ROUND_1M["round"], ex, dict(STANDIN_SIZES))
+    ok_code = D["groups"] == REFERENCE_SEEDS and D["candidates_tried"] == REFERENCE_TRIED
+    return ok_value and ok_minimal and ok_code, dict(value_is_sha256_of_signature=ok_value, minimal=mine,
+                                                    minimal_tried=tried, draw_seeds=D["groups"],
+                                                    draw_seeds_tried=D["candidates_tried"], want=REFERENCE_SEEDS,
+                                                    want_tried=REFERENCE_TRIED)
+
+
+def case_beacon_canonical(tmp, src):
+    """draw_seeds.draw (the narrowest real function; no root needed) on the canonical lowercase beacon."""
+    got = draw_function(ROUND_1M["randomness"])
+    want = canonical_seeds()
+    return got == want, dict(seeds=got, want=want)
+
+
+def beacon_writing_case(name):
+    def case(tmp, src):
+        w = WRITINGS[name](ROUND_1M["randomness"])
+        try:
+            got = draw_function(w)
+        except Exception as e:                                    # refused: acceptable
+            return True, dict(writing=w, refused=repr(e)[:300])
+        want = canonical_seeds()
+        return got == want, dict(writing=w, seeds=got, canonical=want)
+    case.__name__ = f"case_beacon_{name}"
+    return case
+
+
+def case_sizes_permutations(tmp, src):
+    """draw_seeds.draw with the sizes dict in each of its 6 orders, at sizes where the groups collide."""
+    import itertools
+    out = {}
+    for perm in itertools.permutations(COLLIDING_SIZES):
+        try:
+            g = draw_function(ROUND_1M["randomness"], {k: COLLIDING_SIZES[k] for k in perm})
+        except Exception as e:
+            return False, dict(order=perm, error=repr(e)[:300])
+        out[",".join(perm)] = g
+    first = next(iter(out.values()))
+    diff = {o: {k: sorted(set(v[k]) ^ set(first[k])) for k in v if v[k] != first[k]} for o, v in out.items() if v != first}
+    return not diff, dict(sizes=COLLIDING_SIZES, reference_order=next(iter(out)), differing_orders=diff)
+
+
+def standin_writing_case(name):
+    def case(tmp, src):
+        r, res, obs = standin_run(tmp, src, f"standin_beacon_{name}", writing=name)
+        obs["control_passed"] = STANDIN_CONTROL.get("ok", False)
+        if not obs["control_passed"]:
+            return False, obs
+        if refused(r):
+            return True, obs
+        planned = sorted(json.dumps(res or {}).count(f"NOT1_{s}") > 0 for s in canonical_seeds()["NOT1"])
+        obs["accepted_with_canonical_NOT1"] = planned
+        return r.returncode == 0 and all(planned), obs
+    case.__name__ = f"case_standin_beacon_{name}"
+    return case
+
+
+# ------------------------------------------------------------------------------------------------ R: rehearsal seeds
+# The rehearsal draw (6/6/6, mode rehearsal, the pinned list) and a campaign draw on another published round, whose
+# announced exclusion list must hold every rehearsal seed S and its noise seeds 10 S + n (n = 0..3). Test mode,
+# offline: draw=/excluded=/announce=/activity= for the campaign draw, rehearsal_draw=/rehearsal_excluded=/
+# rehearsal_announce=/rehearsal_activity= for the rehearsal's.
+REHEARSAL_SIZES = dict(NOT1=6, ANDOR3=6, XOR3=6)
+
+
+def announce_text(fmt, mode, excluded_sha256, words, second_scan_sha256=None):
+    """DRAW_ANNOUNCE.txt: /1 is 4 lines; /2 (the campaign's, the owner's decision of 2026-11-28) adds the line
+    second_scan_sha256 after excluded_sha256 (None: left out, for the case that it is missing). fmt "1s": the header
+    /1 with that fifth line (the campaign announce of a5ba132b, before the /2 change)."""
+    scan = "" if second_scan_sha256 is None else f"second_scan_sha256 {second_scan_sha256}\n"
+    return (f"format layered-draw-announce/{2 if fmt == 2 else 1}\nmode {mode}\nexcluded_sha256 {excluded_sha256}\n"
+            + (scan if fmt in (2, "1s") else "") + f"sizes {words}\n")
+
+
+def announced_draw(d, name, rnd, ex_obj, ex_bytes, sizes, mode, branch, fmt=1, second_scan_sha256=None):
+    """Write <name>.json (DRAW), <name>_EXCLUDED.json, <name>_ANNOUNCE.txt and <name>_activity.json for `rnd` (a
+    published round dict). The announce is pushed 600 s before the round's time. Returns (draw, paths, push time)."""
+    sys.path.insert(0, str(HERE))
+    import beacon_chain as BC
+    import beacon_verify as BV
+    import draw_seeds as DS
+    import datetime
+    t0 = BV.round_time(BC.QUICKNET, rnd["round"]) - 600
+    utc = lambda t: datetime.datetime.fromtimestamp(t, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    commit = hashlib.sha1(f"defect test announce {name}".encode()).hexdigest()
+    D = DS.draw(rnd["randomness"], rnd["round"], ex_obj, dict(sizes))
+    D["beacon_round"] = dict(rnd)
+    D["announce"] = dict(branch=branch, commit=commit, push_utc=utc(t0))
+    paths = dict(draw=d / f"{name}.json", excluded=d / f"{name}_EXCLUDED.json", announce=d / f"{name}_ANNOUNCE.txt",
+                 activity=d / f"{name}_activity.json")
+    paths["draw"].write_bytes(DS.canon(D))
+    paths["excluded"].write_bytes(ex_bytes)
+    words = " ".join(f"{g}={n}" for g, n in sizes.items())
+    paths["announce"].write_text(announce_text(fmt, mode, hashlib.sha256(ex_bytes).hexdigest(), words,
+                                               second_scan_sha256))
+    paths["activity"].write_text(json.dumps([dict(activity_type="branch_creation", after=commit, before="0" * 40,
+                                                  ref=f"refs/heads/{branch}", timestamp=utc(t0))], indent=1) + "\n")
+    return D, paths, t0
+
+
+def rehearsal_run(tmp, src, label, drop=None, swap_rounds=False):
+    """drop: None (the full list), "seed" (one rehearsal seed left out) or "noise" (one of its noise seeds left out).
+    swap_rounds: the rehearsal on round 20000000 and the campaign on 1000000, so the rehearsal's announce is later."""
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as DS
+    import plan_split3 as P3
+    d = tmp / "draws"
+    d.mkdir(parents=True)
+    pinned_b = (HERE / "EXCLUDED.json").read_bytes()
+    pinned = json.loads(pinned_b)
+    r_round, c_round = (ROUND_20M, ROUND_1M) if swap_rounds else (ROUND_1M, ROUND_20M)
+    R, rp, rt0 = announced_draw(d, "REHEARSAL", r_round, pinned, pinned_b, REHEARSAL_SIZES, "rehearsal",
+                                "evidence/combined-rehearsal-draw")
+    rseeds = sorted(s_ for v in R["groups"].values() for s_ in v)
+    extra = set(rseeds) | {10 * s_ + j for s_ in rseeds for j in range(4)}
+    removed = None
+    if drop == "seed":
+        removed = rseeds[0]
+    elif drop == "noise":
+        removed = 10 * rseeds[0] + 1
+    seeds = sorted((set(pinned["seeds"]) | extra) - ({removed} if removed is not None and removed not in pinned["seeds"]
+                                                      else set()))
+    assert removed is None or removed not in seeds, "the removed seed is in the pinned list itself"
+    ex = dict(pinned, seeds=seeds, count=len(seeds), seeds_sha256=hashlib.sha256(DS.canon(seeds)).hexdigest())
+    C, cp, ct0 = announced_draw(d, "CAMPAIGN", c_round, ex, DS.canon(ex), STANDIN_SIZES, "test",
+                                "evidence/combined-draw")
+    plans = tmp / "plans"
+    plans.mkdir()
+    for k, pl in enumerate(P3.split(C, json.loads((HERE / "campaign_template.json").read_text()), 12)[0], start=1):
+        (plans / f"PLAN_K{k:02d}.json").write_bytes(DS.canon(pl))
+    home = next(f.name for f in sorted(plans.glob("PLAN_K*.json")) if json.loads(f.read_text())["groups"])
+    root = draw_root(src, tmp / "a" / f"out_{home[5:8]}", tmp, "out_K05", home, plans=plans, controls=False)
+    args = [f"{DRAW_ARG}={cp['draw']}", f"excluded={cp['excluded']}", f"announce={cp['announce']}",
+            f"activity={cp['activity']}", f"rehearsal_draw={rp['draw']}", f"rehearsal_excluded={rp['excluded']}",
+            f"rehearsal_announce={rp['announce']}", f"rehearsal_activity={rp['activity']}"]
+    r, res, obs = run(tmp, [root], label, extra=args)
+    obs.update(rehearsal_seeds=rseeds, removed=removed, rehearsal_push=rt0, campaign_push=ct0, root=home[5:8])
+    return r, res, obs
+
+
+REHEARSAL_CONTROL = {}
+
+
+def case_rehearsal_full_list(tmp, src):
+    r, res, obs = rehearsal_run(tmp, src, "rehearsal_full_list")
+    REHEARSAL_CONTROL["ok"] = ok = r.returncode == 0
+    return ok, obs
+
+
+def rehearsal_mutation(label, **kw):
+    def case(tmp, src):
+        r, res, obs = rehearsal_run(tmp, src, label, **kw)
+        obs["control_passed"] = REHEARSAL_CONTROL.get("ok", False)
+        text = r.stdout + r.stderr
+        named = obs["removed"] is None or str(obs["removed"]) in text
+        return refused(r) and obs["control_passed"] and named, obs
+    case.__name__ = f"case_{label}"
+    return case
+
+
+def case_standin_draw_valid(tmp, src):
+    """The control of the draw mutations: the valid stand-in draw, K03's root with none of its instances run."""
+    r, res, obs = standin_run(tmp, src, "standin_draw_valid")
+    ok = r.returncode == 0 and all(rows_sum(res, g, n) for g, n in STANDIN_SIZES.items()) and all(
+        not_run_entry(res, f"NOT1_{n}", where=res["counts"]["NOT1"][lv]) for lv in ("K0", "K3")
+        for n in canonical_seeds()["NOT1"])
+    obs["expected_NOT1"] = canonical_seeds()["NOT1"]
+    # INTEGRATION on the pinned list: no drawn seed, and no noise seed of one, is in the pinned EXCLUDED.json.
+    pinned = set(json.loads((HERE / "EXCLUDED.json").read_text())["seeds"])
+    drawn = [s_ for v in draw_function(ROUND_1M["randomness"]).values() for s_ in v]
+    hit = sorted({s_ for s_ in drawn if s_ in pinned} | {10 * s_ + j for s_ in drawn for j in range(4)} & pinned)
+    obs["drawn_in_pinned_list"] = hit
+    ok = ok and not hit
+    STANDIN_CONTROL["ok"] = ok
+    return ok, obs
+
+
+def mutation(r, obs):
+    """A draw mutation passes only if refused AND the valid control passed with the same code: a refusal of the
+    arguments themselves, or of the root, is then excluded."""
+    obs["control_passed"] = STANDIN_CONTROL.get("ok", False)
+    return refused(r) and obs["control_passed"]
+
+
+def case_standin_seed_changed(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_seed_changed", seed_edit=True)
+    return mutation(r, obs), obs
+
+
+def case_standin_round_off_by_one(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_round_off_by_one", push_shift_s=3)
+    return mutation(r, obs), obs
+
+
+def case_standin_signature_byte(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_signature_byte", sig_flip=True)
+    return mutation(r, obs), obs
+
+
+def case_standin_excluded_not_superset(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_excluded_not_superset", excluded="not_superset")
+    return mutation(r, obs), obs
+
+
+def case_standin_excluded_sha_differs(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_excluded_sha_differs", excluded="sha_differs")
+    return mutation(r, obs), obs
+
+
+def case_standin_activity_clean(tmp, src):
+    """E2 control: the valid stand-in draw with activity= holding one clean branch_creation at announce.push_utc."""
+    r, res, obs = standin_run(tmp, src, "standin_activity_clean", activity="clean")
+    ok = r.returncode == 0 and all(rows_sum(res, g, n) for g, n in STANDIN_SIZES.items())
+    STANDIN_CONTROL["activity_ok"] = ok
+    return ok, obs
+
+
+def activity_mutation(r, obs):
+    obs["control_passed"] = STANDIN_CONTROL.get("activity_ok", False)
+    return refused(r) and obs["control_passed"]
+
+
+def case_standin_activity_redone(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_activity_redone", activity="redone")
+    return activity_mutation(r, obs), obs
+
+
+def case_standin_activity_force_push(tmp, src):
+    r, res, obs = standin_run(tmp, src, "standin_activity_force_push", activity="force_push")
+    return activity_mutation(r, obs), obs
+
+
+def case_draw_same_machine_twice(tmp, src):
+    roots = [draw_root(src, tmp / x / "out_K01", tmp, "out_K05", "PLAN_K01.json") for x in ("a", "b")]
+    r, res, obs = run(tmp, roots, "draw_same_machine_twice", extra=[f"{DRAW_ARG}={DRAW}"])
+    return refused(r) and "K01" in (r.stdout + r.stderr) and not_inflated(res, most=1), obs
+
+
+def case_same_root_30_times(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    r, res, obs = run(tmp, [root] * 30, "same_root_30_times")
+    established = res is not None and any(v[lv]["verdict"] == "established" for v in res["groups"].values()
+                                          for lv in ("K0", "K3"))
+    return refused(r) and not_inflated(res) and not established, obs
+
+
+def case_same_machine_two_paths(tmp, src):
+    roots = [place(src / "out_K05", tmp / "a" / "out_K05", tmp), place(src / "out_K05", tmp / "b" / "out_K05", tmp)]
+    r, res, obs = run(tmp, roots, "same_machine_two_paths")
+    return refused(r) and not_inflated(res), obs
+
+
+def case_home_instance_twice(tmp, src):
+    a = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    b = place(src / "out_K05", tmp / "a" / "out_K07", tmp, branch="evidence/devtest-seals2-K07")
+    shutil.rmtree(b / "NOT1_6220")
+    drop_lines(b, "NOT1_6220")
+    old, new = b'"branch": "evidence/devtest-seals2-K05"', b'"branch": "evidence/devtest-seals2-K07"'
+    for f in sorted((b / "NOT1_6212").glob("N*/**/noisy_record.json")):   # the records name their machine's seal branch
+        if old in f.read_bytes():
+            f.write_bytes(f.read_bytes().replace(old, new))
+            redeclare(b, f.relative_to(b))
+
+    def e(d):
+        d["groups"]["NOT1"].update(seeds=[6212], d4_audit=[])
+        d["what"] = "defect test D9: a copy of K05 without NOT1_6220, on its own seal branch (TEST)"
+    edit_plan(b, e)
+    r, res, obs = run(tmp, [a, b], "home_instance_twice")
+    return refused(r) and not_inflated(res), obs
+
+
+def case_one_byte_in_comparison(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    f = root / "NOT1_6212" / "N0" / "comparison.json"
+    b = f.read_bytes()
+    assert b.count(b'"cell_bits": 2') == 1
+    f.write_bytes(b.replace(b'"cell_bits": 2', b'"cell_bits": 3'))
+    r, res, obs = run(tmp, [root], "one_byte_in_comparison")
+    return refused(r) and "N0/comparison.json" in (r.stdout + r.stderr), obs
+
+
+def case_listed_file_missing(tmp, src):
+    root = place(src / "out_K05", tmp / "a" / "out_K05", tmp)
+    f = root / "NOT1_6212" / "N2" / "extract" / "extract.json"
+    assert "N2/extract/extract.json" in (root / "NOT1_6212" / "SHA256SUMS").read_text()
+    f.unlink()
+    r, res, obs = run(tmp, [root], "listed_file_missing")
+    return refused(r) and "extract.json" in (r.stdout + r.stderr), obs
+
+
+# ------------------------------------------------------------------------------------------------ L: list exactness
+# Rehearsal 2's list must be byte-equal to what [block rehearsal2-list] builds, and the campaign's to what [block list]
+# builds from EXCLUDED_SECOND_SCAN.json and the two verified rehearsal draws; the scan must hold the pinned list. Each
+# case runs on the FREEZE.txt blocks (extracted as proof2.py extracts them, never edited) and on analysis.py's own
+# checks in the order its rehearsal and campaign modes call them: check_draw(kw, mode, ..., offline=True), then
+# check_rehearsal_seeds(kw, info, ..., strict=False, mode). Both modes refuse the test roots before any draw check, so
+# these two functions are called directly (in a subprocess).
+#
+# The fixture, built once per run:
+# - rehearsal 1: its published DRAW.json (evidence/combined-rehearsal-draw-result at REHEARSAL1's result commit), its
+#   EXCLUDED_PUBLISHED.json and DRAW_ANNOUNCE.txt (evidence/combined-rehearsal-draw), fetched by branch name;
+# - EXCLUDED_REHEARSAL2.json, written by [block rehearsal2-list];
+# - a stand-in rehearsal 2 (published quicknet round 34335000, 6/6/6, mode rehearsal) drawn over that list and announced
+#   600 s before its round, after rehearsal 1's announce;
+# - EXCLUDED_SECOND_SCAN.json, a twin of the scan's output: the pinned EXCLUDED.json plus SCAN_EXTRA (integers of 7
+#   digits that no draw reads), count and seeds_sha256 recomputed;
+# - EXCLUDED_SECOND.json, written by [block list];
+# - a stand-in campaign draw (round 34340000, 60/32/37, mode campaign) over the case's campaign list.
+# A mutated list is announced (its excluded_sha256) and its draw recomputed over it, so check_draw accepts it unless
+# the mutation breaks the superset of the pinned list.
+#
+# The blocks run in bash with L (this tree), F (its HEAD), PY (this python) and python() set as in [block vars], in a
+# working folder holding the fixture. A usercustomize.py on PYTHONPATH (the image's sitecustomize is left alone)
+# replaces two reads, and only these, once analysis is imported:
+# - check_draw called with offline=None in rehearsal or campaign mode (a GitHub read): offline=True and announce= the
+#   fixture's DRAW_ANNOUNCE.txt of that draw. So the announce file and its push time are not read from GitHub
+#   (announce_on_github), the announce branch name and N1 (freeze_time on research/layered-campaign-freeze) are not
+#   checked; the announce's mode, sizes and excluded_sha256, the round, the signature and the recomputed draw are.
+# - check_rehearsal_seeds called with strict=True: strict=False (its mode kept), with rehearsal_announce= and
+#   rehearsal1_announce= the fixture's announces, so its two draws are checked offline the same way.
+# The shim writes one line per replaced read to stderr ("shim: ..."), kept in the record.
+
+ROUND_R2 = dict(round=34335000, randomness="95b68dcc123c90a03aa8609452cb45519c4ed8b054f6e94618455198f10a6fb1",
+                signature="86a988abe179f2ea5f9a30f8ff7ee0ca2a6fd3e9245afff6b5d16fc8751ae6b49c58c017d565fa033f46f39ec77af4c7")
+ROUND_C = dict(round=34340000, randomness="310a4ed5530b6496e3735158a8d814b106db3fafe3fc31fb4e6a5294cf48e77c",
+               signature="a9e6f824268a56d68119afce3fa7e308ed6347e51ffba1fd08ff4f6663ce719811321472d66ca8a28fad244d5b792740")
+CAMPAIGN_SIZES = dict(NOT1=60, ANDOR3=32, XOR3=37)
+SCAN_EXTRA = (1234567, 2345678, 3456789)
+SECOND_SCAN_ARG = "second_scan"                   # the fix's argument: second_scan=EXCLUDED_SECOND_SCAN.json
+LIST_WRONG = "THE LIST IS WRONG"                  # the check blocks' verdict on a wrong list
+LIST_RIGHT = "the list is right"
+OLD_INCLUSION = ("excluded= list lacks",)         # check_rehearsal_seeds's inclusion check (before the fix)
+
+SHIM = '''"""The defect tests' shim (tests/test_analysis_defects.py): two GitHub reads of analysis replaced offline."""
+import importlib.machinery, inspect, json, os, sys
+ANN = json.loads(os.environ["LAYERED_SHIM_ANNOUNCE"])
+
+
+def patch(A):
+    cd, crs = A.check_draw, A.check_rehearsal_seeds
+
+    def check_draw(*a, **k):
+        b = inspect.signature(cd).bind(*a, **k)
+        b.apply_defaults()
+        x = b.arguments
+        if x["offline"] is None and x["mode"] != "test":
+            x["kw"] = dict(x["kw"], announce=ANN[os.path.basename(x["kw"]["draw"])])
+            x["offline"] = True
+            print(f"shim: check_draw {os.path.basename(x['kw']['draw'])} {x['mode']}: offline, announce="
+                  f"{os.path.basename(x['kw']['announce'])}", file=sys.stderr)
+        return cd(*b.args, **b.kwargs)
+
+    def check_rehearsal_seeds(*a, **k):
+        b = inspect.signature(crs).bind(*a, **k)
+        b.apply_defaults()
+        x = b.arguments
+        if x["strict"]:
+            kw = dict(x["kw"])
+            for pre in ("rehearsal_", "rehearsal1_"):
+                if pre + "draw" in kw:
+                    kw[pre + "announce"] = ANN[os.path.basename(kw[pre + "draw"])]
+            x["kw"], x["strict"] = kw, False
+            x["mode"] = x["mode"] if x["mode"] is not None else "campaign"
+            print(f"shim: check_rehearsal_seeds {x['mode']}: strict=False, announces offline", file=sys.stderr)
+        return crs(*b.args, **b.kwargs)
+
+    A.check_draw, A.check_rehearsal_seeds = check_draw, check_rehearsal_seeds
+
+
+class Hook:
+    def find_spec(self, name, path=None, target=None):
+        if name != "analysis":
+            return None
+        sys.meta_path.remove(self)
+        spec = importlib.machinery.PathFinder.find_spec(name, path)
+        run = spec.loader.exec_module
+
+        def exec_module(m):
+            run(m)
+            patch(m)
+        spec.loader.exec_module = exec_module
+        return spec
+
+
+sys.meta_path.insert(0, Hook())
+'''
+
+FUNCS = '''import json, sys, tempfile, traceback
+sys.path.insert(0, sys.argv[1])
+import analysis as A
+a = json.loads(sys.argv[2])
+out = dict(reached="check_draw")
+try:
+    d, info, _ = A.check_draw(a["kw"], a["mode"], tempfile.mkdtemp(), None, offline=True)
+    out["reached"] = "check_rehearsal_seeds"
+    A.check_rehearsal_seeds(a["kw"], info, tempfile.mkdtemp(), None, False, a["mode"])
+    out.update(reached="accepted", refused=False)
+except A.Refused as e:
+    tb = traceback.extract_tb(e.__traceback__)
+    names = [f.name for f in tb]
+    out.update(refused=True, message=str(e), raised_in=names[-2] if len(names) > 1 else names[-1], stack=names,
+               within=[n for n in names if n in ("check_draw", "check_rehearsal_seeds", "parse_announce")][-1:] or [None])
+    out["within"] = out["within"][0]
+print(json.dumps(out))
+'''
+
+
+def freeze_blocks():
+    """[block NAME] ... [end] of FREEZE.txt, extracted as dev/freeze/final/proof2.py extracts them."""
+    import re
+    import textwrap
+    text = (HERE / "FREEZE.txt").read_text().split("\n")
+    blocks, k = {}, 0
+    while k < len(text):
+        m = re.fullmatch(r"\s*\[block ([a-z0-9-]+)\]\s*", text[k])
+        if m:
+            j = next(i for i in range(k + 1, len(text)) if text[i].strip() == "[end]")
+            assert m.group(1) not in blocks, m.group(1)
+            blocks[m.group(1)] = textwrap.dedent("\n".join(text[k + 1:j])) + "\n"
+            k = j
+        k += 1
+    return blocks
+
+
+def run_block(w, name, announces):
+    """Run the block `name` verbatim in bash in the folder w, the shim on PYTHONPATH."""
+    shim = w.parent / "shim"
+    shim.mkdir(exist_ok=True)
+    (shim / "usercustomize.py").write_text(SHIM)
+    pre = (f'L={HERE}\nF=$(git -C "$L" rev-parse HEAD)\nPY={PY}\npython() {{ "$PY" "$@"; }}\n')
+    env = dict(os.environ, PYTHONPATH=str(shim), LAYERED_SHIM_ANNOUNCE=json.dumps(announces))
+    r = subprocess.run(["bash", "-c", pre + freeze_blocks()[name]], cwd=w, env=env, capture_output=True, text=True)
+    return dict(block=name, exit=r.returncode, stdout=r.stdout[-1500:], stderr=r.stderr[-2500:])
+
+
+def run_funcs(kw, mode):
+    r = subprocess.run([PY, "-B", "-c", FUNCS, str(HERE), json.dumps(dict(kw=kw, mode=mode))], capture_output=True,
+                       text=True)
+    if r.returncode != 0 or not r.stdout.strip():
+        return dict(crashed=True, exit=r.returncode, stderr=r.stderr[-1500:])
+    return json.loads(r.stdout.strip().splitlines()[-1])
+
+
+def regen(obj, seeds):
+    sys.path.insert(0, str(HERE))
+    import draw_seeds as DS
+    seeds = sorted(set(seeds))
+    return dict(obj, seeds=seeds, count=len(seeds), seeds_sha256=hashlib.sha256(DS.canon(seeds)).hexdigest())
+
+
+LIST_BASE = {}
+
+
+def list_base(tmp):
+    """The shared fixture (see above), built once in the run's temporary folder."""
+    if LIST_BASE:
+        return LIST_BASE
+    sys.path.insert(0, str(HERE))
+    import analysis as A
+    import draw_seeds as DS
+    b = tmp.parent / "_list_base"
+    b.mkdir()
+    rep = b / "fetch"
+    rep.mkdir()
+    git("init", "-q", cwd=rep)
+    r1 = A.REHEARSAL1
+    git("fetch", "-q", origin_url(), f"refs/heads/{r1['result_branch']}", cwd=rep)
+    assert git("rev-parse", "FETCH_HEAD", cwd=rep).strip() == r1["result_commit"], "rehearsal 1's result branch moved"
+    (b / "DRAW_REHEARSAL1.json").write_bytes(subprocess.run(["git", "show", "FETCH_HEAD:DRAW.json"], cwd=rep,
+                                                            check=True, capture_output=True).stdout)
+    git("fetch", "-q", origin_url(), f"refs/heads/{r1['announce_branch']}", cwd=rep)
+    for f, to in (("EXCLUDED_PUBLISHED.json", "EXCLUDED_REHEARSAL1.json"), ("DRAW_ANNOUNCE.txt", "ANNOUNCE_R1.txt")):
+        (b / to).write_bytes(subprocess.run(["git", "show", f"FETCH_HEAD:{f}"], cwd=rep, check=True,
+                                            capture_output=True).stdout)
+    assert sha(b / "DRAW_REHEARSAL1.json") == r1["draw_sha256"] and sha(b / "EXCLUDED_REHEARSAL1.json") == \
+        r1["excluded_sha256"], "rehearsal 1's published files are not the pinned ones"
+    bb = run_block(b, "rehearsal2-list", {})
+    assert bb["exit"] == 0, bb
+    x2b = (b / "EXCLUDED_REHEARSAL2.json").read_bytes()
+    R2, p2, t2 = announced_draw(b, "R2", ROUND_R2, json.loads(x2b), x2b, REHEARSAL_SIZES, "rehearsal",
+                                "evidence/combined-rehearsal2-draw")
+    shutil.copy(p2["draw"], b / "DRAW_REHEARSAL.json")
+    shutil.copy(p2["announce"], b / "ANNOUNCE_R2.txt")
+    pinned = json.loads((HERE / "EXCLUDED.json").read_bytes())
+    assert not set(SCAN_EXTRA) & set(pinned["seeds"])
+    (b / "EXCLUDED_SECOND_SCAN.json").write_bytes(DS.canon(regen(pinned, pinned["seeds"] + list(SCAN_EXTRA))))
+    bl = run_block(b, "list", {})
+    assert bl["exit"] == 0, bl
+    rs1 = sorted(s for v in json.loads((b / "DRAW_REHEARSAL1.json").read_text())["groups"].values() for s in v)
+    rs2 = sorted(s for v in R2["groups"].values() for s in v)
+    LIST_BASE.update(dir=b, pinned=pinned, rs1=rs1, rs2=rs2, rehearsal2_push=t2, blocks=[bb, bl],
+                     rehearsal2_list_sha256=sha(b / "EXCLUDED_REHEARSAL2.json"),
+                     campaign_list_sha256=sha(b / "EXCLUDED_SECOND.json"))
+    return LIST_BASE
+
+
+def mutate(obj, kind, which, base):
+    """The list `obj` with one mutation; seeds changes regenerate count and seeds_sha256."""
+    seeds, pinned = list(obj["seeds"]), set(base["pinned"]["seeds"])
+    rs = base["rs1"] if which == "rehearsal" else base["rs2"]
+    note = None
+    if kind == "extra":
+        note = next(i for i in range(1000001, 9999999) if i not in seeds)
+        return regen(obj, seeds + [note]), note
+    if kind == "drop_noise":
+        note = next(10 * s + j for s in rs for j in range(4) if 10 * s + j not in pinned and 10 * s + j in seeds)
+    elif kind == "drop_scan":
+        if which == "rehearsal":     # rehearsal 2's scan is the pinned list itself: a pinned seed, not of rehearsal 1
+            ex1 = set(base["rs1"]) | {10 * s + j for s in base["rs1"] for j in range(4)}
+            note = next(s for s in sorted(pinned) if s not in ex1)
+        else:                        # one of the scan's own seeds beyond the pinned list
+            note = SCAN_EXTRA[0]
+    elif kind == "field":
+        key = "rehearsal1_draw_sha256" if which == "rehearsal" else "rehearsal_draw_sha256"
+        note = f"added.{key}"
+        return dict(obj, added=dict(obj["added"], **{key: hashlib.sha256(b"another draw").hexdigest()})), note
+    seeds.remove(note)
+    return regen(obj, seeds), note
+
+
+def list_case_files(tmp, which, kind):
+    """A working folder with the fixture, the list of `which` mutated by `kind` (None: exact)."""
+    base = list_base(tmp)
+    import draw_seeds as DS
+    w = tmp / "work"
+    shutil.copytree(base["dir"], w, ignore=shutil.ignore_patterns("fetch"))
+    name = "EXCLUDED_REHEARSAL2.json" if which == "rehearsal" else "EXCLUDED_SECOND.json"
+    note = None
+    if kind in ("extra", "drop_noise", "drop_scan", "field"):
+        obj, note = mutate(json.loads((w / name).read_bytes()), kind, which, base)
+        (w / name).write_bytes(DS.canon(obj))
+    elif kind == "r2_extra":    # rehearsal 2's list with one extra integer, rehearsal 2 drawn and announced over it,
+        r2 = w / "EXCLUDED_REHEARSAL2.json"   # and the campaign's list rebuilt by [block list] from that draw
+        obj, note = mutate(json.loads(r2.read_bytes()), "extra", "rehearsal", base)
+        r2.write_bytes(DS.canon(obj))
+        _, p2, _ = announced_draw(w, "R2X", ROUND_R2, obj, r2.read_bytes(), REHEARSAL_SIZES, "rehearsal",
+                                  "evidence/combined-rehearsal2-draw")
+        shutil.copy(p2["draw"], w / "DRAW_REHEARSAL.json")
+        shutil.copy(p2["announce"], w / "ANNOUNCE_R2.txt")
+        (w / name).unlink()
+        bl = run_block(w, "list", {})
+        assert bl["exit"] == 0, bl
+    return w, name, note
+
+
+EXPECTED_CHECK = {
+    "extra": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "field": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "drop_scan": "the new exactness check (1234567 is in the scan only, not pinned, not a rehearsal seed)",
+    "drop_noise": "the new exactness check, or the existing inclusion check naming the seed",
+    "no_scan": "the new check that second_scan= is given (blocks: the read of EXCLUDED_SECOND_SCAN.json)",
+    "scan_short": "the new check that second_scan is a superset of the pinned EXCLUDED.json",
+    "r2_extra": "the new exactness check of rehearsal_excluded= (rehearsal 2's list rebuilt from the pinned list and "
+                "rehearsal 1's verified draw)",
+}
+EXPECTED_REHEARSAL_DROP_SCAN = "check_draw's existing superset check (the removed seed is in the pinned EXCLUDED.json)"
+
+
+def list_facts(w, name, which, kind):
+    """What the mutation recomputed, and the test's own check that the mutated list is self-consistent (count, sorted,
+    no duplicate, seeds_sha256, the 20 % cap, and the pinned superset except where a pinned seed is removed), so that
+    no count, hash or cap check can refuse it: only the content."""
+    import draw_seeds as DS
+    x = json.loads((w / name).read_bytes())
+    pinned = set(LIST_BASE["pinned"]["seeds"])
+    sup = set(x["seeds"]) >= pinned
+    ok = (x["count"] == len(x["seeds"]) == len(set(x["seeds"])) and x["seeds"] == sorted(x["seeds"])
+          and hashlib.sha256(DS.canon(x["seeds"])).hexdigest() == x["seeds_sha256"]
+          and DS.excluded_fraction(x) <= DS.MAX_EXCLUDED_FRACTION
+          and (sup or (which == "rehearsal" and kind == "drop_scan")))
+    exp = (EXPECTED_REHEARSAL_DROP_SCAN if (which, kind) == ("rehearsal", "drop_scan") else EXPECTED_CHECK.get(kind))
+    return dict(recomputed=(["count", "seeds_sha256"] if kind in ("extra", "drop_noise", "drop_scan") else
+                            ["rehearsal 2's list: count, seeds_sha256; its draw and announce; the campaign's list by "
+                             "[block list]"] if kind == "r2_extra" else []),
+                list_sha256=sha(w / name), list_self_consistent=ok, pinned_superset=sup, expected_check=exp)
+
+
+def list_block_case(which, kind):
+    """kind: None (exact), extra, drop_noise, drop_scan, field, no_scan (EXCLUDED_SECOND_SCAN.json absent), scan_short
+    (the scan without a pinned seed that rehearsal 1 drew: [block list] rebuilds the same bytes from it)."""
+    def case(tmp, src):
+        w, name, note = list_case_files(tmp, which, kind)
+        obs = dict(list=name, mutation=kind, changed=note, **list_facts(w, name, which, kind))
+        if kind == "no_scan":
+            (w / "EXCLUDED_SECOND_SCAN.json").unlink()
+        elif kind == "scan_unreadable":           # a directory in its place
+            (w / "EXCLUDED_SECOND_SCAN.json").unlink()
+            (w / "EXCLUDED_SECOND_SCAN.json").mkdir()
+        elif kind == "scan_short":
+            import draw_seeds as DS
+            scan = json.loads((w / "EXCLUDED_SECOND_SCAN.json").read_bytes())
+            obs["changed"] = drop = LIST_BASE["rs1"][0]
+            (w / "EXCLUDED_SECOND_SCAN.json").write_bytes(DS.canon(regen(scan, [s for s in scan["seeds"] if s != drop])))
+            (w / "EXCLUDED_SECOND.json").unlink()
+            bl = run_block(w, "list", {})
+            obs["rebuilt_list_equal"] = sha(w / "EXCLUDED_SECOND.json") == LIST_BASE["campaign_list_sha256"]
+            if bl["exit"] != 0 or not obs["rebuilt_list_equal"]:
+                return False, dict(obs, list_block=bl)
+        ann = {"DRAW_REHEARSAL1.json": str(w / "ANNOUNCE_R1.txt"), "DRAW_REHEARSAL.json": str(w / "ANNOUNCE_R2.txt")}
+        r = run_block(w, "check-rehearsal2-list" if which == "rehearsal" else "check-list", ann)
+        obs.update(r, shim_lines=[x for x in r["stderr"].splitlines() if x.startswith("shim:")])
+        key = ("blocks", which)
+        if kind is None:
+            LIST_CONTROL[key] = ok = r["exit"] == 0 and LIST_RIGHT in r["stdout"] and bool(obs["shim_lines"])
+            return ok, obs
+        obs["control_passed"] = LIST_CONTROL.get(key, False) and obs["list_self_consistent"]
+        if kind in ("no_scan", "scan_unreadable"):   # an explicit refusal naming the file, no traceback
+            own = (r["exit"] != 0 and LIST_RIGHT not in r["stdout"] and "Traceback" not in r["stderr"]
+                   and "EXCLUDED_SECOND_SCAN.json" in r["stdout"] + r["stderr"])
+        else:                         # the block's own verdict, or a refusal of the list check it calls (pinned below)
+            own = (r["exit"] != 0 and (LIST_WRONG in r["stdout"] or "refused:" in r["stderr"])
+                   and "Traceback" not in r["stderr"])
+            if kind == "drop_noise":  # or, in [block check-list], check_rehearsal_seeds's inclusion check naming it
+                own = own or (r["exit"] != 0 and any(o in r["stderr"] for o in OLD_INCLUSION) and str(note) in r["stderr"]
+                              and "Traceback" not in r["stderr"])
+        obs["reached_own_check"] = own
+        err = r["stderr"].strip().splitlines()
+        obs["message"] = next((x for x in err if x.startswith("refused:")), None) or \
+            (err[-1] if "Traceback" in r["stderr"] else None) or (r["stdout"].strip().splitlines() or [None])[-1]
+        return own and obs["control_passed"], obs
+    case.__name__ = f"case_list_blocks_{which}_{kind}"
+    return case
+
+
+LIST_CONTROL = {}
+LIST_MESSAGES = {}
+
+
+def list_funcs_case(which, kind):
+    """The same mutations through analysis.py's check_draw and check_rehearsal_seeds in rehearsal mode (which
+    "rehearsal": draw= rehearsal 2, excluded= its list) or campaign mode (draw= the campaign stand-in, excluded= its
+    list, second_scan= the scan; rehearsal_* and rehearsal1_* the two rehearsals)."""
+    def case(tmp, src):
+        w, name, note = list_case_files(tmp, which, kind)
+        obs = dict(list=name, mutation=kind, changed=note, **list_facts(w, name, which, kind))
+        eb = (w / name).read_bytes()
+        if which == "rehearsal":
+            D, p, t0 = announced_draw(w, "CASE", ROUND_R2, json.loads(eb), eb, REHEARSAL_SIZES, "rehearsal",
+                                      "evidence/combined-rehearsal2-draw")
+            kw = dict(draw=str(p["draw"]), excluded=str(p["excluded"]), announce=str(p["announce"]))
+        else:
+            scan_file = w / "EXCLUDED_SECOND_SCAN.json"
+            if kind == "scan_short":
+                import draw_seeds as DS
+                scan = json.loads(scan_file.read_bytes())
+                obs["changed"] = drop = LIST_BASE["rs1"][0]        # pinned, and drawn by rehearsal 1
+                scan_file = w / "SCAN_SHORT.json"
+                scan_file.write_bytes(DS.canon(regen(scan, [s for s in scan["seeds"] if s != drop])))
+            fmt = campaign_announce_format()
+            D, p, t0 = announced_draw(w, "CASE", ROUND_C, json.loads(eb), eb, CAMPAIGN_SIZES, "campaign",
+                                      "evidence/combined-draw", fmt=fmt, second_scan_sha256=sha(scan_file))
+            kw = dict(draw=str(p["draw"]), excluded=str(p["excluded"]), announce=str(p["announce"]),
+                      rehearsal_draw=str(w / "DRAW_REHEARSAL.json"),
+                      rehearsal_excluded=str(w / "EXCLUDED_REHEARSAL2.json"),
+                      rehearsal_announce=str(w / "ANNOUNCE_R2.txt"))
+            kw[SECOND_SCAN_ARG] = str(scan_file)
+            obs.update(announce_format=fmt, announced_second_scan_sha256=sha(scan_file) if fmt in (2, "1s") else None)
+            if kind == "no_scan":
+                del kw[SECOND_SCAN_ARG]
+        kw.update(rehearsal1_draw=str(w / "DRAW_REHEARSAL1.json"), rehearsal1_excluded=str(w / "EXCLUDED_REHEARSAL1.json"),
+                  rehearsal1_announce=str(w / "ANNOUNCE_R1.txt"))
+        obs["announced_excluded_sha256"] = [ln.split()[1] for ln in Path(p["announce"]).read_text().splitlines()
+                                            if ln.startswith("excluded_sha256 ")][0]
+        obs["announce_names_the_list"] = obs["announced_excluded_sha256"] == obs["list_sha256"]  # re-announced
+        res = run_funcs(kw, which)
+        obs.update(res, mode=which, args=sorted(kw))
+        obs["earlier_checks_passed"] = res.get("reached") in ("check_rehearsal_seeds", "accepted")   # check_draw
+        msg = res.get("message") or ""
+        key = ("funcs", which)
+        if kind is None:
+            LIST_CONTROL[key] = ok = res.get("reached") == "accepted"
+            return ok, obs
+        obs["control_passed"] = (LIST_CONTROL.get(key, False) and obs["list_self_consistent"]
+                                 and obs["announce_names_the_list"])
+        old = any(o in msg for o in OLD_INCLUSION)
+        if which == "rehearsal" and kind == "drop_scan":       # a pinned seed missing: check_draw's superset check
+            own = res.get("within") == "check_draw" and "is not a superset of the freeze's EXCLUDED.json" in msg
+        elif kind == "drop_noise":   # the exactness check, or the inclusion check naming the seed
+            own = res.get("within") == "check_rehearsal_seeds" and (not old or str(note) in msg)
+        elif kind in ("no_scan", "scan_short"):
+            own = res.get("within") == "check_rehearsal_seeds" and SECOND_SCAN_ARG in msg and not old
+        else:                        # extra, field, drop_scan (campaign): the exactness check, check_draw passed
+            own = res.get("within") == "check_rehearsal_seeds" and not old and obs["earlier_checks_passed"]
+        LIST_MESSAGES[(which, kind)] = msg
+        if kind == "scan_short":     # its own check: not the one refusing an absent second_scan=
+            own = own and msg != LIST_MESSAGES.get(("campaign", "no_scan"))
+        if kind in ("no_scan", "scan_short", "r2_extra"):     # nor the campaign list's exactness check
+            own = own and msg != LIST_MESSAGES.get(("campaign", "extra"))
+        obs["reached_own_check"] = own
+        return own and obs["control_passed"], obs
+    case.__name__ = f"case_list_funcs_{which}_{kind}"
+    return case
+
+
+LIST_KINDS = {
+    None: "the exact list (control): accepted",
+    "extra": "one extra integer, count and seeds_sha256 recomputed: refused",
+    "drop_noise": "one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused",
+    "drop_scan": "one scan seed removed, count and sha recomputed: refused",
+    "field": "the \"added\" field's draw sha256 changed (a non-seed field): refused",
+    "no_scan": "no EXCLUDED_SECOND_SCAN.json / no second_scan=: refused",
+    "scan_short": "the scan without one pinned seed (one rehearsal 1 drew, so the rebuilt list is byte-equal): refused",
+}
+def campaign_announce_format():
+    """2 (the spec); LAYERED_DEFECT_CAMPAIGN_ANNOUNCE=1s writes the campaign's announces as a5ba132b does (header /1,
+    the fifth line second_scan_sha256), =1 as da3d9b3b does (/1, 4 lines), for code from before the /2 change
+    (recorded in the report)."""
+    v = os.environ.get("LAYERED_DEFECT_CAMPAIGN_ANNOUNCE", "2")
+    return v if v == "1s" else int(v)
+
+
+PARSE = '''import json, sys
+sys.path.insert(0, sys.argv[1])
+import analysis as A
+try:
+    print(json.dumps(dict(parsed=A.parse_announce(open(sys.argv[2], "rb").read()))))
+except A.Refused as e:
+    print(json.dumps(dict(refused=True, message=str(e))))
+'''
+
+
+def case_announce_rehearsal1_parses(tmp, src):
+    """Rehearsal 1's real /1 announce (DRAW_ANNOUNCE.txt of evidence/combined-rehearsal-draw, fetched by name) parses
+    with analysis.parse_announce: mode rehearsal, its published list's sha256, 6/6/6."""
+    base = list_base(tmp)
+    f = base["dir"] / "ANNOUNCE_R1.txt"
+    r = subprocess.run([PY, "-B", "-c", PARSE, str(HERE), str(f)], capture_output=True, text=True)
+    obs = dict(announce_sha256=sha(f), announce=f.read_text(), stderr=r.stderr[-800:])
+    try:
+        obs.update(json.loads(r.stdout.strip().splitlines()[-1]))
+    except (ValueError, IndexError):
+        return False, obs
+    a = obs.get("parsed") or {}
+    sys.path.insert(0, str(HERE))
+    import analysis as A
+    ok = (a.get("mode") == "rehearsal" and a.get("excluded_sha256") == A.REHEARSAL1["excluded_sha256"]
+          and a.get("sizes") == REHEARSAL_SIZES and f.read_bytes().startswith(b"format layered-draw-announce/1\n"))
+    return ok, obs
+
+
+FORMAT_VARIANTS = {
+    "campaign_v1": "a campaign announce with the header /1 and the line second_scan_sha256 (a5ba132b's form): refused",
+    "campaign_v1_4lines": "a campaign announce in /1, 4 lines (no second_scan_sha256): refused",
+    "rehearsal_v2": "a rehearsal announce in /2 (5 lines, with second_scan_sha256): refused",
+    "campaign_v2_no_scan_sha": "a campaign announce in /2 without the line second_scan_sha256: refused",
+    "campaign_v2_scan_sha_other": "a campaign announce in /2 whose second_scan_sha256 is not second_scan='s: refused",
+    "campaign_v2_sha_nonhex": "a campaign announce in /2 whose excluded_sha256 is written in upper case: refused",
+}
+
+
+def format_case(variant):
+    """The exact lists and draws of the L fixture, through check_draw + check_rehearsal_seeds, with one announce
+    format changed. Gated on list_funcs_<mode>_exact."""
+    which = "rehearsal" if variant.startswith("rehearsal") else "campaign"
+
+    def case(tmp, src):
+        w, name, _ = list_case_files(tmp, which, None)
+        eb = (w / name).read_bytes()
+        scan = w / "EXCLUDED_SECOND_SCAN.json"
+        if which == "rehearsal":
+            _, p, _ = announced_draw(w, "CASE", ROUND_R2, json.loads(eb), eb, REHEARSAL_SIZES, "rehearsal",
+                                     "evidence/combined-rehearsal2-draw", fmt=2, second_scan_sha256=sha(scan))
+            kw = dict(draw=str(p["draw"]), excluded=str(p["excluded"]), announce=str(p["announce"]))
+        else:
+            fmt, ssha = dict(campaign_v1=("1s", sha(scan)), campaign_v1_4lines=(1, sha(scan)),
+                             campaign_v2_no_scan_sha=(2, None),
+                             campaign_v2_scan_sha_other=(2, hashlib.sha256(b"another scan").hexdigest()),
+                             campaign_v2_sha_nonhex=(2, sha(scan)))[variant]
+            _, p, _ = announced_draw(w, "CASE", ROUND_C, json.loads(eb), eb, CAMPAIGN_SIZES, "campaign",
+                                     "evidence/combined-draw", fmt=fmt, second_scan_sha256=ssha)
+            kw = dict(draw=str(p["draw"]), excluded=str(p["excluded"]), announce=str(p["announce"]),
+                      rehearsal_draw=str(w / "DRAW_REHEARSAL.json"), rehearsal_excluded=str(w / "EXCLUDED_REHEARSAL2.json"),
+                      rehearsal_announce=str(w / "ANNOUNCE_R2.txt"), **{SECOND_SCAN_ARG: str(scan)})
+        kw.update(rehearsal1_draw=str(w / "DRAW_REHEARSAL1.json"), rehearsal1_excluded=str(w / "EXCLUDED_REHEARSAL1.json"),
+                  rehearsal1_announce=str(w / "ANNOUNCE_R1.txt"))
+        if variant == "campaign_v2_sha_nonhex":
+            t = Path(p["announce"]).read_text()
+            h = hashlib.sha256(eb).hexdigest()
+            Path(p["announce"]).write_text(t.replace(f"excluded_sha256 {h}", f"excluded_sha256 {h.upper()}"))
+        res = run_funcs(kw, which)
+        obs = dict(variant=variant, announce=Path(p["announce"]).read_text(), mode=which,
+                   expected_check="the announce format check (parse_announce or check_draw)" if
+                   variant != "campaign_v2_scan_sha_other" else "the check of second_scan_sha256 against second_scan=",
+                   control_passed=LIST_CONTROL.get(("funcs", which), False), **res)
+        msg = res.get("message") or ""
+        if variant == "campaign_v2_scan_sha_other":
+            own = (res.get("refused") is True and SECOND_SCAN_ARG + "=" in msg and "is not exactly the lines" not in msg
+                   and not any(o in msg for o in OLD_INCLUSION))
+        else:
+            own = res.get("within") in ("parse_announce", "check_draw") and "announce" in msg.lower()
+        obs["reached_own_check"] = own
+        return own and obs["control_passed"], obs
+    case.__name__ = f"case_format_{variant}"
+    return case
+
+
+def announce_block_run(tmp, mutate_scan):
+    """[block announce] verbatim in campaign mode, in the L fixture's folder, after [block vars-campaign] with its
+    placeholders filled (H: the campaign list's sha256; a placeholder about the scan: the exact scan's sha256). Every
+    https://github.com/HevisNico/kernel-R URL of the block goes to a local bare repository holding only main (fetched
+    by name), by url.insteadOf in a GIT_CONFIG_GLOBAL of the test, and GIT_ALLOW_PROTOCOL=file: no network."""
+    import re
+    w, name, _ = list_case_files(tmp, "campaign", None)
+    scan = w / "EXCLUDED_SECOND_SCAN.json"
+    bare = tmp / "github_twin.git"
+    git("init", "-q", "--bare", str(bare))
+    git("fetch", "-q", "--depth", "1", origin_url(), "refs/heads/main:refs/heads/main", cwd=bare)
+    cfg = tmp / "gitconfig"
+    cfg.write_text(f'[url "file://{bare}"]\n\tinsteadOf = https://github.com/HevisNico/kernel-R\n')
+    kept = dict(list=sha(w / name), scan=sha(scan))
+    lines, unknown = [], []
+    for ln in freeze_blocks()["vars-campaign"].splitlines():
+        m = re.fullmatch(r"(\w+)=<([^>]*)>\s*", ln)
+        if m:
+            v = (kept["list"] if m.group(1) == "H" else kept["scan"] if m.group(1) in ("HS", "VS")
+                 or "scan" in m.group(2).lower() else None)
+            if v is None:
+                unknown.append(ln)
+            ln = f"{m.group(1)}={v}"
+        lines.append(ln)
+    obs = dict(kept=kept, unknown_placeholders=unknown)
+    if mutate_scan:                    # one byte of the scan copy changed: a letter of its "rule" text
+        b = bytearray(scan.read_bytes())
+        i = b.index(b'"rule":"') + len(b'"rule":"')
+        b[i] = ord("x") if b[i] != ord("x") else ord("y")
+        scan.write_bytes(bytes(b))
+        obs["scan_byte_changed"] = dict(offset=i, sha256_now=sha(scan))
+    pre = (f'L={HERE}\nF=$(git -C "$L" rev-parse HEAD)\nPY={PY}\npython() {{ "$PY" "$@"; }}\n' + "\n".join(lines) + "\n")
+    env = dict(os.environ, GIT_CONFIG_GLOBAL=str(cfg), GIT_CONFIG_NOSYSTEM="1", GIT_ALLOW_PROTOCOL="file")
+    r = subprocess.run(["bash", "-c", pre + freeze_blocks()["announce"]], cwd=w, env=env, capture_output=True, text=True)
+    repo = w / "announce_campaign"
+    has_commit = repo.is_dir() and subprocess.run(["git", "-C", str(repo), "rev-parse", "-q", "--verify", "HEAD"],
+                                                  capture_output=True).returncode == 0
+    pushed = subprocess.run(["git", "-C", str(bare), "rev-parse", "-q", "--verify", "refs/heads/evidence/combined-draw"],
+                            capture_output=True).returncode == 0
+    obs.update(exit=r.returncode, stdout=r.stdout[-1200:], stderr=r.stderr[-1200:], commit_made=has_commit,
+               pushed_to_twin=pushed)
+    if pushed:
+        ann = subprocess.run(["git", "-C", str(bare), "show", "refs/heads/evidence/combined-draw:DRAW_ANNOUNCE.txt"],
+                             capture_output=True, text=True).stdout
+        obs["announce_pushed"] = ann
+    return r, obs
+
+
+ANNOUNCE_CONTROL = {}
+
+
+def case_announce_block_exact(tmp, src):
+    r, obs = announce_block_run(tmp, False)
+    ann = obs.get("announce_pushed") or ""
+    obs["announce_v2_names_scan"] = (ann.startswith("format layered-draw-announce/2\n")
+                                     and f"second_scan_sha256 {obs['kept']['scan']}\n" in ann)
+    ANNOUNCE_CONTROL["ok"] = ok = (r.returncode == 0 and obs["pushed_to_twin"] and not obs["unknown_placeholders"])
+    return ok and obs["announce_v2_names_scan"], obs
+
+
+def case_announce_block_scan_byte(tmp, src):
+    r, obs = announce_block_run(tmp, True)
+    obs["control_passed"] = ANNOUNCE_CONTROL.get("ok", False)
+    obs["expected_check"] = "the block's check of the scan copy's sha256 against the kept one, before the commit"
+    obs["message"] = next((x for x in r.stdout.splitlines() if "REFUSED" in x), None)
+    ok = (r.returncode != 0 and "REFUSED" in r.stdout and not obs["commit_made"] and not obs["pushed_to_twin"])
+    obs["refused_before_commit"] = ok
+    return ok and obs["control_passed"], obs
+
+
+LIST_KINDS["r2_extra"] = ("rehearsal_excluded= (rehearsal 2's list) with one extra integer, count and sha recomputed, "
+                          "rehearsal 2 drawn and announced over it, the campaign list rebuilt from it: refused")
+LIST_KINDS["scan_unreadable"] = "EXCLUDED_SECOND_SCAN.json a directory: an explicit refusal naming it, no traceback"
+LIST_CASES = [(f"list_{side}_{which}_{kind or 'exact'}", which, kind, side)
+              for side in ("blocks", "funcs") for which in ("rehearsal", "campaign")
+              for kind in LIST_KINDS if (which == "campaign" or kind not in ("no_scan", "scan_short", "r2_extra"))
+              and (side == "blocks" and which == "campaign" or kind != "scan_unreadable")]
+
+
+# ------------------------------------------------------------------------------------------------ L: the scan itself
+# The owner's decisions after the review of a5ba132b (spec relayed 2026-11-28): second_scan= must be draw_seeds.py
+# scan's own output, self-consistent and canonical (one refusal each); a missing or unreadable scan is an explicit
+# refusal naming the file; [block verify-scan], run on a second machine, reproduces the scan from its own ls-remote
+# and [block announce] refuses unless its sha256 VS equals HS.
+
+def rebuild_campaign_list(w, scan_obj):
+    """[block list]'s rule, in the test: the scan plus both rehearsals' seeds and noise seeds, with "added" (bools of
+    the scan are written as the integers they equal, so the list itself stays a list of integers)."""
+    import draw_seeds as DS
+    rb, rb1 = (w / "DRAW_REHEARSAL.json").read_bytes(), (w / "DRAW_REHEARSAL1.json").read_bytes()
+    rs = sorted({s for b in (rb, rb1) for v in json.loads(b)["groups"].values() for s in v})
+    noise = sorted(10 * s + n for s in rs for n in range(4))
+    seeds = sorted({int(x) for x in scan_obj["seeds"]} | set(rs) | set(noise))
+    out = dict(scan_obj, seeds=seeds, count=len(seeds), seeds_sha256=hashlib.sha256(DS.canon(seeds)).hexdigest(),
+               added=dict(rehearsal_seeds=rs, noise_seeds=noise, rehearsal_draw_sha256=hashlib.sha256(rb).hexdigest(),
+                          rehearsal1_draw_sha256=hashlib.sha256(rb1).hexdigest()))
+    return DS.canon(out)
+
+
+def scan_variant(obj, variant):
+    """The bytes of the scan with exactly one defect; everything else valid (count and seeds_sha256 recomputed over
+    the seeds as written, except in the cases on those two fields)."""
+    import draw_seeds as DS
+    sha_of = lambda seeds: hashlib.sha256(DS.canon(seeds)).hexdigest()
+    o = json.loads(json.dumps(obj))
+    if variant == "noncanon":
+        return (json.dumps(o, sort_keys=True, indent=1) + "\n").encode()
+    if variant == "format":
+        o["format"] = "layered-excluded-seeds/0"
+    elif variant == "rule":
+        o["rule"] = o["rule"] + " (edited)"
+    elif variant in ("unsorted", "duplicate", "bool"):
+        s = list(o["seeds"])
+        if variant == "unsorted":
+            s[0], s[1] = s[1], s[0]
+        elif variant == "duplicate":
+            s.insert(1, s[0])
+        else:                            # 0 or 1 written as the bool it equals
+            v = 0 if 0 in s else 1
+            s[s.index(v)] = bool(v)
+        o.update(seeds=s, count=len(s), seeds_sha256=sha_of(s))
+    elif variant == "count":
+        o["count"] += 1
+    elif variant == "seeds_sha256":
+        o["seeds_sha256"] = sha_of(o["seeds"] + [9999999])
+    elif variant == "refs_malformed":
+        k = next(k for k in sorted(o["refs"]) if k != "HEAD")
+        o["refs"][k] = dict(tip="not a tip", numbers=o["refs"][k].get("numbers", 0))
+    elif variant == "refs_no_head":
+        del o["refs"]["HEAD"]
+    elif variant == "head_not_main":       # HEAD at another ref's tip
+        k = next(k for k in sorted(o["refs"]) if k != "HEAD" and not k.endswith("/main")
+                 and o["refs"][k].get("tip") != o["refs"]["HEAD"].get("tip"))
+        o["refs"]["HEAD"] = dict(o["refs"]["HEAD"], tip=o["refs"][k]["tip"])
+    elif variant == "refs_duplicate":       # canonical bytes with one ref name written twice
+        b = DS.canon(o).decode()
+        k = next(k for k in sorted(o["refs"]) if k != "HEAD")
+        entry = json.dumps({k: o["refs"][k]}, sort_keys=True, separators=(",", ":"))[1:-1]
+        return b.replace(entry, entry + "," + entry, 1).encode()
+    return DS.canon(o)
+
+
+SCAN_VARIANTS = {
+    "noncanon": "the scan's bytes are not draw_seeds.canon of its JSON (indented)",
+    "format": "its format is not draw_seeds.py scan's",
+    "rule": "its rule text is not draw_seeds.py scan's",
+    "unsorted": "two seeds swapped (count and seeds_sha256 recomputed over them)",
+    "duplicate": "one seed written twice (count and seeds_sha256 recomputed)",
+    "bool": "the seed 0 (or 1) written as false (true) (count and seeds_sha256 recomputed)",
+    "count": "count one more than the seeds",
+    "seeds_sha256": "seeds_sha256 of other seeds",
+    "refs_malformed": "one ref's tip is not a commit sha",
+    "refs_duplicate": "one ref name written twice in the bytes",
+    "refs_no_head": "no HEAD entry in refs",
+    "head_not_main": "HEAD's tip is another ref's, not main's",
+}
+SCAN_MESSAGES = {}
+
+
+def scan_case(variant):
+    """Campaign mode through check_draw + check_rehearsal_seeds: second_scan= the scan with one defect, the announce
+    naming its sha256, excluded= rebuilt from it by [block list]'s rule and the draw over that list. Must be refused,
+    in check_rehearsal_seeds (or a helper), with a message naming second_scan= that no other variant gives and that is
+    not the exact union's. Gated on list_funcs_campaign_exact."""
+    def case(tmp, src):
+        w, name, _ = list_case_files(tmp, "campaign", None)
+        sb = scan_variant(json.loads((w / "EXCLUDED_SECOND_SCAN.json").read_bytes()), variant)
+        (w / "SCAN_X.json").write_bytes(sb)
+        (w / name).write_bytes(rebuild_campaign_list(w, json.loads(sb)))
+        eb = (w / name).read_bytes()
+        fmt = campaign_announce_format()
+        _, p, _ = announced_draw(w, "CASE", ROUND_C, json.loads(eb), eb, CAMPAIGN_SIZES, "campaign",
+                                 "evidence/combined-draw", fmt=fmt, second_scan_sha256=sha(w / "SCAN_X.json"))
+        kw = dict(draw=str(p["draw"]), excluded=str(p["excluded"]), announce=str(p["announce"]),
+                  rehearsal_draw=str(w / "DRAW_REHEARSAL.json"), rehearsal_excluded=str(w / "EXCLUDED_REHEARSAL2.json"),
+                  rehearsal_announce=str(w / "ANNOUNCE_R2.txt"), rehearsal1_draw=str(w / "DRAW_REHEARSAL1.json"),
+                  rehearsal1_excluded=str(w / "EXCLUDED_REHEARSAL1.json"), rehearsal1_announce=str(w / "ANNOUNCE_R1.txt"),
+                  **{SECOND_SCAN_ARG: str(w / "SCAN_X.json")})
+        res = run_funcs(kw, "campaign")
+        msg = res.get("message") or ""
+        import re
+        SCAN_MESSAGES[variant] = re.sub(r"second_scan= \S+?(:| is | names )", r"second_scan= <path>\1", msg)
+        obs = dict(variant=variant, defect=SCAN_VARIANTS[variant], scan_sha256=sha(w / "SCAN_X.json"),
+                   announce_format=fmt, expected_check="the second scan's own check: " + SCAN_VARIANTS[variant],
+                   control_passed=LIST_CONTROL.get(("funcs", "campaign"), False), **res)
+        own = (res.get("within") == "check_rehearsal_seeds" and SECOND_SCAN_ARG in msg and CU not in msg
+               and not any(o in msg for o in OLD_INCLUSION))
+        if variant == list(SCAN_VARIANTS)[-1]:      # the last: one message per class of defect (the owner's list:
+            # unsorted and duplicated seeds are one class, "seeds are not sorted and unique")
+            cls = {v: ("unsorted" if v == "duplicate" else v) for v in SCAN_VARIANTS}
+            by = {}
+            for v in SCAN_VARIANTS:
+                by.setdefault(cls[v], set()).add(SCAN_MESSAGES.get(v))
+            msgs = [m for ms in by.values() for m in ms]
+            obs["messages_distinct"] = (None not in msgs and all(len(ms) == 1 for ms in by.values())
+                                        and len(set(msgs)) == len(by))
+            own = own and obs["messages_distinct"]
+        obs["reached_own_check"] = own
+        return own and obs["control_passed"], obs
+    case.__name__ = f"case_scan_{variant}"
+    return case
+
+
+def scan_file_case(kind):
+    """second_scan= missing (a path that does not exist) or unreadable (a directory): an explicit refusal naming the
+    file, no traceback. Gated on list_funcs_campaign_exact."""
+    def case(tmp, src):
+        w, name, _ = list_case_files(tmp, "campaign", None)
+        eb = (w / name).read_bytes()
+        fmt = campaign_announce_format()
+        _, p, _ = announced_draw(w, "CASE", ROUND_C, json.loads(eb), eb, CAMPAIGN_SIZES, "campaign",
+                                 "evidence/combined-draw", fmt=fmt, second_scan_sha256=sha(w / "EXCLUDED_SECOND_SCAN.json"))
+        bad = w / ("NO_SUCH_SCAN.json" if kind == "missing" else "SCAN_DIR.json")
+        if kind == "unreadable":
+            bad.mkdir()
+        kw = dict(draw=str(p["draw"]), excluded=str(p["excluded"]), announce=str(p["announce"]),
+                  rehearsal_draw=str(w / "DRAW_REHEARSAL.json"), rehearsal_excluded=str(w / "EXCLUDED_REHEARSAL2.json"),
+                  rehearsal_announce=str(w / "ANNOUNCE_R2.txt"), rehearsal1_draw=str(w / "DRAW_REHEARSAL1.json"),
+                  rehearsal1_excluded=str(w / "EXCLUDED_REHEARSAL1.json"), rehearsal1_announce=str(w / "ANNOUNCE_R1.txt"),
+                  **{SECOND_SCAN_ARG: str(bad)})
+        res = run_funcs(kw, "campaign")
+        msg = res.get("message") or ""
+        if res.get("crashed"):
+            res["message"] = (res.get("stderr") or "").strip().splitlines()[-1:] or [None]
+            res["message"] = res["message"][0]
+        obs = dict(kind=kind, file=bad.name, control_passed=LIST_CONTROL.get(("funcs", "campaign"), False),
+                   expected_check="an explicit refusal naming the file", **res)
+        own = res.get("refused") is True and bad.name in msg and not res.get("crashed")
+        obs["reached_own_check"] = own
+        return own and obs["control_passed"], obs
+    case.__name__ = f"case_scan_file_{kind}"
+    return case
+
+
+# [block verify-scan]: a local twin of the repository (no network), whose scan holds the pinned list
+VS_BRANCHES = ("main", "evidence/twin-a", "evidence/twin-b")
+VS_BASE = {}
+
+
+def twin_repository(tmp):
+    """A bare repository with VS_BRANCHES. main holds pinned_seeds.txt, one line "seed NNNNNNN" (7 digits, zero
+    padded) per seed of the pinned EXCLUDED.json, so that its scan is a superset of the pinned list; the two other
+    branches each add one file with other integers. Its main commit's author is a test identity."""
+    bare, work = tmp / "twin.git", tmp / "twin_work"
+    git("init", "-q", "--bare", str(bare))
+    git("init", "-q", "-b", "main", str(work))
+    ident = ["-c", "user.name=defect test", "-c", "user.email=defect-test@localhost"]
+    pinned = json.loads((HERE / "EXCLUDED.json").read_bytes())["seeds"]
+    (work / "pinned_seeds.txt").write_text("".join(f"seed {s:07d}\n" for s in pinned))
+    git("add", ".", cwd=work)
+    git(*ident, "commit", "-q", "-m", "twin main", cwd=work)
+    for k, br in enumerate(VS_BRANCHES[1:]):
+        git("checkout", "-q", "-b", br, "main", cwd=work)
+        (work / f"twin_{k}.txt").write_text(f"seed {7654321 - k}\nnoise_seed {6543210 - k}\n")
+        git("add", ".", cwd=work)
+        git(*ident, "commit", "-q", "-m", f"twin {br}", cwd=work)
+    git("push", "-q", str(bare), *[f"{b}:refs/heads/{b}" for b in VS_BRANCHES], cwd=work)
+    git("symbolic-ref", "HEAD", "refs/heads/main", cwd=bare)
+    return bare
+
+
+def twin_env(tmp, bare):
+    cfg = tmp / "gitconfig"
+    cfg.write_text(f'[url "file://{bare}"]\n\tinsteadOf = https://github.com/HevisNico/kernel-R\n')
+    return dict(os.environ, GIT_CONFIG_GLOBAL=str(cfg), GIT_CONFIG_NOSYSTEM="1", GIT_ALLOW_PROTOCOL="file")
+
+
+def bash_blocks(w, env, names, fill):
+    """Run blocks verbatim, in one bash, after the vars preamble and [block vars-campaign] with its placeholders
+    filled by fill(name, description) (None: an unknown placeholder, recorded)."""
+    import re
+    blocks = freeze_blocks()
+    missing = [n for n in names if n not in blocks]
+    lines, unknown = [], []
+    for ln in blocks["vars-campaign"].splitlines():
+        m = re.fullmatch(r"(\w+)=<([^>]*)>\s*", ln)
+        if m:
+            v = fill(m.group(1), m.group(2))
+            if v is None:
+                unknown.append(ln)
+            ln = f"{m.group(1)}={v}"
+        lines.append(ln)
+    if missing:
+        return None, dict(missing_blocks=missing, unknown_placeholders=unknown)
+    pre = f'L={HERE}\nF=$(git -C "$L" rev-parse HEAD)\nPY={PY}\npython() {{ "$PY" "$@"; }}\n' + "\n".join(lines) + "\n"
+    r = subprocess.run(["bash", "-c", pre + "".join(blocks[n] for n in names)], cwd=w, env=env, capture_output=True,
+                       text=True)
+    return r, dict(blocks=names, exit=r.returncode, stdout=r.stdout[-1500:], stderr=r.stderr[-1500:],
+                   unknown_placeholders=unknown)
+
+
+def vs_base(tmp):
+    """The twin, and its scan reproduced by [block second-scan] verbatim (the canonical scan of the twin)."""
+    if VS_BASE:
+        return VS_BASE
+    base = list_base(tmp)
+    root = tmp.parent / "_vs_base"
+    root.mkdir()
+    bare = twin_repository(root)
+    env = twin_env(root, bare)
+    w = root / "scan"
+    w.mkdir()
+    r, obs = bash_blocks(w, env, ["second-scan"], lambda n, d: "0" * 64)
+    assert r is not None and r.returncode == 0, obs
+    scan = json.loads((w / "EXCLUDED_SECOND_SCAN.json").read_bytes())
+    assert set(base["pinned"]["seeds"]) <= set(scan["seeds"]), "the twin's scan does not hold the pinned list"
+    VS_BASE.update(bare=bare, env=env, scan=(w / "EXCLUDED_SECOND_SCAN.json").read_bytes(),
+                   scan_sha256=sha(w / "EXCLUDED_SECOND_SCAN.json"), refs=sorted(scan["refs"]))
+    return VS_BASE
+
+
+VS_KINDS = {
+    None: "the twin's scan as [block second-scan] makes it (control): verify-scan passes, VS = HS",
+    "plus3": "the canonical scan plus 3 integers, count and seeds_sha256 recomputed (the owner's acceptance case): "
+             "verify-scan fails before any announce commit, and [block announce] refuses",
+    "omit_branch": "the scan without one branch's ref entry: verify-scan fails",
+    "wrong_tip": "one ref with another commit's tip: verify-scan fails",
+}
+VS_CONTROL = {}
+
+
+def verify_scan_case(kind):
+    """The implementer's interface (13ebca8b): on the second machine, a fresh folder: [block second-scan] verbatim on
+    a fresh copy of the twin, SCAN_TO_VERIFY.json the case's scan, then [block verify-scan] verbatim. It prints
+    VERIFY.txt, whose final line carries " VS <64hex>". Exact: exit 0, "the scan is reproduced", VS = HS, one push to
+    the twin's evidence/combined-scan-verify. Doctored: exit 1, "THE SCAN IS NOT REPRODUCED", no push. plus3 then runs
+    [block announce] on the first machine's folder with HS its scan's sha256 and VS the printed one: refused before any
+    ls-remote, mkdir or commit."""
+    def case(tmp, src):
+        import draw_seeds as DS
+        import re
+        vb = vs_base(tmp)
+        bare = tmp / "twin.git"
+        shutil.copytree(vb["bare"], bare)
+        env = twin_env(tmp, bare)
+        w, name, _ = list_case_files(tmp, "campaign", None)
+        o = json.loads(vb["scan"])
+        if kind == "plus3":
+            have = set(o["seeds"])
+            extra = [i for i in range(1000001, 1000100) if i not in have][:3]
+            o = regen(o, o["seeds"] + extra)
+        elif kind == "omit_branch":
+            del o["refs"][next(k for k in o["refs"] if k.endswith("twin-a"))]
+        elif kind == "wrong_tip":
+            k = next(k for k in o["refs"] if k.endswith("twin-b"))
+            o["refs"][k]["tip"] = o["refs"][next(k2 for k2 in o["refs"] if k2.endswith("twin-a"))]["tip"]
+        sb = DS.canon(o)
+        (w / "EXCLUDED_SECOND_SCAN.json").write_bytes(sb)      # the first machine's folder
+        (w / name).unlink()
+        bl = run_block(w, "list", {})
+        hs = hashlib.sha256(sb).hexdigest()
+        m2 = tmp / "second_machine"
+        m2.mkdir()
+        dummy = lambda n, d: "0" * 64
+        r2, o2 = bash_blocks(m2, env, ["second-scan"], dummy)
+        (m2 / "SCAN_TO_VERIFY.json").write_bytes(sb)
+        r, obs = bash_blocks(m2, env, ["verify-scan"], dummy)
+        obs.update(kind=kind, list_block_exit=bl["exit"], second_scan_exit=r2.returncode if r2 else None, HS=hs,
+                   expected_check=VS_KINDS[kind])
+        if r is None:
+            return False, obs
+        vt = (m2 / "VERIFY.txt").read_text() if (m2 / "VERIFY.txt").exists() else r.stdout
+        last = (vt.strip().splitlines() or [""])[-1]
+        m = re.search(r" VS ([0-9a-f]{64})\b", last)
+        vs = m.group(1) if m else None
+        pushed_verify = subprocess.run(["git", "-C", str(bare), "rev-parse", "-q", "--verify",
+                                        "refs/heads/evidence/combined-scan-verify"], capture_output=True).returncode == 0
+        obs.update(VS=vs, final_line=last, problems=[x for x in vt.splitlines() if x.startswith("PROBLEM:")],
+                   verify_pushed_to_twin=pushed_verify, message=last)
+        if kind is None:
+            VS_CONTROL["ok"] = ok = (r.returncode == 0 and last.startswith("the scan is reproduced") and vs == hs
+                                     and pushed_verify)
+            return ok, obs
+        obs["control_passed"] = VS_CONTROL.get("ok", False)
+        ok = r.returncode == 1 and last.startswith("THE SCAN IS NOT REPRODUCED") and not pushed_verify and vs != hs
+        if kind == "plus3":            # the announce, with VS != HS, refuses before any ls-remote, mkdir or commit
+            fill = lambda n, d: sha(w / name) if n == "H" else hs if n == "HS" else vs if n == "VS" else None
+            ra, oa = bash_blocks(w, env, ["announce"], fill)
+            pushed = subprocess.run(["git", "-C", str(bare), "rev-parse", "-q", "--verify",
+                                     "refs/heads/evidence/combined-draw"], capture_output=True).returncode == 0
+            oa.update(announce_folder_made=(w / "announce_campaign").exists(), pushed_to_twin=pushed)
+            obs["announce"] = oa
+            obs["message"] = next((x for x in (ra.stdout if ra else "").splitlines() if "REFUSED" in x), None)
+            ok = (ok and ra is not None and ra.returncode != 0 and (obs["message"] or "").startswith("REFUSED: VS (")
+                  and not oa["announce_folder_made"] and not pushed and not oa["unknown_placeholders"])
+        obs["refused_before_announce"] = ok
+        return ok and obs["control_passed"], obs
+    case.__name__ = f"case_verify_scan_{kind or 'exact'}"
+    return case
+
+
+PRE = '''import datetime, json, sys, tempfile, traceback
+sys.path.insert(0, sys.argv[1])
+import analysis as A
+a = json.loads(sys.argv[2])
+now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+extra = dict(pre_announce=True) if a["pre_announce"] else {}
+try:
+    A.check_rehearsal_seeds(a["kw"], dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), None, False, "campaign",
+                            **extra)
+    print(json.dumps(dict(refused=False)))
+except A.Refused as e:
+    print(json.dumps(dict(refused=True, message=str(e))))
+'''
+
+
+def pre_announce_case(given):
+    """check_rehearsal_seeds as [block check-list] calls it, before the announce (draw_info has only a push time, no
+    second_scan_sha256): with pre_announce=True accepted (control), without it refused."""
+    def case(tmp, src):
+        w, name, _ = list_case_files(tmp, "campaign", None)
+        kw = dict(excluded=str(w / name), rehearsal_draw=str(w / "DRAW_REHEARSAL.json"),
+                  rehearsal_excluded=str(w / "EXCLUDED_REHEARSAL2.json"), rehearsal_announce=str(w / "ANNOUNCE_R2.txt"),
+                  rehearsal1_draw=str(w / "DRAW_REHEARSAL1.json"), rehearsal1_excluded=str(w / "EXCLUDED_REHEARSAL1.json"),
+                  rehearsal1_announce=str(w / "ANNOUNCE_R1.txt"), **{SECOND_SCAN_ARG: str(w / "EXCLUDED_SECOND_SCAN.json")})
+        r = subprocess.run([PY, "-B", "-c", PRE, str(HERE), json.dumps(dict(kw=kw, pre_announce=given))],
+                           capture_output=True, text=True)
+        try:
+            res = json.loads(r.stdout.strip().splitlines()[-1])
+        except (ValueError, IndexError):
+            return False, dict(crashed=True, stderr=r.stderr[-1500:])
+        obs = dict(pre_announce=given, **res)
+        if given:
+            PRE_CONTROL["ok"] = ok = res.get("refused") is False
+            return ok, obs
+        obs["control_passed"] = PRE_CONTROL.get("ok", False)
+        return res.get("refused") is True and obs["control_passed"], obs
+    case.__name__ = f"case_pre_announce_{'given' if given else 'absent'}"
+    return case
+
+
+PRE_CONTROL = {}
+
+
+def case_cli_pre_announce(tmp, src):
+    """`analysis.py test OUT ROOT pre_announce=True` (the internal argument on the command line): refused as an
+    unknown argument."""
+    root = tmp / "root"
+    root.mkdir()
+    r = subprocess.run([PY, "-B", str(ANALYSIS), "test", str(tmp / "out"), str(root), "pre_announce=True"],
+                       capture_output=True, text=True, cwd=tmp)
+    text = r.stdout + r.stderr
+    msg = next((x for x in text.splitlines() if "refused" in x), text.strip()[-300:])
+    return r.returncode != 0 and "unknown argument 'pre_announce=True'" in text, dict(exit=r.returncode, message=msg)
+
+
+COMMIT = '''import json, sys, tempfile, traceback
+sys.path.insert(0, sys.argv[1])
+import analysis as A
+a = json.loads(sys.argv[2])
+files = {k: (None if v is None else open(v, "rb").read()) for k, v in a["files"].items()}
+ann = open(a["announce"], "rb").read()
+
+
+def announce_on_github(branch, outdir, files_=None, **k):       # the stand-in: the announce commit's content
+    return a["commit"], ann, a["push_utc"], {n: files.get(n) for n in (files_ or files)}
+
+
+A.announce_on_github = announce_on_github
+A.freeze_time = lambda tree_commit, outdir: "2026-11-01T00:00:00Z"
+out = dict(reached="check_draw")
+try:
+    A.check_draw(a["kw"], "campaign", tempfile.mkdtemp(), "0" * 40)
+    out.update(reached="accepted", refused=False)
+except A.Refused as e:
+    tb = traceback.extract_tb(e.__traceback__)
+    out.update(refused=True, message=str(e), stack=[f.name for f in tb])
+print(json.dumps(out))
+'''
+COMMIT_KINDS = {
+    None: "the announce commit holds the announced EXCLUDED_PUBLISHED.json and EXCLUDED_SECOND_SCAN.json (control): "
+          "check_draw accepts",
+    "no_scan": "the announce commit has no EXCLUDED_SECOND_SCAN.json: refused",
+    "scan_differs": "the announce commit's EXCLUDED_SECOND_SCAN.json (announced, its sha256 in the announce) is not "
+                    "byte-equal to second_scan=: refused",
+}
+COMMIT_CONTROL = {}
+
+
+def announce_commit_case(kind):
+    """check_draw in campaign mode on its GitHub path, announce_on_github and freeze_time replaced by stand-ins that
+    return the announce commit's content (the implementer's entry points, 13ebca8b). The campaign draw, list and /2
+    announce are the L fixture's; kind changes what the commit holds."""
+    def case(tmp, src):
+        w, name, _ = list_case_files(tmp, "campaign", None)
+        scan = w / "EXCLUDED_SECOND_SCAN.json"
+        files = {"EXCLUDED_PUBLISHED.json": str(w / name), "EXCLUDED_SECOND_SCAN.json": str(scan)}
+        named = scan
+        if kind == "no_scan":
+            files["EXCLUDED_SECOND_SCAN.json"] = None
+        elif kind == "scan_differs":     # the commit's scan: one more integer, and the announce names it
+            other = w / "SCAN_IN_COMMIT.json"
+            import draw_seeds as DS
+            o = json.loads(scan.read_bytes())
+            other.write_bytes(DS.canon(regen(o, o["seeds"] + [1000099])))
+            files["EXCLUDED_SECOND_SCAN.json"] = named = str(other)
+        eb = (w / name).read_bytes()
+        _, p, _ = announced_draw(w, "CASE", ROUND_C, json.loads(eb), eb, CAMPAIGN_SIZES, "campaign",
+                                 "evidence/combined-draw", fmt=2, second_scan_sha256=sha(named))
+        d = json.loads(Path(p["draw"]).read_text())
+        kw = dict(draw=str(p["draw"]), excluded=str(w / name), **{SECOND_SCAN_ARG: str(scan)})
+        r = subprocess.run([PY, "-B", "-c", COMMIT, str(HERE), json.dumps(dict(
+            kw=kw, files=files, announce=str(p["announce"]), commit=d["announce"]["commit"],
+            push_utc=d["announce"]["push_utc"]))], capture_output=True, text=True)
+        try:
+            res = json.loads(r.stdout.strip().splitlines()[-1])
+        except (ValueError, IndexError):
+            return False, dict(crashed=True, stderr=r.stderr[-1500:])
+        obs = dict(kind=kind, commit_files={k: (None if v is None else sha(v)) for k, v in files.items()},
+                   expected_check=COMMIT_KINDS[kind], **res)
+        if kind is None:
+            COMMIT_CONTROL["ok"] = ok = res.get("reached") == "accepted"
+            return ok, obs
+        obs["control_passed"] = COMMIT_CONTROL.get("ok", False)
+        return res.get("refused") is True and obs["control_passed"], obs
+    case.__name__ = f"case_announce_commit_{kind or 'exact'}"
+    return case
+
+
+# The owner's last change (relayed 2026-11-28 10:38): [block announce] (campaign) reads the published verify record on
+# evidence/combined-scan-verify at its creation commit instead of trusting the hand-copied VS. Cases on the twin.
+VERIFY_BRANCH = "evidence/combined-scan-verify"
+RECORD_KINDS = {
+    None: "the record verify-scan pushed, H/HS/VS right (control): [block announce] pushes its announce",
+    "absent": "H/HS/VS right but no record branch (the owner's decisive case): refused before any announce commit",
+    "other_hash": "H/HS/VS right but the record names another scan sha256 (the owner's decisive case): refused",
+    "not_success": "the record's final line is not the success verdict: refused",
+}
+RECORD_CONTROL = {}
+
+
+def rewrite_record(bare, tmp, edit):
+    """Replace the record commit on the twin's VERIFY_BRANCH by one whose text files went through edit(text) (same
+    parents, so still one commit on the branch)."""
+    work = tmp / "record_edit"
+    git("clone", "-q", "--branch", VERIFY_BRANCH, str(bare), str(work))
+    changed = []
+    for f in sorted(work.rglob("*")):
+        if f.is_file() and ".git" not in f.parts:
+            try:
+                t = f.read_text()
+            except UnicodeDecodeError:
+                continue
+            n = edit(t)
+            if n != t:
+                f.write_text(n)
+                changed.append(str(f.relative_to(work)))
+    ident = ["-c", "user.name=defect test", "-c", "user.email=defect-test@localhost"]
+    git("add", "-A", cwd=work)
+    git(*ident, "commit", "-q", "--amend", "--no-edit", cwd=work)
+    git("push", "-q", "--force", "origin", f"HEAD:refs/heads/{VERIFY_BRANCH}", cwd=work)
+    return changed
+
+
+def verify_record_case(kind):
+    def case(tmp, src):
+        import draw_seeds as DS
+        vb = vs_base(tmp)
+        bare = tmp / "twin.git"
+        shutil.copytree(vb["bare"], bare)
+        env = twin_env(tmp, bare)
+        w, name, _ = list_case_files(tmp, "campaign", None)
+        sb = vb["scan"]
+        (w / "EXCLUDED_SECOND_SCAN.json").write_bytes(sb)
+        (w / name).unlink()
+        bl = run_block(w, "list", {})
+        hs = hashlib.sha256(sb).hexdigest()
+        obs = dict(kind=kind, HS=hs, list_block_exit=bl["exit"], expected_check=RECORD_KINDS[kind])
+        if kind != "absent":
+            m2 = tmp / "second_machine"
+            m2.mkdir()
+            dummy = lambda n, d: "0" * 64
+            bash_blocks(m2, env, ["second-scan"], dummy)
+            (m2 / "SCAN_TO_VERIFY.json").write_bytes(sb)
+            rv, ov = bash_blocks(m2, env, ["verify-scan"], dummy)
+            obs["verify"] = ov
+            if rv is None or rv.returncode != 0:
+                return False, obs
+        if kind == "other_hash":
+            other = hashlib.sha256(b"another scan").hexdigest()
+            obs["record_files_changed"] = rewrite_record(bare, tmp, lambda t: t.replace(hs, other))
+        elif kind == "not_success":
+            obs["record_files_changed"] = rewrite_record(bare, tmp, lambda t: t.replace(
+                "the scan is reproduced", "THE SCAN IS NOT REPRODUCED: no announce, push nothing"))
+        fill = lambda n, d: sha(w / name) if n == "H" else hs if n in ("HS", "VS") else None
+        ra, oa = bash_blocks(w, env, ["announce"], fill)
+        pushed = subprocess.run(["git", "-C", str(bare), "rev-parse", "-q", "--verify", "refs/heads/evidence/combined-draw"],
+                                capture_output=True).returncode == 0
+        repo = w / "announce_campaign"
+        commit = repo.is_dir() and subprocess.run(["git", "-C", str(repo), "rev-parse", "-q", "--verify", "HEAD"],
+                                                  capture_output=True).returncode == 0
+        obs.update(announce=oa, commit_made=commit, pushed_to_twin=pushed,
+                   message=next((x for x in (ra.stdout if ra else "").splitlines() if "REFUSED" in x), None))
+        if ra is None:
+            return False, obs
+        if kind is None:
+            RECORD_CONTROL["ok"] = ok = ra.returncode == 0 and pushed and not oa["unknown_placeholders"]
+            return ok, obs
+        obs["control_passed"] = RECORD_CONTROL.get("ok", False)
+        ok = ra.returncode != 0 and obs["message"] is not None and not commit and not pushed
+        return ok and obs["control_passed"], obs
+    case.__name__ = f"case_verify_record_{kind or 'exact'}"
+    return case
+
+
+# analysis.py's side of the verify record (the implementer's interface, f20b3d8b): check_draw in campaign mode on its
+# GitHub path calls check_scan_verify, which reads the record with scan_verify_record(verify_remote(), HS) and its
+# history with activity_items. Stand-ins: verify_remote (a local bare repository), activity_items (the record branch's
+# items), announce_on_github and freeze_time (as in announce_commit_*).
+RECORD_FUNC_KINDS = {
+    None: "a record of one commit, success, scan_sha256 = VS = HS, created before the announce (control): accepted",
+    "after": "the record created after the campaign announce: refused",
+    "same_time": "the record created at the announce's own push time (not strictly before): refused",
+    "second_commit": "the record branch with a second commit on top of its creation commit: refused",
+    "force_push": "a force_push in the record branch's activity: refused (not single-use)",
+    "absent": "no record branch: refused",
+    "other_hash": "the record names another scan sha256: refused",
+}
+RECORD_FUNC_CONTROL = {}
+RECORD_FUNC = '''import json, sys, tempfile, traceback
+sys.path.insert(0, sys.argv[1])
+import analysis as A
+a = json.loads(sys.argv[2])
+files = {k: (None if v is None else open(v, "rb").read()) for k, v in a["files"].items()}
+ann = open(a["announce"], "rb").read()
+A.announce_on_github = lambda branch, outdir, files_=None, **k: (a["commit"], ann, a["push_utc"], files)
+A.freeze_time = lambda tree_commit, outdir: "2026-11-01T00:00:00Z"
+A.verify_remote = lambda: a["record_remote"]
+A.activity_items = lambda remote, branch, outdir: a["items"]
+out = dict(reached="check_draw")
+try:
+    d, info, _ = A.check_draw(a["kw"], "campaign", tempfile.mkdtemp(), "0" * 40)
+    out.update(reached="accepted", refused=False, scan_verify=info.get("scan_verify"))
+except A.Refused as e:
+    tb = traceback.extract_tb(e.__traceback__)
+    out.update(refused=True, message=str(e), stack=[f.name for f in tb])
+print(json.dumps(out))
+'''
+
+
+def record_repo(tmp, hs, kind):
+    """A bare repository with the record branch: one orphan commit holding VERIFY.txt (and VERIFY_INPUTS.txt), its
+    final line the success verdict on hs (another sha for other_hash); second_commit adds a child commit."""
+    bare, work = tmp / "record.git", tmp / "record_work"
+    git("init", "-q", "--bare", str(bare))
+    git("init", "-q", "-b", VERIFY_BRANCH, str(work))
+    ident = ["-c", "user.name=defect test", "-c", "user.email=defect-test@localhost"]
+    named = hashlib.sha256(b"another scan").hexdigest() if kind == "other_hash" else hs
+    (work / "VERIFY.txt").write_text(f"the scan is reproduced scan_sha256 {named} VS {named}\n")
+    (work / "VERIFY_INPUTS.txt").write_text("format layered-scan-verify-inputs/1\n")
+    git("add", ".", cwd=work)
+    git(*ident, "commit", "-q", "-m", "scan verify record", cwd=work)
+    first = git("rev-parse", "HEAD", cwd=work).strip()
+    if kind == "second_commit":
+        (work / "NOTE.txt").write_text("a second commit\n")
+        git("add", ".", cwd=work)
+        git(*ident, "commit", "-q", "-m", "second", cwd=work)
+    if kind != "absent":
+        git("push", "-q", str(bare), f"HEAD:refs/heads/{VERIFY_BRANCH}", cwd=work)
+    return bare, first, git("rev-parse", "HEAD", cwd=work).strip()
+
+
+def record_func_case(kind):
+    def case(tmp, src):
+        import datetime
+        vb = vs_base(tmp)
+        w, name, _ = list_case_files(tmp, "campaign", None)
+        scan = w / "EXCLUDED_SECOND_SCAN.json"
+        scan.write_bytes(vb["scan"])                    # the twin's canonical scan, a superset of the pinned list
+        (w / name).unlink()
+        bl = run_block(w, "list", {})
+        hs = sha(scan)
+        eb = (w / name).read_bytes()
+        _, p, t0 = announced_draw(w, "CASE", ROUND_C, json.loads(eb), eb, CAMPAIGN_SIZES, "campaign",
+                                  "evidence/combined-draw", fmt=2, second_scan_sha256=hs)
+        d = json.loads(Path(p["draw"]).read_text())
+        bare, first, tip = record_repo(tmp, hs, kind)
+        utc = lambda t: datetime.datetime.fromtimestamp(t, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        created = {"after": t0 + 60, "same_time": t0}.get(kind, t0 - 3600)
+        ref = f"refs/heads/{VERIFY_BRANCH}"
+        items = [dict(activity_type="branch_creation", after=first, before="0" * 40, ref=ref, timestamp=utc(created))]
+        if kind == "second_commit":
+            items.append(dict(activity_type="push", after=tip, before=first, ref=ref, timestamp=utc(created + 10)))
+        elif kind == "force_push":
+            items.append(dict(activity_type="force_push", after=first, before=first, ref=ref, timestamp=utc(created + 10)))
+        kw = dict(draw=str(p["draw"]), excluded=str(w / name), **{SECOND_SCAN_ARG: str(scan)})
+        files = {"EXCLUDED_PUBLISHED.json": str(w / name), "EXCLUDED_SECOND_SCAN.json": str(scan)}
+        r = subprocess.run([PY, "-B", "-c", RECORD_FUNC, str(HERE), json.dumps(dict(
+            kw=kw, files=files, announce=str(p["announce"]), commit=d["announce"]["commit"],
+            push_utc=d["announce"]["push_utc"], record_remote=str(bare), items=items))], capture_output=True, text=True)
+        try:
+            res = json.loads(r.stdout.strip().splitlines()[-1])
+        except (ValueError, IndexError):
+            return False, dict(crashed=True, stderr=r.stderr[-1500:], list_block_exit=bl["exit"])
+        obs = dict(kind=kind, HS=hs, record_created=utc(created), announce_push=d["announce"]["push_utc"],
+                   activity=[x["activity_type"] for x in items], expected_check=RECORD_FUNC_KINDS[kind], **res)
+        if kind is None:
+            RECORD_FUNC_CONTROL["ok"] = ok = res.get("reached") == "accepted" and bool(res.get("scan_verify"))
+            return ok, obs
+        obs["control_passed"] = RECORD_FUNC_CONTROL.get("ok", False)
+        return res.get("refused") is True and obs["control_passed"], obs
+    case.__name__ = f"case_record_analysis_{kind or 'exact'}"
+    return case
+
+
+# INTEGRATION: each case that depends on a passing control must reach the specific check it exercises. Its refusal
+# must carry that check's words (the stable part of the analysis's message, at the fix's tip); a refusal by any
+# earlier check fails the case. The accepted cases (exit 0) are checked by their own assertions.
+REACHES = {
+    "standin_seed_changed": "is not draw_seeds.draw of its beacon and round",
+    "standin_round_off_by_one": "is not the round the announce's push time fixes",
+    "standin_signature_byte": "must both be exactly sha256(signature)",
+    "standin_excluded_not_superset": "is not a superset of the freeze's EXCLUDED.json",
+    "standin_excluded_sha_differs": "is not the one DRAW_ANNOUNCE.txt names",
+    **{f"standin_beacon_{w}": "must both be exactly sha256(signature)" for w in ("upper", "mixed", "spaces", "0x")},
+    **{f"standin_signature_{k}": "not written in canonical form" for k in ("pad00", "pad0000", "pad000000")},
+    "standin_signature_flip": "does not verify against the pinned quicknet key",
+    "standin_signature_other_round": "'signature_ok': False",
+    "standin_activity_redone": "(branch_deletion in its activity)",
+    "standin_activity_force_push": "(force_push in its activity)",
+    "rehearsal_seed_missing": "list lacks rehearsal",           # "rehearsal seeds [" at 04d05b47, "rehearsal2 seeds [" at 8b5c9f95
+    "rehearsal_noise_missing": "and noise seeds [",
+    "rehearsal_announce_later": "is not earlier than the campaign's",
+}
+
+# The L cases' refusals, pinned to the messages of analysis.py at a5ba132b (the exact union), the same for the blocks
+# (which call analysis's checks) and the functions. r2_extra and the /2 format cases await the follow-ups: not pinned.
+R2U = "the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds"
+CU = "the exact union of second_scan= and both rehearsals' verified seeds and noise seeds"
+for side in ("blocks", "funcs"):
+    REACHES.update({
+        f"list_{side}_rehearsal_extra": f"rehearsal 2's excluded= list adds 1 seeds that are not in {R2U}",
+        f"list_{side}_rehearsal_field": f"rehearsal 2's excluded= list has the exact union's seed set but another field "
+                                        f"differs from {R2U}",
+        f"list_{side}_rehearsal_drop_noise": "rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [",
+        f"list_{side}_campaign_extra": f"the campaign's excluded= list adds 1 seeds that are not in {CU}",
+        f"list_{side}_campaign_drop_scan": f"the campaign's excluded= list is missing 1 seeds of {CU} ([block list]): "
+                                           f"[1234567]",
+        f"list_{side}_campaign_field": f"the campaign's excluded= list has the exact union's seed set but another field "
+                                       f"differs from {CU}",
+        f"list_{side}_campaign_drop_noise": "the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [",
+        f"list_{side}_campaign_scan_short": "second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 "
+                                            "of its seeds [18985]",
+    })
+REACHES.update({
+    "list_blocks_rehearsal_drop_scan": f"rehearsal 2's excluded= list is missing 1 seeds of {R2U}",
+    "list_funcs_rehearsal_drop_scan": "the excluded= list is not a superset of the freeze's EXCLUDED.json",
+    "list_blocks_campaign_no_scan": "EXCLUDED_SECOND_SCAN.json",
+    "list_funcs_campaign_no_scan": "campaign mode: second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output",
+    "format_campaign_v2_scan_sha_other": "second_scan= has sha256 ",
+    "announce_block_scan_byte": "EXCLUDED_SECOND_SCAN.json has sha256 ",
+})
+
+# The owner's review decisions, pinned to the refusal prefixes of the implementer's interface (13ebca8b, relayed by
+# the coordinator before its push).
+REACHES.update({
+    "scan_noncanon": "is not in canonical form",
+    "scan_format": ": format 'layered-excluded-seeds/0' is not draw_seeds.scan's",
+    "scan_rule": ": its rule is not draw_seeds.scan's rule",
+    "scan_unsorted": ": seeds are not sorted and unique",
+    "scan_duplicate": ": seeds are not sorted and unique",
+    "scan_bool": ": seeds are not a list of integers",
+    "scan_count": "is not the number of seeds",
+    "scan_seeds_sha256": ": seeds_sha256 is not sha256 of its seeds",
+    "scan_refs_malformed": "refs not of draw_seeds.scan's shape",
+    "scan_refs_duplicate": "names a key twice",
+    "scan_refs_no_head": ": no HEAD entry",
+    "scan_file_missing": "is missing or unreadable: ",
+    "scan_file_unreadable": "is missing or unreadable: ",
+    "list_blocks_campaign_no_scan": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON",
+    "list_blocks_campaign_scan_unreadable": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON",
+    "format_campaign_v1": "(second_scan_sha256 only in layered-draw-announce/2)",
+    "format_campaign_v1_4lines": "a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+    "format_rehearsal_v2": "layered-draw-announce/2 is the campaign announce only, not mode 'rehearsal'",
+    "format_campaign_v2_no_scan_sha": "in layered-draw-announce/2 is not exactly the lines",
+    "list_blocks_campaign_r2_extra": "rehearsal 2's list (rehearsal_excluded=) adds 1 seeds",
+    "list_funcs_campaign_r2_extra": "rehearsal 2's list (rehearsal_excluded=) adds 1 seeds",
+    "pre_announce_absent": "the campaign announce names no second_scan_sha256, so second_scan= cannot be checked against it",
+    "announce_commit_no_scan": "the announce commit has no EXCLUDED_SECOND_SCAN.json",
+    "announce_commit_scan_differs": "the second_scan= file is not byte-equal to",
+    "verify_scan_plus3": "REFUSED: VS (",
+    "scan_head_not_main": ": HEAD is not main's tip",
+    "format_campaign_v2_sha_nonhex": "is not exactly 64 lowercase hex characters",
+    **{f"verify_record_{k}": "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a "
+                             "success, or not HS" for k in ("absent", "other_hash", "not_success")},
+    "record_analysis_after": "not before the campaign announce",
+    "record_analysis_same_time": "not before the campaign announce",
+    "record_analysis_second_commit": "has 2 commits: it must be exactly its creation commit (single-use)",
+    "record_analysis_force_push": "is not single-use: force_push in its activity",
+    "record_analysis_absent": "the scan verify record evidence/combined-scan-verify is absent from",
+    "record_analysis_other_hash": "verified the scan ",
+    "verify_scan_omit_branch": "THE SCAN IS NOT REPRODUCED",
+    "verify_scan_wrong_tip": "THE SCAN IS NOT REPRODUCED",
+})
+
+# The manifest problems a case makes on purpose. Every other case must leave its roots' manifests consistent: that is
+# asserted, so a refusal in a D8 or D9 case cannot come from the fixture.
+TAMPERED = {
+    "one_byte_in_comparison": ["out_K05/NOT1_6212/N0/comparison.json: differs"],
+    "listed_file_missing": ["out_K05/NOT1_6212/N2/extract/extract.json: missing"],
+}
+
+CASES = [
+    ("control", "k05_alone", case_k05_alone, "exit 0; NOT1 counted 2 at K0 and K3"),
+    ("control", "k05_with_dupx", case_k05_with_dupx, "exit 0; NOT1 counted 2 at K0 and K3 (the DUPX_ folder is a control)"),
+    ("D8", "planned_seed_not_started", case_planned_seed_not_started,
+     "exit 0; NOT1 rows sum to 3 at K0 and K3; a not_run entry for NOT1_6230 at each level"),
+    ("D8", "planned_machine_no_root", case_planned_machine_no_root,
+     "no draw: exit 0 and a not_run entry naming NOT1_6212 (the home instance K06's plan names); no refusal"),
+    ("D8", "draw_machine_without_root", case_draw_machine_without_root,
+     "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; a not_run entry for NOT1_6213 (K02, no root) at each level"),
+    ("D8", "draw_duplicate_machine_only", case_draw_duplicate_machine_only,
+     "draw=: exit 0; NOT1 rows sum to 2 at K0 and K3; not_run entries for NOT1_6212 (K01) and NOT1_6213 (K02)"),
+    ("D9", "same_root_30_times", case_same_root_30_times,
+     "refused; NOT1 not counted more than twice; no verdict \"established\""),
+    ("D9", "draw_same_machine_twice", case_draw_same_machine_twice,
+     "draw=: refused, the output naming K01; NOT1 not counted more than once"),
+    ("D9", "same_machine_two_paths", case_same_machine_two_paths, "refused; NOT1 not counted more than twice"),
+    ("D9", "home_instance_twice", case_home_instance_twice, "refused; NOT1 not counted more than twice"),
+    ("draw", "standin_draw_valid", case_standin_draw_valid,
+     "the valid stand-in draw (round 1000000): exit 0; every group's rows sum to its size; not_run for both NOT1 "
+     "seeds of canonical_seeds() (derived at run time from the pinned list)"),
+    ("draw", "standin_seed_changed", case_standin_seed_changed, "one drawn seed changed, signature kept: refused"),
+    ("draw", "standin_round_off_by_one", case_standin_round_off_by_one, "push_utc + 3 s, the round off by one: refused"),
+    ("draw", "standin_signature_byte", case_standin_signature_byte, "one signature byte changed: refused"),
+    ("draw", "standin_excluded_not_superset", case_standin_excluded_not_superset,
+     "an exclusion list missing one pinned seed (announced, and the draw recomputed over it): refused"),
+    ("draw", "standin_excluded_sha_differs", case_standin_excluded_sha_differs,
+     "an exclusion list with the pinned seeds but other bytes than announced: refused"),
+    ("E2", "standin_activity_clean", case_standin_activity_clean,
+     "the valid stand-in draw with activity= one clean branch_creation of the announce commit: exit 0, rows sum"),
+    ("E2", "standin_activity_redone", case_standin_activity_redone,
+     "activity= branch_creation, branch_deletion, a second later branch_creation used by DRAW.json: refused "
+     "(gated on standin_activity_clean)"),
+    ("E2", "standin_activity_force_push", case_standin_activity_force_push,
+     "activity= the clean branch_creation then a force_push on the announce branch: refused (gated)"),
+    ("beacon", "draw_reference", case_draw_reference,
+     "fixed reference (round 1000000's signature and value, tests/fixtures/REFERENCE_EXCLUDED.json, 2/1/1): value = "
+     "sha256(signature); a minimal SHA-256 loop in the test and draw_seeds.draw both give the hard-coded seeds "
+     + json.dumps(REFERENCE_SEEDS) + " and candidate counts"),
+    ("beacon", "beacon_canonical", case_beacon_canonical,
+     "draw_seeds.draw on the canonical lowercase beacon gives the seeds of the ef374ccd formula over the pinned list "
+     "(canonical_seeds(), derived at run time)"),
+    *[("beacon", f"beacon_{n}", beacon_writing_case(n),
+       f"draw_seeds.draw on the beacon written {n}: raises, or gives the canonical seeds") for n in WRITINGS],
+    ("beacon", "sizes_permutations", case_sizes_permutations,
+     "draw_seeds.draw with the sizes dict in all 6 orders at sizes 166 each: identical seeds"),
+    *[("beacon", f"standin_beacon_{n}", standin_writing_case(n),
+       f"analysis with a DRAW.json whose beacon and beacon_round.randomness are written {n} (the seeds drawn on that "
+       f"writing, a matching root): refused, or accepted with the canonical NOT1 seeds (gated on standin_draw_valid)")
+      for n in WRITINGS],
+    ("X1", "verify_signature_real", case_verify_signature_real,
+     "beacon_verify.verify on round 1000000 as published: ok (control)"),
+    *[("X1", f"verify_signature_{k}", verify_pad_case(k),
+       f"beacon_verify.verify on the signature with {k[3:]} in front and value sha256(those bytes): not ok")
+      for k in PADS],
+    *[("X1", f"standin_signature_{k}", standin_sig_case(k),
+       f"analysis on a forged DRAW.json: the signature with {k[3:]} in front, value and seeds from it: refused (gated)")
+      for k in PADS],
+    ("X1", "standin_signature_flip", standin_sig_case("flip", ("does not verify against the pinned quicknet key",
+                                                               "decod")),
+     "analysis on a forged DRAW.json: one signature byte flipped, value = sha256(flipped bytes), seeds from it: "
+     "refused by the signature check (\"does not verify against the pinned quicknet key\" or a decoding failure)"),
+    *[("X2", "plans_command_" + "_".join(str(n) for n in sz.values()), plans_case(sz),
+       f"plan_split3.py on the DRAW.json file at {sz}: all 12 plans equal plan_split3.split of the draw") for sz in X2_SIZES],
+    ("X1", "verify_other_round", case_verify_other_round,
+     "beacon_verify.verify on round 20000000's signature presented as round 1000000's: not ok, with subgroups_ok "
+     "true and signature_ok false (the pairing refuses it, not the decoding)"),
+    ("X1", "standin_signature_other_round", standin_sig_case("other_round", ("does not verify against the pinned "
+                                                                             "quicknet key",), avoid=("decod",)),
+     "analysis on a forged DRAW.json: round 20000000's signature as round 1000000's, value = sha256 of it, seeds "
+     "from it: refused by the pairing (\"does not verify against the pinned quicknet key\", no decoding failure)"),
+    ("X2", "standin_plans_from_command", case_standin_plans_from_command,
+     "the 6/6/6 stand-in, plans from the plan_split3.py command, roots for its remote-duplicate machines, draw=: "
+     "exit 0 (gated)"),
+    ("R", "rehearsal_full_list", case_rehearsal_full_list,
+     "rehearsal draw (round 1000000, 6/6/6) and campaign draw (round 20000000) whose excluded= list is the pinned list "
+     "plus every rehearsal seed and its noise seeds: exit 0 (control)"),
+    ("R", "rehearsal_seed_missing", rehearsal_mutation("rehearsal_seed_missing", drop="seed"),
+     "the same with one rehearsal seed left out of the campaign's list: refused, naming the seed (gated)"),
+    ("R", "rehearsal_noise_missing", rehearsal_mutation("rehearsal_noise_missing", drop="noise"),
+     "the same with one rehearsal noise seed (10 S + 1) left out: refused, naming it (gated)"),
+    ("R", "rehearsal_announce_later", rehearsal_mutation("rehearsal_announce_later", swap_rounds=True),
+     "the rehearsal on round 20000000 and the campaign on 1000000 (the rehearsal announced later), the list full: "
+     "refused (gated)"),
+    *[("L", n, (list_block_case if side == "blocks" else list_funcs_case)(which, kind),
+       f"{'FREEZE.txt blocks' if side == 'blocks' else 'analysis.check_draw + check_rehearsal_seeds'}, {which} list: "
+       + LIST_KINDS[kind] + ("" if kind is None else " (gated on the exact case)")) for n, which, kind, side in LIST_CASES],
+    *[("L", f"scan_{v}", scan_case(v), "second_scan= " + t + ": refused by its own check (gated)")
+      for v, t in SCAN_VARIANTS.items()],
+    *[("L", f"scan_file_{k}", scan_file_case(k), f"second_scan= {k}: an explicit refusal naming the file (gated)")
+      for k in ("missing", "unreadable")],
+    *[("L", f"verify_scan_{k or 'exact'}", verify_scan_case(k), t) for k, t in VS_KINDS.items()],
+    ("L", "cli_pre_announce", case_cli_pre_announce,
+     "analysis.py test OUT ROOT pre_announce=True: refused as an unknown argument (the pre-announce exception is not "
+     "reachable from the command line)"),
+    ("L", "pre_announce_given", pre_announce_case(True),
+     "check_rehearsal_seeds as [block check-list] calls it (no announce yet), pre_announce=True: accepted (control)"),
+    ("L", "pre_announce_absent", pre_announce_case(False),
+     "the same without pre_announce: refused, the announce names no second_scan_sha256 (gated)"),
+    *[("L", f"announce_commit_{k or 'exact'}", announce_commit_case(k), t + ("" if k is None else " (gated)"))
+      for k, t in COMMIT_KINDS.items()],
+    *[("L", f"verify_record_{k or 'exact'}", verify_record_case(k), t + ("" if k is None else " (gated)"))
+      for k, t in RECORD_KINDS.items()],
+    *[("L", f"record_analysis_{k or 'exact'}", record_func_case(k), t + ("" if k is None else " (gated)"))
+      for k, t in RECORD_FUNC_KINDS.items()],
+    ("L", "announce_rehearsal1_parses", case_announce_rehearsal1_parses,
+     "rehearsal 1's real /1 DRAW_ANNOUNCE.txt (evidence/combined-rehearsal-draw, fetched by name) parses with "
+     "analysis.parse_announce: mode rehearsal, its list's sha256, 6/6/6"),
+    *[("L", f"format_{v}", format_case(v), t + " (gated on the exact case)") for v, t in FORMAT_VARIANTS.items()],
+    ("L", "announce_block_exact", case_announce_block_exact,
+     "[block announce] verbatim, campaign, pushed to a local twin of GitHub: pushed, a /2 announce naming the scan's "
+     "sha256 (control)"),
+    ("L", "announce_block_scan_byte", case_announce_block_scan_byte,
+     "the same with one byte of the scan copy changed: refused, no commit made, nothing pushed (gated)"),
+    ("E1", "round_own_check_failed", case_round_own_check_failed,
+     "N2 of NOT1_6220 stopped by its own check (" + OWN_CHECK + "): exit 0; refuted at K3, in a sub-row about the "
+     "run's own check listing the status; NOT1_6212 held"),
+    ("E1", "round_simulator_ended", case_round_simulator_ended,
+     "the twin, N2 ended by the simulator (" + SIM_ENDED + "): exit 0; NOT1_6220 not completed at K3, not refuted; "
+     "NOT1_6212 held"),
+    ("D10", "one_byte_in_comparison", case_one_byte_in_comparison, "refused; the output names N0/comparison.json"),
+    ("D10", "listed_file_missing", case_listed_file_missing, "refused; the output names extract.json"),
+    ("D10", "stopped_mid_instance", case_stopped_mid_instance,
+     "exit 0; NOT1_6220 refuted at K3, its K3 flagged manifest not final; NOT1_6212 held at K0 and K3"),
+]
+
+
+def main(out_json=None):
+    only = set(filter(None, os.environ.get("LAYERED_DEFECT_ONLY", "").split(",")))   # e.g. L: those groups only
+    lean = shutil.which("lean")
+    head = git("rev-parse", "HEAD", cwd=REPO).strip()
+    code = git("log", "-1", "--format=%H", "--", "research/layered-networks/analysis.py", cwd=REPO).strip()
+    report = dict(format="layered-analysis-defects/1", script_sha256=sha(__file__), analysis_sha256=sha(ANALYSIS), draw_seeds_sha256=sha(HERE / "draw_seeds.py"),
+                  tree_head=head, analysis_last_commit=code, lean=dict(path=lean, sha256=sha(lean) if lean else None),
+                  only=sorted(only), campaign_announce_format=campaign_announce_format(), cases=[])
+    with tempfile.TemporaryDirectory() as t:
+        t = Path(t)
+        cases = [c for c in CASES if not only or c[0] in only]
+        src = sources(t) if any(c[0] != "L" for c in cases) else None     # the L cases use no root
+        for defect, name, fn, asserts in cases:
+            w = t / name
+            w.mkdir()
+            try:
+                ok, obs = fn(w, src)
+                got = sorted(x.split(" (listed in")[0] for x in obs.get("roots_manifest_problems", []))
+                want = sorted(TAMPERED.get(name, []))
+                obs["fixture_ok"] = got == want                       # only the D10 tampering, nothing else
+                ok = ok and obs["fixture_ok"]
+                if name in REACHES:
+                    obs["reached_check"] = REACHES[name] in (obs.get("message") or "")
+                    ok = ok and obs["reached_check"]
+            except Exception as e:                                     # a crash of the setup, not of the analysis
+                ok, obs = False, dict(setup_error=repr(e))
+            print(f"{'PASS' if ok else 'FAIL'}  {defect:7} {name}: {json.dumps(obs)[:400]}", flush=True)
+            report["cases"].append(dict(defect=defect, case=name, asserts=asserts, result="PASS" if ok else "FAIL",
+                                        observed=obs))
+            shutil.rmtree(w, ignore_errors=True)
+    if out_json:
+        Path(out_json).write_text(json.dumps(report, indent=1, sort_keys=True) + "\n")
+    bad = [c["case"] for c in report["cases"] if c["result"] != "PASS"]
+    print(f"{len(report['cases']) - len(bad)} of {len(report['cases'])} cases pass" + (f"; failing: {bad}" if bad else ""))
+    return not bad
+
+
+if __name__ == "__main__":
+    sys.exit(0 if main(*sys.argv[1:2]) else 1)

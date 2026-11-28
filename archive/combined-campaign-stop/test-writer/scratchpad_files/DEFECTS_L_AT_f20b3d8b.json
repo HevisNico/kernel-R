@@ -1,0 +1,2234 @@
+{
+ "analysis_last_commit": "2530adda1c506b40e9947ddf85c1dc96504874a3",
+ "analysis_sha256": "069eeca87927cdfea23f12bfc3522932cd0db662a73f5800c10c7480f67bbaa6",
+ "campaign_announce_format": 2,
+ "cases": [
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: the exact list (control): accepted",
+   "case": "list_blocks_rehearsal_exact",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": null,
+    "exit": 0,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "mutation": null,
+    "pinned_superset": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds rehearsal: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds rehearsal: strict=False, announces offline\n",
+    "stdout": "the list is right 18 72 sha256 8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_extra",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": 1000001,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c",
+    "message": "refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds rehearsal: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds rehearsal: strict=False, announces offline\nrefused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]\n",
+    "stdout": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_drop_noise",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": 189850,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105",
+    "message": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [189850] (the list must add the earlier rehearsals' seeds)",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds rehearsal: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds rehearsal: strict=False, announces offline\nrefused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [189850] (the list must add the earlier rehearsals' seeds)\n",
+    "stdout": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_drop_scan",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": 0,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "check_draw's existing superset check (the removed seed is in the pinned EXCLUDED.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "message": "refused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]",
+    "mutation": "drop_scan",
+    "pinned_superset": false,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds rehearsal: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds rehearsal: strict=False, announces offline\nrefused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]\n",
+    "stdout": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_field",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": "added.rehearsal1_draw_sha256",
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa",
+    "message": "refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['added']",
+    "mutation": "field",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds rehearsal: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds rehearsal: strict=False, announces offline\nrefused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['added']\n",
+    "stdout": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: the exact list (control): accepted",
+   "case": "list_blocks_campaign_exact",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": null,
+    "exit": 0,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "mutation": null,
+    "pinned_superset": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\n",
+    "stdout": "rehearsal 2 list: the exact union\nthe list is right 36 144 sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9 scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_extra",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 1000001,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4",
+    "message": "refused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1000001]",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1000001]\n",
+    "stdout": "rehearsal 2 list: the exact union\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_drop_noise",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 218210,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "f5673159668bb35f4bc120fb150987cdf628c78cba1488e68145610a3f064b7a",
+    "message": "refused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [218210] (the list must add the earlier rehearsals' seeds)",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [218210] (the list must add the earlier rehearsals' seeds)\n",
+    "stdout": "rehearsal 2 list: the exact union\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_drop_scan",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 1234567,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check (1234567 is in the scan only, not pinned, not a rehearsal seed)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2",
+    "message": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1234567]",
+    "mutation": "drop_scan",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1234567]\n",
+    "stdout": "rehearsal 2 list: the exact union\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_blocks_campaign_field",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": "added.rehearsal_draw_sha256",
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752",
+    "message": "refused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['added']",
+    "mutation": "field",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['added']\n",
+    "stdout": "rehearsal 2 list: the exact union\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: no EXCLUDED_SECOND_SCAN.json / no second_scan=: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_no_scan",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": null,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new check that second_scan= is given (blocks: the read of EXCLUDED_SECOND_SCAN.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: [Errno 2] No such file or directory: 'EXCLUDED_SECOND_SCAN.json' - push nothing",
+    "mutation": "no_scan",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "shim_lines": [],
+    "stderr": "",
+    "stdout": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: [Errno 2] No such file or directory: 'EXCLUDED_SECOND_SCAN.json' - push nothing\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: the scan without one pinned seed (one rehearsal 1 drew, so the rebuilt list is byte-equal): refused (gated on the exact case)",
+   "case": "list_blocks_campaign_scan_short",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 18985,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new check that second_scan is a superset of the pinned EXCLUDED.json",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "refused: second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [18985]",
+    "mutation": "scan_short",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "rebuilt_list_equal": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [18985]\n",
+    "stdout": "rehearsal 2 list: the exact union\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: rehearsal_excluded= (rehearsal 2's list) with one extra integer, count and sha recomputed, rehearsal 2 drawn and announced over it, the campaign list rebuilt from it: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_r2_extra",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 1000001,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check of rehearsal_excluded= (rehearsal 2's list rebuilt from the pinned list and rehearsal 1's verified draw)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "a75e58f57a3aedd6ec7bde374dcfa820a526ccb2e96d354c8639d7dba36ecccd",
+    "message": "refused: rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]",
+    "mutation": "r2_extra",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "rehearsal 2's list: count, seeds_sha256; its draw and announce; the campaign's list by [block list]"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]\n",
+    "stdout": "REHEARSAL 2 LIST IS NOT THE EXACT UNION\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: EXCLUDED_SECOND_SCAN.json a directory: an explicit refusal naming it, no traceback (gated on the exact case)",
+   "case": "list_blocks_campaign_scan_unreadable",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": null,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: [Errno 21] Is a directory: 'EXCLUDED_SECOND_SCAN.json' - push nothing",
+    "mutation": "scan_unreadable",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "shim_lines": [],
+    "stderr": "",
+    "stdout": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: [Errno 21] Is a directory: 'EXCLUDED_SECOND_SCAN.json' - push nothing\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: the exact list (control): accepted",
+   "case": "list_funcs_rehearsal_exact",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": null,
+    "earlier_checks_passed": true,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "mode": "rehearsal",
+    "mutation": null,
+    "pinned_superset": true,
+    "reached": "accepted",
+    "recomputed": [],
+    "refused": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_extra",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": 1000001,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c",
+    "message": "refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]",
+    "mode": "rehearsal",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_drop_noise",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": 189850,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105",
+    "message": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [189850] (the list must add the earlier rehearsals' seeds)",
+    "mode": "rehearsal",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "raised_in": "check_rehearsal_seeds",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_drop_scan",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": 0,
+    "control_passed": true,
+    "earlier_checks_passed": false,
+    "expected_check": "check_draw's existing superset check (the removed seed is in the pinned EXCLUDED.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "message": "refused: the excluded= list is not a superset of the freeze's EXCLUDED.json",
+    "mode": "rehearsal",
+    "mutation": "drop_scan",
+    "pinned_superset": false,
+    "raised_in": "check_draw",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "refuse"
+    ],
+    "within": "check_draw"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_field",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": "added.rehearsal1_draw_sha256",
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa",
+    "message": "refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['added']",
+    "mode": "rehearsal",
+    "mutation": "field",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: the exact list (control): accepted",
+   "case": "list_funcs_campaign_exact",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": null,
+    "earlier_checks_passed": true,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "mode": "campaign",
+    "mutation": null,
+    "pinned_superset": true,
+    "reached": "accepted",
+    "recomputed": [],
+    "refused": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_extra",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 1000001,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4",
+    "message": "refused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1000001]",
+    "mode": "campaign",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_drop_noise",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "f5673159668bb35f4bc120fb150987cdf628c78cba1488e68145610a3f064b7a",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 218210,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "f5673159668bb35f4bc120fb150987cdf628c78cba1488e68145610a3f064b7a",
+    "message": "refused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [218210] (the list must add the earlier rehearsals' seeds)",
+    "mode": "campaign",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "raised_in": "check_rehearsal_seeds",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_drop_scan",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 1234567,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (1234567 is in the scan only, not pinned, not a rehearsal seed)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2",
+    "message": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1234567]",
+    "mode": "campaign",
+    "mutation": "drop_scan",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_funcs_campaign_field",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": "added.rehearsal_draw_sha256",
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752",
+    "message": "refused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['added']",
+    "mode": "campaign",
+    "mutation": "field",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: no EXCLUDED_SECOND_SCAN.json / no second_scan=: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_no_scan",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded"
+    ],
+    "changed": null,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new check that second_scan= is given (blocks: the read of EXCLUDED_SECOND_SCAN.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "refused: campaign mode: second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output, published with the campaign announce) is required",
+    "mode": "campaign",
+    "mutation": "no_scan",
+    "pinned_superset": true,
+    "raised_in": "second_scan_refusal_missing",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "second_scan_refusal_missing",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: the scan without one pinned seed (one rehearsal 1 drew, so the rebuilt list is byte-equal): refused (gated on the exact case)",
+   "case": "list_funcs_campaign_scan_short",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "announced_second_scan_sha256": "3290dfa7bb33215eba173d4e09ba74b6d8323c1f4ba00604064ea3de27ef87fc",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 18985,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new check that second_scan is a superset of the pinned EXCLUDED.json",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "refused: second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [18985]",
+    "mode": "campaign",
+    "mutation": "scan_short",
+    "pinned_superset": true,
+    "raised_in": "check_rehearsal_seeds",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: rehearsal_excluded= (rehearsal 2's list) with one extra integer, count and sha recomputed, rehearsal 2 drawn and announced over it, the campaign list rebuilt from it: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_r2_extra",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "a75e58f57a3aedd6ec7bde374dcfa820a526ccb2e96d354c8639d7dba36ecccd",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 1000001,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check of rehearsal_excluded= (rehearsal 2's list rebuilt from the pinned list and rehearsal 1's verified draw)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "a75e58f57a3aedd6ec7bde374dcfa820a526ccb2e96d354c8639d7dba36ecccd",
+    "message": "refused: rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]",
+    "mode": "campaign",
+    "mutation": "r2_extra",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "rehearsal 2's list: count, seeds_sha256; its draw and announce; the campaign's list by [block list]"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= the scan's bytes are not draw_seeds.canon of its JSON (indented): refused by its own check (gated)",
+   "case": "scan_noncanon",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "the scan's bytes are not draw_seeds.canon of its JSON (indented)",
+    "expected_check": "the second scan's own check: the scan's bytes are not draw_seeds.canon of its JSON (indented)",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_noncanon/work/SCAN_X.json is not in canonical form (its bytes are not draw_seeds.canon of its content)",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "775db41c74139deafb7fcb74c9d082293193799b521286bcb4169fc77dfc9440",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "noncanon",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= its format is not draw_seeds.py scan's: refused by its own check (gated)",
+   "case": "scan_format",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "its format is not draw_seeds.py scan's",
+    "expected_check": "the second scan's own check: its format is not draw_seeds.py scan's",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_format/work/SCAN_X.json: format 'layered-excluded-seeds/0' is not draw_seeds.scan's 'layered-excluded-seeds/1'",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "130af58aec628c5ec562970682e2fd3e141ce2cb5dc360a15b159d37345e166c",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "format",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= its rule text is not draw_seeds.py scan's: refused by its own check (gated)",
+   "case": "scan_rule",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "its rule text is not draw_seeds.py scan's",
+    "expected_check": "the second scan's own check: its rule text is not draw_seeds.py scan's",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_rule/work/SCAN_X.json: its rule is not draw_seeds.scan's rule",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "1931fd51a19305bea92d7800db9d8b597faf5f8fbf8b783ba62f5c295782e965",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "rule",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= two seeds swapped (count and seeds_sha256 recomputed over them): refused by its own check (gated)",
+   "case": "scan_unsorted",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "two seeds swapped (count and seeds_sha256 recomputed over them)",
+    "expected_check": "the second scan's own check: two seeds swapped (count and seeds_sha256 recomputed over them)",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_unsorted/work/SCAN_X.json: seeds are not sorted and unique",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "fac7b370deaad2e6f886ae3dd44f8c630d24951b733ccf61613aa922a606403b",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "unsorted",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= one seed written twice (count and seeds_sha256 recomputed): refused by its own check (gated)",
+   "case": "scan_duplicate",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "one seed written twice (count and seeds_sha256 recomputed)",
+    "expected_check": "the second scan's own check: one seed written twice (count and seeds_sha256 recomputed)",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_duplicate/work/SCAN_X.json: seeds are not sorted and unique",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "09c61dcb52d1bc6ec623d324c9385e0c8d978777b3f0d58cab19f602ebba89a3",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "duplicate",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= the seed 0 (or 1) written as false (true) (count and seeds_sha256 recomputed): refused by its own check (gated)",
+   "case": "scan_bool",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "the seed 0 (or 1) written as false (true) (count and seeds_sha256 recomputed)",
+    "expected_check": "the second scan's own check: the seed 0 (or 1) written as false (true) (count and seeds_sha256 recomputed)",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_bool/work/SCAN_X.json: seeds are not a list of integers",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "34c2d8ec8db5775f2387b23ee7eac95d0195aa0dca09b97d29d687037cc095b8",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "bool",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= count one more than the seeds: refused by its own check (gated)",
+   "case": "scan_count",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "count one more than the seeds",
+    "expected_check": "the second scan's own check: count one more than the seeds",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_count/work/SCAN_X.json: count 16337 is not the number of seeds 16336",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "5fe4206ef8092162797ae7fdfcad51ab190d316db761f8ffc09b432e3d587f47",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "count",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= seeds_sha256 of other seeds: refused by its own check (gated)",
+   "case": "scan_seeds_sha256",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "seeds_sha256 of other seeds",
+    "expected_check": "the second scan's own check: seeds_sha256 of other seeds",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_seeds_sha256/work/SCAN_X.json: seeds_sha256 is not sha256 of its seeds",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "a7d7cbaf7f7bbc7794893eeafe6b53a77bb02dd6a8d7a0af02c6e35b9874f37e",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "seeds_sha256",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= one ref's tip is not a commit sha: refused by its own check (gated)",
+   "case": "scan_refs_malformed",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "one ref's tip is not a commit sha",
+    "expected_check": "the second scan's own check: one ref's tip is not a commit sha",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_refs_malformed/work/SCAN_X.json: refs not of draw_seeds.scan's shape: ['refs/remotes/origin/HevisNico-patch-1']",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "ed18b93f8a280ec148a14f4d92821cc7382bc7c35e791528231e7fd732bfe68e",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "refs_malformed",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= one ref name written twice in the bytes: refused by its own check (gated)",
+   "case": "scan_refs_duplicate",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "one ref name written twice in the bytes",
+    "expected_check": "the second scan's own check: one ref name written twice in the bytes",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_refs_duplicate/work/SCAN_X.json names a key twice (a ref recorded twice, or a field): ['refs/remotes/origin/HevisNico-patch-1']",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "509377615b50fcc79fb04b1b341449d27651fd45f4bc878e9dcda97cb40e0684",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "refs_duplicate",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= no HEAD entry in refs: refused by its own check (gated)",
+   "case": "scan_refs_no_head",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "no HEAD entry in refs",
+    "expected_check": "the second scan's own check: no HEAD entry in refs",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_refs_no_head/work/SCAN_X.json: no HEAD entry (draw_seeds.scan always scans HEAD)",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "4260aab03cf8c1b4aed8d43800116e86317df674a227cb31adf436c16e798dd9",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "refs_no_head",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= HEAD's tip is another ref's, not main's: refused by its own check (gated)",
+   "case": "scan_head_not_main",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "HEAD's tip is another ref's, not main's",
+    "expected_check": "the second scan's own check: HEAD's tip is another ref's, not main's",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_head_not_main/work/SCAN_X.json: HEAD is not main's tip ([block second-scan] sets HEAD to origin/main)",
+    "messages_distinct": true,
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "c36872bba6f22c29094721f0ca5dbedb8aa136f83da0e7290697fb3e79b77c74",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "head_not_main",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= missing: an explicit refusal naming the file (gated)",
+   "case": "scan_file_missing",
+   "defect": "L",
+   "observed": {
+    "control_passed": true,
+    "expected_check": "an explicit refusal naming the file",
+    "file": "NO_SUCH_SCAN.json",
+    "fixture_ok": true,
+    "kind": "missing",
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_file_missing/work/NO_SUCH_SCAN.json is missing or unreadable: No such file or directory",
+    "raised_in": "read_file",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "read_file",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= unreadable: an explicit refusal naming the file (gated)",
+   "case": "scan_file_unreadable",
+   "defect": "L",
+   "observed": {
+    "control_passed": true,
+    "expected_check": "an explicit refusal naming the file",
+    "file": "SCAN_DIR.json",
+    "fixture_ok": true,
+    "kind": "unreadable",
+    "message": "refused: second_scan= /tmp/tmpdvo83rit/scan_file_unreadable/work/SCAN_DIR.json is missing or unreadable: Is a directory",
+    "raised_in": "read_file",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "read_file",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the twin's scan as [block second-scan] makes it (control): verify-scan passes, VS = HS",
+   "case": "verify_scan_exact",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "VS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "blocks": [
+     "verify-scan"
+    ],
+    "exit": 0,
+    "expected_check": "the twin's scan as [block second-scan] makes it (control): verify-scan passes, VS = HS",
+    "final_line": "the scan is reproduced scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "fixture_ok": true,
+    "kind": null,
+    "list_block_exit": 0,
+    "message": "the scan is reproduced scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "problems": [],
+    "second_scan_exit": 0,
+    "stderr": "",
+    "stdout": "the scan is reproduced scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nformat layered-scan-verify-inputs/1\nfreeze_commit f20b3d8bc9c8a9a79966badd97a0d368e48fad86\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 069eeca87927cdfea23f12bfc3522932cd0db662a73f5800c10c7480f67bbaa6\nscan_to_verify_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nreproduced_scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nverify_lsremote_sha256 73012da2932dff88663c1b16974f342bbfd15db09119f83e80a254a19e571139\nscan_lsremote_sha256 73012da2932dff88663c1b16974f342bbfd15db09119f83e80a254a19e571139\nverify record pushed: evidence/combined-scan-verify a3777ca10c482a95a39154f819bb3679aeec5ef0\n",
+    "unknown_placeholders": [],
+    "verify_pushed_to_twin": true
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the canonical scan plus 3 integers, count and seeds_sha256 recomputed (the owner's acceptance case): verify-scan fails before any announce commit, and [block announce] refuses",
+   "case": "verify_scan_plus3",
+   "defect": "L",
+   "observed": {
+    "HS": "f098d1e139c8b3d10289b4c1b1f46db1940af9de56fe129ad5246c238191c112",
+    "VS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "announce": {
+     "announce_folder_made": false,
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "pushed_to_twin": false,
+     "stderr": "",
+     "stdout": "REFUSED: VS (6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS (f098d1e139c8b3d10289b4c1b1f46db1940af9de56fe129ad5246c238191c112): no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "blocks": [
+     "verify-scan"
+    ],
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the canonical scan plus 3 integers, count and seeds_sha256 recomputed (the owner's acceptance case): verify-scan fails before any announce commit, and [block announce] refuses",
+    "final_line": "THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 f098d1e139c8b3d10289b4c1b1f46db1940af9de56fe129ad5246c238191c112 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "fixture_ok": true,
+    "kind": "plus3",
+    "list_block_exit": 0,
+    "message": "REFUSED: VS (6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS (f098d1e139c8b3d10289b4c1b1f46db1940af9de56fe129ad5246c238191c112): no commit, no push",
+    "problems": [
+     "PROBLEM: the reproduced scan has sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3, not the scan's f098d1e139c8b3d10289b4c1b1f46db1940af9de56fe129ad5246c238191c112"
+    ],
+    "reached_check": true,
+    "refused_before_announce": true,
+    "second_scan_exit": 0,
+    "stderr": "",
+    "stdout": "PROBLEM: the reproduced scan has sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3, not the scan's f098d1e139c8b3d10289b4c1b1f46db1940af9de56fe129ad5246c238191c112\nTHE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 f098d1e139c8b3d10289b4c1b1f46db1940af9de56fe129ad5246c238191c112 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\n",
+    "unknown_placeholders": [],
+    "verify_pushed_to_twin": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the scan without one branch's ref entry: verify-scan fails",
+   "case": "verify_scan_omit_branch",
+   "defect": "L",
+   "observed": {
+    "HS": "b48e94919ddfa15f61bffdfec651816628fc226ca25566f995f9a0b38f61425f",
+    "VS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "blocks": [
+     "verify-scan"
+    ],
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the scan without one branch's ref entry: verify-scan fails",
+    "final_line": "THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 b48e94919ddfa15f61bffdfec651816628fc226ca25566f995f9a0b38f61425f VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "fixture_ok": true,
+    "kind": "omit_branch",
+    "list_block_exit": 0,
+    "message": "THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 b48e94919ddfa15f61bffdfec651816628fc226ca25566f995f9a0b38f61425f VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "problems": [
+     "PROBLEM: branch evidence/twin-a is on the remote (8ecb8031b84b) but not in the scan",
+     "PROBLEM: the reproduced scan has sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3, not the scan's b48e94919ddfa15f61bffdfec651816628fc226ca25566f995f9a0b38f61425f"
+    ],
+    "reached_check": true,
+    "refused_before_announce": true,
+    "second_scan_exit": 0,
+    "stderr": "",
+    "stdout": "PROBLEM: branch evidence/twin-a is on the remote (8ecb8031b84b) but not in the scan\nPROBLEM: the reproduced scan has sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3, not the scan's b48e94919ddfa15f61bffdfec651816628fc226ca25566f995f9a0b38f61425f\nTHE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 b48e94919ddfa15f61bffdfec651816628fc226ca25566f995f9a0b38f61425f VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\n",
+    "unknown_placeholders": [],
+    "verify_pushed_to_twin": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "one ref with another commit's tip: verify-scan fails",
+   "case": "verify_scan_wrong_tip",
+   "defect": "L",
+   "observed": {
+    "HS": "adab134dbb9c8811d782f348da6cbd7d00e4775c97e313246542b5b911117287",
+    "VS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "blocks": [
+     "verify-scan"
+    ],
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "one ref with another commit's tip: verify-scan fails",
+    "final_line": "THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 adab134dbb9c8811d782f348da6cbd7d00e4775c97e313246542b5b911117287 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "fixture_ok": true,
+    "kind": "wrong_tip",
+    "list_block_exit": 0,
+    "message": "THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 adab134dbb9c8811d782f348da6cbd7d00e4775c97e313246542b5b911117287 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "problems": [
+     "PROBLEM: branch evidence/twin-b is at 2c8d182b8adc on the remote, at 8ecb8031b84b in the scan",
+     "PROBLEM: the reproduced scan has sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3, not the scan's adab134dbb9c8811d782f348da6cbd7d00e4775c97e313246542b5b911117287"
+    ],
+    "reached_check": true,
+    "refused_before_announce": true,
+    "second_scan_exit": 0,
+    "stderr": "",
+    "stdout": "PROBLEM: branch evidence/twin-b is at 2c8d182b8adc on the remote, at 8ecb8031b84b in the scan\nPROBLEM: the reproduced scan has sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3, not the scan's adab134dbb9c8811d782f348da6cbd7d00e4775c97e313246542b5b911117287\nTHE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 adab134dbb9c8811d782f348da6cbd7d00e4775c97e313246542b5b911117287 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\n",
+    "unknown_placeholders": [],
+    "verify_pushed_to_twin": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.py test OUT ROOT pre_announce=True: refused as an unknown argument (the pre-announce exception is not reachable from the command line)",
+   "case": "cli_pre_announce",
+   "defect": "L",
+   "observed": {
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: unknown argument 'pre_announce=True' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, rehearsal1_draw, rehearsal1_excluded, rehearsal1_announce, rehearsal1_activity, second_scan, times, thresholds, controls, tips; a root path cannot contain '=')"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_rehearsal_seeds as [block check-list] calls it (no announce yet), pre_announce=True: accepted (control)",
+   "case": "pre_announce_given",
+   "defect": "L",
+   "observed": {
+    "fixture_ok": true,
+    "pre_announce": true,
+    "refused": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the same without pre_announce: refused, the announce names no second_scan_sha256 (gated)",
+   "case": "pre_announce_absent",
+   "defect": "L",
+   "observed": {
+    "control_passed": true,
+    "fixture_ok": true,
+    "message": "refused: campaign mode: the campaign announce names no second_scan_sha256, so second_scan= cannot be checked against it",
+    "pre_announce": false,
+    "reached_check": true,
+    "refused": true
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the announce commit holds the announced EXCLUDED_PUBLISHED.json and EXCLUDED_SECOND_SCAN.json (control): check_draw accepts",
+   "case": "announce_commit_exact",
+   "defect": "L",
+   "observed": {
+    "commit_files": {
+     "EXCLUDED_PUBLISHED.json": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+     "EXCLUDED_SECOND_SCAN.json": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6"
+    },
+    "expected_check": "the announce commit holds the announced EXCLUDED_PUBLISHED.json and EXCLUDED_SECOND_SCAN.json (control): check_draw accepts",
+    "fixture_ok": true,
+    "kind": null,
+    "reached": "accepted",
+    "refused": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the announce commit has no EXCLUDED_SECOND_SCAN.json: refused (gated)",
+   "case": "announce_commit_no_scan",
+   "defect": "L",
+   "observed": {
+    "commit_files": {
+     "EXCLUDED_PUBLISHED.json": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+     "EXCLUDED_SECOND_SCAN.json": null
+    },
+    "control_passed": true,
+    "expected_check": "the announce commit has no EXCLUDED_SECOND_SCAN.json: refused",
+    "fixture_ok": true,
+    "kind": "no_scan",
+    "message": "refused: the announce commit has no EXCLUDED_SECOND_SCAN.json: the announced second_scan_sha256 names nothing published",
+    "reached": "check_draw",
+    "reached_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_announce_files",
+     "refuse"
+    ]
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the announce commit's EXCLUDED_SECOND_SCAN.json (announced, its sha256 in the announce) is not byte-equal to second_scan=: refused (gated)",
+   "case": "announce_commit_scan_differs",
+   "defect": "L",
+   "observed": {
+    "commit_files": {
+     "EXCLUDED_PUBLISHED.json": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+     "EXCLUDED_SECOND_SCAN.json": "c70f6d335d490bd0e4b5610d6c6ec82c446497d07a5e4bee5a3cf8e5f2ed7dee"
+    },
+    "control_passed": true,
+    "expected_check": "the announce commit's EXCLUDED_SECOND_SCAN.json (announced, its sha256 in the announce) is not byte-equal to second_scan=: refused",
+    "fixture_ok": true,
+    "kind": "scan_differs",
+    "message": "refused: the second_scan= file is not byte-equal to the announce commit's EXCLUDED_SECOND_SCAN.json",
+    "reached": "check_draw",
+    "reached_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_announce_files",
+     "refuse"
+    ]
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the record verify-scan pushed, H/HS/VS right (control): [block announce] pushes its announce",
+   "case": "verify_record_exact",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan verify record evidence/combined-scan-verify 76f56502492f62826b414a39cc1b9c29d46298d0 verified scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nannounce ok\nannounce pushed: evidence/combined-draw dd8de3f56ff238f7fcbdec8f9c5b36730cb8e345\n",
+     "unknown_placeholders": []
+    },
+    "commit_made": true,
+    "expected_check": "the record verify-scan pushed, H/HS/VS right (control): [block announce] pushes its announce",
+    "fixture_ok": true,
+    "kind": null,
+    "list_block_exit": 0,
+    "message": null,
+    "pushed_to_twin": true,
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nformat layered-scan-verify-inputs/1\nfreeze_commit f20b3d8bc9c8a9a79966badd97a0d368e48fad86\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 069eeca87927cdfea23f12bfc3522932cd0db662a73f5800c10c7480f67bbaa6\nscan_to_verify_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nreproduced_scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nverify_lsremote_sha256 73012da2932dff88663c1b16974f342bbfd15db09119f83e80a254a19e571139\nscan_lsremote_sha256 73012da2932dff88663c1b16974f342bbfd15db09119f83e80a254a19e571139\nverify record pushed: evidence/combined-scan-verify 76f56502492f62826b414a39cc1b9c29d46298d0\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "H/HS/VS right but no record branch (the owner's decisive case): refused before any announce commit (gated)",
+   "case": "verify_record_absent",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "refused: the scan verify record evidence/combined-scan-verify is absent from https://github.com/HevisNico/kernel-R: [block verify-scan] has not published it\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3): no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "commit_made": false,
+    "control_passed": true,
+    "expected_check": "H/HS/VS right but no record branch (the owner's decisive case): refused before any announce commit",
+    "fixture_ok": true,
+    "kind": "absent",
+    "list_block_exit": 0,
+    "message": "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3): no commit, no push",
+    "pushed_to_twin": false,
+    "reached_check": true
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "H/HS/VS right but the record names another scan sha256 (the owner's decisive case): refused (gated)",
+   "case": "verify_record_other_hash",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "refused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not 6a468d35adb1\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3): no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "commit_made": false,
+    "control_passed": true,
+    "expected_check": "H/HS/VS right but the record names another scan sha256 (the owner's decisive case): refused",
+    "fixture_ok": true,
+    "kind": "other_hash",
+    "list_block_exit": 0,
+    "message": "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3): no commit, no push",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_files_changed": [
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nformat layered-scan-verify-inputs/1\nfreeze_commit f20b3d8bc9c8a9a79966badd97a0d368e48fad86\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 069eeca87927cdfea23f12bfc3522932cd0db662a73f5800c10c7480f67bbaa6\nscan_to_verify_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nreproduced_scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nverify_lsremote_sha256 73012da2932dff88663c1b16974f342bbfd15db09119f83e80a254a19e571139\nscan_lsremote_sha256 73012da2932dff88663c1b16974f342bbfd15db09119f83e80a254a19e571139\nverify record pushed: evidence/combined-scan-verify eee0fa57d32b01cabe847a06bcf29140311ac178\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the record's final line is not the success verdict: refused (gated)",
+   "case": "verify_record_not_success",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "refused: the scan verify record evidence/combined-scan-verify's verdict is not success ([block verify-scan] did not reproduce the scan)\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3): no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "commit_made": false,
+    "control_passed": true,
+    "expected_check": "the record's final line is not the success verdict: refused",
+    "fixture_ok": true,
+    "kind": "not_success",
+    "list_block_exit": 0,
+    "message": "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3): no commit, no push",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_files_changed": [
+     "VERIFY.txt"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3 VS 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nformat layered-scan-verify-inputs/1\nfreeze_commit f20b3d8bc9c8a9a79966badd97a0d368e48fad86\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 069eeca87927cdfea23f12bfc3522932cd0db662a73f5800c10c7480f67bbaa6\nscan_to_verify_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nreproduced_scan_sha256 6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3\nverify_lsremote_sha256 73012da2932dff88663c1b16974f342bbfd15db09119f83e80a254a19e571139\nscan_lsremote_sha256 73012da2932dff88663c1b16974f342bbfd15db09119f83e80a254a19e571139\nverify record pushed: evidence/combined-scan-verify e265daf74db27ff899d772f4bfb3160150663faf\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a record of one commit, success, scan_sha256 = VS = HS, created before the announce (control): accepted",
+   "case": "record_analysis_exact",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "expected_check": "a record of one commit, success, scan_sha256 = VS = HS, created before the announce (control): accepted",
+    "fixture_ok": true,
+    "kind": null,
+    "reached": "accepted",
+    "record_created": "2026-11-27T22:39:24Z",
+    "refused": false,
+    "scan_verify": {
+     "branch": "evidence/combined-scan-verify",
+     "commit": "e99846b0a5ef2c808c1a88d6100cc32519e205c0",
+     "created_utc": "2026-11-27T22:39:24Z",
+     "scan_sha256": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+     "vs": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3"
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the record created after the campaign announce: refused (gated)",
+   "case": "record_analysis_after",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected_check": "the record created after the campaign announce: refused",
+    "fixture_ok": true,
+    "kind": "after",
+    "message": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-27T23:40:24Z, not before the campaign announce (2026-11-27T23:39:24Z)",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_created": "2026-11-27T23:40:24Z",
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "refuse"
+    ]
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the record created at the announce's own push time (not strictly before): refused (gated)",
+   "case": "record_analysis_same_time",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected_check": "the record created at the announce's own push time (not strictly before): refused",
+    "fixture_ok": true,
+    "kind": "same_time",
+    "message": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-27T23:39:24Z, not before the campaign announce (2026-11-27T23:39:24Z)",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_created": "2026-11-27T23:39:24Z",
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "refuse"
+    ]
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the record branch with a second commit on top of its creation commit: refused (gated)",
+   "case": "record_analysis_second_commit",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "activity": [
+     "branch_creation",
+     "push"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected_check": "the record branch with a second commit on top of its creation commit: refused",
+    "fixture_ok": true,
+    "kind": "second_commit",
+    "message": "refused: the scan verify record evidence/combined-scan-verify has 2 commits: it must be exactly its creation commit (single-use)",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_created": "2026-11-27T22:39:24Z",
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ]
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a force_push in the record branch's activity: refused (not single-use) (gated)",
+   "case": "record_analysis_force_push",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "activity": [
+     "branch_creation",
+     "force_push"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected_check": "a force_push in the record branch's activity: refused (not single-use)",
+    "fixture_ok": true,
+    "kind": "force_push",
+    "message": "refused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_created": "2026-11-27T22:39:24Z",
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "announce_time",
+     "refuse"
+    ]
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "no record branch: refused (gated)",
+   "case": "record_analysis_absent",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected_check": "no record branch: refused",
+    "fixture_ok": true,
+    "kind": "absent",
+    "message": "refused: the scan verify record evidence/combined-scan-verify is absent from /tmp/tmpdvo83rit/record_analysis_absent/record.git: [block verify-scan] has not published it",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_created": "2026-11-27T22:39:24Z",
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ]
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the record names another scan sha256: refused (gated)",
+   "case": "record_analysis_other_hash",
+   "defect": "L",
+   "observed": {
+    "HS": "6a468d35adb1206ca650e92bfd3d3cd8e1eea2f3501dd99b6b840950d7e657f3",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected_check": "the record names another scan sha256: refused",
+    "fixture_ok": true,
+    "kind": "other_hash",
+    "message": "refused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not 6a468d35adb1",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_created": "2026-11-27T22:39:24Z",
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ]
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "rehearsal 1's real /1 DRAW_ANNOUNCE.txt (evidence/combined-rehearsal-draw, fetched by name) parses with analysis.parse_announce: mode rehearsal, its list's sha256, 6/6/6",
+   "case": "announce_rehearsal1_parses",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/1\nmode rehearsal\nexcluded_sha256 abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c\nsizes NOT1=6 ANDOR3=6 XOR3=6\n",
+    "announce_sha256": "050efd55df1c96288d48625042b341116ce6a7da6bbe1157111eac896f39c17f",
+    "fixture_ok": true,
+    "parsed": {
+     "excluded_sha256": "abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c",
+     "format": "layered-draw-announce/1",
+     "mode": "rehearsal",
+     "sizes": {
+      "ANDOR3": 6,
+      "NOT1": 6,
+      "XOR3": 6
+     }
+    },
+    "stderr": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a campaign announce with the header /1 and the line second_scan_sha256 (a5ba132b's form): refused (gated on the exact case)",
+   "case": "format_campaign_v1",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/1\nmode campaign\nexcluded_sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\nsecond_scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "control_passed": true,
+    "expected_check": "the announce format check (parse_announce or check_draw)",
+    "fixture_ok": true,
+    "message": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/1 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (second_scan_sha256 only in layered-draw-announce/2)",
+    "mode": "campaign",
+    "raised_in": "parse_announce",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "parse_announce",
+     "refuse"
+    ],
+    "variant": "campaign_v1",
+    "within": "parse_announce"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a campaign announce in /1, 4 lines (no second_scan_sha256): refused (gated on the exact case)",
+   "case": "format_campaign_v1_4lines",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/1\nmode campaign\nexcluded_sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "control_passed": true,
+    "expected_check": "the announce format check (parse_announce or check_draw)",
+    "fixture_ok": true,
+    "message": "refused: DRAW_ANNOUNCE.txt: a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+    "mode": "campaign",
+    "raised_in": "parse_announce",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "parse_announce",
+     "refuse"
+    ],
+    "variant": "campaign_v1_4lines",
+    "within": "parse_announce"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a rehearsal announce in /2 (5 lines, with second_scan_sha256): refused (gated on the exact case)",
+   "case": "format_rehearsal_v2",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/2\nmode rehearsal\nexcluded_sha256 8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\nsecond_scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\nsizes NOT1=6 ANDOR3=6 XOR3=6\n",
+    "control_passed": true,
+    "expected_check": "the announce format check (parse_announce or check_draw)",
+    "fixture_ok": true,
+    "message": "refused: DRAW_ANNOUNCE.txt: layered-draw-announce/2 is the campaign announce only, not mode 'rehearsal'",
+    "mode": "rehearsal",
+    "raised_in": "parse_announce",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "parse_announce",
+     "refuse"
+    ],
+    "variant": "rehearsal_v2",
+    "within": "parse_announce"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a campaign announce in /2 without the line second_scan_sha256: refused (gated on the exact case)",
+   "case": "format_campaign_v2_no_scan_sha",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/2\nmode campaign\nexcluded_sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "control_passed": true,
+    "expected_check": "the announce format check (parse_announce or check_draw)",
+    "fixture_ok": true,
+    "message": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/2 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes', 'second_scan_sha256')",
+    "mode": "campaign",
+    "raised_in": "parse_announce",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "parse_announce",
+     "refuse"
+    ],
+    "variant": "campaign_v2_no_scan_sha",
+    "within": "parse_announce"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a campaign announce in /2 whose second_scan_sha256 is not second_scan='s: refused (gated on the exact case)",
+   "case": "format_campaign_v2_scan_sha_other",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/2\nmode campaign\nexcluded_sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\nsecond_scan_sha256 6cc47232a4416a5d090d3aafefc41895ea99176da14ca90659fc0726ae3804bb\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "control_passed": true,
+    "expected_check": "the check of second_scan_sha256 against second_scan=",
+    "fixture_ok": true,
+    "message": "refused: second_scan= has sha256 460ff3ca76d6, not the second_scan_sha256 6cc47232a441 the campaign announce names",
+    "mode": "campaign",
+    "raised_in": "check_rehearsal_seeds",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "refuse"
+    ],
+    "variant": "campaign_v2_scan_sha_other",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a campaign announce in /2 whose excluded_sha256 is written in upper case: refused (gated on the exact case)",
+   "case": "format_campaign_v2_sha_nonhex",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/2\nmode campaign\nexcluded_sha256 66D7E539D40FBCB0125CD8C18C2F6EA735EE2DD8256E96188ABE3F1B184108D9\nsecond_scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "control_passed": true,
+    "expected_check": "the announce format check (parse_announce or check_draw)",
+    "fixture_ok": true,
+    "message": "refused: DRAW_ANNOUNCE.txt: excluded_sha256 '66D7E539D40FBCB0125CD8C18C2F6EA735EE2DD8256E96188ABE3F1B184108D9' is not exactly 64 lowercase hex characters",
+    "mode": "campaign",
+    "raised_in": "parse_announce",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "parse_announce",
+     "refuse"
+    ],
+    "variant": "campaign_v2_sha_nonhex",
+    "within": "parse_announce"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce] verbatim, campaign, pushed to a local twin of GitHub: pushed, a /2 announce naming the scan's sha256 (control)",
+   "case": "announce_block_exact",
+   "defect": "L",
+   "observed": {
+    "announce_pushed": "format layered-draw-announce/2\nmode campaign\nexcluded_sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\nsecond_scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "announce_v2_names_scan": true,
+    "commit_made": true,
+    "exit": 0,
+    "fixture_ok": true,
+    "kept": {
+     "list": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+     "scan": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6"
+    },
+    "pushed_to_twin": true,
+    "stderr": "",
+    "stdout": "the scan verify record evidence/combined-scan-verify 5aae9d12b3175920f4327b3cf5230777f0351a52 verified scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6 VS 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\nannounce ok\nannounce pushed: evidence/combined-draw 6dbdf9d5e29b6e73c94455f706f9a32ea6e16159\n",
+    "unknown_placeholders": []
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the same with one byte of the scan copy changed: refused, no commit made, nothing pushed (gated)",
+   "case": "announce_block_scan_byte",
+   "defect": "L",
+   "observed": {
+    "commit_made": false,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the block's check of the scan copy's sha256 against the kept one, before the commit",
+    "fixture_ok": true,
+    "kept": {
+     "list": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+     "scan": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6"
+    },
+    "message": "REFUSED: EXCLUDED_SECOND_SCAN.json has sha256 38d8bcee112156c8f51f05bbc583ea71e9b41578a866b22550bca14d3d5c4de3, not the validated 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6: no commit, no push",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "refused_before_commit": true,
+    "scan_byte_changed": {
+     "offset": 37892,
+     "sha256_now": "38d8bcee112156c8f51f05bbc583ea71e9b41578a866b22550bca14d3d5c4de3"
+    },
+    "stderr": "",
+    "stdout": "the scan verify record evidence/combined-scan-verify 6a6272a4355a8430f4b22dc704b4068d19ebf10b verified scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6 VS 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\nREFUSED: EXCLUDED_SECOND_SCAN.json has sha256 38d8bcee112156c8f51f05bbc583ea71e9b41578a866b22550bca14d3d5c4de3, not the validated 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6: no commit, no push\n",
+    "unknown_placeholders": []
+   },
+   "result": "PASS"
+  }
+ ],
+ "draw_seeds_sha256": "b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958",
+ "format": "layered-analysis-defects/1",
+ "lean": {
+  "path": null,
+  "sha256": null
+ },
+ "only": [
+  "L"
+ ],
+ "script_sha256": "4b1a8bb3dd74ce09c61b3ef3b4690643c8d7947f077027e4c540cf013c083e27",
+ "tree_head": "f20b3d8bc9c8a9a79966badd97a0d368e48fad86"
+}

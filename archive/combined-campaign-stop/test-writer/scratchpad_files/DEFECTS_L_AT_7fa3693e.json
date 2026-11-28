@@ -1,0 +1,3700 @@
+{
+ "analysis_last_commit": "b6605c76fa396221028eef0b54a4d9a661dfcd6c",
+ "analysis_sha256": "0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6",
+ "campaign_announce_format": 2,
+ "cases": [
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: the exact list (control): accepted",
+   "case": "list_blocks_rehearsal_exact",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": null,
+    "exit": 0,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "mutation": null,
+    "pinned_superset": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds rehearsal: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds rehearsal: strict=False, announces offline\n",
+    "stdout": "the list is right 18 72 sha256 8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_extra",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": 1000001,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c",
+    "message": "refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds rehearsal: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds rehearsal: strict=False, announces offline\nrefused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]\n",
+    "stdout": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_drop_noise",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": 189850,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105",
+    "message": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [189850] (the list must add the earlier rehearsals' seeds)",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds rehearsal: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds rehearsal: strict=False, announces offline\nrefused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [189850] (the list must add the earlier rehearsals' seeds)\n",
+    "stdout": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_drop_scan",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": 0,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "check_draw's existing superset check (the removed seed is in the pinned EXCLUDED.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "message": "refused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]",
+    "mutation": "drop_scan",
+    "pinned_superset": false,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds rehearsal: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds rehearsal: strict=False, announces offline\nrefused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]\n",
+    "stdout": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, rehearsal list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_blocks_rehearsal_field",
+   "defect": "L",
+   "observed": {
+    "block": "check-rehearsal2-list",
+    "changed": "added.rehearsal1_draw_sha256",
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa",
+    "message": "refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['added']",
+    "mutation": "field",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds rehearsal: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds rehearsal: strict=False, announces offline\nrefused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['added']\n",
+    "stdout": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: the exact list (control): accepted",
+   "case": "list_blocks_campaign_exact",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": null,
+    "exit": 0,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "mutation": null,
+    "pinned_superset": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\n",
+    "stdout": "rehearsal 2 list: the exact union\nthe list is right 36 144 sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9 scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_extra",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 1000001,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4",
+    "message": "refused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1000001]",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1000001]\n",
+    "stdout": "rehearsal 2 list: the exact union\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_drop_noise",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 218210,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "f5673159668bb35f4bc120fb150987cdf628c78cba1488e68145610a3f064b7a",
+    "message": "refused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [218210] (the list must add the earlier rehearsals' seeds)",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [218210] (the list must add the earlier rehearsals' seeds)\n",
+    "stdout": "rehearsal 2 list: the exact union\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_drop_scan",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 1234567,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check (1234567 is in the scan only, not pinned, not a rehearsal seed)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2",
+    "message": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1234567]",
+    "mutation": "drop_scan",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1234567]\n",
+    "stdout": "rehearsal 2 list: the exact union\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_blocks_campaign_field",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": "added.rehearsal_draw_sha256",
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752",
+    "message": "refused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['added']",
+    "mutation": "field",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['added']\n",
+    "stdout": "rehearsal 2 list: the exact union\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: no EXCLUDED_SECOND_SCAN.json / no second_scan=: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_no_scan",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": null,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new check that second_scan= is given (blocks: the read of EXCLUDED_SECOND_SCAN.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: [Errno 2] No such file or directory: 'EXCLUDED_SECOND_SCAN.json' - push nothing",
+    "mutation": "no_scan",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "shim_lines": [],
+    "stderr": "",
+    "stdout": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: [Errno 2] No such file or directory: 'EXCLUDED_SECOND_SCAN.json' - push nothing\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: the scan without one pinned seed (one rehearsal 1 drew, so the rebuilt list is byte-equal): refused (gated on the exact case)",
+   "case": "list_blocks_campaign_scan_short",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 18985,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new check that second_scan is a superset of the pinned EXCLUDED.json",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "refused: second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [18985]",
+    "mutation": "scan_short",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "rebuilt_list_equal": true,
+    "recomputed": [],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [18985]\n",
+    "stdout": "rehearsal 2 list: the exact union\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: rehearsal_excluded= (rehearsal 2's list) with one extra integer, count and sha recomputed, rehearsal 2 drawn and announced over it, the campaign list rebuilt from it: refused (gated on the exact case)",
+   "case": "list_blocks_campaign_r2_extra",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": 1000001,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the new exactness check of rehearsal_excluded= (rehearsal 2's list rebuilt from the pinned list and rehearsal 1's verified draw)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "a75e58f57a3aedd6ec7bde374dcfa820a526ccb2e96d354c8639d7dba36ecccd",
+    "message": "refused: rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]",
+    "mutation": "r2_extra",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "rehearsal 2's list: count, seeds_sha256; its draw and announce; the campaign's list by [block list]"
+    ],
+    "shim_lines": [
+     "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt",
+     "shim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt",
+     "shim: check_rehearsal_seeds campaign: strict=False, announces offline"
+    ],
+    "stderr": "shim: check_draw DRAW_REHEARSAL.json rehearsal: offline, announce=ANNOUNCE_R2.txt\nshim: check_draw DRAW_REHEARSAL1.json rehearsal: offline, announce=ANNOUNCE_R1.txt\nshim: check_rehearsal_seeds campaign: strict=False, announces offline\nrefused: rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]\n",
+    "stdout": "REHEARSAL 2 LIST IS NOT THE EXACT UNION\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "FREEZE.txt blocks, campaign list: EXCLUDED_SECOND_SCAN.json a directory: an explicit refusal naming it, no traceback (gated on the exact case)",
+   "case": "list_blocks_campaign_scan_unreadable",
+   "defect": "L",
+   "observed": {
+    "block": "check-list",
+    "changed": null,
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: [Errno 21] Is a directory: 'EXCLUDED_SECOND_SCAN.json' - push nothing",
+    "mutation": "scan_unreadable",
+    "pinned_superset": true,
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "shim_lines": [],
+    "stderr": "",
+    "stdout": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: [Errno 21] Is a directory: 'EXCLUDED_SECOND_SCAN.json' - push nothing\n"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: the exact list (control): accepted",
+   "case": "list_funcs_rehearsal_exact",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": null,
+    "earlier_checks_passed": true,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "mode": "rehearsal",
+    "mutation": null,
+    "pinned_superset": true,
+    "reached": "accepted",
+    "recomputed": [],
+    "refused": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_extra",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": 1000001,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "8c0593d3a5981445d795ecd133708e8d58a91ea6ef58e349a351cb53ecf13f2c",
+    "message": "refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]",
+    "mode": "rehearsal",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_drop_noise",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": 189850,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "f0d485dae61cc3ee320da5e6826b9cf8f26757ef2ea0f57e8eec61402a44a105",
+    "message": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [189850] (the list must add the earlier rehearsals' seeds)",
+    "mode": "rehearsal",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "raised_in": "check_rehearsal_seeds",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_drop_scan",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": 0,
+    "control_passed": true,
+    "earlier_checks_passed": false,
+    "expected_check": "check_draw's existing superset check (the removed seed is in the pinned EXCLUDED.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "message": "refused: the excluded= list is not a superset of the freeze's EXCLUDED.json",
+    "mode": "rehearsal",
+    "mutation": "drop_scan",
+    "pinned_superset": false,
+    "raised_in": "check_draw",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "refuse"
+    ],
+    "within": "check_draw"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, rehearsal list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_funcs_rehearsal_field",
+   "defect": "L",
+   "observed": {
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded"
+    ],
+    "changed": "added.rehearsal1_draw_sha256",
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_REHEARSAL2.json",
+    "list_self_consistent": true,
+    "list_sha256": "374898f570a0abb2402ec7aeac354bc7fdb16b6999052b5d95a113d2756820aa",
+    "message": "refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['added']",
+    "mode": "rehearsal",
+    "mutation": "field",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: the exact list (control): accepted",
+   "case": "list_funcs_campaign_exact",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": null,
+    "earlier_checks_passed": true,
+    "expected_check": null,
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "mode": "campaign",
+    "mutation": null,
+    "pinned_superset": true,
+    "reached": "accepted",
+    "recomputed": [],
+    "refused": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: one extra integer, count and seeds_sha256 recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_extra",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 1000001,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "2d0c717a0169edaa538317241e10b4648aa98b7487d2a9c8496595a4c42e12b4",
+    "message": "refused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1000001]",
+    "mode": "campaign",
+    "mutation": "extra",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: one noise seed 10 S + j (not in the pinned list) removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_drop_noise",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "f5673159668bb35f4bc120fb150987cdf628c78cba1488e68145610a3f064b7a",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 218210,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check, or the existing inclusion check naming the seed",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "f5673159668bb35f4bc120fb150987cdf628c78cba1488e68145610a3f064b7a",
+    "message": "refused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [218210] (the list must add the earlier rehearsals' seeds)",
+    "mode": "campaign",
+    "mutation": "drop_noise",
+    "pinned_superset": true,
+    "raised_in": "check_rehearsal_seeds",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: one scan seed removed, count and sha recomputed: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_drop_scan",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 1234567,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (1234567 is in the scan only, not pinned, not a rehearsal seed)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "4c916e58f2d52e723ae2c51eafdcceeb46dac245fceb3a3225d6873b92f9e2a2",
+    "message": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [1234567]",
+    "mode": "campaign",
+    "mutation": "drop_scan",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "count",
+     "seeds_sha256"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: the \"added\" field's draw sha256 changed (a non-seed field): refused (gated on the exact case)",
+   "case": "list_funcs_campaign_field",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": "added.rehearsal_draw_sha256",
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check (the list byte-equal to the block's rebuild)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "0ec0c7521058630f59a39449b77dc56f47a146cf3048211e376bf51935bf6752",
+    "message": "refused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['added']",
+    "mode": "campaign",
+    "mutation": "field",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: no EXCLUDED_SECOND_SCAN.json / no second_scan=: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_no_scan",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded"
+    ],
+    "changed": null,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new check that second_scan= is given (blocks: the read of EXCLUDED_SECOND_SCAN.json)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "refused: campaign mode: second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output, published with the campaign announce) is required",
+    "mode": "campaign",
+    "mutation": "no_scan",
+    "pinned_superset": true,
+    "raised_in": "second_scan_refusal_missing",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "second_scan_refusal_missing",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: the scan without one pinned seed (one rehearsal 1 drew, so the rebuilt list is byte-equal): refused (gated on the exact case)",
+   "case": "list_funcs_campaign_scan_short",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "announced_second_scan_sha256": "3290dfa7bb33215eba173d4e09ba74b6d8323c1f4ba00604064ea3de27ef87fc",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 18985,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new check that second_scan is a superset of the pinned EXCLUDED.json",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+    "message": "refused: second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [18985]",
+    "mode": "campaign",
+    "mutation": "scan_short",
+    "pinned_superset": true,
+    "raised_in": "check_rehearsal_seeds",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.check_draw + check_rehearsal_seeds, campaign list: rehearsal_excluded= (rehearsal 2's list) with one extra integer, count and sha recomputed, rehearsal 2 drawn and announced over it, the campaign list rebuilt from it: refused (gated on the exact case)",
+   "case": "list_funcs_campaign_r2_extra",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "announce_names_the_list": true,
+    "announced_excluded_sha256": "a75e58f57a3aedd6ec7bde374dcfa820a526ccb2e96d354c8639d7dba36ecccd",
+    "announced_second_scan_sha256": "460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6",
+    "args": [
+     "announce",
+     "draw",
+     "excluded",
+     "rehearsal1_announce",
+     "rehearsal1_draw",
+     "rehearsal1_excluded",
+     "rehearsal_announce",
+     "rehearsal_draw",
+     "rehearsal_excluded",
+     "second_scan"
+    ],
+    "changed": 1000001,
+    "control_passed": true,
+    "earlier_checks_passed": true,
+    "expected_check": "the new exactness check of rehearsal_excluded= (rehearsal 2's list rebuilt from the pinned list and rehearsal 1's verified draw)",
+    "fixture_ok": true,
+    "list": "EXCLUDED_SECOND.json",
+    "list_self_consistent": true,
+    "list_sha256": "a75e58f57a3aedd6ec7bde374dcfa820a526ccb2e96d354c8639d7dba36ecccd",
+    "message": "refused: rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [1000001]",
+    "mode": "campaign",
+    "mutation": "r2_extra",
+    "pinned_superset": true,
+    "raised_in": "check_exact_list",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "recomputed": [
+     "rehearsal 2's list: count, seeds_sha256; its draw and announce; the campaign's list by [block list]"
+    ],
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_exact_list",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= the scan's bytes are not draw_seeds.canon of its JSON (indented): refused by its own check (gated)",
+   "case": "scan_noncanon",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "the scan's bytes are not draw_seeds.canon of its JSON (indented)",
+    "expected_check": "the second scan's own check: the scan's bytes are not draw_seeds.canon of its JSON (indented)",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_noncanon/work/SCAN_X.json is not in canonical form (its bytes are not draw_seeds.canon of its content)",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "775db41c74139deafb7fcb74c9d082293193799b521286bcb4169fc77dfc9440",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "noncanon",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= its format is not draw_seeds.py scan's: refused by its own check (gated)",
+   "case": "scan_format",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "its format is not draw_seeds.py scan's",
+    "expected_check": "the second scan's own check: its format is not draw_seeds.py scan's",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_format/work/SCAN_X.json: format 'layered-excluded-seeds/0' is not draw_seeds.scan's 'layered-excluded-seeds/1'",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "130af58aec628c5ec562970682e2fd3e141ce2cb5dc360a15b159d37345e166c",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "format",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= its rule text is not draw_seeds.py scan's: refused by its own check (gated)",
+   "case": "scan_rule",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "its rule text is not draw_seeds.py scan's",
+    "expected_check": "the second scan's own check: its rule text is not draw_seeds.py scan's",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_rule/work/SCAN_X.json: its rule is not draw_seeds.scan's rule",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "1931fd51a19305bea92d7800db9d8b597faf5f8fbf8b783ba62f5c295782e965",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "rule",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= two seeds swapped (count and seeds_sha256 recomputed over them): refused by its own check (gated)",
+   "case": "scan_unsorted",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "two seeds swapped (count and seeds_sha256 recomputed over them)",
+    "expected_check": "the second scan's own check: two seeds swapped (count and seeds_sha256 recomputed over them)",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_unsorted/work/SCAN_X.json: seeds are not sorted and unique",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "fac7b370deaad2e6f886ae3dd44f8c630d24951b733ccf61613aa922a606403b",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "unsorted",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= one seed written twice (count and seeds_sha256 recomputed): refused by its own check (gated)",
+   "case": "scan_duplicate",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "one seed written twice (count and seeds_sha256 recomputed)",
+    "expected_check": "the second scan's own check: one seed written twice (count and seeds_sha256 recomputed)",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_duplicate/work/SCAN_X.json: seeds are not sorted and unique",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "09c61dcb52d1bc6ec623d324c9385e0c8d978777b3f0d58cab19f602ebba89a3",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "duplicate",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= the seed 0 (or 1) written as false (true) (count and seeds_sha256 recomputed): refused by its own check (gated)",
+   "case": "scan_bool",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "the seed 0 (or 1) written as false (true) (count and seeds_sha256 recomputed)",
+    "expected_check": "the second scan's own check: the seed 0 (or 1) written as false (true) (count and seeds_sha256 recomputed)",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_bool/work/SCAN_X.json: seeds are not a list of integers",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "34c2d8ec8db5775f2387b23ee7eac95d0195aa0dca09b97d29d687037cc095b8",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "bool",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= count one more than the seeds: refused by its own check (gated)",
+   "case": "scan_count",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "count one more than the seeds",
+    "expected_check": "the second scan's own check: count one more than the seeds",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_count/work/SCAN_X.json: count 16337 is not the number of seeds 16336",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "5fe4206ef8092162797ae7fdfcad51ab190d316db761f8ffc09b432e3d587f47",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "count",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= seeds_sha256 of other seeds: refused by its own check (gated)",
+   "case": "scan_seeds_sha256",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "seeds_sha256 of other seeds",
+    "expected_check": "the second scan's own check: seeds_sha256 of other seeds",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_seeds_sha256/work/SCAN_X.json: seeds_sha256 is not sha256 of its seeds",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "a7d7cbaf7f7bbc7794893eeafe6b53a77bb02dd6a8d7a0af02c6e35b9874f37e",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "seeds_sha256",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= one ref's tip is not a commit sha: refused by its own check (gated)",
+   "case": "scan_refs_malformed",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "one ref's tip is not a commit sha",
+    "expected_check": "the second scan's own check: one ref's tip is not a commit sha",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_refs_malformed/work/SCAN_X.json: refs not of draw_seeds.scan's shape: ['refs/remotes/origin/HevisNico-patch-1']",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "ed18b93f8a280ec148a14f4d92821cc7382bc7c35e791528231e7fd732bfe68e",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "refs_malformed",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= one ref name written twice in the bytes: refused by its own check (gated)",
+   "case": "scan_refs_duplicate",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "one ref name written twice in the bytes",
+    "expected_check": "the second scan's own check: one ref name written twice in the bytes",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_refs_duplicate/work/SCAN_X.json names a key twice (a ref recorded twice, or a field): ['refs/remotes/origin/HevisNico-patch-1']",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "509377615b50fcc79fb04b1b341449d27651fd45f4bc878e9dcda97cb40e0684",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "refs_duplicate",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= no HEAD entry in refs: refused by its own check (gated)",
+   "case": "scan_refs_no_head",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "no HEAD entry in refs",
+    "expected_check": "the second scan's own check: no HEAD entry in refs",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_refs_no_head/work/SCAN_X.json: no HEAD entry (draw_seeds.scan always scans HEAD)",
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "4260aab03cf8c1b4aed8d43800116e86317df674a227cb31adf436c16e798dd9",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "refs_no_head",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= HEAD's tip is another ref's, not main's: refused by its own check (gated)",
+   "case": "scan_head_not_main",
+   "defect": "L",
+   "observed": {
+    "announce_format": 2,
+    "control_passed": true,
+    "defect": "HEAD's tip is another ref's, not main's",
+    "expected_check": "the second scan's own check: HEAD's tip is another ref's, not main's",
+    "fixture_ok": true,
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_head_not_main/work/SCAN_X.json: HEAD is not main's tip ([block second-scan] sets HEAD to origin/main)",
+    "messages_distinct": true,
+    "raised_in": "check_scan",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "scan_sha256": "c36872bba6f22c29094721f0ca5dbedb8aa136f83da0e7290697fb3e79b77c74",
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "check_scan",
+     "refuse"
+    ],
+    "variant": "head_not_main",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= missing: an explicit refusal naming the file (gated)",
+   "case": "scan_file_missing",
+   "defect": "L",
+   "observed": {
+    "control_passed": true,
+    "expected_check": "an explicit refusal naming the file",
+    "file": "NO_SUCH_SCAN.json",
+    "fixture_ok": true,
+    "kind": "missing",
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_file_missing/work/NO_SUCH_SCAN.json is missing or unreadable: No such file or directory",
+    "raised_in": "read_file",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "read_file",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "second_scan= unreadable: an explicit refusal naming the file (gated)",
+   "case": "scan_file_unreadable",
+   "defect": "L",
+   "observed": {
+    "control_passed": true,
+    "expected_check": "an explicit refusal naming the file",
+    "file": "SCAN_DIR.json",
+    "fixture_ok": true,
+    "kind": "unreadable",
+    "message": "refused: second_scan= /tmp/tmp6n8dpdy0/scan_file_unreadable/work/SCAN_DIR.json is missing or unreadable: Is a directory",
+    "raised_in": "read_file",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "read_file",
+     "refuse"
+    ],
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the twin's scan as [block second-scan] makes it (control): verify-scan passes, VS = HS",
+   "case": "verify_scan_exact",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "VS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "blocks": [
+     "verify-scan"
+    ],
+    "exit": 0,
+    "expected_check": "the twin's scan as [block second-scan] makes it (control): verify-scan passes, VS = HS",
+    "final_line": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "fixture_ok": true,
+    "kind": null,
+    "list_block_exit": 0,
+    "message": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "problems": [],
+    "second_scan_exit": 0,
+    "stderr": "",
+    "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify a47ef728b29be692c826a3ddf446379baccdcfa5\n",
+    "unknown_placeholders": [],
+    "verify_pushed_to_twin": true
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the canonical scan plus 3 integers, count and seeds_sha256 recomputed (the owner's acceptance case): verify-scan fails before any announce commit, and [block announce] refuses",
+   "case": "verify_scan_plus3",
+   "defect": "L",
+   "observed": {
+    "HS": "e4f2754cc3f43ee017d8236d2f238d2e88e0756cec1cceb082996cde67ee90c4",
+    "VS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "announce": {
+     "announce_folder_made": false,
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "pushed_to_twin": false,
+     "stderr": "",
+     "stdout": "REFUSED: VS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS (e4f2754cc3f43ee017d8236d2f238d2e88e0756cec1cceb082996cde67ee90c4): no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "blocks": [
+     "verify-scan"
+    ],
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the canonical scan plus 3 integers, count and seeds_sha256 recomputed (the owner's acceptance case): verify-scan fails before any announce commit, and [block announce] refuses",
+    "final_line": "THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 e4f2754cc3f43ee017d8236d2f238d2e88e0756cec1cceb082996cde67ee90c4 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "fixture_ok": true,
+    "kind": "plus3",
+    "list_block_exit": 0,
+    "message": "REFUSED: VS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS (e4f2754cc3f43ee017d8236d2f238d2e88e0756cec1cceb082996cde67ee90c4): no commit, no push",
+    "problems": [
+     "PROBLEM: the reproduced scan has sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6, not the scan's e4f2754cc3f43ee017d8236d2f238d2e88e0756cec1cceb082996cde67ee90c4"
+    ],
+    "reached_check": true,
+    "refused_before_announce": true,
+    "second_scan_exit": 0,
+    "stderr": "",
+    "stdout": "PROBLEM: the reproduced scan has sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6, not the scan's e4f2754cc3f43ee017d8236d2f238d2e88e0756cec1cceb082996cde67ee90c4\nTHE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 e4f2754cc3f43ee017d8236d2f238d2e88e0756cec1cceb082996cde67ee90c4 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\n",
+    "unknown_placeholders": [],
+    "verify_pushed_to_twin": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the scan without one branch's ref entry: verify-scan fails",
+   "case": "verify_scan_omit_branch",
+   "defect": "L",
+   "observed": {
+    "HS": "4b49ff6df6d778252567f52810da1521cb3b0bf0ad62027a17527ba617600838",
+    "VS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "blocks": [
+     "verify-scan"
+    ],
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "the scan without one branch's ref entry: verify-scan fails",
+    "final_line": "THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 4b49ff6df6d778252567f52810da1521cb3b0bf0ad62027a17527ba617600838 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "fixture_ok": true,
+    "kind": "omit_branch",
+    "list_block_exit": 0,
+    "message": "THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 4b49ff6df6d778252567f52810da1521cb3b0bf0ad62027a17527ba617600838 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "problems": [
+     "PROBLEM: branch evidence/twin-a is on the remote (db9972933024) but not in the scan",
+     "PROBLEM: the reproduced scan has sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6, not the scan's 4b49ff6df6d778252567f52810da1521cb3b0bf0ad62027a17527ba617600838"
+    ],
+    "reached_check": true,
+    "refused_before_announce": true,
+    "second_scan_exit": 0,
+    "stderr": "",
+    "stdout": "PROBLEM: branch evidence/twin-a is on the remote (db9972933024) but not in the scan\nPROBLEM: the reproduced scan has sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6, not the scan's 4b49ff6df6d778252567f52810da1521cb3b0bf0ad62027a17527ba617600838\nTHE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 4b49ff6df6d778252567f52810da1521cb3b0bf0ad62027a17527ba617600838 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\n",
+    "unknown_placeholders": [],
+    "verify_pushed_to_twin": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "one ref with another commit's tip: verify-scan fails",
+   "case": "verify_scan_wrong_tip",
+   "defect": "L",
+   "observed": {
+    "HS": "bf870f80029605ff52a13ec762589d2751c7ae9326c8ec5ffe1ee9d930300d16",
+    "VS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "blocks": [
+     "verify-scan"
+    ],
+    "control_passed": true,
+    "exit": 1,
+    "expected_check": "one ref with another commit's tip: verify-scan fails",
+    "final_line": "THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 bf870f80029605ff52a13ec762589d2751c7ae9326c8ec5ffe1ee9d930300d16 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "fixture_ok": true,
+    "kind": "wrong_tip",
+    "list_block_exit": 0,
+    "message": "THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 bf870f80029605ff52a13ec762589d2751c7ae9326c8ec5ffe1ee9d930300d16 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "problems": [
+     "PROBLEM: branch evidence/twin-b is at d45ce9d7dd7c on the remote, at db9972933024 in the scan",
+     "PROBLEM: the reproduced scan has sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6, not the scan's bf870f80029605ff52a13ec762589d2751c7ae9326c8ec5ffe1ee9d930300d16"
+    ],
+    "reached_check": true,
+    "refused_before_announce": true,
+    "second_scan_exit": 0,
+    "stderr": "",
+    "stdout": "PROBLEM: branch evidence/twin-b is at d45ce9d7dd7c on the remote, at db9972933024 in the scan\nPROBLEM: the reproduced scan has sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6, not the scan's bf870f80029605ff52a13ec762589d2751c7ae9326c8ec5ffe1ee9d930300d16\nTHE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 bf870f80029605ff52a13ec762589d2751c7ae9326c8ec5ffe1ee9d930300d16 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\n",
+    "unknown_placeholders": [],
+    "verify_pushed_to_twin": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "analysis.py test OUT ROOT pre_announce=True: refused as an unknown argument (the pre-announce exception is not reachable from the command line)",
+   "case": "cli_pre_announce",
+   "defect": "L",
+   "observed": {
+    "exit": 1,
+    "fixture_ok": true,
+    "message": "refused: unknown argument 'pre_announce=True' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, rehearsal1_draw, rehearsal1_excluded, rehearsal1_announce, rehearsal1_activity, second_scan, times, thresholds, controls, tips; a root path cannot contain '=')"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_rehearsal_seeds as [block check-list] calls it (no announce yet), pre_announce=True: accepted (control)",
+   "case": "pre_announce_given",
+   "defect": "L",
+   "observed": {
+    "fixture_ok": true,
+    "pre_announce": true,
+    "refused": false
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the same without pre_announce: refused, the announce names no second_scan_sha256 (gated)",
+   "case": "pre_announce_absent",
+   "defect": "L",
+   "observed": {
+    "control_passed": true,
+    "fixture_ok": true,
+    "message": "refused: campaign mode: the campaign announce names no second_scan_sha256, so second_scan= cannot be checked against it",
+    "pre_announce": false,
+    "reached_check": true,
+    "refused": true
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the announce commit holds the announced EXCLUDED_PUBLISHED.json and EXCLUDED_SECOND_SCAN.json (control)",
+   "case": "announce_commit_exact",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "expected_check": "the announce commit holds the announced EXCLUDED_PUBLISHED.json and EXCLUDED_SECOND_SCAN.json (control)",
+    "fixture_ok": true,
+    "reached": "accepted",
+    "record_commit": "81ba9a29cd8a32b91c6932e0d6301e5391cfc3fc",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": false,
+    "scan_verify": {
+     "branch": "evidence/combined-scan-verify",
+     "commit": "81ba9a29cd8a32b91c6932e0d6301e5391cfc3fc",
+     "created_utc": "2026-11-27T22:39:24Z",
+     "scan_sha256": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+     "vs": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6"
+    },
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 81ba9a29cd8a32b91c6932e0d6301e5391cfc3fc\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the announce commit has no EXCLUDED_SECOND_SCAN.json: refused (gated)",
+   "case": "announce_commit_no_scan",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected_check": "the announce commit has no EXCLUDED_SECOND_SCAN.json: refused",
+    "fixture_ok": true,
+    "message": "refused: the announce commit has no EXCLUDED_SECOND_SCAN.json: the announced second_scan_sha256 names nothing published",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "51c87040f3f95f30afb82bfcd44fef3f3e1a3d2a",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_announce_files",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 51c87040f3f95f30afb82bfcd44fef3f3e1a3d2a\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the announce commit's EXCLUDED_SECOND_SCAN.json (announced) is not byte-equal to second_scan=: refused (gated)",
+   "case": "announce_commit_scan_differs",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected_check": "the announce commit's EXCLUDED_SECOND_SCAN.json (announced) is not byte-equal to second_scan=: refused",
+    "fixture_ok": true,
+    "message": "refused: the second_scan= file is not byte-equal to the announce commit's EXCLUDED_SECOND_SCAN.json",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "b186c0a387b06e482ae48bfdf85ce551c7db2c17",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_announce_files",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify b186c0a387b06e482ae48bfdf85ce551c7db2c17\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: the authentic record (control): accepted: pushed (control)",
+   "case": "verify_record_exact",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 0,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_exact/twin.git\ntwin shim: record_created reads /tmp/tmp6n8dpdy0/verify_record_exact/twin.git\n",
+     "stdout": "the scan verify record evidence/combined-scan-verify 061aace76a58e9f0bc8111c5cc260333ac41db1e created 2026-11-28T12:02:34Z verified scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nannounce ok\nannounce pushed: evidence/combined-draw b40e3db7b1eb7388c77a976beab4b27c9fcb8acf\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": true,
+    "announce_pushed": "format layered-draw-announce/2\nmode campaign\nexcluded_sha256 11c91db9ae70a94c52dbb9e6c897b12f44875c981d6ba2a4dff34b588b73f093\nsecond_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "block_line": null,
+    "expected": "the authentic record (control): accepted",
+    "fixture_ok": true,
+    "kind": null,
+    "message": null,
+    "pushed_to_twin": true,
+    "record_commit": "061aace76a58e9f0bc8111c5cc260333ac41db1e",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_exact/twin.git",
+     "twin shim: record_created reads /tmp/tmp6n8dpdy0/verify_record_exact/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 061aace76a58e9f0bc8111c5cc260333ac41db1e\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: no record branch (the owner's decisive case): refused before any announce commit (gated)",
+   "case": "verify_record_absent",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_absent/twin.git\nrefused: the scan verify record evidence/combined-scan-verify is absent from /tmp/tmp6n8dpdy0/verify_record_absent/twin.git: [block verify-scan] has not published it\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "no record branch (the owner's decisive case)",
+    "fixture_ok": true,
+    "kind": "absent",
+    "message": "refused: the scan verify record evidence/combined-scan-verify is absent from /tmp/tmp6n8dpdy0/verify_record_absent/twin.git: [block verify-scan] has not published it",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "4fa1332fc6f53113500fc9d2459c97b5fc2516c8",
+    "record_files": [],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_absent/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 4fa1332fc6f53113500fc9d2459c97b5fc2516c8\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: the record naming another scan sha256 everywhere HS appears (the owner's decisive case): refused before any announce commit (gated)",
+   "case": "verify_record_other_hash",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_other_hash/twin.git\nrefused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not 93bd8e1f8cc5\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "the record naming another scan sha256 everywhere HS appears (the owner's decisive case)",
+    "fixture_ok": true,
+    "kind": "other_hash",
+    "message": "refused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not 93bd8e1f8cc5",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "9677ff94995ca2ace7f6f5de0c58cd5c6a37aff3",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_other_hash/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 46992cf19c37d5366ef55f24c0368f360a6f2fa7\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: the record's verdict rewritten to the failure verdict: refused before any announce commit (gated)",
+   "case": "verify_record_not_success",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_not_success/twin.git\nrefused: the scan verify record's verdict is not success ([block verify-scan] did not reproduce the scan)\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "the record's verdict rewritten to the failure verdict",
+    "fixture_ok": true,
+    "kind": "not_success",
+    "message": "refused: the scan verify record's verdict is not success ([block verify-scan] did not reproduce the scan)",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "47f480922a2a2a2ed092ed78150f8c5ab7fcb530",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_not_success/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify e38bf44f7fed495c2869004cc48db817a8b02e8e\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: (1) the record reduced to the single success line (VERIFY.txt alone): refused before any announce commit (gated)",
+   "case": "verify_record_success_only",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_success_only/twin.git\nrefused: the scan verify record evidence/combined-scan-verify has no VERIFY_INPUTS.txt at its creation commit e3a7e3d58c02 (all four files are required: VERIFY.txt, VERIFY_INPUTS.txt, VERIFY_LSREMOTE.txt, SCAN_LSREMOTE.txt)\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "(1) the record reduced to the single success line (VERIFY.txt alone)",
+    "fixture_ok": true,
+    "kind": "success_only",
+    "message": "refused: the scan verify record evidence/combined-scan-verify has no VERIFY_INPUTS.txt at its creation commit e3a7e3d58c02 (all four files are required: VERIFY.txt, VERIFY_INPUTS.txt, VERIFY_LSREMOTE.txt, SCAN_LSREMOTE.txt)",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "e3a7e3d58c02b675545c794575cb5498878d26d1",
+    "record_files": [
+     "VERIFY.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_success_only/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 27515693e1c9b4721e47947be290102f9f648544\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: (2) a complete record citing another freeze commit: refused before any announce commit (gated)",
+   "case": "verify_record_other_freeze",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_other_freeze/twin.git\nrefused: the scan verify record cites the freeze 'da3d9b3b1f22b312eab3a4aaa67d06abf47f2c45', not the expected 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "(2) a complete record citing another freeze commit",
+    "fixture_ok": true,
+    "kind": "other_freeze",
+    "message": "refused: the scan verify record cites the freeze 'da3d9b3b1f22b312eab3a4aaa67d06abf47f2c45', not the expected 7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "e70007101e49d1b5cd566a6fedecc3bc7f845574",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_other_freeze/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 8b92dcedf34c8e3b80517b5eea154c4c7d41d26d\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: (2b) an empty F given to the read: refused before any announce commit (gated)",
+   "case": "verify_record_empty_freeze",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_empty_freeze/twin.git\nrefused: the expected freeze commit '' is not a full 40-hex SHA: the scan verify record cannot be checked against it\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "(2b) an empty F given to the read",
+    "fixture_ok": true,
+    "kind": "empty_freeze",
+    "message": "refused: the expected freeze commit '' is not a full 40-hex SHA: the scan verify record cannot be checked against it",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "d99c535a0bc67e047efb11f2743766664ea4c7a5",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_empty_freeze/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify d99c535a0bc67e047efb11f2743766664ea4c7a5\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: (3) VERIFY_LSREMOTE.txt with one branch at its right name and another sha: refused before any announce commit (gated)",
+   "case": "verify_record_verify_lsremote_sha",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_verify_lsremote_sha/twin.git\nrefused: the scan verify record's VERIFY_LSREMOTE.txt is not the scan's inventory: branch evidence/twin-a is at 308cb915cfb3 on the record's VERIFY_LSREMOTE.txt, at db9972933024 in the scan\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "(3) VERIFY_LSREMOTE.txt with one branch at its right name and another sha",
+    "fixture_ok": true,
+    "kind": "verify_lsremote_sha",
+    "message": "refused: the scan verify record's VERIFY_LSREMOTE.txt is not the scan's inventory: branch evidence/twin-a is at 308cb915cfb3 on the record's VERIFY_LSREMOTE.txt, at db9972933024 in the scan",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "8b6a61be2236ceee325bc9dc81d7c6ee0190ca77",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_verify_lsremote_sha/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 93c4473aba34b0bda829bc4ed8c56d55648dff33\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: (3b) the same in SCAN_LSREMOTE.txt: refused before any announce commit (gated)",
+   "case": "verify_record_scan_lsremote_sha",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_scan_lsremote_sha/twin.git\nrefused: the scan verify record's SCAN_LSREMOTE.txt is not the scan's inventory: branch evidence/twin-a is at 308cb915cfb3 on the record's SCAN_LSREMOTE.txt, at db9972933024 in the scan\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "(3b) the same in SCAN_LSREMOTE.txt",
+    "fixture_ok": true,
+    "kind": "scan_lsremote_sha",
+    "message": "refused: the scan verify record's SCAN_LSREMOTE.txt is not the scan's inventory: branch evidence/twin-a is at 308cb915cfb3 on the record's SCAN_LSREMOTE.txt, at db9972933024 in the scan",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "eebee5f98c067cb04ad4c9766f5b7b254e9d79e9",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_scan_lsremote_sha/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify e8f1948aa8484fe364a93dd97f2b07ee89ab2e1e\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: (4) a PROBLEM line before the success line: refused before any announce commit (gated)",
+   "case": "verify_record_problem_line",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_problem_line/twin.git\nrefused: the scan verify record's VERIFY.txt has a PROBLEM line: [block verify-scan] did not succeed\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "(4) a PROBLEM line before the success line",
+    "fixture_ok": true,
+    "kind": "problem_line",
+    "message": "refused: the scan verify record's VERIFY.txt has a PROBLEM line: [block verify-scan] did not succeed",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "64ec3e1349c5a87e8a5ad9fa4f4686b1f9dec2d6",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_problem_line/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 01f8604be0a9864c9aefb85d6aa145cef50bd5a0\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: (5) the branch force-pushed away and back onto its creation commit: refused before any announce commit (gated)",
+   "case": "verify_record_force_back",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation",
+     "force_push",
+     "force_push"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_force_back/twin.git\ntwin shim: record_created reads /tmp/tmp6n8dpdy0/verify_record_force_back/twin.git\nrefused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "(5) the branch force-pushed away and back onto its creation commit",
+    "fixture_ok": true,
+    "kind": "force_back",
+    "message": "refused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "42b1d4bc6999040a1d631ca613bade96d26260a5",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_force_back/twin.git",
+     "twin shim: record_created reads /tmp/tmp6n8dpdy0/verify_record_force_back/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 42b1d4bc6999040a1d631ca613bade96d26260a5\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: (5b) the branch deleted and recreated on the same commit: refused before any announce commit (gated)",
+   "case": "verify_record_recreate",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation",
+     "branch_deletion",
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_recreate/twin.git\ntwin shim: record_created reads /tmp/tmp6n8dpdy0/verify_record_recreate/twin.git\nrefused: the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "(5b) the branch deleted and recreated on the same commit",
+    "fixture_ok": true,
+    "kind": "recreate",
+    "message": "refused: the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "fdc4487c18b00e37e16704890e2ee3ac24608941",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_recreate/twin.git",
+     "twin shim: record_created reads /tmp/tmp6n8dpdy0/verify_record_recreate/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify fdc4487c18b00e37e16704890e2ee3ac24608941\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce], campaign, on the twin, H/HS/VS right: (6) VERIFY_INPUTS.txt naming another analysis.py sha256: refused before any announce commit (gated)",
+   "case": "verify_record_other_analysis_sha",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_other_analysis_sha/twin.git\nrefused: the scan verify record's VERIFY_INPUTS.txt: analysis_py_sha256 7c7f0378190e is not FREEZE_PINS.json's 0c10b8b94bcb for research/layered-networks/analysis.py\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "(6) VERIFY_INPUTS.txt naming another analysis.py sha256",
+    "fixture_ok": true,
+    "kind": "other_analysis_sha",
+    "message": "refused: the scan verify record's VERIFY_INPUTS.txt: analysis_py_sha256 7c7f0378190e is not FREEZE_PINS.json's 0c10b8b94bcb for research/layered-networks/analysis.py",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "e33fa0bc99fc64721d4976c986ff1ce8918fa49e",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/verify_record_other_analysis_sha/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify fdc4487c18b00e37e16704890e2ee3ac24608941\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): the authentic record (control): accepted",
+   "case": "record_analysis_exact",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "expected": "the authentic record (control): accepted",
+    "fixture_ok": true,
+    "reached": "accepted",
+    "record_commit": "d732bace02fdd49e7c20c87abc299ca76c5e35cf",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": false,
+    "scan_verify": {
+     "branch": "evidence/combined-scan-verify",
+     "commit": "d732bace02fdd49e7c20c87abc299ca76c5e35cf",
+     "created_utc": "2026-11-27T22:39:24Z",
+     "scan_sha256": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+     "vs": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6"
+    },
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify d732bace02fdd49e7c20c87abc299ca76c5e35cf\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): no record branch (the owner's decisive case): refused (gated)",
+   "case": "record_analysis_absent",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "no record branch (the owner's decisive case)",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record evidence/combined-scan-verify is absent from /tmp/tmp6n8dpdy0/record_analysis_absent/twin.git: [block verify-scan] has not published it",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "c79e58c4ad20a323d35af925704e8cbe1a4ce371",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify c79e58c4ad20a323d35af925704e8cbe1a4ce371\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): the record naming another scan sha256 everywhere HS appears (the owner's decisive case): refused (gated)",
+   "case": "record_analysis_other_hash",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "the record naming another scan sha256 everywhere HS appears (the owner's decisive case)",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not 93bd8e1f8cc5",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "2ba1303f9a2a1f5ce51769b65634bf0521e48f26",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify fe6f126af292bfef4c63148c979b2f877cdb5a0a\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): the record's verdict rewritten to the failure verdict: refused (gated)",
+   "case": "record_analysis_not_success",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "the record's verdict rewritten to the failure verdict",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record's verdict is not success ([block verify-scan] did not reproduce the scan)",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "186906ad7b011b2944a4a355efafd5e2ca89c8c8",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "parse_verify",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 5679152a100d5b6febf42b09f96d0046b24ae8fc\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): (1) the record reduced to the single success line (VERIFY.txt alone): refused (gated)",
+   "case": "record_analysis_success_only",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "(1) the record reduced to the single success line (VERIFY.txt alone)",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record evidence/combined-scan-verify has no VERIFY_INPUTS.txt at its creation commit d5b95527476f (all four files are required: VERIFY.txt, VERIFY_INPUTS.txt, VERIFY_LSREMOTE.txt, SCAN_LSREMOTE.txt)",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "d5b95527476f61d9467d487b6b1055420cbf2961",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "VERIFY.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify df0ac136a665c8ccf5582219bdcada6f7c0099d4\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): (2) a complete record citing another freeze commit: refused (gated)",
+   "case": "record_analysis_other_freeze",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "(2) a complete record citing another freeze commit",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record cites the freeze 'da3d9b3b1f22b312eab3a4aaa67d06abf47f2c45', not the expected 7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "4f255798be3707d9727cd158472704feb5cc7715",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify b237f41eb17f39df1a154e84e3f4a20ab280ff58\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): (2b) an empty F given to the read: refused (gated)",
+   "case": "record_analysis_empty_freeze",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "(2b) an empty F given to the read",
+    "fixture_ok": true,
+    "message": "refused: the expected freeze commit '' is not a full 40-hex SHA: the scan verify record cannot be checked against it",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "c78291858ae8d8de6a3eb410ef885f0985674dda",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ],
+    "tree": "",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify c78291858ae8d8de6a3eb410ef885f0985674dda\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): (3) VERIFY_LSREMOTE.txt with one branch at its right name and another sha: refused (gated)",
+   "case": "record_analysis_verify_lsremote_sha",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "(3) VERIFY_LSREMOTE.txt with one branch at its right name and another sha",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record's VERIFY_LSREMOTE.txt is not the scan's inventory: branch evidence/twin-a is at 308cb915cfb3 on the record's VERIFY_LSREMOTE.txt, at db9972933024 in the scan",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "cd838d203d3475b74a19b6fcdd64d9bed1e24618",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify c5180af750048ff3fb6c81bbc0ca789dfc33cf23\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): (3b) the same in SCAN_LSREMOTE.txt: refused (gated)",
+   "case": "record_analysis_scan_lsremote_sha",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "(3b) the same in SCAN_LSREMOTE.txt",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record's SCAN_LSREMOTE.txt is not the scan's inventory: branch evidence/twin-a is at 308cb915cfb3 on the record's SCAN_LSREMOTE.txt, at db9972933024 in the scan",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "de62c61b0706c1c1e38bf38367ed463ad8e763eb",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify a31f7a64657af1a0598474a05b8187e60b29dfbe\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): (4) a PROBLEM line before the success line: refused (gated)",
+   "case": "record_analysis_problem_line",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "(4) a PROBLEM line before the success line",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record's VERIFY.txt has a PROBLEM line: [block verify-scan] did not succeed",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "c8daf0be8a8346317f0366985f8820d2bb4b741c",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "parse_verify",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 8e7c5920ca2a297e91abca874fa291005e1ca668\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): (5) the branch force-pushed away and back onto its creation commit: refused (gated)",
+   "case": "record_analysis_force_back",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation",
+     "force_push",
+     "force_push"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "(5) the branch force-pushed away and back onto its creation commit",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "c18313da6458637f3c0c282f003d43e7f092d8d8",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "record_created",
+     "announce_time",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify c18313da6458637f3c0c282f003d43e7f092d8d8\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): (5b) the branch deleted and recreated on the same commit: refused (gated)",
+   "case": "record_analysis_recreate",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation",
+     "branch_deletion",
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "(5b) the branch deleted and recreated on the same commit",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "146d2df42de22ae46e39714c957d56d236f8fc03",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "record_created",
+     "announce_time",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 146d2df42de22ae46e39714c957d56d236f8fc03\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): (6) VERIFY_INPUTS.txt naming another analysis.py sha256: refused (gated)",
+   "case": "record_analysis_other_analysis_sha",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "(6) VERIFY_INPUTS.txt naming another analysis.py sha256",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record's VERIFY_INPUTS.txt: analysis_py_sha256 7c7f0378190e is not FREEZE_PINS.json's 0c10b8b94bcb for research/layered-networks/analysis.py",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "5c4f2cfa42f6c9919afdde042156104d62244b4e",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 8b0c6b71c14f688f034fc3fc3b4b6b90f8311194\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): the record created after the campaign announce: refused (gated)",
+   "case": "record_analysis_after",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "the record created after the campaign announce",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-27T23:40:24Z, not before the campaign announce (2026-11-27T23:39:24Z)",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "8b0c6b71c14f688f034fc3fc3b4b6b90f8311194",
+    "record_created": "2026-11-27T23:40:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 8b0c6b71c14f688f034fc3fc3b4b6b90f8311194\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): the record created at the announce's own push time (not strictly before): refused (gated)",
+   "case": "record_analysis_same_time",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "the record created at the announce's own push time (not strictly before)",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-27T23:39:24Z, not before the campaign announce (2026-11-27T23:39:24Z)",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "ffba502de88367cbd7fc60001a913be468b2047e",
+    "record_created": "2026-11-27T23:39:24Z",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify ffba502de88367cbd7fc60001a913be468b2047e\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "check_draw campaign (check_scan_verify): the record branch with a second commit on top of its creation commit: refused (gated)",
+   "case": "record_analysis_second_commit",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation",
+     "push"
+    ],
+    "announce_push": "2026-11-27T23:39:24Z",
+    "control_passed": true,
+    "expected": "the record branch with a second commit on top of its creation commit",
+    "fixture_ok": true,
+    "message": "refused: the scan verify record evidence/combined-scan-verify has 2 commits: it must be exactly its creation commit (single-use)",
+    "reached": "check_draw",
+    "reached_check": true,
+    "record_commit": "68bd7c1be454ea9e204e579626adaac16733d8d2",
+    "record_created": "2026-11-27T22:39:24Z",
+    "record_files": [
+     "NOTE.txt",
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "stack": [
+     "<module>",
+     "check_draw",
+     "check_scan_verify",
+     "scan_verify_record",
+     "refuse"
+    ],
+    "tree": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189",
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 68bd7c1be454ea9e204e579626adaac16733d8d2\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "(2b) [block verify-scan] with F empty: refused, no record pushed",
+   "case": "verify_scan_empty_freeze",
+   "defect": "L",
+   "observed": {
+    "fixture_ok": true,
+    "message": "REFUSED: F () is not the freeze clone's full 40-hex commit ([block vars]): no commit, no push",
+    "reached_check": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 1,
+     "stderr": "",
+     "stdout": "REFUSED: F () is not the freeze clone's full 40-hex commit ([block vars]): no commit, no push\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "rehearsal 1's real /1 DRAW_ANNOUNCE.txt (evidence/combined-rehearsal-draw, fetched by name) parses with analysis.parse_announce: mode rehearsal, its list's sha256, 6/6/6",
+   "case": "announce_rehearsal1_parses",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/1\nmode rehearsal\nexcluded_sha256 abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c\nsizes NOT1=6 ANDOR3=6 XOR3=6\n",
+    "announce_sha256": "050efd55df1c96288d48625042b341116ce6a7da6bbe1157111eac896f39c17f",
+    "fixture_ok": true,
+    "parsed": {
+     "excluded_sha256": "abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c",
+     "format": "layered-draw-announce/1",
+     "mode": "rehearsal",
+     "sizes": {
+      "ANDOR3": 6,
+      "NOT1": 6,
+      "XOR3": 6
+     }
+    },
+    "stderr": ""
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a campaign announce with the header /1 and the line second_scan_sha256 (a5ba132b's form): refused (gated on the exact case)",
+   "case": "format_campaign_v1",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/1\nmode campaign\nexcluded_sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\nsecond_scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "control_passed": true,
+    "expected_check": "the announce format check (parse_announce or check_draw)",
+    "fixture_ok": true,
+    "message": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/1 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (second_scan_sha256 only in layered-draw-announce/2)",
+    "mode": "campaign",
+    "raised_in": "parse_announce",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "parse_announce",
+     "refuse"
+    ],
+    "variant": "campaign_v1",
+    "within": "parse_announce"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a campaign announce in /1, 4 lines (no second_scan_sha256): refused (gated on the exact case)",
+   "case": "format_campaign_v1_4lines",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/1\nmode campaign\nexcluded_sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "control_passed": true,
+    "expected_check": "the announce format check (parse_announce or check_draw)",
+    "fixture_ok": true,
+    "message": "refused: DRAW_ANNOUNCE.txt: a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+    "mode": "campaign",
+    "raised_in": "parse_announce",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "parse_announce",
+     "refuse"
+    ],
+    "variant": "campaign_v1_4lines",
+    "within": "parse_announce"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a rehearsal announce in /2 (5 lines, with second_scan_sha256): refused (gated on the exact case)",
+   "case": "format_rehearsal_v2",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/2\nmode rehearsal\nexcluded_sha256 8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\nsecond_scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\nsizes NOT1=6 ANDOR3=6 XOR3=6\n",
+    "control_passed": true,
+    "expected_check": "the announce format check (parse_announce or check_draw)",
+    "fixture_ok": true,
+    "message": "refused: DRAW_ANNOUNCE.txt: layered-draw-announce/2 is the campaign announce only, not mode 'rehearsal'",
+    "mode": "rehearsal",
+    "raised_in": "parse_announce",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "parse_announce",
+     "refuse"
+    ],
+    "variant": "rehearsal_v2",
+    "within": "parse_announce"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a campaign announce in /2 without the line second_scan_sha256: refused (gated on the exact case)",
+   "case": "format_campaign_v2_no_scan_sha",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/2\nmode campaign\nexcluded_sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "control_passed": true,
+    "expected_check": "the announce format check (parse_announce or check_draw)",
+    "fixture_ok": true,
+    "message": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/2 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes', 'second_scan_sha256')",
+    "mode": "campaign",
+    "raised_in": "parse_announce",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "parse_announce",
+     "refuse"
+    ],
+    "variant": "campaign_v2_no_scan_sha",
+    "within": "parse_announce"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a campaign announce in /2 whose second_scan_sha256 is not second_scan='s: refused (gated on the exact case)",
+   "case": "format_campaign_v2_scan_sha_other",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/2\nmode campaign\nexcluded_sha256 66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9\nsecond_scan_sha256 6cc47232a4416a5d090d3aafefc41895ea99176da14ca90659fc0726ae3804bb\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "control_passed": true,
+    "expected_check": "the check of second_scan_sha256 against second_scan=",
+    "fixture_ok": true,
+    "message": "refused: second_scan= has sha256 460ff3ca76d6, not the second_scan_sha256 6cc47232a441 the campaign announce names",
+    "mode": "campaign",
+    "raised_in": "check_rehearsal_seeds",
+    "reached": "check_rehearsal_seeds",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_rehearsal_seeds",
+     "refuse"
+    ],
+    "variant": "campaign_v2_scan_sha_other",
+    "within": "check_rehearsal_seeds"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "a campaign announce in /2 whose excluded_sha256 is written in upper case: refused (gated on the exact case)",
+   "case": "format_campaign_v2_sha_nonhex",
+   "defect": "L",
+   "observed": {
+    "announce": "format layered-draw-announce/2\nmode campaign\nexcluded_sha256 66D7E539D40FBCB0125CD8C18C2F6EA735EE2DD8256E96188ABE3F1B184108D9\nsecond_scan_sha256 460ff3ca76d64326da5e417fa9a78e36277e8cb19bd2d043d9c33525eb1024e6\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "control_passed": true,
+    "expected_check": "the announce format check (parse_announce or check_draw)",
+    "fixture_ok": true,
+    "message": "refused: DRAW_ANNOUNCE.txt: excluded_sha256 '66D7E539D40FBCB0125CD8C18C2F6EA735EE2DD8256E96188ABE3F1B184108D9' is not exactly 64 lowercase hex characters",
+    "mode": "campaign",
+    "raised_in": "parse_announce",
+    "reached": "check_draw",
+    "reached_check": true,
+    "reached_own_check": true,
+    "refused": true,
+    "stack": [
+     "<module>",
+     "check_draw",
+     "parse_announce",
+     "refuse"
+    ],
+    "variant": "campaign_v2_sha_nonhex",
+    "within": "parse_announce"
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "[block announce] verbatim, campaign, on the twin with the authentic record: pushed, a /2 announce naming HS",
+   "case": "announce_block_exact",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 0,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/announce_block_exact/twin.git\ntwin shim: record_created reads /tmp/tmp6n8dpdy0/announce_block_exact/twin.git\n",
+     "stdout": "the scan verify record evidence/combined-scan-verify d5b4560ee058642f7b36ec2a67d6f066d42914f6 created 2026-11-28T12:03:06Z verified scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nannounce ok\nannounce pushed: evidence/combined-draw 252f827a9fad26d30ede988543dc65671454e5f2\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": true,
+    "announce_pushed": "format layered-draw-announce/2\nmode campaign\nexcluded_sha256 11c91db9ae70a94c52dbb9e6c897b12f44875c981d6ba2a4dff34b588b73f093\nsecond_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nsizes NOT1=60 ANDOR3=32 XOR3=37\n",
+    "block_line": null,
+    "expected": "the authentic record (control): accepted",
+    "fixture_ok": true,
+    "kind": null,
+    "message": null,
+    "pushed_to_twin": true,
+    "record_commit": "d5b4560ee058642f7b36ec2a67d6f066d42914f6",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/announce_block_exact/twin.git",
+     "twin shim: record_created reads /tmp/tmp6n8dpdy0/announce_block_exact/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify d5b4560ee058642f7b36ec2a67d6f066d42914f6\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  },
+  {
+   "asserts": "the same with one byte of the scan copy changed after HS was kept: refused, no commit, nothing pushed (gated)",
+   "case": "announce_block_scan_byte",
+   "defect": "L",
+   "observed": {
+    "HS": "93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6",
+    "activity": [
+     "branch_creation"
+    ],
+    "announce": {
+     "blocks": [
+      "announce"
+     ],
+     "exit": 1,
+     "stderr": "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/announce_block_scan_byte/twin.git\nrefused: the published scan has sha256 c4a717b244a2, not HS 93bd8e1f8cc5\n",
+     "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+     "unknown_placeholders": []
+    },
+    "announce_folder_made": false,
+    "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "control_passed": true,
+    "expected": "scan_byte",
+    "fixture_ok": true,
+    "kind": "scan_byte",
+    "message": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+    "pushed_to_twin": false,
+    "reached_check": true,
+    "record_commit": "988e22d8b5e0dc99668527b6f3ebb4b4b05f8c38",
+    "record_files": [
+     "SCAN_LSREMOTE.txt",
+     "VERIFY.txt",
+     "VERIFY_INPUTS.txt",
+     "VERIFY_LSREMOTE.txt"
+    ],
+    "refused_before_announce": true,
+    "second_scan": {
+     "blocks": [
+      "second-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+     "unknown_placeholders": []
+    },
+    "shim_lines": [
+     "twin shim: scan_verify_record reads /tmp/tmp6n8dpdy0/announce_block_scan_byte/twin.git"
+    ],
+    "verify": {
+     "blocks": [
+      "verify-scan"
+     ],
+     "exit": 0,
+     "stderr": "",
+     "stdout": "the scan is reproduced scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6 VS 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nreproduced_scan_sha256 93bd8e1f8cc5728dfeccdcd00ce48d596785509a5e3387d944a4defca7a570e6\nverify_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\nscan_lsremote_sha256 0ec685183e85fdf495101c42ae2abbc7a6c88e01c68e50ac02f72a1e3de711f0\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 988e22d8b5e0dc99668527b6f3ebb4b4b05f8c38\n",
+     "unknown_placeholders": []
+    }
+   },
+   "result": "PASS"
+  }
+ ],
+ "draw_seeds_sha256": "b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958",
+ "format": "layered-analysis-defects/1",
+ "lean": {
+  "path": null,
+  "sha256": null
+ },
+ "only": [
+  "L"
+ ],
+ "script_sha256": "2b06d9be1b0573840b2eea123a40698ef0f9c2ca54a9ce3bfae41a6c78bc1abb",
+ "tree_head": "7fa3693ea85a85dde8490e0efdb9eafa80ff7189"
+}
