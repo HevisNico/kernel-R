@@ -1363,7 +1363,7 @@ def parse_announce(b):
     """DRAW_ANNOUNCE.txt. Format /1 (ANNOUNCE_FORMAT): exactly the lines `format layered-draw-announce/1`, `mode M`,
     `excluded_sha256 H`, `sizes NOT1=n ANDOR3=n XOR3=n`, M not campaign (rehearsal 1's published announce is /1).
     Format /2 (ANNOUNCE_FORMAT_CAMPAIGN): those lines with `format layered-draw-announce/2`, plus
-    `second_scan_sha256 HS`, M campaign only."""
+    `second_scan_sha256 HS`, M campaign only. H and HS: exactly 64 lowercase hex characters."""
     try:
         lines = b.decode().split("\n")
     except UnicodeDecodeError:
@@ -1382,6 +1382,10 @@ def parse_announce(b):
         refuse(f"DRAW_ANNOUNCE.txt: a campaign announce is {ANNOUNCE_FORMAT_CAMPAIGN}, not {ANNOUNCE_FORMAT}")
     if fmt == ANNOUNCE_FORMAT_CAMPAIGN and kv["mode"] != "campaign":
         refuse(f"DRAW_ANNOUNCE.txt: {ANNOUNCE_FORMAT_CAMPAIGN} is the campaign announce only, not mode {kv['mode']!r}")
+    for k in ("excluded_sha256", ANNOUNCE_SCAN_KEY):
+        v = kv.get(k)
+        if v is not None and not (len(v) == 64 and all(c in "0123456789abcdef" for c in v)):
+            refuse(f"DRAW_ANNOUNCE.txt: {k} {v[:80]!r} is not exactly 64 lowercase hex characters")
     try:
         sizes = {g: int(v) for g, v in (x.split("=") for x in kv["sizes"].split())}
     except ValueError:
@@ -1684,7 +1688,8 @@ def check_scan(sb, path):
     """F1, level 1: second_scan= must be draw_seeds.py scan's output, consistent in itself. Returns the parsed scan.
     Each failure has its own refusal: not JSON (or a duplicate key, e.g. a ref named twice), not canonical bytes,
     format or rule not draw_seeds.scan's, seeds not sorted unique integers, count or seeds_sha256 not the seeds',
-    refs missing or not of draw_seeds.scan's shape, no HEAD entry, HEAD not main's tip."""
+    refs missing or not of draw_seeds.scan's shape, no HEAD entry, HEAD not main's tip, a same_tree_as_scanned ref
+    whose tip no ref scanned (checked after HEAD, so a HEAD at another tip reads as such)."""
     import draw_seeds
     try:
         scan = json.loads(sb, object_pairs_hook=no_duplicate_keys)
@@ -1719,15 +1724,15 @@ def check_scan(sb, path):
                                                or set(v) == {"tip", "same_tree_as_scanned"} and v["same_tree_as_scanned"] is True)]
     if bad:
         refuse(f"second_scan= {path}: refs not of draw_seeds.scan's shape: {bad[:5]}")
-    scanned = {v["tip"] for v in refs.values() if "numbers" in v}
-    same = [n for n, v in refs.items() if "same_tree_as_scanned" in v and v["tip"] not in scanned]
-    if same:
-        refuse(f"second_scan= {path}: refs marked same_tree_as_scanned whose tip no other ref scanned: {same[:5]}")
     if "HEAD" not in refs:
         refuse(f"second_scan= {path}: no HEAD entry (draw_seeds.scan always scans HEAD)")
     main = refs.get("refs/remotes/origin/main")
     if main is None or refs["HEAD"]["tip"] != main["tip"]:
         refuse(f"second_scan= {path}: HEAD is not main's tip ([block second-scan] sets HEAD to origin/main)")
+    scanned = {v["tip"] for v in refs.values() if "numbers" in v}
+    same = [n for n, v in refs.items() if "same_tree_as_scanned" in v and v["tip"] not in scanned]
+    if same:
+        refuse(f"second_scan= {path}: refs marked same_tree_as_scanned whose tip no other ref scanned: {same[:5]}")
     return scan
 
 

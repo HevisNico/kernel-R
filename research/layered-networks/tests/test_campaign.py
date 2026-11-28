@@ -2031,7 +2031,15 @@ def case_exact_union_owner(w):
             ("/2 rehearsal refused", five.format(f="layered-draw-announce/2", m="rehearsal"),
              "layered-draw-announce/2 is the campaign announce only, not mode 'rehearsal'"),
             ("another format refused", four.format(f="layered-draw-announce/3", m="rehearsal"),
-             "format 'layered-draw-announce/3' is neither")):
+             "format 'layered-draw-announce/3' is neither"),
+            ("N2: /2 with second_scan_sha256 not hex refused", five.format(f="layered-draw-announce/2", m="campaign").replace("b" * 64, "zz"),
+             "DRAW_ANNOUNCE.txt: second_scan_sha256 'zz' is not exactly 64 lowercase hex characters"),
+            ("N2: /2 with second_scan_sha256 in upper case refused", five.format(f="layered-draw-announce/2", m="campaign").replace("b" * 64, "B" * 64),
+             "DRAW_ANNOUNCE.txt: second_scan_sha256 '" + "B" * 64 + "' is not exactly 64 lowercase hex characters"),
+            ("N2: /1 with excluded_sha256 of 63 characters refused", four.format(f="layered-draw-announce/1", m="rehearsal").replace("a" * 64, "a" * 63),
+             "DRAW_ANNOUNCE.txt: excluded_sha256 '" + "a" * 63 + "' is not exactly 64 lowercase hex characters"),
+            ("N2: /2 with excluded_sha256 not hex refused", five.format(f="layered-draw-announce/2", m="campaign").replace("a" * 64, "g" * 64),
+             "DRAW_ANNOUNCE.txt: excluded_sha256 '" + "g" * 64 + "' is not exactly 64 lowercase hex characters")):
         note("format: " + label, call(A.parse_announce, text.encode()), needle, ANALYSIS)
     # ---- (b): rehearsal 2's list in campaign mode, one extra seed, re-announced
     y = json.loads(r2b)
@@ -2189,6 +2197,9 @@ def case_scan_checks(w):
          "no HEAD entry (draw_seeds.scan always scans HEAD)"),
         ("HEAD not main's tip", canon(dict(g, refs=dict(g["refs"], HEAD=dict(tip=other, same_tree_as_scanned=True)))),
          "HEAD is not main's tip"),
+        ("N1: HEAD at a tip no ref scanned (same_tree_as_scanned): HEAD's own message, not the same_tree one",
+         canon(dict(g, refs=dict(g["refs"], HEAD=dict(tip="e" * 40, same_tree_as_scanned=True)))),
+         "S.json: HEAD is not main's tip ([block second-scan] sets HEAD to origin/main)"),
         ("a boolean seed", canon(recount(dict(g, seeds=[True] + g["seeds"]))), "seeds are not a list of integers"),
         ("seeds unsorted", canon(recount(dict(g, seeds=g["seeds"][1:] + g["seeds"][:1]))), "seeds are not sorted and unique"),
         ("a seed twice", canon(recount(dict(g, seeds=sorted(g["seeds"] + g["seeds"][:1])))), "seeds are not sorted and unique"),
