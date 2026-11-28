@@ -1,0 +1,157 @@
+{
+ "cells": [
+  {
+   "cell": "c1_0",
+   "gate": "copy",
+   "measured": true,
+   "why_not_measured": [],
+   "anchors": {
+    "d": 8213,
+    "g": {
+     "1": 84296,
+     "2": 0
+    },
+    "H": 30
+   },
+   "D_mV": {
+    "1": "12112656377794125/4503599627370496"
+   },
+   "need": {
+    "0": 2
+   },
+   "maxWrites": 3,
+   "settled_writes": {
+    "1": 2,
+    "2": 0
+   },
+   "guarded": {
+    "help": 0,
+    "gain": {
+     "1": 84296,
+     "2": 0
+    },
+    "dose": 8213
+   },
+   "epsilon": 0,
+   "sensitivity": {
+    "1": "36988063739593883648/12112656377794125"
+   },
+   "drift_V": {
+    "1": "450359963/4503599627370496"
+   },
+   "budgets": {
+    "K0": {
+     "train_base": 92,
+     "test_base": 92,
+     "H": 30,
+     "H_drift": 1,
+     "D1": 0,
+     "D2": 0,
+     "H_D4": 42,
+     "D4_stage": "1/200",
+     "D4_source": "calibration.json d4_stage",
+     "trainError": 165,
+     "testError": 165
+    },
+    "K3": {
+     "train_base": 1338,
+     "test_base": 1338,
+     "H": 30,
+     "H_drift": 1,
+     "D1": 0,
+     "D2": 0,
+     "H_D4": 42,
+     "D4_stage": "1/200",
+     "D4_source": "calibration.json d4_stage",
+     "trainError": 1411,
+     "testError": 1411
+    }
+   },
+   "verdicts": {
+    "K0": {
+     "valid": true,
+     "trained_word_matches_model": true,
+     "training_calibration": true,
+     "read_calibration": true,
+     "failing": [],
+     "min_slack": {
+      "dose > 0": 8213,
+      "g0: 0 < stop \u2264 maxWrites (stop 2, maxWrites 3)": 1,
+      "g0: early silence k=0": 15539,
+      "g0: early silence k=1": 7326,
+      "g0: stop margin": 558,
+      "rail port 1": 899278,
+      "rail port 2": 1000000,
+      "silent mask ()": 99835,
+      "silent mask (2,)": 99835,
+      "anchor (1,)": 558
+     },
+     "training_residual_min_slack": 165,
+     "decoder_exact_training": true,
+     "test_residual_min_slack": null,
+     "decoder_exact_reads": true,
+     "anchor_min_slack": 164,
+     "ok": true
+    },
+    "K3": {
+     "valid": false,
+     "trained_word_matches_model": true,
+     "training_calibration": true,
+     "read_calibration": true,
+     "failing": [
+      "g0: stop margin (slack -688)",
+      "anchor (1,) (slack -688)"
+     ],
+     "min_slack": {
+      "dose > 0": 8213,
+      "g0: 0 < stop \u2264 maxWrites (stop 2, maxWrites 3)": 1,
+      "g0: early silence k=0": 14293,
+      "g0: early silence k=1": 6080,
+      "g0: stop margin": -688,
+      "rail port 1": 899278,
+      "rail port 2": 1000000,
+      "silent mask ()": 98589,
+      "silent mask (2,)": 98589,
+      "anchor (1,)": -688
+     },
+     "training_residual_min_slack": 1411,
+     "decoder_exact_training": true,
+     "test_residual_min_slack": null,
+     "decoder_exact_reads": true,
+     "anchor_min_slack": 1410,
+     "ok": false
+    }
+   },
+   "lean_cell": {
+    "K0": {
+     "gate": "copy",
+     "help": 0,
+     "gain": {
+      "1": 84296,
+      "2": 0
+     },
+     "dose": 8213,
+     "threshold": 100000,
+     "maxWrites": 3,
+     "rail": 1000000,
+     "trainError": 165,
+     "testError": 165
+    },
+    "K3": {
+     "gate": "copy",
+     "help": 0,
+     "gain": {
+      "1": 84296,
+      "2": 0
+     },
+     "dose": 8213,
+     "threshold": 100000,
+     "maxWrites": 3,
+     "rail": 1000000,
+     "trainError": 1411,
+     "testError": 1411
+    }
+   }
+  }
+ ]
+}
