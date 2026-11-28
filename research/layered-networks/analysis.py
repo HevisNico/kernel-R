@@ -70,6 +70,17 @@ THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
   ([block list]). A seed added, a seed missing, another field differing, second_scan= missing
   and second_scan= not a superset each refuse with their own message. Test mode keeps the inclusion check only, and
   refuses second_scan= (as rehearsal mode does).
+- THE SCAN (campaign mode, F1 level 1; check_scan): second_scan= must be draw_seeds.py scan's output, consistent in
+  itself: its bytes draw_seeds.canon of its content, its format and rule draw_seeds.scan's, its seeds sorted unique
+  integers, count and seeds_sha256 those of its seeds, refs of draw_seeds.scan's shape (no ref named twice), a HEAD
+  entry at main's tip. Each failure refuses with its own message. A missing or unreadable second_scan=, or one that
+  is not JSON, refuses naming the file (F3). The announce's second_scan_sha256 is ALWAYS required in campaign mode
+  (F2); only [block check-list], before the announce exists, skips it, by the function argument pre_announce of
+  check_rehearsal_seeds, which no command-line key reaches. Level 2, the scan reproduced on a second machine before
+  the announce, is FREEZE.txt's [block verify-scan] (verify_scan).
+- THE ANNOUNCE COMMIT'S FILES (O1; check_announce_files), in campaign and rehearsal modes: EXCLUDED_PUBLISHED.json and,
+  for the campaign, EXCLUDED_SECOND_SCAN.json are read at the exact announce commit; each must have the announced
+  sha256 (excluded_sha256, second_scan_sha256) and be byte-equal to the excluded= and second_scan= files used.
 - The seeds are recomputed with the pinned draw_seeds.draw; the 12 expected plans are plan_split3.split of the
   RECOMPUTED draw on the frozen template, never of the file's own lists.
 - Each root's PLAN_INPUT.json must be byte-identical to plan_split.canon of one of them, which names the root's
@@ -200,6 +211,10 @@ ANNOUNCE_FORMAT = "layered-draw-announce/1"             # rehearsal and test ann
 ANNOUNCE_FORMAT_CAMPAIGN = "layered-draw-announce/2"    # the campaign announce: ANNOUNCE_KEYS + ANNOUNCE_SCAN_KEY
 ANNOUNCE_KEYS = ("format", "mode", "excluded_sha256", "sizes")
 ANNOUNCE_SCAN_KEY = "second_scan_sha256"         # the campaign announce's fifth line: the second scan's raw output
+ANNOUNCE_LIST_FILE = "EXCLUDED_PUBLISHED.json"   # the announce commit's list (excluded_sha256)
+ANNOUNCE_SCAN_FILE = "EXCLUDED_SECOND_SCAN.json"  # the campaign announce commit's scan (second_scan_sha256)
+ANNOUNCE_PUBLISHED = (ANNOUNCE_LIST_FILE, ANNOUNCE_SCAN_FILE)
+SCAN_FORMAT = "layered-excluded-seeds/1"          # draw_seeds.scan's format (its literal)
 ANNOUNCE_BRANCH = dict(campaign="evidence/combined-draw", rehearsal="evidence/combined-rehearsal2-draw")
 RESULT_BRANCH = dict(campaign="evidence/combined-draw-result", rehearsal="evidence/combined-rehearsal2-draw-result")
 # rehearsal 1, published under the freeze of 5d02acce (its announce, its draw, its list), checked against that freeze
@@ -1357,9 +1372,11 @@ def parse_announce(b):
     return out
 
 
-def announce_on_github(branch, outdir):
+def announce_on_github(branch, outdir, files=None):
     """The first commit adding DRAW_ANNOUNCE.txt on `branch` (first-parent), its file, and GitHub's push time of it
-    (sealpush.github_times; every activity item saved in OUTDIR/activity/)."""
+    (sealpush.github_times; every activity item saved in OUTDIR/activity/). With `files` (names), also the bytes of each
+    at THAT commit (None when the commit has no such file), as a fourth element; without, the three elements only
+    ([block draw] reads them)."""
     remote = json.loads(CP.FROZEN_TEMPLATE.read_text())["seal_push"]["remote"]
     with tempfile.TemporaryDirectory() as w:
         try:
@@ -1372,11 +1389,17 @@ def announce_on_github(branch, outdir):
             commit = adds[0]
             text = subprocess.run(["git", "show", f"{commit}:{ANNOUNCE_FILE}"], cwd=w, capture_output=True,
                                   check=True).stdout
+            at = {}
+            for name in files or ():
+                g = subprocess.run(["git", "show", f"{commit}:{name}"], cwd=w, capture_output=True)
+                at[name] = g.stdout if g.returncode == 0 else None
             items = activity_items(remote, branch, outdir)
         except Refused:
             raise
         except Exception as e:                            # never reinterpreted: the analysis is rerun later
             refuse(f"the draw's announce cannot be read from GitHub ({branch}): {e!r}"[:500])
+    if files is not None:
+        return commit, text, announce_time(items, commit, branch), at
     return commit, text, announce_time(items, commit, branch)
 
 
@@ -1448,7 +1471,7 @@ def check_draw(kw, mode, outdir, tree_commit=None, offline=None, past=None):
         want_branch = past["announce_branch"] if past is not None else ANNOUNCE_BRANCH[mode]
         if an["branch"] != want_branch:
             refuse(f"{mode} mode: the announce branch is {want_branch}, not {an['branch']!r}")
-        commit, ab, push_utc = announce_on_github(an["branch"], outdir)
+        commit, ab, push_utc, at = announce_on_github(an["branch"], outdir, files=ANNOUNCE_PUBLISHED)
         if commit != an["commit"] or push_utc != an["push_utc"]:
             refuse(f"DRAW.json's announce ({an['commit'][:12]}, {an['push_utc']}) is not GitHub's: the first commit "
                    f"adding {ANNOUNCE_FILE} on {an['branch']} is {commit[:12]}, pushed {push_utc}")
@@ -1458,6 +1481,8 @@ def check_draw(kw, mode, outdir, tree_commit=None, offline=None, past=None):
             refuse(f"the announce was pushed at {push_utc}, not after the frozen tree {str(fc)[:12]} "
                    f"({FREEZE_BRANCH}, {ft})")
     A = parse_announce(ab)
+    if not offline:                                        # O1: the files at the exact announce commit
+        check_announce_files(at, A, kw, mode)
     if A["mode"] != mode:
         refuse(f"DRAW_ANNOUNCE.txt says mode {A['mode']}, not {mode}")
     sizes = DRAW_SIZES if mode == "campaign" else DRAW_SIZES_REHEARSAL if mode == "rehearsal" else d.get("n")
@@ -1587,12 +1612,140 @@ def check_exact_list(path, want, subject, of):
            f"union of {of}")
 
 
+def check_announce_files(at, A, kw, mode):
+    """O1: the files of the exact announce commit (`at`, name -> bytes or None). EXCLUDED_PUBLISHED.json must be there,
+    with the announced excluded_sha256, and byte-equal to the excluded= file; for the campaign, EXCLUDED_SECOND_SCAN.json
+    too, with the announced second_scan_sha256, and byte-equal to second_scan= when given."""
+    pairs = [(ANNOUNCE_LIST_FILE, "excluded_sha256", "excluded")]
+    if mode == "campaign":
+        pairs.append((ANNOUNCE_SCAN_FILE, ANNOUNCE_SCAN_KEY, "second_scan"))
+    for name, key, arg in pairs:
+        b = at.get(name)
+        if b is None:
+            refuse(f"the announce commit has no {name}: the announced {key} names nothing published")
+        if hashlib.sha256(b).hexdigest() != A.get(key):
+            refuse(f"the announce commit's {name} has sha256 {hashlib.sha256(b).hexdigest()[:12]}, not the announced "
+                   f"{key} {str(A.get(key))[:12]}")
+        if arg in kw and read_file(kw[arg], f"{arg}=") != b:
+            refuse(f"the {arg}= file is not byte-equal to the announce commit's {name}")
+
+
+def read_file(path, what):
+    """The bytes of a file the analysis needs, or an explicit refusal naming it (never a traceback)."""
+    try:
+        return Path(path).read_bytes()
+    except OSError as e:
+        refuse(f"{what} {path} is missing or unreadable: {e.strerror if e.strerror else repr(e)}")
+
+
+class DuplicateKey(ValueError):
+    pass
+
+
+def no_duplicate_keys(pairs):
+    keys = [k for k, _ in pairs]
+    dup = sorted({k for k in keys if keys.count(k) > 1})
+    if dup:
+        raise DuplicateKey(dup[:5])
+    return dict(pairs)
+
+
+def scan_rule():
+    """draw_seeds.scan's rule field, computed as draw_seeds.scan computes it (from its docstring)."""
+    import draw_seeds
+    return draw_seeds.__doc__.split("**The draw.**")[0].split("**The exclusion list (scan).**")[1].strip()
+
+
+def check_scan(sb, path):
+    """F1, level 1: second_scan= must be draw_seeds.py scan's output, consistent in itself. Returns the parsed scan.
+    Each failure has its own refusal: not JSON (or a duplicate key, e.g. a ref named twice), not canonical bytes,
+    format or rule not draw_seeds.scan's, seeds not sorted unique integers, count or seeds_sha256 not the seeds',
+    refs missing or not of draw_seeds.scan's shape, no HEAD entry, HEAD not main's tip."""
+    import draw_seeds
+    try:
+        scan = json.loads(sb, object_pairs_hook=no_duplicate_keys)
+    except DuplicateKey as e:
+        refuse(f"second_scan= {path} names a key twice (a ref recorded twice, or a field): {e.args[0]}")
+    except ValueError as e:
+        refuse(f"second_scan= {path} is not readable JSON: {e}"[:400])
+    if not isinstance(scan, dict):
+        refuse(f"second_scan= {path} is not a JSON object")
+    if draw_seeds.canon(scan) != sb:
+        refuse(f"second_scan= {path} is not in canonical form (its bytes are not draw_seeds.canon of its content)")
+    if scan.get("format") != SCAN_FORMAT:
+        refuse(f"second_scan= {path}: format {scan.get('format')!r} is not draw_seeds.scan's {SCAN_FORMAT!r}")
+    if scan.get("rule") != scan_rule():
+        refuse(f"second_scan= {path}: its rule is not draw_seeds.scan's rule")
+    s = scan.get("seeds")
+    if not isinstance(s, list) or not all(isinstance(x, int) and not isinstance(x, bool) for x in s):
+        refuse(f"second_scan= {path}: seeds are not a list of integers")
+    if s != sorted(set(s)):
+        refuse(f"second_scan= {path}: seeds are not sorted and unique")
+    if scan.get("count") != len(s):
+        refuse(f"second_scan= {path}: count {scan.get('count')!r} is not the number of seeds {len(s)}")
+    if scan.get("seeds_sha256") != hashlib.sha256(draw_seeds.canon(s)).hexdigest():
+        refuse(f"second_scan= {path}: seeds_sha256 is not sha256 of its seeds")
+    refs = scan.get("refs")
+    if not isinstance(refs, dict) or not refs:
+        refuse(f"second_scan= {path}: no refs (draw_seeds.scan records every ref it scanned)")
+    hexsha = lambda x: isinstance(x, str) and len(x) == 40 and all(c in "0123456789abcdef" for c in x)
+    isn = lambda x: isinstance(x, int) and not isinstance(x, bool) and x >= 0
+    bad = [n for n, v in refs.items() if not (n == "HEAD" or n.startswith("refs/remotes/origin/")) or not isinstance(v, dict)
+           or not hexsha(v.get("tip")) or not (set(v) == {"tip", "numbers"} and isn(v["numbers"])
+                                               or set(v) == {"tip", "same_tree_as_scanned"} and v["same_tree_as_scanned"] is True)]
+    if bad:
+        refuse(f"second_scan= {path}: refs not of draw_seeds.scan's shape: {bad[:5]}")
+    scanned = {v["tip"] for v in refs.values() if "numbers" in v}
+    same = [n for n, v in refs.items() if "same_tree_as_scanned" in v and v["tip"] not in scanned]
+    if same:
+        refuse(f"second_scan= {path}: refs marked same_tree_as_scanned whose tip no other ref scanned: {same[:5]}")
+    if "HEAD" not in refs:
+        refuse(f"second_scan= {path}: no HEAD entry (draw_seeds.scan always scans HEAD)")
+    main = refs.get("refs/remotes/origin/main")
+    if main is None or refs["HEAD"]["tip"] != main["tip"]:
+        refuse(f"second_scan= {path}: HEAD is not main's tip ([block second-scan] sets HEAD to origin/main)")
+    return scan
+
+
+def verify_scan(sv, sr, lsremote):
+    """F1, level 2 ([block verify-scan]): `sv`, the scan to verify (bytes), against `sr`, the verifier's own
+    reproduction with [block second-scan] (bytes), and `lsremote`, the verifier's own `git ls-remote --heads` (text).
+    Returns the list of problems (empty: verified): the branch inventory (names and tips) of the scan's refs against
+    the ls-remote (a branch missing, extra or at another tip), HEAD against main's tip, and the reproduction byte for
+    byte."""
+    problems = []
+    try:
+        scan = check_scan(sv, "SCAN_TO_VERIFY.json")
+    except Refused as e:
+        return [str(e)]
+    have = {n[len("refs/remotes/origin/"):]: v["tip"] for n, v in scan["refs"].items() if n != "HEAD"}
+    remote = {}
+    for ln in lsremote.splitlines():
+        if ln.strip():
+            tip, ref = ln.split()
+            remote[ref[len("refs/heads/"):]] = tip
+    for b in sorted(set(remote) - set(have)):
+        problems.append(f"branch {b} is on the remote ({remote[b][:12]}) but not in the scan")
+    for b in sorted(set(have) - set(remote)):
+        problems.append(f"branch {b} is in the scan ({have[b][:12]}) but not on the remote")
+    for b in sorted(set(have) & set(remote)):
+        if have[b] != remote[b]:
+            problems.append(f"branch {b} is at {remote[b][:12]} on the remote, at {have[b][:12]} in the scan")
+    if scan["refs"]["HEAD"]["tip"] != remote.get("main"):
+        problems.append(f"the scan's HEAD {scan['refs']['HEAD']['tip'][:12]} is not main's tip on the remote "
+                        f"{str(remote.get('main'))[:12]}")
+    if sr != sv:
+        problems.append(f"the reproduced scan has sha256 {hashlib.sha256(sr).hexdigest()}, not the scan's "
+                        f"{hashlib.sha256(sv).hexdigest()}")
+    return problems
+
+
 def second_scan_refusal_missing():
     refuse("campaign mode: second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output, published with the "
            "campaign announce) is required")
 
 
-def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict, mode=None):
+def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict, mode=None, pre_announce=False):
     """The owner's rule: the campaign's exclusion list must hold every seed of BOTH rehearsals and their noise seeds
     10 S + 0..3, and both rehearsals' announces must be earlier than the campaign's. Rehearsal 2 (rehearsal_draw=,
     rehearsal_excluded= defaulting to the freeze's EXCLUDED.json) is checked in full as in rehearsal mode (its announce
@@ -1603,26 +1756,27 @@ def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict, mode=None)
     THE EXACT UNION (campaign and rehearsal modes): the list must then be byte for byte what FREEZE.txt builds
     (check_exact_list): rehearsal mode, rehearsal2_list of the freeze's EXCLUDED.json and rehearsal 1's verified draw;
     campaign mode, campaign_list of second_scan= (required, a superset of the freeze's EXCLUDED.json, with the sha256
-    the announce names when draw_info's announce names one) and both verified draws, and rehearsal_excluded=
-    (rehearsal 2's list) rehearsal2_list, as in rehearsal mode."""
+    the announce names) and both verified draws, and rehearsal_excluded= (rehearsal 2's list) rehearsal2_list, as in
+    rehearsal mode. second_scan= must be draw_seeds.scan's output, consistent in itself (check_scan).
+    `pre_announce` (a function argument only, never a command-line key: [block check-list], before the campaign
+    announce exists): the scan's sha256 is then not compared with an announce. Otherwise campaign mode refuses a
+    draw_info whose announce names no second_scan_sha256."""
     mode = mode if mode is not None else ("campaign" if strict else "test")
     pinned = json.loads((HERE / "EXCLUDED.json").read_text())
     scan = None
     if mode == "campaign":
         if "second_scan" not in kw:
             second_scan_refusal_missing()
-        sb = Path(kw["second_scan"]).read_bytes()
-        try:
-            scan = json.loads(sb)
-        except ValueError:
-            scan = None
-        if not is_seed_list(scan):
-            refuse("second_scan= is not a JSON list record with integer seeds (draw_seeds.py scan's output)")
+        sb = read_file(kw["second_scan"], "second_scan=")
+        scan = check_scan(sb, kw["second_scan"])
         if not set(pinned["seeds"]) <= set(scan["seeds"]):
             lost = sorted(set(pinned["seeds"]) - set(scan["seeds"]))
             refuse(f"second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks {len(lost)} of its seeds "
                    f"{lost[:20]}")
         named = (draw_info.get("announce") or {}).get(ANNOUNCE_SCAN_KEY)
+        if named is None and not pre_announce:
+            refuse(f"campaign mode: the campaign announce names no {ANNOUNCE_SCAN_KEY}, so second_scan= cannot be "
+                   "checked against it")
         if named is not None and hashlib.sha256(sb).hexdigest() != named:
             refuse(f"second_scan= has sha256 {hashlib.sha256(sb).hexdigest()[:12]}, not the {ANNOUNCE_SCAN_KEY} "
                    f"{str(named)[:12]} the campaign announce names")

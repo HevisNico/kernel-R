@@ -109,8 +109,8 @@ TWINS = {   # (block, written line or fragment) -> replacement; each must occur 
                     f"rehearsal_announce='announce_rehearsal/DRAW_ANNOUNCE.txt', rehearsal1_announce='{W}/REHEARSAL1_DRAW_ANNOUNCE.txt',",
                     "the announce files for check_rehearsal_seeds offline: rehearsal 2's from the twin, rehearsal 1's as "
                     "published (its announce commit 9c3ec1e1 on GitHub, fetched by proof2)"),
-                   ("dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True, 'campaign')",
-                    "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False, 'campaign')",
+                   ("dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True, 'campaign',",
+                    "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False, 'campaign',",
                     "strict=False: check_rehearsal_seeds checks both rehearsal draws offline (rehearsal 2 is on the twin "
                     "only); rehearsal 1 is also checked from GitHub, verbatim, by the block's own check_draw with past=")],
     "vars": [("L=<a clean clone of research/layered-campaign-freeze, with research/circuit/pdk linked to the SKY130 PDK at 1232782c as on the machines>/research/layered-networks",
@@ -125,7 +125,13 @@ TWINS = {   # (block, written line or fragment) -> replacement; each must occur 
                        "placeholder: H read from step (3)'s printed line (log/08_check-list.out)"),
                       ('HS=<the 64 hex characters that ORDER 3 step (3) printed after "scan_sha256">',
                        f"HS=$(grep -o 'scan_sha256 [0-9a-f]\\{{64\\}}' {LOG}/08_check-list.out | tail -1 | cut -c13-)",
-                       "placeholder: HS read from step (3)'s printed line (log/08_check-list.out)")],
+                       "placeholder: HS read from step (3)'s printed line (log/08_check-list.out)"),
+                      ('VS=<the 64 hex characters that ORDER 3 step (3b), [block verify-scan] on the SECOND machine, printed after "VS">',
+                       f"VS=$(grep -o ' VS [0-9a-f]\\{{64\\}}' {LOG}/08b_verify-scan.out | tail -1 | cut -c5-)",
+                       "placeholder: VS read from step (3b)'s printed line (log/08b_verify-scan.out); the second machine "
+                       "is the folder verify/ of this proof, with its own [block second-scan]")],
+    "verify-scan": [(PUSH + "$V", f"git push -q {TWIN} HEAD:refs/heads/$V",
+                     "no push to GitHub: the verify record goes to the local twin")],
     # [block check-rehearsal2-list]'s analysis.check_rehearsal_seeds call (rehearsal mode, strict) needs no twin: it
     # checks rehearsal 1 only, on GitHub, as the block's own check_draw with past= does (proof2 runs that verbatim).
     # [block check-list]'s call keeps its three twins (listed above); its new second_scan= argument is the scan's file.
@@ -277,12 +283,20 @@ STEPS = [dict(num="01", name="vars", kind="pass", body=B("vars")),
          dict(num="06", name="rehearsal-draw", kind="pass", body=B("rehearsal-draw")),
          dict(num="07", name="list", kind="pass", body=B("list")),
          dict(num="08", name="check-list", kind="pass", body=B("check-list")),
+         # ORDER 3 (3b): the second machine, as a separate folder with its own [block second-scan] (a second full scan)
+         dict(num="08a", name="verify-second-scan", kind="pass",
+              body=f"( mkdir {W}/verify && cd {W}/verify && cp {W}/work/EXCLUDED_SECOND_SCAN.json SCAN_TO_VERIFY.json\n"
+                   + B("second-scan") + ")\n"),
+         dict(num="08b", name="verify-scan", kind="pass", body=f"( cd {W}/verify\n" + B("verify-scan") + ")\n"),
          dict(num="09", name="vars-campaign", kind="pass", body=B("vars-campaign")),
+         dict(num="09a", name="NEG-vs-not-hs", kind="neg",
+              setup=f"cp {W}/work/EXCLUDED_SECOND.json {W}/work/EXCLUDED_SECOND_SCAN.json .\nVS_KEPT=$VS\nVS={'0' * 64}\n",
+              body=B("announce") + "RC=$?\nVS=$VS_KEPT\n( exit $RC )\n", made="announce_$M", where=f"{W}/work/neg_vs"),
          dict(num="10", name="NEG-old-list", kind="neg", setup="X_KEPT=$X\nX=$L/EXCLUDED.json\n",
               body=B("announce") + "RC=$?\nX=$X_KEPT\n( exit $RC )\n", made="announce_$M", where=f"{W}/work/neg_oldlist"),
          dict(num="11", name="announce", kind="pass", body=B("announce")),
          dict(num="12", name="draw", kind="pass", body=B("draw")),
-         dict(num="13", name="owner-identity", kind="pass", body=ident_body(TWIN, W / "kernel-R", 4)),   # rehearsal 2 and campaign: announce + result each
+         dict(num="13", name="owner-identity", kind="pass", body=ident_body(TWIN, W / "kernel-R", 5)),   # rehearsal 2 and campaign: announce + result each; the verify record
          dict(num="14", name="clone-clean", kind="pass", body=clean_body(W / "kernel-R"))]
 rc, summary = run_steps(STEPS, W / "work", LOG, head=[f"export GIT_CONFIG_GLOBAL={W}/gitconfig_global_other",
                                                     'echo "global identity during the run: $(git config --global user.name)"'])
