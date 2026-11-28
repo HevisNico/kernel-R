@@ -1,0 +1,192 @@
+{
+ "env_sha256": "0e69a50e97ab9e3c48e63b21d5ca3132356885fd5b055b5ceebafa89ec63a8f4",
+ "group": "ANDOR3",
+ "mode": "TEST",
+ "seed": 6104,
+ "steps": {
+  "C0": {
+   "argv": [
+    "/root/yieldK03/venv/bin/python",
+    "-B",
+    "/root/devtest_b/kernel-R/research/layered-networks/compare_d2.py",
+    "/root/devtest_b/out_K03/ANDOR3_6104/seal",
+    "/root/devtest_b/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/devtest_b/out_K03/ANDOR3_6104/N0/noisy_record.json",
+    "noiseless",
+    "/root/devtest_b/out_K03/ANDOR3_6104/N0/comparison.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-26T22:04:34.141337Z",
+   "outputs": {
+    "N0/comparison.json": "ed59e3db59507e7015db40c7e6f592b9510c82cc42a272b424e1f59629c8bf96"
+   },
+   "started": "2026-11-26T22:04:34.087783Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "D": {
+   "argv": [
+    "/root/yieldK03/venv/bin/python",
+    "-B",
+    "/root/devtest_b/kernel-R/research/layered-networks/stage_d6.py",
+    "run",
+    "/root/devtest_b/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/devtest_b/out_K03/ANDOR3_6104/D",
+    "6104",
+    "overlay=config_inverter_c5.json",
+    "rule=one-port"
+   ],
+   "cores": 1,
+   "cpu_s": 2776.3,
+   "ended": "2026-11-26T21:36:49.642387Z",
+   "outputs": {
+    "D/prediction.json": "6cbf35a02e2fb47b4148c988ce3d295603936df5ea7d611a182c9219fcf56bd2",
+    "D/record.json": "371fb97ad03439faec2e8337f992f1161bea4bfaffd7d1e54720e7878883bdcf"
+   },
+   "started": "2026-11-26T20:50:06.154555Z",
+   "status": "done",
+   "wall_s": 2803.5
+  },
+  "N0": {
+   "argv": [
+    "/root/yieldK03/venv/bin/python",
+    "-B",
+    "/root/devtest_b/noise/research/layered-networks/controls4.py",
+    "stagen",
+    "/root/devtest_b/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/devtest_b/out_K03/ANDOR3_6104/N0",
+    "6104",
+    "0",
+    "seal_log=248189347319bf6a6d1e88ecfad09633939b0449",
+    "seal_branch=evidence/devtest-seals-K03",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cores": 1,
+   "cpu_s": 1646.6,
+   "ended": "2026-11-26T22:04:34.086674Z",
+   "outputs": {
+    "N0/noisy_record.json": "219c9da9cdcd98fb3f14844e651fd504ed6b826d0c18beb4e06a9a060cab6e73",
+    "N0/trace.digest.json": "ae3424f500db5402427fa3941b1758c9c999b5531fce004c74792766c1f3cbe4"
+   },
+   "started": "2026-11-26T21:36:54.074532Z",
+   "status": "done",
+   "wall_s": 1660.0
+  },
+  "N1": {
+   "argv": [
+    "/root/yieldK03/venv/bin/python",
+    "-B",
+    "/root/devtest_b/noise/research/layered-networks/controls4.py",
+    "stagen",
+    "/root/devtest_b/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/devtest_b/out_K03/ANDOR3_6104/N1",
+    "6104",
+    "1",
+    "seal_log=248189347319bf6a6d1e88ecfad09633939b0449",
+    "seal_branch=evidence/devtest-seals-K03",
+    "overlay=config_inverter_c5.json"
+   ],
+   "started": "2026-11-26T22:04:34.490966Z",
+   "status": "running"
+  },
+  "N2": {
+   "argv": [
+    "/root/yieldK03/venv/bin/python",
+    "-B",
+    "/root/devtest_b/noise/research/layered-networks/controls4.py",
+    "stagen",
+    "/root/devtest_b/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/devtest_b/out_K03/ANDOR3_6104/N2",
+    "6104",
+    "2",
+    "seal_log=248189347319bf6a6d1e88ecfad09633939b0449",
+    "seal_branch=evidence/devtest-seals-K03",
+    "overlay=config_inverter_c5.json"
+   ],
+   "started": "2026-11-26T22:04:34.488197Z",
+   "status": "running"
+  },
+  "N3": {
+   "argv": [
+    "/root/yieldK03/venv/bin/python",
+    "-B",
+    "/root/devtest_b/noise/research/layered-networks/controls4.py",
+    "stagen",
+    "/root/devtest_b/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/devtest_b/out_K03/ANDOR3_6104/N3",
+    "6104",
+    "3",
+    "seal_log=248189347319bf6a6d1e88ecfad09633939b0449",
+    "seal_branch=evidence/devtest-seals-K03",
+    "overlay=config_inverter_c5.json"
+   ],
+   "started": "2026-11-26T22:04:34.492235Z",
+   "status": "running"
+  },
+  "deck": {
+   "argv": [
+    "/root/yieldK03/venv/bin/python",
+    "-B",
+    "/root/devtest_b/kernel-R/research/layered-networks/stage_d6.py",
+    "deck",
+    "/root/devtest_b/kernel-R/research/layered-networks/specs/andor3.json",
+    "/root/devtest_b/out_K03/ANDOR3_6104/deck.spice",
+    "overlay=config_inverter_c5.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-26T20:50:06.153666Z",
+   "outputs": {
+    "deck.spice": "3afd629f4aae973b5a357069fd52ba3c01d65b64f7a1bce14d0d95b1e033364b"
+   },
+   "started": "2026-11-26T20:50:06.058050Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "seal": {
+   "argv": [
+    "/root/yieldK03/venv/bin/python",
+    "-B",
+    "/root/devtest_b/kernel-R/research/layered-networks/stage_d6.py",
+    "seal",
+    "/root/devtest_b/out_K03/ANDOR3_6104/seal",
+    "/root/devtest_b/out_K03/ANDOR3_6104/D"
+   ],
+   "cores": 1,
+   "cpu_s": 0.1,
+   "ended": "2026-11-26T21:36:49.719086Z",
+   "outputs": {
+    "seal/MANIFEST.json": "c67f828bdf1aed15d6e092a6f6c20acbeee45e1cfc8d7303ac70c23fc2e33960",
+    "seal/SHA256SUMS": "0d0e096e35474341ed3cb07c761cf93597c50dbdf161924c07f057db817a2b4f"
+   },
+   "started": "2026-11-26T21:36:49.643370Z",
+   "status": "done",
+   "wall_s": 0.1
+  },
+  "sealpush": {
+   "argv": [
+    "/root/yieldK03/venv/bin/python",
+    "-B",
+    "/root/devtest_b/kernel-R/research/layered-networks/sealpush2.py",
+    "push",
+    "https://github.com/HevisNico/kernel-R",
+    "evidence/devtest-seals-K03",
+    "ANDOR3_6104",
+    "/root/devtest_b/out_K03/ANDOR3_6104/seal",
+    "/root/devtest_b/out_K03/.seal_log_work",
+    "/root/devtest_b/out_K03/ANDOR3_6104/seal_push.json"
+   ],
+   "cores": 1,
+   "cpu_s": 0.3,
+   "ended": "2026-11-26T21:36:52.081349Z",
+   "outputs": {
+    "seal_push.json": "34ed6e8799d211910fe4df808b9d5b8d890d547d6e6e422be85ac3a043b6c6b9"
+   },
+   "started": "2026-11-26T21:36:49.720110Z",
+   "status": "done",
+   "wall_s": 2.4
+  }
+ },
+ "tag": "ANDOR3"
+}
