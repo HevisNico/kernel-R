@@ -1,0 +1,1249 @@
+{
+ "all_pass": true,
+ "analysis_announce": {
+  "detail": {
+   "checks": [
+    {
+     "check": "a clean creation gives its time",
+     "expected": "ok 2026-11-26T22:25:58Z",
+     "matched": "ok 2026-11-26T22:25:58Z",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "deleted and created again: refused",
+     "expected": "was rewritten or deleted (branch_deletion",
+     "matched": "refused: the announce branch evidence/combined-draw was rewritten or deleted (branch_deletion in its activity): the draw could have been redone",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "a force push: refused",
+     "expected": "was rewritten or deleted (force_push",
+     "matched": "refused: the announce branch evidence/combined-draw was rewritten or deleted (force_push in its activity): the draw could have been redone",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "not the creation's commit: refused",
+     "expected": "is not the branch_creation that pushed the announce commit",
+     "matched": "refused: the oldest activity item of evidence/combined-draw is not the branch_creation that pushed the announce commit 80f2c0f5b46c (branch_creation, 5226d975283f)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    }
+   ],
+   "clean": "ok 2026-11-26T22:25:58Z",
+   "forced": "refused: the announce branch evidence/combined-draw was rewritten or deleted (force_push in its activity): the draw could have been redone",
+   "not_the_creation": "refused: the oldest activity item of evidence/combined-draw is not the branch_creation that pushed the announce commit 80f2c0f5b46c (branch_creation, 5226d975283f)",
+   "redone": "refused: the announce branch evidence/combined-draw was rewritten or deleted (branch_deletion in its activity): the draw could have been redone"
+  },
+  "ok": true,
+  "seconds": 0.2
+ },
+ "analysis_two_rehearsals": {
+  "detail": {
+   "checks": [
+    {
+     "check": "both, the full list: accepted",
+     "expected": "\"rehearsal1\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}",
+     "matched": "accepted: {\"rehearsal1\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}, \"rehearsal2\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}}",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1 absent: refused",
+     "expected": "rehearsal1_draw= (rehearsal1's published DRAW.json) is required",
+     "matched": "refused: campaign mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 2 absent: refused",
+     "expected": "rehearsal_draw= (rehearsal2's published DRAW.json) is required",
+     "matched": "refused: campaign mode: rehearsal_draw= (rehearsal2's published DRAW.json) is required (its seeds must be excluded)",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "a rehearsal 1 seed missing: refused",
+     "expected": "lacks rehearsal1 seeds [18985]",
+     "matched": "refused: the campaign's excluded= list lacks rehearsal1 seeds [18985] and noise seeds [] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "a rehearsal 1 noise seed missing: refused",
+     "expected": "noise seeds [277353]",
+     "matched": "refused: the campaign's excluded= list lacks rehearsal1 seeds [] and noise seeds [277353] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1's DRAW.json re-serialized: refused",
+     "expected": "the published rehearsal 1 draw is b8aaefd9f107",
+     "matched": "refused: the published rehearsal 1 draw is b8aaefd9f107 (DRAW.json of evidence/combined-rehearsal-draw-result at f74b75fbdf72), not 49aeefea47b3",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1 with another list: refused",
+     "expected": "not the one DRAW_ANNOUNCE.txt names",
+     "matched": "refused: the excluded= file is not the one DRAW_ANNOUNCE.txt names (excluded_sha256)",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal mode: rehearsal 2's list with rehearsal 1's seeds: accepted",
+     "expected": "accepted: [\"rehearsal1\"]",
+     "matched": "accepted: [\"rehearsal1\"]",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal mode: rehearsal 2's list missing one rehearsal 1 noise seed: refused",
+     "expected": "rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [291791]",
+     "matched": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [291791] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal mode: rehearsal 1 absent: refused",
+     "expected": "rehearsal mode: rehearsal1_draw=",
+     "matched": "refused: rehearsal mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1's announce later than the campaign's: refused",
+     "expected": "rehearsal1's announce (2026-11-27T15:14:37Z) is not earlier",
+     "matched": "refused: rehearsal1's announce (2026-11-27T15:14:37Z) is not earlier than the campaign's announce (2026-11-27T15:00:00Z)",
+     "target": "/tmp/claude-0/tc7/two_out",
+     "target_exists": true
+    }
+   ],
+   "rehearsal1_seeds": [
+    18985,
+    27735,
+    29179,
+    30743,
+    34095,
+    46230,
+    49299,
+    49661,
+    54016,
+    60536,
+    66680,
+    70229,
+    70285,
+    75255,
+    87182,
+    88529,
+    94823,
+    99508
+   ],
+   "rehearsal2_standin_seeds": [
+    12671,
+    18632,
+    22468,
+    29795,
+    30469,
+    33236,
+    40210,
+    49489,
+    56454,
+    77868,
+    78193,
+    82742,
+    84213,
+    84992,
+    92048,
+    94937,
+    95481,
+    99613
+   ],
+   "results": {
+    "a rehearsal 1 noise seed missing: refused": "refused: the campaign's excluded= list lacks rehearsal1 seeds [] and noise seeds [277353] (the list must add the earlier rehearsals' seeds)",
+    "a rehearsal 1 seed missing: refused": "refused: the campaign's excluded= list lacks rehearsal1 seeds [18985] and noise seeds [] (the list must add the earlier rehearsals' seeds)",
+    "both, the full list: accepted": "accepted: {\"rehearsal1\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}, \"rehearsal2\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}}",
+    "rehearsal 1 absent: refused": "refused: campaign mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+    "rehearsal 1 with another list: refused": "refused: the excluded= file is not the one DRAW_ANNOUNCE.txt names (excluded_sha256)",
+    "rehearsal 1's DRAW.json re-serialized: refused": "refused: the published rehearsal 1 draw is b8aaefd9f107 (DRAW.json of evidence/combined-rehearsal-draw-result at f74b75fbdf72), not 49aeefea47b3",
+    "rehearsal 1's announce later than the campaign's: refused": "refused: rehearsal1's announce (2026-11-27T15:14:37Z) is not earlier than the campaign's announce (2026-11-27T15:00:00Z)",
+    "rehearsal 2 absent: refused": "refused: campaign mode: rehearsal_draw= (rehearsal2's published DRAW.json) is required (its seeds must be excluded)",
+    "rehearsal mode: rehearsal 1 absent: refused": "refused: rehearsal mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+    "rehearsal mode: rehearsal 2's list missing one rehearsal 1 noise seed: refused": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [291791] (the list must add the earlier rehearsals' seeds)",
+    "rehearsal mode: rehearsal 2's list with rehearsal 1's seeds: accepted": "accepted: [\"rehearsal1\"]"
+   }
+  },
+  "ok": true,
+  "seconds": 8.0
+ },
+ "exact_union": {
+  "detail": {
+   "checks": [
+    {
+     "check": "[block rehearsal2-list]: 18 and 72",
+     "expected": "18 rehearsal seeds, 72 noise seeds",
+     "matched": "rc 0: 18 rehearsal seeds, 72 noise seeds; 16391 integers, seeds_sha256 6c0559aa53e8d03b4fb5544f9681c9da8cd5a5376f6bd1e9f6fa1a43e8bbb85a",
+     "target": "/tmp/claude-0/tc7/exact_union/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block rehearsal2-list] = analysis.rehearsal2_list",
+     "expected": "identical",
+     "matched": "identical",
+     "target": "/tmp/claude-0/tc7/exact_union/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block list]: 36 and 144",
+     "expected": "36 rehearsal seeds, 144 noise seeds",
+     "matched": "rc 0: 36 rehearsal seeds, 144 noise seeds; 16484 integers, seeds_sha256 eb39b06799fe8ddd202e60fbc55aa9e08f042b0912e946fbe60257894a1ead21",
+     "target": "/tmp/claude-0/tc7/exact_union/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block list] = analysis.campaign_list",
+     "expected": "identical",
+     "matched": "identical",
+     "target": "/tmp/claude-0/tc7/exact_union/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list]: the exact list",
+     "expected": "the list is right",
+     "matched": "rc 0: the list is right 18 72 sha256 8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+     "target": "/tmp/claude-0/tc7/exact_union/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] as written: one extra seed (10006) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-rehearsal2-list_one_extra_seed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] its own rebuild alone: one extra seed (10006) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 9835c7ac76572ed98f47b71d6ba50f333c54d3620ed3bb2b396dc29f16fa31ff",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-rehearsal2-list_one_extra_seed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] as written: one seed removed (0) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: refused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-rehearsal2-list_one_seed_removed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] its own rebuild alone: one seed removed (0) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-rehearsal2-list_one_seed_removed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] as written: a field changed (rule) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['rule']",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-rehearsal2-list_a_field_changed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] its own rebuild alone: a field changed (rule) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 6b2e83318d9ae09fb28586b2183dcaba86781afe3dac77cfcfd5a72556e8d5fe",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-rehearsal2-list_a_field_changed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list]: the exact list",
+     "expected": "the list is right",
+     "matched": "the list is right 36 144 sha256 be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+     "target": "/tmp/claude-0/tc7/exact_union/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] as written: one extra seed (10006) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: rehearsal 2 list: the exact union",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-list_one_extra_seed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] its own rebuild alone: one extra seed (10006) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "THE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 adda2b377bf1f8df77754770dc1a4fc722a3f69dc9444d87f5e14800ddeb4722 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-list_one_extra_seed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] as written: one seed removed (12001) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: rehearsal 2 list: the exact union",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-list_one_seed_removed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] its own rebuild alone: one seed removed (12001) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "THE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 ca27573d4bf8110b95d6e5b2da56aa6e978634106f4879cc8fe06731d462cac3 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-list_one_seed_removed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] as written: a field changed (rule) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: rehearsal 2 list: the exact union",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-list_a_field_changed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] its own rebuild alone: a field changed (rule) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "THE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 771eddfa1b401d6fcaedc59c3cad112d2d270b5b85e0e315663a33e6db1101de scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+     "target": "/tmp/claude-0/tc7/exact_union/mut_check-list_a_field_changed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis rehearsal mode: the exact list accepted",
+     "expected": "\"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+     "matched": "accepted: {\"of\": \"EXCLUDED.json + rehearsal 1\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}",
+     "target": "/tmp/claude-0/tc7/exact_union/a_rehearsal_exact.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis rehearsal mode: one extra seed refused",
+     "expected": "adds 1 seeds that are not in the exact union of",
+     "matched": "refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+     "target": "/tmp/claude-0/tc7/exact_union/a_rehearsal_one_extra_seed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis rehearsal mode: one seed removed refused",
+     "expected": "is missing 1 seeds of the exact union of",
+     "matched": "refused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]",
+     "target": "/tmp/claude-0/tc7/exact_union/a_rehearsal_one_seed_removed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis rehearsal mode: a field changed refused",
+     "expected": "another field differs",
+     "matched": "refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['rule']",
+     "target": "/tmp/claude-0/tc7/exact_union/a_rehearsal_a_field_changed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: the exact list accepted",
+     "expected": "\"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156",
+     "matched": "{\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}",
+     "target": "/tmp/claude-0/tc7/exact_union/a_campaign_exact.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: one extra seed refused",
+     "expected": "adds 1 seeds that are not in the exact union of",
+     "matched": "refused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [10006]",
+     "target": "/tmp/claude-0/tc7/exact_union/a_campaign_one_extra_seed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: one seed removed refused",
+     "expected": "is missing 1 seeds of the exact union of",
+     "matched": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+     "target": "/tmp/claude-0/tc7/exact_union/a_campaign_one_seed_removed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: a field changed refused",
+     "expected": "another field differs",
+     "matched": "refused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['rule']",
+     "target": "/tmp/claude-0/tc7/exact_union/a_campaign_a_field_changed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: second_scan= missing refused",
+     "expected": "second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output, published with the campaign announce) is required",
+     "matched": "refused: campaign mode: second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output, published with the campaign announce) is required",
+     "target": "/tmp/claude-0/tc7/exact_union/a_campaign_exact.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: second_scan= not a superset refused",
+     "expected": "second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [20]",
+     "matched": "refused: second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [20]",
+     "target": "/tmp/claude-0/tc7/exact_union/a_scan_not_superset.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: second_scan= not the announce's refused",
+     "expected": "not the second_scan_sha256 000000000000 the campaign announce names",
+     "matched": "refused: second_scan= has sha256 c594d000ce7a, not the second_scan_sha256 000000000000 the campaign announce names",
+     "target": "/tmp/claude-0/tc7/exact_union/EXCLUDED_SECOND_SCAN.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: second_scan= the announce's accepted",
+     "expected": "accepted: ",
+     "matched": "{\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}",
+     "target": "/tmp/claude-0/tc7/exact_union/EXCLUDED_SECOND_SCAN.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis rehearsal mode: second_scan= refused",
+     "expected": "rehearsal mode: second_scan= is for campaign mode only",
+     "matched": "refused: rehearsal mode: second_scan= is for campaign mode only",
+     "target": "/tmp/claude-0/tc7/exact_union/EXCLUDED_SECOND_SCAN.json",
+     "target_exists": true
+    },
+    {
+     "check": "parse_announce: campaign (/2) with second_scan_sha256 parsed",
+     "expected": "\"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"",
+     "matched": "parsed: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/2\", \"mode\": \"campaign\", \"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\", \"sizes\": {\"ANDOR3\": 32, \"NOT1\": 60, \"XOR3\": 37}}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "parse_announce: campaign (/1) without it refused",
+     "expected": "a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+     "matched": "refused: DRAW_ANNOUNCE.txt: a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "parse_announce: rehearsal (/1) with it refused",
+     "expected": "(second_scan_sha256 only in layered-draw-announce/2)",
+     "matched": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/1 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (second_scan_sha256 only in layered-draw-announce/2)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "parse_announce: rehearsal (/1) without it parsed",
+     "expected": "\"mode\": \"rehearsal\"",
+     "matched": "parsed: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 32, \"NOT1\": 60, \"XOR3\": 37}}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.py test mode: second_scan= refused",
+     "expected": "test mode: second_scan= is for campaign mode only",
+     "matched": "rc 1: refused: test mode: second_scan= is for campaign mode only",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    }
+   ],
+   "new_scan_integers": [
+    12001,
+    12002,
+    12003
+   ],
+   "results": {
+    "[block check-list] as written: a field changed (rule) refused": "rc 1, refused: rehearsal 2 list: the exact union\nrefused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['rule']",
+    "[block check-list] as written: one extra seed (10006) refused": "rc 1, refused: rehearsal 2 list: the exact union\nrefused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [10006]",
+    "[block check-list] as written: one seed removed (12001) refused": "rc 1, refused: rehearsal 2 list: the exact union\nrefused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+    "[block check-list] its own rebuild alone: a field changed (rule) refused": "rc 1, refused: rehearsal 2 list: the exact union\nTHE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 771eddfa1b401d6fcaedc59c3cad112d2d270b5b85e0e315663a33e6db1101de scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+    "[block check-list] its own rebuild alone: one extra seed (10006) refused": "rc 1, refused: rehearsal 2 list: the exact union\nTHE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 adda2b377bf1f8df77754770dc1a4fc722a3f69dc9444d87f5e14800ddeb4722 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+    "[block check-list] its own rebuild alone: one seed removed (12001) refused": "rc 1, refused: rehearsal 2 list: the exact union\nTHE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 ca27573d4bf8110b95d6e5b2da56aa6e978634106f4879cc8fe06731d462cac3 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+    "[block check-list]: the exact list": "rc 0: rehearsal 2 list: the exact union\nthe list is right 36 144 sha256 be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+    "[block check-rehearsal2-list] as written: a field changed (rule) refused": "rc 1, refused: refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['rule']",
+    "[block check-rehearsal2-list] as written: one extra seed (10006) refused": "rc 1, refused: refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+    "[block check-rehearsal2-list] as written: one seed removed (0) refused": "rc 1, refused: refused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]",
+    "[block check-rehearsal2-list] its own rebuild alone: a field changed (rule) refused": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 6b2e83318d9ae09fb28586b2183dcaba86781afe3dac77cfcfd5a72556e8d5fe",
+    "[block check-rehearsal2-list] its own rebuild alone: one extra seed (10006) refused": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 9835c7ac76572ed98f47b71d6ba50f333c54d3620ed3bb2b396dc29f16fa31ff",
+    "[block check-rehearsal2-list] its own rebuild alone: one seed removed (0) refused": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "[block check-rehearsal2-list]: the exact list": "rc 0: the list is right 18 72 sha256 8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "[block list] = analysis.campaign_list": "identical",
+    "[block list]: 36 and 144": "rc 0: 36 rehearsal seeds, 144 noise seeds; 16484 integers, seeds_sha256 eb39b06799fe8ddd202e60fbc55aa9e08f042b0912e946fbe60257894a1ead21",
+    "[block rehearsal2-list] = analysis.rehearsal2_list": "identical",
+    "[block rehearsal2-list]: 18 and 72": "rc 0: 18 rehearsal seeds, 72 noise seeds; 16391 integers, seeds_sha256 6c0559aa53e8d03b4fb5544f9681c9da8cd5a5376f6bd1e9f6fa1a43e8bbb85a",
+    "analysis campaign mode: a field changed refused": "refused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['rule']",
+    "analysis campaign mode: one extra seed refused": "refused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [10006]",
+    "analysis campaign mode: one seed removed refused": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+    "analysis campaign mode: second_scan= missing refused": "refused: campaign mode: second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output, published with the campaign announce) is required",
+    "analysis campaign mode: second_scan= not a superset refused": "refused: second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [20]",
+    "analysis campaign mode: second_scan= not the announce's refused": "refused: second_scan= has sha256 c594d000ce7a, not the second_scan_sha256 000000000000 the campaign announce names",
+    "analysis campaign mode: second_scan= the announce's accepted": "accepted: {\"of\": \"second_scan + rehearsal 2 + rehearsal 1\", \"rehearsal2_list\": {\"file\": \"EXCLUDED_REHEARSAL2.json\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}, \"second_scan\": {\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}",
+    "analysis campaign mode: the exact list accepted": "accepted: {\"of\": \"second_scan + rehearsal 2 + rehearsal 1\", \"rehearsal2_list\": {\"file\": \"EXCLUDED_REHEARSAL2.json\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}, \"second_scan\": {\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}",
+    "analysis rehearsal mode: a field changed refused": "refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['rule']",
+    "analysis rehearsal mode: one extra seed refused": "refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+    "analysis rehearsal mode: one seed removed refused": "refused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]",
+    "analysis rehearsal mode: second_scan= refused": "refused: rehearsal mode: second_scan= is for campaign mode only",
+    "analysis rehearsal mode: the exact list accepted": "accepted: {\"of\": \"EXCLUDED.json + rehearsal 1\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}",
+    "analysis.py test mode: second_scan= refused": "rc 1: refused: test mode: second_scan= is for campaign mode only\n",
+    "parse_announce: campaign (/1) without it refused": "refused: DRAW_ANNOUNCE.txt: a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+    "parse_announce: campaign (/2) with second_scan_sha256 parsed": "parsed: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/2\", \"mode\": \"campaign\", \"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\", \"sizes\": {\"ANDOR3\": 32, \"NOT1\": 60, \"XOR3\": 37}}",
+    "parse_announce: rehearsal (/1) with it refused": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/1 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (second_scan_sha256 only in layered-draw-announce/2)",
+    "parse_announce: rehearsal (/1) without it parsed": "parsed: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 32, \"NOT1\": 60, \"XOR3\": 37}}",
+    "twins": {
+     "check-list": [
+      [
+       "A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_REHEARSAL2.json'), 'rehearsal', tempfile.mkdtemp(), '$F')",
+       "A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_REHEARSAL2.json', announce='ANNOUNCE_REHEARSAL2.txt'), 'rehearsal', tempfile.mkdtemp(), '$F', offline=True)"
+      ],
+      [
+       "A.check_draw(dict(draw='DRAW_REHEARSAL1.json', excluded='EXCLUDED_REHEARSAL1.json'), 'rehearsal', tempfile.mkdtemp(), '$F', past=A.REHEARSAL1)",
+       "A.check_draw(dict(draw='DRAW_REHEARSAL1.json', excluded='EXCLUDED_REHEARSAL1.json', announce='ANNOUNCE_REHEARSAL1.txt'), 'rehearsal', tempfile.mkdtemp(), '$F', offline=True, past=A.REHEARSAL1)"
+      ],
+      [
+       "A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal_excluded='EXCLUDED_REHEARSAL2.json',",
+       "A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal_excluded='EXCLUDED_REHEARSAL2.json', rehearsal_announce='ANNOUNCE_REHEARSAL2.txt', rehearsal1_announce='ANNOUNCE_REHEARSAL1.txt',"
+      ],
+      [
+       "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True, 'campaign',",
+       "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False, 'campaign',"
+      ]
+     ],
+     "check-rehearsal2-list": [
+      [
+       "A.check_draw(dict(draw='DRAW_REHEARSAL1.json', excluded='EXCLUDED_REHEARSAL1.json'), 'rehearsal', tempfile.mkdtemp(), '$F', past=A.REHEARSAL1)",
+       "A.check_draw(dict(draw='DRAW_REHEARSAL1.json', excluded='EXCLUDED_REHEARSAL1.json', announce='ANNOUNCE_REHEARSAL1.txt'), 'rehearsal', tempfile.mkdtemp(), '$F', offline=True, past=A.REHEARSAL1)"
+      ],
+      [
+       "A.check_rehearsal_seeds(dict(rehearsal1_draw='DRAW_REHEARSAL1.json', rehearsal1_excluded='EXCLUDED_REHEARSAL1.json',",
+       "A.check_rehearsal_seeds(dict(rehearsal1_draw='DRAW_REHEARSAL1.json', rehearsal1_excluded='EXCLUDED_REHEARSAL1.json', rehearsal1_announce='ANNOUNCE_REHEARSAL1.txt',"
+      ],
+      [
+       "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True, 'rehearsal')",
+       "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False, 'rehearsal')"
+      ]
+     ],
+     "no_analysis": [
+      "A.check_rehearsal_seeds(",
+      "(lambda *a, **k: None)("
+     ]
+    }
+   }
+  },
+  "ok": true,
+  "seconds": 36.0
+ },
+ "exact_union_owner": {
+  "detail": {
+   "checks": [
+    {
+     "check": "V1 control: the exact list re-announced: the old checks (check_draw, offline) accept it",
+     "expected": "check_draw accepted",
+     "matched": "check_draw accepted",
+     "target": "/tmp/claude-0/tc7/exact_union_owner/v1c_EXCLUDED.json",
+     "target_exists": true
+    },
+    {
+     "check": "V1 control: the exact list re-announced: accepted",
+     "expected": "accepted: ",
+     "matched": "d67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}, \"rehearsal1\": {\"all_excluded_with_noise_seeds\": true, \"announce\": {\"branch\": \"evidence/com",
+     "target": "/tmp/claude-0/tc7/exact_union_owner/v1c_EXCLUDED.json",
+     "target_exists": true
+    },
+    {
+     "check": "V1: a scan-only seed removed, re-announced: the old checks (check_draw, offline) accept it",
+     "expected": "check_draw accepted",
+     "matched": "check_draw accepted",
+     "target": "/tmp/claude-0/tc7/exact_union_owner/v1m_EXCLUDED.json",
+     "target_exists": true
+    },
+    {
+     "check": "V1: a scan-only seed removed, re-announced: refused by the exact union",
+     "expected": "the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+     "matched": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+     "target": "/tmp/claude-0/tc7/exact_union_owner/v1m_EXCLUDED.json",
+     "target_exists": true
+    },
+    {
+     "check": "V2: a scan copy with one byte changed: refused before any commit",
+     "expected": "REFUSED: EXCLUDED_SECOND_SCAN.json has sha256 1f85f5145f547329028c8b33323fed2bc8d8d2193788ddad6721ea8aa892b12f, not the validated c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f: no commit, no push",
+     "matched": "REFUSED: EXCLUDED_SECOND_SCAN.json has sha256 1f85f5145f547329028c8b33323fed2bc8d8d2193788ddad6721ea8aa892b12f, not the validated c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f: no commit, no push",
+     "target": "/tmp/claude-0/tc7/exact_union_owner/v2_mut/EXCLUDED_SECOND_SCAN.json",
+     "target_exists": true
+    },
+    {
+     "check": "V2 control: the scan: one commit, three files, a /2 announce",
+     "expected": "announce pushed: evidence/combined-draw-test-v2_ok",
+     "matched": "announce pushed: evidence/combined-draw-test-v2_ok 14878761308e38bde1e4b32e7a2d6654eee83459",
+     "target": "/tmp/claude-0/tc7/exact_union_owner/v2_ok/EXCLUDED_SECOND_SCAN.json",
+     "target_exists": true
+    },
+    {
+     "check": "V3: rehearsal 1's real announce (fetched by name) parses",
+     "expected": "\"excluded_sha256\": \"abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\"",
+     "matched": "fetch rc 0, 9c3ec1e1b53a8a0fe047ffa33e6b6737728a907c: accepted: {\"excluded_sha256\": \"abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+     "target": "/tmp/claude-0/tc7/exact_union_owner/r1_announce_fetch",
+     "target_exists": true
+    },
+    {
+     "check": "format: /1 rehearsal accepted",
+     "expected": "\"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\"",
+     "matched": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /1 test accepted",
+     "expected": "\"mode\": \"test\"",
+     "matched": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/1\", \"mode\": \"test\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /1 with second_scan_sha256 refused",
+     "expected": "DRAW_ANNOUNCE.txt in layered-draw-announce/1 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (second_scan_sha256 only in layered-draw-announce/2)",
+     "matched": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/1 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (second_scan_sha256 only in layered-draw-announce/2)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /1 campaign refused",
+     "expected": "a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+     "matched": "refused: DRAW_ANNOUNCE.txt: a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /2 campaign with second_scan_sha256 accepted",
+     "expected": "\"format\": \"layered-draw-announce/2\", \"mode\": \"campaign\", \"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+     "matched": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/2\", \"mode\": \"campaign\", \"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /2 campaign without second_scan_sha256 refused",
+     "expected": "DRAW_ANNOUNCE.txt in layered-draw-announce/2 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes', 'second_scan_sha256')",
+     "matched": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/2 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes', 'second_scan_sha256')",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /2 rehearsal refused",
+     "expected": "layered-draw-announce/2 is the campaign announce only, not mode 'rehearsal'",
+     "matched": "refused: DRAW_ANNOUNCE.txt: layered-draw-announce/2 is the campaign announce only, not mode 'rehearsal'",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: another format refused",
+     "expected": "format 'layered-draw-announce/3' is neither",
+     "matched": "refused: DRAW_ANNOUNCE.txt: format 'layered-draw-announce/3' is neither layered-draw-announce/1 nor layered-draw-announce/2",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "(b): rehearsal 2's list with one extra seed, re-announced, refused in campaign mode",
+     "expected": "rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+     "matched": "refused: rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+     "target": "/tmp/claude-0/tc7/exact_union_owner/r2m_EXCLUDED.json",
+     "target_exists": true
+    },
+    {
+     "check": "(b) control: rehearsal 2's exact list accepted in campaign mode",
+     "expected": "\"rehearsal2_list\": {\"file\": \"r2_EXCLUDED.json\"",
+     "matched": "d67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}, \"rehearsal1\": {\"all_excluded_with_noise_seeds\": true, \"announce\": {\"branch\": \"evidence/com",
+     "target": "/tmp/claude-0/tc7/exact_union_owner/r2_EXCLUDED.json",
+     "target_exists": true
+    }
+   ],
+   "rehearsal2_extra_seed": 10006,
+   "results": {
+    "(b) control: rehearsal 2's exact list accepted in campaign mode": "accepted: {\"exact_union\": {\"of\": \"second_scan + rehearsal 2 + rehearsal 1\", \"rehearsal2_list\": {\"file\": \"r2_EXCLUDED.json\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}, \"second_scan\": {\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}, \"rehearsal1\": {\"all_excluded_with_noise_seeds\": true, \"announce\": {\"branch\": \"evidence/com",
+    "(b): rehearsal 2's list with one extra seed, re-announced, refused in campaign mode": "refused: rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+    "V1 control: the exact list re-announced: accepted": "accepted: {\"exact_union\": {\"of\": \"second_scan + rehearsal 2 + rehearsal 1\", \"rehearsal2_list\": {\"file\": \"r2_EXCLUDED.json\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}, \"second_scan\": {\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}, \"rehearsal1\": {\"all_excluded_with_noise_seeds\": true, \"announce\": {\"branch\": \"evidence/com",
+    "V1 control: the exact list re-announced: the old checks (check_draw, offline) accept it": "check_draw accepted",
+    "V1: a scan-only seed removed, re-announced: refused by the exact union": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+    "V1: a scan-only seed removed, re-announced: the old checks (check_draw, offline) accept it": "check_draw accepted",
+    "V2 control: the scan: one commit, three files, a /2 announce": "rc 0, files ['DRAW_ANNOUNCE.txt', 'EXCLUDED_PUBLISHED.json', 'EXCLUDED_SECOND_SCAN.json'], announce 'format layered-draw-announce/2\\nmode campaign\\nexcluded_sha256 be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\\nsecond_scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\\nsizes NOT1=60 ANDOR3=32 XOR3=37\\n': the scan verify record evidence/combined-scan-verify 11da3a8aaa7a30f32697ba75bb5d613811a9cd15 verified scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f VS c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\nannounce ok\nannounce pushed: evidence/combined-draw-test-v2_ok 14878761308e38bde1e4b32e7a2d6654eee83459\nfatal: expected 'acknowledgments', received 'packfile'\nwarning: push negotiation failed; proceeding anyway with push",
+    "V2: a scan copy with one byte changed: refused before any commit": "rc 1, commit False, twin refs []: the scan verify record evidence/combined-scan-verify 11da3a8aaa7a30f32697ba75bb5d613811a9cd15 verified scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f VS c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\nREFUSED: EXCLUDED_SECOND_SCAN.json has sha256 1f85f5145f547329028c8b33323fed2bc8d8d2193788ddad6721ea8aa892b12f, not the validated c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f: no commit, no push",
+    "V3: rehearsal 1's real announce (fetched by name) parses": "fetch rc 0, 9c3ec1e1b53a8a0fe047ffa33e6b6737728a907c: accepted: {\"excluded_sha256\": \"abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+    "announce_twins": [
+     [
+      "git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/$B",
+      "git push -q /tmp/claude-0/tc7/exact_union_owner/twin.git HEAD:refs/heads/$B"
+     ],
+     [
+      "test -z \"$(git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$B)\"",
+      "test -z \"$(git ls-remote /tmp/claude-0/tc7/exact_union_owner/twin.git refs/heads/$B)\""
+     ],
+     [
+      "A.scan_verify_record('https://github.com/HevisNico/kernel-R', '$HS')",
+      "A.scan_verify_record('/tmp/claude-0/tc7/exact_union_owner/twin.git', '$HS')"
+     ]
+    ],
+    "format: /1 campaign refused": "refused: DRAW_ANNOUNCE.txt: a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+    "format: /1 rehearsal accepted": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+    "format: /1 test accepted": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/1\", \"mode\": \"test\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+    "format: /1 with second_scan_sha256 refused": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/1 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (second_scan_sha256 only in layered-draw-announce/2)",
+    "format: /2 campaign with second_scan_sha256 accepted": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/2\", \"mode\": \"campaign\", \"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+    "format: /2 campaign without second_scan_sha256 refused": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/2 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes', 'second_scan_sha256')",
+    "format: /2 rehearsal refused": "refused: DRAW_ANNOUNCE.txt: layered-draw-announce/2 is the campaign announce only, not mode 'rehearsal'",
+    "format: another format refused": "refused: DRAW_ANNOUNCE.txt: format 'layered-draw-announce/3' is neither layered-draw-announce/1 nor layered-draw-announce/2",
+    "rehearsal1_announce_fixture_identical": true
+   },
+   "scan_only_seed_removed": 12001
+  },
+  "ok": true,
+  "seconds": 10.8
+ },
+ "scan_checks": {
+  "detail": {
+   "checks": [
+    {
+     "check": "F1 level 1: the stand-in scan, canonical: accepted",
+     "expected": "accepted",
+     "matched": "{\"count\": 16336, \"format\": \"layered-excluded-seeds/1\", \"refs\": {\"HEAD\": {\"same_tree_as_scanned\": true, \"tip\": \"3f27bb36dadd77a57e27b8fa80f81c3864a02b0e\"}, \"refs/remotes/origin/HevisNico-patch-1\": {\"numbers\": 15, \"tip\": \"4f454862f57ee5985a5aa05ac15f83020d505446\"}, \"refs/remotes/origin/HevisNico-patch",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: count not the number of seeds",
+     "expected": "count 16337 is not the number of seeds 16336",
+     "matched": "refused: second_scan= S.json: count 16337 is not the number of seeds 16336",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: seeds_sha256 not the seeds'",
+     "expected": "seeds_sha256 is not sha256 of its seeds",
+     "matched": "refused: second_scan= S.json: seeds_sha256 is not sha256 of its seeds",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: non-canonical bytes",
+     "expected": "is not in canonical form",
+     "matched": "refused: second_scan= S.json is not in canonical form (its bytes are not draw_seeds.canon of its content)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: a ref named twice",
+     "expected": "names a key twice (a ref recorded twice, or a field): ['refs/remotes/origin/HevisNico-patch-1']",
+     "matched": "refused: second_scan= S.json names a key twice (a ref recorded twice, or a field): ['refs/remotes/origin/HevisNico-patch-1']",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: no HEAD entry",
+     "expected": "no HEAD entry (draw_seeds.scan always scans HEAD)",
+     "matched": "refused: second_scan= S.json: no HEAD entry (draw_seeds.scan always scans HEAD)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: HEAD not main's tip",
+     "expected": "HEAD is not main's tip",
+     "matched": "refused: second_scan= S.json: HEAD is not main's tip ([block second-scan] sets HEAD to origin/main)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: a boolean seed",
+     "expected": "seeds are not a list of integers",
+     "matched": "refused: second_scan= S.json: seeds are not a list of integers",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: seeds unsorted",
+     "expected": "seeds are not sorted and unique",
+     "matched": "refused: second_scan= S.json: seeds are not sorted and unique",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: a seed twice",
+     "expected": "seeds are not sorted and unique",
+     "matched": "refused: second_scan= S.json: seeds are not sorted and unique",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: another format",
+     "expected": "is not draw_seeds.scan's 'layered-excluded-seeds/1'",
+     "matched": "refused: second_scan= S.json: format 'layered-excluded-seeds/2' is not draw_seeds.scan's 'layered-excluded-seeds/1'",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: another rule",
+     "expected": "its rule is not draw_seeds.scan's rule",
+     "matched": "refused: second_scan= S.json: its rule is not draw_seeds.scan's rule",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: a ref entry of another shape",
+     "expected": "refs not of draw_seeds.scan's shape",
+     "matched": "refused: second_scan= S.json: refs not of draw_seeds.scan's shape: ['refs/remotes/origin/HevisNico-patch-1']",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: a same_tree entry whose tip no ref scanned",
+     "expected": "refs marked same_tree_as_scanned whose tip no other ref scanned: ['refs/remotes/origin/zz-extra']",
+     "matched": "refused: second_scan= S.json: refs marked same_tree_as_scanned whose tip no other ref scanned: ['refs/remotes/origin/zz-extra']",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1: no refs",
+     "expected": "no refs (draw_seeds.scan records every ref it scanned)",
+     "matched": "refused: second_scan= S.json: no refs (draw_seeds.scan records every ref it scanned)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F1 level 1 through check_rehearsal_seeds (campaign): count not the number of seeds",
+     "expected": "second_scan= /tmp/claude-0/tc7/scan_checks/SCAN_bad_count.json: count 16337 is not the number of seeds 16336",
+     "matched": "refused: second_scan= /tmp/claude-0/tc7/scan_checks/SCAN_bad_count.json: count 16337 is not the number of seeds 16336",
+     "target": "/tmp/claude-0/tc7/scan_checks/SCAN_bad_count.json",
+     "target_exists": true
+    },
+    {
+     "check": "F2: campaign mode, the announce names no second_scan_sha256: refused",
+     "expected": "campaign mode: the campaign announce names no second_scan_sha256",
+     "matched": "refused: campaign mode: the campaign announce names no second_scan_sha256, so second_scan= cannot be checked against it",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F2: the same with pre_announce=True (the function argument only): accepted",
+     "expected": "accepted: ",
+     "matched": "{\"exact_union\": {\"of\": \"second_scan + rehearsal 2 + rehearsal 1\", \"rehearsal2_list\": {\"file\": \"r2_EXCLUDED.json\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}, \"second_scan\": {\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9ecc",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F2: no command-line key reaches pre_announce",
+     "expected": "refused: unknown argument 'pre_announce=True'",
+     "matched": "t 'pre_announce=True' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, rehearsal1_draw, rehearsal1_excluded, rehearsal1_announce, rehearsal1_activity, second_scan, times, thresholds, controls, tips; a root path cannot contain '=')",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F3: second_scan= a missing file: refused naming it",
+     "expected": "second_scan= /tmp/claude-0/tc7/scan_checks/no_such_scan.json is missing or unreadable: No such file or directory",
+     "matched": "refused: second_scan= /tmp/claude-0/tc7/scan_checks/no_such_scan.json is missing or unreadable: No such file or directory",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F3: second_scan= a folder: refused naming it",
+     "expected": "second_scan= /tmp/claude-0/tc7/scan_checks/a_folder is missing or unreadable: Is a directory",
+     "matched": "refused: second_scan= /tmp/claude-0/tc7/scan_checks/a_folder is missing or unreadable: Is a directory",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F3: second_scan= not JSON: refused naming it",
+     "expected": "second_scan= /tmp/claude-0/tc7/scan_checks/not_json.json is not readable JSON",
+     "matched": "refused: second_scan= /tmp/claude-0/tc7/scan_checks/not_json.json is not readable JSON: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "F3: [block check-list] verbatim, EXCLUDED_SECOND_SCAN.json missing: an explicit refusal",
+     "expected": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON:",
+     "matched": "rc 1: REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: [Errno 2] No such file or directory: 'EXCLUDED_SECOND_SCAN.json' - push nothing",
+     "target": "/tmp/claude-0/tc7/scan_checks/checklist_missing",
+     "target_exists": true
+    },
+    {
+     "check": "F3: [block check-list] verbatim, EXCLUDED_SECOND_SCAN.json not JSON: an explicit refusal",
+     "expected": "REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON:",
+     "matched": "rc 1: REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: Expecting property name enclosed in double quotes: line 1 column 2 (char 1) - push nothing",
+     "target": "/tmp/claude-0/tc7/scan_checks/checklist_notjson",
+     "target_exists": true
+    },
+    {
+     "check": "O1: both files as announced and as used: accepted",
+     "expected": "accepted",
+     "matched": "accepted",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "O1: EXCLUDED_PUBLISHED.json missing from the commit",
+     "expected": "the announce commit has no EXCLUDED_PUBLISHED.json",
+     "matched": "refused: the announce commit has no EXCLUDED_PUBLISHED.json: the announced excluded_sha256 names nothing published",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "O1: EXCLUDED_SECOND_SCAN.json missing from the commit",
+     "expected": "the announce commit has no EXCLUDED_SECOND_SCAN.json",
+     "matched": "refused: the announce commit has no EXCLUDED_SECOND_SCAN.json: the announced second_scan_sha256 names nothing published",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "O1: the commit's list with another sha256 than announced",
+     "expected": "the announce commit's EXCLUDED_PUBLISHED.json has sha256",
+     "matched": "refused: the announce commit's EXCLUDED_PUBLISHED.json has sha256 89881447bbf9, not the announced excluded_sha256 be61f722e36d",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "O1: the commit's scan with another sha256 than announced",
+     "expected": "the announce commit's EXCLUDED_SECOND_SCAN.json has sha256",
+     "matched": "refused: the announce commit's EXCLUDED_SECOND_SCAN.json has sha256 fa02b590b5fc, not the announced second_scan_sha256 c594d000ce7a",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "O1: excluded= not the commit's list",
+     "expected": "the excluded= file is not byte-equal to the announce commit's EXCLUDED_PUBLISHED.json",
+     "matched": "refused: the excluded= file is not byte-equal to the announce commit's EXCLUDED_PUBLISHED.json",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "O1: second_scan= not the commit's scan",
+     "expected": "the second_scan= file is not byte-equal to the announce commit's EXCLUDED_SECOND_SCAN.json",
+     "matched": "refused: the second_scan= file is not byte-equal to the announce commit's EXCLUDED_SECOND_SCAN.json",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "O1: rehearsal mode reads no scan",
+     "expected": "accepted",
+     "matched": "accepted",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "check_draw (campaign, GitHub path): the commit's files as announced: accepted",
+     "expected": "accepted",
+     "matched": "{\"branch\": \"evidence/combined-draw\", \"commit\": \"0000000000000000000000000000000000000000\", \"from_github\": true, \"push_utc\": \"2026-11-28T00:00:00Z\", \"second_scan_sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"sha256\": \"1e07e9451d8c7f1801c18f4206b878959558e2daf6db60a699a",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "check_draw (campaign, GitHub path): the commit's scan differs from the announce: refused",
+     "expected": "the announce commit's EXCLUDED_SECOND_SCAN.json has sha256",
+     "matched": "refused: the announce commit's EXCLUDED_SECOND_SCAN.json has sha256 fa02b590b5fc, not the announced second_scan_sha256 c594d000ce7a",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    }
+   ],
+   "results": {
+    "F1 level 1 through check_rehearsal_seeds (campaign): count not the number of seeds": "refused: second_scan= /tmp/claude-0/tc7/scan_checks/SCAN_bad_count.json: count 16337 is not the number of seeds 16336",
+    "F1 level 1: HEAD not main's tip": "refused: second_scan= S.json: HEAD is not main's tip ([block second-scan] sets HEAD to origin/main)",
+    "F1 level 1: a boolean seed": "refused: second_scan= S.json: seeds are not a list of integers",
+    "F1 level 1: a ref entry of another shape": "refused: second_scan= S.json: refs not of draw_seeds.scan's shape: ['refs/remotes/origin/HevisNico-patch-1']",
+    "F1 level 1: a ref named twice": "refused: second_scan= S.json names a key twice (a ref recorded twice, or a field): ['refs/remotes/origin/HevisNico-patch-1']",
+    "F1 level 1: a same_tree entry whose tip no ref scanned": "refused: second_scan= S.json: refs marked same_tree_as_scanned whose tip no other ref scanned: ['refs/remotes/origin/zz-extra']",
+    "F1 level 1: a seed twice": "refused: second_scan= S.json: seeds are not sorted and unique",
+    "F1 level 1: another format": "refused: second_scan= S.json: format 'layered-excluded-seeds/2' is not draw_seeds.scan's 'layered-excluded-seeds/1'",
+    "F1 level 1: another rule": "refused: second_scan= S.json: its rule is not draw_seeds.scan's rule",
+    "F1 level 1: count not the number of seeds": "refused: second_scan= S.json: count 16337 is not the number of seeds 16336",
+    "F1 level 1: no HEAD entry": "refused: second_scan= S.json: no HEAD entry (draw_seeds.scan always scans HEAD)",
+    "F1 level 1: no refs": "refused: second_scan= S.json: no refs (draw_seeds.scan records every ref it scanned)",
+    "F1 level 1: non-canonical bytes": "refused: second_scan= S.json is not in canonical form (its bytes are not draw_seeds.canon of its content)",
+    "F1 level 1: seeds unsorted": "refused: second_scan= S.json: seeds are not sorted and unique",
+    "F1 level 1: seeds_sha256 not the seeds'": "refused: second_scan= S.json: seeds_sha256 is not sha256 of its seeds",
+    "F1 level 1: the stand-in scan, canonical: accepted": "accepted: {\"count\": 16336, \"format\": \"layered-excluded-seeds/1\", \"refs\": {\"HEAD\": {\"same_tree_as_scanned\": true, \"tip\": \"3f27bb36dadd77a57e27b8fa80f81c3864a02b0e\"}, \"refs/remotes/origin/HevisNico-patch-1\": {\"numbers\": 15, \"tip\": \"4f454862f57ee5985a5aa05ac15f83020d505446\"}, \"refs/remotes/origin/HevisNico-patch",
+    "F2: campaign mode, the announce names no second_scan_sha256: refused": "refused: campaign mode: the campaign announce names no second_scan_sha256, so second_scan= cannot be checked against it",
+    "F2: no command-line key reaches pre_announce": "rc 1: refused: unknown argument 'pre_announce=True' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, rehearsal1_draw, rehearsal1_excluded, rehearsal1_announce, rehearsal1_activity, second_scan, times, thresholds, controls, tips; a root path cannot contain '=')\n",
+    "F2: the same with pre_announce=True (the function argument only): accepted": "accepted: {\"exact_union\": {\"of\": \"second_scan + rehearsal 2 + rehearsal 1\", \"rehearsal2_list\": {\"file\": \"r2_EXCLUDED.json\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}, \"second_scan\": {\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9ecc",
+    "F3: [block check-list] verbatim, EXCLUDED_SECOND_SCAN.json missing: an explicit refusal": "rc 1: REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: [Errno 2] No such file or directory: 'EXCLUDED_SECOND_SCAN.json' - push nothing\n",
+    "F3: [block check-list] verbatim, EXCLUDED_SECOND_SCAN.json not JSON: an explicit refusal": "rc 1: REFUSED: EXCLUDED_SECOND_SCAN.json is missing, unreadable or not JSON: Expecting property name enclosed in double quotes: line 1 column 2 (char 1) - push nothing\n",
+    "F3: second_scan= a folder: refused naming it": "refused: second_scan= /tmp/claude-0/tc7/scan_checks/a_folder is missing or unreadable: Is a directory",
+    "F3: second_scan= a missing file: refused naming it": "refused: second_scan= /tmp/claude-0/tc7/scan_checks/no_such_scan.json is missing or unreadable: No such file or directory",
+    "F3: second_scan= not JSON: refused naming it": "refused: second_scan= /tmp/claude-0/tc7/scan_checks/not_json.json is not readable JSON: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",
+    "O1: EXCLUDED_PUBLISHED.json missing from the commit": "refused: the announce commit has no EXCLUDED_PUBLISHED.json: the announced excluded_sha256 names nothing published",
+    "O1: EXCLUDED_SECOND_SCAN.json missing from the commit": "refused: the announce commit has no EXCLUDED_SECOND_SCAN.json: the announced second_scan_sha256 names nothing published",
+    "O1: both files as announced and as used: accepted": "accepted",
+    "O1: excluded= not the commit's list": "refused: the excluded= file is not byte-equal to the announce commit's EXCLUDED_PUBLISHED.json",
+    "O1: rehearsal mode reads no scan": "accepted",
+    "O1: second_scan= not the commit's scan": "refused: the second_scan= file is not byte-equal to the announce commit's EXCLUDED_SECOND_SCAN.json",
+    "O1: the commit's list with another sha256 than announced": "refused: the announce commit's EXCLUDED_PUBLISHED.json has sha256 89881447bbf9, not the announced excluded_sha256 be61f722e36d",
+    "O1: the commit's scan with another sha256 than announced": "refused: the announce commit's EXCLUDED_SECOND_SCAN.json has sha256 fa02b590b5fc, not the announced second_scan_sha256 c594d000ce7a",
+    "check_draw (campaign, GitHub path): the commit's files as announced: accepted": "accepted: {\"branch\": \"evidence/combined-draw\", \"commit\": \"0000000000000000000000000000000000000000\", \"from_github\": true, \"push_utc\": \"2026-11-28T00:00:00Z\", \"second_scan_sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"sha256\": \"1e07e9451d8c7f1801c18f4206b878959558e2daf6db60a699a",
+    "check_draw (campaign, GitHub path): the commit's scan differs from the announce: refused": "refused: the announce commit's EXCLUDED_SECOND_SCAN.json has sha256 fa02b590b5fc, not the announced second_scan_sha256 c594d000ce7a"
+   }
+  },
+  "ok": true,
+  "seconds": 2.6
+ },
+ "scan_verify_record": {
+  "detail": {
+   "checks": [
+    {
+     "check": "[block announce], local H/HS/VS right, the record absent: refused before any commit",
+     "expected": "the scan verify record evidence/combined-scan-verify is absent from",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify is absent from /tmp/claude-0/tc7/scan_verify_record/twin_absent.git: [block verify-scan] has not published it",
+     "target": "/tmp/claude-0/tc7/scan_verify_record/announce_absent",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, the record another hash: refused before any commit",
+     "expected": "the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not c594d000ce7a",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not c594d000ce7a",
+     "target": "/tmp/claude-0/tc7/scan_verify_record/announce_another_hash",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, the record its VS another hash: refused before any commit",
+     "expected": "the scan verify record evidence/combined-scan-verify's reproduction VS 6cc47232a441 is not c594d000ce7a",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify's reproduction VS 6cc47232a441 is not c594d000ce7a",
+     "target": "/tmp/claude-0/tc7/scan_verify_record/announce_its_VS_another_hash",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, the record verdict not success: refused before any commit",
+     "expected": "the scan verify record evidence/combined-scan-verify's verdict is not success",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify's verdict is not success ([block verify-scan] did not reproduce the scan)",
+     "target": "/tmp/claude-0/tc7/scan_verify_record/announce_verdict_not_success",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, the record two commits: refused before any commit",
+     "expected": "the scan verify record evidence/combined-scan-verify has 2 commits",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify has 2 commits: it must be exactly its creation commit (single-use)",
+     "target": "/tmp/claude-0/tc7/scan_verify_record/announce_two_commits",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], the honest record: the announce pushed",
+     "expected": "announce pushed: evidence/combined-draw-recordtest",
+     "matched": "announce pushed: evidence/combined-draw-recordtest 78feac44e79820647ff2a2f039bd1edb9a251b7a",
+     "target": "/tmp/claude-0/tc7/scan_verify_record/announce_honest",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: the honest record, created before the announce: accepted",
+     "expected": "\"commit\": \"b1ca4d48992f6fbf35fade8e5f680d294b13104d\"",
+     "matched": "epted: {\"branch\": \"evidence/combined-scan-verify\", \"commit\": \"b1ca4d48992f6fbf35fade8e5f680d294b13104d\", \"created_utc\": \"2026-11-27T23:00:00Z\", \"scan_sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"vs\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\"}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: created after the announce: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify was created at 2026-11-28T00:01:00Z, not before the campaign announce",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-28T00:01:00Z, not before the campaign announce (2026-11-28T00:00:00Z)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: created at the announce's second: refused (strictly earlier)",
+     "expected": "not before the campaign announce",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-28T00:00:00Z, not before the campaign announce (2026-11-28T00:00:00Z)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: a force_push in its activity: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: a branch_deletion in its activity: refused",
+     "expected": "is not single-use: branch_deletion in its activity",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: its oldest item not the branch_creation of its commit: refused",
+     "expected": "the oldest activity item of the scan verify record evidence/combined-scan-verify is not the branch_creation",
+     "matched": "refused: the oldest activity item of the scan verify record evidence/combined-scan-verify is not the branch_creation that pushed its commit b1ca4d48992f (branch_creation, ffffffffffff)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: no activity: refused",
+     "expected": "GitHub records no activity for the scan verify record",
+     "matched": "refused: GitHub records no activity for the scan verify record evidence/combined-scan-verify",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: the record absent: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify is absent from",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify is absent from /tmp/claude-0/tc7/scan_verify_record/twin_a_absent.git: [block verify-scan] has not published it",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: the record another hash: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not c594d000ce7a",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not c594d000ce7a",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: the record its VS another hash: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify's reproduction VS 6cc47232a441 is not c594d000ce7a",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify's reproduction VS 6cc47232a441 is not c594d000ce7a",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: the record verdict not success: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify's verdict is not success",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify's verdict is not success ([block verify-scan] did not reproduce the scan)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: the record two commits: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify has 2 commits",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify has 2 commits: it must be exactly its creation commit (single-use)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "check_draw (campaign, GitHub path): the record created before the announce: accepted",
+     "expected": "\"scan_verify\": {\"branch\": \"evidence/combined-scan-verify\"",
+     "matched": "{\"scan_verify\": {\"branch\": \"evidence/combined-scan-verify\", \"commit\": \"b1ca4d48992f6fbf35fade8e5f680d294b13104d\", \"created_utc\": \"2026-11-27T23:00:00Z\", \"scan_sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"vs\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28f",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "check_draw (campaign, GitHub path): the record created after the announce: refused",
+     "expected": "not before the campaign announce",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-28T00:01:00Z, not before the campaign announce (2026-11-28T00:00:00Z)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "check_draw (rehearsal, GitHub path): no record read",
+     "expected": "accepted: ",
+     "matched": "accepted: [\"announce\", \"beacon\", \"excluded\", \"machines\", \"recomputed\", \"round\", \"sha256\", \"signature_verified\", \"sizes\"]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    }
+   ],
+   "results": {
+    "[block announce], local H/HS/VS right, the record absent: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f): no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify is absent from /tmp/claude-0/tc7/scan_verify_record/twin_absent.git: [block verify-scan] has not published it",
+    "[block announce], local H/HS/VS right, the record another hash: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f): no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not c594d000ce7a",
+    "[block announce], local H/HS/VS right, the record its VS another hash: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f): no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify's reproduction VS 6cc47232a441 is not c594d000ce7a",
+    "[block announce], local H/HS/VS right, the record two commits: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f): no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify has 2 commits: it must be exactly its creation commit (single-use)",
+    "[block announce], local H/HS/VS right, the record verdict not success: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f): no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify's verdict is not success ([block verify-scan] did not reproduce the scan)",
+    "[block announce], the honest record: the announce pushed": "rc 0, files ['DRAW_ANNOUNCE.txt', 'EXCLUDED_PUBLISHED.json', 'EXCLUDED_SECOND_SCAN.json']: the scan verify record evidence/combined-scan-verify b1ca4d48992f6fbf35fade8e5f680d294b13104d verified scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f VS c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\nannounce ok\nannounce pushed: evidence/combined-draw-recordtest 78feac44e79820647ff2a2f039bd1edb9a251b7a\nfatal: expected 'acknowledgments', received 'packfile'\nwarning: push negotiation failed; proceeding anyway with push",
+    "analysis.check_scan_verify: a branch_deletion in its activity: refused": "refused: the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity",
+    "analysis.check_scan_verify: a force_push in its activity: refused": "refused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+    "analysis.check_scan_verify: created after the announce: refused": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-28T00:01:00Z, not before the campaign announce (2026-11-28T00:00:00Z)",
+    "analysis.check_scan_verify: created at the announce's second: refused (strictly earlier)": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-28T00:00:00Z, not before the campaign announce (2026-11-28T00:00:00Z)",
+    "analysis.check_scan_verify: its oldest item not the branch_creation of its commit: refused": "refused: the oldest activity item of the scan verify record evidence/combined-scan-verify is not the branch_creation that pushed its commit b1ca4d48992f (branch_creation, ffffffffffff)",
+    "analysis.check_scan_verify: no activity: refused": "refused: GitHub records no activity for the scan verify record evidence/combined-scan-verify",
+    "analysis.check_scan_verify: the honest record, created before the announce: accepted": "accepted: {\"branch\": \"evidence/combined-scan-verify\", \"commit\": \"b1ca4d48992f6fbf35fade8e5f680d294b13104d\", \"created_utc\": \"2026-11-27T23:00:00Z\", \"scan_sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"vs\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\"}",
+    "analysis.check_scan_verify: the record absent: refused": "refused: the scan verify record evidence/combined-scan-verify is absent from /tmp/claude-0/tc7/scan_verify_record/twin_a_absent.git: [block verify-scan] has not published it",
+    "analysis.check_scan_verify: the record another hash: refused": "refused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not c594d000ce7a",
+    "analysis.check_scan_verify: the record its VS another hash: refused": "refused: the scan verify record evidence/combined-scan-verify's reproduction VS 6cc47232a441 is not c594d000ce7a",
+    "analysis.check_scan_verify: the record two commits: refused": "refused: the scan verify record evidence/combined-scan-verify has 2 commits: it must be exactly its creation commit (single-use)",
+    "analysis.check_scan_verify: the record verdict not success: refused": "refused: the scan verify record evidence/combined-scan-verify's verdict is not success ([block verify-scan] did not reproduce the scan)",
+    "announce twin URLs (absent)": 4,
+    "announce twin URLs (another hash)": 4,
+    "announce twin URLs (honest)": 4,
+    "announce twin URLs (its VS another hash)": 4,
+    "announce twin URLs (two commits)": 4,
+    "announce twin URLs (verdict not success)": 4,
+    "check_draw (campaign, GitHub path): the record created after the announce: refused": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-28T00:01:00Z, not before the campaign announce (2026-11-28T00:00:00Z)",
+    "check_draw (campaign, GitHub path): the record created before the announce: accepted": "accepted: {\"scan_verify\": {\"branch\": \"evidence/combined-scan-verify\", \"commit\": \"b1ca4d48992f6fbf35fade8e5f680d294b13104d\", \"created_utc\": \"2026-11-27T23:00:00Z\", \"scan_sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"vs\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28f",
+    "check_draw (rehearsal, GitHub path): no record read": "accepted: [\"announce\", \"beacon\", \"excluded\", \"machines\", \"recomputed\", \"round\", \"sha256\", \"signature_verified\", \"sizes\"]"
+   }
+  },
+  "ok": true,
+  "seconds": 5.0
+ },
+ "verify_scan": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the first machine's [block second-scan] on the twin",
+     "expected": "excluded integers from 6 refs",
+     "matched": "7 excluded integers from 6 refs; sha256 6d270b52bdc3b99af98ce8a6719c6d7c47cb2297446dca04a090c4e6254ea6f5",
+     "target": "/tmp/claude-0/tc7/verify_scan/first",
+     "target_exists": true
+    },
+    {
+     "check": "the enriched scan passes level 1 (analysis.check_scan)",
+     "expected": "accepted",
+     "matched": "accepted",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "[block verify-scan]: the enriched scan FAILS, no record",
+     "expected": "PROBLEM: the reproduced scan has sha256 cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed, not the scan's 358acd7da577a32703a785026baf6b9a351b3fdb1f4d600a7e5492771131c543",
+     "matched": "rc 1, record commit False, twin refs []: PROBLEM: the reproduced scan has sha256 cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed, not the scan's 358acd7da577a32703a785026baf6b9a351b3fdb1f4d600a7e5492771131c543",
+     "target": "/tmp/claude-0/tc7/verify_scan/verifier_enriched",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce]: VS is not HS, refused before any commit",
+     "expected": "REFUSED: VS (cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS (358acd7da577a32703a785026baf6b9a351b3fdb1f4d600a7e5492771131c543): no commit, no push",
+     "matched": "rc 1, announce_campaign exists False: REFUSED: VS (cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS (358acd7da577a32703a785026baf6b9a351b3fdb1f4d600a7e5492771131c543): no commit, no push",
+     "target": "/tmp/claude-0/tc7/verify_scan/verifier_enriched",
+     "target_exists": true
+    },
+    {
+     "check": "[block verify-scan]: the honest scan passes, VS = HS, its record published once",
+     "expected": "the scan is reproduced scan_sha256 cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed VS cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed",
+     "matched": "rc 0, twin refs ['refs/heads/evidence/combined-scan-verify'], files ['SCAN_LSREMOTE.txt', 'VERIFY.txt', 'VERIFY_LSREMOTE.txt']: the scan is reproduced scan_sha256 cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed VS cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed",
+     "target": "/tmp/claude-0/tc7/verify_scan/verifier_honest",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.verify_scan: the inventory as scanned: verified",
+     "expected": "[]",
+     "matched": "[]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.verify_scan: a branch on the remote, not in the scan",
+     "expected": "branch new-branch is on the remote",
+     "matched": "[\"branch new-branch is on the remote (66c566ac988c) but not in the scan\"]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.verify_scan: a branch in the scan, not on the remote",
+     "expected": "branch docs is in the scan",
+     "matched": "[\"branch docs is in the scan (a0611dcaef7e) but not on the remote\"]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.verify_scan: a branch at another tip",
+     "expected": "branch feature-b is at 71f2429587f5 on the remote, at 66c566ac988c in the scan",
+     "matched": "[\"branch feature-b is at 71f2429587f5 on the remote, at 66c566ac988c in the scan\"]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.verify_scan: HEAD not main's tip",
+     "expected": "the scan's HEAD",
+     "matched": "[\"branch main is at 66c566ac988c on the remote, at 71f2429587f5 in the scan\", \"the scan's HEAD 71f2429587f5 is not main's tip on the remote 66c566ac988c\"]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    }
+   ],
+   "enriched_with": [
+    41001,
+    41002,
+    41003
+   ],
+   "results": {
+    "[block announce]: VS is not HS, refused before any commit": "rc 1, announce_campaign exists False: REFUSED: VS (cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS (358acd7da577a32703a785026baf6b9a351b3fdb1f4d600a7e5492771131c543): no commit, no push",
+    "[block verify-scan]: the enriched scan FAILS, no record": "rc 1, record commit False, twin refs []: PROBLEM: the reproduced scan has sha256 cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed, not the scan's 358acd7da577a32703a785026baf6b9a351b3fdb1f4d600a7e5492771131c543\nTHE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 358acd7da577a32703a785026baf6b9a351b3fdb1f4d600a7e5492771131c543 VS cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed",
+    "[block verify-scan]: the honest scan passes, VS = HS, its record published once": "rc 0, twin refs ['refs/heads/evidence/combined-scan-verify'], files ['SCAN_LSREMOTE.txt', 'VERIFY.txt', 'VERIFY_LSREMOTE.txt']: the scan is reproduced scan_sha256 cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed VS cd273c38ae83b02d7dd27dfdbb11c10ffaa750c549c6d67196da23423c4b2fed\nverify record pushed: evidence/combined-scan-verify ac140da9157b624d86d0f86fedab99fc908b57e5\nfatal: expected 'acknowledgments', received 'packfile'\nwarning: push negotiation failed; proceeding anyway with push",
+    "analysis.verify_scan: HEAD not main's tip": "[\"branch main is at 66c566ac988c on the remote, at 71f2429587f5 in the scan\", \"the scan's HEAD 71f2429587f5 is not main's tip on the remote 66c566ac988c\"]",
+    "analysis.verify_scan: a branch at another tip": "[\"branch feature-b is at 71f2429587f5 on the remote, at 66c566ac988c in the scan\"]",
+    "analysis.verify_scan: a branch in the scan, not on the remote": "[\"branch docs is in the scan (a0611dcaef7e) but not on the remote\"]",
+    "analysis.verify_scan: a branch on the remote, not in the scan": "[\"branch new-branch is on the remote (66c566ac988c) but not in the scan\"]",
+    "analysis.verify_scan: the inventory as scanned: verified": "[]",
+    "second-scan: GitHub URLs replaced by the twin": 1,
+    "the enriched scan passes level 1 (analysis.check_scan)": "accepted",
+    "the first machine's [block second-scan] on the twin": "rc 0: 5\nfetched: every branch of the ls-remote at its tip (5)\n7 excluded integers from 6 refs; sha256 6d270b52bdc3b99af98ce8a6719c6d7c47cb2297446dca04a090c4e6254ea6f5",
+    "verify-scan: GitHub URLs replaced by the twin (enriched)": 4,
+    "verify-scan: GitHub URLs replaced by the twin (honest)": 4
+   }
+  },
+  "ok": true,
+  "seconds": 1.3
+ }
+}

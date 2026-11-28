@@ -1,0 +1,226 @@
+{
+ "crash": {
+  "detail": {
+   "D": {
+    "status": "failed",
+    "why": "exit -9, missing ['D/record.json', 'D/prediction.json']"
+   },
+   "checks": [
+    {
+     "check": "D killed from outside",
+     "expected": "exit -9",
+     "matched": "exit -9, missing ['D/record.json', 'D/prediction.json']",
+     "target": "/tmp/claude-0/g2/c/w/root_crash",
+     "target_exists": true
+    }
+   ],
+   "killed_pids": [
+    25714
+   ],
+   "steps": {
+    "D": "failed",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 139.1
+ },
+ "guard": {
+  "detail": {
+   "checks": [
+    {
+     "check": "deck held below the guard",
+     "expected": "\"step\": \"deck\"",
+     "matched": "[{\"free_gb\": 51.11, \"instance\": \"NOT1_6213\", \"step\": \"deck\"}]",
+     "target": "/tmp/claude-0/g2/c/w/plans_guard/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
+   "steps": {},
+   "stopped_for_disk": [
+    {
+     "free_gb": 51.11,
+     "instance": "NOT1_6213",
+     "step": "deck"
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 12.2
+ },
+ "interrupt_and_resume": {
+  "detail": {
+   "D_why": "found running at a resume (the driver or the machine stopped)",
+   "after": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   },
+   "before": {
+    "D": "running",
+    "deck": "done",
+    "inverters": "done"
+   },
+   "checks": [
+    {
+     "check": "D found running at the rerun",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/tmp/claude-0/g2/c/w/root_interrupt",
+     "target_exists": true
+    }
+   ],
+   "env_resumes": [
+    {
+     "static_sha256": "5933c19e4450efebd238a017fc757ef1dc06f327c015713ce299e0bc15d856ed",
+     "uptime_s": "2026-11-28 07:42:16"
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 140.9
+ },
+ "pins": {
+  "detail": {
+   "checks": [
+    {
+     "check": "one pinned byte changed: launch",
+     "expected": "pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']",
+     "matched": "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']",
+     "target": "/tmp/claude-0/g2/c/w/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .py in the driver's tree: launch",
+     "expected": "is not clean (a changed tracked file, or an untracked .py/.json)",
+     "matched": "refused: campaign mode: the tree at c0c1da37631c is not clean (a changed tracked file, or an untracked .py/.json)",
+     "target": "/tmp/claude-0/g2/c/w/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .json in the kit tree: launch",
+     "expected": "no clean worktree at kit_commit",
+     "matched": "refused: no clean worktree at kit_commit d599300d51fc (git worktree add --detach DIR d599300d51fcf3a1a4c33d103b89827f8ac4da41)",
+     "target": "/tmp/claude-0/g2/c/w/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
+   "clean tree, every pin matching: check": {
+    "ok": true,
+    "pins": {
+     "mismatched": [],
+     "not_pinned": [],
+     "pinned_files": 114,
+     "pins_file": "research/layered-networks/FREEZE_PINS.json",
+     "pins_sha256": "32ea52f78dfe3833fa58cc014ecbe4f678dc837f915e5940d70b22eedf9f94ab",
+     "tree_clean": true,
+     "tree_commit": "c0c1da37631c7a8a63e6267b19f593b357c336e5"
+    },
+    "rc": 0
+   },
+   "one pinned byte changed: launch": [
+    1,
+    "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']"
+   ],
+   "untracked .json in the kit tree: launch": [
+    1,
+    "refused: no clean worktree at kit_commit d599300d51fc (git worktree add --detach DIR d599300d51fcf3a1a4c33d103b89827f8ac4da41)"
+   ],
+   "untracked .py in the driver's tree: launch": [
+    1,
+    "refused: campaign mode: the tree at c0c1da37631c is not clean (a changed tracked file, or an untracked .py/.json)"
+   ]
+  },
+  "ok": true,
+  "seconds": 4.8
+ },
+ "refusals": {
+  "detail": {
+   "campaign mode, test template": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not 668b9c565c82\"}",
+   "checks": [
+    {
+     "check": "campaign mode, test template",
+     "expected": "campaign mode needs the frozen template",
+     "matched": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not 668b9c565c82\"}",
+     "target": "/tmp/claude-0/g2/c/w/T_refusals.json",
+     "target_exists": true
+    },
+    {
+     "check": "test mode, frozen template",
+     "expected": "test mode needs a test template, not the frozen one",
+     "matched": "{\"ok\": false, \"why\": \"refused: test mode needs a test template, not the frozen one\"}",
+     "target": "/tmp/claude-0/g2/c/w/tree_main/research/layered-networks/campaign_template.json",
+     "target_exists": true
+    },
+    {
+     "check": "missing key rounds",
+     "expected": "the plan differs from the template: missing key rounds",
+     "matched": "refused: the plan differs from the template: missing key rounds",
+     "target": "/tmp/claude-0/g2/c/w/PLAN_bad_missing_key_rounds.json",
+     "target_exists": true
+    },
+    {
+     "check": "extra key steps_until",
+     "expected": "the plan differs from the template: key steps_until is not allowed",
+     "matched": "refused: the plan differs from the template: key steps_until is not allowed",
+     "target": "/tmp/claude-0/g2/c/w/PLAN_bad_extra_key_steps_until.json",
+     "target_exists": true
+    },
+    {
+     "check": "short kit commit",
+     "expected": "the plan differs from the template: kit_commit is 'd599300d'",
+     "matched": "refused: the plan differs from the template: kit_commit is 'd599300d', the template's is 'd599300d51fcf3a1a4c33d103b89827f8ac4da41'",
+     "target": "/tmp/claude-0/g2/c/w/PLAN_bad_short_kit_commit.json",
+     "target_exists": true
+    },
+    {
+     "check": "disk at launch",
+     "expected": "GB free at launch, 1e+06 GB needed (disk_launch_gb)",
+     "matched": "refused: 51.7 GB free at launch, 1e+06 GB needed (disk_launch_gb)",
+     "target": "/tmp/claude-0/g2/c/w/T_bigdisk.json",
+     "target_exists": true
+    }
+   ],
+   "disk at launch": [
+    1,
+    "refused: 51.7 GB free at launch, 1e+06 GB needed (disk_launch_gb)"
+   ],
+   "extra key steps_until": [
+    1,
+    "refused: the plan differs from the template: key steps_until is not allowed"
+   ],
+   "missing key rounds": [
+    1,
+    "refused: the plan differs from the template: missing key rounds"
+   ],
+   "short kit commit": [
+    1,
+    "refused: the plan differs from the template: kit_commit is 'd599300d', the template's is 'd599300d51fcf3a1a4c33d103b89827f8ac4da41'"
+   ],
+   "test mode, frozen template": "{\"ok\": false, \"why\": \"refused: test mode needs a test template, not the frozen one\"}"
+  },
+  "ok": true,
+  "seconds": 5.3
+ },
+ "timeout": {
+  "detail": {
+   "checks": [
+    {
+     "check": "deck timed out",
+     "expected": "more than 0.001 s",
+     "matched": "more than 0.001 s",
+     "target": "/tmp/claude-0/g2/c/w/plans_timeout/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
+   "result_mode": "TEST",
+   "steps": {
+    "deck": "timeout"
+   },
+   "why": "more than 0.001 s"
+  },
+  "ok": true,
+  "seconds": 11.4
+ }
+}

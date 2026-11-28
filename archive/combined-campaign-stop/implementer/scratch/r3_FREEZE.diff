@@ -1,0 +1,117 @@
+diff --git a/research/layered-networks/FREEZE.txt b/research/layered-networks/FREEZE.txt
+index 607e7af8..668a1ea2 100644
+--- a/research/layered-networks/FREEZE.txt
++++ b/research/layered-networks/FREEZE.txt
+@@ -21,7 +21,7 @@ Branch tips (on origin when this was written):
+                                     FREEZE_PINS.json and FREEZE.txt)
+ 
+ Pins:
+-  FREEZE_PINS.json                  sha256 adb62966fbc33cad4c9d0c164ca9e19d44a3f193536a7bd2c3346c69b91df84d  (114 files)
++  FREEZE_PINS.json                  sha256 dcf1a67634b978366b57b7de035f7a6f3cc9f35c39409234e279de8481ee4ab2  (114 files)
+   EXCLUDED.json                     sha256 a3a76e1a8552fa054faf616faee0771669432b19d3aa1722a9988e7029cb8940
+     seeds_sha256                    1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb  (16333 integers, 286 refs)
+   EXCLUDED_PRINT.txt                sha256 efc8d463affe0f24b6f3b80a57ea7acaac74e0c428c69c15f900434f685cbca1
+@@ -36,7 +36,7 @@ Pins:
+                                     campaign.FROZEN_TEMPLATE_SHA256)
+   plan_split3.py (the splitter)     sha256 061f8b375aeef65adade60762866aab0fdc4da4562963b8776f4afe88a3635a9
+   campaign.py (the driver)          sha256 dbe738d1c88d79c734fab0affecf3f0d4387d1a5c92b2bf902c1b96191408e95
+-  analysis.py (the analysis)        sha256 013f01ac79ed75bd1acf1343f4b97c4a8ec20464f720e6a63a0bfb42bb23d016
++  analysis.py (the analysis)        sha256 069eeca87927cdfea23f12bfc3522932cd0db662a73f5800c10c7480f67bbaa6
+   stage_d6.py (stage D, kernel)     sha256 a4e2d9335c9a068e0a94067ff6dd5f5d0ad8df27eecfccebfd3c1c7f385c8aca
+   leancell.py (the kernel check)    sha256 aca47f5220868f4716bc9ec9a7bdacae60563c7eab28a40248fa731e48c55f2e
+   trace_extract.py (the extract)    sha256 e8b1ef3d7f80eac86867f3bfbcae43ca9d6f2f33aa575bb3ac005d90949a6320
+@@ -539,9 +539,28 @@ ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_A
+          prints the reproduction's sha256 after "VS", KEPT as VS (block vars-campaign). Then, and only then, it
+          publishes its record on its own single-use branch evidence/combined-scan-verify, by one creating push of one
+          commit (VERIFY.txt, its printed result; VERIFY_LSREMOTE.txt, its own ls-remote; SCAN_LSREMOTE.txt, the
+-         ls-remote of its own [block second-scan]), never pushed again, never forced, never deleted. The branch is
++         ls-remote of its own [block second-scan]; VERIFY_INPUTS.txt, what a later replay needs: the freeze commit F,
++         the sha256 of the scan code used, $L's draw_seeds.py and analysis.py, of both scan outputs, SCAN_TO_VERIFY.json
++         and its own EXCLUDED_SECOND_SCAN.json, and of the two inventories), never pushed again, never forced, never
++         deleted. A replay by a third party, later, from these SHAs, is deferred until after rehearsal 2 (the owner's
++         decision); the record keeps what it needs. The branch is
+          created BEFORE the announce, so the announce comes after a public record of the reproduction.
+-       The campaign announce refuses, with no commit and no push, unless VS equals HS.
++       The campaign announce refuses, with no commit and no push, unless VS equals HS AND the published record says
++       so: [block announce] fetches evidence/combined-scan-verify by name, takes its creation commit (the branch's
++       history must be that single commit), reads VERIFY.txt there, and refuses unless its final line is the success
++       verdict with scan_sha256 = HS and VS = HS (analysis.scan_verify_record, the reader analysis.py campaign uses
++       too). A record that is absent, not a success, or of another hash stops the announce before any commit.
++     THE ORDER, explicitly:
++       - [block second-scan] on the first machine, then (3), then [block second-scan] on the second machine, then
++         [block verify-scan] there;
++       - evidence/combined-scan-verify is created AFTER both scans and BEFORE the announce: it is the FIRST
++         publication allowed after the successful comparison, so it is naturally absent from both inventories (the
++         scans' and the verifier's own ls-remote, all taken before it exists);
++       - GitHub's creation time of evidence/combined-scan-verify (its branch_creation, in the activity API)
++         establishes that the record existed before the announce; analysis.py campaign requires it strictly earlier
++         than the announce's, and the branch single-use;
++       - the two runs' hardware independence is a property of the procedure (two machines, each with its own clone,
++         Python and fetch), not of the files: the record shows an independent run, not which machine made it.
+     [block verify-scan]
+     ( set -e
+       ! git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "REFUSED: started inside a git work tree: no commit, no push"; exit 1; }
+@@ -559,6 +578,17 @@ ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_A
+           print('the scan is reproduced' if not problems else 'THE SCAN IS NOT REPRODUCED: no announce, push nothing',
+           'scan_sha256', hashlib.sha256(sv).hexdigest(), 'VS', hashlib.sha256(sr).hexdigest()); sys.exit(0 if not problems else 1)" > VERIFY.txt || { cat VERIFY.txt; exit 1; }
+       cat VERIFY.txt
++      # what a later replay needs (the owner's decision): the freeze commit, the scan code and both scan outputs, by
++      # sha256; both inventories are the two ls-remote files
++      { echo "format layered-scan-verify-inputs/1"
++        echo "freeze_commit $F"
++        echo "draw_seeds_py_sha256 $(sha256sum < "$L/draw_seeds.py" | cut -c1-64)"
++        echo "analysis_py_sha256 $(sha256sum < "$L/analysis.py" | cut -c1-64)"
++        echo "scan_to_verify_sha256 $(sha256sum < SCAN_TO_VERIFY.json | cut -c1-64)"
++        echo "reproduced_scan_sha256 $(sha256sum < EXCLUDED_SECOND_SCAN.json | cut -c1-64)"
++        echo "verify_lsremote_sha256 $(sha256sum < VERIFY_LSREMOTE.txt | cut -c1-64)"
++        echo "scan_lsremote_sha256 $(sha256sum < SCAN_LSREMOTE.txt | cut -c1-64)"; } > VERIFY_INPUTS.txt
++      cat VERIFY_INPUTS.txt
+       # the record, on its own single-use branch, by one creating push of one commit
+       V=evidence/combined-scan-verify
+       test -z "$(git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$V)" || { echo "REFUSED: $V already exists: no commit, no push"; exit 1; }
+@@ -569,11 +599,11 @@ ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_A
+       git fetch -q --depth 1 https://github.com/HevisNico/kernel-R refs/heads/main     # the owner identity, from main, never printed
+       git config user.name "$(git log -1 --format=%an FETCH_HEAD)"
+       git config user.email "$(git log -1 --format=%ae FETCH_HEAD)"
+-      cp ../VERIFY.txt ../VERIFY_LSREMOTE.txt ../SCAN_LSREMOTE.txt .
++      cp ../VERIFY.txt ../VERIFY_INPUTS.txt ../VERIFY_LSREMOTE.txt ../SCAN_LSREMOTE.txt .
+       [ "$(git rev-parse --show-toplevel)" = "$(pwd -P)" ] || { echo "REFUSED: the repository is not this new folder: no commit, no push"; exit 1; }
+       [ "$(git symbolic-ref --short HEAD)" = "$V" ] || { echo "REFUSED: HEAD is not the orphan $V: no commit, no push"; exit 1; }
+       ! git rev-parse -q --verify HEAD >/dev/null || { echo "REFUSED: the new repository already has a commit: no commit, no push"; exit 1; }
+-      git add VERIFY.txt VERIFY_LSREMOTE.txt SCAN_LSREMOTE.txt
++      git add VERIFY.txt VERIFY_INPUTS.txt VERIFY_LSREMOTE.txt SCAN_LSREMOTE.txt
+       git commit -q -m "Scan verify (campaign)"               # the owner identity, set above
+       O=$(git log -1 --format='%an %ae' FETCH_HEAD)
+       [ "$(git log -1 --format='%an %ae' HEAD)" = "$O" ] && [ "$(git log -1 --format='%cn %ce' HEAD)" = "$O" ] || { echo "REFUSED: the commit's author or committer is not main's (the owner): no push"; exit 1; }
+@@ -590,7 +620,9 @@ DRAW_ANNOUNCE (after the block vars and the block vars-rehearsal or vars-campaig
+ one push of one commit, never pushed again, never forced, never deleted. Rehearsal 2's DRAW_ANNOUNCE.txt is format
+ layered-draw-announce/1, exactly four lines, as rehearsal 1's. The campaign's is format layered-draw-announce/2, with a
+ fifth line second_scan_sha256 naming the second scan's raw output, EXCLUDED_SECOND_SCAN.json, which the campaign's
+-commit also carries)
++commit also carries. The campaign's announce comes after the published scan verify record evidence/combined-scan-verify
++(ORDER 3 (3b)), which it reads before anything else: no record, a failed one, or one of another hash, and nothing is
++committed or pushed)
+     [block announce]
+     ( set -e
+       X=$(realpath -e "$X")                                   # absolute, before any cd
+@@ -599,6 +631,12 @@ commit also carries)
+         S=$(realpath -e "$S")
+         test ${#HS} = 64 || { echo "REFUSED: HS is not a sha256: no commit, no push"; exit 1; }
+         [ "$VS" = "$HS" ] || { echo "REFUSED: VS ($VS), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS ($HS): no commit, no push"; exit 1; }
++        # the PUBLISHED record, read (analysis.scan_verify_record), not the copied VS: before any ls-remote of $B,
++        # mkdir or commit
++        python -B -c "if True:
++            import sys; sys.path.insert(0, '$L'); import analysis as A
++            c, s, v = A.scan_verify_record('https://github.com/HevisNico/kernel-R', '$HS')
++            print('the scan verify record', A.VERIFY_BRANCH, c, 'verified scan_sha256', s, 'VS', v)" || { echo "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS ($HS): no commit, no push"; exit 1; }
+       else
+         [ -z "$S$HS$VS" ] || { echo "REFUSED: S, HS and VS are for the campaign only: no commit, no push"; exit 1; }
+       fi
+@@ -650,5 +688,6 @@ commit also carries)
+   2, H is the sha256 of the final EXCLUDED_REHEARSAL2.json, printed by ORDER 2 step (r3); for the campaign, H names the
+   final list EXCLUDED_SECOND.json and HS the source scan EXCLUDED_SECOND_SCAN.json, both printed by ORDER 3 step (3),
+   and VS the second machine's independent reproduction of that scan, printed by ORDER 3 step (3b), which must equal
+-  HS. It is not checked against a sha256 it computes itself. A wrong file, for example the freeze's list in place of
++  HS; and the published record of (3b), read on GitHub at its creation commit, must say the same of HS. It is not
++  checked against a sha256 it computes itself. A wrong file, for example the freeze's list in place of
+   EXCLUDED_SECOND.json, or a scan copy with one byte changed, is refused before the commit, so before the single push.

@@ -1,0 +1,306 @@
+IMPLEMENTER FINAL REPORT, part 2 of 3: the DESIGN NOTE for (E), then the FULL diff of analysis.py (git diff da3d9b3b HEAD).
+
+DESIGN NOTE (E): the second scan's raw output made public (FOR THE OWNER'S APPROVAL)
+
+Problem. Under (D), analysis.py campaign rebuilds the campaign's list from second_scan= and the two verified draws, so
+anyone rerunning the analysis needs EXCLUDED_SECOND_SCAN.json. Today it exists only in the coordinator's working folder.
+
+The change (implemented; the campaign announce only, rehearsal 2's announce is byte for byte as before):
+1. The campaign announce commit on evidence/combined-draw carries three files instead of two: DRAW_ANNOUNCE.txt,
+   EXCLUDED_PUBLISHED.json (= EXCLUDED_SECOND.json, as now) and EXCLUDED_SECOND_SCAN.json (the raw scan output,
+   unedited). It is still one commit and one creating push, so the scan is published at the same moment as the list,
+   before the round exists.
+2. DRAW_ANNOUNCE.txt gets a fifth line, in campaign mode only:
+       format layered-draw-announce/1
+       mode campaign
+       excluded_sha256 <H>
+       second_scan_sha256 <HS>
+       sizes NOT1=60 ANDOR3=32 XOR3=37
+   analysis.parse_announce now requires that line if and only if mode is campaign (a campaign announce without it,
+   or a rehearsal/test announce with it, is refused). The format string stays layered-draw-announce/1: rehearsal 1's
+   published announce, rehearsal 2's and every test announce are four lines and still parse. (Alternative: bump to
+   /2 for the campaign. I did not, to leave the other announces' format untouched; easy to change if preferred.)
+3. HS is KEPT like H: [block check-list] now prints "... sha256 <H> scan_sha256 <HS>", and [block vars-campaign]
+   takes S=EXCLUDED_SECOND_SCAN.json and HS=<...>. [block vars-rehearsal] sets S= HS= (empty).
+4. [block announce], campaign only: S made absolute before any cd; HS must be 64 characters; the copy of S must have
+   sha256 HS (else "REFUSED ... no commit, no push"); the 5-line DRAW_ANNOUNCE.txt; the python check additionally
+   requires second_scan_sha256 == HS == the copy's sha256 and the scan a superset of the freeze's EXCLUDED.json;
+   git add also adds EXCLUDED_SECOND_SCAN.json. In rehearsal mode a non-empty S or HS refuses; the 4-line file and
+   the python check are as before (plus "no second_scan_sha256 line").
+5. analysis.py campaign: check_draw records second_scan_sha256 from the announce read on GitHub;
+   check_rehearsal_seeds refuses a second_scan= whose sha256 is not that one ("second_scan= has sha256 ..., not the
+   second_scan_sha256 ... the campaign announce names"). So the analysis can only be run on the published scan.
+
+What this binds. The announce (on GitHub, before the round) fixes both H and HS; the analysis checks
+second_scan= against HS, excluded= against H, and excluded= == campaign_list(second_scan=, the two verified draws)
+byte for byte. Anyone can fetch evidence/combined-draw and rerun it; anyone can also rerun the scan itself
+(draw_seeds.py scan at the refs and tips the scan file names) and compare its bytes with the published one.
+
+Size: EXCLUDED.json today is 16333 integers (138 KB); the scan output is the same kind of file.
+
+Not changed: the [block draw] step 5 (check_draw only, as before; it reads the 5-line announce fine), the result
+branch, rehearsal 2's announce, campaign.py, DRAW.json's format.
+
+Run once (one-off, not a committed test): [block announce] extracted verbatim with its single GitHub push twinned to a
+local bare repository: campaign → commit with the 3 files and the 5-line announce; campaign with a wrong HS →
+"REFUSED: EXCLUDED_SECOND_SCAN.json has sha256 ..., not the validated 000...: no commit, no push"; rehearsal → the 2
+files and the 4-line announce as before; rehearsal with S/HS set → "REFUSED: S and HS are for the campaign only".
+
+===== git diff da3d9b3b HEAD -- research/layered-networks/analysis.py
+diff --git a/research/layered-networks/analysis.py b/research/layered-networks/analysis.py
+index 5ddd4b5d..1c8576c9 100644
+--- a/research/layered-networks/analysis.py
++++ b/research/layered-networks/analysis.py
+@@ -7,12 +7,13 @@ JSON round trip between them as before.
+                                           [rehearsal_excluded=EXCLUDED.json] [rehearsal_announce=...] [rehearsal_activity=...]
+                                           [rehearsal1_draw=DRAW_REHEARSAL1.json] [rehearsal1_excluded=EXCLUDED_PUBLISHED.json]
+                                           [rehearsal1_announce=...] [rehearsal1_activity=...]
++                                          [second_scan=EXCLUDED_SECOND_SCAN.json]
+                                           [times=github|bare|lsremote:LOG] [thresholds=FILE] [controls=DIR] [tips=FILE]
+ 
+ MODE:
+ - **campaign:** every ROOT must come from campaign.py in campaign mode: its ENV.json names this tree's campaign.py by
+   sha256, the frozen template (campaign.FROZEN_TEMPLATE_SHA256), and mode CAMPAIGN. Any other root is refused, and so
+-  is a mix. draw= and excluded= are required, times must be github, thresholds the pinned file, controls the noise
++  is a mix. draw=, excluded= and second_scan= are required, times must be github, thresholds the pinned file, controls the noise
+   tree at the template's noise_commit. The sizes are DRAW_SIZES, pinned here.
+ - **rehearsal:** every refusal of campaign mode, with the sizes DRAW_SIZES_REHEARSAL and the rehearsal's own announce
+   (ANNOUNCE_BRANCH). RESULTS.json says "mode": "REHEARSAL", in its first field (NOTICE) and in every verdict line: it
+@@ -28,7 +29,9 @@ THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
+ - The announce: in campaign and rehearsal modes, the first commit adding DRAW_ANNOUNCE.txt on ANNOUNCE_BRANCH[mode]
+   (first-parent), read from GitHub, and GitHub's recorded push time of it (sealpush.github_times; every activity item
+   saved in OUTDIR/activity/); both must equal DRAW.json's announce. DRAW_ANNOUNCE.txt is exactly four lines:
+-  `format layered-draw-announce/1`, `mode M`, `excluded_sha256 H`, `sizes NOT1=n ANDOR3=n XOR3=n`.
++  `format layered-draw-announce/1`, `mode M`, `excluded_sha256 H`, `sizes NOT1=n ANDOR3=n XOR3=n`; with mode
++  campaign, and only then, a fifth line `second_scan_sha256 HS` names the second scan's raw output, which the campaign
++  announce commit carries as EXCLUDED_SECOND_SCAN.json (public, so that anyone can rerun the exact-union check).
+ - The announce cannot be redone (the audit's defect 2): no activity item of the announce branch may be a force_push
+   or a branch_deletion, and its OLDEST item must be its branch_creation, whose `after` is the announce commit; the
+   push time is that item's. N1: it must be later than GitHub's push time of this tree's commit (pins.tree_commit) on
+@@ -56,6 +59,14 @@ THE DRAW, RECOMPUTED IN FULL FROM PUBLIC INPUTS (D8, B5, B16, the owner's rule):
+   2's own analysis) requires rehearsal1_draw= and rehearsal1_excluded= too: its excluded= list (rehearsal 2's list,
+   the freeze's scan plus rehearsal 1's seeds) must hold rehearsal 1's 18 seeds and their noise seeds, and rehearsal 1's
+   announce must be earlier than rehearsal 2's.
++- THE EXACT UNION (campaign and rehearsal modes; check_exact_list): holding the seeds is not enough, the list must be
++  exactly what FREEZE.txt's blocks build, byte for byte. Rehearsal mode: excluded= must be rehearsal2_list of the
++  freeze's EXCLUDED.json and rehearsal 1's verified draw ([block rehearsal2-list]). Campaign mode: second_scan= (the
++  second scan's raw output, EXCLUDED_SECOND_SCAN.json) is required, must be a superset of the freeze's EXCLUDED.json
++  and must have the sha256 the announce names (second_scan_sha256); excluded= must be campaign_list of it and the two
++  verified rehearsal draws ([block list]). A seed added, a seed missing, another field differing, second_scan= missing
++  and second_scan= not a superset each refuse with their own message. Test mode keeps the inclusion check only, and
++  refuses second_scan= (as rehearsal mode does).
+ - The seeds are recomputed with the pinned draw_seeds.draw; the 12 expected plans are plan_split3.split of the
+   RECOMPUTED draw on the frozen template, never of the file's own lists.
+ - Each root's PLAN_INPUT.json must be byte-identical to plan_split.canon of one of them, which names the root's
+@@ -184,6 +195,7 @@ DRAW_EXTRA_KEYS = ("beacon_round", "announce")  # drand's /public/<round>; the a
+ ANNOUNCE_FILE = "DRAW_ANNOUNCE.txt"
+ ANNOUNCE_FORMAT = "layered-draw-announce/1"
+ ANNOUNCE_KEYS = ("format", "mode", "excluded_sha256", "sizes")
++ANNOUNCE_SCAN_KEY = "second_scan_sha256"         # the campaign announce's fifth line: the second scan's raw output
+ ANNOUNCE_BRANCH = dict(campaign="evidence/combined-draw", rehearsal="evidence/combined-rehearsal2-draw")
+ RESULT_BRANCH = dict(campaign="evidence/combined-draw-result", rehearsal="evidence/combined-rehearsal2-draw-result")
+ # rehearsal 1, published under the freeze of 5d02acce (its announce, its draw, its list), checked against that freeze
+@@ -196,7 +208,7 @@ FREEZE_BRANCH = "research/layered-campaign-freeze"     # N1: the announce must c
+ PLAN_LOCAL_KEYS = ("kit_tree", "noise_tree")   # campaign.resolve_trees: the only machine-local keys of PLAN.json
+ KEYS = ("draw", "excluded", "announce", "activity", "rehearsal_draw", "rehearsal_excluded", "rehearsal_announce",
+         "rehearsal_activity", "rehearsal1_draw", "rehearsal1_excluded", "rehearsal1_announce", "rehearsal1_activity",
+-        "times", "thresholds", "controls", "tips")
++        "second_scan", "times", "thresholds", "controls", "tips")
+ 
+ # ---- the comparisons (A2, A6)
+ VERDICTS = ("agrees", "refuted", "run failed", "observed only (no prediction)")      # compare_d.compare's verdicts
+@@ -1310,7 +1322,7 @@ def kernel_library(outdir):
+ 
+ def parse_announce(b):
+     """DRAW_ANNOUNCE.txt: exactly the lines `format layered-draw-announce/1`, `mode M`, `excluded_sha256 H`,
+-    `sizes NOT1=n ANDOR3=n XOR3=n`."""
++    `sizes NOT1=n ANDOR3=n XOR3=n`, plus `second_scan_sha256 HS` if and only if M is campaign."""
+     try:
+         lines = b.decode().split("\n")
+     except UnicodeDecodeError:
+@@ -1318,13 +1330,18 @@ def parse_announce(b):
+     if lines and lines[-1] == "":
+         lines = lines[:-1]
+     kv = dict((ln.split(" ", 1) + [""])[:2] for ln in lines)
+-    if len(kv) != len(lines) or set(kv) != set(ANNOUNCE_KEYS) or kv["format"] != ANNOUNCE_FORMAT:
+-        refuse(f"DRAW_ANNOUNCE.txt is not exactly the lines {ANNOUNCE_KEYS} ({ANNOUNCE_FORMAT})")
++    keys = ANNOUNCE_KEYS + ((ANNOUNCE_SCAN_KEY,) if kv.get("mode") == "campaign" else ())
++    if len(kv) != len(lines) or set(kv) != set(keys) or kv["format"] != ANNOUNCE_FORMAT:
++        refuse(f"DRAW_ANNOUNCE.txt is not exactly the lines {keys} ({ANNOUNCE_FORMAT}; {ANNOUNCE_SCAN_KEY} with mode "
++               "campaign only)")
+     try:
+         sizes = {g: int(v) for g, v in (x.split("=") for x in kv["sizes"].split())}
+     except ValueError:
+         refuse(f"DRAW_ANNOUNCE.txt: sizes {kv['sizes']!r}")
+-    return dict(mode=kv["mode"], excluded_sha256=kv["excluded_sha256"], sizes=sizes)
++    out = dict(mode=kv["mode"], excluded_sha256=kv["excluded_sha256"], sizes=sizes)
++    if ANNOUNCE_SCAN_KEY in kv:
++        out[ANNOUNCE_SCAN_KEY] = kv[ANNOUNCE_SCAN_KEY]
++    return out
+ 
+ 
+ def announce_on_github(branch, outdir):
+@@ -1486,7 +1503,79 @@ def check_draw(kw, mode, outdir, tree_commit=None, offline=None, past=None):
+                        excluded=dict(file=Path(kw["excluded"]).name, sha256=A["excluded_sha256"], fraction_of_range=round(frac, 4),
+                                      seeds_sha256=ex.get("seeds_sha256"), count=ex.get("count"),
+                                      superset_of_freeze=pinned["seeds_sha256"]),
+-                       announce=dict(an, from_github=not offline, sha256=hashlib.sha256(ab).hexdigest())), notice
++                       announce=dict(an, from_github=not offline, sha256=hashlib.sha256(ab).hexdigest(),
++                                     **{k: A[k] for k in (ANNOUNCE_SCAN_KEY,) if k in A})), notice
++
++
++def draw_seeds_of(draw):
++    """The sorted seeds of a (verified) draw's groups."""
++    return sorted(s for v in draw["groups"].values() for s in v)
++
++
++def rehearsal2_list(frz, r1, rb1):
++    """THE EXACT UNION for rehearsal 2, as FREEZE.txt's [block rehearsal2-list] builds it: the freeze's EXCLUDED.json
++    `frz` plus rehearsal 1's verified seeds and their noise seeds 10 S + 0..3, with the "added" field naming them and
++    the sha256 of rehearsal 1's DRAW.json bytes `rb1`. Returns the bytes (draw_seeds.canon)."""
++    import draw_seeds
++    rs = draw_seeds_of(r1)
++    noise = sorted(10 * s + n for s in rs for n in range(4))
++    seeds = sorted(set(frz["seeds"]) | set(rs) | set(noise))
++    return draw_seeds.canon(dict(frz, seeds=seeds, count=len(seeds),
++                                 seeds_sha256=hashlib.sha256(draw_seeds.canon(seeds)).hexdigest(),
++                                 added=dict(rehearsal1_seeds=rs, noise_seeds=noise,
++                                            rehearsal1_draw_sha256=hashlib.sha256(rb1).hexdigest())))
++
++
++def campaign_list(scan, r2, rb2, r1, rb1):
++    """THE EXACT UNION for the campaign, as FREEZE.txt's [block list] builds it: the second scan's raw output `scan`
++    plus both rehearsals' verified seeds (r2: rehearsal 2, r1: rehearsal 1) and their noise seeds, with the "added"
++    field naming them and the sha256 of each DRAW.json's bytes. Returns the bytes (draw_seeds.canon)."""
++    import draw_seeds
++    rs = sorted(set(draw_seeds_of(r2)) | set(draw_seeds_of(r1)))
++    noise = sorted(10 * s + n for s in rs for n in range(4))
++    seeds = sorted(set(scan["seeds"]) | set(rs) | set(noise))
++    return draw_seeds.canon(dict(scan, seeds=seeds, count=len(seeds),
++                                 seeds_sha256=hashlib.sha256(draw_seeds.canon(seeds)).hexdigest(),
++                                 added=dict(rehearsal_seeds=rs, noise_seeds=noise,
++                                            rehearsal_draw_sha256=hashlib.sha256(rb2).hexdigest(),
++                                            rehearsal1_draw_sha256=hashlib.sha256(rb1).hexdigest())))
++
++
++def is_seed_list(x):
++    isint = lambda s: isinstance(s, int) and not isinstance(s, bool)
++    return isinstance(x, dict) and isinstance(x.get("seeds"), list) and all(isint(s) for s in x["seeds"])
++
++
++def check_exact_list(path, want, whose, of):
++    """The excluded= file at `path` must be byte for byte `want`, the exact union. Each way of differing has its own
++    refusal: a seed added, a seed missing, another field (or the serialization) differing."""
++    got = Path(path).read_bytes()
++    if got == want:
++        return
++    w = json.loads(want)
++    try:
++        g = json.loads(got)
++    except ValueError:
++        g = None
++    if not is_seed_list(g):
++        refuse(f"{whose} excluded= list is not a JSON list record with integer seeds, so not the exact union of {of}")
++    added = sorted(set(g["seeds"]) - set(w["seeds"]))
++    missing = sorted(set(w["seeds"]) - set(g["seeds"]))
++    if added:
++        refuse(f"{whose} excluded= list adds {len(added)} seeds that are not in the exact union of {of}: {added[:20]}")
++    if missing:
++        refuse(f"{whose} excluded= list is missing {len(missing)} seeds of the exact union of {of}: {missing[:20]}")
++    fields = sorted(k for k in set(g) | set(w) if k not in g or k not in w or g[k] != w[k])
++    if fields:
++        refuse(f"{whose} excluded= list has the exact union's seed set but another field differs from the exact union of "
++               f"{of}: {fields}")
++    refuse(f"{whose} excluded= list has the exact union's content but not its bytes (draw_seeds.canon): the exact "
++           f"union of {of}")
++
++
++def second_scan_refusal_missing():
++    refuse("campaign mode: second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output, published with the "
++           "campaign announce) is required")
+ 
+ 
+ def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict, mode=None):
+@@ -1496,15 +1585,41 @@ def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict, mode=None)
+     on ANNOUNCE_BRANCH["rehearsal"]); rehearsal 1 (rehearsal1_draw=, rehearsal1_excluded=: the published files) in full
+     by the same rules against its own freeze (REHEARSAL1). Both are mandatory in campaign mode; in test mode each is
+     checked, offline (rehearsal_announce=, rehearsal1_announce=, ..._activity=), when given. A single seed missing from
+-    the campaign's excluded= list refuses, naming it."""
++    the campaign's excluded= list refuses, naming it.
++    THE EXACT UNION (campaign and rehearsal modes): the list must then be byte for byte what FREEZE.txt builds
++    (check_exact_list): rehearsal mode, rehearsal2_list of the freeze's EXCLUDED.json and rehearsal 1's verified draw;
++    campaign mode, campaign_list of second_scan= (required, a superset of the freeze's EXCLUDED.json, with the sha256
++    the announce names when draw_info's announce names one) and both verified draws."""
+     mode = mode if mode is not None else ("campaign" if strict else "test")
++    pinned = json.loads((HERE / "EXCLUDED.json").read_text())
++    scan = None
++    if mode == "campaign":
++        if "second_scan" not in kw:
++            second_scan_refusal_missing()
++        sb = Path(kw["second_scan"]).read_bytes()
++        try:
++            scan = json.loads(sb)
++        except ValueError:
++            scan = None
++        if not is_seed_list(scan):
++            refuse("second_scan= is not a JSON list record with integer seeds (draw_seeds.py scan's output)")
++        if not set(pinned["seeds"]) <= set(scan["seeds"]):
++            lost = sorted(set(pinned["seeds"]) - set(scan["seeds"]))
++            refuse(f"second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks {len(lost)} of its seeds "
++                   f"{lost[:20]}")
++        named = (draw_info.get("announce") or {}).get(ANNOUNCE_SCAN_KEY)
++        if named is not None and hashlib.sha256(sb).hexdigest() != named:
++            refuse(f"second_scan= has sha256 {hashlib.sha256(sb).hexdigest()[:12]}, not the {ANNOUNCE_SCAN_KEY} "
++                   f"{str(named)[:12]} the campaign announce names")
++    elif "second_scan" in kw:
++        refuse(f"{mode} mode: second_scan= is for campaign mode only")
+     # campaign: both rehearsals required; rehearsal (rehearsal 2's own analysis, whose excluded= is rehearsal 2's
+     # list): rehearsal 1 required, its seeds and noise seeds in that list (the owner's rule for rehearsal 2's list);
+     # test: whichever is given
+     required = dict(campaign=("rehearsal2", "rehearsal1"), rehearsal=("rehearsal1",)).get(mode, ())
+     whose = "the campaign's" if mode != "rehearsal" else "rehearsal 2's"
+     ex = set(json.loads(Path(kw["excluded"]).read_text())["seeds"])
+-    out = {}
++    out, verified = {}, {}
+     for name, pre, past in (("rehearsal2", "rehearsal_", None), ("rehearsal1", "rehearsal1_", REHEARSAL1)):
+         if mode == "rehearsal" and name == "rehearsal2":
+             continue                                       # rehearsal 2 is the draw= of rehearsal mode itself
+@@ -1523,7 +1638,8 @@ def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict, mode=None)
+             if f"{pre}{k}" in kw:
+                 rkw[k] = kw[f"{pre}{k}"]
+         rdraw, rinfo, _ = check_draw(rkw, "rehearsal", outdir, tree_commit, offline=not strict, past=past)
+-        seeds = sorted(s for v in rdraw["groups"].values() for s in v)
++        verified[name] = (rdraw, Path(rkw["draw"]).read_bytes())  # check_draw: the file is canon of the recomputed draw
++        seeds = draw_seeds_of(rdraw)
+         missing = [s for s in seeds if s not in ex]
+         missing_noise = [10 * s + j for s in seeds for j in range(4) if 10 * s + j not in ex]
+         if missing or missing_noise:
+@@ -1533,6 +1649,17 @@ def check_rehearsal_seeds(kw, draw_info, outdir, tree_commit, strict, mode=None)
+             refuse(f"{name}'s announce ({rinfo['announce']['push_utc']}) is not earlier than {whose} announce "
+                    f"({draw_info['announce']['push_utc']})")
+         out[name] = dict(rinfo, seeds=len(seeds), all_excluded_with_noise_seeds=True)
++    if mode == "rehearsal":
++        check_exact_list(kw["excluded"], rehearsal2_list(pinned, *verified["rehearsal1"]), whose,
++                         "the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list])")
++        out["exact_union"] = dict(of="EXCLUDED.json + rehearsal 1", sha256=sha(kw["excluded"]))
++    elif mode == "campaign":
++        check_exact_list(kw["excluded"], campaign_list(scan, *verified["rehearsal2"], *verified["rehearsal1"]), whose,
++                         "second_scan= and both rehearsals' verified seeds and noise seeds ([block list])")
++        out["exact_union"] = dict(of="second_scan + rehearsal 2 + rehearsal 1", sha256=sha(kw["excluded"]),
++                                  second_scan=dict(file=Path(kw["second_scan"]).name, sha256=sha(kw["second_scan"]),
++                                                   count=len(scan["seeds"]),
++                                                   superset_of_freeze=pinned["seeds_sha256"]))
+     return out
+ 
+ 
+@@ -1635,6 +1762,10 @@ def main(mode, outdir, *args):
+             refuse(f"roots whose driver checked another FREEZE_PINS.json than this tree's ({pc['pins_sha256'][:12]}): {bad}")
+         if "draw" not in kw:
+             refuse(f"{mode} mode: draw=DRAW.json is required")
++        if mode == "campaign" and "second_scan" not in kw:
++            second_scan_refusal_missing()
++    if mode != "campaign" and "second_scan" in kw:
++        refuse(f"{mode} mode: second_scan= is for campaign mode only")
+     th = json.loads(tf.read_text())
+     tips = None
+     if "tips" in kw:

@@ -1,0 +1,2310 @@
+{
+ "all_pass": true,
+ "analysis_announce": {
+  "detail": {
+   "checks": [
+    {
+     "check": "a clean creation gives its time",
+     "expected": "ok 2026-11-26T22:25:58Z",
+     "matched": "ok 2026-11-26T22:25:58Z",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "deleted and created again: refused",
+     "expected": "was rewritten or deleted (branch_deletion",
+     "matched": "refused: the announce branch evidence/combined-draw was rewritten or deleted (branch_deletion in its activity): the draw could have been redone",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "a force push: refused",
+     "expected": "was rewritten or deleted (force_push",
+     "matched": "refused: the announce branch evidence/combined-draw was rewritten or deleted (force_push in its activity): the draw could have been redone",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "not the creation's commit: refused",
+     "expected": "is not the branch_creation that pushed the announce commit",
+     "matched": "refused: the oldest activity item of evidence/combined-draw is not the branch_creation that pushed the announce commit 80f2c0f5b46c (branch_creation, 5226d975283f)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    }
+   ],
+   "clean": "ok 2026-11-26T22:25:58Z",
+   "forced": "refused: the announce branch evidence/combined-draw was rewritten or deleted (force_push in its activity): the draw could have been redone",
+   "not_the_creation": "refused: the oldest activity item of evidence/combined-draw is not the branch_creation that pushed the announce commit 80f2c0f5b46c (branch_creation, 5226d975283f)",
+   "redone": "refused: the announce branch evidence/combined-draw was rewritten or deleted (branch_deletion in its activity): the draw could have been redone"
+  },
+  "ok": true,
+  "seconds": 0.3
+ },
+ "analysis_d10_manifest": {
+  "detail": {
+   "K0": null,
+   "checks": [
+    {
+     "check": "the changed comparison refused, named",
+     "expected": "NOT1_6212/N0/comparison.json: differs from NOT1_6212/SHA256SUMS",
+     "matched": "refused: files that differ from their manifests, or are missing: {\"/tmp/claude-0/runc2/w/root_d10\": [\"NOT1_6212/N0/comparison.json: differs from NOT1_6212/SHA256SUMS\"]}",
+     "target": "/tmp/claude-0/runc2/w/root_d10/NOT1_6212/N0/comparison.json",
+     "target_exists": true
+    }
+   ],
+   "rc": 1,
+   "stderr": "refused: files that differ from their manifests, or are missing: {\"/tmp/claude-0/runc2/w/root_d10\": [\"NOT1_6212/N0/comparison.json: differs from NOT1_6212/SHA256SUMS\"]}"
+  },
+  "ok": true,
+  "seconds": 0.3
+ },
+ "analysis_d8_not_run": {
+  "detail": {
+   "checks": [
+    {
+     "check": "K0: NOT1_6213 not run",
+     "expected": "[\"NOT1_6213\"]",
+     "matched": "[\"NOT1_6213\"]",
+     "target": "/tmp/claude-0/runc2/w/root_d8",
+     "target_exists": true
+    },
+    {
+     "check": "K3: NOT1_6213 not run",
+     "expected": "[\"NOT1_6213\"]",
+     "matched": "[\"NOT1_6213\"]",
+     "target": "/tmp/claude-0/runc2/w/root_d8",
+     "target_exists": true
+    }
+   ],
+   "counts_NOT1": {
+    "K0": {
+     "counted": 1,
+     "held": {
+      "list": [
+       "NOT1_6212"
+      ],
+      "n": 1
+     },
+     "instances": 2,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [],
+      "n": 0
+     },
+     "not_run": {
+      "list": [
+       {
+        "instance": "NOT1_6213",
+        "machine": "machine_1",
+        "why": "no folder: never started"
+       }
+      ],
+      "n": 1
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [],
+      "n": 0
+     },
+     "refuted_stopped_by_own_check": {
+      "list": [],
+      "n": 0
+     }
+    },
+    "K3": {
+     "counted": 1,
+     "held": {
+      "list": [
+       "NOT1_6212"
+      ],
+      "n": 1
+     },
+     "instances": 2,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [],
+      "n": 0
+     },
+     "not_run": {
+      "list": [
+       {
+        "instance": "NOT1_6213",
+        "machine": "machine_1",
+        "why": "no folder: never started"
+       }
+      ],
+      "n": 1
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [],
+      "n": 0
+     },
+     "refuted_stopped_by_own_check": {
+      "list": [],
+      "n": 0
+     }
+    }
+   },
+   "rc": 0,
+   "stderr": ""
+  },
+  "ok": true,
+  "seconds": 12.3
+ },
+ "analysis_d9_copies": {
+  "detail": {
+   "checks": [
+    {
+     "check": "30 copies refused",
+     "expected": "the home instance NOT1 6212 is in more than one root",
+     "matched": "refused: the home instance NOT1 6212 is in more than one root: machine_1 and machine_2",
+     "target": "/tmp/claude-0/runc2/w/root_d9_01",
+     "target_exists": true
+    },
+    {
+     "check": "one root twice refused",
+     "expected": "a root is given more than once",
+     "matched": "refused: a root is given more than once: ['/tmp/claude-0/runc2/w/root_d9_00', '/tmp/claude-0/runc2/w/root_d9_00']",
+     "target": "/tmp/claude-0/runc2/w/root_d9_00",
+     "target_exists": true
+    }
+   ],
+   "rc": 1,
+   "stderr": "refused: the home instance NOT1 6212 is in more than one root: machine_1 and machine_2",
+   "twice_rc": 1
+  },
+  "ok": true,
+  "seconds": 1.2
+ },
+ "analysis_forged_pins": {
+  "detail": {
+   "a CAMPAIGN root whose driver checked another FREEZE_PINS.json": [
+    1,
+    "refused: roots whose driver checked another FREEZE_PINS.json than this tree's (406821faa0a4): ['root_1']"
+   ],
+   "checks": [
+    {
+     "check": "times=bare",
+     "expected": "campaign mode: times must be github, not 'bare'",
+     "matched": "refused: campaign mode: times must be github, not 'bare'",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "thresholds=another file",
+     "expected": "campaign mode reads the pinned thresholds.json only",
+     "matched": "refused: campaign mode reads the pinned thresholds.json only",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "controls=another tree",
+     "expected": "campaign mode: controls must be the noise tree at",
+     "matched": "refused: campaign mode: controls must be the noise tree at 458bc7a6d763 (/tmp/claude-0/runc2/w/tree_pins.wt-458bc7a6/research/layered-networks)",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "the home run's TEST root itself",
+     "expected": "roots not run by this campaign.py on the frozen template in campaign mode",
+     "matched": "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['root_1']",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .py in the analysis tree",
+     "expected": "is not clean (a changed tracked file, or an untracked .py/.json)",
+     "matched": "refused: campaign mode: the tree at aa8b4c3028f8 is not clean (a changed tracked file, or an untracked .py/.json)",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "a CAMPAIGN root whose driver checked another FREEZE_PINS.json",
+     "expected": "roots whose driver checked another FREEZE_PINS.json than this tree's",
+     "matched": "refused: roots whose driver checked another FREEZE_PINS.json than this tree's (406821faa0a4): ['root_1']",
+     "target": "/tmp/claude-0/runc2/w/root_home_forged_pins",
+     "target_exists": true
+    },
+    {
+     "check": "control: the same forged root with this tree's pins",
+     "expected": "campaign mode: draw=DRAW.json is required",
+     "matched": "refused: campaign mode: draw=DRAW.json is required",
+     "must_not_contain": "another FREEZE_PINS.json",
+     "target": "/tmp/claude-0/runc2/w/root_home_forged_control",
+     "target_exists": true
+    }
+   ],
+   "control: the same forged root with this tree's pins": [
+    1,
+    "refused: campaign mode: draw=DRAW.json is required"
+   ],
+   "controls=another tree": [
+    1,
+    "refused: campaign mode: controls must be the noise tree at 458bc7a6d763 (/tmp/claude-0/runc2/w/tree_pins.wt-458bc7a6/research/layered-networks)"
+   ],
+   "the home run's TEST root itself": [
+    1,
+    "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['root_1']"
+   ],
+   "thresholds=another file": [
+    1,
+    "refused: campaign mode reads the pinned thresholds.json only"
+   ],
+   "times=bare": [
+    1,
+    "refused: campaign mode: times must be github, not 'bare'"
+   ],
+   "untracked .py in the analysis tree": [
+    1,
+    "refused: campaign mode: the tree at aa8b4c3028f8 is not clean (a changed tracked file, or an untracked .py/.json)"
+   ]
+  },
+  "ok": true,
+  "seconds": 1.8
+ },
+ "analysis_hardening": {
+  "detail": {
+   "A4: a root path with '='": [
+    1,
+    "-0/runc2/w/root_h=eq' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, rehearsal1_draw, rehearsal1_excluded, rehearsal1_announce, rehearsal1_activity, second_scan, times, thresholds, controls, tips; a root path cannot contain '=')"
+   ],
+   "A4: no root": [
+    1,
+    "refused: no root"
+   ],
+   "A4: unknown key": [
+    1,
+    "argument 'colour=red' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, rehearsal1_draw, rehearsal1_excluded, rehearsal1_announce, rehearsal1_activity, second_scan, times, thresholds, controls, tips; a root path cannot contain '=')"
+   ],
+   "A5: python -O": [
+    1,
+    "refused: Python runs with -O (sys.flags.optimize): run analysis.py without it"
+   ],
+   "A6: an unknown verdict": [
+    1,
+    "refused: /tmp/claude-0/runc2/w/root_h_a6: NOT1_6212/N0/comparison.json: unknown verdict 'agrees mostly'"
+   ],
+   "A7": {
+    "expected": 1,
+    "failed": 0,
+    "not_judged": 0,
+    "passed": 1,
+    "present": 1
+   },
+   "B10: a non-empty OUTDIR": [
+    1,
+    "refused: OUTDIR /tmp/claude-0/runc2/w/an_h_full exists and is not an empty folder"
+   ],
+   "B16/D8: a verified draw, the root's plan is none of the expected plans": [
+    1,
+    "refused: /tmp/claude-0/runc2/w/root_home: PLAN.json is none of the expected plans of the draw"
+   ],
+   "B16: one changed signature byte": [
+    1,
+    "refused: DRAW.json: the beacon round does not verify against the pinned quicknet key: {'round': 1000000, 'randomness_ok': True, 'ok': False, 'why': \"point decoding: ValueError('The given point is not on G1: y**2 = x**3 + b')\"}"
+   ],
+   "B16: one seed changed, the signature kept": [
+    1,
+    "refused: DRAW.json is not draw_seeds.draw of its beacon and round on the excluded= list at the sizes {'ANDOR3': 1, 'NOT1': 2, 'XOR3': 1} (with its beacon_round and announce), byte for byte"
+   ],
+   "B16: the round off by one (the announce pushed 3 s later)": [
+    1,
+    "refused: DRAW.json's round 1000000 is not the round the announce's push time fixes (1000001, 2023-09-27T08:19:27Z + 600 s)"
+   ],
+   "B2": {
+    "K0": {
+     "counted": false,
+     "not_sealed": true
+    },
+    "rc": 0,
+    "seal": {
+     "log": {
+      "why": "no valid seal"
+     },
+     "log_ok": false,
+     "regenerated_identical": false,
+     "regeneration_why": "the seal folder holds ['MANIFEST.json', 'NOT1_6212.copy.json', 'NOT1_6212.json', 'SHA256SUMS'], not exactly MANIFEST.json, SHA256SUMS and NOT1_6212.json"
+    },
+    "stderr": ""
+   },
+   "B4: a comparison compare_d2 does not reproduce": [
+    1,
+    "refused: /tmp/claude-0/runc2/w/root_h_b4: NOT1_6212/N1/comparison.json is not what the pinned compare_d2 computes from its seal and noisy_record.json"
+   ],
+   "B8: a read file under no manifest line": [
+    1,
+    "refused: /tmp/claude-0/runc2/w/root_h_b8: NOT1_6212/D/record.json is read but is under no verified manifest line and not on UNMANIFESTED"
+   ],
+   "B9": {
+    "notice": [
+     "no draw: the expected plans are each root's own PLAN.json (test mode, no draw=)",
+     "root not finished: machine_1 (1 seal lines on evidence/combined-seals-K01)"
+    ],
+    "rc": 0,
+    "stderr": ""
+   },
+   "N5: an exclusion list rejecting more than 20 % of the range": [
+    1,
+    "refused: the excluded= list rejects 38.1% of the draw range, more than 20%"
+   ],
+   "N6: a round written 1000000.0": [
+    1,
+    "refused: DRAW.json has no beacon string, or its round or beacon_round's round is not an integer"
+   ],
+   "X1: a zero-padded signature (it would verify)": [
+    1,
+    "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)"
+   ],
+   "checks": [
+    {
+     "check": "A4: unknown key",
+     "expected": "unknown argument 'colour=red'",
+     "matched": "argument 'colour=red' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, rehearsal1_draw, rehearsal1_excluded, rehearsal1_announce, rehearsal1_activity, second_scan, times, thresholds, controls, tips; a root path cannot contain '=')",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "A4: a root path with '='",
+     "expected": "unknown argument",
+     "matched": "-0/runc2/w/root_h=eq' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, rehearsal1_draw, rehearsal1_excluded, rehearsal1_announce, rehearsal1_activity, second_scan, times, thresholds, controls, tips; a root path cannot contain '=')",
+     "target": "/tmp/claude-0/runc2/w/root_h=eq",
+     "target_exists": true
+    },
+    {
+     "check": "A4: no root",
+     "expected": "refused: no root",
+     "matched": "refused: no root",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "A5: python -O",
+     "expected": "Python runs with -O",
+     "matched": "refused: Python runs with -O (sys.flags.optimize): run analysis.py without it",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B10: a non-empty OUTDIR",
+     "expected": "exists and is not an empty folder",
+     "matched": "refused: OUTDIR /tmp/claude-0/runc2/w/an_h_full exists and is not an empty folder",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "A6: an unknown verdict",
+     "expected": "unknown verdict 'agrees mostly'",
+     "matched": "refused: /tmp/claude-0/runc2/w/root_h_a6: NOT1_6212/N0/comparison.json: unknown verdict 'agrees mostly'",
+     "target": "/tmp/claude-0/runc2/w/root_h_a6",
+     "target_exists": true
+    },
+    {
+     "check": "B4: a comparison compare_d2 does not reproduce",
+     "expected": "NOT1_6212/N1/comparison.json is not what the pinned compare_d2 computes",
+     "matched": "refused: /tmp/claude-0/runc2/w/root_h_b4: NOT1_6212/N1/comparison.json is not what the pinned compare_d2 computes from its seal and noisy_record.json",
+     "target": "/tmp/claude-0/runc2/w/root_h_b4",
+     "target_exists": true
+    },
+    {
+     "check": "B8: a read file under no manifest line",
+     "expected": "NOT1_6212/D/record.json is read but is under no verified manifest line",
+     "matched": "refused: /tmp/claude-0/runc2/w/root_h_b8: NOT1_6212/D/record.json is read but is under no verified manifest line and not on UNMANIFESTED",
+     "target": "/tmp/claude-0/runc2/w/root_h_b8",
+     "target_exists": true
+    },
+    {
+     "check": "B1/B2: an extra file in the seal folder is a seal defect",
+     "expected": "not exactly MANIFEST.json",
+     "matched": "the seal folder holds ['MANIFEST.json', 'NOT1_6212.copy.json', 'NOT1_6212.json', 'SHA256SUMS'], not exactly MANIFEST.json, SHA256SUMS and NOT1_6212.json",
+     "target": "/tmp/claude-0/runc2/w/root_h_b2",
+     "target_exists": true
+    },
+    {
+     "check": "B9: a root without DONE is analysed, not finished",
+     "expected": "root not finished: machine_1",
+     "matched": "[\"no draw: the expected plans are each root's own PLAN.json (test mode, no draw=)\", \"root not finished: machine_1 (1 seal lines on evidence/combined-seals-K01)\"]",
+     "target": "/tmp/claude-0/runc2/w/root_h_b9",
+     "target_exists": true
+    },
+    {
+     "check": "A7: the expected U, present and passed",
+     "expected": "\"expected\": 1, \"failed\": 0, \"not_judged\": 0, \"passed\": 1, \"present\": 1",
+     "matched": "{\"expected\": 1, \"failed\": 0, \"not_judged\": 0, \"passed\": 1, \"present\": 1}",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16: one seed changed, the signature kept",
+     "expected": "DRAW.json is not draw_seeds.draw of its beacon and round",
+     "matched": "refused: DRAW.json is not draw_seeds.draw of its beacon and round on the excluded= list at the sizes {'ANDOR3': 1, 'NOT1': 2, 'XOR3': 1} (with its beacon_round and announce), byte for byte",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16: the round off by one (the announce pushed 3 s later)",
+     "expected": "is not the round the announce's push time fixes",
+     "matched": "refused: DRAW.json's round 1000000 is not the round the announce's push time fixes (1000001, 2023-09-27T08:19:27Z + 600 s)",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16: one changed signature byte",
+     "expected": "the beacon round does not verify",
+     "matched": "refused: DRAW.json: the beacon round does not verify against the pinned quicknet key: {'round': 1000000, 'randomness_ok': True, 'ok': False, 'why': \"point decoding: ValueError('The given point is not on G1: y**2 = x**3 + b')\"}",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16/D8: a verified draw, the root's plan is none of the expected plans",
+     "expected": "PLAN.json is none of the expected plans of the draw",
+     "matched": "refused: /tmp/claude-0/runc2/w/root_home: PLAN.json is none of the expected plans of the draw",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "X1: a zero-padded signature (it would verify)",
+     "expected": "exactly 48 bytes",
+     "matched": "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "N6: a round written 1000000.0",
+     "expected": "is not an integer",
+     "matched": "refused: DRAW.json has no beacon string, or its round or beacon_round's round is not an integer",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "N5: an exclusion list rejecting more than 20 % of the range",
+     "expected": "of the draw range, more than 20%",
+     "matched": "refused: the excluded= list rejects 38.1% of the draw range, more than 20%",
+     "target": "/tmp/claude-0/runc2/w/EXCLUDED_wide.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: rehearsal seeds, a rehearsal seed missing",
+     "expected": "lacks rehearsal2 seeds [12671]",
+     "matched": "refused: the campaign's excluded= list lacks rehearsal2 seeds [12671] and noise seeds [] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/runc2/w/DRAW_campaign16422.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: rehearsal seeds, a rehearsal noise seed missing",
+     "expected": "noise seeds [186322]",
+     "matched": "refused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [186322] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/runc2/w/DRAW_campaign16422.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: rehearsal seeds, the full list: accepted (refused later, at the root's plan)",
+     "expected": "PLAN.json is none of the expected plans",
+     "matched": "refused: /tmp/claude-0/runc2/w/root_home: PLAN.json is none of the expected plans of the draw",
+     "target": "/tmp/claude-0/runc2/w/DRAW_campaign16423.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: one value, one writing (upper-case beacon)",
+     "expected": "another writing of the value is refused",
+     "matched": "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused",
+     "target": "/tmp/claude-0/runc2/w/DRAW_wupper.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: one value, one writing (upper-case randomness)",
+     "expected": "another writing of the value is refused",
+     "matched": "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused",
+     "target": "/tmp/claude-0/runc2/w/DRAW_wupper.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: one value, one writing (upper-case signature)",
+     "expected": "not written in canonical form",
+     "matched": "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)",
+     "target": "/tmp/claude-0/runc2/w/DRAW_wupper.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: stopped after a differing N1, refuted (manifest not final)",
+     "expected": "\"counted\": true, \"manifest_not_final\": true, \"refuted\": true",
+     "matched": "{\"counted\": true, \"manifest_not_final\": true, \"refuted\": true}",
+     "target": "/tmp/claude-0/runc2/w/root_h_partial",
+     "target_exists": true
+    }
+   ],
+   "owner: one value, one writing (upper-case beacon)": [
+    1,
+    "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused"
+   ],
+   "owner: one value, one writing (upper-case randomness)": [
+    1,
+    "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused"
+   ],
+   "owner: one value, one writing (upper-case signature)": [
+    1,
+    "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)"
+   ],
+   "owner: rehearsal seeds, a rehearsal noise seed missing": [
+    1,
+    "refused: the campaign's excluded= list lacks rehearsal2 seeds [] and noise seeds [186322] (the list must add the earlier rehearsals' seeds)"
+   ],
+   "owner: rehearsal seeds, a rehearsal seed missing": [
+    1,
+    "refused: the campaign's excluded= list lacks rehearsal2 seeds [12671] and noise seeds [] (the list must add the earlier rehearsals' seeds)"
+   ],
+   "owner: rehearsal seeds, the full list: accepted (refused later, at the root's plan)": [
+    1,
+    "refused: /tmp/claude-0/runc2/w/root_home: PLAN.json is none of the expected plans of the draw"
+   ],
+   "partial": {
+    "K0": {
+     "counted": false
+    },
+    "K3": {
+     "counted": true,
+     "manifest_not_final": true,
+     "refuted": true
+    },
+    "counts_K0_not_completed": {
+     "list": [
+      {
+       "instance": "NOT1_6212",
+       "status": "not completed, manifest not final (no verified instance manifest: the machine stopped)",
+       "step": null
+      }
+     ],
+     "n": 1
+    },
+    "notice": [
+     "no draw: the expected plans are each root's own PLAN.json (test mode, no draw=)",
+     "root not finished: machine_1 (1 seal lines on evidence/combined-seals-K01)"
+    ],
+    "rc": 0,
+    "stderr": ""
+   },
+   "rehearsal_seeds": [
+    12671,
+    18632,
+    22468,
+    29795,
+    30469,
+    33236,
+    40210,
+    49489,
+    56454,
+    77868,
+    78193,
+    82742,
+    84213,
+    84992,
+    92048,
+    94937,
+    95481,
+    99613
+   ]
+  },
+  "ok": true,
+  "seconds": 92.2
+ },
+ "analysis_own_check": {
+  "detail": {
+   "A1ii": {
+    "K0": {
+     "counted": false,
+     "not_sealed": true
+    },
+    "K3": {
+     "counted": true,
+     "refuted": true,
+     "seal_defect": true,
+     "stopped_by_own_check": true
+    },
+    "rc": 0
+   },
+   "analysis_rc": 0,
+   "checks": [
+    {
+     "check": "6212 refuted at K3, stopped by its own check, with its status",
+     "expected": "[{\"instance\": \"NOT1_6212\", \"stopped_by_own_check\": [{\"round\": \"C2\", \"status\": \"failed: stub: the run's own check (test)\"}]}]",
+     "matched": "[{\"instance\": \"NOT1_6212\", \"stopped_by_own_check\": [{\"round\": \"C2\", \"status\": \"failed: stub: the run's own check (test)\"}]}]",
+     "target": "/tmp/claude-0/runc2/w/root_ownchk",
+     "target_exists": true
+    },
+    {
+     "check": "6212 listed with its full status",
+     "expected": "failed: stub: the run's own check (test)",
+     "matched": "[{\"instance\": \"NOT1_6212\", \"machine\": \"machine_1\", \"round\": \"C2\", \"status\": \"failed: stub: the run's own check (test)\"}]",
+     "target": "/tmp/claude-0/runc2/w/root_ownchk",
+     "target_exists": true
+    },
+    {
+     "check": "6213, a simulator end: not completed at K3",
+     "expected": "[\"NOT1_6213\"]",
+     "matched": "[\"NOT1_6213\"]",
+     "target": "/tmp/claude-0/runc2/w/root_ownchk",
+     "target_exists": true
+    },
+    {
+     "check": "A1(ii): refuted with a defective seal, flagged",
+     "expected": "\"seal_defect\": true",
+     "matched": "{\"counted\": true, \"refuted\": true, \"seal_defect\": true, \"stopped_by_own_check\": true}",
+     "target": "/tmp/claude-0/runc2/w/root_ownchk_a1",
+     "target_exists": true
+    }
+   ],
+   "counts": {
+    "K0": {
+     "counted": 2,
+     "held": {
+      "list": [
+       "NOT1_6212",
+       "NOT1_6213"
+      ],
+      "n": 2
+     },
+     "instances": 2,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [],
+      "n": 0
+     },
+     "not_run": {
+      "list": [],
+      "n": 0
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [],
+      "n": 0
+     },
+     "refuted_stopped_by_own_check": {
+      "list": [],
+      "n": 0
+     }
+    },
+    "K3": {
+     "counted": 1,
+     "held": {
+      "list": [],
+      "n": 0
+     },
+     "instances": 2,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [
+       {
+        "instance": "NOT1_6213",
+        "status": "failed",
+        "step": "N2"
+       }
+      ],
+      "n": 1
+     },
+     "not_run": {
+      "list": [],
+      "n": 0
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [],
+      "n": 0
+     },
+     "refuted_stopped_by_own_check": {
+      "list": [
+       {
+        "instance": "NOT1_6212",
+        "stopped_by_own_check": [
+         {
+          "round": "C2",
+          "status": "failed: stub: the run's own check (test)"
+         }
+        ]
+       }
+      ],
+      "n": 1
+     }
+    }
+   },
+   "fixture_is_the_driver_state": true,
+   "run_rc": 0,
+   "stderr": "",
+   "steps": {
+    "NOT1_6212": {
+     "C0": "done",
+     "C1": "done",
+     "C3": "done",
+     "D": "done",
+     "N0": "done",
+     "N1": "done",
+     "N2": "failed",
+     "N3": "done",
+     "deck": "done",
+     "inverters": "done",
+     "seal": "done",
+     "sealpush": "done"
+    },
+    "NOT1_6213": {
+     "C0": "done",
+     "C1": "done",
+     "C3": "done",
+     "D": "done",
+     "N0": "done",
+     "N1": "done",
+     "N2": "failed",
+     "N3": "done",
+     "deck": "done",
+     "inverters": "done",
+     "seal": "done",
+     "sealpush": "done"
+    }
+   },
+   "stopped": [
+    {
+     "instance": "NOT1_6212",
+     "machine": "machine_1",
+     "round": "C2",
+     "status": "failed: stub: the run's own check (test)"
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 627.1
+ },
+ "analysis_refuses": {
+  "detail": {
+   "branch": "pins match",
+   "campaign_on_test": "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['root_1']",
+   "checks": [
+    {
+     "check": "campaign mode, every pin matches: the test root is refused as not run by this campaign.py",
+     "expected": "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['root_1']",
+     "matched": "refused: roots not run by this campaign.py on the frozen template in campaign mode: ['root_1']",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "OUTDIR inside the root",
+     "expected": "lies inside the root",
+     "matched": "refused: OUTDIR /tmp/claude-0/runc2/w/root_home/analysis lies inside the root /tmp/claude-0/runc2/w/root_home",
+     "target": "/tmp/claude-0/runc2/w/root_home",
+     "target_exists": true
+    }
+   ],
+   "outdir_inside": "refused: OUTDIR /tmp/claude-0/runc2/w/root_home/analysis lies inside the root /tmp/claude-0/runc2/w/root_home",
+   "pins_differing": [],
+   "tree_dirty": [],
+   "tree_head": "a5ba132bc59e64b4eb6adcc01d107177d5fbe22b"
+  },
+  "ok": true,
+  "seconds": 1.8
+ },
+ "analysis_tampered": {
+  "detail": {
+   "A1": {
+    "K3": {
+     "counted": true,
+     "refuted": true
+    },
+    "counts_K3": {
+     "counted": 1,
+     "held": {
+      "list": [],
+      "n": 0
+     },
+     "instances": 1,
+     "no_prediction": {
+      "list": [],
+      "n": 0
+     },
+     "not_completed": {
+      "list": [],
+      "n": 0
+     },
+     "not_run": {
+      "list": [],
+      "n": 0
+     },
+     "not_sealed": {
+      "list": [],
+      "n": 0
+     },
+     "premise_flagged_D4": {
+      "list": [],
+      "n": 0
+     },
+     "refuted": {
+      "list": [
+       "NOT1_6212"
+      ],
+      "n": 1
+     },
+     "refuted_stopped_by_own_check": {
+      "list": [],
+      "n": 0
+     }
+    },
+    "rc": 0,
+    "verdict": "refuted (no D4 audit in this group)"
+   },
+   "A2": {
+    "K0": {
+     "counted": false,
+     "not_sealed": true
+    },
+    "K3": {
+     "counted": false,
+     "not_sealed": true
+    },
+    "not_sealed_K3": [
+     {
+      "instance": "NOT1_6212",
+      "verdicts": {
+       "C0": "agrees",
+       "C1": "agrees",
+       "C2": "agrees",
+       "C3": "agrees"
+      }
+     }
+    ],
+    "rc": 0,
+    "seal": {
+     "log": {
+      "commit": "630e29ca57286a9c57ca112953208a9a9582f802",
+      "margin_s": 2.01,
+      "pushed_utc": "2026-11-28T08:35:02.906378Z",
+      "stage_n_start": "2026-11-28T08:35:04.916813Z"
+     },
+     "log_ok": true,
+     "regenerated_identical": false,
+     "regeneration_why": "D/prediction.json differs from its seal (the sealed prediction is the one read)"
+    },
+    "stage_d_room_K3": true
+   },
+   "checks": [
+    {
+     "check": "A1: K3 refuted beside a timed-out round",
+     "expected": "{\"counted\": true, \"refuted\": true}",
+     "matched": "{\"counted\": true, \"refuted\": true}",
+     "target": "/tmp/claude-0/runc2/w/root_tampered_A1",
+     "target_exists": true
+    },
+    {
+     "check": "A2: the changed D/prediction.json is a seal defect",
+     "expected": "D/prediction.json differs from its seal",
+     "matched": "D/prediction.json differs from its seal (the sealed prediction is the one read)",
+     "target": "/tmp/claude-0/runc2/w/root_tampered_A2",
+     "target_exists": true
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 24.6
+ },
+ "analysis_two_rehearsals": {
+  "detail": {
+   "checks": [
+    {
+     "check": "both, the full list: accepted",
+     "expected": "\"rehearsal1\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}",
+     "matched": "accepted: {\"rehearsal1\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}, \"rehearsal2\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}}",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1 absent: refused",
+     "expected": "rehearsal1_draw= (rehearsal1's published DRAW.json) is required",
+     "matched": "refused: campaign mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 2 absent: refused",
+     "expected": "rehearsal_draw= (rehearsal2's published DRAW.json) is required",
+     "matched": "refused: campaign mode: rehearsal_draw= (rehearsal2's published DRAW.json) is required (its seeds must be excluded)",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "a rehearsal 1 seed missing: refused",
+     "expected": "lacks rehearsal1 seeds [18985]",
+     "matched": "refused: the campaign's excluded= list lacks rehearsal1 seeds [18985] and noise seeds [] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "a rehearsal 1 noise seed missing: refused",
+     "expected": "noise seeds [277353]",
+     "matched": "refused: the campaign's excluded= list lacks rehearsal1 seeds [] and noise seeds [277353] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1's DRAW.json re-serialized: refused",
+     "expected": "the published rehearsal 1 draw is b8aaefd9f107",
+     "matched": "refused: the published rehearsal 1 draw is b8aaefd9f107 (DRAW.json of evidence/combined-rehearsal-draw-result at f74b75fbdf72), not 49aeefea47b3",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1 with another list: refused",
+     "expected": "not the one DRAW_ANNOUNCE.txt names",
+     "matched": "refused: the excluded= file is not the one DRAW_ANNOUNCE.txt names (excluded_sha256)",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal mode: rehearsal 2's list with rehearsal 1's seeds: accepted",
+     "expected": "accepted: [\"rehearsal1\"]",
+     "matched": "accepted: [\"rehearsal1\"]",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal mode: rehearsal 2's list missing one rehearsal 1 noise seed: refused",
+     "expected": "rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [291791]",
+     "matched": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [291791] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal mode: rehearsal 1 absent: refused",
+     "expected": "rehearsal mode: rehearsal1_draw=",
+     "matched": "refused: rehearsal mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1's announce later than the campaign's: refused",
+     "expected": "rehearsal1's announce (2026-11-27T15:14:37Z) is not earlier",
+     "matched": "refused: rehearsal1's announce (2026-11-27T15:14:37Z) is not earlier than the campaign's announce (2026-11-27T15:00:00Z)",
+     "target": "/tmp/claude-0/runc2/w/two_out",
+     "target_exists": true
+    }
+   ],
+   "rehearsal1_seeds": [
+    18985,
+    27735,
+    29179,
+    30743,
+    34095,
+    46230,
+    49299,
+    49661,
+    54016,
+    60536,
+    66680,
+    70229,
+    70285,
+    75255,
+    87182,
+    88529,
+    94823,
+    99508
+   ],
+   "rehearsal2_standin_seeds": [
+    12671,
+    18632,
+    22468,
+    29795,
+    30469,
+    33236,
+    40210,
+    49489,
+    56454,
+    77868,
+    78193,
+    82742,
+    84213,
+    84992,
+    92048,
+    94937,
+    95481,
+    99613
+   ],
+   "results": {
+    "a rehearsal 1 noise seed missing: refused": "refused: the campaign's excluded= list lacks rehearsal1 seeds [] and noise seeds [277353] (the list must add the earlier rehearsals' seeds)",
+    "a rehearsal 1 seed missing: refused": "refused: the campaign's excluded= list lacks rehearsal1 seeds [18985] and noise seeds [] (the list must add the earlier rehearsals' seeds)",
+    "both, the full list: accepted": "accepted: {\"rehearsal1\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}, \"rehearsal2\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}}",
+    "rehearsal 1 absent: refused": "refused: campaign mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+    "rehearsal 1 with another list: refused": "refused: the excluded= file is not the one DRAW_ANNOUNCE.txt names (excluded_sha256)",
+    "rehearsal 1's DRAW.json re-serialized: refused": "refused: the published rehearsal 1 draw is b8aaefd9f107 (DRAW.json of evidence/combined-rehearsal-draw-result at f74b75fbdf72), not 49aeefea47b3",
+    "rehearsal 1's announce later than the campaign's: refused": "refused: rehearsal1's announce (2026-11-27T15:14:37Z) is not earlier than the campaign's announce (2026-11-27T15:00:00Z)",
+    "rehearsal 2 absent: refused": "refused: campaign mode: rehearsal_draw= (rehearsal2's published DRAW.json) is required (its seeds must be excluded)",
+    "rehearsal mode: rehearsal 1 absent: refused": "refused: rehearsal mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+    "rehearsal mode: rehearsal 2's list missing one rehearsal 1 noise seed: refused": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [291791] (the list must add the earlier rehearsals' seeds)",
+    "rehearsal mode: rehearsal 2's list with rehearsal 1's seeds: accepted": "accepted: [\"rehearsal1\"]"
+   }
+  },
+  "ok": true,
+  "seconds": 7.8
+ },
+ "crash": {
+  "detail": {
+   "D": {
+    "status": "failed",
+    "why": "exit -9, missing ['D/record.json', 'D/prediction.json']"
+   },
+   "checks": [
+    {
+     "check": "D killed from outside",
+     "expected": "exit -9",
+     "matched": "exit -9, missing ['D/record.json', 'D/prediction.json']",
+     "target": "/tmp/claude-0/runc2/w/root_crash",
+     "target_exists": true
+    }
+   ],
+   "killed_pids": [
+    1667
+   ],
+   "steps": {
+    "D": "failed",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 133.1
+ },
+ "differing_duplicate": {
+  "detail": {
+   "analysis_rc": 0,
+   "checker_last": "DUPLICATE DIFFERS",
+   "checks": [
+    {
+     "check": "the duplicate judged not identical",
+     "expected": "\"identical\": false",
+     "matched": "{\"identical\": false}",
+     "target": "/tmp/claude-0/runc2/w/analysis_dupdiff/RESULTS.json",
+     "target_exists": true
+    }
+   ],
+   "comparison": {
+    "equals_original": true,
+    "verdict": "agrees"
+   },
+   "duplicate": [
+    {
+     "cpu_s": 64.8,
+     "exit": 0,
+     "group": "NOT1",
+     "instance": "NOT1_6212",
+     "ok": true,
+     "timed_out": false
+    }
+   ],
+   "identical": false
+  },
+  "ok": true,
+  "seconds": 95.3
+ },
+ "draw_canonical": {
+  "detail": {
+   "beacon_verify": {
+    "padded": false,
+    "published": true
+   },
+   "bytes_same": true,
+   "checks": [
+    {
+     "check": "lowercase: the seeds of ef374ccd",
+     "expected": "\"campaign\": true, \"rehearsal\": true, \"standin\": true",
+     "matched": "{\"campaign\": true, \"rehearsal\": true, \"standin\": true}",
+     "target": "/home/user/kr/research/layered-networks/draw_seeds.py",
+     "target_exists": true
+    },
+    {
+     "check": "other writings refused",
+     "expected": "\"mixed\": true, \"prefixed\": true, \"round_as_string\": true, \"spaced\": true, \"upper\": true",
+     "matched": "{\"mixed\": true, \"prefixed\": true, \"round_as_string\": true, \"spaced\": true, \"upper\": true}",
+     "target": "/home/user/kr/research/layered-networks/draw_seeds.py",
+     "target_exists": true
+    },
+    {
+     "check": "every permutation of the sizes identical",
+     "expected": "\"campaign\": true, \"rehearsal\": true, \"standin\": true",
+     "matched": "{\"campaign\": true, \"rehearsal\": true, \"standin\": true}",
+     "target": "/home/user/kr/research/layered-networks/draw_seeds.py",
+     "target_exists": true
+    },
+    {
+     "check": "the order evidence",
+     "expected": "\"old_differs\": true, \"new_identical\": true",
+     "matched": "{\"value\": \"40513fe582e179a7fd663a3afbfac614b9d7c7fcc7d9065a27539d8b8478a85e\", \"old_differs\": true, \"new_identical\": true}",
+     "target": "/home/user/kr/research/layered-networks/draw_seeds.py",
+     "target_exists": true
+    },
+    {
+     "check": "beacon_verify: the published signature verifies, the zero-padded one is refused",
+     "expected": "\"padded\": false, \"published\": true",
+     "matched": "{\"padded\": false, \"published\": true}",
+     "target": "/home/user/kr/research/layered-networks/beacon_verify.py",
+     "target_exists": true
+    }
+   ],
+   "lowercase_same_as_ef374ccd": {
+    "campaign": true,
+    "rehearsal": true,
+    "standin": true
+   },
+   "order_evidence": {
+    "new_identical": true,
+    "old_differs": true,
+    "value": "40513fe582e179a7fd663a3afbfac614b9d7c7fcc7d9065a27539d8b8478a85e"
+   },
+   "other_writings_refused": {
+    "mixed": true,
+    "prefixed": true,
+    "round_as_string": true,
+    "spaced": true,
+    "upper": true
+   },
+   "permutations_identical": {
+    "campaign": true,
+    "rehearsal": true,
+    "standin": true
+   }
+  },
+  "ok": true,
+  "seconds": 1.6
+ },
+ "draw_plans_command": {
+  "detail": {
+   "campaign": {
+    "every_key_order_identical": true,
+    "plans_match": {
+     "K01": true,
+     "K02": true,
+     "K03": true,
+     "K04": true,
+     "K05": true,
+     "K06": true,
+     "K07": true,
+     "K08": true,
+     "K09": true,
+     "K10": true,
+     "K11": true,
+     "K12": true
+    },
+    "rc": 0
+   },
+   "checks": [
+    {
+     "check": "campaign: the 12 plan files are the expected plans",
+     "matched": "{\"K01\": true, \"K02\": true, \"K03\": true, \"K04\": true, \"K05\": true, \"K06\": true, \"K07\": true, \"K08\": true, \"K09\": true, \"K10\": true, \"K11\": true, \"K12\": true}",
+     "target": "/tmp/claude-0/runc2/w/DRAW_plans_campaign.json",
+     "target_exists": true
+    },
+    {
+     "check": "campaign: one split for every key order",
+     "matched": "identical",
+     "target": "/tmp/claude-0/runc2/w/DRAW_plans_campaign.json",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal: the 12 plan files are the expected plans",
+     "matched": "{\"K01\": true, \"K02\": true, \"K03\": true, \"K04\": true, \"K05\": true, \"K06\": true, \"K07\": true, \"K08\": true, \"K09\": true, \"K10\": true, \"K11\": true, \"K12\": true}",
+     "target": "/tmp/claude-0/runc2/w/DRAW_plans_rehearsal.json",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal: one split for every key order",
+     "matched": "identical",
+     "target": "/tmp/claude-0/runc2/w/DRAW_plans_rehearsal.json",
+     "target_exists": true
+    }
+   ],
+   "rehearsal": {
+    "every_key_order_identical": true,
+    "plans_match": {
+     "K01": true,
+     "K02": true,
+     "K03": true,
+     "K04": true,
+     "K05": true,
+     "K06": true,
+     "K07": true,
+     "K08": true,
+     "K09": true,
+     "K10": true,
+     "K11": true,
+     "K12": true
+    },
+    "rc": 0
+   }
+  },
+  "ok": true,
+  "seconds": 0.1
+ },
+ "duplicate_after_later_seals": {
+  "detail": {
+   "analysis_rc": 0,
+   "checker_lines": [
+    "input.spice: identical (519a6ce2db19)",
+    "comparison.json: identical (excepted fields removed)",
+    "noisy_record.json: identical (excepted fields removed)",
+    "trace.raw: identical under the criterion {'size': (19433552, 19433552), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': 'af272127d902'}",
+    "session.log: identical under the criterion {'excluded': (260, 242), 'other_diffs': []}",
+    "DUPLICATE IDENTICAL"
+   ],
+   "checks": [
+    {
+     "check": "the duplicate's seal_log commit is the home's own seal commit, not the tip read",
+     "expected": "\"record\": \"630e29ca57286a9c57ca112953208a9a9582f802\"",
+     "matched": "{\"seal_log\": [\"630e29ca57286a9c57ca112953208a9a9582f802\", \"evidence/combined-seals-K01\"], \"tip_read\": \"95767e33c263c4307548ba603422257ff1277803\", \"record\": \"630e29ca57286a9c57ca112953208a9a9582f802\"}",
+     "target": "/tmp/claude-0/runc2/w/root_dup_later/DUPX_NOT1_6212/seal_check.json",
+     "target_exists": true
+    },
+    {
+     "check": "check_duplicate: IDENTICAL",
+     "expected": "DUPLICATE IDENTICAL",
+     "matched": "\"DUPLICATE IDENTICAL\"",
+     "target": "/tmp/claude-0/runc2/w/analysis_dup_later/RESULTS.json",
+     "target_exists": true
+    }
+   ],
+   "identical": true,
+   "own_commit": "630e29ca57286a9c57ca112953208a9a9582f802",
+   "seal_check": {
+    "compare": {
+     "cpu_s": 0.0,
+     "exit": 0,
+     "timed_out": false,
+     "written": true
+    },
+    "instance": "NOT1_6212",
+    "ok": true,
+    "seal_dir": "/tmp/tmppet7_2ej/seal",
+    "seal_log": [
+     "630e29ca57286a9c57ca112953208a9a9582f802",
+     "evidence/combined-seals-K01"
+    ],
+    "seal_log_tip_read": "95767e33c263c4307548ba603422257ff1277803",
+    "seal_sha256": "e4d0c517c14378ed101a58107d77ac9eca8ab9a983ecc2cee3abcc17931ef4b0",
+    "verdict": "agrees",
+    "why": null
+   },
+   "tip_after_two_seals": "95767e33c263c4307548ba603422257ff1277803"
+  },
+  "ok": true,
+  "seconds": 97.9
+ },
+ "duplicate_forged_line": {
+  "detail": {
+   "checks": [
+    {
+     "check": "refused, not completed, at the forged line's commit",
+     "expected": "refused, not completed",
+     "matched": "\"refused, not completed: the seal of NOT1_6212 at its introducing commit bca1d09d257d does not verify (the log's seal sha256 ffffffffffff is not seal_dir's e4d0c517c143)\"",
+     "target": "/tmp/claude-0/runc2/w/root_dup_forged/DUPX_NOT1_6212/duplicate_here.json",
+     "target_exists": true
+    }
+   ],
+   "duplicate_here": {
+    "group": "NOT1",
+    "instance": "NOT1_6212",
+    "not_completed": true,
+    "ok": false,
+    "refused": true,
+    "why": "refused, not completed: the seal of NOT1_6212 at its introducing commit bca1d09d257d does not verify (the log's seal sha256 ffffffffffff is not seal_dir's e4d0c517c143)"
+   },
+   "forged_tip": "bca1d09d257d991074c16f8e173d6f236a699958",
+   "own_commit": "630e29ca57286a9c57ca112953208a9a9582f802",
+   "seal_check": {
+    "instance": "NOT1_6212",
+    "ok": false,
+    "seal_dir": "/tmp/tmp0s84vp8x/seal",
+    "seal_log": [
+     "bca1d09d257d991074c16f8e173d6f236a699958",
+     "evidence/combined-seals-K01"
+    ],
+    "seal_log_tip_read": "bca1d09d257d991074c16f8e173d6f236a699958",
+    "seal_sha256": "e4d0c517c14378ed101a58107d77ac9eca8ab9a983ecc2cee3abcc17931ef4b0",
+    "why": "the log's seal sha256 ffffffffffff is not seal_dir's e4d0c517c143"
+   }
+  },
+  "ok": true,
+  "seconds": 12.3
+ },
+ "exact_union": {
+  "detail": {
+   "checks": [
+    {
+     "check": "[block rehearsal2-list]: 18 and 72",
+     "expected": "18 rehearsal seeds, 72 noise seeds",
+     "matched": "rc 0: 18 rehearsal seeds, 72 noise seeds; 16391 integers, seeds_sha256 6c0559aa53e8d03b4fb5544f9681c9da8cd5a5376f6bd1e9f6fa1a43e8bbb85a",
+     "target": "/tmp/claude-0/runc2/w/exact_union/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block rehearsal2-list] = analysis.rehearsal2_list",
+     "expected": "identical",
+     "matched": "identical",
+     "target": "/tmp/claude-0/runc2/w/exact_union/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block list]: 36 and 144",
+     "expected": "36 rehearsal seeds, 144 noise seeds",
+     "matched": "rc 0: 36 rehearsal seeds, 144 noise seeds; 16484 integers, seeds_sha256 eb39b06799fe8ddd202e60fbc55aa9e08f042b0912e946fbe60257894a1ead21",
+     "target": "/tmp/claude-0/runc2/w/exact_union/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block list] = analysis.campaign_list",
+     "expected": "identical",
+     "matched": "identical",
+     "target": "/tmp/claude-0/runc2/w/exact_union/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list]: the exact list",
+     "expected": "the list is right",
+     "matched": "rc 0: the list is right 18 72 sha256 8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+     "target": "/tmp/claude-0/runc2/w/exact_union/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] as written: one extra seed (10006) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-rehearsal2-list_one_extra_seed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] its own rebuild alone: one extra seed (10006) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 9835c7ac76572ed98f47b71d6ba50f333c54d3620ed3bb2b396dc29f16fa31ff",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-rehearsal2-list_one_extra_seed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] as written: one seed removed (0) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: refused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-rehearsal2-list_one_seed_removed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] its own rebuild alone: one seed removed (0) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-rehearsal2-list_one_seed_removed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] as written: a field changed (rule) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['rule']",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-rehearsal2-list_a_field_changed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-rehearsal2-list] its own rebuild alone: a field changed (rule) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 6b2e83318d9ae09fb28586b2183dcaba86781afe3dac77cfcfd5a72556e8d5fe",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-rehearsal2-list_a_field_changed/EXCLUDED_REHEARSAL2.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list]: the exact list",
+     "expected": "the list is right",
+     "matched": "rc 0: the list is right 36 144 sha256 be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+     "target": "/tmp/claude-0/runc2/w/exact_union/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] as written: one extra seed (10006) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: refused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [10006]",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-list_one_extra_seed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] its own rebuild alone: one extra seed (10006) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 adda2b377bf1f8df77754770dc1a4fc722a3f69dc9444d87f5e14800ddeb4722 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-list_one_extra_seed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] as written: one seed removed (12001) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-list_one_seed_removed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] its own rebuild alone: one seed removed (12001) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 ca27573d4bf8110b95d6e5b2da56aa6e978634106f4879cc8fe06731d462cac3 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-list_one_seed_removed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] as written: a field changed (rule) refused",
+     "expected": "refused: ",
+     "matched": "rc 1, refused: refused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['rule']",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-list_a_field_changed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "[block check-list] its own rebuild alone: a field changed (rule) refused",
+     "expected": "THE LIST IS WRONG: rebuild it, push nothing",
+     "matched": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 771eddfa1b401d6fcaedc59c3cad112d2d270b5b85e0e315663a33e6db1101de scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+     "target": "/tmp/claude-0/runc2/w/exact_union/mut_check-list_a_field_changed/EXCLUDED_SECOND.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis rehearsal mode: the exact list accepted",
+     "expected": "\"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+     "matched": "accepted: {\"of\": \"EXCLUDED.json + rehearsal 1\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}",
+     "target": "/tmp/claude-0/runc2/w/exact_union/a_rehearsal_exact.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis rehearsal mode: one extra seed refused",
+     "expected": "adds 1 seeds that are not in the exact union of",
+     "matched": "refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+     "target": "/tmp/claude-0/runc2/w/exact_union/a_rehearsal_one_extra_seed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis rehearsal mode: one seed removed refused",
+     "expected": "is missing 1 seeds of the exact union of",
+     "matched": "refused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]",
+     "target": "/tmp/claude-0/runc2/w/exact_union/a_rehearsal_one_seed_removed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis rehearsal mode: a field changed refused",
+     "expected": "another field differs",
+     "matched": "refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['rule']",
+     "target": "/tmp/claude-0/runc2/w/exact_union/a_rehearsal_a_field_changed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: the exact list accepted",
+     "expected": "\"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156",
+     "matched": "{\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}",
+     "target": "/tmp/claude-0/runc2/w/exact_union/a_campaign_exact.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: one extra seed refused",
+     "expected": "adds 1 seeds that are not in the exact union of",
+     "matched": "refused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [10006]",
+     "target": "/tmp/claude-0/runc2/w/exact_union/a_campaign_one_extra_seed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: one seed removed refused",
+     "expected": "is missing 1 seeds of the exact union of",
+     "matched": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+     "target": "/tmp/claude-0/runc2/w/exact_union/a_campaign_one_seed_removed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: a field changed refused",
+     "expected": "another field differs",
+     "matched": "refused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['rule']",
+     "target": "/tmp/claude-0/runc2/w/exact_union/a_campaign_a_field_changed.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: second_scan= missing refused",
+     "expected": "second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output, published with the campaign announce) is required",
+     "matched": "refused: campaign mode: second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output, published with the campaign announce) is required",
+     "target": "/tmp/claude-0/runc2/w/exact_union/a_campaign_exact.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: second_scan= not a superset refused",
+     "expected": "second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [20]",
+     "matched": "refused: second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [20]",
+     "target": "/tmp/claude-0/runc2/w/exact_union/a_scan_not_superset.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: second_scan= not the announce's refused",
+     "expected": "not the second_scan_sha256 000000000000 the campaign announce names",
+     "matched": "refused: second_scan= has sha256 c594d000ce7a, not the second_scan_sha256 000000000000 the campaign announce names",
+     "target": "/tmp/claude-0/runc2/w/exact_union/EXCLUDED_SECOND_SCAN.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis campaign mode: second_scan= the announce's accepted",
+     "expected": "accepted: ",
+     "matched": "{\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}",
+     "target": "/tmp/claude-0/runc2/w/exact_union/EXCLUDED_SECOND_SCAN.json",
+     "target_exists": true
+    },
+    {
+     "check": "analysis rehearsal mode: second_scan= refused",
+     "expected": "rehearsal mode: second_scan= is for campaign mode only",
+     "matched": "refused: rehearsal mode: second_scan= is for campaign mode only",
+     "target": "/tmp/claude-0/runc2/w/exact_union/EXCLUDED_SECOND_SCAN.json",
+     "target_exists": true
+    },
+    {
+     "check": "parse_announce: campaign with second_scan_sha256 parsed",
+     "expected": "\"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"",
+     "matched": "parsed: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"mode\": \"campaign\", \"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\", \"sizes\": {\"ANDOR3\": 32, \"NOT1\": 60, \"XOR3\": 37}}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "parse_announce: campaign without it refused",
+     "expected": "second_scan_sha256 with mode campaign only",
+     "matched": "refused: DRAW_ANNOUNCE.txt is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes', 'second_scan_sha256') (layered-draw-announce/1; second_scan_sha256 with mode campaign only)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "parse_announce: rehearsal with it refused",
+     "expected": "second_scan_sha256 with mode campaign only",
+     "matched": "refused: DRAW_ANNOUNCE.txt is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (layered-draw-announce/1; second_scan_sha256 with mode campaign only)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "parse_announce: rehearsal without it parsed",
+     "expected": "\"mode\": \"rehearsal\"",
+     "matched": "parsed: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 32, \"NOT1\": 60, \"XOR3\": 37}}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.py test mode: second_scan= refused",
+     "expected": "test mode: second_scan= is for campaign mode only",
+     "matched": "rc 1: refused: test mode: second_scan= is for campaign mode only",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    }
+   ],
+   "new_scan_integers": [
+    12001,
+    12002,
+    12003
+   ],
+   "results": {
+    "[block check-list] as written: a field changed (rule) refused": "rc 1, refused: refused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['rule']",
+    "[block check-list] as written: one extra seed (10006) refused": "rc 1, refused: refused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [10006]",
+    "[block check-list] as written: one seed removed (12001) refused": "rc 1, refused: refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+    "[block check-list] its own rebuild alone: a field changed (rule) refused": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 771eddfa1b401d6fcaedc59c3cad112d2d270b5b85e0e315663a33e6db1101de scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+    "[block check-list] its own rebuild alone: one extra seed (10006) refused": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 adda2b377bf1f8df77754770dc1a4fc722a3f69dc9444d87f5e14800ddeb4722 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+    "[block check-list] its own rebuild alone: one seed removed (12001) refused": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 36 144 sha256 ca27573d4bf8110b95d6e5b2da56aa6e978634106f4879cc8fe06731d462cac3 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+    "[block check-list]: the exact list": "rc 0: the list is right 36 144 sha256 be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156 scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f",
+    "[block check-rehearsal2-list] as written: a field changed (rule) refused": "rc 1, refused: refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['rule']",
+    "[block check-rehearsal2-list] as written: one extra seed (10006) refused": "rc 1, refused: refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+    "[block check-rehearsal2-list] as written: one seed removed (0) refused": "rc 1, refused: refused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]",
+    "[block check-rehearsal2-list] its own rebuild alone: a field changed (rule) refused": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 6b2e83318d9ae09fb28586b2183dcaba86781afe3dac77cfcfd5a72556e8d5fe",
+    "[block check-rehearsal2-list] its own rebuild alone: one extra seed (10006) refused": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 9835c7ac76572ed98f47b71d6ba50f333c54d3620ed3bb2b396dc29f16fa31ff",
+    "[block check-rehearsal2-list] its own rebuild alone: one seed removed (0) refused": "rc 1, refused: THE LIST IS WRONG: rebuild it, push nothing 18 72 sha256 b51dbdff63980e5db019dae61f033aee99e0897a285ee4dbcddccc58b1f839f6",
+    "[block check-rehearsal2-list]: the exact list": "rc 0: the list is right 18 72 sha256 8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+    "[block list] = analysis.campaign_list": "identical",
+    "[block list]: 36 and 144": "rc 0: 36 rehearsal seeds, 144 noise seeds; 16484 integers, seeds_sha256 eb39b06799fe8ddd202e60fbc55aa9e08f042b0912e946fbe60257894a1ead21",
+    "[block rehearsal2-list] = analysis.rehearsal2_list": "identical",
+    "[block rehearsal2-list]: 18 and 72": "rc 0: 18 rehearsal seeds, 72 noise seeds; 16391 integers, seeds_sha256 6c0559aa53e8d03b4fb5544f9681c9da8cd5a5376f6bd1e9f6fa1a43e8bbb85a",
+    "analysis campaign mode: a field changed refused": "refused: the campaign's excluded= list has the exact union's seed set but another field differs from the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): ['rule']",
+    "analysis campaign mode: one extra seed refused": "refused: the campaign's excluded= list adds 1 seeds that are not in the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [10006]",
+    "analysis campaign mode: one seed removed refused": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+    "analysis campaign mode: second_scan= missing refused": "refused: campaign mode: second_scan=EXCLUDED_SECOND_SCAN.json (the second scan's raw output, published with the campaign announce) is required",
+    "analysis campaign mode: second_scan= not a superset refused": "refused: second_scan= is not a superset of the freeze's EXCLUDED.json: it lacks 1 of its seeds [20]",
+    "analysis campaign mode: second_scan= not the announce's refused": "refused: second_scan= has sha256 c594d000ce7a, not the second_scan_sha256 000000000000 the campaign announce names",
+    "analysis campaign mode: second_scan= the announce's accepted": "accepted: {\"of\": \"second_scan + rehearsal 2 + rehearsal 1\", \"second_scan\": {\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}",
+    "analysis campaign mode: the exact list accepted": "accepted: {\"of\": \"second_scan + rehearsal 2 + rehearsal 1\", \"second_scan\": {\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}",
+    "analysis rehearsal mode: a field changed refused": "refused: rehearsal 2's excluded= list has the exact union's seed set but another field differs from the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): ['rule']",
+    "analysis rehearsal mode: one extra seed refused": "refused: rehearsal 2's excluded= list adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+    "analysis rehearsal mode: one seed removed refused": "refused: rehearsal 2's excluded= list is missing 1 seeds of the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [0]",
+    "analysis rehearsal mode: second_scan= refused": "refused: rehearsal mode: second_scan= is for campaign mode only",
+    "analysis rehearsal mode: the exact list accepted": "accepted: {\"of\": \"EXCLUDED.json + rehearsal 1\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}",
+    "analysis.py test mode: second_scan= refused": "rc 1: refused: test mode: second_scan= is for campaign mode only\n",
+    "parse_announce: campaign with second_scan_sha256 parsed": "parsed: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"mode\": \"campaign\", \"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\", \"sizes\": {\"ANDOR3\": 32, \"NOT1\": 60, \"XOR3\": 37}}",
+    "parse_announce: campaign without it refused": "refused: DRAW_ANNOUNCE.txt is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes', 'second_scan_sha256') (layered-draw-announce/1; second_scan_sha256 with mode campaign only)",
+    "parse_announce: rehearsal with it refused": "refused: DRAW_ANNOUNCE.txt is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (layered-draw-announce/1; second_scan_sha256 with mode campaign only)",
+    "parse_announce: rehearsal without it parsed": "parsed: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 32, \"NOT1\": 60, \"XOR3\": 37}}",
+    "twins": {
+     "check-list": [
+      [
+       "A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_REHEARSAL2.json'), 'rehearsal', tempfile.mkdtemp(), '$F')",
+       "A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_REHEARSAL2.json', announce='ANNOUNCE_REHEARSAL2.txt'), 'rehearsal', tempfile.mkdtemp(), '$F', offline=True)"
+      ],
+      [
+       "A.check_draw(dict(draw='DRAW_REHEARSAL1.json', excluded='EXCLUDED_REHEARSAL1.json'), 'rehearsal', tempfile.mkdtemp(), '$F', past=A.REHEARSAL1)",
+       "A.check_draw(dict(draw='DRAW_REHEARSAL1.json', excluded='EXCLUDED_REHEARSAL1.json', announce='ANNOUNCE_REHEARSAL1.txt'), 'rehearsal', tempfile.mkdtemp(), '$F', offline=True, past=A.REHEARSAL1)"
+      ],
+      [
+       "A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal_excluded='EXCLUDED_REHEARSAL2.json',",
+       "A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal_excluded='EXCLUDED_REHEARSAL2.json', rehearsal_announce='ANNOUNCE_REHEARSAL2.txt', rehearsal1_announce='ANNOUNCE_REHEARSAL1.txt',"
+      ],
+      [
+       "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True, 'campaign')",
+       "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False, 'campaign')"
+      ]
+     ],
+     "check-rehearsal2-list": [
+      [
+       "A.check_draw(dict(draw='DRAW_REHEARSAL1.json', excluded='EXCLUDED_REHEARSAL1.json'), 'rehearsal', tempfile.mkdtemp(), '$F', past=A.REHEARSAL1)",
+       "A.check_draw(dict(draw='DRAW_REHEARSAL1.json', excluded='EXCLUDED_REHEARSAL1.json', announce='ANNOUNCE_REHEARSAL1.txt'), 'rehearsal', tempfile.mkdtemp(), '$F', offline=True, past=A.REHEARSAL1)"
+      ],
+      [
+       "A.check_rehearsal_seeds(dict(rehearsal1_draw='DRAW_REHEARSAL1.json', rehearsal1_excluded='EXCLUDED_REHEARSAL1.json',",
+       "A.check_rehearsal_seeds(dict(rehearsal1_draw='DRAW_REHEARSAL1.json', rehearsal1_excluded='EXCLUDED_REHEARSAL1.json', rehearsal1_announce='ANNOUNCE_REHEARSAL1.txt',"
+      ],
+      [
+       "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True, 'rehearsal')",
+       "dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False, 'rehearsal')"
+      ]
+     ],
+     "no_analysis": [
+      "A.check_rehearsal_seeds(",
+      "(lambda *a: None)("
+     ]
+    }
+   }
+  },
+  "ok": true,
+  "seconds": 37.7
+ },
+ "github_times": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the branch-creating push counts",
+     "expected": "\"5226d975283f5a905ba54abea8f8570685eef388\": \"2026-11-26T22:25:58Z\"",
+     "matched": "{\"80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384\": \"2026-11-26T22:27:29Z\", \"5226d975283f5a905ba54abea8f8570685eef388\": \"2026-11-26T22:25:58Z\"}",
+     "target": "/home/user/kr/research/layered-networks/sealpush.py",
+     "target_exists": true
+    },
+    {
+     "check": "the later push counts",
+     "expected": "\"80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384\": \"2026-11-26T22:27:29Z\"",
+     "matched": "{\"80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384\": \"2026-11-26T22:27:29Z\", \"5226d975283f5a905ba54abea8f8570685eef388\": \"2026-11-26T22:25:58Z\"}",
+     "target": "/home/user/kr/research/layered-networks/sealpush.py",
+     "target_exists": true
+    },
+    {
+     "check": "the pages parsed one after the other",
+     "expected": "{\"one page\": true, \"two pages, a newline between\": true, \"two pages, no separator\": true}",
+     "matched": "{\"one page\": true, \"two pages, a newline between\": true, \"two pages, no separator\": true}",
+     "target": "/home/user/kr/research/layered-networks/sealpush.py",
+     "target_exists": true
+    }
+   ],
+   "pages": {
+    "one page": true,
+    "two pages, a newline between": true,
+    "two pages, no separator": true
+   },
+   "times": {
+    "5226d975283f5a905ba54abea8f8570685eef388": "2026-11-26T22:25:58Z",
+    "80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384": "2026-11-26T22:27:29Z"
+   }
+  },
+  "ok": true,
+  "seconds": 0.0
+ },
+ "guard": {
+  "detail": {
+   "checks": [
+    {
+     "check": "deck held below the guard",
+     "expected": "\"step\": \"deck\"",
+     "matched": "[{\"free_gb\": 56.31, \"instance\": \"NOT1_6213\", \"step\": \"deck\"}]",
+     "target": "/tmp/claude-0/runc2/w/plans_guard/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
+   "steps": {},
+   "stopped_for_disk": [
+    {
+     "free_gb": 56.31,
+     "instance": "NOT1_6213",
+     "step": "deck"
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 10.8
+ },
+ "home_run": {
+  "detail": {
+   "U": [
+    {
+     "cpu_s": 21.4,
+     "exit": 0,
+     "instance": "NOT1_6212",
+     "inverter_fires_reported": [
+      {
+       "inverter": 0,
+       "slot": 0
+      }
+     ],
+     "ok": true,
+     "patterns": 2,
+     "r_cell_fires": [],
+     "record_seal_log": {
+      "branch": "evidence/combined-seals-K01",
+      "commit": "630e29ca57286a9c57ca112953208a9a9582f802"
+     },
+     "seal_log": {
+      "branch": "evidence/combined-seals-K01",
+      "commit": "630e29ca57286a9c57ca112953208a9a9582f802"
+     },
+     "timed_out": false,
+     "tool": "controls4.py"
+    }
+   ],
+   "checks": [
+    {
+     "check": "every step done",
+     "expected": "[\"done\"]",
+     "matched": "[\"done\"]",
+     "target": "/tmp/claude-0/runc2/w/root_home/DONE",
+     "target_exists": true
+    }
+   ],
+   "steps": {
+    "C0": "done",
+    "C1": "done",
+    "C2": "done",
+    "C3": "done",
+    "D": "done",
+    "N0": "done",
+    "N1": "done",
+    "N2": "done",
+    "N3": "done",
+    "deck": "done",
+    "inverters": "done",
+    "seal": "done",
+    "sealpush": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 496.2
+ },
+ "interrupt_and_resume": {
+  "detail": {
+   "D_why": "found running at a resume (the driver or the machine stopped)",
+   "after": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   },
+   "before": {
+    "D": "running",
+    "deck": "done",
+    "inverters": "done"
+   },
+   "checks": [
+    {
+     "check": "D found running at the rerun",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/tmp/claude-0/runc2/w/root_interrupt",
+     "target_exists": true
+    }
+   ],
+   "env_resumes": [
+    {
+     "static_sha256": "7a03c4231aa4274cf171623e482f879e9d98a0e3ef9077b0a8ee2ca43fc19eee",
+     "uptime_s": "2026-11-28 07:42:16"
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 132.8
+ },
+ "k3_budget_stop": {
+  "detail": {
+   "D": {
+    "ended": "2026-11-28T08:29:53.655294Z",
+    "status": "refused",
+    "why": "inv/K3_BUDGET.json is not ok (the inverters' K3 budget)"
+   },
+   "checks": [
+    {
+     "check": "D refused for the K3 budget",
+     "expected": "inv/K3_BUDGET.json is not ok",
+     "matched": "inv/K3_BUDGET.json is not ok (the inverters' K3 budget)",
+     "target": "/tmp/claude-0/runc2/w/root_k3stop/NOT1_6213/inv/K3_BUDGET.json",
+     "target_exists": true
+    }
+   ],
+   "steps": {
+    "D": "refused",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 137.6
+ },
+ "kernel_mirror_disagreement": {
+  "detail": {
+   "D": "failed",
+   "checks": [
+    {
+     "check": "the kernel disagrees with the stub mirror",
+     "expected": "\"clause\": \"dose > 0\"",
+     "matched": "[{\"cell\": \"c1_0\", \"clause\": \"cellValid\", \"level\": \"K0\"}, {\"cell\": \"c1_0\", \"clause\": \"dose > 0\", \"level\": \"K0\"}, {\"cell\": \"c1_0\", \"clause\": \"cellValid\", \"level\": \"K3\"}, {\"cell\": \"c1_0\", \"clause\": \"dose > 0\", \"level\": \"K3\"}]",
+     "target": "/tmp/claude-0/runc2/w/root_kernel/NOT1_6213/D/prediction.json",
+     "target_exists": true
+    }
+   ],
+   "disagreements": [
+    {
+     "cell": "c1_0",
+     "clause": "cellValid",
+     "level": "K0"
+    },
+    {
+     "cell": "c1_0",
+     "clause": "dose > 0",
+     "level": "K0"
+    },
+    {
+     "cell": "c1_0",
+     "clause": "cellValid",
+     "level": "K3"
+    },
+    {
+     "cell": "c1_0",
+     "clause": "dose > 0",
+     "level": "K3"
+    }
+   ]
+  },
+  "ok": true,
+  "seconds": 306.0
+ },
+ "no_pushed_seal": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the push refused by the log's hook",
+     "expected": "pre-receive hook declined",
+     "matched": "! [remote rejected] HEAD -> evidence/combined-seals-K02 (pre-receive hook declined)",
+     "target": "/tmp/claude-0/runc2/w/root_nopush/NOT1_6213/seal_push.json",
+     "target_exists": true
+    }
+   ],
+   "seal_push": {
+    "branch": "evidence/combined-seals-K02",
+    "commit": "ef34b01be1443c39d35b976a01032cad45c983c5",
+    "instance": "NOT1_6213",
+    "line": "NOT1_6213 7f023e4e2521e450bbed9dd0a8fa8f32d461024609a4190e39584c1ca19b13fe 2026-11-28T07:59:01.851557Z",
+    "previous": null,
+    "pushed": false,
+    "remote": "/tmp/claude-0/runc2/w/log_nopush.git",
+    "seal_folder": {
+     "bytes": 5790,
+     "files": 3,
+     "path": "seals/NOT1_6213"
+    },
+    "seal_sha256": "7f023e4e2521e450bbed9dd0a8fa8f32d461024609a4190e39584c1ca19b13fe",
+    "why": "push rejected: arning: push negotiation failed; proceeding anyway with push\nremote: refused by the test hook        \nTo /tmp/claude-0/runc2/w/log_nopush.git\n ! [remote rejected] HEAD -> evidence/combined-seals-K02 (pre-receive hook declined)\nerror: failed to push some refs to '/tmp/claude-0/runc2/w/log_nopush.git'",
+    "with_seal_folder": true
+   },
+   "steps": {
+    "D": "done",
+    "deck": "done",
+    "inverters": "done",
+    "seal": "done",
+    "sealpush": "failed"
+   }
+  },
+  "ok": true,
+  "seconds": 302.2
+ },
+ "partial_guard_and_resume": {
+  "detail": {
+   "U_after": [
+    {
+     "cpu_s": 21.7,
+     "exit": 0,
+     "instance": "NOT1_6212",
+     "inverter_fires_reported": [
+      {
+       "inverter": 0,
+       "slot": 0
+      }
+     ],
+     "ok": true,
+     "patterns": 2,
+     "r_cell_fires": [],
+     "record_seal_log": {
+      "branch": "evidence/combined-seals-K01",
+      "commit": "35847e7cf7147768ca357347f7b2891bd36ff219"
+     },
+     "seal_log": {
+      "branch": "evidence/combined-seals-K01",
+      "commit": "35847e7cf7147768ca357347f7b2891bd36ff219"
+     },
+     "timed_out": false,
+     "tool": "controls4.py"
+    }
+   ],
+   "checks": [
+    {
+     "check": "C0 exempt from the guard",
+     "expected": "\"step\": \"C0\"",
+     "matched": "[{\"free_gb\": 45.68, \"guard_gb\": 46.7, \"instance\": \"NOT1_6212\", \"step\": \"C0\"}]",
+     "target": "/tmp/claude-0/runc2/w/root_partial/GUARD_EXEMPT.json",
+     "target_exists": true
+    },
+    {
+     "check": "N1 held below the guard",
+     "expected": "\"step\": \"N1\"",
+     "matched": "[{\"free_gb\": 45.68, \"instance\": \"U_NOT1_6212\", \"step\": \"U\"}, {\"free_gb\": 45.68, \"instance\": \"NOT1_6212\", \"step\": \"N1\"}, {\"free_gb\": 45.68, \"instance\": \"NOT1_6212\", \"step\": \"N2\"}, {\"free_gb\": 45.68, \"instance\": \"NOT1_6212\", \"step\": \"N3\"}]",
+     "target": "/tmp/claude-0/runc2/w/root_partial",
+     "target_exists": true
+    }
+   ],
+   "exempt": [
+    {
+     "free_gb": 45.68,
+     "guard_gb": 46.7,
+     "instance": "NOT1_6212",
+     "step": "C0"
+    }
+   ],
+   "guard_gb": 46.7,
+   "held_first": [
+    [
+     "U_NOT1_6212",
+     "U"
+    ],
+    [
+     "NOT1_6212",
+     "N1"
+    ],
+    [
+     "NOT1_6212",
+     "N2"
+    ],
+    [
+     "NOT1_6212",
+     "N3"
+    ]
+   ],
+   "rc_resume": 0,
+   "steps_after_resume": {
+    "C0": "done",
+    "C1": "done",
+    "C2": "done",
+    "C3": "done",
+    "D": "done",
+    "N0": "done",
+    "N1": "done",
+    "N2": "done",
+    "N3": "done",
+    "deck": "done",
+    "inverters": "done",
+    "seal": "done",
+    "sealpush": "done"
+   },
+   "steps_first": {
+    "C0": "done",
+    "D": "done",
+    "N0": "done",
+    "deck": "done",
+    "inverters": "done",
+    "seal": "done",
+    "sealpush": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 486.9
+ },
+ "pins": {
+  "detail": {
+   "checks": [
+    {
+     "check": "one pinned byte changed: launch",
+     "expected": "pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']",
+     "matched": "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']",
+     "target": "/tmp/claude-0/runc2/w/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .py in the driver's tree: launch",
+     "expected": "is not clean (a changed tracked file, or an untracked .py/.json)",
+     "matched": "refused: campaign mode: the tree at aa8b4c3028f8 is not clean (a changed tracked file, or an untracked .py/.json)",
+     "target": "/tmp/claude-0/runc2/w/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    },
+    {
+     "check": "untracked .json in the kit tree: launch",
+     "expected": "no clean worktree at kit_commit",
+     "matched": "refused: no clean worktree at kit_commit d599300d51fc (git worktree add --detach DIR d599300d51fcf3a1a4c33d103b89827f8ac4da41)",
+     "target": "/tmp/claude-0/runc2/w/plans_pins/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
+   "clean tree, every pin matching: check": {
+    "ok": true,
+    "pins": {
+     "mismatched": [],
+     "not_pinned": [],
+     "pinned_files": 114,
+     "pins_file": "research/layered-networks/FREEZE_PINS.json",
+     "pins_sha256": "406821faa0a4eee94dae88f087b39b91778bdc277398360d58f7edc043dec69a",
+     "tree_clean": true,
+     "tree_commit": "aa8b4c3028f88a7b9a821ca604da863a6ff542a3"
+    },
+    "rc": 0
+   },
+   "one pinned byte changed: launch": [
+    1,
+    "refused: campaign mode: pinned files differ from FREEZE_PINS.json: ['research/layered-networks/fit3.py']"
+   ],
+   "untracked .json in the kit tree: launch": [
+    1,
+    "refused: no clean worktree at kit_commit d599300d51fc (git worktree add --detach DIR d599300d51fcf3a1a4c33d103b89827f8ac4da41)"
+   ],
+   "untracked .py in the driver's tree: launch": [
+    1,
+    "refused: campaign mode: the tree at aa8b4c3028f8 is not clean (a changed tracked file, or an untracked .py/.json)"
+   ]
+  },
+  "ok": true,
+  "seconds": 4.6
+ },
+ "refusals": {
+  "detail": {
+   "campaign mode, test template": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not 5da0a687d97f\"}",
+   "checks": [
+    {
+     "check": "campaign mode, test template",
+     "expected": "campaign mode needs the frozen template",
+     "matched": "{\"ok\": false, \"why\": \"refused: campaign mode needs the frozen template 02af33e0c79b, not 5da0a687d97f\"}",
+     "target": "/tmp/claude-0/runc2/w/T_refusals.json",
+     "target_exists": true
+    },
+    {
+     "check": "test mode, frozen template",
+     "expected": "test mode needs a test template, not the frozen one",
+     "matched": "{\"ok\": false, \"why\": \"refused: test mode needs a test template, not the frozen one\"}",
+     "target": "/tmp/claude-0/runc2/w/tree_main/research/layered-networks/campaign_template.json",
+     "target_exists": true
+    },
+    {
+     "check": "missing key rounds",
+     "expected": "the plan differs from the template: missing key rounds",
+     "matched": "refused: the plan differs from the template: missing key rounds",
+     "target": "/tmp/claude-0/runc2/w/PLAN_bad_missing_key_rounds.json",
+     "target_exists": true
+    },
+    {
+     "check": "extra key steps_until",
+     "expected": "the plan differs from the template: key steps_until is not allowed",
+     "matched": "refused: the plan differs from the template: key steps_until is not allowed",
+     "target": "/tmp/claude-0/runc2/w/PLAN_bad_extra_key_steps_until.json",
+     "target_exists": true
+    },
+    {
+     "check": "short kit commit",
+     "expected": "the plan differs from the template: kit_commit is 'd599300d'",
+     "matched": "refused: the plan differs from the template: kit_commit is 'd599300d', the template's is 'd599300d51fcf3a1a4c33d103b89827f8ac4da41'",
+     "target": "/tmp/claude-0/runc2/w/PLAN_bad_short_kit_commit.json",
+     "target_exists": true
+    },
+    {
+     "check": "disk at launch",
+     "expected": "GB free at launch, 1e+06 GB needed (disk_launch_gb)",
+     "matched": "refused: 56.9 GB free at launch, 1e+06 GB needed (disk_launch_gb)",
+     "target": "/tmp/claude-0/runc2/w/T_bigdisk.json",
+     "target_exists": true
+    }
+   ],
+   "disk at launch": [
+    1,
+    "refused: 56.9 GB free at launch, 1e+06 GB needed (disk_launch_gb)"
+   ],
+   "extra key steps_until": [
+    1,
+    "refused: the plan differs from the template: key steps_until is not allowed"
+   ],
+   "missing key rounds": [
+    1,
+    "refused: the plan differs from the template: missing key rounds"
+   ],
+   "short kit commit": [
+    1,
+    "refused: the plan differs from the template: kit_commit is 'd599300d', the template's is 'd599300d51fcf3a1a4c33d103b89827f8ac4da41'"
+   ],
+   "test mode, frozen template": "{\"ok\": false, \"why\": \"refused: test mode needs a test template, not the frozen one\"}"
+  },
+  "ok": true,
+  "seconds": 7.8
+ },
+ "second_seal": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the second seal refused",
+     "expected": "a second seal is refused",
+     "matched": "seals/NOT1_6213 is already on evidence/combined-seals-K02: a second seal is refused",
+     "target": "/tmp/claude-0/runc2/w/root_secondseal_2/NOT1_6213/seal_push.json",
+     "target_exists": true
+    }
+   ],
+   "first": "done",
+   "log": "",
+   "seal_push": {
+    "branch": "evidence/combined-seals-K02",
+    "instance": "NOT1_6213",
+    "pushed": false,
+    "remote": "/tmp/claude-0/runc2/w/log_secondseal.git",
+    "why": "seals/NOT1_6213 is already on evidence/combined-seals-K02: a second seal is refused",
+    "with_seal_folder": true
+   },
+   "second": "failed"
+  },
+  "ok": true,
+  "seconds": 765.5
+ },
+ "sigkill_driver_only": {
+  "detail": {
+   "checks": [
+    {
+     "check": "run while the orphan child runs",
+     "expected": "ngspice process(es) running",
+     "matched": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+     "target": "/tmp/claude-0/runc2/w/root_sigkill",
+     "target_exists": true
+    },
+    {
+     "check": "resume while the orphan child runs",
+     "expected": "ngspice process(es) running",
+     "matched": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+     "target": "/tmp/claude-0/runc2/w/root_sigkill",
+     "target_exists": true
+    },
+    {
+     "check": "the later run found D running",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/tmp/claude-0/runc2/w/root_sigkill",
+     "target_exists": true
+    }
+   ],
+   "children_after_kill": [
+    6973
+   ],
+   "resume_while_child": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+   "run_while_child": "refused: 1 ngspice process(es) running (a child of a stopped driver?)",
+   "steps": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 135.4
+ },
+ "sigterm_driver_only": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the driver logged the signal and killed its children",
+     "expected": "\"signal\": \"SIGTERM\"",
+     "matched": "[{\"at\": \"2026-11-28T08:25:15.325005Z\", \"killed_process_groups\": [6292], \"signal\": \"SIGTERM\"}]",
+     "target": "/tmp/claude-0/runc2/w/root_sigterm/SIGNALS.json",
+     "target_exists": true
+    },
+    {
+     "check": "the resume found D running",
+     "expected": "found running at a resume",
+     "matched": "found running at a resume (the driver or the machine stopped)",
+     "target": "/tmp/claude-0/runc2/w/root_sigterm",
+     "target_exists": true
+    }
+   ],
+   "children_before": [
+    6292
+   ],
+   "children_gone": true,
+   "pids": "2026-11-28T08:25:15.553153Z 6372 driver_resume_1.log\n",
+   "resume": "launched pid 6372",
+   "signals": [
+    {
+     "at": "2026-11-28T08:25:15.325005Z",
+     "killed_process_groups": [
+      6292
+     ],
+     "signal": "SIGTERM"
+    }
+   ],
+   "steps": {
+    "D": "interrupted",
+    "deck": "done",
+    "inverters": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 138.5
+ },
+ "timeout": {
+  "detail": {
+   "checks": [
+    {
+     "check": "deck timed out",
+     "expected": "more than 0.001 s",
+     "matched": "more than 0.001 s",
+     "target": "/tmp/claude-0/runc2/w/plans_timeout/PLAN_K02.json",
+     "target_exists": true
+    }
+   ],
+   "result_mode": "TEST",
+   "steps": {
+    "deck": "timeout"
+   },
+   "why": "more than 0.001 s"
+  },
+  "ok": true,
+  "seconds": 89.3
+ }
+}

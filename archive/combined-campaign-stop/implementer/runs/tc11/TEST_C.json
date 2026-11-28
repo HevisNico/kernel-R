@@ -1,0 +1,631 @@
+{
+ "all_pass": false,
+ "exact_union_owner": {
+  "detail": {
+   "checks": [
+    {
+     "check": "V1 control: the exact list re-announced: the old checks (check_draw, offline) accept it",
+     "expected": "check_draw accepted",
+     "matched": "check_draw accepted",
+     "target": "/tmp/claude-0/tc11/exact_union_owner/v1c_EXCLUDED.json",
+     "target_exists": true
+    },
+    {
+     "check": "V1 control: the exact list re-announced: accepted",
+     "expected": "accepted: ",
+     "matched": "d67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}, \"rehearsal1\": {\"all_excluded_with_noise_seeds\": true, \"announce\": {\"branch\": \"evidence/com",
+     "target": "/tmp/claude-0/tc11/exact_union_owner/v1c_EXCLUDED.json",
+     "target_exists": true
+    },
+    {
+     "check": "V1: a scan-only seed removed, re-announced: the old checks (check_draw, offline) accept it",
+     "expected": "check_draw accepted",
+     "matched": "check_draw accepted",
+     "target": "/tmp/claude-0/tc11/exact_union_owner/v1m_EXCLUDED.json",
+     "target_exists": true
+    },
+    {
+     "check": "V1: a scan-only seed removed, re-announced: refused by the exact union",
+     "expected": "the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+     "matched": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+     "target": "/tmp/claude-0/tc11/exact_union_owner/v1m_EXCLUDED.json",
+     "target_exists": true
+    },
+    {
+     "check": "V2: a scan copy with one byte changed: refused before any commit",
+     "expected": "REFUSED: EXCLUDED_SECOND_SCAN.json has sha256 1f85f5145f547329028c8b33323fed2bc8d8d2193788ddad6721ea8aa892b12f, not the validated c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f: no commit, no push",
+     "matched": null,
+     "target": "/tmp/claude-0/tc11/exact_union_owner/v2_mut/EXCLUDED_SECOND_SCAN.json",
+     "target_exists": true
+    },
+    {
+     "check": "V2 control: the scan: one commit, three files, a /2 announce",
+     "expected": "announce pushed: evidence/combined-draw-test-v2_ok",
+     "matched": "announce pushed: evidence/combined-draw-test-v2_ok fea2de4cb93a0d72b30c18434bfa139e01854f64",
+     "target": "/tmp/claude-0/tc11/exact_union_owner/v2_ok/EXCLUDED_SECOND_SCAN.json",
+     "target_exists": true
+    },
+    {
+     "check": "V3: rehearsal 1's real announce (fetched by name) parses",
+     "expected": "\"excluded_sha256\": \"abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\"",
+     "matched": "fetch rc 0, 9c3ec1e1b53a8a0fe047ffa33e6b6737728a907c: accepted: {\"excluded_sha256\": \"abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+     "target": "/tmp/claude-0/tc11/exact_union_owner/r1_announce_fetch",
+     "target_exists": true
+    },
+    {
+     "check": "format: /1 rehearsal accepted",
+     "expected": "\"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\"",
+     "matched": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /1 test accepted",
+     "expected": "\"mode\": \"test\"",
+     "matched": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/1\", \"mode\": \"test\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /1 with second_scan_sha256 refused",
+     "expected": "DRAW_ANNOUNCE.txt in layered-draw-announce/1 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (second_scan_sha256 only in layered-draw-announce/2)",
+     "matched": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/1 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (second_scan_sha256 only in layered-draw-announce/2)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /1 campaign refused",
+     "expected": "a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+     "matched": "refused: DRAW_ANNOUNCE.txt: a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /2 campaign with second_scan_sha256 accepted",
+     "expected": "\"format\": \"layered-draw-announce/2\", \"mode\": \"campaign\", \"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+     "matched": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/2\", \"mode\": \"campaign\", \"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /2 campaign without second_scan_sha256 refused",
+     "expected": "DRAW_ANNOUNCE.txt in layered-draw-announce/2 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes', 'second_scan_sha256')",
+     "matched": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/2 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes', 'second_scan_sha256')",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: /2 rehearsal refused",
+     "expected": "layered-draw-announce/2 is the campaign announce only, not mode 'rehearsal'",
+     "matched": "refused: DRAW_ANNOUNCE.txt: layered-draw-announce/2 is the campaign announce only, not mode 'rehearsal'",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: another format refused",
+     "expected": "format 'layered-draw-announce/3' is neither",
+     "matched": "refused: DRAW_ANNOUNCE.txt: format 'layered-draw-announce/3' is neither layered-draw-announce/1 nor layered-draw-announce/2",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: N2: /2 with second_scan_sha256 not hex refused",
+     "expected": "DRAW_ANNOUNCE.txt: second_scan_sha256 'zz' is not exactly 64 lowercase hex characters",
+     "matched": "refused: DRAW_ANNOUNCE.txt: second_scan_sha256 'zz' is not exactly 64 lowercase hex characters",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: N2: /2 with second_scan_sha256 in upper case refused",
+     "expected": "DRAW_ANNOUNCE.txt: second_scan_sha256 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB' is not exactly 64 lowercase hex characters",
+     "matched": "refused: DRAW_ANNOUNCE.txt: second_scan_sha256 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB' is not exactly 64 lowercase hex characters",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: N2: /1 with excluded_sha256 of 63 characters refused",
+     "expected": "DRAW_ANNOUNCE.txt: excluded_sha256 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' is not exactly 64 lowercase hex characters",
+     "matched": "refused: DRAW_ANNOUNCE.txt: excluded_sha256 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' is not exactly 64 lowercase hex characters",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "format: N2: /2 with excluded_sha256 not hex refused",
+     "expected": "DRAW_ANNOUNCE.txt: excluded_sha256 'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg' is not exactly 64 lowercase hex characters",
+     "matched": "refused: DRAW_ANNOUNCE.txt: excluded_sha256 'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg' is not exactly 64 lowercase hex characters",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "(b): rehearsal 2's list with one extra seed, re-announced, refused in campaign mode",
+     "expected": "rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+     "matched": "refused: rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+     "target": "/tmp/claude-0/tc11/exact_union_owner/r2m_EXCLUDED.json",
+     "target_exists": true
+    },
+    {
+     "check": "(b) control: rehearsal 2's exact list accepted in campaign mode",
+     "expected": "\"rehearsal2_list\": {\"file\": \"r2_EXCLUDED.json\"",
+     "matched": "d67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}, \"rehearsal1\": {\"all_excluded_with_noise_seeds\": true, \"announce\": {\"branch\": \"evidence/com",
+     "target": "/tmp/claude-0/tc11/exact_union_owner/r2_EXCLUDED.json",
+     "target_exists": true
+    }
+   ],
+   "rehearsal2_extra_seed": 10006,
+   "results": {
+    "(b) control: rehearsal 2's exact list accepted in campaign mode": "accepted: {\"exact_union\": {\"of\": \"second_scan + rehearsal 2 + rehearsal 1\", \"rehearsal2_list\": {\"file\": \"r2_EXCLUDED.json\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}, \"second_scan\": {\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}, \"rehearsal1\": {\"all_excluded_with_noise_seeds\": true, \"announce\": {\"branch\": \"evidence/com",
+    "(b): rehearsal 2's list with one extra seed, re-announced, refused in campaign mode": "refused: rehearsal 2's list (rehearsal_excluded=) adds 1 seeds that are not in the exact union of the freeze's EXCLUDED.json and rehearsal 1's verified seeds and noise seeds ([block rehearsal2-list]): [10006]",
+    "V1 control: the exact list re-announced: accepted": "accepted: {\"exact_union\": {\"of\": \"second_scan + rehearsal 2 + rehearsal 1\", \"rehearsal2_list\": {\"file\": \"r2_EXCLUDED.json\", \"sha256\": \"8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\"}, \"second_scan\": {\"count\": 16336, \"file\": \"EXCLUDED_SECOND_SCAN.json\", \"sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"superset_of_freeze\": \"1e8e0456f8668de9a6d43ae1ef62ef7dd45dd1e53c49261d33a1156ef02d25fb\"}, \"sha256\": \"be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\"}, \"rehearsal1\": {\"all_excluded_with_noise_seeds\": true, \"announce\": {\"branch\": \"evidence/com",
+    "V1 control: the exact list re-announced: the old checks (check_draw, offline) accept it": "check_draw accepted",
+    "V1: a scan-only seed removed, re-announced: refused by the exact union": "refused: the campaign's excluded= list is missing 1 seeds of the exact union of second_scan= and both rehearsals' verified seeds and noise seeds ([block list]): [12001]",
+    "V1: a scan-only seed removed, re-announced: the old checks (check_draw, offline) accept it": "check_draw accepted",
+    "V2 control: the scan: one commit, three files, a /2 announce": "rc 0, files ['DRAW_ANNOUNCE.txt', 'EXCLUDED_PUBLISHED.json', 'EXCLUDED_SECOND_SCAN.json'], announce 'format layered-draw-announce/2\\nmode campaign\\nexcluded_sha256 be61f722e36ddd896bce938487528a3b2dfe1ac5ac324b625f6bfc25e2443156\\nsecond_scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\\nsizes NOT1=60 ANDOR3=32 XOR3=37\\n': the scan verify record evidence/combined-scan-verify 9910320c8ee3676f635ea7c97b9e89c2e8fe0301 created 2026-11-27T23:00:00Z verified scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f VS c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\nannounce ok\nannounce pushed: evidence/combined-draw-test-v2_ok fea2de4cb93a0d72b30c18434bfa139e01854f64\nfatal: expected 'acknowledgments', received 'packfile'\nwarning: push negotiation failed; proceeding anyway with push",
+    "V2: a scan copy with one byte changed: refused before any commit": "rc 1, commit False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the published scan has sha256 1f85f5145f54, not HS c594d000ce7a",
+    "V3: rehearsal 1's real announce (fetched by name) parses": "fetch rc 0, 9c3ec1e1b53a8a0fe047ffa33e6b6737728a907c: accepted: {\"excluded_sha256\": \"abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+    "announce_twins": [
+     [
+      "git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/$B",
+      "git push -q /tmp/claude-0/tc11/exact_union_owner/twin.git HEAD:refs/heads/$B"
+     ],
+     [
+      "test -z \"$(git ls-remote https://github.com/HevisNico/kernel-R refs/heads/$B)\"",
+      "test -z \"$(git ls-remote /tmp/claude-0/tc11/exact_union_owner/twin.git refs/heads/$B)\""
+     ],
+     [
+      "R = 'https://github.com/HevisNico/kernel-R'",
+      "R = '/tmp/claude-0/tc11/exact_union_owner/twin.git'"
+     ]
+    ],
+    "format: /1 campaign refused": "refused: DRAW_ANNOUNCE.txt: a campaign announce is layered-draw-announce/2, not layered-draw-announce/1",
+    "format: /1 rehearsal accepted": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/1\", \"mode\": \"rehearsal\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+    "format: /1 test accepted": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/1\", \"mode\": \"test\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+    "format: /1 with second_scan_sha256 refused": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/1 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes') (second_scan_sha256 only in layered-draw-announce/2)",
+    "format: /2 campaign with second_scan_sha256 accepted": "accepted: {\"excluded_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"format\": \"layered-draw-announce/2\", \"mode\": \"campaign\", \"second_scan_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\", \"sizes\": {\"ANDOR3\": 6, \"NOT1\": 6, \"XOR3\": 6}}",
+    "format: /2 campaign without second_scan_sha256 refused": "refused: DRAW_ANNOUNCE.txt in layered-draw-announce/2 is not exactly the lines ('format', 'mode', 'excluded_sha256', 'sizes', 'second_scan_sha256')",
+    "format: /2 rehearsal refused": "refused: DRAW_ANNOUNCE.txt: layered-draw-announce/2 is the campaign announce only, not mode 'rehearsal'",
+    "format: N2: /1 with excluded_sha256 of 63 characters refused": "refused: DRAW_ANNOUNCE.txt: excluded_sha256 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' is not exactly 64 lowercase hex characters",
+    "format: N2: /2 with excluded_sha256 not hex refused": "refused: DRAW_ANNOUNCE.txt: excluded_sha256 'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg' is not exactly 64 lowercase hex characters",
+    "format: N2: /2 with second_scan_sha256 in upper case refused": "refused: DRAW_ANNOUNCE.txt: second_scan_sha256 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB' is not exactly 64 lowercase hex characters",
+    "format: N2: /2 with second_scan_sha256 not hex refused": "refused: DRAW_ANNOUNCE.txt: second_scan_sha256 'zz' is not exactly 64 lowercase hex characters",
+    "format: another format refused": "refused: DRAW_ANNOUNCE.txt: format 'layered-draw-announce/3' is neither layered-draw-announce/1 nor layered-draw-announce/2",
+    "rehearsal1_announce_fixture_identical": true
+   },
+   "scan_only_seed_removed": 12001
+  },
+  "ok": false,
+  "seconds": 10.3
+ },
+ "scan_verify_record": {
+  "detail": {
+   "checks": [
+    {
+     "check": "[block announce], local H/HS/VS right, absent: refused before any commit",
+     "expected": "refused: the scan verify record evidence/combined-scan-verify is absent from",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify is absent from /tmp/claude-0/tc11/scan_verify_record/twin_b_absent.git: [block verify-scan] has not published it",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_absent",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, (1) reduced to the single success line: refused before any commit",
+     "expected": "refused: the scan verify record evidence/combined-scan-verify has no VERIFY_INPUTS.txt at its creation commit",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify has no VERIFY_INPUTS.txt at its creation commit c454c77d0747 (all four files are required: VERIFY.txt, VERIFY_INPUTS.txt, VERIFY_LSREMOTE.txt, SCAN_LSREMOTE.txt)",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce__1__reduced_to_the_single_success_line",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, (2) citing another freeze: refused before any commit",
+     "expected": "refused: the scan verify record cites the freeze '1111111111111111111111111111111111111111', not the expected f20b3d8bc9c8a9a79966badd97a0d368e48fad86",
+     "matched": "refused: the scan verify record cites the freeze '1111111111111111111111111111111111111111', not the expected f20b3d8bc9c8a9a79966badd97a0d368e48fad86",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce__2__citing_another_freeze",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, (3) one inventory branch with the right name and the wrong SHA: refused before any commit",
+     "expected": "refused: the scan verify record's VERIFY_LSREMOTE.txt is not the scan's inventory: branch HevisNico-patch-1 is at ffffffffffff",
+     "matched": "refused: the scan verify record's VERIFY_LSREMOTE.txt is not the scan's inventory: branch HevisNico-patch-1 is at ffffffffffff on the record's VERIFY_LSREMOTE.txt, at 4f454862f57e in the scan",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce__3__one_inventory_branch_with_the_right_",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, (3b) the same in SCAN_LSREMOTE.txt: refused before any commit",
+     "expected": "refused: the scan verify record's SCAN_LSREMOTE.txt is not the scan's inventory: branch HevisNico-patch-1 is at ffffffffffff",
+     "matched": "refused: the scan verify record's SCAN_LSREMOTE.txt is not the scan's inventory: branch HevisNico-patch-1 is at ffffffffffff on the record's SCAN_LSREMOTE.txt, at 4f454862f57e in the scan",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce__3b__the_same_in_SCAN_LSREMOTE_txt",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, (4) a PROBLEM line before the success line: refused before any commit",
+     "expected": "refused: the scan verify record's VERIFY.txt has a PROBLEM line",
+     "matched": "refused: the scan verify record's VERIFY.txt has a PROBLEM line: [block verify-scan] did not succeed",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce__4__a_PROBLEM_line_before_the_success_li",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, the success line not alone: refused before any commit",
+     "expected": "refused: the scan verify record's VERIFY.txt is not exactly the success line (2 lines)",
+     "matched": "refused: the scan verify record's VERIFY.txt is not exactly the success line (2 lines)",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_the_success_line_not_alone",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, VERIFY.txt of another hash: refused before any commit",
+     "expected": "refused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not c594d000ce7a",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not c594d000ce7a",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_VERIFY_txt_of_another_hash",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, VERIFY.txt's VS another: refused before any commit",
+     "expected": "refused: the scan verify record evidence/combined-scan-verify's reproduction VS 6cc47232a441 is not c594d000ce7a",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify's reproduction VS 6cc47232a441 is not c594d000ce7a",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_VERIFY_txt_s_VS_another",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, the verdict not success: refused before any commit",
+     "expected": "refused: the scan verify record's verdict is not success",
+     "matched": "refused: the scan verify record's verdict is not success ([block verify-scan] did not reproduce the scan)",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_the_verdict_not_success",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, the inputs of another scan: refused before any commit",
+     "expected": "refused: the scan verify record's VERIFY_INPUTS.txt: reproduced_scan_sha256 6cc47232a441 is not HS c594d000ce7a",
+     "matched": "refused: the scan verify record's VERIFY_INPUTS.txt: reproduced_scan_sha256 6cc47232a441 is not HS c594d000ce7a",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_the_inputs_of_another_scan",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, another analysis.py than FREEZE_PINS.json's: refused before any commit",
+     "expected": "refused: the scan verify record's VERIFY_INPUTS.txt: analysis_py_sha256 6cc47232a441 is not FREEZE_PINS.json's",
+     "matched": "refused: the scan verify record's VERIFY_INPUTS.txt: analysis_py_sha256 6cc47232a441 is not FREEZE_PINS.json's 0c10b8b94bcb for research/layered-networks/analysis.py",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_another_analysis_py_than_FREEZE_PINS_jso",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, another draw_seeds.py than FREEZE_PINS.json's: refused before any commit",
+     "expected": "refused: the scan verify record's VERIFY_INPUTS.txt: draw_seeds_py_sha256 6cc47232a441 is not FREEZE_PINS.json's",
+     "matched": "refused: the scan verify record's VERIFY_INPUTS.txt: draw_seeds_py_sha256 6cc47232a441 is not FREEZE_PINS.json's b0480dc302ee for research/layered-networks/draw_seeds.py",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_another_draw_seeds_py_than_FREEZE_PINS_j",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, an inventory's listed sha256 not its file's: refused before any commit",
+     "expected": "refused: the scan verify record's VERIFY_INPUTS.txt: scan_lsremote_sha256 is not the sha256 of its SCAN_LSREMOTE.txt",
+     "matched": "refused: the scan verify record's VERIFY_INPUTS.txt: scan_lsremote_sha256 is not the sha256 of its SCAN_LSREMOTE.txt",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_an_inventory_s_listed_sha256_not_its_fil",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, VERIFY_INPUTS.txt of format /1, no versions: refused before any commit",
+     "expected": "refused: the scan verify record's VERIFY_INPUTS.txt is not exactly the lines",
+     "matched": "an verify record's VERIFY_INPUTS.txt is not exactly the lines ('format', 'freeze_commit', 'draw_seeds_py_sha256', 'analysis_py_sha256', 'scan_to_verify_sha256', 'reproduced_scan_sha256', 'verify_lsremote_sha256', 'scan_lsremote_sha256', 'git_version', 'python_version') (layered-scan-verify-inputs/2)",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_VERIFY_INPUTS_txt_of_format__1__no_versi",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, two commits: refused before any commit",
+     "expected": "refused: the scan verify record evidence/combined-scan-verify has 2 commits",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify has 2 commits: it must be exactly its creation commit (single-use)",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_two_commits",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, (5) put back onto its first commit after a force push away and back: refused before any commit",
+     "expected": "refused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce__5__put_back_onto_its_first_commit_after",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, (5b) put back after a deletion and a recreation: refused before any commit",
+     "expected": "refused: the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce__5b__put_back_after_a_deletion_and_a_rec",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, (6) an empty F: refused before any commit",
+     "expected": "refused: the expected freeze commit '' is not a full 40-hex SHA",
+     "matched": "refused: the expected freeze commit '' is not a full 40-hex SHA: the scan verify record cannot be checked against it",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce__6__an_empty_F",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce], local H/HS/VS right, (6b) a well-formed other F: refused before any commit",
+     "expected": "refused: the scan verify record cites the freeze 'f20b3d8bc9c8a9a79966badd97a0d368e48fad86', not the expected 1111111111111111111111111111111111111111",
+     "matched": "refused: the scan verify record cites the freeze 'f20b3d8bc9c8a9a79966badd97a0d368e48fad86', not the expected 1111111111111111111111111111111111111111",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce__6b__a_well_formed_other_F",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce]: the authentic record (control): the announce pushed",
+     "expected": "announce pushed: evidence/combined-draw-recordtest",
+     "matched": "announce pushed: evidence/combined-draw-recordtest cd135e366b9addd84d8c3d46cffe408703e783f1",
+     "target": "/tmp/claude-0/tc11/scan_verify_record/announce_the_authentic_record__control_",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: the authentic record, created before the announce: accepted",
+     "expected": "\"commit\": \"8873a405a56d0703b0d46b286f25356ec6c8b351\", \"created_utc\": \"2026-11-27T23:00:00Z\"",
+     "matched": "epted: {\"branch\": \"evidence/combined-scan-verify\", \"commit\": \"8873a405a56d0703b0d46b286f25356ec6c8b351\", \"created_utc\": \"2026-11-27T23:00:00Z\", \"scan_sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"vs\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\"}",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: created after the announce: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify was created at 2026-11-27T23:00:00Z, not before the campaign announce (2026-11-27T22:00:00Z)",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-27T23:00:00Z, not before the campaign announce (2026-11-27T22:00:00Z)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: created at the announce's second: refused (strictly earlier)",
+     "expected": "not before the campaign announce",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-27T23:00:00Z, not before the campaign announce (2026-11-27T23:00:00Z)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: absent: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify is absent from",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify is absent from /tmp/claude-0/tc11/scan_verify_record/twin_a_absent.git: [block verify-scan] has not published it",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: (1) reduced to the single success line: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify has no VERIFY_INPUTS.txt at its creation commit",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify has no VERIFY_INPUTS.txt at its creation commit 638b303f9834 (all four files are required: VERIFY.txt, VERIFY_INPUTS.txt, VERIFY_LSREMOTE.txt, SCAN_LSREMOTE.txt)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: (2) citing another freeze: refused",
+     "expected": "the scan verify record cites the freeze '1111111111111111111111111111111111111111', not the expected f20b3d8bc9c8a9a79966badd97a0d368e48fad86",
+     "matched": "refused: the scan verify record cites the freeze '1111111111111111111111111111111111111111', not the expected f20b3d8bc9c8a9a79966badd97a0d368e48fad86",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: (3) one inventory branch with the right name and the wrong SHA: refused",
+     "expected": "the scan verify record's VERIFY_LSREMOTE.txt is not the scan's inventory: branch HevisNico-patch-1 is at ffffffffffff",
+     "matched": "refused: the scan verify record's VERIFY_LSREMOTE.txt is not the scan's inventory: branch HevisNico-patch-1 is at ffffffffffff on the record's VERIFY_LSREMOTE.txt, at 4f454862f57e in the scan",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: (4) a PROBLEM line before the success line: refused",
+     "expected": "the scan verify record's VERIFY.txt has a PROBLEM line",
+     "matched": "refused: the scan verify record's VERIFY.txt has a PROBLEM line: [block verify-scan] did not succeed",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: two commits: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify has 2 commits",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify has 2 commits: it must be exactly its creation commit (single-use)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: (5) put back onto its first commit after a force push away and back: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: (5b) put back after a deletion and a recreation: refused",
+     "expected": "the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: (6) an empty F: refused",
+     "expected": "the expected freeze commit '' is not a full 40-hex SHA",
+     "matched": "refused: the expected freeze commit '' is not a full 40-hex SHA: the scan verify record cannot be checked against it",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.check_scan_verify: (6b) a well-formed other F: refused",
+     "expected": "the scan verify record cites the freeze 'f20b3d8bc9c8a9a79966badd97a0d368e48fad86', not the expected 1111111111111111111111111111111111111111",
+     "matched": "refused: the scan verify record cites the freeze 'f20b3d8bc9c8a9a79966badd97a0d368e48fad86', not the expected 1111111111111111111111111111111111111111",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "check_draw (campaign, GitHub path): the record created before the announce: accepted",
+     "expected": "\"scan_verify\": {\"branch\": \"evidence/combined-scan-verify\"",
+     "matched": "{\"scan_verify\": {\"branch\": \"evidence/combined-scan-verify\", \"commit\": \"c1d08eb707f6ebaeb83d6f430e61c1dcaff39e67\", \"created_utc\": \"2026-11-27T23:00:00Z\", \"scan_sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"vs\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28f",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "check_draw (campaign, GitHub path): the record created after the announce: refused",
+     "expected": "not before the campaign announce",
+     "matched": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-28T00:01:00Z, not before the campaign announce (2026-11-28T00:00:00Z)",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "check_draw (rehearsal, GitHub path): no record read",
+     "expected": "accepted: ",
+     "matched": "accepted: [\"announce\", \"beacon\", \"excluded\", \"machines\", \"recomputed\", \"round\", \"sha256\", \"signature_verified\", \"sizes\"]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    }
+   ],
+   "results": {
+    "[block announce], local H/HS/VS right, (1) reduced to the single success line: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify has no VERIFY_INPUTS.txt at its creation commit c454c77d0747 (all four files are required: VERIFY.txt, VERIFY_INPUTS.txt, VERIFY_LSREMOTE.txt, SCAN_LSREMOTE.txt)",
+    "[block announce], local H/HS/VS right, (2) citing another freeze: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record cites the freeze '1111111111111111111111111111111111111111', not the expected f20b3d8bc9c8a9a79966badd97a0d368e48fad86",
+    "[block announce], local H/HS/VS right, (3) one inventory branch with the right name and the wrong SHA: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record's VERIFY_LSREMOTE.txt is not the scan's inventory: branch HevisNico-patch-1 is at ffffffffffff on the record's VERIFY_LSREMOTE.txt, at 4f454862f57e in the scan",
+    "[block announce], local H/HS/VS right, (3b) the same in SCAN_LSREMOTE.txt: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record's SCAN_LSREMOTE.txt is not the scan's inventory: branch HevisNico-patch-1 is at ffffffffffff on the record's SCAN_LSREMOTE.txt, at 4f454862f57e in the scan",
+    "[block announce], local H/HS/VS right, (4) a PROBLEM line before the success line: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record's VERIFY.txt has a PROBLEM line: [block verify-scan] did not succeed",
+    "[block announce], local H/HS/VS right, (5) put back onto its first commit after a force push away and back: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+    "[block announce], local H/HS/VS right, (5b) put back after a deletion and a recreation: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity",
+    "[block announce], local H/HS/VS right, (6) an empty F: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (), or its branch is not single-use: no commit, no push\nrefused: the expected freeze commit '' is not a full 40-hex SHA: the scan verify record cannot be checked against it",
+    "[block announce], local H/HS/VS right, (6b) a well-formed other F: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (1111111111111111111111111111111111111111), or its branch is not single-use: no commit, no push\nrefused: the scan verify record cites the freeze 'f20b3d8bc9c8a9a79966badd97a0d368e48fad86', not the expected 1111111111111111111111111111111111111111",
+    "[block announce], local H/HS/VS right, VERIFY.txt of another hash: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify verified the scan 6cc47232a441, not c594d000ce7a",
+    "[block announce], local H/HS/VS right, VERIFY.txt's VS another: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify's reproduction VS 6cc47232a441 is not c594d000ce7a",
+    "[block announce], local H/HS/VS right, VERIFY_INPUTS.txt of format /1, no versions: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record's VERIFY_INPUTS.txt is not exactly the lines ('format', 'freeze_commit', 'draw_seeds_py_sha256', 'analysis_py_sha256', 'scan_to_verify_sha256', 'reproduced_scan_sha256', 'verify_lsremote_sha256', 'scan_lsremote_sha256', 'git_version', 'python_version') (layered-scan-verify-inputs/2)",
+    "[block announce], local H/HS/VS right, absent: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify is absent from /tmp/claude-0/tc11/scan_verify_record/twin_b_absent.git: [block verify-scan] has not published it",
+    "[block announce], local H/HS/VS right, an inventory's listed sha256 not its file's: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record's VERIFY_INPUTS.txt: scan_lsremote_sha256 is not the sha256 of its SCAN_LSREMOTE.txt",
+    "[block announce], local H/HS/VS right, another analysis.py than FREEZE_PINS.json's: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record's VERIFY_INPUTS.txt: analysis_py_sha256 6cc47232a441 is not FREEZE_PINS.json's 0c10b8b94bcb for research/layered-networks/analysis.py",
+    "[block announce], local H/HS/VS right, another draw_seeds.py than FREEZE_PINS.json's: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record's VERIFY_INPUTS.txt: draw_seeds_py_sha256 6cc47232a441 is not FREEZE_PINS.json's b0480dc302ee for research/layered-networks/draw_seeds.py",
+    "[block announce], local H/HS/VS right, the inputs of another scan: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record's VERIFY_INPUTS.txt: reproduced_scan_sha256 6cc47232a441 is not HS c594d000ce7a",
+    "[block announce], local H/HS/VS right, the success line not alone: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record's VERIFY.txt is not exactly the success line (2 lines)",
+    "[block announce], local H/HS/VS right, the verdict not success: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record's verdict is not success ([block verify-scan] did not reproduce the scan)",
+    "[block announce], local H/HS/VS right, two commits: refused before any commit": "rc 1, announce_campaign exists False, twin refs []: REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f) for the freeze F (f20b3d8bc9c8a9a79966badd97a0d368e48fad86), or its branch is not single-use: no commit, no push\nrefused: the scan verify record evidence/combined-scan-verify has 2 commits: it must be exactly its creation commit (single-use)",
+    "[block announce]: the authentic record (control): the announce pushed": "rc 0, files ['DRAW_ANNOUNCE.txt', 'EXCLUDED_PUBLISHED.json', 'EXCLUDED_SECOND_SCAN.json']: the scan verify record evidence/combined-scan-verify 8873a405a56d0703b0d46b286f25356ec6c8b351 created 2026-11-27T23:00:00Z verified scan_sha256 c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f VS c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\nannounce ok\nannounce pushed: evidence/combined-draw-recordtest cd135e366b9addd84d8c3d46cffe408703e783f1\nfatal: expected 'acknowledgments', received 'packfile'\nwarning: push negotiation failed; proceeding anyway with push",
+    "analysis.check_scan_verify: (1) reduced to the single success line: refused": "refused: the scan verify record evidence/combined-scan-verify has no VERIFY_INPUTS.txt at its creation commit 638b303f9834 (all four files are required: VERIFY.txt, VERIFY_INPUTS.txt, VERIFY_LSREMOTE.txt, SCAN_LSREMOTE.txt)",
+    "analysis.check_scan_verify: (2) citing another freeze: refused": "refused: the scan verify record cites the freeze '1111111111111111111111111111111111111111', not the expected f20b3d8bc9c8a9a79966badd97a0d368e48fad86",
+    "analysis.check_scan_verify: (3) one inventory branch with the right name and the wrong SHA: refused": "refused: the scan verify record's VERIFY_LSREMOTE.txt is not the scan's inventory: branch HevisNico-patch-1 is at ffffffffffff on the record's VERIFY_LSREMOTE.txt, at 4f454862f57e in the scan",
+    "analysis.check_scan_verify: (4) a PROBLEM line before the success line: refused": "refused: the scan verify record's VERIFY.txt has a PROBLEM line: [block verify-scan] did not succeed",
+    "analysis.check_scan_verify: (5) put back onto its first commit after a force push away and back: refused": "refused: the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity",
+    "analysis.check_scan_verify: (5b) put back after a deletion and a recreation: refused": "refused: the scan verify record evidence/combined-scan-verify is not single-use: branch_deletion in its activity",
+    "analysis.check_scan_verify: (6) an empty F: refused": "refused: the expected freeze commit '' is not a full 40-hex SHA: the scan verify record cannot be checked against it",
+    "analysis.check_scan_verify: (6b) a well-formed other F: refused": "refused: the scan verify record cites the freeze 'f20b3d8bc9c8a9a79966badd97a0d368e48fad86', not the expected 1111111111111111111111111111111111111111",
+    "analysis.check_scan_verify: absent: refused": "refused: the scan verify record evidence/combined-scan-verify is absent from /tmp/claude-0/tc11/scan_verify_record/twin_a_absent.git: [block verify-scan] has not published it",
+    "analysis.check_scan_verify: created after the announce: refused": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-27T23:00:00Z, not before the campaign announce (2026-11-27T22:00:00Z)",
+    "analysis.check_scan_verify: created at the announce's second: refused (strictly earlier)": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-27T23:00:00Z, not before the campaign announce (2026-11-27T23:00:00Z)",
+    "analysis.check_scan_verify: the authentic record, created before the announce: accepted": "accepted: {\"branch\": \"evidence/combined-scan-verify\", \"commit\": \"8873a405a56d0703b0d46b286f25356ec6c8b351\", \"created_utc\": \"2026-11-27T23:00:00Z\", \"scan_sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"vs\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\"}",
+    "analysis.check_scan_verify: two commits: refused": "refused: the scan verify record evidence/combined-scan-verify has 2 commits: it must be exactly its creation commit (single-use)",
+    "announce twin URLs ((1) reduced to the single success line)": 4,
+    "announce twin URLs ((2) citing another freeze)": 4,
+    "announce twin URLs ((3) one inventory branch with the right name and the wrong SHA)": 4,
+    "announce twin URLs ((3b) the same in SCAN_LSREMOTE.txt)": 4,
+    "announce twin URLs ((4) a PROBLEM line before the success line)": 4,
+    "announce twin URLs ((5) put back onto its first commit after a force push away and back)": 4,
+    "announce twin URLs ((5b) put back after a deletion and a recreation)": 4,
+    "announce twin URLs ((6) an empty F)": 4,
+    "announce twin URLs ((6b) a well-formed other F)": 4,
+    "announce twin URLs (VERIFY.txt of another hash)": 4,
+    "announce twin URLs (VERIFY.txt's VS another)": 4,
+    "announce twin URLs (VERIFY_INPUTS.txt of format /1, no versions)": 4,
+    "announce twin URLs (absent)": 4,
+    "announce twin URLs (an inventory's listed sha256 not its file's)": 4,
+    "announce twin URLs (another analysis.py than FREEZE_PINS.json's)": 4,
+    "announce twin URLs (another draw_seeds.py than FREEZE_PINS.json's)": 4,
+    "announce twin URLs (the authentic record (control))": 4,
+    "announce twin URLs (the inputs of another scan)": 4,
+    "announce twin URLs (the success line not alone)": 4,
+    "announce twin URLs (the verdict not success)": 4,
+    "announce twin URLs (two commits)": 4,
+    "check_draw (campaign, GitHub path): the record created after the announce: refused": "refused: the scan verify record evidence/combined-scan-verify was created at 2026-11-28T00:01:00Z, not before the campaign announce (2026-11-28T00:00:00Z)",
+    "check_draw (campaign, GitHub path): the record created before the announce: accepted": "accepted: {\"scan_verify\": {\"branch\": \"evidence/combined-scan-verify\", \"commit\": \"c1d08eb707f6ebaeb83d6f430e61c1dcaff39e67\", \"created_utc\": \"2026-11-27T23:00:00Z\", \"scan_sha256\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28fefc253f\", \"vs\": \"c594d000ce7a3b28e6a981f9eccd67b8e36b728348249aca8807ca28f",
+    "check_draw (rehearsal, GitHub path): no record read": "accepted: [\"announce\", \"beacon\", \"excluded\", \"machines\", \"recomputed\", \"round\", \"sha256\", \"signature_verified\", \"sizes\"]"
+   }
+  },
+  "ok": true,
+  "seconds": 9.1
+ },
+ "verify_scan": {
+  "detail": {
+   "checks": [
+    {
+     "check": "the first machine's [block second-scan] on the twin",
+     "expected": "excluded integers from 6 refs",
+     "matched": "7 excluded integers from 6 refs; sha256 6d270b52bdc3b99af98ce8a6719c6d7c47cb2297446dca04a090c4e6254ea6f5",
+     "target": "/tmp/claude-0/tc11/verify_scan/first",
+     "target_exists": true
+    },
+    {
+     "check": "the enriched scan passes level 1 (analysis.check_scan)",
+     "expected": "accepted",
+     "matched": "accepted",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "[block verify-scan]: the enriched scan FAILS, no record",
+     "expected": "PROBLEM: the reproduced scan has sha256 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a, not the scan's 33f51c2c33a586ccb5238e349e19b0dd0c10107ef17fe80b7ef1452ad9e80091",
+     "matched": "rc 1, record commit False, twin refs []: PROBLEM: the reproduced scan has sha256 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a, not the scan's 33f51c2c33a586ccb5238e349e19b0dd0c10107ef17fe80b7ef1452ad9e80091",
+     "target": "/tmp/claude-0/tc11/verify_scan/verifier_enriched",
+     "target_exists": true
+    },
+    {
+     "check": "[block announce]: VS is not HS, refused before any commit",
+     "expected": "REFUSED: VS (8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS (33f51c2c33a586ccb5238e349e19b0dd0c10107ef17fe80b7ef1452ad9e80091): no commit, no push",
+     "matched": "rc 1, announce_campaign exists False: REFUSED: VS (8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS (33f51c2c33a586ccb5238e349e19b0dd0c10107ef17fe80b7ef1452ad9e80091): no commit, no push",
+     "target": "/tmp/claude-0/tc11/verify_scan/verifier_enriched",
+     "target_exists": true
+    },
+    {
+     "check": "[block verify-scan]: the honest scan passes, VS = HS, its record published once",
+     "expected": "the scan is reproduced scan_sha256 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a VS 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a",
+     "matched": "['refs/heads/evidence/combined-scan-verify'], files ['SCAN_LSREMOTE.txt', 'VERIFY.txt', 'VERIFY_INPUTS.txt', 'VERIFY_LSREMOTE.txt']: the scan is reproduced scan_sha256 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a VS 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a",
+     "target": "/tmp/claude-0/tc11/verify_scan/verifier_honest",
+     "target_exists": true
+    },
+    {
+     "check": "[block verify-scan]: the record's VERIFY_INPUTS.txt states F, the scan code, both outputs and both inventories",
+     "expected": "identical",
+     "matched": "identical",
+     "target": "/tmp/claude-0/tc11/verify_scan/verifier_honest",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.verify_scan: the inventory as scanned: verified",
+     "expected": "[]",
+     "matched": "[]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.verify_scan: a branch on the remote, not in the scan",
+     "expected": "branch new-branch is on the remote",
+     "matched": "[\"branch new-branch is on the remote (bfa5cfd50141) but not in the scan\"]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.verify_scan: a branch in the scan, not on the remote",
+     "expected": "branch docs is in the scan",
+     "matched": "[\"branch docs is in the scan (ee594a693f0d) but not on the remote\"]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.verify_scan: a branch at another tip",
+     "expected": "branch feature-b is at 5ef87cbbceb4 on the remote, at bfa5cfd50141 in the scan",
+     "matched": "[\"branch feature-b is at 5ef87cbbceb4 on the remote, at bfa5cfd50141 in the scan\"]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    },
+    {
+     "check": "analysis.verify_scan: HEAD not main's tip",
+     "expected": "the scan's HEAD",
+     "matched": "[\"branch main is at bfa5cfd50141 on the remote, at 5ef87cbbceb4 in the scan\", \"the scan's HEAD 5ef87cbbceb4 is not main's tip on the remote bfa5cfd50141\"]",
+     "target": "/home/user/kr/research/layered-networks/analysis.py",
+     "target_exists": true
+    }
+   ],
+   "enriched_with": [
+    41001,
+    41002,
+    41003
+   ],
+   "results": {
+    "[block announce]: VS is not HS, refused before any commit": "rc 1, announce_campaign exists False: REFUSED: VS (8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a), the second machine's reproduction of the scan (ORDER 3 (3b)), is not HS (33f51c2c33a586ccb5238e349e19b0dd0c10107ef17fe80b7ef1452ad9e80091): no commit, no push",
+    "[block verify-scan]: the enriched scan FAILS, no record": "rc 1, record commit False, twin refs []: PROBLEM: the reproduced scan has sha256 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a, not the scan's 33f51c2c33a586ccb5238e349e19b0dd0c10107ef17fe80b7ef1452ad9e80091\nTHE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 33f51c2c33a586ccb5238e349e19b0dd0c10107ef17fe80b7ef1452ad9e80091 VS 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a",
+    "[block verify-scan]: the honest scan passes, VS = HS, its record published once": "rc 0, twin refs ['refs/heads/evidence/combined-scan-verify'], files ['SCAN_LSREMOTE.txt', 'VERIFY.txt', 'VERIFY_INPUTS.txt', 'VERIFY_LSREMOTE.txt']: the scan is reproduced scan_sha256 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a VS 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a\nformat layered-scan-verify-inputs/2\nfreeze_commit f20b3d8bc9c8a9a79966badd97a0d368e48fad86\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a\nreproduced_scan_sha256 8af0e908fb23ae78fbfefd607618fbdb50bca9d45d25b8e98ae65f565465fd5a\nverify_lsremote_sha256 a5f2671b985b70a28a17e8869a5f803613c59ef35b79da1bc1bbd7dd15769847\nscan_lsremote_sha256 a5f2671b985b70a28a17e8869a5f803613c59ef35b79da1bc1bbd7dd15769847\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify 2b68a61df42788f02e05acb4ccf0242941dd19fb\nfatal: expected 'acknowledgments', received 'packfile'\nwarning: push negotiation failed; proceeding anyway with push",
+    "[block verify-scan]: the record's VERIFY_INPUTS.txt states F, the scan code, both outputs and both inventories": "identical",
+    "analysis.verify_scan: HEAD not main's tip": "[\"branch main is at bfa5cfd50141 on the remote, at 5ef87cbbceb4 in the scan\", \"the scan's HEAD 5ef87cbbceb4 is not main's tip on the remote bfa5cfd50141\"]",
+    "analysis.verify_scan: a branch at another tip": "[\"branch feature-b is at 5ef87cbbceb4 on the remote, at bfa5cfd50141 in the scan\"]",
+    "analysis.verify_scan: a branch in the scan, not on the remote": "[\"branch docs is in the scan (ee594a693f0d) but not on the remote\"]",
+    "analysis.verify_scan: a branch on the remote, not in the scan": "[\"branch new-branch is on the remote (bfa5cfd50141) but not in the scan\"]",
+    "analysis.verify_scan: the inventory as scanned: verified": "[]",
+    "second-scan: GitHub URLs replaced by the twin": 1,
+    "the enriched scan passes level 1 (analysis.check_scan)": "accepted",
+    "the first machine's [block second-scan] on the twin": "rc 0: 5\nfetched: every branch of the ls-remote at its tip (5)\n7 excluded integers from 6 refs; sha256 6d270b52bdc3b99af98ce8a6719c6d7c47cb2297446dca04a090c4e6254ea6f5",
+    "verify-scan: GitHub URLs replaced by the twin (enriched)": 4,
+    "verify-scan: GitHub URLs replaced by the twin (honest)": 4
+   }
+  },
+  "ok": true,
+  "seconds": 1.0
+ }
+}
