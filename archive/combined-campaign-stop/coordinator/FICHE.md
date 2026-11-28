@@ -7,7 +7,7 @@
 
 | File | What | State |
 |---|---|---|
-| AMENDMENT_1_DRAFT_NOT_ADOPTED.md | amendment 1 draft, extracted verbatim from the brief, with a "not adopted" header | draft, not adopted |
+| AMENDMENT_1_DRAFT_NOT_ADOPTED.md | amendment 1 draft (§1 to §7), extracted verbatim from COORDINATOR_BRIEF_2026-11-28.txt from the line after "AMENDMENT 1 DRAFT" to the end, with a "not adopted" header | draft, not adopted |
 | COORDINATOR_BRIEF_2026-11-28.txt | the brief handed to this coordinator (state, plan, lessons, the draft in context) | record, verbatim |
 | ETAT.md | the coordinator's running state (French), up to the stop | working notes |
 | SUIVI.md | the owner's decisions to carry into the amendment (French): deferred L1, wording, closing criterion | working notes |
