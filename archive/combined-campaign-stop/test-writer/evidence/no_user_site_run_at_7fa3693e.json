@@ -1,0 +1,89 @@
+{
+ "list_blocks_rehearsal_exact": {
+  "ok": false,
+  "obs": {
+   "list": "EXCLUDED_REHEARSAL2.json",
+   "mutation": null,
+   "changed": null,
+   "recomputed": [],
+   "list_sha256": "8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51",
+   "list_self_consistent": true,
+   "pinned_superset": true,
+   "expected_check": null,
+   "block": "check-rehearsal2-list",
+   "exit": 0,
+   "stdout": "the list is right 18 72 sha256 8aa311f87b230d9d2a6e2fa28ff6ba03370a51898fcc5037cfd6eb42d3efdd51\n",
+   "stderr": "",
+   "shim_lines": []
+  }
+ },
+ "list_blocks_campaign_exact": {
+  "ok": false,
+  "obs": {
+   "list": "EXCLUDED_SECOND.json",
+   "mutation": null,
+   "changed": null,
+   "recomputed": [],
+   "list_sha256": "66d7e539d40fbcb0125cd8c18c2f6ea735ee2dd8256e96188abe3f1b184108d9",
+   "list_self_consistent": true,
+   "pinned_superset": true,
+   "expected_check": null,
+   "block": "check-list",
+   "exit": 1,
+   "stdout": "",
+   "stderr": "refused: the draw's announce cannot be read from GitHub (evidence/combined-rehearsal2-draw): RuntimeError(\"git fetch -q https://github.com/HevisNico/kernel-R refs/heads/evidence/combined-rehearsal2-draw: fatal: couldn't find remote ref refs/heads/evidence/combined-rehearsal2-draw\")\n",
+   "shim_lines": []
+  }
+ },
+ "verify_record_exact": {
+  "ok": false,
+  "obs": {
+   "second_scan": {
+    "blocks": [
+     "second-scan"
+    ],
+    "exit": 0,
+    "stdout": "3\nfetched: every branch of the ls-remote at its tip (3)\n16337 excluded integers from 4 refs; sha256 d379020abb067e627ab3732d03c3136da7c841009636087f31721a81c77942c0\n",
+    "stderr": "",
+    "unknown_placeholders": []
+   },
+   "verify": {
+    "blocks": [
+     "verify-scan"
+    ],
+    "exit": 0,
+    "stdout": "the scan is reproduced scan_sha256 3105d495a3cb9007a0da326933290b743af2e81bdbe0f3c3635c873d010b46df VS 3105d495a3cb9007a0da326933290b743af2e81bdbe0f3c3635c873d010b46df\nformat layered-scan-verify-inputs/2\nfreeze_commit 7fa3693ea85a85dde8490e0efdb9eafa80ff7189\ndraw_seeds_py_sha256 b0480dc302ee0cf821b40be0eed2a1d9c20794d9ca6d9ecd75299fe312ae6958\nanalysis_py_sha256 0c10b8b94bcb1bd414683528b26a92b50db7cb3ac2c824b0a73b83cd00b860f6\nscan_to_verify_sha256 3105d495a3cb9007a0da326933290b743af2e81bdbe0f3c3635c873d010b46df\nreproduced_scan_sha256 3105d495a3cb9007a0da326933290b743af2e81bdbe0f3c3635c873d010b46df\nverify_lsremote_sha256 a3f9d76de809bb35cc8896d363f2dec778901d9e8962718e936824d83840c713\nscan_lsremote_sha256 a3f9d76de809bb35cc8896d363f2dec778901d9e8962718e936824d83840c713\ngit_version git version 2.43.0\npython_version 3.13.18\nverify record pushed: evidence/combined-scan-verify ac654cb0cc3cff18524a5608ec85033088597db0\n",
+    "stderr": "",
+    "unknown_placeholders": []
+   },
+   "record_commit": "ac654cb0cc3cff18524a5608ec85033088597db0",
+   "activity": [
+    "branch_creation"
+   ],
+   "record_files": [
+    "SCAN_LSREMOTE.txt",
+    "VERIFY.txt",
+    "VERIFY_INPUTS.txt",
+    "VERIFY_LSREMOTE.txt"
+   ],
+   "announce": {
+    "blocks": [
+     "announce"
+    ],
+    "exit": 1,
+    "stdout": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (3105d495a3cb9007a0da326933290b743af2e81bdbe0f3c3635c873d010b46df) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push\n",
+    "stderr": "refused: GitHub records no activity for the scan verify record evidence/combined-scan-verify\n",
+    "unknown_placeholders": []
+   },
+   "kind": null,
+   "HS": "3105d495a3cb9007a0da326933290b743af2e81bdbe0f3c3635c873d010b46df",
+   "expected": "the authentic record (control): accepted",
+   "announce_folder_made": false,
+   "pushed_to_twin": false,
+   "shim_lines": [],
+   "block_line": "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS (3105d495a3cb9007a0da326933290b743af2e81bdbe0f3c3635c873d010b46df) for the freeze F (7fa3693ea85a85dde8490e0efdb9eafa80ff7189), or its branch is not single-use: no commit, no push",
+   "message": "refused: GitHub records no activity for the scan verify record evidence/combined-scan-verify",
+   "announce_pushed": ""
+  }
+ }
+}
