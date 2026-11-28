@@ -1,0 +1,141 @@
+{
+ "all_pass": true,
+ "analysis_two_rehearsals": {
+  "detail": {
+   "checks": [
+    {
+     "check": "both, the full list: accepted",
+     "expected": "\"rehearsal1\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}",
+     "matched": "accepted: {\"rehearsal1\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}, \"rehearsal2\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}}",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1 absent: refused",
+     "expected": "rehearsal1_draw= (rehearsal1's published DRAW.json) is required",
+     "matched": "refused: campaign mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 2 absent: refused",
+     "expected": "rehearsal_draw= (rehearsal2's published DRAW.json) is required",
+     "matched": "refused: campaign mode: rehearsal_draw= (rehearsal2's published DRAW.json) is required (its seeds must be excluded)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "a rehearsal 1 seed missing: refused",
+     "expected": "lacks rehearsal1 seeds [18985]",
+     "matched": "refused: the campaign's excluded= list lacks rehearsal1 seeds [18985] and noise seeds [] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "a rehearsal 1 noise seed missing: refused",
+     "expected": "noise seeds [277353]",
+     "matched": "refused: the campaign's excluded= list lacks rehearsal1 seeds [] and noise seeds [277353] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1's DRAW.json re-serialized: refused",
+     "expected": "the published rehearsal 1 draw is b8aaefd9f107",
+     "matched": "refused: the published rehearsal 1 draw is b8aaefd9f107 (DRAW.json of evidence/combined-rehearsal-draw-result at f74b75fbdf72), not 49aeefea47b3",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1 with another list: refused",
+     "expected": "not the one DRAW_ANNOUNCE.txt names",
+     "matched": "refused: the excluded= file is not the one DRAW_ANNOUNCE.txt names (excluded_sha256)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal mode: rehearsal 2's list with rehearsal 1's seeds: accepted",
+     "expected": "accepted: [\"rehearsal1\"]",
+     "matched": "accepted: [\"rehearsal1\"]",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal mode: rehearsal 2's list missing one rehearsal 1 noise seed: refused",
+     "expected": "rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [291791]",
+     "matched": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [291791] (the list must add the earlier rehearsals' seeds)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal mode: rehearsal 1 absent: refused",
+     "expected": "rehearsal mode: rehearsal1_draw=",
+     "matched": "refused: rehearsal mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    },
+    {
+     "check": "rehearsal 1's announce later than the campaign's: refused",
+     "expected": "rehearsal1's announce (2026-11-27T15:14:37Z) is not earlier",
+     "matched": "refused: rehearsal1's announce (2026-11-27T15:14:37Z) is not earlier than the campaign's announce (2026-11-27T15:00:00Z)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc2r/two_out",
+     "target_exists": true
+    }
+   ],
+   "rehearsal1_seeds": [
+    18985,
+    27735,
+    29179,
+    30743,
+    34095,
+    46230,
+    49299,
+    49661,
+    54016,
+    60536,
+    66680,
+    70229,
+    70285,
+    75255,
+    87182,
+    88529,
+    94823,
+    99508
+   ],
+   "rehearsal2_standin_seeds": [
+    15995,
+    17855,
+    31243,
+    38935,
+    39442,
+    40642,
+    41186,
+    52718,
+    54197,
+    61223,
+    62017,
+    63231,
+    73249,
+    80646,
+    84301,
+    92738,
+    95404,
+    97754
+   ],
+   "results": {
+    "a rehearsal 1 noise seed missing: refused": "refused: the campaign's excluded= list lacks rehearsal1 seeds [] and noise seeds [277353] (the list must add the earlier rehearsals' seeds)",
+    "a rehearsal 1 seed missing: refused": "refused: the campaign's excluded= list lacks rehearsal1 seeds [18985] and noise seeds [] (the list must add the earlier rehearsals' seeds)",
+    "both, the full list: accepted": "accepted: {\"rehearsal1\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}, \"rehearsal2\": {\"recomputed\": true, \"seeds\": 18, \"signature_verified\": true}}",
+    "rehearsal 1 absent: refused": "refused: campaign mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+    "rehearsal 1 with another list: refused": "refused: the excluded= file is not the one DRAW_ANNOUNCE.txt names (excluded_sha256)",
+    "rehearsal 1's DRAW.json re-serialized: refused": "refused: the published rehearsal 1 draw is b8aaefd9f107 (DRAW.json of evidence/combined-rehearsal-draw-result at f74b75fbdf72), not 49aeefea47b3",
+    "rehearsal 1's announce later than the campaign's: refused": "refused: rehearsal1's announce (2026-11-27T15:14:37Z) is not earlier than the campaign's announce (2026-11-27T15:00:00Z)",
+    "rehearsal 2 absent: refused": "refused: campaign mode: rehearsal_draw= (rehearsal2's published DRAW.json) is required (its seeds must be excluded)",
+    "rehearsal mode: rehearsal 1 absent: refused": "refused: rehearsal mode: rehearsal1_draw= (rehearsal1's published DRAW.json) is required (its seeds must be excluded)",
+    "rehearsal mode: rehearsal 2's list missing one rehearsal 1 noise seed: refused": "refused: rehearsal 2's excluded= list lacks rehearsal1 seeds [] and noise seeds [291791] (the list must add the earlier rehearsals' seeds)",
+    "rehearsal mode: rehearsal 2's list with rehearsal 1's seeds: accepted": "accepted: [\"rehearsal1\"]"
+   }
+  },
+  "ok": true,
+  "seconds": 14.6
+ }
+}

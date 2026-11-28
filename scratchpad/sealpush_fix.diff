@@ -1,0 +1,80 @@
+diff --git a/research/layered-networks/sealpush.py b/research/layered-networks/sealpush.py
+index 8ffd1548..94ebefc9 100644
+--- a/research/layered-networks/sealpush.py
++++ b/research/layered-networks/sealpush.py
+@@ -118,6 +118,16 @@ def install_hook(bare):
+     h.chmod(0o755)
+ 
+ 
++GITHUB_PUSH_TYPES = ("push", "branch_creation")   # GitHub records the push that creates a branch as branch_creation
++
++
++def github_times(items):
++    """{commit sha: push time} from the repository activity API's items for one ref. Only a push (activity_type push)
++    or the push that created the branch (branch_creation) counts: never force_push, branch_deletion, or any other
++    type. The time is the one of the push that made the commit the branch tip (`after`)."""
++    return {x["after"]: x["timestamp"] for x in items if x.get("activity_type") in GITHUB_PUSH_TYPES}
++
++
+ def times(remote, branch, source):
+     """{commit sha: UTC time the remote received the push that made it the branch tip}."""
+     if source == "bare":
+@@ -134,9 +144,8 @@ def times(remote, branch, source):
+     if source == "github":
+         owner_repo = str(remote).rstrip("/").removesuffix(".git").split("github.com/")[-1]
+         r = subprocess.run(["gh", "api", "-X", "GET", f"repos/{owner_repo}/activity", "-f", f"ref=refs/heads/{branch}",
+-                            "-f", "activity_type=push", "--paginate"], capture_output=True, text=True, check=True)
+-        items = json.loads(r.stdout.replace("][", ","))
+-        return {x["after"]: x["timestamp"] for x in items}
++                            "--paginate"], capture_output=True, text=True, check=True)
++        return github_times(json.loads(r.stdout.replace("][", ",")))
+     raise ValueError(source)
+ 
+ 
+diff --git a/research/layered-networks/tests/test_campaign.py b/research/layered-networks/tests/test_campaign.py
+index c81c3d46..885bef6e 100644
+--- a/research/layered-networks/tests/test_campaign.py
++++ b/research/layered-networks/tests/test_campaign.py
+@@ -336,6 +336,34 @@ def case_no_pushed_seal(w):
+     return ok, dict(steps={k: v["status"] for k, v in st.items()}, seal_push=sp, checks=checks)
+ 
+ 
++def case_github_times(w):
++    """sealpush.github_times on a recorded activity API response (evidence/devtest-seals2-K05, 27 Nov 2026, the two
++    seals' pushes) plus synthetic force_push and branch_deletion items: the branch-creating push and the later push
++    count; the force push and the deletion never do."""
++    import importlib.util
++    spec = importlib.util.spec_from_file_location("sealpush_t", HERE / "sealpush.py")
++    SPm = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(SPm)
++    z = "0" * 40
++    items = [dict(activity_type="push", before="5226d975283f5a905ba54abea8f8570685eef388",
++                  after="80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384", timestamp="2026-11-26T22:27:29Z",
++                  ref="refs/heads/evidence/devtest-seals2-K05"),
++             dict(activity_type="branch_creation", before=z, after="5226d975283f5a905ba54abea8f8570685eef388",
++                  timestamp="2026-11-26T22:25:58Z", ref="refs/heads/evidence/devtest-seals2-K05"),
++             dict(activity_type="force_push", before="80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384", after="f" * 40,
++                  timestamp="2026-11-26T23:00:00Z", ref="refs/heads/evidence/devtest-seals2-K05"),
++             dict(activity_type="branch_deletion", before="f" * 40, after=z, timestamp="2026-11-26T23:10:00Z",
++                  ref="refs/heads/evidence/devtest-seals2-K05")]
++    tm = SPm.github_times(items)
++    checks = []
++    c1 = check(checks, "the branch-creating push counts", json.dumps(tm), '"5226d975283f5a905ba54abea8f8570685eef388": '
++               '"2026-11-26T22:25:58Z"', HERE / "sealpush.py", (HERE / "sealpush.py").exists())
++    c2 = check(checks, "the later push counts", json.dumps(tm), '"80f2c0f5b46ce875cbb52ec4020a2e54ed0d4384": '
++               '"2026-11-26T22:27:29Z"', HERE / "sealpush.py", (HERE / "sealpush.py").exists())
++    ok = c1 and c2 and ("f" * 40) not in tm and z not in tm and len(tm) == 2
++    return ok, dict(times=tm, checks=checks)
++
++
+ def case_second_seal(w):
+     tr = w.tree("main")["tree"]
+     template = w.template("secondseal", w.remote("secondseal"))
+@@ -746,6 +774,7 @@ def main(wd, *only):
+     run("kernel_mirror_disagreement", case_kernel)
+     run("no_pushed_seal", case_no_pushed_seal)
+     run("second_seal", case_second_seal)
++    run("github_times", case_github_times)
+     run("sigterm_driver_only", case_sigterm_driver_only)
+     run("sigkill_driver_only", case_sigkill_driver_only)
+     run("k3_budget_stop", case_k3_budget_stop)

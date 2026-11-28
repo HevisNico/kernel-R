@@ -1,0 +1,346 @@
+{
+ "analysis_hardening": {
+  "ok": true,
+  "seconds": 146,
+  "detail": {
+   "A4: unknown key": [
+    1,
+    "refused: unknown argument 'colour=red' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, times, thresholds, controls, tips; a root path cannot contain '=')"
+   ],
+   "A4: a root path with '='": [
+    1,
+    "nknown argument '/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h=eq' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, times, thresholds, controls, tips; a root path cannot contain '=')"
+   ],
+   "A4: no root": [
+    1,
+    "refused: no root"
+   ],
+   "A5: python -O": [
+    1,
+    "refused: Python runs with -O (sys.flags.optimize): run analysis.py without it"
+   ],
+   "B10: a non-empty OUTDIR": [
+    1,
+    "refused: OUTDIR /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/an_h_full exists and is not an empty folder"
+   ],
+   "A6: an unknown verdict": [
+    1,
+    "refused: /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_a6: NOT1_6212/N0/comparison.json: unknown verdict 'agrees mostly'"
+   ],
+   "B4: a comparison compare_d2 does not reproduce": [
+    1,
+    "refused: /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_b4: NOT1_6212/N1/comparison.json is not what the pinned compare_d2 computes from its seal and noisy_record.json"
+   ],
+   "B8: a read file under no manifest line": [
+    1,
+    "refused: /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_b8: NOT1_6212/D/record.json is read but is under no verified manifest line and not on UNMANIFESTED"
+   ],
+   "B2": {
+    "rc": 0,
+    "stderr": "",
+    "seal": {
+     "log": {
+      "why": "no valid seal"
+     },
+     "log_ok": false,
+     "regenerated_identical": false,
+     "regeneration_why": "the seal folder holds ['MANIFEST.json', 'NOT1_6212.copy.json', 'NOT1_6212.json', 'SHA256SUMS'], not exactly MANIFEST.json, SHA256SUMS and NOT1_6212.json"
+    },
+    "K0": {
+     "counted": false,
+     "not_sealed": true
+    }
+   },
+   "B9": {
+    "rc": 0,
+    "notice": [
+     "no draw: the expected plans are each root's own PLAN.json (test mode, no draw=)",
+     "root not finished: machine_1 (1 seal lines on evidence/combined-seals-K01)"
+    ],
+    "stderr": ""
+   },
+   "A7": {
+    "expected": 1,
+    "failed": 0,
+    "not_judged": 0,
+    "passed": 1,
+    "present": 1
+   },
+   "B16: one seed changed, the signature kept": [
+    1,
+    "refused: DRAW.json is not draw_seeds.draw of its beacon and round on the excluded= list at the sizes {'ANDOR3': 1, 'NOT1': 2, 'XOR3': 1} (with its beacon_round and announce), byte for byte"
+   ],
+   "B16: the round off by one (the announce pushed 3 s later)": [
+    1,
+    "refused: DRAW.json's round 1000000 is not the round the announce's push time fixes (1000001, 2023-09-27T08:19:27Z + 600 s)"
+   ],
+   "B16: one changed signature byte": [
+    1,
+    "refused: DRAW.json: the beacon round does not verify against the pinned quicknet key: {'round': 1000000, 'randomness_ok': True, 'ok': False, 'why': \"point decoding: ValueError('The given point is not on G1: y**2 = x**3 + b')\"}"
+   ],
+   "B16/D8: a verified draw, the root's plan is none of the expected plans": [
+    1,
+    "refused: /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home: PLAN.json is none of the expected plans of the draw"
+   ],
+   "X1: a zero-padded signature (it would verify)": [
+    1,
+    "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)"
+   ],
+   "N6: a round written 1000000.0": [
+    1,
+    "refused: DRAW.json has no beacon string, or its round or beacon_round's round is not an integer"
+   ],
+   "N5: an exclusion list rejecting more than 20 % of the range": [
+    1,
+    "refused: the excluded= list rejects 37.9% of the draw range, more than 20%"
+   ],
+   "owner: rehearsal seeds, a rehearsal seed missing": [
+    1,
+    "refused: the campaign's excluded= list lacks rehearsal seeds [22098] and noise seeds [] (the second scan must read the rehearsal)"
+   ],
+   "owner: rehearsal seeds, a rehearsal noise seed missing": [
+    1,
+    "refused: the campaign's excluded= list lacks rehearsal seeds [] and noise seeds [277792] (the second scan must read the rehearsal)"
+   ],
+   "owner: rehearsal seeds, the full list: accepted (refused later, at the root's plan)": [
+    1,
+    "refused: /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home: PLAN.json is none of the expected plans of the draw"
+   ],
+   "rehearsal_seeds": [
+    22098,
+    27779,
+    31243,
+    38935,
+    39442,
+    40642,
+    41186,
+    52718,
+    54197,
+    61223,
+    62017,
+    63231,
+    73249,
+    80646,
+    84301,
+    92738,
+    95404,
+    97754
+   ],
+   "owner: one value, one writing (upper-case beacon)": [
+    1,
+    "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused"
+   ],
+   "owner: one value, one writing (upper-case randomness)": [
+    1,
+    "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused"
+   ],
+   "owner: one value, one writing (upper-case signature)": [
+    1,
+    "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)"
+   ],
+   "partial": {
+    "rc": 0,
+    "stderr": "",
+    "K0": {
+     "counted": false
+    },
+    "K3": {
+     "counted": true,
+     "manifest_not_final": true,
+     "refuted": true
+    },
+    "notice": [
+     "no draw: the expected plans are each root's own PLAN.json (test mode, no draw=)",
+     "root not finished: machine_1 (1 seal lines on evidence/combined-seals-K01)"
+    ],
+    "counts_K0_not_completed": {
+     "list": [
+      {
+       "instance": "NOT1_6212",
+       "status": "not completed, manifest not final (no verified instance manifest: the machine stopped)",
+       "step": null
+      }
+     ],
+     "n": 1
+    }
+   },
+   "checks": [
+    {
+     "check": "A4: unknown key",
+     "expected": "unknown argument 'colour=red'",
+     "matched": "refused: unknown argument 'colour=red' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, times, thresholds, controls, tips; a root path cannot contain '=')",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "A4: a root path with '='",
+     "expected": "unknown argument",
+     "matched": "nknown argument '/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h=eq' (keys: draw, excluded, announce, activity, rehearsal_draw, rehearsal_excluded, rehearsal_announce, rehearsal_activity, times, thresholds, controls, tips; a root path cannot contain '=')",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h=eq",
+     "target_exists": true
+    },
+    {
+     "check": "A4: no root",
+     "expected": "refused: no root",
+     "matched": "refused: no root",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "A5: python -O",
+     "expected": "Python runs with -O",
+     "matched": "refused: Python runs with -O (sys.flags.optimize): run analysis.py without it",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B10: a non-empty OUTDIR",
+     "expected": "exists and is not an empty folder",
+     "matched": "refused: OUTDIR /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/an_h_full exists and is not an empty folder",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "A6: an unknown verdict",
+     "expected": "unknown verdict 'agrees mostly'",
+     "matched": "refused: /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_a6: NOT1_6212/N0/comparison.json: unknown verdict 'agrees mostly'",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_a6",
+     "target_exists": true
+    },
+    {
+     "check": "B4: a comparison compare_d2 does not reproduce",
+     "expected": "NOT1_6212/N1/comparison.json is not what the pinned compare_d2 computes",
+     "matched": "refused: /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_b4: NOT1_6212/N1/comparison.json is not what the pinned compare_d2 computes from its seal and noisy_record.json",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_b4",
+     "target_exists": true
+    },
+    {
+     "check": "B8: a read file under no manifest line",
+     "expected": "NOT1_6212/D/record.json is read but is under no verified manifest line",
+     "matched": "refused: /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_b8: NOT1_6212/D/record.json is read but is under no verified manifest line and not on UNMANIFESTED",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_b8",
+     "target_exists": true
+    },
+    {
+     "check": "B1/B2: an extra file in the seal folder is a seal defect",
+     "expected": "not exactly MANIFEST.json",
+     "matched": "the seal folder holds ['MANIFEST.json', 'NOT1_6212.copy.json', 'NOT1_6212.json', 'SHA256SUMS'], not exactly MANIFEST.json, SHA256SUMS and NOT1_6212.json",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_b2",
+     "target_exists": true
+    },
+    {
+     "check": "B9: a root without DONE is analysed, not finished",
+     "expected": "root not finished: machine_1",
+     "matched": "[\"no draw: the expected plans are each root's own PLAN.json (test mode, no draw=)\", \"root not finished: machine_1 (1 seal lines on evidence/combined-seals-K01)\"]",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_b9",
+     "target_exists": true
+    },
+    {
+     "check": "A7: the expected U, present and passed",
+     "expected": "\"expected\": 1, \"failed\": 0, \"not_judged\": 0, \"passed\": 1, \"present\": 1",
+     "matched": "{\"expected\": 1, \"failed\": 0, \"not_judged\": 0, \"passed\": 1, \"present\": 1}",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16: one seed changed, the signature kept",
+     "expected": "DRAW.json is not draw_seeds.draw of its beacon and round",
+     "matched": "refused: DRAW.json is not draw_seeds.draw of its beacon and round on the excluded= list at the sizes {'ANDOR3': 1, 'NOT1': 2, 'XOR3': 1} (with its beacon_round and announce), byte for byte",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16: the round off by one (the announce pushed 3 s later)",
+     "expected": "is not the round the announce's push time fixes",
+     "matched": "refused: DRAW.json's round 1000000 is not the round the announce's push time fixes (1000001, 2023-09-27T08:19:27Z + 600 s)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16: one changed signature byte",
+     "expected": "the beacon round does not verify",
+     "matched": "refused: DRAW.json: the beacon round does not verify against the pinned quicknet key: {'round': 1000000, 'randomness_ok': True, 'ok': False, 'why': \"point decoding: ValueError('The given point is not on G1: y**2 = x**3 + b')\"}",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "B16/D8: a verified draw, the root's plan is none of the expected plans",
+     "expected": "PLAN.json is none of the expected plans of the draw",
+     "matched": "refused: /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home: PLAN.json is none of the expected plans of the draw",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "X1: a zero-padded signature (it would verify)",
+     "expected": "exactly 48 bytes",
+     "matched": "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "N6: a round written 1000000.0",
+     "expected": "is not an integer",
+     "matched": "refused: DRAW.json has no beacon string, or its round or beacon_round's round is not an integer",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home",
+     "target_exists": true
+    },
+    {
+     "check": "N5: an exclusion list rejecting more than 20 % of the range",
+     "expected": "of the draw range, more than 20%",
+     "matched": "refused: the excluded= list rejects 37.9% of the draw range, more than 20%",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/EXCLUDED_wide.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: rehearsal seeds, a rehearsal seed missing",
+     "expected": "lacks rehearsal seeds [22098]",
+     "matched": "refused: the campaign's excluded= list lacks rehearsal seeds [22098] and noise seeds [] (the second scan must read the rehearsal)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/DRAW_campaign15785.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: rehearsal seeds, a rehearsal noise seed missing",
+     "expected": "noise seeds [277792]",
+     "matched": "refused: the campaign's excluded= list lacks rehearsal seeds [] and noise seeds [277792] (the second scan must read the rehearsal)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/DRAW_campaign15785.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: rehearsal seeds, the full list: accepted (refused later, at the root's plan)",
+     "expected": "PLAN.json is none of the expected plans",
+     "matched": "refused: /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tc13/root_home: PLAN.json is none of the expected plans of the draw",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/DRAW_campaign15786.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: one value, one writing (upper-case beacon)",
+     "expected": "another writing of the value is refused",
+     "matched": "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/DRAW_wupper.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: one value, one writing (upper-case randomness)",
+     "expected": "another writing of the value is refused",
+     "matched": "refused: DRAW.json: the beacon and the round's randomness must both be exactly sha256(signature) = b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3 (round 1000000); another writing of the value is refused",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/DRAW_wupper.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: one value, one writing (upper-case signature)",
+     "expected": "not written in canonical form",
+     "matched": "refused: DRAW.json: the beacon round's signature is not written in canonical form (exactly 48 bytes, 96 lowercase hex characters, no spaces, no padding)",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/DRAW_wupper.json",
+     "target_exists": true
+    },
+    {
+     "check": "owner: stopped after a differing N1, refuted (manifest not final)",
+     "expected": "\"counted\": true, \"manifest_not_final\": true, \"refuted\": true",
+     "matched": "{\"counted\": true, \"manifest_not_final\": true, \"refuted\": true}",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/devh/root_h_partial",
+     "target_exists": true
+    }
+   ]
+  }
+ }
+}

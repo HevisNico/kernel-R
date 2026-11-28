@@ -1,0 +1,1257 @@
+{
+ "all_identical_except_listed": false,
+ "files_listed": [
+  {
+   "reason": "the instance's file list: follows the files above",
+   "regex": "(.*/)?SHA256SUMS"
+  },
+  {
+   "reason": "the driver's status file (steps' times, cores, mode)",
+   "regex": "(.*/)?status\\.json"
+  },
+  {
+   "reason": "the kernel build folder",
+   "regex": "D/kernel(/.*)?"
+  },
+  {
+   "reason": "trace extracts: compared through trace.digest.json",
+   "regex": "N\\d/extract(/.*)?"
+  },
+  {
+   "reason": "an older chain's extract file name",
+   "regex": "N\\d/ref_extract\\.json"
+  },
+  {
+   "reason": "the duplicate's wait log, written by campaign_run15 onwards and by campaign.py; campaign_run14 wrote none",
+   "regex": "seal_wait\\.json"
+  },
+  {
+   "reason": "deleted from the reference roots after their analysis (RAWS_DELETED_AFTER_ANALYSIS.txt); trace.digest.json is compared instead",
+   "regex": "N0/trace\\.raw"
+  }
+ ],
+ "format": "layered-equiv-b/1",
+ "listed_rules": [
+  {
+   "name": "cost",
+   "reason": "wall and CPU times (check_duplicate's exception)",
+   "regex": ".*:(.*/)?(cost|wall_s|cpu_s|[^/]*_wall_s|[^/]*_cpu_s)(/.*)?"
+  },
+  {
+   "name": "other_times",
+   "reason": "other wall and CPU time fields (Lean's seconds, the inverter measures' machine time)",
+   "regex": ".*:(.*/)?(cpu_min|seconds|seconds_total|machine_s|machine_s_total|wall_minutes|network_op_s)(/.*)?"
+  },
+  {
+   "name": "date_line",
+   "reason": "the trace's Date: line, as in check_duplicate",
+   "regex": ".*:(.*/)?date_line(/.*)?"
+  },
+  {
+   "name": "derived_hash",
+   "reason": "the sha256 of another file of the same pair, which is itself compared here field by field (it differs only by listed fields: times, the ENV hash)",
+   "regex": ".*:(.*/)?(inverter_gate/sha256|inverter_gate/source/sha256|prediction_sha256|instances/sha256|measure_sha256|extract/sha256|files/ngspice\\.log)"
+  },
+  {
+   "name": "kernel_paths",
+   "reason": "the absolute path of prediction.json given to Lean",
+   "regex": "D/kernel/.*:(.*/)?prediction"
+  },
+  {
+   "name": "times",
+   "reason": "UTC dates of the run",
+   "regex": ".*:(.*/)?(started|ended|at|time|utc|[^/]*_utc|pushed_at[^/]*|date)(/.*)?"
+  },
+  {
+   "name": "env",
+   "reason": "the ENV.json hash: ENV.json differs by its paths, uptime and the new `campaign` key",
+   "regex": ".*:(.*/)?(env_sha256|env|ENV_sha256)(/.*)?"
+  },
+  {
+   "name": "seal_log",
+   "reason": "the seal-log commit: another log repository, another commit and time",
+   "regex": ".*:(.*/)?(seal_log|record_seal_log|commit|line|seal_branch|branch|remote|seal_dir)(/.*)?"
+  },
+  {
+   "name": "seal_sha",
+   "reason": "the seal's hash, which follows the ENV hash sealed inside it",
+   "regex": ".*:(.*/)?(seal_sha256|seal_sha|manifest_sha256|sha256sums_sha256)(/.*)?"
+  },
+  {
+   "name": "seal_sums",
+   "reason": "the seal's file list hashes and the push record, which follow the ENV hash and the log repository",
+   "regex": "seal/SHA256SUMS:.*|N\\d/SEAL_LOG\\.json:.*|seal_push\\.json:.*"
+  },
+  {
+   "name": "code",
+   "reason": "hashes of the code files: another clone, and the chain's or campaign.py's driver",
+   "regex": ".*:(.*/)?(code|code_sha256|driver[^/]*|[^/]*script[^/]*_sha256|sources)(/.*)?"
+  },
+  {
+   "name": "kernel",
+   "reason": "the kernel build reference (absent in stage_d5-era roots)",
+   "regex": ".*:(.*/)?(kernel|kernel_build|kernel_[^/]*)(/.*)?"
+  },
+  {
+   "name": "paths",
+   "reason": "absolute paths of another root",
+   "regex": ".*:(.*/)?(path|dir|root|out|cwd|argv|deck)(/.*)?"
+  }
+ ],
+ "pairs": [
+  {
+   "files": {
+    "N0/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N0/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "519a6ce2db19"
+    },
+    "N0/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (269, 306), 'other_diffs': []}"
+    },
+    "N0/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "duplicate_here.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "cost": [
+       "/cpu_s"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/MANIFEST.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/instances[0]/inverter_gate/sha256",
+       "/instances[0]/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/NOT1_6212.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/source/sha256"
+      ],
+      "env": [
+       "/env_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "seal_check.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "seal_log": [
+       "/seal_dir",
+       "/seal_log[0]",
+       "/seal_log[1]"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal_fetch.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "seal_log": [
+       "/branch",
+       "/commit",
+       "/remote"
+      ]
+     },
+     "unlisted": []
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/final/out_K05/DUPX_NOT1_6212",
+   "only_new": [],
+   "only_ref": [
+    {
+     "file": "N0/trace.raw",
+     "listed": "deleted from the reference roots after their analysis (RAWS_DELETED_AFTER_ANALYSIS.txt); trace.digest.json is compared instead"
+    },
+    {
+     "file": "seal_wait.json",
+     "listed": "the duplicate's wait log, written by campaign_run15 onwards and by campaign.py; campaign_run14 wrote none"
+    }
+   ],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/e2e17/out_K07/DUPX_NOT1_6212",
+   "ref_driver": null,
+   "unlisted": [],
+   "verdict": "identical except listed"
+  },
+  {
+   "files": {
+    "U/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "U/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "519a6ce2db19"
+    },
+    "U/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (47, 48), 'other_diffs': []}"
+    },
+    "U/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "U/untrained_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "untrained.json": {
+     "compared": "json",
+     "differences": 5,
+     "listed": {
+      "cost": [
+       "/cpu_s"
+      ],
+      "seal_log": [
+       "/record_seal_log/branch",
+       "/record_seal_log/commit",
+       "/seal_log/branch",
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/final/out_K04/U_NOT1_6212",
+   "only_new": [],
+   "only_ref": [],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/e2e17/out_K02/U_NOT1_6212",
+   "ref_driver": null,
+   "unlisted": [],
+   "verdict": "identical except listed"
+  },
+  {
+   "files": {
+    "D/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "D/cost_d.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/cost/cpu_end_s",
+       "/cost/cpu_setup_s",
+       "/cost/cpu_test_s",
+       "/cost/cpu_train_s",
+       "/cost/wall_scan_s",
+       "/cost/wall_setup_s",
+       "/cost/wall_test_s",
+       "/cost/wall_train_s"
+      ],
+      "other_times": [
+       "/cpu_min"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/fit_d.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "D/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "28b8df4502b9"
+    },
+    "D/overlay_d.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "D/prediction.json": {
+     "compared": "json",
+     "differences": 5,
+     "listed": {
+      "code": [
+       "/code/leancell.py",
+       "/code/stage_d6.py"
+      ],
+      "derived_hash": [
+       "/inverter_gate/source/sha256"
+      ],
+      "env": [
+       "/env_sha256"
+      ],
+      "kernel": [
+       "/kernel"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/record.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/cost/cpu_end_s",
+       "/cost/cpu_setup_s",
+       "/cost/cpu_test_s",
+       "/cost/cpu_train_s",
+       "/cost/wall_scan_s",
+       "/cost/wall_setup_s",
+       "/cost/wall_test_s",
+       "/cost/wall_train_s",
+       "/scans/wall_s"
+      ]
+     },
+     "unlisted": []
+    },
+    "D/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (12059, 14145), 'other_diffs': []}"
+    },
+    "N0/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "seal_log": [
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N0/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "28b8df4502b9"
+    },
+    "N0/noisy_record.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N0/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (9447, 11257), 'other_diffs': []}"
+    },
+    "N0/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "seal_log": [
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N1/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N1/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "22c24821fc29"
+    },
+    "N1/noisy_record.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": [
+      "/saved_ref"
+     ]
+    },
+    "N1/session.log": {
+     "compared": "log_compare",
+     "identical": false,
+     "info": "{'excluded': (12743, 14702), 'other_diffs': [(24, '>>> save v(xc1_0.p) v(xc1_1.p) v(xc2_0.p) v(xc3_0.p) v(xn0.p) v(xn1.p) v(xc1_0.vmem1) v(xc1_0.vmem2) v(xc1_1.vmem1) v(xc1_1.vmem2) v(xc2_0.vmem1) v(xc2_0.vmem2) v(xc3_0.vmem1) v(xc3_0.vmem2) v(xc1_0.x1.sum) v(xc1_0.x2.sum) v(xc1_1.x1.sum) v(xc1_1.x2.sum) v(xc2_0.x1.sum) v(xc2_0.x2.sum) v(xc3_0.x1.sum) v(xc3_0.x2.sum) v(xn0.vq) v(xn1.vq) v(xn0.nzm) v(nzhn0) v(nzjn0) v(xn1.nzm) v(nzhn1) v(nzjn1)', '>>> save v(xc1_0.p) v(xc1_1.p) v(xc2_0.p) v(xc3_0.p) v(xn0.p) v(xn1.p) v(xc1_0.vmem1) v(xc1_0.vmem2) v(xc1_1.vmem1) v(xc1_1.vmem2) v(xc2_0.vmem1) v(xc2_0.vmem2) v(xc3_0.vmem1) v(xc3_0.vmem2) v(xc1_0.x1.sum) v(xc1_0.x2.sum) v(xc1_1.x1.sum) v(xc1_1.x2.sum) v(xc2_0.x1.sum) v(xc2_0.x2.sum) v(xc3_0.x1.sum) v(xc3_0.x2.sum) v(xn0.vq) v(xn1.vq) v(xn0.nzm) v(nzhn0) v(nzjn0) v(xn1.nzm) v(nzhn1) v(nzjn1) v(xn0.vrefm) v(xn0.vrefmn) v(xn1.vrefm) v(xn1.vrefmn)'), (1137, '34: condition met: stop  when v(xn1.p) > 0.9', '38: condition met: stop  when v(xn1.p) > 0.9'), (1165, '36: condition met: stop  when time >= 0.0004001', '40: condition met: stop  when time >= 0.0004001'), (1197, '39: condition met: stop  when time >= 0.0005401', '43: condition met: stop  when time >= 0.0005401'), (1292, '42: condition met: stop  when v(xn1.p) > 0.9', '46: condition met: stop  when v(xn1.p) > 0.9')]}"
+    },
+    "N1/trace.digest.json": {
+     "compared": "json",
+     "differences": 4,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": [
+      "/data_sha256",
+      "/header_sha256_without_date",
+      "/size"
+     ]
+    },
+    "N2/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "seal_log": [
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N2/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "22c24821fc29"
+    },
+    "N2/noisy_record.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N2/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (12482, 14342), 'other_diffs': []}"
+    },
+    "N2/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/SEAL_LOG.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "seal_log": [
+       "/commit",
+       "/line"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "N3/comparison.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/inverter_gate/sha256",
+       "/prediction_sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "22c24821fc29"
+    },
+    "N3/noisy_record.json": {
+     "compared": "json",
+     "differences": 3,
+     "listed": {
+      "cost": [
+       "/cost/cpu_s",
+       "/cost/wall_s"
+      ],
+      "seal_log": [
+       "/seal_log/commit"
+      ]
+     },
+     "unlisted": []
+    },
+    "N3/session.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (12707, 14707), 'other_diffs': []}"
+    },
+    "N3/trace.digest.json": {
+     "compared": "json",
+     "differences": 1,
+     "listed": {
+      "date_line": [
+       "/date_line"
+      ]
+     },
+     "unlisted": []
+    },
+    "SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "deck.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "28b8df4502b9"
+    },
+    "inv/K3_BUDGET.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/NETWORK_FINGERPRINT.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "inv/inverter_gate.json": {
+     "compared": "json",
+     "differences": 9,
+     "listed": {
+      "cost": [
+       "/job_wall_s/n0",
+       "/job_wall_s/n1"
+      ],
+      "derived_hash": [
+       "/inverters/n0/measure_sha256",
+       "/inverters/n1/measure_sha256"
+      ],
+      "other_times": [
+       "/inverters/n0/machine_s",
+       "/inverters/n1/machine_s",
+       "/network_op_s",
+       "/wall_minutes"
+      ],
+      "paths": [
+       "/deck"
+      ]
+     },
+     "unlisted": []
+    },
+    "inv/lean_build/CircuitInverterGate.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "d4f4402594ac"
+    },
+    "inv/lean_build/InverterInstanceTiming.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "f2e8f6a7b3ba"
+    },
+    "inv/lean_build/InverterTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "961ae03c4184"
+    },
+    "inv/lean_build/MonotoneOneSidedTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "cac184d04063"
+    },
+    "inv/lean_build/MonotoneSupport.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "bf65f320d332"
+    },
+    "inv/lean_build/MonotoneTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "d9e549231d1d"
+    },
+    "inv/lean_build/Target.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "10fcc53ffe8a"
+    },
+    "inv/lean_build/TwoLayerTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "2f3ca34cfcb9"
+    },
+    "inv/lean_build/TwoRailsTarget.olean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "706b0ab32daf"
+    },
+    "inv/n0/gates/GATE_9803.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/n0/gates/Inverter_9803.lean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "0b7c512f2c4e"
+    },
+    "inv/n0/gates/Inverter_9803.log": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "inv/n0/runs/9803/MEASURE.json": {
+     "compared": "json",
+     "differences": 11,
+     "listed": {
+      "derived_hash": [
+       "/runs/R1_absent/files/ngspice.log",
+       "/runs/R2_present/files/ngspice.log",
+       "/runs/R3_leak_above/files/ngspice.log",
+       "/runs/R4_leak_below/files/ngspice.log",
+       "/runs/R5_static/files/ngspice.log"
+      ],
+      "other_times": [
+       "/measures/machine_s/R1_absent",
+       "/measures/machine_s/R2_present",
+       "/measures/machine_s/R3_leak_above",
+       "/measures/machine_s/R4_leak_below",
+       "/measures/machine_s/R5_static",
+       "/measures/machine_s_total"
+      ]
+     },
+     "unlisted": []
+    },
+    "inv/n0/runs/9803/R1_absent/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/9803/R1_absent/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "b7f56f8bd96a"
+    },
+    "inv/n0/runs/9803/R1_absent/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (210, 232), 'other_diffs': []}"
+    },
+    "inv/n0/runs/9803/R1_absent/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "a3ec8bc8449f"
+    },
+    "inv/n0/runs/9803/R2_present/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/9803/R2_present/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "0db90ec642bd"
+    },
+    "inv/n0/runs/9803/R2_present/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (130, 149), 'other_diffs': []}"
+    },
+    "inv/n0/runs/9803/R2_present/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e1572cda0b82"
+    },
+    "inv/n0/runs/9803/R3_leak_above/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/9803/R3_leak_above/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "1b356da03387"
+    },
+    "inv/n0/runs/9803/R3_leak_above/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (119, 131), 'other_diffs': []}"
+    },
+    "inv/n0/runs/9803/R3_leak_above/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "148073726370"
+    },
+    "inv/n0/runs/9803/R4_leak_below/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/9803/R4_leak_below/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "4ce688d842a9"
+    },
+    "inv/n0/runs/9803/R4_leak_below/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (82, 95), 'other_diffs': []}"
+    },
+    "inv/n0/runs/9803/R4_leak_below/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "40fea06deed3"
+    },
+    "inv/n0/runs/9803/R5_static/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n0/runs/9803/R5_static/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "6fe2fc236874"
+    },
+    "inv/n0/runs/9803/R5_static/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (232, 267), 'other_diffs': []}"
+    },
+    "inv/n0/runs/9803/R5_static/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "2ce8fc023e2a"
+    },
+    "inv/n1/gates/GATE_9803.json": {
+     "compared": "json",
+     "differences": 0,
+     "listed": {},
+     "unlisted": []
+    },
+    "inv/n1/gates/Inverter_9803.lean": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "08bbae85aa3e"
+    },
+    "inv/n1/gates/Inverter_9803.log": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "inv/n1/runs/9803/MEASURE.json": {
+     "compared": "json",
+     "differences": 11,
+     "listed": {
+      "derived_hash": [
+       "/runs/R1_absent/files/ngspice.log",
+       "/runs/R2_present/files/ngspice.log",
+       "/runs/R3_leak_above/files/ngspice.log",
+       "/runs/R4_leak_below/files/ngspice.log",
+       "/runs/R5_static/files/ngspice.log"
+      ],
+      "other_times": [
+       "/measures/machine_s/R1_absent",
+       "/measures/machine_s/R2_present",
+       "/measures/machine_s/R3_leak_above",
+       "/measures/machine_s/R4_leak_below",
+       "/measures/machine_s/R5_static",
+       "/measures/machine_s_total"
+      ]
+     },
+     "unlisted": []
+    },
+    "inv/n1/runs/9803/R1_absent/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n1/runs/9803/R1_absent/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "15d693e7c43b"
+    },
+    "inv/n1/runs/9803/R1_absent/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (202, 233), 'other_diffs': []}"
+    },
+    "inv/n1/runs/9803/R1_absent/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "14a562f6e112"
+    },
+    "inv/n1/runs/9803/R2_present/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n1/runs/9803/R2_present/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "6ad9bada5ba5"
+    },
+    "inv/n1/runs/9803/R2_present/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (130, 151), 'other_diffs': []}"
+    },
+    "inv/n1/runs/9803/R2_present/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "36ffb34c109d"
+    },
+    "inv/n1/runs/9803/R3_leak_above/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n1/runs/9803/R3_leak_above/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "589f67024dc6"
+    },
+    "inv/n1/runs/9803/R3_leak_above/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (114, 130), 'other_diffs': []}"
+    },
+    "inv/n1/runs/9803/R3_leak_above/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "0cda5ba51569"
+    },
+    "inv/n1/runs/9803/R4_leak_below/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n1/runs/9803/R4_leak_below/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "0b230faca5ed"
+    },
+    "inv/n1/runs/9803/R4_leak_below/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (82, 94), 'other_diffs': []}"
+    },
+    "inv/n1/runs/9803/R4_leak_below/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "2635bb14ed99"
+    },
+    "inv/n1/runs/9803/R5_static/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/n1/runs/9803/R5_static/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "df7720ed4523"
+    },
+    "inv/n1/runs/9803/R5_static/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (227, 264), 'other_diffs': []}"
+    },
+    "inv/n1/runs/9803/R5_static/trace.txt": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "018f3d10f51e"
+    },
+    "inv/network_op/blocks.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "7677efdb277d"
+    },
+    "inv/network_op/input.spice": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "94091b751ac2"
+    },
+    "inv/network_op/ngspice.log": {
+     "compared": "log_compare",
+     "identical": true,
+     "info": "{'excluded': (1, 1), 'other_diffs': []}"
+    },
+    "inv/status/n0.ok": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "inv/status/n1.ok": {
+     "compared": "bytes",
+     "identical": true,
+     "sha256": "e3b0c44298fc"
+    },
+    "seal/MANIFEST.json": {
+     "compared": "json",
+     "differences": 2,
+     "listed": {
+      "derived_hash": [
+       "/instances[0]/inverter_gate/sha256",
+       "/instances[0]/sha256"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal/SHA256SUMS": {
+     "compared": "listed file, not compared",
+     "identical": false
+    },
+    "seal/XOR3_9803.json": {
+     "compared": "json",
+     "differences": 5,
+     "listed": {
+      "code": [
+       "/code/leancell.py",
+       "/code/stage_d6.py"
+      ],
+      "derived_hash": [
+       "/inverter_gate/source/sha256"
+      ],
+      "env": [
+       "/env_sha256"
+      ],
+      "kernel": [
+       "/kernel"
+      ]
+     },
+     "unlisted": []
+    },
+    "seal_push.json": {
+     "compared": "json",
+     "differences": 8,
+     "listed": {
+      "seal_log": [
+       "/commit",
+       "/line",
+       "/remote"
+      ],
+      "seal_sha": [
+       "/seal_sha256"
+      ],
+      "seal_sums": [
+       "/seal_folder",
+       "/with_seal_folder"
+      ],
+      "times": [
+       "/push_started_machine_utc",
+       "/pushed_at_machine_utc"
+      ]
+     },
+     "unlisted": []
+    },
+    "status.json": {
+     "compared": "listed file, not compared",
+     "identical": false
+    }
+   },
+   "new": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/final/out_K01/XOR3_9803",
+   "only_new": [
+    {
+     "file": "D/kernel/LEANCELL.json",
+     "listed": "the kernel build folder"
+    },
+    {
+     "file": "D/kernel/MANIFEST.json",
+     "listed": "the kernel build folder"
+    },
+    {
+     "file": "D/kernel/prediction.lean",
+     "listed": "the kernel build folder"
+    },
+    {
+     "file": "D/kernel/prediction.log",
+     "listed": "the kernel build folder"
+    },
+    {
+     "file": "N0/extract/PARTS.txt",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N0/extract/SHA256SUMS",
+     "listed": "the instance's file list: follows the files above"
+    },
+    {
+     "file": "N0/extract/extract.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N0/extract/noisy_record.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N0/extract/trace.raw.part-000",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N0/extract/trace.raw.part-001",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/PARTS.txt",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/SHA256SUMS",
+     "listed": "the instance's file list: follows the files above"
+    },
+    {
+     "file": "N1/extract/extract.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/noisy_record.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/trace.raw.part-000",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/trace.raw.part-001",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N1/extract/trace.raw.part-002",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/PARTS.txt",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/SHA256SUMS",
+     "listed": "the instance's file list: follows the files above"
+    },
+    {
+     "file": "N2/extract/extract.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/noisy_record.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/trace.raw.part-000",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/trace.raw.part-001",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N2/extract/trace.raw.part-002",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/PARTS.txt",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/SHA256SUMS",
+     "listed": "the instance's file list: follows the files above"
+    },
+    {
+     "file": "N3/extract/extract.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/noisy_record.json",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/trace.raw.part-000",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/trace.raw.part-001",
+     "listed": "trace extracts: compared through trace.digest.json"
+    },
+    {
+     "file": "N3/extract/trace.raw.part-002",
+     "listed": "trace extracts: compared through trace.digest.json"
+    }
+   ],
+   "only_ref": [],
+   "ref": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/prefreeze/out1/XOR3_9803",
+   "ref_driver": null,
+   "unlisted": [
+    "N1/noisy_record.json:/saved_ref",
+    "N1/session.log: differs (log_compare)",
+    "N1/trace.digest.json:/data_sha256",
+    "N1/trace.digest.json:/header_sha256_without_date",
+    "N1/trace.digest.json:/size"
+   ],
+   "verdict": "DIFFERS"
+  }
+ ],
+ "script_sha256": "fc7f85c4d50dac7bab0f1a07bac0aff0d0d7e6ff231eb616d683a2d5abdbb6f1"
+}

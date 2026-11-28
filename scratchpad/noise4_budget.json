@@ -1,0 +1,40 @@
+{
+ "_doc": "noise4: the C5 inverter's K3 budget at the injected (measured) noise level, the owner's decision of 2026-11-25. Development values, not preregistered. The gate's K3 allowance is K3_sigmas x sigma: delta = 3 sigma_delta_x, eta = 3 sigma_eta_x, each rounded up to the gate's rational_denominator (1e6), as invinst/gate.py allowance() rounds. Each sigma is the LARGER of two measures (the owner's rule), from two noisy NOT1 runs of dev seed 9801 with two noise seeds, by tests/check_noise_sources.py: round 1, noise seed 98011 (controls4, dev/controls4/not1_N1a/noise_sources.json, pushed at ee58b78) and round 4, noise seed 98014 (controls5 save_ref=1, dev/controls5/seed2_N4/noise_sources.json). The R cells' noise is unchanged (noise2's sources, campaign (a)'s convention). research/circuit/noise.json is unchanged.",
+ "vunit_V": 0.5,
+ "K3_sigmas": 3,
+ "measures": [
+  {
+   "noise_seed": 98011,
+   "sources": "dev/controls4/not1_N1a/noise_sources.json",
+   "comparator_total_rms_uV": 417.61475786564256,
+   "sigma_delta_x": 0.0008352295157312851,
+   "sigma_eta_x": 0.0008653432669551806
+  },
+  {
+   "noise_seed": 98014,
+   "sources": "dev/controls5/seed2_N4/noise_sources.json",
+   "comparator_total_rms_uV": 347.35595622560885,
+   "sigma_delta_x": 0.0006947119124512176,
+   "sigma_eta_x": 0.0007988088453781997
+  }
+ ],
+ "sigma_delta": {
+  "comparator_total_rms_uV": 417.61475786564256,
+  "sigma_delta_x": 0.0008352295157312851,
+  "source": "the larger of the two measures (noise seed 98011): rms of xn0.nzm over the run, read at the source's sample instants k tnz (6501 samples over 2.6 ms)",
+  "replaces": "noise.json fire_comparator.total_input_uV 335.0293706286406 (sigma_delta_x 0.0006700587412572812)"
+ },
+ "sigma_eta": {
+  "sigma_eta_x": 0.0008653432669551806,
+  "source": "the larger of the two measures (noise seed 98011): sd of the mirror charge integral of (nzh + nzj) over 130 disjoint windows of length D tu = 20 us, divided by cq vunit",
+  "replaces": "sqrt(2) inmw sqrt(D tu tnz) / (cq vunit) = 0.0007843264626416732 (D 1, tu 2e-5 s, tnz 4e-7 s, cq 5e-12 F)"
+ },
+ "allowance_K3": {
+  "delta": "2506/1000000",
+  "eta": "2597/1000000"
+ },
+ "allowance_K3_noise_json": {
+  "delta": "2011/1000000",
+  "eta": "2353/1000000"
+ }
+}

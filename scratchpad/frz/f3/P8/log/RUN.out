@@ -1,0 +1,51 @@
+global identity during the run: someone else
+### 01 vars (pass)
+envcheck ok
+rc=0
+### 01a rehearsal1-files (pass)
+b8aaefd9f107ea72aae0e60d543396899a5d5fcf8fd335fc5ad445ecf291894f  DRAW_REHEARSAL1.json
+abdc38e8c3dee532ecb67097951e3c7d4f8c3bb1e22d3a30a91a11dceb5d680c  EXCLUDED_REHEARSAL1.json
+rc=0
+### 01b rehearsal2-list (pass)
+18 rehearsal seeds, 72 noise seeds; 15831 integers, seeds_sha256 0d2ef61ddc8ca86685c898f201a2d7a6e12effd567299496954033f6fa81c231
+rc=0
+### 01c check-rehearsal2-list (pass)
+the list is right 18 72 sha256 cb46d2b94374472678e26153d4cb6ee70463af77255c066d70515f6ee514f5b3
+rc=0
+### 02 vars-rehearsal (pass)
+rc=0
+### 03 announce (pass)
+announce ok
+announce pushed: evidence/combined-rehearsal2-draw 46208fce900ed320cd67ecbeb816088307e5e984
+rc=0
+### 04 draw (pass)
+{'sha256': 'debe0d39fda2e47d52aecb8e3dd57096a0c6526304fc24f8d7db2dc7489d7db8', 'beacon': 'b22aad4794f7451896f7a371aa46106fd84d919f3f569acd5b2fddf1d1440af3', 'round': 1000000, 'sizes': {'NOT1': 6, 'ANDOR3': 6, 'XOR3': 6}, 'machines': 12, 'recomputed': True, 'signature_verified': True, 'excluded': {'file': 'EXCLUDED_REHEARSAL2.json', 'sha256': 'cb46d2b94374472678e26153d4cb6ee70463af77255c066d70515f6ee514f5b3', 'fraction_of_range': 0.0688, 'seeds_sha256': '0d2ef61ddc8ca86685c898f201a2d7a6e12effd567299496954033f6fa81c231', 'count': 15831, 'superset_of_freeze': 'd9975dee4f80fb75ea5fb67d3d0301bbae2274b0857fc7d44dc216f1c67afbc6'}, 'announce': {'branch': 'evidence/combined-rehearsal2-draw', 'commit': '46208fce900ed320cd67ecbeb816088307e5e984', 'push_utc': '2023-09-27T08:19:24Z', 'from_github': False, 'sha256': 'b2f93b65e61e31ce433a6aa71507c21a4d567ba1076482516eb0ad64c63aee0b'}}
+{"machines": 12, "duplicates": {"K10": [["NOT1_78394", "evidence/combined-seals-K09"]], "K11": [["ANDOR3_71018", "evidence/combined-seals-K08"]], "K12": [["XOR3_62982", "evidence/combined-seals-K03"]]}}
+draw published: evidence/combined-rehearsal2-draw-result 24bce06704a2bd2d4384603c88aca7888b632051
+rc=0
+### 04a NEG-announce-exists (neg)
+NEGCHECK commit=no
+NEGCHECK twin=same
+NEGCHECK github=same
+rc=0
+### 04b NEG-draw-exists (neg)
+NEGCHECK commit=no
+NEGCHECK twin=same
+NEGCHECK github=same
+rc=0
+### 04c NEG-inside-clone (neg)
+NEGCHECK commit=no
+NEGCHECK twin=same
+NEGCHECK github=same
+rc=0
+### 04d NEG-scan-missing-branch (neg)
+NEGCHECK commit=no
+NEGCHECK twin=same
+NEGCHECK github=same
+rc=0
+### 05 second-scan (pass)
+< 8b5c9f9578c1fdbd375c000e0d839cd40400fd7e refs/heads/research/layered-campaign-dev
+193a193
+> acf61c3bc2f806ec367894bf1ed30083452cefee refs/heads/research/layered-campaign-dev
+rc=1
+STOPPED: step 05 second-scan failed

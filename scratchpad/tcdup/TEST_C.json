@@ -1,0 +1,181 @@
+{
+ "all_pass": true,
+ "differing_duplicate": {
+  "detail": {
+   "analysis_rc": 0,
+   "checker_last": "DUPLICATE DIFFERS",
+   "checks": [
+    {
+     "check": "the duplicate judged not identical",
+     "expected": "\"identical\": false",
+     "matched": "{\"identical\": false}",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tcdup/analysis_dupdiff/RESULTS.json",
+     "target_exists": true
+    }
+   ],
+   "comparison": {
+    "equals_original": true,
+    "verdict": "agrees"
+   },
+   "duplicate": [
+    {
+     "cpu_s": 83.7,
+     "exit": 0,
+     "group": "NOT1",
+     "instance": "NOT1_6212",
+     "ok": true,
+     "timed_out": false
+    }
+   ],
+   "identical": false
+  },
+  "ok": true,
+  "seconds": 116.0
+ },
+ "duplicate_after_later_seals": {
+  "detail": {
+   "analysis_rc": 0,
+   "checker_lines": [
+    "input.spice: identical (519a6ce2db19)",
+    "comparison.json: identical (excepted fields removed)",
+    "noisy_record.json: identical (excepted fields removed)",
+    "trace.raw: identical under the criterion {'size': (19433552, 19433552), 'date_lines': (1, 1), 'header_diffs': [], 'data_identical': True, 'data_sha256': 'af272127d902'}",
+    "session.log: identical under the criterion {'excluded': (278, 279), 'other_diffs': []}",
+    "DUPLICATE IDENTICAL"
+   ],
+   "checks": [
+    {
+     "check": "the duplicate's seal_log commit is the home's own seal commit, not the tip read",
+     "expected": "\"record\": \"1ce09af77234b8ed6daa999edb1894c32859fef0\"",
+     "matched": "{\"seal_log\": [\"1ce09af77234b8ed6daa999edb1894c32859fef0\", \"evidence/combined-seals-K01\"], \"tip_read\": \"16c64cf6767cfe8bf4598d3c266102c84d0bd803\", \"record\": \"1ce09af77234b8ed6daa999edb1894c32859fef0\"}",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tcdup/root_dup_later/DUPX_NOT1_6212/seal_check.json",
+     "target_exists": true
+    },
+    {
+     "check": "check_duplicate: IDENTICAL",
+     "expected": "DUPLICATE IDENTICAL",
+     "matched": "\"DUPLICATE IDENTICAL\"",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tcdup/analysis_dup_later/RESULTS.json",
+     "target_exists": true
+    }
+   ],
+   "identical": true,
+   "own_commit": "1ce09af77234b8ed6daa999edb1894c32859fef0",
+   "seal_check": {
+    "compare": {
+     "cpu_s": 0.0,
+     "exit": 0,
+     "timed_out": false,
+     "written": true
+    },
+    "instance": "NOT1_6212",
+    "ok": true,
+    "seal_dir": "/tmp/tmp5f196ns2/seal",
+    "seal_log": [
+     "1ce09af77234b8ed6daa999edb1894c32859fef0",
+     "evidence/combined-seals-K01"
+    ],
+    "seal_log_tip_read": "16c64cf6767cfe8bf4598d3c266102c84d0bd803",
+    "seal_sha256": "5217b935f2087d0e8a9e39c338361f7e30f7edea5c3430bc36d926372a0fceee",
+    "verdict": "agrees",
+    "why": null
+   },
+   "tip_after_two_seals": "16c64cf6767cfe8bf4598d3c266102c84d0bd803"
+  },
+  "ok": true,
+  "seconds": 110.2
+ },
+ "duplicate_forged_line": {
+  "detail": {
+   "checks": [
+    {
+     "check": "refused, not completed, at the forged line's commit",
+     "expected": "refused, not completed",
+     "matched": "\"refused, not completed: the seal of NOT1_6212 at its introducing commit 675c575ba19a does not verify (the log's seal sha256 ffffffffffff is not seal_dir's 5217b935f208)\"",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tcdup/root_dup_forged/DUPX_NOT1_6212/duplicate_here.json",
+     "target_exists": true
+    }
+   ],
+   "duplicate_here": {
+    "group": "NOT1",
+    "instance": "NOT1_6212",
+    "not_completed": true,
+    "ok": false,
+    "refused": true,
+    "why": "refused, not completed: the seal of NOT1_6212 at its introducing commit 675c575ba19a does not verify (the log's seal sha256 ffffffffffff is not seal_dir's 5217b935f208)"
+   },
+   "forged_tip": "675c575ba19a7e7075665e0c50572f4b4333afeb",
+   "own_commit": "1ce09af77234b8ed6daa999edb1894c32859fef0",
+   "seal_check": {
+    "instance": "NOT1_6212",
+    "ok": false,
+    "seal_dir": "/tmp/tmp5fsfx2_z/seal",
+    "seal_log": [
+     "675c575ba19a7e7075665e0c50572f4b4333afeb",
+     "evidence/combined-seals-K01"
+    ],
+    "seal_log_tip_read": "675c575ba19a7e7075665e0c50572f4b4333afeb",
+    "seal_sha256": "5217b935f2087d0e8a9e39c338361f7e30f7edea5c3430bc36d926372a0fceee",
+    "why": "the log's seal sha256 ffffffffffff is not seal_dir's 5217b935f208"
+   }
+  },
+  "ok": true,
+  "seconds": 12.4
+ },
+ "home_run": {
+  "detail": {
+   "U": [
+    {
+     "cpu_s": 26.5,
+     "exit": 0,
+     "instance": "NOT1_6212",
+     "inverter_fires_reported": [
+      {
+       "inverter": 0,
+       "slot": 0
+      }
+     ],
+     "ok": true,
+     "patterns": 2,
+     "r_cell_fires": [],
+     "record_seal_log": {
+      "branch": "evidence/combined-seals-K01",
+      "commit": "1ce09af77234b8ed6daa999edb1894c32859fef0"
+     },
+     "seal_log": {
+      "branch": "evidence/combined-seals-K01",
+      "commit": "1ce09af77234b8ed6daa999edb1894c32859fef0"
+     },
+     "timed_out": false,
+     "tool": "controls4.py"
+    }
+   ],
+   "checks": [
+    {
+     "check": "every step done",
+     "expected": "[\"done\"]",
+     "matched": "[\"done\"]",
+     "target": "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/tcdup/root_home/DONE",
+     "target_exists": true
+    }
+   ],
+   "steps": {
+    "C0": "done",
+    "C1": "done",
+    "C2": "done",
+    "C3": "done",
+    "D": "done",
+    "N0": "done",
+    "N1": "done",
+    "N2": "done",
+    "N3": "done",
+    "deck": "done",
+    "inverters": "done",
+    "seal": "done",
+    "sealpush": "done"
+   }
+  },
+  "ok": true,
+  "seconds": 581.8
+ }
+}

@@ -1,0 +1,50 @@
+>>> set numdgt=16
+ERROR: (external)  no graphics interface;
+ please check if X-server is running,
+ or ngspice is compiled properly (see INSTALL)
+
+Note: Compatibility modes selected: hs a
+
+Warning: m=xx on .subckt line will override multiplier m hierarchy!
+
+
+Circuit: * layered network xor3: 4 r cells, 2 inverters (development, not preregistered)
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+>>> setseed 9803
+>>> reset
+Reset re-loads circuit * layered network xor3: 4 r cells, 2 inverters (development, not preregistered)
+
+Circuit: * layered network xor3: 4 r cells, 2 inverters (development, not preregistered)
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+>>> op
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+ Reference value :  0.00000e+00
+No. of Data Rows : 1
+>>> print v(xn0.ibm)
+v(xn0.ibm) = 5.0792387282395912e-01
+>>> print @m.xn0.xcmpm.xm1.msky130_fd_pr__pfet_01v8_lvt[vth]
+@m.xn0.xcmpm.xm1.msky130_fd_pr__pfet_01v8_lvt[vth] = 4.5590906995719582e-01
+>>> print @m.xn0.xcmpm.xm2.msky130_fd_pr__pfet_01v8_lvt[vth]
+@m.xn0.xcmpm.xm2.msky130_fd_pr__pfet_01v8_lvt[vth] = 4.5535596993421157e-01
+>>> print @m.xn0.xmh1.msky130_fd_pr__nfet_01v8[vth]
+@m.xn0.xmh1.msky130_fd_pr__nfet_01v8[vth] = 5.2943579069017521e-01
+>>> print @m.xn0.xmj1.msky130_fd_pr__pfet_01v8[vth]
+@m.xn0.xmj1.msky130_fd_pr__pfet_01v8[vth] = 1.0364474067942657e+00
+>>> print v(xn1.ibm)
+v(xn1.ibm) = 5.0833629430027305e-01
+>>> print @m.xn1.xcmpm.xm1.msky130_fd_pr__pfet_01v8_lvt[vth]
+@m.xn1.xcmpm.xm1.msky130_fd_pr__pfet_01v8_lvt[vth] = 4.5239133118276703e-01
+>>> print @m.xn1.xcmpm.xm2.msky130_fd_pr__pfet_01v8_lvt[vth]
+@m.xn1.xcmpm.xm2.msky130_fd_pr__pfet_01v8_lvt[vth] = 4.5623401167313443e-01
+>>> print @m.xn1.xmh1.msky130_fd_pr__nfet_01v8[vth]
+@m.xn1.xmh1.msky130_fd_pr__nfet_01v8[vth] = 5.2952294124345989e-01
+>>> print @m.xn1.xmj1.msky130_fd_pr__pfet_01v8[vth]
+@m.xn1.xmj1.msky130_fd_pr__pfet_01v8[vth] = 1.0383547470221790e+00

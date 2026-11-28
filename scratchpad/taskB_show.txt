@@ -1,0 +1,130 @@
+commit 030e6bd9082cadb567fc36000f420129c1e08bb0
+Author: Nicolas Breuillaud
+Parent: 0ce2d1af486833ead496047707a4f9e2763c6571
+
+    layered: the final rescan versioned before it runs: FREEZE.txt's [block second-scan] byte for byte, wrapped by rescan.sh with three labelled additions (the byte check of the block, a second ls-remote, EXCLUDED.json and EXCLUDED_PRINT.txt from the scan output)
+
+ .../dev/freeze/final/rescan/README.txt             | 10 ++++++
+ .../dev/freeze/final/rescan/extract_block.py       | 19 +++++++++++
+ .../dev/freeze/final/rescan/rescan.sh              | 38 ++++++++++++++++++++++
+ .../dev/freeze/final/rescan/second-scan.block.sh   | 28 ++++++++++++++++
+ 4 files changed, 95 insertions(+)
+diff --git a/research/layered-networks/dev/freeze/final/rescan/README.txt b/research/layered-networks/dev/freeze/final/rescan/README.txt
+new file mode 100644
+index 00000000..d2aef3d3
+--- /dev/null
++++ b/research/layered-networks/dev/freeze/final/rescan/README.txt
+@@ -0,0 +1,10 @@
++The final rescan of the exclusion list, versioned before it runs.
++
++- second-scan.block.sh: FREEZE.txt's [block second-scan], unchanged, byte for byte. It is extracted by proof2.py's
++  own rule (extract_block.py). This is THE COMMAND.
++- rescan.sh wraps the block. Three parts are added, labelled in the script; none of them edits the block:
++  PART 0  a check: this copy of the block is byte-identical to the one in FREEZE.txt;
++  PART 2  a check: a second ls-remote after the fetch equals the first (origin did not move during the scan);
++  PART 3  a step: EXCLUDED.json is a byte copy of the block's EXCLUDED_SECOND_SCAN.json, and EXCLUDED_PRINT.txt is
++          draw_seeds.py print of it, as the freeze pins them.
++- Run only under a push hold on the whole repository; the scan takes about 23 GB and 30 minutes.
+diff --git a/research/layered-networks/dev/freeze/final/rescan/extract_block.py b/research/layered-networks/dev/freeze/final/rescan/extract_block.py
+new file mode 100644
+index 00000000..193294c8
+--- /dev/null
++++ b/research/layered-networks/dev/freeze/final/rescan/extract_block.py
+@@ -0,0 +1,19 @@
++"""Print one [block NAME] ... [end] of FREEZE.txt, extracted by proof2.py's own rule (the lines between the two
++markers, dedented, plus a final newline):  python extract_block.py FREEZE.txt NAME"""
++import re
++import sys
++import textwrap
++
++text = open(sys.argv[1]).read().split("\n")
++name, found, k = sys.argv[2], [], 0
++while k < len(text):
++    m = re.fullmatch(r"\s*\[block ([a-z0-9-]+)\]\s*", text[k])
++    if m:
++        j = next(i for i in range(k + 1, len(text)) if text[i].strip() == "[end]")
++        if m.group(1) == name:
++            found.append(textwrap.dedent("\n".join(text[k + 1:j])) + "\n")
++        k = j
++    k += 1
++if len(found) != 1:
++    sys.exit(f"REFUSED: [block {name}] found {len(found)} times in {sys.argv[1]}")
++sys.stdout.write(found[0])
+diff --git a/research/layered-networks/dev/freeze/final/rescan/rescan.sh b/research/layered-networks/dev/freeze/final/rescan/rescan.sh
+new file mode 100755
+index 00000000..67cf3baf
+--- /dev/null
++++ b/research/layered-networks/dev/freeze/final/rescan/rescan.sh
+@@ -0,0 +1,38 @@
++#!/bin/bash
++# The final rescan of the exclusion list (FREEZE.txt: "The exclusion list is rescanned LAST").
++#   bash rescan.sh L PY WORKDIR
++# L: research/layered-networks of a clean clone (with research/circuit/pdk linked), whose FREEZE.txt holds the block;
++# PY: the pinned Python; WORKDIR: a new folder outside every git tree. Run only under a push hold on the whole repo.
++#
++# PART 1 (THE COMMAND) is FREEZE.txt's [block second-scan], unchanged: second-scan.block.sh, byte for byte.
++# PARTS 0, 2 AND 3 ARE ADDITIONS, labelled as such; none of them changes the block or its output.
++set -e
++HERE="$(cd "$(dirname "$0")" && pwd)"
++L="$1"; PY="$2"; WD="$3"
++python() { "$PY" "$@"; }                         # every `python` in the block is the pinned one, as in [block vars]
++
++# ---- PART 0 (ADDED CHECK): this script's copy of the block is FREEZE.txt's [block second-scan], byte for byte
++"$PY" -B "$HERE/extract_block.py" "$L/FREEZE.txt" second-scan | cmp -s - "$HERE/second-scan.block.sh" \
++  || { echo "REFUSED: second-scan.block.sh differs from [block second-scan] of $L/FREEZE.txt"; exit 1; }
++echo "PART 0: second-scan.block.sh = [block second-scan] of FREEZE.txt ($(sha256sum < "$HERE/second-scan.block.sh" | cut -c1-16))"
++[ ! -e "$WD" ] || { echo "REFUSED: $WD already exists"; exit 1; }
++git -C "$(dirname "$WD")" rev-parse --show-toplevel >/dev/null 2>&1 && { echo "REFUSED: $WD lies inside a git work tree"; exit 1; }
++mkdir "$WD"; cd "$WD"
++
++# ---- PART 1 (THE COMMAND): [block second-scan], run as FREEZE.txt's blocks are run, in this shell
++. "$HERE/second-scan.block.sh"
++echo "PART 1: [block second-scan] done: EXCLUDED_SECOND_SCAN.json"
++
++# ---- PART 2 (ADDED CHECK): origin did not move during the scan (a second ls-remote after the fetch)
++git ls-remote --heads https://github.com/HevisNico/kernel-R | awk '{print $1" "$2}' | sort > SCAN_LSREMOTE_AFTER.txt
++cmp -s SCAN_EXPECTED.txt SCAN_LSREMOTE_AFTER.txt \
++  || { echo "REFUSED: origin moved during the scan"; diff SCAN_EXPECTED.txt SCAN_LSREMOTE_AFTER.txt | head; exit 1; }
++echo "PART 2: origin unchanged from the first ls-remote to after the fetch"
++
++# ---- PART 3 (ADDED STEP): the freeze's pinned list. EXCLUDED.json is the scan's output unedited (a byte copy);
++#      EXCLUDED_PRINT.txt is draw_seeds.py print of it
++cp EXCLUDED_SECOND_SCAN.json EXCLUDED.json
++cmp -s EXCLUDED_SECOND_SCAN.json EXCLUDED.json
++python -B "$L/draw_seeds.py" print EXCLUDED.json > EXCLUDED_PRINT.txt
++echo "PART 3: EXCLUDED.json $(sha256sum < EXCLUDED.json | cut -c1-64)"
++echo "PART 3: EXCLUDED_PRINT.txt $(sha256sum < EXCLUDED_PRINT.txt | cut -c1-64)"
+diff --git a/research/layered-networks/dev/freeze/final/rescan/second-scan.block.sh b/research/layered-networks/dev/freeze/final/rescan/second-scan.block.sh
+new file mode 100644
+index 00000000..54f66af9
+--- /dev/null
++++ b/research/layered-networks/dev/freeze/final/rescan/second-scan.block.sh
+@@ -0,0 +1,28 @@
++( set -e
++  [ ! -e scanrepo ] || { echo "REFUSED: scanrepo already exists: no commit, no push"; exit 1; }
++  [ ! -e EXCLUDED_SECOND_SCAN.json ] || { echo "REFUSED: EXCLUDED_SECOND_SCAN.json already exists: no commit, no push"; exit 1; }
++  mkdir scanrepo
++  cd scanrepo
++  git init -q
++  git remote add origin https://github.com/HevisNico/kernel-R
++  [ ! -e ../SCAN_LSREMOTE.txt ] || { echo "REFUSED: SCAN_LSREMOTE.txt already exists"; exit 1; }
++  git ls-remote --heads origin > ../SCAN_LSREMOTE.txt          # ONE ls-remote: the branches and their tips
++  awk '{print $2}' ../SCAN_LSREMOTE.txt | sed 's#refs/heads/##' > ../SCAN_BRANCHES.txt
++  wc -l < ../SCAN_BRANCHES.txt
++  rm -f ../SCAN_BATCH_*
++  split -l 10 ../SCAN_BRANCHES.txt ../SCAN_BATCH_              # fetched 10 branches at a time, each batch retried
++  for f in ../SCAN_BATCH_*; do
++    for i in 1 2 3 4; do
++      timeout 3600 git fetch -q --depth 1 origin $(sed 's#.*#+refs/heads/&:refs/remotes/origin/&#' "$f") && break
++      [ $i = 4 ] && { echo "REFUSED: the fetch of $f failed 4 times"; exit 1; }; sleep $((i * 10))
++    done
++  done
++  # exactly the branches of the ls-remote, each at the tip the ls-remote gave
++  git for-each-ref --format='%(objectname) %(refname)' refs/remotes/origin | sed 's# refs/remotes/origin/# refs/heads/#' | sort > ../SCAN_FETCHED.txt
++  awk '{print $1" "$2}' ../SCAN_LSREMOTE.txt | sort > ../SCAN_EXPECTED.txt
++  cmp -s ../SCAN_FETCHED.txt ../SCAN_EXPECTED.txt || { echo "REFUSED: the fetched refs are not the ls-remote's"; diff ../SCAN_EXPECTED.txt ../SCAN_FETCHED.txt | head; exit 1; }
++  echo "fetched: every branch of the ls-remote at its tip ($(wc -l < ../SCAN_FETCHED.txt))"
++  git update-ref refs/heads/master "$(git rev-parse refs/remotes/origin/main)"
++  git symbolic-ref HEAD refs/heads/master
++  cd ..
++  python -B "$L/draw_seeds.py" scan EXCLUDED_SECOND_SCAN.json scanrepo )

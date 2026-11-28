@@ -1,0 +1,109 @@
+XOR3_27735, key 1/0/0, 3rd symbol: read-only trace study (stage-D worker, 2026-11-27). Nothing re-run, nothing pushed.
+
+Files read
+  K03: out_K03/XOR3_27735/N0/{input.spice, blocks.spice, noisy_record.json, extract/extract.json, trace.raw}. trace.raw was
+       restored from 35 parts, sha256 0d07f4b8…, 1710467403 bytes, 637 variables, 335646 points, binary float64.
+  K12: out_K12/DUPX_XOR3_27735/N0/trace.raw (restored, sha256 49454020…).
+  Stage D: out_K03/XOR3_27735/D/{record.json, fit_d.json, prediction.json}.
+  Script: study.py. Output: study.json, fig_xor3_27735_key100_round2.png.
+
+What key 1/0/0 and "s"/"F" are (noise2.train_and_test, run.Network.slot)
+  - Key 1/0/0 is layer 1, cell c1_0, training group 0. Its word holds one letter per lesson round.
+  - "F" means the read of that round emitted, and "s" means it did not.
+  - A read emits when v(xc1_0.p), the cell's output after its comparator and protection latch, rises above 0.9 V
+    within the watch window, from the slot's T to T + 240 us (watch_tu 12 x tu 20 us).
+  - The 3rd symbol is lesson round 2.
+  - The network word is sssFF on K03 and on K12. The stage-D word, measured in isolation, is ssFF, the sealed
+    prediction.
+
+Round 2 in the network (K03)
+  - Slot T = 1040.100 us.
+  - Port arrivals at 1051.300 us and 1052.900 us, that is T+11.2 and T+12.8 us: 1.6 us apart.
+  - No latch.
+  - max v(xc1_0.p) over the window is 0.000141 V, at 1172.902 us.
+  - Signed margin against the 0.9 V emission rule: -0.89986 V.
+  - That number only says that the binary output stayed low. v(p) is the latched digital output, so it carries no
+    information on how close the decision was.
+  - Sampling: ngspice variable step, 10459 points in the 240 us window; median step 0.008 ns, maximum step 200 ns.
+  - Units: V; times in ns or us of simulated time.
+  - THE ANALOG DECISION NODE IS NOT IN THE TRACE. The cell's comparator xc1_0.x1.xcmps compares xc1_0.x1.vs
+    (input inp) with xc1_0.x1.vrefsn (input inn): out high when inp > inn.
+  - Neither node is saved. The trace holds only v(xc1_0.p), vmem1/2 and x1/x2.sum for this cell, plus meas vectors.
+  - So the signed analog margin at the 3rd pulse cannot be read from the network trace.
+  - What the trace does show: the stored state u_p = vmem_p - x_p.sum is flat through the read: -15.2227 mV on port 1
+    and -15.4168 mV on port 2. Then comes the silent round's write of about -2.7 mV per port, after T+36 us.
+
+Round 3 in the network, for contrast
+  - Arrivals T+11.2 and T+12.8 us (the same 1.6 us apart).
+  - Latch at 1506.633 us (T+26.53 us), emission at 1506.900 us.
+  - max v(p) 1.857 V.
+  - u = -17.938 / -18.113 mV: one write more than in round 2.
+
+K12 (DUPX_XOR3_27735)
+  - The same 240 us window is identical sample for sample on all six vectors (10459 points each).
+  - The frozen analysis also reports the duplicate's trace data identical (data_sha256 a8068c8a…).
+  - So the figure stands for both runs.
+
+Stage D: what is known of the isolated margin
+  - KEPT for that pulse (D/record.json, lesson round 2, slot 2):
+    - T = 1040.100 us; both port arrivals at the same instant, 1042.500 us (T+2.4 us, no skew);
+    - latch at 1062.105 us (T+22.005 us, 19.6 us after the arrivals), emission at 1062.500 us;
+    - the state u before the read is -15.2227 / -15.4168 mV, equal to the network's round-2 u to 0.1 uV;
+    - so the isolated read fired from the same stored state.
+  - NOT KEPT: the voltage at the crossing. Stage D keeps no trace (no D/trace.raw) and no comparator node.
+    ISOLATED MARGIN NOT RECORDED (no voltage).
+  - What the fit gives (D/fit_d.json, c1_0, a model quantity, not a measured voltage): "g0: stop margin" slack 376 at
+    K0 and -2120 at K3, in the lean_cell fixed-point units, where threshold = 100000.
+    - The K0 prediction "F at round 2" had a slack of 376/100000.
+    - At K3 the stop margin is negative, hence no K3 room for c1_0.
+  - The fit's measured write size per port: D = 2.7153 mV (port 1) and 2.6961 mV (port 2); stop = 2 writes,
+    maxWrites 3.
+
+Observed difference between the two reads at the same u (facts only, no interpretation)
+  - Stage D isolated read: the two port pulses arrive together, at T+2.4 us; it fired.
+  - Network read: the pulses arrive 1.6 us apart, at T+11.2 and T+12.8 us (stimulus lines 0 and 3, info.stimulus [0, 3]);
+    it stayed silent.
+  - One more write later, in round 3, the network read fired with the same 1.6 us spacing.
+
+CORRECTION, same day: the stage-D latch of XOR3_27735's round 2 is at T+22.005 us (1062.105 - 1040.100), not
+T+21.995 us as first sent. 19.6 us after the arrivals (1062.105 - 1042.500) was right.
+
+ADDITION 1: the port arrivals in every lesson round of the refuted key (study2.json; times from the slot's T, in us)
+  XOR3_27735, key 1/0/0 (c1_0), network K03:
+    rounds 0-4: arrivals 11.2 and 12.8 (spacing 1.6) in every round.
+    Latch: none in rounds 0, 1 and 2; 26.533 in rounds 3 and 4.
+    Network word: s s s F F.
+  XOR3_27735, stage D (isolated):
+    rounds 0-3: both arrivals at 2.4 (spacing 0) in every round.
+    Latch: none in rounds 0 and 1; 22.005 in rounds 2 and 3.
+    Stage-D word: s s F F.
+  -> The 1.6 us spacing is the same in every network round; it is not specific to round 2. No round fired "on time"
+     before round 2: rounds 0 and 1 are silent in the network and in stage D alike.
+  -> u before each read, network against stage D, for rounds 0, 1 and 2:
+     -9.7921/-10.0246, -12.5074/-12.7208 and -15.2227/-15.4168 mV, identical to 0.1 uV.
+
+ADDITION 2: XOR3_88529, key 1/1/0 (c1_1, group 0), K01 (the D4-audited instance)
+  Source: out_K01/XOR3_88529/N0/extract/ (trace.raw.part-000 + part-001, reassembled, sha256 9538f0ea… as in PARTS.txt;
+  25 vectors at full time resolution). The full trace.raw (1584729184 bytes) stays on K01 (NOT_PUBLISHED.txt). For
+  XOR3_27735 the extract equals the full trace sample for sample on all 25 vectors (335646 points), so the extract
+  method is exact.
+  Words: network sssFF, stage D ssFF.
+  Network rounds 0-4: arrivals 12.8 (port 1) and 11.2 (port 2), i.e. port 2 first, spacing 1.6 us, in every round.
+    Latch: none in rounds 0-2; 26.468 in rounds 3 and 4.
+  Round 2 (the 3rd symbol):
+    - max v(xc1_1.p) = 0.000129 V; signed margin to the 0.9 V rule: -0.89987 V.
+    - u before the read: -14.3882 / -16.6998 mV.
+    - The comparator nodes xc1_1.x1.vs and vrefsn are not in the extract (nor in the full trace's saved list):
+      the signed analog margin is not recorded.
+  Round 3: latch at T+26.468 us, max v(p) 1.856 V, u = -17.1037 / -19.4161 mV (one write more).
+  Stage D (D/record.json, c1_1, kept for that pulse, round 2):
+    - both arrivals at T+2.4 us; latch at T+21.762 us (fired);
+    - u before the read -14.3883 / -16.6999 mV, the same as the network's to 0.1 uV.
+    - No voltage at the crossing is kept: ISOLATED MARGIN NOT RECORDED.
+  Fit (model, not a voltage), D/fit_d.json c1_1:
+    - "g0: stop margin" slack 893 at K0 and -1582 at K3 (lean_cell threshold 100000);
+    - D = 2.7154 / 2.7164 mV per write; stop 2, maxWrites 3.
+  Figure: fig_xor3_88529_key110_round2.png (the same layout as XOR3_27735's).
+  Observed, without interpretation: the same pattern as XOR3_27735. From the same stored state, the isolated read
+  with simultaneous pulses fired at round 2, while the network read with pulses 1.6 us apart stayed silent. One write
+  later the network read fired.

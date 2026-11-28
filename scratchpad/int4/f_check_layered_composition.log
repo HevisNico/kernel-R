@@ -1,0 +1,49 @@
+Layered composition audit passed: 520 declarations.
+  LayeredCompositionTarget: 1.1 s
+  LayeredRecognitionAt: 1.2 s
+  LayeredChain: 1.5 s
+  LayeredTrainingChainTarget: 1.0 s
+  LayeredTrainingChain: 1.1 s
+  LayeredChainChecks: 1.4 s
+  LayeredChainExamples: 1.8 s
+  LayeredInverterTarget: 1.2 s
+  LayeredInverters: 0.9 s
+  LayeredWitnessSupport: 1.2 s
+  LayeredWitnessAndOr: 2.4 s
+  LayeredWitnessNot: 1.2 s
+  LayeredWitnessXor: 2.0 s
+  LayeredIntrinsic: 1.1 s
+  LayeredIntrinsicExample: 1.8 s
+Rejected: project axiom
+  /tmp/tmpqodhh7w7/LayeredCompositionAudit.lean:23:0: error: Unexpected layered-composition axiom LayeredNegativeAxiom
+Rejected: admitted proof
+  /tmp/tmpi11k8vn5/LayeredChain.lean:214:8: error: declaration uses `sorry`
+Rejected: chain without the downstream skew inequality
+  /tmp/tmpwvem6bc_/LayeredChain.lean:91:24: error: `grind` failed
+Rejected: chain without the downstream start inequality
+  /tmp/tmppdzsxus6/LayeredChain.lean:91:24: error: `grind` failed
+Rejected: latency without its lower bound
+  /tmp/tmp0cqheeer/LayeredChain.lean:102:16: error: Application type mismatch: The argument
+Rejected: lesson chain without the addressed cell's skew inequality
+  /tmp/tmp4o0lbc8k/LayeredTrainingChain.lean:58:78: error: Application type mismatch: The argument
+Rejected: direct rails not delayed
+  /tmp/tmpbzbwkkdf/LayeredInverters.lean:37:2: error: Tactic `rfl` failed: The left-hand side
+Rejected: deadline-only chain claimed to accept main's example
+  /tmp/tmpw9_u0m6o/LayeredChainExamples.lean:28:35: error: Tactic `decide` failed to reduce
+Rejected: witness: an inverter that fires on its input
+  /tmp/tmp02wvjhyu/LayeredWitnessNot.lean:50:68: error: Tactic `decide` failed to reduce
+Rejected: witness: front width below the inverter spread
+  /tmp/tmppa8rf0i6/LayeredWitnessXor.lean:62:2: error: Tactic `decide` failed to reduce
+Rejected: witness: a wire delay that misses the next read window
+  /tmp/tmph5wl1yf9/LayeredWitnessXor.lean:47:84: error: Tactic `decide` failed to reduce
+Rejected: witness: a latency bound below the emission date
+  /tmp/tmpyc2gu35x/LayeredWitnessXor.lean:55:68: error: Tactic `decide` failed to reduce
+Rejected: witness: a cascade reading the direct rail, which cannot answer NOT
+  /tmp/tmp_l35trgp/LayeredWitnessNot.lean:41:61: error: Tactic `decide` failed to reduce
+Rejected: intrinsic chain with λmax below skew + dmax
+  /tmp/tmpouszrz9q/LayeredIntrinsic.lean:51:18: error: `grind` failed
+Rejected: intrinsic example with dmax below the observed delay
+  /tmp/tmpuw31q9is/LayeredIntrinsicExample.lean:69:37: error: Tactic `decide` failed to reduce
+Rejected: witness: a claimed function other than XOR
+  /tmp/tmpxve49lga/LayeredWitnessXor.lean:59:62: error: Tactic `decide` proved that the proposition
+All 16 layered-composition controls rejected; repository sources untouched.

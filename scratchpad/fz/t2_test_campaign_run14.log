@@ -1,0 +1,189 @@
+ a plan from the old template: ['missing key kernel', "stage_d_script is 'stage_d5.py', the template's is 'stage_d6.py'", 'missing key trace_extract']
+ok test_template_2_and_old_refused
+ok test_changed_kernel_source_refused
+ library built in 17.0 s
+{
+ "eligible_K0": true,
+ "room_K3": true,
+ "cells": [
+  {
+   "cell": "c1_0",
+   "gate": "copy",
+   "measured": true,
+   "why_not_measured": [],
+   "need": {
+    "0": 2
+   },
+   "maxWrites": 3,
+   "epsilon": 0,
+   "anchors": {
+    "d": 7807,
+    "g": {
+     "1": 87544,
+     "2": 0
+    },
+    "H": 15
+   },
+   "guarded": {
+    "help": 0,
+    "gain": {
+     "1": 87544,
+     "2": 0
+    },
+    "dose": 7807
+   },
+   "lean_cell": {
+    "K0": {
+     "gate": "copy",
+     "help": 0,
+     "gain": {
+      "1": 87544,
+      "2": 0
+     },
+     "dose": 7807,
+     "threshold": 100000,
+     "maxWrites": 3,
+     "rail": 1000000,
+     "trainError": 134,
+     "testError": 134
+    },
+    "K3": {
+     "gate": "copy",
+     "help": 0,
+     "gain": {
+      "1": 87544,
+      "2": 0
+     },
+     "dose": 7807,
+     "threshold": 100000,
+     "maxWrites": 3,
+     "rail": 1000000,
+     "trainError": 1309,
+     "testError": 1309
+    }
+   },
+   "K0": {
+    "ok": true,
+    "failing": []
+   },
+   "K3": {
+    "ok": true,
+    "failing": []
+   }
+  }
+ ],
+ "prediction": {
+  "words": {
+   "1/0/0": "ssFF"
+  },
+  "outputs": {
+   "0": true,
+   "1": false
+  },
+  "cells": {
+   "0": {
+    "c1_0": true
+   },
+   "1": {
+    "c1_0": false
+   }
+  },
+  "skew_silent": [],
+  "output_equals_function": true
+ }
+}
+{"label": "prediction", "seconds": 0.93, "theorems": 24, "kernel_agrees_everywhere": true, "sealed_failing_equals_mirror": true}
+{"kernel_agrees": true, "theorems": 24, "disagreements": []}
+{"testError_rule": "one-port", "eligible_K0": true, "room_K3": true}
+{
+ "eligible_K0": false,
+ "room_K3": false,
+ "cells": [
+  {
+   "cell": "c1_0",
+   "gate": "copy",
+   "measured": true,
+   "why_not_measured": [],
+   "need": {
+    "0": 2
+   },
+   "maxWrites": 3,
+   "epsilon": 0,
+   "anchors": {
+    "d": 7807,
+    "g": {
+     "1": 87544,
+     "2": 0
+    },
+    "H": 15
+   },
+   "guarded": {
+    "help": 0,
+    "gain": {
+     "1": 87544,
+     "2": 0
+    },
+    "dose": 7807
+   },
+   "lean_cell": {
+    "K0": {
+     "gate": "copy",
+     "help": 0,
+     "gain": {
+      "1": 87544,
+      "2": 0
+     },
+     "dose": 7807,
+     "threshold": 100000,
+     "maxWrites": 3,
+     "rail": 1000000,
+     "trainError": 134,
+     "testError": 134
+    },
+    "K3": {
+     "gate": "copy",
+     "help": 0,
+     "gain": {
+      "1": 87544,
+      "2": 0
+     },
+     "dose": 7807,
+     "threshold": 100000,
+     "maxWrites": 3,
+     "rail": 1000000,
+     "trainError": 1309,
+     "testError": 1309
+    }
+   },
+   "K0": {
+    "ok": false,
+    "failing": [
+     "dose > 0 (slack 0)"
+    ]
+   },
+   "K3": {
+    "ok": false,
+    "failing": [
+     "dose > 0 (slack 0)"
+    ]
+   }
+  }
+ ],
+ "prediction": null
+}
+{"label": "prediction", "seconds": 0.97, "theorems": 24, "kernel_agrees_everywhere": false, "sealed_failing_equals_mirror": true}
+{"kernel_agrees": false, "theorems": 24, "disagreements": [{"cell": "c1_0", "clause": "cellValid", "level": "K0"}, {"cell": "c1_0", "clause": "dose > 0", "level": "K0"}, {"cell": "c1_0", "clause": "cellValid", "level": "K3"}, {"cell": "c1_0", "clause": "dose > 0", "level": "K3"}]}
+{"testError_rule": "one-port", "eligible_K0": false, "room_K3": false}
+ wrong mirror: [{'cell': 'c1_0', 'clause': 'cellValid', 'level': 'K0'}, {'cell': 'c1_0', 'clause': 'dose > 0', 'level': 'K0'}, {'cell': 'c1_0', 'clause': 'cellValid', 'level': 'K3'}, {'cell': 'c1_0', 'clause': 'dose > 0', 'level': 'K3'}]
+ok test_stage_d6_kernel_and_disagreement
+ (raw kept, extract written): {'NOT1_1/N0': (False, False), 'NOT1_1/N1': (False, False), 'NOT1_2/N0': (False, False), 'NOT1_2/N1': (False, False)}
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/fz/freeze/research/layered-networks/tests/test_campaign_run14.py", line 151, in <module>
+    f()
+    ~^^
+  File "/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/fz/freeze/research/layered-networks/tests/test_campaign_run14.py", line 131, in test_drop_raw_extract_and_keep_raw
+    assert have == {"NOT1_1/N0": (True, True), "NOT1_1/N1": (False, True), "NOT1_2/N0": (False, True),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    "NOT1_2/N1": (False, True)}
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

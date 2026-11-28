@@ -1,0 +1,24 @@
+runner self-test: [('a required block that exits 1', 1, 'ok'), ('a negative block that succeeds', 1, 'ok'), ('a negative block that commits (then exits 1)', 1, 'ok'), ('a twin ref committed under another identity', 1, 'ok'), ('a dirty clone', 1, 'ok'), ('a passing block and a refusing negative block', 0, 'ok')]
+passed 7, refused as expected 4, failed 10; exit code 1
+   01 vars                   PASSED
+  01a rehearsal1-files       PASSED
+  01b rehearsal2-list        PASSED
+  01c check-rehearsal2-list  PASSED
+   02 vars-rehearsal         PASSED
+   03 announce               PASSED
+   04 draw                   PASSED
+  04a NEG-announce-exists    REFUSED AS EXPECTED
+  04b NEG-draw-exists        REFUSED AS EXPECTED
+  04c NEG-inside-clone       REFUSED AS EXPECTED
+  04d NEG-scan-missing-branch REFUSED AS EXPECTED
+   05 second-scan            FAILED  (rc 1)
+   06 rehearsal-draw         FAILED  (not run (the run stopped before it))
+   07 list                   FAILED  (not run (the run stopped before it))
+   08 check-list             FAILED  (not run (the run stopped before it))
+   09 vars-campaign          FAILED  (not run (the run stopped before it))
+   10 NEG-old-list           FAILED  (not run (the run stopped before it))
+   11 announce               FAILED  (not run (the run stopped before it))
+   12 draw                   FAILED  (not run (the run stopped before it))
+   13 owner-identity         FAILED  (not run (the run stopped before it))
+   14 clone-clean            FAILED  (not run (the run stopped before it))
+proof2 exit=1

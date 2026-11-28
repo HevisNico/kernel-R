@@ -1,0 +1,41 @@
+# Changes made to the blocks of FREEZE.txt (placeholders and offline twins), line by line
+
+- block **vars** (placeholder: the freeze branch does not exist yet; the clean clone of the candidate):
+  - written: `L=<a clean clone of research/layered-campaign-freeze, with research/circuit/pdk linked to the SKY130 PDK at 1232782c as on the machines>/research/layered-networks`
+  - run:     `L=/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/f3/P8/kernel-R/research/layered-networks`
+- block **vars** (placeholder: the pinned venv's Python):
+  - written: `PY=<the pinned Python 3.13.18 (numpy 2.3.5, py_ecc 8.0.0), the one envcheck_layered4.py passed with on this machine>`
+  - run:     `PY=/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/prefreeze2/venvA/bin/python`
+- block **vars-rehearsal** (placeholder: H read from step (r3)'s printed line (log/01c_check-rehearsal2-list.out)):
+  - written: `H=<the 64 hex characters that ORDER 2 step (r3) printed after "sha256">`
+  - run:     `H=$(grep -o 'sha256 [0-9a-f]\{64\}' /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/f3/P8/log/01c_check-rehearsal2-list.out | tail -1 | cut -c8-)`
+- block **vars-campaign** (placeholder: H read from step (3)'s printed line (log/08_check-list.out)):
+  - written: `H=<the 64 hex characters that ORDER 3 step (3) printed after "sha256">`
+  - run:     `H=$(grep -o 'sha256 [0-9a-f]\{64\}' /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/f3/P8/log/08_check-list.out | tail -1 | cut -c8-)`
+- block **draw** (the announce commit read from the twin; its push time is the stand-in's (600 s before round 1000000)):
+  - written: `c, text, t = A.announce_on_github('$B', tempfile.mkdtemp()); print(c, t)`
+  - run:     `import subprocess; c = subprocess.run(['git', '--git-dir', '/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/f3/P8/github_twin.git', 'rev-parse', 'refs/heads/$B'], capture_output=True, text=True, check=True).stdout.strip(); t = '2023-09-27T08:19:24Z'; print(c, t)`
+- block **draw** (drand is unreachable here: the published round 1000000 as drand serves it):
+  - written: `curl -sf https://api.drand.sh/$CH/public/$ROUND > ROUND_RAW.json || curl -sf https://api2.drand.sh/$CH/public/$ROUND > ROUND_RAW.json`
+  - run:     `cp /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/f3/P8/STANDIN_ROUND_1000000.json ROUND_RAW.json`
+- block **draw** (the GitHub read of the announce replaced by its offline mode on the twin's announce file):
+  - written: `A.check_draw(dict(draw='DRAW.json', excluded='$X'), '$M', tempfile.mkdtemp(), '$F')`
+  - run:     `A.check_draw(dict(draw='DRAW.json', excluded='$X', announce='../announce_$M/DRAW_ANNOUNCE.txt'), '$M', tempfile.mkdtemp(), '$F', offline=True)`
+- block **draw** (no push to GitHub: the push goes to the local twin):
+  - written: `git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/$R`
+  - run:     `git push -q /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/f3/P8/github_twin.git HEAD:refs/heads/$R`
+- block **rehearsal-draw** (rehearsal 2's result branch exists only on the twin (rehearsal 1's two fetches stay on GitHub)):
+  - written: `git fetch -q https://github.com/HevisNico/kernel-R refs/heads/evidence/combined-rehearsal2-draw-result`
+  - run:     `git fetch -q /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/f3/P8/github_twin.git refs/heads/evidence/combined-rehearsal2-draw-result`
+- block **check-list** (the GitHub read of the rehearsal's announce replaced by its offline mode on the twin's announce file):
+  - written: `A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_REHEARSAL2.json'), 'rehearsal', tempfile.mkdtemp(), '$F')`
+  - run:     `A.check_draw(dict(draw='DRAW_REHEARSAL.json', excluded='EXCLUDED_REHEARSAL2.json', announce='announce_rehearsal/DRAW_ANNOUNCE.txt'), 'rehearsal', tempfile.mkdtemp(), '$F', offline=True)`
+- block **check-list** (the announce files for check_rehearsal_seeds offline: rehearsal 2's from the twin, rehearsal 1's as published (its announce commit 9c3ec1e1 on GitHub, fetched by proof2)):
+  - written: `A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal_excluded='EXCLUDED_REHEARSAL2.json',`
+  - run:     `A.check_rehearsal_seeds(dict(rehearsal_draw='DRAW_REHEARSAL.json', rehearsal_excluded='EXCLUDED_REHEARSAL2.json', rehearsal_announce='announce_rehearsal/DRAW_ANNOUNCE.txt', rehearsal1_announce='/tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/f3/P8/REHEARSAL1_DRAW_ANNOUNCE.txt',`
+- block **check-list** (strict=False: check_rehearsal_seeds checks both rehearsal draws offline (rehearsal 2 is on the twin only); rehearsal 1 is also checked from GitHub, verbatim, by the block's own check_draw with past=):
+  - written: `dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', True, 'campaign')`
+  - run:     `dict(announce=dict(push_utc=now)), tempfile.mkdtemp(), '$F', False, 'campaign')`
+- block **announce** (no push to GitHub: the push goes to the local twin):
+  - written: `git push -q https://github.com/HevisNico/kernel-R HEAD:refs/heads/$B`
+  - run:     `git push -q /tmp/claude-0/-home-user-kernel-R/dbf013be-0c0e-5eee-ad1c-7c5e7bfb6d12/scratchpad/frz/f3/P8/github_twin.git HEAD:refs/heads/$B`

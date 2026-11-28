@@ -1,0 +1,91 @@
+stage D lesson c1_0 group 0: ssFF
+stage D lesson c1_1 group 0: ssFF
+stage D lesson c2_0 group 0: sssFF
+stage D lesson c3_0 group 0: sssFF
+stage D lesson c2_0 group 1: sssFF
+stage D mask reads: c1_0[1]=s, c1_1[1]=s, c2_0[1]=F, c3_0[1]=F
+stage D mask reads: c1_0[2]=s, c1_1[2]=s, c2_0[2]=F
+stage D mask reads: c1_0[1, 2]=F, c1_1[1, 2]=F, c2_0[1, 2]=F
+scan c1_0 group 0: s* 1.71594 +- 0.00001 in 46 slots
+scan c1_1 group 0: s* 1.20318 +- 0.00196 in 41 slots
+scan c2_0 group 0: s* 2.42141 +- 0.00368 in 38 slots
+scan c2_0 group 1: s* 2.68410 +- 0.00366 in 41 slots
+scan c3_0 group 0: s* 2.29993 +- 0.00192 in 40 slots
+{
+ "status": "done",
+ "cost": {
+  "wall_setup_s": 15.261779308319092,
+  "wall_train_s": 775.2526361942291,
+  "wall_test_s": 149.04668831825256,
+  "wall_scan_s": 2122.4746627807617,
+  "cpu_setup_s": 15.09,
+  "cpu_train_s": 786.27,
+  "cpu_test_s": 934.63,
+  "cpu_end_s": 3084.52,
+  "simulated_s": 0.036620135576509026,
+  "lesson_slots": 10,
+  "test_slots": 3,
+  "scan_slots": 70,
+  "solo_scan_slots": null
+ },
+ "words": {
+  "1/0/0": "ssFF",
+  "1/1/0": "ssFF",
+  "2/0/0": "sssFF",
+  "3/0/0": "sssFF",
+  "2/0/1": "sssFF"
+ }
+}
+{
+ "eligible_K0": true,
+ "room_K3": true,
+ "prediction": {
+  "words": {
+   "1/0/0": "ssFF",
+   "1/1/0": "ssFF",
+   "2/0/0": "sssFF",
+   "3/0/0": "sssFF",
+   "2/0/1": "sssFF"
+  },
+  "outputs": {
+   "0": false,
+   "1": true,
+   "2": true,
+   "3": false
+  },
+  "cells": {
+   "0": {
+    "c1_0": false,
+    "c1_1": false,
+    "c2_0": false,
+    "c3_0": false
+   },
+   "1": {
+    "c1_0": true,
+    "c1_1": false,
+    "c2_0": true,
+    "c3_0": true
+   },
+   "2": {
+    "c1_0": false,
+    "c1_1": true,
+    "c2_0": true,
+    "c3_0": true
+   },
+   "3": {
+    "c1_0": false,
+    "c1_1": false,
+    "c2_0": false,
+    "c3_0": false
+   }
+  },
+  "skew_silent": [
+   "c1_0",
+   "c1_1"
+  ],
+  "output_equals_function": true
+ }
+}
+{"label": "prediction", "seconds": 1.24, "theorems": 116, "kernel_agrees_everywhere": true, "sealed_failing_equals_mirror": true}
+{"kernel_agrees": true, "theorems": 116, "disagreements": []}
+{"testError_rule": "one-port", "eligible_K0": true, "room_K3": true}
