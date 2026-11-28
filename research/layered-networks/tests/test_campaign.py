@@ -55,9 +55,10 @@ The cases:
 - verify_scan: [block second-scan] and [block verify-scan] verbatim on a local twin of the repository: a scan enriched
   with 3 integers fails the independent reproduction, before any announce commit, and [block announce] refuses VS != HS;
   the honest scan is reproduced and its record published once; the inventory checks of analysis.verify_scan.
-- scan_verify_record: the published record READ by [block announce] (the owner's decisive cases: local H/HS/VS right,
-  the record absent, of another hash, not a success, or of two commits: refused before any commit) and by analysis.py
-  campaign (single-use, created strictly before the announce, its hashes the announce's), on local twins of GitHub.
+- scan_verify_record: the published record READ by ONE shared reader in [block announce] and analysis.py campaign:
+  its four files, a lone success line, its inputs checked against HS, the freeze F, FREEZE_PINS.json and its own
+  inventory files, both inventories the scan's (name and SHA), its branch's history single-use (a branch put back
+  after a forbidden move refused); each refused before any announce commit; the authentic record passes in both.
 """
 import json
 import os
@@ -1802,9 +1803,50 @@ ROUND_34340412 = dict(round=34340412, randomness="4522e03cf897e1eae78e736eeaae49
                       signature="895cb3f5107c4d6d2ba64e8f084cbf70550952c28d81655f0cf554bcee1f7acbb33e2b93aa27b08a188110b3794003e1")
 
 
-def publish_record(bare, verify_text, folder, commits=1):
-    """A scan verify record on the bare repository `bare`: evidence/combined-scan-verify, `commits` commits (the
-    record is single-use: one), the last holding VERIFY.txt = verify_text, as [block verify-scan] would push it."""
+def ls_heads_of(scan):
+    """The `git ls-remote --heads` text a scan's refs stand for (refs/remotes/origin/X at T -> `T\trefs/heads/X`)."""
+    return "".join(f"{v['tip']}\trefs/heads/{n[len('refs/remotes/origin/'):]}\n"
+                   for n, v in sorted(scan["refs"].items()) if n != "HEAD")
+
+
+def authentic_record(scan_bytes, F, verify_lsremote=None, scan_lsremote=None, **inputs):
+    """The four files of an authentic [block verify-scan] record for the scan `scan_bytes` under the freeze F: VERIFY.txt
+    the success line, both inventories the scan's own, VERIFY_INPUTS.txt (format /2) with the pinned code sha256
+    (FREEZE_PINS.json), both scan sha256, the inventories' sha256, git and Python versions. `inputs` overrides a key."""
+    import hashlib
+    sha_b = lambda b: hashlib.sha256(b).hexdigest()
+    hs = sha_b(scan_bytes)
+    inv = ls_heads_of(json.loads(scan_bytes))
+    vl = (verify_lsremote if verify_lsremote is not None else inv).encode()
+    sl = (scan_lsremote if scan_lsremote is not None else inv).encode()
+    pins = {p: h for fs in json.loads((HERE / "FREEZE_PINS.json").read_text())["groups"].values() for p, h in fs.items()}
+    kv = dict(format="layered-scan-verify-inputs/2", freeze_commit=F,
+              draw_seeds_py_sha256=pins["research/layered-networks/draw_seeds.py"],
+              analysis_py_sha256=pins["research/layered-networks/analysis.py"],
+              scan_to_verify_sha256=hs, reproduced_scan_sha256=hs, verify_lsremote_sha256=sha_b(vl),
+              scan_lsremote_sha256=sha_b(sl), git_version="git version 2.43.0", python_version="3.13.18")
+    kv.update(inputs)
+    return {"VERIFY.txt": f"the scan is reproduced scan_sha256 {hs} VS {hs}\n".encode(),
+            "VERIFY_INPUTS.txt": "".join(f"{k} {v}\n" for k, v in kv.items()).encode(),
+            "VERIFY_LSREMOTE.txt": vl, "SCAN_LSREMOTE.txt": sl}
+
+
+def twin_activity(bare, items):
+    """GitHub's activity for the record branch, on a LOCAL twin (analysis.record_activity reads it there)."""
+    d = Path(bare) / "ACTIVITY"
+    d.mkdir(exist_ok=True)
+    (d / "evidence__combined-scan-verify.json").write_text(json.dumps(items, indent=1) + "\n")
+
+
+def activity_item(kind, after, utc):
+    return dict(activity_type=kind, after=after, before="0" * 40, ref="refs/heads/evidence/combined-scan-verify",
+                timestamp=utc)
+
+
+def publish_record(bare, files, folder, commits=1, created="2026-11-27T23:00:00Z"):
+    """A scan verify record on the bare repository `bare`: evidence/combined-scan-verify, `commits` commits (single-use:
+    one), the last holding `files` (name -> bytes), as [block verify-scan] pushes it; and, unless created is None, the
+    twin's activity: one branch_creation of that commit at `created`. Returns the commit."""
     folder.mkdir(parents=True)
     G = lambda *a: subprocess.run(["git", *a], cwd=folder, capture_output=True, text=True, check=True)
     G("init", "-q")
@@ -1812,11 +1854,19 @@ def publish_record(bare, verify_text, folder, commits=1):
     G("config", "user.name", "twin owner")
     G("config", "user.email", "twin-owner@invalid")
     for k in range(commits):
-        (folder / "VERIFY.txt").write_text(verify_text if k == commits - 1 else "an earlier record\n")
-        G("add", "VERIFY.txt")
+        if k < commits - 1:
+            (folder / "EARLIER.txt").write_text(f"an earlier record {k}\n")
+            G("add", "EARLIER.txt")
+        else:
+            for n, b in files.items():
+                (folder / n).write_bytes(b)
+            G("add", *files)
         G("commit", "-q", "-m", f"Scan verify (campaign) {k}")
     G("push", "-q", str(bare), "HEAD:refs/heads/evidence/combined-scan-verify")
-    return subprocess.run(["git", "-C", str(folder), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    commit = subprocess.run(["git", "-C", str(folder), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    if created is not None:
+        twin_activity(bare, [activity_item("branch_creation", commit, created)])
+    return commit
 
 
 def case_exact_union_owner(w):
@@ -1833,9 +1883,9 @@ def case_exact_union_owner(w):
       check passes (no "lacks rehearsal" refusal), and check_rehearsal_seeds refuses it by the exact union, naming the
       seed. The exact list re-announced the same way is accepted (control).
     - V2: [block announce] verbatim, campaign, its single push twinned to a local bare repository and its ls-remote to
-      that same repository: a copy of the scan with ONE byte changed (HS kept from the original) is refused with
-      "REFUSED: EXCLUDED_SECOND_SCAN.json has sha256", before any commit (no HEAD in announce_campaign) and the twin
-      holds no ref. The original scan (control) gives one commit with the three files and a /2 announce of 5 lines.
+      that same repository: a copy of the scan with ONE byte changed (HS kept from the original) is refused before
+      any commit (no HEAD in announce_campaign) and the twin holds no ref; since review #3 the first refusal is the
+      record reader's own check of the copy ("the published scan has sha256 ..., not HS ..."). The original scan (control) gives one commit with the three files and a /2 announce of 5 lines.
     - V3: rehearsal 1's REAL announce, fetched by name from evidence/combined-rehearsal-draw (commit 9c3ec1e1), parses:
       format /1, mode rehearsal, its excluded_sha256 the one analysis.REHEARSAL1 pins.
     - The formats: /1 rehearsal and test accepted; /1 with second_scan_sha256 refused; /1 campaign refused; /2
@@ -1964,8 +2014,8 @@ def case_exact_union_owner(w):
     GH = "https://github.com/HevisNico/kernel-R"
     twins = [(f"git push -q {GH} HEAD:refs/heads/$B", f"git push -q {bare} HEAD:refs/heads/$B"),
              (f'test -z "$(git ls-remote {GH} refs/heads/$B)"', f'test -z "$(git ls-remote {bare} refs/heads/$B)"'),
-             (f"A.scan_verify_record('{GH}', '$HS')", f"A.scan_verify_record('{bare}', '$HS')")]
-    publish_record(bare, f"the scan is reproduced scan_sha256 {scan_sha} VS {scan_sha}\n", wd / "v2_record")
+             (f"R = '{GH}'", f"R = '{bare}'")]
+    publish_record(bare, authentic_record((wd / "EXCLUDED_SECOND_SCAN.json").read_bytes(), F), wd / "v2_record")
     out["announce_twins"] = twins
     H = sha_b(secb)
     orig = (wd / "EXCLUDED_SECOND_SCAN.json").read_bytes()
@@ -1989,7 +2039,8 @@ def case_exact_union_owner(w):
                               capture_output=True, text=True).stdout.split()
         if sb == one:
             note(label + ": refused before any commit", f"rc {rc}, commit {commit}, twin refs {refs}: {txt}",
-                 f"REFUSED: EXCLUDED_SECOND_SCAN.json has sha256 {sha_b(one)}, not the validated {scan_sha}: no commit, no push",
+                 # since review #3 the block's record reader reads the copy itself, so the copy is refused there, first
+                 f"refused: the published scan has sha256 {sha_b(one)[:12]}, not HS {scan_sha[:12]}",
                  fd / "EXCLUDED_SECOND_SCAN.json")
             oks.append(rc != 0 and not commit and not refs)
         else:
@@ -2284,7 +2335,7 @@ def case_scan_checks(w):
     ab = camp["announce"].read_bytes()
     saved = A.announce_on_github, A.freeze_time, A.check_scan_verify
     try:
-        A.check_scan_verify = lambda hs, push, outdir: dict(stand_in=True)    # case scan_verify_record tests it
+        A.check_scan_verify = lambda *a, **k: dict(stand_in=True)    # case scan_verify_record tests it
         for label, at, needle in (
                 ("check_draw (campaign, GitHub path): the commit's files as announced: accepted",
                  {"EXCLUDED_PUBLISHED.json": lb, "EXCLUDED_SECOND_SCAN.json": sb}, "accepted"),
@@ -2407,14 +2458,16 @@ def case_verify_scan(w):
             # what a later replay needs, in the record (the owner's decision): F, the scan code, both outputs, both inventories
             inputs = subprocess.run(["git", "--git-dir", str(twin), "show", f"{refs[0]}:VERIFY_INPUTS.txt"], capture_output=True,
                                     text=True).stdout if refs else ""
-            want = ("format layered-scan-verify-inputs/1\n"
+            want = ("format layered-scan-verify-inputs/2\n"
                     f"freeze_commit {F}\n"
                     f"draw_seeds_py_sha256 {sha_b((HERE / 'draw_seeds.py').read_bytes())}\n"
                     f"analysis_py_sha256 {sha_b((HERE / 'analysis.py').read_bytes())}\n"
                     f"scan_to_verify_sha256 {sha_b(honest)}\n"
                     f"reproduced_scan_sha256 {sha_b((fd / 'EXCLUDED_SECOND_SCAN.json').read_bytes())}\n"
                     f"verify_lsremote_sha256 {sha_b((fd / 'VERIFY_LSREMOTE.txt').read_bytes())}\n"
-                    f"scan_lsremote_sha256 {sha_b((fd / 'SCAN_LSREMOTE.txt').read_bytes())}\n")
+                    f"scan_lsremote_sha256 {sha_b((fd / 'SCAN_LSREMOTE.txt').read_bytes())}\n"
+                    f"git_version {subprocess.run(['git', '--version'], capture_output=True, text=True).stdout.strip()}\n"
+                    f"python_version {sys.version.split()[0]}\n")
             note("[block verify-scan]: the record's VERIFY_INPUTS.txt states F, the scan code, both outputs and both inventories",
                  "identical" if inputs == want else f"DIFFERS: {inputs!r}", "identical", fd)
     # the inventory, on analysis.verify_scan
@@ -2438,23 +2491,28 @@ def case_verify_scan(w):
 
 
 def case_scan_verify_record(w):
-    """The published scan verify record is READ, not copied by hand (the owner's decision, (n)). On local twins of
-    GitHub (bare repositories with main and, per case, a record branch evidence/combined-scan-verify made by
-    publish_record), with the campaign stand-in inputs (EXCLUDED.json plus 3 integers as the scan, the campaign's list
-    from [block list], both rehearsals):
-    - [block announce] verbatim (campaign), every GitHub URL replaced by the case's twin, the local H, HS and VS all
-      RIGHT (VS = HS): the owner's decisive cases, each refused before any commit (no announce_campaign repository, no
-      announce ref on the twin): the record absent; the record verifying another hash; its VS another hash; its
-      verdict not success; the record branch with two commits. The honest record: the announce is pushed (one commit,
-      three files, a /2 announce).
-    - analysis.check_scan_verify (analysis.py campaign's GitHub path), with verify_remote() the twin and
-      activity_items() the record's activity as GitHub would give it: the honest record created before the announce
-      accepted; refused, each with its own message: created after the announce, created at the same second, a
-      force_push in its activity, a branch_deletion, its oldest item not the branch_creation of its commit, two
-      commits, absent, another hash, not success.
-    - check_draw's GitHub path (stand-ins for the announce read and the freeze time) reaches it: a record created
-      after the announce refuses the campaign draw; rehearsal mode reads no record (a verify_remote that raises is
-      never called)."""
+    """The published scan verify record is READ, by ONE shared reader (analysis.scan_verify_record), in [block announce]
+    and in analysis.py campaign (check_scan_verify), and its branch's history checked (analysis.record_created): the
+    owner's decisions after review #3 (M1, L1, L2, L4). On local twins of GitHub (bare repositories with main, the
+    record branch made by publish_record, and its activity in <twin>/ACTIVITY, which analysis.record_activity reads for
+    a non-GitHub remote), with the campaign stand-in inputs (EXCLUDED.json plus 3 integers as the scan, the campaign's
+    list from [block list]):
+    - [block announce] verbatim (campaign), every GitHub URL replaced by the case's twin, the local H, HS and VS RIGHT:
+      each case refused BEFORE any commit (no announce_campaign repository, no announce ref on the twin), with its own
+      message: the record absent; reduced to the single success line (3 files absent); citing another freeze; one
+      inventory branch with the right name and the wrong SHA; a PROBLEM line before the success line; the success line
+      not alone; VERIFY.txt of another hash, VS another; the verdict not success; inputs of another scan, of another
+      draw_seeds.py or analysis.py than FREEZE_PINS.json's, an inventory's listed sha256 not its file's, VERIFY_INPUTS.txt
+      of the old format /1 (no git or Python version); two commits; the branch put back onto its first commit after a
+      force push away and back, and after a deletion and a recreation (right content, wrong history); an empty F; a
+      well-formed other F. The authentic record (control): the announce is pushed (one commit, three files, /2).
+    - analysis.check_scan_verify (the GitHub path of analysis.py campaign, verify_remote() the twin): the authentic
+      record, created before the announce, accepted; refused: created after the announce, or at its second; the two
+      forbidden-move histories; two commits; and the same reader's refusals (3 files absent, another freeze, a wrong
+      inventory SHA, a PROBLEM line, an empty F, another F).
+    - check_draw's GitHub path (stand-ins for the announce read and the freeze time) reaches it, with the freeze from
+      its tree_commit and the scan from the announce commit: a record created after the announce refuses; rehearsal
+      mode reads no record."""
     import datetime
     import hashlib
     A = load_analysis("analysis_scan_verify_record")
@@ -2464,8 +2522,11 @@ def case_scan_verify_record(w):
     sha_b = lambda b: hashlib.sha256(b).hexdigest()
     utc = lambda t: datetime.datetime.fromtimestamp(t, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     HS = C["scan_sha"]
+    F = C["F"]
     other = sha_b(b"another scan")
+    otherF = "1" * 40
     GH = "https://github.com/HevisNico/kernel-R"
+    scan_b = (wd / "EXCLUDED_SECOND_SCAN.json").read_bytes()
 
     def note(label, got, needle, target=ANALYSIS):
         out[label] = got
@@ -2485,102 +2546,133 @@ def case_scan_verify_record(w):
     (src / "README").write_text("main\n")
     G("add", ".")
     G("commit", "-q", "-m", "main")
+    auth = authentic_record(scan_b, F)
+    inv = ls_heads_of(json.loads(scan_b))
+    first = inv.splitlines()[0]
+    wrong_inv = inv.replace(first, "f" * 40 + first[40:], 1)
+    branch0 = first.split("refs/heads/")[1]
+    t_created, t_push = "2026-11-27T23:00:00Z", C["camp"]["push_utc"]
 
-    def twin(label, text=None, commits=1):
+    def twin(label, files=None, commits=1, history=None):
+        """A twin of GitHub: main, and the record (files; commits; history: None = its one branch_creation, or a list of
+        (kind, after-or-None for the record's commit, utc))."""
         bare = wd / f"twin_{label}.git"
         subprocess.run(["git", "init", "-q", "--bare", str(bare)], check=True)
         G("push", "-q", str(bare), "main")
-        commit = publish_record(bare, text, wd / f"record_{label}", commits) if text is not None else None
+        commit = None
+        if files is not None:
+            commit = publish_record(bare, files, wd / f"record_{label}", commits, created=t_created)
+            if history is not None:
+                twin_activity(bare, [activity_item(k, a or commit, u) for k, a, u in history])
         return bare, commit
-    ok_text = f"the scan is reproduced scan_sha256 {HS} VS {HS}\n"
-    records = [
-        ("absent", None, 1, f"the scan verify record evidence/combined-scan-verify is absent from"),
-        ("another hash", f"the scan is reproduced scan_sha256 {other} VS {other}\n", 1,
-         f"the scan verify record evidence/combined-scan-verify verified the scan {other[:12]}, not {HS[:12]}"),
-        ("its VS another hash", f"the scan is reproduced scan_sha256 {HS} VS {other}\n", 1,
-         f"the scan verify record evidence/combined-scan-verify's reproduction VS {other[:12]} is not {HS[:12]}"),
-        ("verdict not success", f"PROBLEM: the reproduced scan has sha256 {other}, not the scan's {HS}\n"
-                                f"THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 {HS} VS {HS}\n", 1,
-         "the scan verify record evidence/combined-scan-verify's verdict is not success"),
-        ("two commits", ok_text, 2, "the scan verify record evidence/combined-scan-verify has 2 commits"),
-        ("honest", ok_text, 1, "announce pushed: evidence/combined-draw-recordtest")]
+    forced = [("branch_creation", None, t_created), ("force_push", "e" * 40, "2026-11-27T23:10:00Z"),
+              ("force_push", None, "2026-11-27T23:20:00Z")]
+    recreated = [("branch_creation", None, t_created), ("branch_deletion", "0" * 40, "2026-11-27T23:10:00Z"),
+                 ("branch_creation", None, "2026-11-27T23:20:00Z")]
+    R = "the scan verify record evidence/combined-scan-verify"
+    cases = [   # label, files, commits, history, F, needle (after "refused: ")
+        ("absent", None, 1, None, F, f"{R} is absent from"),
+        ("(1) reduced to the single success line", {"VERIFY.txt": auth["VERIFY.txt"]}, 1, None, F,
+         f"{R} has no VERIFY_INPUTS.txt at its creation commit"),
+        ("(2) citing another freeze", authentic_record(scan_b, F, freeze_commit=otherF), 1, None, F,
+         f"the scan verify record cites the freeze '{otherF}', not the expected {F}"),
+        ("(3) one inventory branch with the right name and the wrong SHA", authentic_record(scan_b, F, verify_lsremote=wrong_inv),
+         1, None, F, f"the scan verify record's VERIFY_LSREMOTE.txt is not the scan's inventory: branch {branch0} is at ffffffffffff"),
+        ("(3b) the same in SCAN_LSREMOTE.txt", authentic_record(scan_b, F, scan_lsremote=wrong_inv), 1, None, F,
+         f"the scan verify record's SCAN_LSREMOTE.txt is not the scan's inventory: branch {branch0} is at ffffffffffff"),
+        ("(4) a PROBLEM line before the success line",
+         dict(auth, **{"VERIFY.txt": b"PROBLEM: branch x is on the remote but not in the scan\n" + auth["VERIFY.txt"]}), 1, None, F,
+         "the scan verify record's VERIFY.txt has a PROBLEM line"),
+        ("the success line not alone", dict(auth, **{"VERIFY.txt": b"a note\n" + auth["VERIFY.txt"]}), 1, None, F,
+         "the scan verify record's VERIFY.txt is not exactly the success line (2 lines)"),
+        ("VERIFY.txt of another hash", dict(auth, **{"VERIFY.txt": f"the scan is reproduced scan_sha256 {other} VS {other}\n".encode()}),
+         1, None, F, f"{R} verified the scan {other[:12]}, not {HS[:12]}"),
+        ("VERIFY.txt's VS another", dict(auth, **{"VERIFY.txt": f"the scan is reproduced scan_sha256 {HS} VS {other}\n".encode()}),
+         1, None, F, f"{R}'s reproduction VS {other[:12]} is not {HS[:12]}"),
+        ("the verdict not success", dict(auth, **{"VERIFY.txt": f"THE SCAN IS NOT REPRODUCED: no announce, push nothing scan_sha256 {HS} VS {HS}\n".encode()}),
+         1, None, F, "the scan verify record's verdict is not success"),
+        ("the inputs of another scan", authentic_record(scan_b, F, reproduced_scan_sha256=other), 1, None, F,
+         f"the scan verify record's VERIFY_INPUTS.txt: reproduced_scan_sha256 {other[:12]} is not HS {HS[:12]}"),
+        ("another analysis.py than FREEZE_PINS.json's", authentic_record(scan_b, F, analysis_py_sha256=other), 1, None, F,
+         f"the scan verify record's VERIFY_INPUTS.txt: analysis_py_sha256 {other[:12]} is not FREEZE_PINS.json's"),
+        ("another draw_seeds.py than FREEZE_PINS.json's", authentic_record(scan_b, F, draw_seeds_py_sha256=other), 1, None, F,
+         f"the scan verify record's VERIFY_INPUTS.txt: draw_seeds_py_sha256 {other[:12]} is not FREEZE_PINS.json's"),
+        ("an inventory's listed sha256 not its file's", authentic_record(scan_b, F, scan_lsremote_sha256=other), 1, None, F,
+         "the scan verify record's VERIFY_INPUTS.txt: scan_lsremote_sha256 is not the sha256 of its SCAN_LSREMOTE.txt"),
+        ("VERIFY_INPUTS.txt of format /1, no versions",
+         dict(auth, **{"VERIFY_INPUTS.txt": b"".join(ln + b"\n" for ln in auth["VERIFY_INPUTS.txt"].splitlines()
+                                                      if not ln.startswith((b"git_version", b"python_version"))).replace(b"/2", b"/1")}),
+         1, None, F, "the scan verify record's VERIFY_INPUTS.txt is not exactly the lines"),
+        ("two commits", auth, 2, None, F, f"{R} has 2 commits"),
+        ("(5) put back onto its first commit after a force push away and back", auth, 1, forced, F,
+         f"{R} is not single-use: force_push in its activity"),
+        ("(5b) put back after a deletion and a recreation", auth, 1, recreated, F,
+         f"{R} is not single-use: branch_deletion in its activity"),
+        ("(6) an empty F", auth, 1, None, "", "the expected freeze commit '' is not a full 40-hex SHA"),
+        ("(6b) a well-formed other F", auth, 1, None, otherF, f"the scan verify record cites the freeze '{F}', not the expected {otherF}"),
+        ("the authentic record (control)", auth, 1, None, F, "announce pushed: evidence/combined-draw-recordtest")]
     camp_list = C["camp"]["list"]
     H = A.sha(camp_list)
-    F = C["F"]
-    for label, text, n, needle in records:
-        bare, commit = twin(label.replace(" ", "_"), text, n)
-        fd = wd / f"announce_{label.replace(' ', '_')}"
+    for label, files, n, history, fv, needle in cases:
+        tag = "".join(c if c.isalnum() else "_" for c in label)[:40]
+        bare, commit = twin("b_" + tag, files, n, history)
+        fd = wd / f"announce_{tag}"
         fd.mkdir()
         shutil.copy(camp_list, fd / "EXCLUDED_SECOND.json")
         shutil.copy(wd / "EXCLUDED_SECOND_SCAN.json", fd / "EXCLUDED_SECOND_SCAN.json")
         b = freeze_block("announce")
-        nurl = b.count(GH)
+        out[f"announce twin URLs ({label})"] = b.count(GH)
         b = b.replace(GH, str(bare))
         pre = (f"M=campaign B=evidence/combined-draw-recordtest R=x X=EXCLUDED_SECOND.json SIZES='NOT1=60 ANDOR3=32 XOR3=37' "
                f"H={H} S=EXCLUDED_SECOND_SCAN.json HS={HS} VS={HS}\n")
-        r = subprocess.run(["bash", "-c", f"L={HERE}\nF={F}\nPY={PY}\npython() {{ \"$PY\" \"$@\"; }}\n" + pre + b], cwd=fd,
+        r = subprocess.run(["bash", "-c", f"L={HERE}\nF={fv}\nPY={PY}\npython() {{ \"$PY\" \"$@\"; }}\n" + pre + b], cwd=fd,
                            capture_output=True, text=True)
         txt = (r.stdout + r.stderr).strip()[-1500:]
         made = (fd / "announce_campaign").exists()
         refs = subprocess.run(["git", "--git-dir", str(bare), "for-each-ref", "--format=%(refname)",
                                "refs/heads/evidence/combined-draw-recordtest"], capture_output=True, text=True).stdout.split()
-        out[f"announce twin URLs ({label})"] = nurl
-        if label == "honest":
-            files = subprocess.run(["git", "--git-dir", str(bare), "ls-tree", "--name-only", refs[0]], capture_output=True,
-                                   text=True).stdout.split() if refs else []
-            note("[block announce], the honest record: the announce pushed", f"rc {r.returncode}, files {files}: {txt}", needle, fd)
-            oks.append(r.returncode == 0 and files == ["DRAW_ANNOUNCE.txt", "EXCLUDED_PUBLISHED.json", "EXCLUDED_SECOND_SCAN.json"])
+        if label.startswith("the authentic"):
+            files_ = subprocess.run(["git", "--git-dir", str(bare), "ls-tree", "--name-only", refs[0]], capture_output=True,
+                                    text=True).stdout.split() if refs else []
+            note("[block announce]: " + label + ": the announce pushed", f"rc {r.returncode}, files {files_}: {txt}", needle, fd)
+            oks.append(r.returncode == 0 and files_ == ["DRAW_ANNOUNCE.txt", "EXCLUDED_PUBLISHED.json", "EXCLUDED_SECOND_SCAN.json"])
         else:
-            note(f"[block announce], local H/HS/VS right, the record {label}: refused before any commit",
-                 f"rc {r.returncode}, announce_campaign exists {made}, twin refs {refs}: {txt}", needle, fd)
-            oks.append(r.returncode != 0 and not made and not refs
-                       and "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a "
-                           "success, or not HS" in txt)
-    # ---- analysis.check_scan_verify, the GitHub path, on twins
-    push = C["camp"]["push_utc"]                       # the campaign announce's push time (2026-11-28T00:00:00Z)
-    t_push = int(datetime.datetime.strptime(push, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc).timestamp())
-    saved = A.verify_remote, A.activity_items
+            note(f"[block announce], local H/HS/VS right, {label}: refused before any commit",
+                 f"rc {r.returncode}, announce_campaign exists {made}, twin refs {refs}: {txt}", "refused: " + needle, fd)
+            oks.append(r.returncode != 0 and not made and not refs and "REFUSED: the published scan verify record "
+                       "(evidence/combined-scan-verify) does not verify HS" in txt)
+    # ---- analysis.check_scan_verify (analysis.py campaign's GitHub path), verify_remote() the twin
+    saved = A.verify_remote
     try:
-        def run(label, bare, items, needle):
+        def run(label, bare, needle, freeze=F, push=t_push):
             A.verify_remote = lambda: str(bare)
-            A.activity_items = lambda remote, branch, outdir: items
-            note("analysis.check_scan_verify: " + label, call(A.check_scan_verify, HS, push, wd / "a_out"), needle)
-        bare_ok, c_ok = twin("a_honest", ok_text)
-        item = lambda kind, after, t: dict(activity_type=kind, after=after, before="0" * 40,
-                                           ref="refs/heads/evidence/combined-scan-verify", timestamp=utc(t))
-        run("the honest record, created before the announce: accepted", bare_ok,
-            [item("branch_creation", c_ok, t_push - 3600)], f'"commit": "{c_ok}"')
-        run("created after the announce: refused", bare_ok, [item("branch_creation", c_ok, t_push + 60)],
-            f"the scan verify record evidence/combined-scan-verify was created at {utc(t_push + 60)}, not before the campaign announce")
-        run("created at the announce's second: refused (strictly earlier)", bare_ok, [item("branch_creation", c_ok, t_push)],
-            "not before the campaign announce")
-        run("a force_push in its activity: refused", bare_ok,
-            [item("branch_creation", c_ok, t_push - 3600), item("force_push", c_ok, t_push - 1800)],
-            "the scan verify record evidence/combined-scan-verify is not single-use: force_push in its activity")
-        run("a branch_deletion in its activity: refused", bare_ok,
-            [item("branch_creation", c_ok, t_push - 3600), item("branch_deletion", c_ok, t_push - 1800)],
-            "is not single-use: branch_deletion in its activity")
-        run("its oldest item not the branch_creation of its commit: refused", bare_ok,
-            [item("branch_creation", "f" * 40, t_push - 3600)],
-            "the oldest activity item of the scan verify record evidence/combined-scan-verify is not the branch_creation")
-        run("no activity: refused", bare_ok, [], "GitHub records no activity for the scan verify record")
-        for label, text, n, needle in records[:5]:
-            bare, commit = twin("a_" + label.replace(" ", "_"), text, n)
-            run(f"the record {label}: refused", bare, [item("branch_creation", commit or "0" * 40, t_push - 3600)], needle)
+            note("analysis.check_scan_verify: " + label, call(A.check_scan_verify, HS, push, wd / "a_out", scan_b, freeze), needle)
+        bare_ok, c_ok = twin("a_authentic", auth)
+        run("the authentic record, created before the announce: accepted", bare_ok, f'"commit": "{c_ok}", "created_utc": "{t_created}"')
+        run("created after the announce: refused", bare_ok,
+            f"{R} was created at {t_created}, not before the campaign announce (2026-11-27T22:00:00Z)", push="2026-11-27T22:00:00Z")
+        run("created at the announce's second: refused (strictly earlier)", bare_ok, "not before the campaign announce", push=t_created)
+        for label, files, n, history, fv, needle in cases:
+            if label.startswith(("(1)", "(2)", "(3)", "(4)", "(5)", "(5b)", "(6)", "(6b)", "two commits", "absent")):
+                tag = "".join(c if c.isalnum() else "_" for c in label)[:40]
+                bare, commit = twin("a_" + tag, files, n, history)
+                run(label + ": refused", bare, needle, freeze=fv)
         # ---- check_draw's GitHub path reaches it; rehearsal mode reads no record
-        camp, lb, sb = C["camp"], C["camp"]["list"].read_bytes(), (wd / "EXCLUDED_SECOND_SCAN.json").read_bytes()
+        camp, lb = C["camp"], C["camp"]["list"].read_bytes()
         s_ab, s_fr = A.announce_on_github, A.freeze_time
         try:
             A.announce_on_github = lambda branch, outdir, files=None: ("0" * 40, camp["announce"].read_bytes(), camp["push_utc"],
-                                                                       {"EXCLUDED_PUBLISHED.json": lb, "EXCLUDED_SECOND_SCAN.json": sb})
+                                                                       {"EXCLUDED_PUBLISHED.json": lb, "EXCLUDED_SECOND_SCAN.json": scan_b})
             A.freeze_time = lambda tree_commit, outdir: "2020-01-01T00:00:00Z"   # before both stand-in announces
-            A.verify_remote = lambda: str(bare_ok)
-            for label, t, needle in (("the record created before the announce: accepted", t_push - 3600, '"scan_verify": {"branch": "evidence/combined-scan-verify"'),
-                                     ("the record created after the announce: refused", t_push + 60, "not before the campaign announce")):
-                A.activity_items = lambda remote, branch, outdir, t=t: [item("branch_creation", c_ok, t)]
+            for label, history, needle in (("the record created before the announce: accepted", None,
+                                            '"scan_verify": {"branch": "evidence/combined-scan-verify"'),
+                                           ("the record created after the announce: refused",
+                                            [("branch_creation", None, "2026-11-28T00:01:00Z")], "not before the campaign announce")):
+                bare, commit = twin("d_" + label[:24].replace(" ", "_"), auth, 1, history)
+                A.verify_remote = lambda bare=bare: str(bare)
                 got = call(lambda: {k: v for k, v in A.check_draw(dict(draw=str(camp["draw_file"]), excluded=str(camp["list"]),
                                                                        second_scan=str(wd / "EXCLUDED_SECOND_SCAN.json")),
-                                                                  "campaign", wd / "a_out", "x")[1].items() if k == "scan_verify"})
+                                                                  "campaign", wd / "a_out", F)[1].items() if k == "scan_verify"})
                 note("check_draw (campaign, GitHub path): " + label, got, needle)
             r2 = C["r2"]
             A.announce_on_github = lambda branch, outdir, files=None: ("0" * 40, r2["announce"].read_bytes(), r2["push_utc"],
@@ -2590,13 +2682,13 @@ def case_scan_verify_record(w):
                 raise AssertionError("rehearsal mode read the scan verify record")
             A.verify_remote = boom
             got = call(lambda: sorted(A.check_draw(dict(draw=str(r2["draw_file"]), excluded=str(r2["list"])), "rehearsal",
-                                                   wd / "a_out", "x")[1]))
+                                                   wd / "a_out", F)[1]))
             note("check_draw (rehearsal, GitHub path): no record read", got, "accepted: ")
             oks.append("scan_verify" not in got)
         finally:
             A.announce_on_github, A.freeze_time = s_ab, s_fr
     finally:
-        A.verify_remote, A.activity_items = saved
+        A.verify_remote = saved
     return all(oks), dict(checks=checks, results=out)
 
 

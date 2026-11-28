@@ -539,17 +539,29 @@ ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_A
          prints the reproduction's sha256 after "VS", KEPT as VS (block vars-campaign). Then, and only then, it
          publishes its record on its own single-use branch evidence/combined-scan-verify, by one creating push of one
          commit (VERIFY.txt, its printed result; VERIFY_LSREMOTE.txt, its own ls-remote; SCAN_LSREMOTE.txt, the
-         ls-remote of its own [block second-scan]; VERIFY_INPUTS.txt, what a later replay needs: the freeze commit F,
-         the sha256 of the scan code used, $L's draw_seeds.py and analysis.py, of both scan outputs, SCAN_TO_VERIFY.json
-         and its own EXCLUDED_SECOND_SCAN.json, and of the two inventories), never pushed again, never forced, never
+         ls-remote of its own [block second-scan]; VERIFY_INPUTS.txt, what a later replay needs: the freeze commit F
+         (a full 40-hex SHA, refused otherwise), the sha256 of the scan code used, $L's draw_seeds.py and analysis.py,
+         of both scan outputs, SCAN_TO_VERIFY.json and its own EXCLUDED_SECOND_SCAN.json, of the two inventories, and
+         the git and Python versions), never pushed again, never forced, never
          deleted. A replay by a third party, later, from these SHAs, is deferred until after rehearsal 2 (the owner's
          decision); the record keeps what it needs. The branch is
          created BEFORE the announce, so the announce comes after a public record of the reproduction.
        The campaign announce refuses, with no commit and no push, unless VS equals HS AND the published record says
-       so: [block announce] fetches evidence/combined-scan-verify by name, takes its creation commit (the branch's
-       history must be that single commit), reads VERIFY.txt there, and refuses unless its final line is the success
-       verdict with scan_sha256 = HS and VS = HS (analysis.scan_verify_record, the reader analysis.py campaign uses
-       too). A record that is absent, not a success, or of another hash stops the announce before any commit.
+       so: [block announce] fetches evidence/combined-scan-verify by name and reads it with analysis.scan_verify_record,
+       the reader analysis.py campaign uses too, so that both apply the same rule. The branch's history must be one
+       commit; its four files (VERIFY.txt, VERIFY_INPUTS.txt, VERIFY_LSREMOTE.txt, SCAN_LSREMOTE.txt) are read at that
+       commit, each required; VERIFY.txt must be exactly the success line (no PROBLEM line anywhere) with scan_sha256 =
+       VS = HS; VERIFY_INPUTS.txt is checked against references from outside the record: HS (both scan sha256), F (the
+       freeze clone's full commit, from [block vars]; an empty or a different F refuses), FREEZE_PINS.json (the sha256
+       of draw_seeds.py and analysis.py), and the sha256 of the record's two inventory files; both inventories must name
+       exactly the published scan's branches at its tips (a branch of the right name at another SHA refuses). Then,
+       still before any commit, analysis.record_created asks GitHub for the record branch's activity: it must have been
+       created at the commit read, and be single-use (no force_push, no branch_deletion, no other commit, its one item
+       its branch_creation). A branch put back onto its first commit after a forbidden move (forced away and back,
+       deleted and recreated) has the right content and the wrong history: refused. After the announce, analysis.py
+       campaign redoes both checks and compares GitHub's two creation times: the record's must be strictly earlier
+       than the announce's; that order is established only there. The full byte replay of the scan by a third party
+       stays deferred.
      THE ORDER, explicitly:
        - [block second-scan] on the first machine, then (3), then [block second-scan] on the second machine, then
          [block verify-scan] there;
@@ -564,6 +576,7 @@ ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_A
     [block verify-scan]
     ( set -e
       ! git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "REFUSED: started inside a git work tree: no commit, no push"; exit 1; }
+      printf '%s' "$F" | grep -qxE '[0-9a-f]{40}' || { echo "REFUSED: F ($F) is not the freeze clone's full 40-hex commit ([block vars]): no commit, no push"; exit 1; }
       [ -f SCAN_TO_VERIFY.json ] || { echo "REFUSED: SCAN_TO_VERIFY.json (the first machine's EXCLUDED_SECOND_SCAN.json) is missing: no commit, no push"; exit 1; }
       [ -f EXCLUDED_SECOND_SCAN.json ] || { echo "REFUSED: EXCLUDED_SECOND_SCAN.json (this machine's own [block second-scan]) is missing: no commit, no push"; exit 1; }
       [ -f SCAN_LSREMOTE.txt ] || { echo "REFUSED: SCAN_LSREMOTE.txt (this machine's own [block second-scan]) is missing: no commit, no push"; exit 1; }
@@ -580,14 +593,16 @@ ORDER (each step after the one before; the blocks are those of SEED DRAW, DRAW_A
       cat VERIFY.txt
       # what a later replay needs (the owner's decision): the freeze commit, the scan code and both scan outputs, by
       # sha256; both inventories are the two ls-remote files
-      { echo "format layered-scan-verify-inputs/1"
+      { echo "format layered-scan-verify-inputs/2"
         echo "freeze_commit $F"
         echo "draw_seeds_py_sha256 $(sha256sum < "$L/draw_seeds.py" | cut -c1-64)"
         echo "analysis_py_sha256 $(sha256sum < "$L/analysis.py" | cut -c1-64)"
         echo "scan_to_verify_sha256 $(sha256sum < SCAN_TO_VERIFY.json | cut -c1-64)"
         echo "reproduced_scan_sha256 $(sha256sum < EXCLUDED_SECOND_SCAN.json | cut -c1-64)"
         echo "verify_lsremote_sha256 $(sha256sum < VERIFY_LSREMOTE.txt | cut -c1-64)"
-        echo "scan_lsremote_sha256 $(sha256sum < SCAN_LSREMOTE.txt | cut -c1-64)"; } > VERIFY_INPUTS.txt
+        echo "scan_lsremote_sha256 $(sha256sum < SCAN_LSREMOTE.txt | cut -c1-64)"
+        echo "git_version $(git --version)"
+        echo "python_version $(python -B -c 'import sys; print(sys.version.split()[0])')"; } > VERIFY_INPUTS.txt
       cat VERIFY_INPUTS.txt
       # the record, on its own single-use branch, by one creating push of one commit
       V=evidence/combined-scan-verify
@@ -634,9 +649,11 @@ committed or pushed)
         # the PUBLISHED record, read (analysis.scan_verify_record), not the copied VS: before any ls-remote of $B,
         # mkdir or commit
         python -B -c "if True:
-            import sys; sys.path.insert(0, '$L'); import analysis as A
-            c, s, v = A.scan_verify_record('https://github.com/HevisNico/kernel-R', '$HS')
-            print('the scan verify record', A.VERIFY_BRANCH, c, 'verified scan_sha256', s, 'VS', v)" || { echo "REFUSED: the published scan verify record (evidence/combined-scan-verify) is absent, not a success, or not HS ($HS): no commit, no push"; exit 1; }
+            import sys, tempfile; sys.path.insert(0, '$L'); import analysis as A
+            R = 'https://github.com/HevisNico/kernel-R'
+            c, s, v = A.scan_verify_record(R, '$HS', open('$S', 'rb').read(), '$F')
+            t = A.record_created(R, c, tempfile.mkdtemp())
+            print('the scan verify record', A.VERIFY_BRANCH, c, 'created', t, 'verified scan_sha256', s, 'VS', v)" || { echo "REFUSED: the published scan verify record (evidence/combined-scan-verify) does not verify HS ($HS) for the freeze F ($F), or its branch is not single-use: no commit, no push"; exit 1; }
       else
         [ -z "$S$HS$VS" ] || { echo "REFUSED: S, HS and VS are for the campaign only: no commit, no push"; exit 1; }
       fi

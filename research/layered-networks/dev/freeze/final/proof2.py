@@ -85,8 +85,9 @@ PUSH = f"git push -q {GH} HEAD:refs/heads/"
 TWINS = {   # (block, written line or fragment) -> replacement; each must occur exactly once in its block
     "announce": [(PUSH + "$B", f"git push -q {TWIN} HEAD:refs/heads/$B",
                   "no push to GitHub: the push goes to the local twin"),
-                 (f"A.scan_verify_record('{GH}', '$HS')", f"A.scan_verify_record('{TWIN}', '$HS')",
-                  "the published scan verify record is read from the twin, where step 08b pushed it")],
+                 (f"R = '{GH}'", f"R = '{TWIN}'",
+                  "the published scan verify record and its activity are read from the twin, where step 08b pushed it "
+                  "and step 08c recorded its branch_creation (TWIN/ACTIVITY, analysis.record_activity)")],
     "draw": [("c, text, t = A.announce_on_github('$B', tempfile.mkdtemp()); print(c, t)",
               f"import subprocess; c = subprocess.run(['git', '--git-dir', '{TWIN}', 'rev-parse', 'refs/heads/$B'], "
               f"capture_output=True, text=True, check=True).stdout.strip(); t = '{T1M}'; print(c, t)",
@@ -290,6 +291,13 @@ STEPS = [dict(num="01", name="vars", kind="pass", body=B("vars")),
               body=f"( mkdir {W}/verify && cd {W}/verify && cp {W}/work/EXCLUDED_SECOND_SCAN.json SCAN_TO_VERIFY.json\n"
                    + B("second-scan") + ")\n"),
          dict(num="08b", name="verify-scan", kind="pass", body=f"( cd {W}/verify\n" + B("verify-scan") + ")\n"),
+         # the twin has no activity API: the record branch's one branch_creation, as GitHub would record it, now
+         dict(num="08c", name="twin-record-activity", kind="pass",
+              body=f"( mkdir -p {TWIN}/ACTIVITY && c=$(git --git-dir {TWIN} rev-parse refs/heads/evidence/combined-scan-verify) && "
+                   f"printf '[{{\"activity_type\": \"branch_creation\", \"after\": \"%s\", \"before\": \"%s\", "
+                   f"\"ref\": \"refs/heads/evidence/combined-scan-verify\", \"timestamp\": \"%s\"}}]\\n' "
+                   f"\"$c\" 0000000000000000000000000000000000000000 \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" "
+                   f"> {TWIN}/ACTIVITY/evidence__combined-scan-verify.json && cat {TWIN}/ACTIVITY/evidence__combined-scan-verify.json )\n"),
          dict(num="09", name="vars-campaign", kind="pass", body=B("vars-campaign")),
          dict(num="09a", name="NEG-vs-not-hs", kind="neg",
               setup=f"cp {W}/work/EXCLUDED_SECOND.json {W}/work/EXCLUDED_SECOND_SCAN.json .\nVS_KEPT=$VS\nVS={'0' * 64}\n",
